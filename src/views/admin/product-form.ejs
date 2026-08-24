@@ -1,0 +1,109 @@
+<form action="<%= product ? `/admin/products/${product.id}/edit` : '/admin/products/new' %>" method="post"
+  class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-6 max-w-3xl space-y-4">
+  <div>
+    <label class="block text-sm mb-1 text-[#a89a6c]">ชื่อเกม</label>
+    <input name="title" required value="<%= product ? product.title : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+  </div>
+
+  <div class="grid sm:grid-cols-3 gap-4">
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">ประเภท</label>
+      <select name="type" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2">
+        <option value="offline" <%= product && product.type==='offline' ? 'selected':'' %>>ไอดีออฟไลน์</option>
+        <option value="rental" <%= product && product.type==='rental' ? 'selected':'' %>>ไอดีเช่ารายวัน</option>
+      </select>
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">ราคาขาย (บาท)</label>
+      <input type="number" name="price" required value="<%= product ? product.price : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">ราคาปกติ (สำหรับขีดฆ่า, ไอดีออฟไลน์)</label>
+      <input type="number" name="originalPrice" value="<%= product ? product.originalPrice : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm mb-1 text-[#a89a6c]">แพลตฟอร์ม</label>
+    <input name="platform" value="<%= product ? product.platform : 'Windows' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+  </div>
+
+  <div>
+    <label class="block text-sm mb-1 text-[#a89a6c]">แนวเกม</label>
+    <div class="flex flex-wrap gap-3 text-sm">
+      <% Object.entries(genres).forEach(([key, label]) => { %>
+        <label class="flex items-center gap-1.5 bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5">
+          <input type="checkbox" name="genres" value="<%= key %>" <%= product && product.genres.includes(key) ? 'checked':'' %> />
+          <%= label %>
+        </label>
+      <% }) %>
+    </div>
+  </div>
+
+  <div>
+    <label class="block text-sm mb-1 text-[#a89a6c]">ตัวกรองสินค้า (สินค้านี้มีสิ่งนี้)</label>
+    <% if (!filterTags.length) { %>
+      <p class="text-xs text-[#7a6f47]">ยังไม่มีตัวกรองสินค้า — ไปเพิ่มได้ที่เมนู "🏷️ ตัวกรองสินค้า"</p>
+    <% } else { %>
+      <div class="flex flex-wrap gap-3">
+        <% filterTags.forEach(t => { %>
+          <label class="flex items-center gap-2 bg-[#211c11] border border-[#443a22] rounded-lg pl-2 pr-3 py-1.5 cursor-pointer hover:border-[#c8a63f]">
+            <input type="checkbox" name="filterTagIds" value="<%= t.id %>" <%= product && (product.filterTagIds || []).includes(t.id) ? 'checked':'' %> />
+            <img src="<%= t.image %>" class="w-6 h-6 rounded-full object-cover" alt="<%= t.name %>" />
+            <span class="text-sm"><%= t.name %></span>
+          </label>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
+
+  <div>
+    <label class="block text-sm mb-1 text-[#a89a6c]">รายละเอียดสั้น (แสดงในการ์ดสินค้า)</label>
+    <textarea name="description" rows="2" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2"><%= product ? product.description : '' %></textarea>
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[#a89a6c]">รายละเอียดเกม (แท็บ "รายละเอียด")</label>
+    <textarea name="aboutText" rows="4" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2"><%= product ? product.aboutText : '' %></textarea>
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[#a89a6c]">URL รูปภาพ (1 บรรทัดต่อ 1 รูป รูปแรกเป็นภาพหลัก)</label>
+    <textarea name="images" rows="3" placeholder="https://...&#10;https://..." class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 font-mono text-sm"><%= product ? product.images.join('\n') : '' %></textarea>
+  </div>
+
+  <details class="bg-[#211c11]/50 border border-[#443a22] rounded-lg p-4">
+    <summary class="cursor-pointer text-sm text-[#d6c9a0]">สเปกเครื่องที่ต้องใช้ (ไม่บังคับ)</summary>
+    <div class="grid sm:grid-cols-2 gap-4 mt-4">
+      <div class="space-y-2">
+        <div class="text-xs text-[#a89a6c] mb-1">ขั้นต่ำ</div>
+        <input name="minOs" placeholder="OS" value="<%= product ? product.sysReqMin.os : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+        <input name="minProcessor" placeholder="Processor" value="<%= product ? product.sysReqMin.processor : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+        <input name="minMemory" placeholder="Memory" value="<%= product ? product.sysReqMin.memory : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+        <input name="minGraphics" placeholder="Graphics" value="<%= product ? product.sysReqMin.graphics : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+        <input name="minStorage" placeholder="Storage" value="<%= product ? product.sysReqMin.storage : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+      </div>
+      <div class="space-y-2">
+        <div class="text-xs text-[#a89a6c] mb-1">แนะนำ</div>
+        <input name="recOs" placeholder="OS" value="<%= product ? product.sysReqRec.os : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+        <input name="recProcessor" placeholder="Processor" value="<%= product ? product.sysReqRec.processor : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+        <input name="recMemory" placeholder="Memory" value="<%= product ? product.sysReqRec.memory : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+        <input name="recGraphics" placeholder="Graphics" value="<%= product ? product.sysReqRec.graphics : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+        <input name="recStorage" placeholder="Storage" value="<%= product ? product.sysReqRec.storage : '' %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-1.5 text-sm" />
+      </div>
+    </div>
+  </details>
+
+  <% if (product) { %>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">สถานะ</label>
+      <select name="status" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2">
+        <option value="active" <%= product.status==='active'?'selected':'' %>>เปิดขาย</option>
+        <option value="hidden" <%= product.status==='hidden'?'selected':'' %>>ซ่อน</option>
+      </select>
+    </div>
+  <% } %>
+
+  <div class="flex gap-3">
+    <button class="bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium px-6 py-2 rounded-lg text-sm"><%= product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า' %></button>
+    <a href="/admin/products" class="px-6 py-2 rounded-lg text-sm border border-[#443a22] hover:bg-[#211c11]">ยกเลิก</a>
+  </div>
+</form>

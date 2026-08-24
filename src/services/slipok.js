@@ -1,0 +1,81 @@
+const fs = require('fs');
+const axios = require('axios');
+const FormData = require('form-data');
+
+const BRANCH_ID = process.env.SLIPOK_BRANCH_ID;
+const API_KEY = process.env.SLIPOK_API_KEY;
+
+const ERROR_MESSAGES = {
+  1010: 'สลิปนี้เป็นรายการที่โอนมานานเกินไป (delay slip)',
+  1012: 'สลิปนี้เคยถูกใช้ยืนยันไปแล้ว (สลิปซ้ำ)',
+  1013: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้',
+  1014: 'บัญชีผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า',
+};
+
+const isConfigured = () => Boolean(BRANCH_ID && API_KEY);
+
+/**
+ * Parse SlipOK's transDate (yyyyMMdd) + transTime (HH:mm:ss) — always Thai
+ * local time (UTC+7) — into a real Date object usable for age comparisons.
+ */
+function parseTransDateTime(transDate, transTime) {
+  if (!transDate || !transTime || transDate.length !== 8) return null;
+  const y = transDate.slice(0, 4);
+  const m = transDate.slice(4, 6);
+  const d = transDate.slice(6, 8);
+  const parsed = new Date(`${y}-${m}-${d}T${transTime}+07:00`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+}
+
+/**
+ * Verify a slip image against an expected amount via SlipOK.
+ * Returns { checked, verified, message, raw } — checked is false when
+ * SlipOK isn't configured (caller should fall back to manual review).
+ */
+async function verifySlip(filePath, expectedAmount) {
+  if (!isConfigured()) {
+    return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipOK — ใช้การตรวจสอบด้วยแอดมินแทน', raw: null };
+  }
+
+  try {
+    const form = new FormData();
+    form.append('files', fs.createReadStream(filePath));
+    form.append('amount', String(expectedAmount));
+    form.append('log', 'true');
+
+    const res = await axios.post(
+      `https://api.slipok.com/api/line/apikey/${BRANCH_ID}`,
+      form,
+      { headers: { ...form.getHeaders(), 'x-authorization': API_KEY }, timeout: 15000 }
+    );
+
+    const body = res.data;
+    if (body && body.success && body.data && body.data.success) {
+      return {
+        checked: true,
+        verified: true,
+        message: 'ตรวจสอบสลิปสำเร็จผ่าน SlipOK',
+        raw: body.data,
+      };
+    }
+
+    const code = body && (body.code || (body.data && body.data.code));
+    return {
+      checked: true,
+      verified: false,
+      message: ERROR_MESSAGES[code] || (body && body.message) || 'ไม่สามารถยืนยันสลิปนี้ได้',
+      raw: body,
+    };
+  } catch (err) {
+    const body = err.response && err.response.data;
+    const code = body && (body.code || (body.data && body.data.code));
+    return {
+      checked: true,
+      verified: false,
+      message: ERROR_MESSAGES[code] || (body && body.message) || 'เชื่อมต่อ SlipOK ไม่สำเร็จ',
+      raw: body || null,
+    };
+  }
+}
+
+module.exports = { verifySlip, isConfigured, parseTransDateTime };

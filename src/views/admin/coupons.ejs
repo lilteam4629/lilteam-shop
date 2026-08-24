@@ -1,0 +1,37 @@
+<div class="grid lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 bg-[#1a160d] border border-[#3a3220] rounded-xl overflow-x-auto">
+    <table class="w-full text-sm">
+      <thead class="text-[#7a6f47] text-left border-b border-[#3a3220]">
+        <tr><th class="p-3">โค้ด</th><th class="p-3">ส่วนลด</th><th class="p-3">ใช้ไปแล้ว</th><th class="p-3">สถานะ</th><th class="p-3"></th></tr>
+      </thead>
+      <tbody class="divide-y divide-[#3a3220]">
+        <% coupons.forEach(c => { %>
+          <tr>
+            <td class="p-3 font-mono"><%= c.code %></td>
+            <td class="p-3"><%= c.value %><%= c.type === 'percent' ? '%' : ' ฿' %></td>
+            <td class="p-3"><%= c.usedCount %> / <%= c.usageLimit || '∞' %></td>
+            <td class="p-3"><%= c.active ? '🟢 เปิดใช้งาน' : '⚪ ปิด' %></td>
+            <td class="p-3 text-right space-x-2 whitespace-nowrap">
+              <form action="/admin/coupons/<%= c.id %>/toggle" method="post" class="inline"><button class="text-[#c8a63f] text-xs"><%= c.active ? 'ปิด' : 'เปิด' %></button></form>
+              <form action="/admin/coupons/<%= c.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบคูปองนี้?')"><button class="text-rose-400 text-xs">ลบ</button></form>
+            </td>
+          </tr>
+        <% }) %>
+        <% if (!coupons.length) { %><tr><td class="p-3 text-[#7a6f47]" colspan="5">ยังไม่มีคูปอง</td></tr><% } %>
+      </tbody>
+    </table>
+  </div>
+  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-5">
+    <h3 class="font-semibold mb-3">เพิ่มคูปอง</h3>
+    <form action="/admin/coupons" method="post" class="space-y-3">
+      <input name="code" required placeholder="โค้ด เช่น SALE20" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+      <select name="type" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm">
+        <option value="percent">เปอร์เซ็นต์ (%)</option>
+        <option value="fixed">จำนวนเงินคงที่ (฿)</option>
+      </select>
+      <input type="number" name="value" required placeholder="มูลค่าส่วนลด" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+      <input type="number" name="usageLimit" placeholder="จำนวนครั้งที่ใช้ได้ (0 = ไม่จำกัด)" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+      <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium rounded-lg py-2 text-sm">เพิ่มคูปอง</button>
+    </form>
+  </div>
+</div>

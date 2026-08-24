@@ -1,0 +1,26 @@
+<div class="grid lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 space-y-3">
+    <% announcements.forEach(a => { %>
+      <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-4">
+        <div class="flex justify-between items-start mb-1">
+          <span class="font-medium"><%= a.title %></span>
+          <span class="text-xs text-[#7a6f47]"><%= a.active ? '🟢 แสดงอยู่' : '⚪ ซ่อน' %></span>
+        </div>
+        <p class="text-sm text-[#a89a6c] mb-3"><%= a.body %></p>
+        <div class="space-x-2">
+          <form action="/admin/announcements/<%= a.id %>/toggle" method="post" class="inline"><button class="text-[#c8a63f] text-xs"><%= a.active ? 'ซ่อน' : 'แสดง' %></button></form>
+          <form action="/admin/announcements/<%= a.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบประกาศนี้?')"><button class="text-rose-400 text-xs">ลบ</button></form>
+        </div>
+      </div>
+    <% }) %>
+    <% if (!announcements.length) { %><p class="text-[#7a6f47] text-sm">ยังไม่มีประกาศ</p><% } %>
+  </div>
+  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-5">
+    <h3 class="font-semibold mb-3">เพิ่มประกาศ</h3>
+    <form action="/admin/announcements" method="post" class="space-y-3">
+      <input name="title" required placeholder="หัวข้อ" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+      <textarea name="body" required rows="3" placeholder="เนื้อหาประกาศ" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm"></textarea>
+      <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium rounded-lg py-2 text-sm">เพิ่มประกาศ</button>
+    </form>
+  </div>
+</div>

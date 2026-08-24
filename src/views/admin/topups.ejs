@@ -1,0 +1,58 @@
+<details class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-5 mb-6 max-w-xl" open>
+  <summary class="font-semibold cursor-pointer">ข้อมูลบัญชีรับเงิน</summary>
+  <form action="/admin/topups/payment-settings" method="post" class="space-y-4 mt-4">
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">เบอร์/เลขพร้อมเพย์</label>
+      <input name="promptpayId" value="<%= payment.promptpayId %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">ชื่อบัญชีพร้อมเพย์</label>
+      <input name="promptpayName" value="<%= payment.promptpayName %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">ธนาคาร</label>
+      <input name="bankName" value="<%= payment.bankName %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">เลขบัญชีธนาคาร</label>
+      <input name="bankAccountNumber" value="<%= payment.bankAccountNumber %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">ชื่อบัญชีธนาคาร</label>
+      <input name="bankAccountName" value="<%= payment.bankAccountName %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    </div>
+    <button class="bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium px-6 py-2 rounded-lg text-sm">บันทึกข้อมูลบัญชี</button>
+  </form>
+</details>
+
+<div class="space-y-3">
+  <% requests.forEach(r => { %>
+    <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+      <% if (r.slipPath) { %>
+        <a href="<%= r.slipPath %>" target="_blank" rel="noopener">
+          <img src="<%= r.slipPath %>" class="w-20 h-20 object-cover rounded-lg border border-[#3a3220]" alt="สลิป" />
+        </a>
+      <% } else { %>
+        <div class="w-20 h-20 shrink-0 rounded-lg border border-[#3a3220] bg-[#211c11] flex items-center justify-center text-[10px] text-[#7a6f47] text-center px-1">ยังไม่แนบสลิป</div>
+      <% } %>
+
+      <div class="flex-1 text-sm">
+        <div class="font-medium"><%= r.buyer ? r.buyer.username : 'ไม่พบผู้ใช้' %> <span class="text-[#7a6f47] font-normal">(<%= r.buyer ? r.buyer.email : '-' %>)</span></div>
+        <div class="text-[#a89a6c] font-mono text-xs">#<%= r.refCode %> &middot; <%= r.method === 'promptpay' ? 'พร้อมเพย์' : 'โอนธนาคาร' %></div>
+        <div class="text-[#7a6f47] text-xs"><%= new Date(r.createdAt).toLocaleString('th-TH') %></div>
+      </div>
+
+      <div class="text-xl font-bold text-[#c8a63f] sm:w-32 sm:text-right">฿<%= r.amount.toLocaleString() %>.00</div>
+
+      <% if (r.status === 'pending') { %>
+        <span class="shrink-0 text-xs bg-[#c8a63f]/15 text-[#e2c084] px-3 py-1.5 rounded-full text-center">
+          <%= r.slipPath ? 'รอ SlipOK ตรวจสอบ' : 'รอลูกค้าแนบสลิป' %>
+        </span>
+      <% } else if (r.status === 'approved') { %>
+        <span class="shrink-0 text-xs bg-emerald-900/40 text-emerald-400 px-3 py-1.5 rounded-full text-center">อนุมัติแล้ว</span>
+      <% } else { %>
+        <span class="shrink-0 text-xs bg-[#e2836f]/15 text-[#e2836f] px-3 py-1.5 rounded-full text-center">ปฏิเสธ</span>
+      <% } %>
+    </div>
+  <% }) %>
+</div>

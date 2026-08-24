@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | Admin - <%= settings.shopName %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Kanit', sans-serif; }</style>
+</head>
+<body class="bg-[#100e08] text-[#f3ecd8] min-h-screen flex">
+  <aside class="w-60 shrink-0 bg-[#1a160d] border-r border-[#3a3220] min-h-screen p-4 hidden md:block">
+    <a href="/admin" class="flex items-center gap-2 font-bold text-lg mb-8">
+      <span class="bg-gradient-to-br from-[#c8a63f] to-[#d9bc5e] w-8 h-8 rounded-lg flex items-center justify-center">L</span>
+      Admin Panel
+    </a>
+    <nav class="space-y-1 text-sm">
+      <a href="/admin" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='dashboard'?'bg-[#211c11] text-[#c8a63f]':'' %>">📊 แดชบอร์ด</a>
+      <a href="/admin/products" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='products'?'bg-[#211c11] text-[#c8a63f]':'' %>">🎮 สินค้า</a>
+      <a href="/admin/filter-tags" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='filter-tags'?'bg-[#211c11] text-[#c8a63f]':'' %>">🏷️ ตัวกรองสินค้า</a>
+      <a href="/admin/orders" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='orders'?'bg-[#211c11] text-[#c8a63f]':'' %>">🧾 คำสั่งซื้อ</a>
+      <a href="/admin/users" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='users'?'bg-[#211c11] text-[#c8a63f]':'' %>">👥 สมาชิก</a>
+      <a href="/admin/topups" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='topups'?'bg-[#211c11] text-[#c8a63f]':'' %>">
+        <span>💳 บัญชี</span>
+        <% if (typeof pendingTopupCount !== 'undefined' && pendingTopupCount > 0) { %>
+          <span class="bg-[#c8a63f] text-[#100e08] text-[10px] font-bold rounded-full min-w-[18px] px-1.5 py-0.5 text-center"><%= pendingTopupCount %></span>
+        <% } %>
+      </a>
+      <a href="/admin/coupons" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='coupons'?'bg-[#211c11] text-[#c8a63f]':'' %>">🏷️ คูปองส่วนลด</a>
+      <a href="/admin/announcements" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='announcements'?'bg-[#211c11] text-[#c8a63f]':'' %>">📢 ประกาศ</a>
+      <a href="/admin/settings" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='settings'?'bg-[#211c11] text-[#c8a63f]':'' %>">⚙️ ตั้งค่าร้าน</a>
+      <div class="border-t border-[#3a3220] my-3"></div>
+      <a href="/" class="block px-3 py-2 rounded-lg hover:bg-[#211c11]">🏠 กลับหน้าร้าน</a>
+      <a href="/logout" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] text-rose-400">🚪 ออกจากระบบ</a>
+    </nav>
+  </aside>
+
+  <div class="flex-1 min-w-0">
+    <header class="bg-[#1a160d]/60 border-b border-[#3a3220] px-6 py-3 flex items-center justify-between">
+      <h1 class="font-semibold"><%= title %></h1>
+      <span class="text-sm text-[#a89a6c]">👤 <%= currentUser.username %></span>
+    </header>
+    <main class="p-6">
+      <% if (messages.success && messages.success.length) { %>
+        <% messages.success.forEach(m => { %>
+          <div class="bg-emerald-900/60 border border-emerald-600 text-emerald-200 px-4 py-2 rounded-lg mb-4 text-sm"><%= m %></div>
+        <% }) %>
+      <% } %>
+      <% if (messages.error && messages.error.length) { %>
+        <% messages.error.forEach(m => { %>
+          <div class="bg-rose-900/60 border border-rose-600 text-rose-200 px-4 py-2 rounded-lg mb-4 text-sm"><%= m %></div>
+        <% }) %>
+      <% } %>
+      <%- body %>
+    </main>
+  </div>
+</body>
+</html>

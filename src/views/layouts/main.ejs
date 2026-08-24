@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title + ' | ' + settings.shopName : settings.shopName %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Kanit', sans-serif; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: #4a4028; border-radius: 4px; }
+
+    @keyframes marquee-scroll {
+      from { transform: translateX(100%); }
+      to { transform: translateX(-100%); }
+    }
+    .marquee-track {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      white-space: nowrap;
+      animation: marquee-scroll 22s linear infinite;
+    }
+    .marquee-track:hover { animation-play-state: paused; }
+  </style>
+</head>
+<body class="bg-[#100e08] text-[#f3ecd8] min-h-screen flex flex-col">
+  <%- include('../partials/navbar') %>
+
+  <main class="flex-1">
+    <% if (messages.success && messages.success.length) { %>
+      <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-4">
+        <% messages.success.forEach(m => { %>
+          <div class="bg-emerald-900/40 border border-emerald-700 text-emerald-300 px-4 py-2 rounded-lg mb-2 text-sm"><%= m %></div>
+        <% }) %>
+      </div>
+    <% } %>
+    <% if (messages.error && messages.error.length) { %>
+      <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-4">
+        <% messages.error.forEach(m => { %>
+          <div class="bg-[#e2836f]/10 border border-[#e2836f]/50 text-[#e2836f] px-4 py-2 rounded-lg mb-2 text-sm"><%= m %></div>
+        <% }) %>
+      </div>
+    <% } %>
+    <%- body %>
+  </main>
+
+  <%- include('../partials/footer') %>
+
+  <script>
+    document.addEventListener('mousemove', (e) => {
+      const card = e.target.closest('.spotlight-card');
+      if (!card) return;
+      const rect = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX - rect.left) / rect.width) * 100 + '%');
+      card.style.setProperty('--my', ((e.clientY - rect.top) / rect.height) * 100 + '%');
+    });
+  </script>
+</body>
+</html>

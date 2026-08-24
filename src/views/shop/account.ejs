@@ -1,0 +1,59 @@
+<section class="max-w-3xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6">บัญชีของฉัน</h1>
+
+  <div class="grid sm:grid-cols-2 gap-6 mb-8">
+    <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-5">
+      <div class="text-[#a89a6c] text-sm mb-1">ชื่อผู้ใช้</div>
+      <div class="font-medium mb-3"><%= user.username %></div>
+      <div class="text-[#a89a6c] text-sm mb-1">อีเมล</div>
+      <div class="font-medium"><%= user.email %></div>
+    </div>
+    <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-5">
+      <div class="text-[#a89a6c] text-sm mb-1">ยอดเงินในกระเป๋า</div>
+      <div class="text-2xl font-bold text-[#c8a63f] mb-3">฿<%= user.walletBalance.toLocaleString() %>.00</div>
+      <a href="/account/topup" class="block text-center bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium px-4 py-2 rounded-lg text-sm">+ เติมเงิน</a>
+    </div>
+  </div>
+
+  <% if (topupRequests && topupRequests.length) { %>
+  <h2 class="text-lg font-semibold mb-3">คำขอเติมเงิน</h2>
+  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl divide-y divide-[#241f13] mb-8">
+    <% topupRequests.forEach(t => { %>
+      <a href="/account/topup/<%= t.id %>" class="p-4 flex items-center justify-between text-sm hover:bg-[#211c11]/50">
+        <div>
+          <div class="font-mono text-xs text-[#7a6f47]">#<%= t.refCode %></div>
+          <div class="text-[#7a6f47] text-xs"><%= new Date(t.createdAt).toLocaleString('th-TH') %></div>
+        </div>
+        <div class="flex items-center gap-3">
+          <span class="font-medium">฿<%= t.amount.toLocaleString() %>.00</span>
+          <% if (t.status === 'pending') { %>
+            <span class="text-[10px] bg-[#c8a63f]/15 text-[#e2c084] px-2 py-0.5 rounded-full">รอตรวจสอบ</span>
+          <% } else if (t.status === 'approved') { %>
+            <span class="text-[10px] bg-emerald-900/40 text-emerald-400 px-2 py-0.5 rounded-full">อนุมัติแล้ว</span>
+          <% } else { %>
+            <span class="text-[10px] bg-[#e2836f]/15 text-[#e2836f] px-2 py-0.5 rounded-full">ปฏิเสธ</span>
+          <% } %>
+        </div>
+      </a>
+    <% }) %>
+  </div>
+  <% } %>
+
+  <h2 class="text-lg font-semibold mb-3">ประวัติการทำรายการล่าสุด</h2>
+  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl divide-y divide-[#241f13]">
+    <% if (!transactions.length) { %>
+      <div class="p-4 text-[#a89a6c] text-sm">ยังไม่มีรายการ</div>
+    <% } %>
+    <% transactions.forEach(t => { %>
+      <div class="p-4 flex items-center justify-between text-sm">
+        <div>
+          <div><%= t.note %></div>
+          <div class="text-[#7a6f47] text-xs"><%= new Date(t.createdAt).toLocaleString('th-TH') %></div>
+        </div>
+        <div class="<%= t.amount >= 0 ? 'text-emerald-400' : 'text-[#e2836f]' %> font-medium">
+          <%= t.amount >= 0 ? '+' : '' %><%= t.amount.toLocaleString() %> ฿
+        </div>
+      </div>
+    <% }) %>
+  </div>
+</section>

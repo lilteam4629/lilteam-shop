@@ -1,0 +1,81 @@
+<section class="max-w-lg mx-auto px-4 py-10">
+  <a href="/account" class="text-sm text-[#c8a63f]">← กลับไปหน้าบัญชี</a>
+  <h1 class="text-2xl font-bold mt-2 mb-1">คำขอเติมเงิน #<%= request.refCode %></h1>
+  <p class="text-sm text-[#a89a6c] mb-6"><%= new Date(request.createdAt).toLocaleString('th-TH') %></p>
+
+  <% if (request.status === 'approved') { %>
+    <div class="bg-emerald-900/30 border border-emerald-700 rounded-xl p-5 text-center mb-6">
+      <div class="text-3xl mb-2">✅</div>
+      <div class="text-emerald-300 font-semibold mb-1">อนุมัติแล้ว เติมเงินสำเร็จ</div>
+      <div class="text-2xl font-bold text-[#c8a63f]">฿<%= request.amount.toLocaleString() %>.00</div>
+      <% if (request.slipCheck && request.slipCheck.verified) { %>
+        <p class="text-xs text-emerald-400 mt-2">⚡ ตรวจสอบและอนุมัติอัตโนมัติผ่าน SlipOK</p>
+      <% } %>
+    </div>
+  <% } else if (request.status === 'rejected') { %>
+    <div class="bg-[#e2836f]/10 border border-[#e2836f]/40 rounded-xl p-5 text-center mb-6">
+      <div class="text-3xl mb-2">✕</div>
+      <div class="text-[#e2836f] font-semibold mb-1">คำขอนี้ถูกปฏิเสธ</div>
+      <% if (request.reviewNote) { %><p class="text-sm text-[#a89a6c]"><%= request.reviewNote %></p><% } %>
+    </div>
+  <% } else if (request.slipPath) { %>
+    <div class="bg-[#c8a63f]/10 border border-[#c8a63f]/40 rounded-xl p-4 text-center mb-6 text-sm text-[#e2c084]">
+      ⏳ ระบบกำลังตรวจสอบสลิปโดยอัตโนมัติ — เติมเงินให้ทันทีถ้ายอดถูกต้อง
+    </div>
+  <% } else { %>
+    <div class="bg-[#c8a63f]/10 border border-[#c8a63f]/40 rounded-xl p-4 text-center mb-6 text-sm text-[#e2c084]">
+      ⏳ โอนเงินแล้วแนบสลิปด้านล่าง ระบบจะตรวจสอบและเติมเงินให้อัตโนมัติทันที
+    </div>
+  <% } %>
+
+  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-6 space-y-4 mb-6">
+    <div class="flex justify-between text-sm"><span class="text-[#a89a6c]">จำนวนเงิน</span><span class="text-[#c8a63f] font-bold text-lg">฿<%= request.amount.toLocaleString() %>.00</span></div>
+    <div class="flex justify-between text-sm"><span class="text-[#a89a6c]">ช่องทาง</span><span><%= request.method === 'promptpay' ? 'พร้อมเพย์ (PromptPay)' : 'โอนผ่านธนาคาร' %></span></div>
+
+    <div class="border-t border-[#3a3220] pt-4">
+      <% if (request.method === 'promptpay' && qrDataUrl) { %>
+        <div class="bg-white rounded-lg p-4 flex flex-col items-center mb-3">
+          <img src="<%= qrDataUrl %>" class="w-56 h-56" alt="พร้อมเพย์ QR" />
+          <p class="text-[#100e08] text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
+        </div>
+        <div class="text-sm space-y-1">
+          <div class="flex justify-between"><span class="text-[#a89a6c]">พร้อมเพย์</span><span class="font-mono"><%= payment.promptpayId %></span></div>
+          <div class="flex justify-between"><span class="text-[#a89a6c]">ชื่อบัญชี</span><span><%= payment.promptpayName %></span></div>
+        </div>
+      <% } else if (request.method === 'promptpay') { %>
+        <div class="text-sm space-y-1">
+          <div class="flex justify-between"><span class="text-[#a89a6c]">พร้อมเพย์</span><span class="font-mono"><%= payment.promptpayId %></span></div>
+          <div class="flex justify-between"><span class="text-[#a89a6c]">ชื่อบัญชี</span><span><%= payment.promptpayName %></span></div>
+        </div>
+      <% } else { %>
+        <div class="text-sm space-y-1">
+          <div class="flex justify-between"><span class="text-[#a89a6c]">ธนาคาร</span><span><%= payment.bankName %></span></div>
+          <div class="flex justify-between"><span class="text-[#a89a6c]">เลขบัญชี</span><span class="font-mono"><%= payment.bankAccountNumber %></span></div>
+          <div class="flex justify-between"><span class="text-[#a89a6c]">ชื่อบัญชี</span><span><%= payment.bankAccountName %></span></div>
+        </div>
+      <% } %>
+      <p class="text-xs text-[#7a6f47] mt-3">โอนแล้วกรุณาระบุจำนวนเงินให้ตรงเป๊ะ (฿<%= request.amount.toLocaleString() %>.00) เพื่อให้ระบบตรวจสอบอัตโนมัติผ่านและเติมเงินได้ทันที</p>
+    </div>
+  </div>
+
+  <% if (request.status === 'pending') { %>
+    <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-6">
+      <h2 class="font-semibold mb-3">แนบสลิปการโอนเงิน</h2>
+      <% if (request.slipPath) { %>
+        <div class="mb-3">
+          <img src="<%= request.slipPath %>" class="max-w-full rounded-lg border border-[#3a3220]" alt="สลิปที่แนบ" />
+          <% if (request.slipCheck && request.slipCheck.checked && !request.slipCheck.verified) { %>
+            <p class="text-xs text-[#e2836f] mt-2">✕ ตรวจสอบอัตโนมัติไม่ผ่าน: <%= request.slipCheck.message %> — กรุณาตรวจสอบยอดเงิน/สลิปแล้วลองแนบใหม่อีกครั้ง</p>
+          <% } else { %>
+            <p class="text-xs text-emerald-400 mt-2">✓ แนบสลิปแล้ว รอการตรวจสอบ</p>
+          <% } %>
+        </div>
+      <% } %>
+      <form action="/account/topup/<%= request.id %>/slip" method="post" enctype="multipart/form-data" class="flex gap-2">
+        <input type="file" name="slip" accept="image/*" required class="flex-1 text-sm text-[#a89a6c] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[#c8a63f] file:text-sm" />
+        <button class="bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium px-4 rounded-lg text-sm whitespace-nowrap"><%= request.slipPath ? 'แนบใหม่' : 'แนบสลิป' %></button>
+      </form>
+      <p class="text-[10px] text-[#7a6f47] mt-2">⚠️ สลิปต้องเป็นรายการโอนภายใน 5 นาทีล่าสุด และใช้ยืนยันได้ครั้งเดียวเท่านั้น (สลิปเก่าเกิน 5 นาที หรือสลิปที่เคยใช้แล้วจะไม่ผ่านการตรวจสอบ)</p>
+    </div>
+  <% } %>
+</section>

@@ -1,0 +1,23 @@
+<section class="max-w-md mx-auto px-4 py-14">
+  <h1 class="text-2xl font-bold mb-6 text-center">สมัครสมาชิก</h1>
+  <form action="/register" method="post" class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-6 space-y-4">
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">ชื่อผู้ใช้</label>
+      <input name="username" required class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 focus:outline-none focus:border-[#c8a63f]" />
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">อีเมล</label>
+      <input type="email" name="email" required class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 focus:outline-none focus:border-[#c8a63f]" />
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">รหัสผ่าน</label>
+      <input type="password" name="password" required class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 focus:outline-none focus:border-[#c8a63f]" />
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[#a89a6c]">ยืนยันรหัสผ่าน</label>
+      <input type="password" name="confirmPassword" required class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 focus:outline-none focus:border-[#c8a63f]" />
+    </div>
+    <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] rounded-lg py-2.5 font-medium">สมัครสมาชิก</button>
+  </form>
+  <p class="text-center text-sm text-[#a89a6c] mt-4">มีบัญชีอยู่แล้ว? <a href="/login" class="text-[#c8a63f]">เข้าสู่ระบบ</a></p>
+</section>

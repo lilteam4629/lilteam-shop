@@ -1,0 +1,35 @@
+<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
+  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <h1 class="text-2xl font-bold"><%= title %></h1>
+    <% if (listType) { %>
+      <form method="get" class="flex items-center gap-2 text-sm">
+        <label class="text-[#a89a6c]">เรียงตาม</label>
+        <select name="sort" onchange="this.form.submit()" class="bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2">
+          <option value="" <%= sort==='' ? 'selected':'' %>>ยอดนิยม</option>
+          <option value="newest" <%= sort==='newest' ? 'selected':'' %>>มาใหม่ล่าสุด</option>
+          <option value="price_asc" <%= sort==='price_asc' ? 'selected':'' %>>ราคาน้อย → มาก</option>
+          <option value="price_desc" <%= sort==='price_desc' ? 'selected':'' %>>ราคามาก → น้อย</option>
+          <% if (listType === 'offline') { %>
+            <option value="discount" <%= sort==='discount' ? 'selected':'' %>>ส่วนลดมากสุด</option>
+          <% } %>
+          <option value="name" <%= sort==='name' ? 'selected':'' %>>ชื่อ ก-ฮ / A-Z</option>
+        </select>
+      </form>
+    <% } %>
+  </div>
+
+  <% if (listType && filterTags && filterTags.length) { %>
+    <%- include('../partials/filter-panel', { filterTags }) %>
+  <% } %>
+
+  <% if (!products.length) { %>
+    <p class="text-[#a89a6c]">ไม่พบสินค้าที่ค้นหา</p>
+  <% } else { %>
+    <div id="filterResults" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
+      <% products.forEach(p => { %>
+        <%- include('../partials/product-card', { p }) %>
+      <% }) %>
+    </div>
+    <p class="text-center text-[#7a6f47] text-xs mt-8">แสดง <%= products.length %> รายการ</p>
+  <% } %>
+</section>
