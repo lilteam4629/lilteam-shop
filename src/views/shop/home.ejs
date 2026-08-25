@@ -28,16 +28,17 @@
   </div>
 
   <% if (newest.length) { %>
-  <div class="relative max-w-6xl mx-auto mb-6" style="height: clamp(275px, 40vw, 385px);">
+  <div class="relative max-w-6xl mx-auto mb-6 px-12 sm:px-6" style="height: clamp(220px, 42vw, 385px);">
     <%
       const rot = [-10, -5, 0, 5, 10];
-      const tx = ['-40%', '-20%', '0%', '20%', '40%'];
-      const ty = [58, 24, 0, 24, 58];
-      const widths = ['clamp(150px,18vw,200px)', 'clamp(172px,21vw,230px)', 'clamp(198px,24vw,265px)', 'clamp(172px,21vw,230px)', 'clamp(150px,18vw,200px)'];
+      const txPct = [-34, -17, 0, 17, 34];
+      const widthPct = [17, 21, 25, 21, 17];
+      const ty = ['clamp(18px,10vw,58px)', 'clamp(8px,5vw,24px)', '0px', 'clamp(8px,5vw,24px)', 'clamp(18px,10vw,58px)'];
+      const hideOuter = [true, false, false, false, true];
     %>
     <% newest.slice(0,5).forEach((p, i) => { %>
-      <div class="absolute top-0 left-1/2 aspect-[3/4] hover:z-30"
-        style="width: <%= widths[i] %>; margin-left: calc(<%= tx[i] %> - <%= widths[i] %> / 2); transform: translateY(<%= ty[i] %>px) rotate(<%= rot[i] %>deg); z-index: <%= 10 - Math.abs(2-i) %>;">
+      <div class="absolute top-0 left-1/2 aspect-[3/4] hover:z-30 <%= hideOuter[i] ? 'hidden sm:block' : '' %>"
+        style="width: <%= widthPct[i] %>%; margin-left: calc(<%= txPct[i] %>% - <%= widthPct[i] %>% / 2); transform: translateY(<%= ty[i] %>) rotate(<%= rot[i] %>deg); z-index: <%= 10 - Math.abs(2-i) %>;">
         <%- include('../partials/product-card', { p }) %>
       </div>
     <% }) %>
