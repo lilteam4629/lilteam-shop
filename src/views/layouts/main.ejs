@@ -368,8 +368,25 @@
       function setPlayingUI(playing) {
         isPlaying = playing;
         playBtn.textContent = playing ? '⏸' : '▶';
+        playBtn.setAttribute('aria-label', playing ? 'หยุดเพลง' : 'เล่นเพลง');
+        playBtn.title = playing ? 'หยุดเพลง' : 'เล่นเพลง';
         icon.textContent = playing ? '🎶' : '🎵';
         playingRing.classList.toggle('hidden', !playing);
+      }
+
+      // Keep the user's intent independently from YouTube's delayed state events.
+      // This also makes taps made while the iframe is still loading take effect on ready.
+      function requestPlayback(wanted) {
+        playbackWanted = wanted;
+        localStorage.setItem(STORAGE_PLAYING, wanted ? 'true' : 'false');
+        setPlayingUI(wanted);
+        if (!player || typeof player.playVideo !== 'function') return;
+        if (wanted) {
+          player.unMute();
+          player.playVideo();
+        } else {
+          player.pauseVideo();
+        }
       }
 
       function watchSegment() {
@@ -400,15 +417,14 @@
             onReady: function (e) {
               e.target.setVolume(initialVolume);
               if (playbackWanted) {
-                e.target.unMute();
-                e.target.playVideo();
+                requestPlayback(true);
                 // Some browsers silently block the unmuted resume; keep nudging it for a
                 // few seconds before giving up and waiting for a user gesture instead.
                 let attempts = 0;
                 const retryTimer = setInterval(function () {
                   attempts++;
                   if (!player || !player.getPlayerState) return;
-                  if (player.getPlayerState() === YT.PlayerState.PLAYING || attempts >= 5) {
+                  if (!playbackWanted || player.getPlayerState() === YT.PlayerState.PLAYING || attempts >= 5) {
                     clearInterval(retryTimer);
                     return;
                   }
@@ -422,9 +438,12 @@
                 setPlayingUI(true);
                 watchSegment();
               } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
-                setPlayingUI(e.data === YT.PlayerState.ENDED);
+                setPlayingUI(false);
                 if (segmentTimer) clearInterval(segmentTimer);
-                if (e.data === YT.PlayerState.ENDED) player.seekTo(startSeconds, true);
+                if (e.data === YT.PlayerState.ENDED && playbackWanted) {
+                  player.seekTo(startSeconds, true);
+                  player.playVideo();
+                }
               }
             },
             onError: function () {
@@ -465,17 +484,7 @@
       });
 
       playBtn.addEventListener('click', function () {
-        if (!player) return;
-        if (isPlaying) {
-          playbackWanted = false;
-          player.pauseVideo();
-          localStorage.setItem(STORAGE_PLAYING, 'false');
-        } else {
-          playbackWanted = true;
-          player.unMute();
-          player.playVideo();
-          localStorage.setItem(STORAGE_PLAYING, 'true');
-        }
+        requestPlayback(!playbackWanted);
       });
 
       volumeSlider.addEventListener('input', function () {

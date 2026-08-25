@@ -47,9 +47,12 @@
       <label class="block text-sm mb-1 text-[var(--text-3)]">ระดับเสียงเริ่มต้น (<%= settings.music.defaultVolume %>%)</label>
       <input type="range" name="defaultVolume" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="w-full accent-[var(--gold)]" />
     </div>
-    <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.music.enabled ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-lg px-3 py-2 cursor-pointer text-sm">
-      <input type="checkbox" name="enabled" <%= settings.music.enabled ? 'checked' : '' %> class="accent-[var(--gold)]" />
-      เปิดใช้งานเพลงหน้าเว็บ
+    <label class="flex items-center justify-between gap-3 bg-[var(--input)] border-2 <%= settings.music.enabled ? 'border-emerald-500/70' : 'border-[var(--border-light)]' %> rounded-lg px-4 py-3 cursor-pointer text-sm">
+      <span>
+        <span class="block font-medium">เปิดใช้งานเพลงหน้าเว็บ</span>
+        <span class="block text-xs mt-0.5 <%= settings.music.enabled ? 'text-emerald-400' : 'text-[var(--text-4)]' %>"><%= settings.music.enabled ? 'เปิดอยู่ — กดเพื่อปิด' : 'ปิดอยู่ — กดเพื่อเปิด' %></span>
+      </span>
+      <input type="checkbox" name="enabled" <%= settings.music.enabled ? 'checked' : '' %> class="w-5 h-5 accent-emerald-500" onchange="this.form.requestSubmit()" />
     </label>
     <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกการตั้งค่าเพลง</button>
   </form>
