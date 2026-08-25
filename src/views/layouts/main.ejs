@@ -234,13 +234,19 @@
               if (wasPlaying) {
                 e.target.unMute();
                 e.target.playVideo();
-                // Some browsers silently block the unmuted resume; retry once shortly after.
-                setTimeout(function () {
-                  if (player && player.getPlayerState && player.getPlayerState() !== YT.PlayerState.PLAYING) {
-                    player.unMute();
-                    player.playVideo();
+                // Some browsers silently block the unmuted resume; keep nudging it for a
+                // few seconds before giving up and waiting for a user gesture instead.
+                let attempts = 0;
+                const retryTimer = setInterval(function () {
+                  attempts++;
+                  if (!player || !player.getPlayerState) return;
+                  if (player.getPlayerState() === YT.PlayerState.PLAYING || attempts >= 5) {
+                    clearInterval(retryTimer);
+                    return;
                   }
-                }, 1200);
+                  player.unMute();
+                  player.playVideo();
+                }, 700);
               }
             },
             onStateChange: function (e) {
@@ -261,14 +267,19 @@
         });
       };
 
-      // If autoplay-after-navigation still got blocked, the next tap anywhere on the
-      // page is a real user gesture — use it to silently resume music that should be playing.
-      document.addEventListener('click', function () {
+      // If autoplay-after-navigation gets blocked (common on Safari/Firefox, and even
+      // Chrome without enough site engagement), any real user gesture is a valid signal
+      // to resume — keep trying on every interaction for this page's whole lifetime,
+      // not just the first one, since a single missed attempt shouldn't give up forever.
+      function tryResumeOnGesture() {
         if (wasPlaying && player && player.getPlayerState && player.getPlayerState() !== YT.PlayerState.PLAYING) {
           player.unMute();
           player.playVideo();
         }
-      }, { once: true, capture: true });
+      }
+      ['click', 'touchstart', 'keydown'].forEach(function (evt) {
+        document.addEventListener(evt, tryResumeOnGesture, { capture: true, passive: true });
+      });
 
       fetch('https://noembed.com/embed?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + videoId))
         .then(function (r) { return r.json(); })
