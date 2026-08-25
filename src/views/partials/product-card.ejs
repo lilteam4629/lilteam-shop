@@ -1,3 +1,4 @@
+<% const compactCard = typeof compact !== 'undefined' && compact; %>
 <a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
   class="spotlight-card filterable-card group relative flex w-full h-full aspect-[3/4] rounded-2xl overflow-hidden border border-[var(--border)]
          transition-all duration-300 hover:border-[var(--gold)]/50">
@@ -16,23 +17,23 @@
   <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
 
   <% if (soldOut) { %>
-    <span class="absolute top-2 left-2 z-10 bg-black/70 border border-[#e2836f]/50 text-[#e2836f] text-[10px] px-2 py-0.5 rounded-full">สินค้าหมด</span>
+    <span class="absolute z-10 bg-black/75 border border-[#e2836f]/50 text-[#e2836f] rounded-full <%= compactCard ? 'top-2 left-2 text-[10px] px-2 py-0.5' : 'top-4 left-4 min-[480px]:top-2 min-[480px]:left-2 text-xs min-[480px]:text-[10px] px-3 min-[480px]:px-2 py-1 min-[480px]:py-0.5' %>">สินค้าหมด</span>
   <% } else { %>
-    <span class="absolute top-2 left-2 z-10 bg-black/70 border border-emerald-700/60 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full">พร้อมส่ง</span>
+    <span class="absolute z-10 bg-black/75 border border-emerald-700/60 text-emerald-400 rounded-full <%= compactCard ? 'top-2 left-2 text-[10px] px-2 py-0.5' : 'top-4 left-4 min-[480px]:top-2 min-[480px]:left-2 text-xs min-[480px]:text-[10px] px-3 min-[480px]:px-2 py-1 min-[480px]:py-0.5' %>">พร้อมส่ง</span>
   <% } %>
 
-  <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1 min-w-0">
-    <h3 class="font-medium text-sm line-clamp-2 text-white drop-shadow"><%= p.title %></h3>
+  <div class="absolute inset-x-0 bottom-0 flex flex-col min-w-0 <%= compactCard ? 'p-3 gap-1' : 'p-5 min-[480px]:p-3 gap-2 min-[480px]:gap-1' %>">
+    <h3 class="font-semibold line-clamp-2 text-white drop-shadow <%= compactCard ? 'text-sm' : 'text-xl min-[480px]:text-sm' %>"><%= p.title %></h3>
     <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 min-w-0">
       <% if (p.type === 'rental') { %>
-        <span class="text-[10px] text-white/70">เริ่ม</span>
+        <span class="text-white/70 <%= compactCard ? 'text-[10px]' : 'text-sm min-[480px]:text-[10px]' %>">เริ่ม</span>
       <% } %>
-      <span class="text-[#c8a63f] font-bold text-sm whitespace-nowrap">฿<%= p.price.toLocaleString() %>.00</span>
+      <span class="text-[#c8a63f] font-bold whitespace-nowrap <%= compactCard ? 'text-sm' : 'text-xl min-[480px]:text-sm' %>">฿<%= p.price.toLocaleString() %>.00</span>
       <% if (p.type === 'offline' && p.originalPrice > p.price) { %>
-        <span class="text-[#e2836f] text-[11px] line-through whitespace-nowrap">฿<%= p.originalPrice.toLocaleString() %>.00</span>
+        <span class="text-[#e2836f] line-through whitespace-nowrap <%= compactCard ? 'text-[11px]' : 'text-sm min-[480px]:text-[11px]' %>">฿<%= p.originalPrice.toLocaleString() %>.00</span>
       <% } %>
     </div>
-    <span class="text-[10px] text-white/70 truncate"><%= p.type === 'offline' ? 'ไอดี Offline Steam' : 'ไอดีเช่ารายวัน' %></span>
+    <span class="text-white/70 truncate <%= compactCard ? 'text-[10px]' : 'text-sm min-[480px]:text-[10px]' %>"><%= p.type === 'offline' ? 'ไอดี Offline Steam' : 'ไอดีเช่ารายวัน' %></span>
   </div>
 
   <!-- mouse-tracking spotlight -->
