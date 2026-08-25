@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const path = require('path');
+const fs = require('fs');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
@@ -27,6 +28,20 @@ const logoUpload = multer({
     },
   }),
   limits: { fileSize: 4 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
+});
+
+const productUploadDir = path.join(__dirname, '..', '..', 'public', 'uploads', 'products');
+fs.mkdirSync(productUploadDir, { recursive: true });
+const productImageUpload = multer({
+  storage: multer.diskStorage({
+    destination: productUploadDir,
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname) || '.jpg';
+      cb(null, `product-${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`);
+    },
+  }),
+  limits: { fileSize: 8 * 1024 * 1024, files: 10 },
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
@@ -71,8 +86,13 @@ router.get('/', (req, res) => {
 });
 
 // ---------- Products ----------
-function parseProductBody(body) {
-  const images = (body.images || '').split('\n').map(s => s.trim()).filter(Boolean);
+function parseProductBody(body, uploadedFiles = [], existingImages = []) {
+  const removedImages = new Set(Array.isArray(body.removeImages) ? body.removeImages : (body.removeImages ? [body.removeImages] : []));
+  const keptImages = existingImages.filter(image => !removedImages.has(image));
+  const urlImages = (body.images || '').split('\n').map(s => s.trim()).filter(Boolean);
+  const uploadedImages = uploadedFiles.map(file => `/uploads/products/${file.filename}`);
+  const addedImages = body.newImagesFirst === 'on' ? [...uploadedImages, ...urlImages] : [...urlImages, ...uploadedImages];
+  const images = body.newImagesFirst === 'on' ? [...addedImages, ...keptImages] : [...keptImages, ...addedImages];
   const genres = Array.isArray(body.genres) ? body.genres : (body.genres ? [body.genres] : []);
   const filterTagIds = Array.isArray(body.filterTagIds) ? body.filterTagIds : (body.filterTagIds ? [body.filterTagIds] : []);
   return {
@@ -112,15 +132,21 @@ router.get('/products/new', (req, res) => {
 });
 
 router.post('/products/new', (req, res) => {
-  const fields = parseProductBody(req.body);
-  const product = {
-    id: store.genId(8), slug: slugify(fields.title) + '-' + store.genId(4),
-    ...fields, status: 'active', createdAt: new Date().toISOString(),
-  };
-  store.data.products.push(product);
-  store.save();
-  req.flash('success', 'เพิ่มสินค้าแล้ว');
-  res.redirect('/admin/products');
+  productImageUpload.array('productImages', 10)(req, res, (err) => {
+    if (err) {
+      req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
+      return res.redirect('/admin/products/new');
+    }
+    const fields = parseProductBody(req.body, req.files || []);
+    const product = {
+      id: store.genId(8), slug: slugify(fields.title) + '-' + store.genId(4),
+      ...fields, status: 'active', createdAt: new Date().toISOString(),
+    };
+    store.data.products.push(product);
+    store.save();
+    req.flash('success', 'เพิ่มสินค้าแล้ว');
+    res.redirect('/admin/products');
+  });
 });
 
 router.get('/products/:id/edit', (req, res) => {
@@ -132,11 +158,17 @@ router.get('/products/:id/edit', (req, res) => {
 router.post('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
-  const fields = parseProductBody(req.body);
-  Object.assign(product, fields, { status: req.body.status || 'active' });
-  store.save();
-  req.flash('success', 'บันทึกการแก้ไขแล้ว');
-  res.redirect('/admin/products');
+  productImageUpload.array('productImages', 10)(req, res, (err) => {
+    if (err) {
+      req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
+      return res.redirect(`/admin/products/${product.id}/edit`);
+    }
+    const fields = parseProductBody(req.body, req.files || [], product.images || []);
+    Object.assign(product, fields, { status: req.body.status || 'active' });
+    store.save();
+    req.flash('success', 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
+    res.redirect('/admin/products');
+  });
 });
 
 router.post('/products/:id/delete', (req, res) => {

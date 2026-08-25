@@ -1,4 +1,4 @@
-<form action="<%= product ? `/admin/products/${product.id}/edit` : '/admin/products/new' %>" method="post"
+<form action="<%= product ? `/admin/products/${product.id}/edit` : '/admin/products/new' %>" method="post" enctype="multipart/form-data"
   class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-3xl space-y-4">
   <div>
     <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อเกม</label>
@@ -65,9 +65,44 @@
     <label class="block text-sm mb-1 text-[var(--text-3)]">รายละเอียดเกม (แท็บ "รายละเอียด")</label>
     <textarea name="aboutText" rows="4" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= product ? product.aboutText : '' %></textarea>
   </div>
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">URL รูปภาพ (1 บรรทัดต่อ 1 รูป รูปแรกเป็นภาพหลัก)</label>
-    <textarea name="images" rows="3" placeholder="https://...&#10;https://..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 font-mono text-sm"><%= product ? product.images.join('\n') : '' %></textarea>
+  <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-4">
+    <div>
+      <h3 class="font-medium">รูปภาพสินค้า</h3>
+      <p class="text-xs text-[var(--text-4)]">รูปแรกจะใช้เป็นภาพหน้าปกในการ์ดสินค้า อัปโหลดได้สูงสุดครั้งละ 10 รูป</p>
+    </div>
+
+    <% if (product && product.images && product.images.length) { %>
+      <div>
+        <label class="block text-sm mb-2 text-[var(--text-3)]">รูปปัจจุบัน — ติ๊กใต้รูปที่ต้องการลบ</label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <% product.images.forEach((image, index) => { %>
+            <label class="group relative rounded-xl overflow-hidden border border-[var(--border-light)] bg-[var(--card)] cursor-pointer">
+              <img src="<%= image %>" alt="รูปสินค้า <%= index + 1 %>" class="w-full aspect-[4/3] object-cover" />
+              <% if (index === 0) { %><span class="absolute top-2 left-2 bg-[var(--gold)] text-[var(--bg)] rounded-full px-2 py-0.5 text-[10px] font-bold">ภาพหน้าปก</span><% } %>
+              <span class="flex items-center justify-center gap-1.5 p-2 text-xs text-rose-400 group-hover:bg-rose-500/10">
+                <input type="checkbox" name="removeImages" value="<%= image %>" class="accent-rose-500" /> ลบรูปนี้
+              </span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+    <% } %>
+
+    <div>
+      <label class="block text-sm mb-2 text-[var(--text-3)]">เพิ่มรูปจากเครื่องหรือโทรศัพท์</label>
+      <input id="productImagesInput" type="file" name="productImages" accept="image/png,image/jpeg,image/webp,image/gif" multiple class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
+      <div id="newImagePreview" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3"></div>
+    </div>
+
+    <label class="flex items-center gap-2 text-sm cursor-pointer w-fit">
+      <input type="checkbox" name="newImagesFirst" class="accent-[var(--gold)]" />
+      ใช้รูปที่อัปโหลดใหม่เป็นภาพหน้าปก
+    </label>
+
+    <details>
+      <summary class="cursor-pointer text-xs text-[var(--text-3)]">หรือเพิ่มรูปด้วย URL</summary>
+      <textarea name="images" rows="3" placeholder="https://...&#10;https://..." class="mt-2 w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 font-mono text-sm"></textarea>
+    </details>
   </div>
 
   <details class="bg-[var(--input)]/50 border border-[var(--border-light)] rounded-lg p-4">
@@ -107,3 +142,31 @@
     <a href="/admin/products" class="px-6 py-2 rounded-lg text-sm border border-[var(--border-light)] hover:bg-[var(--input)]">ยกเลิก</a>
   </div>
 </form>
+
+<script>
+  (function () {
+    const input = document.getElementById('productImagesInput');
+    const preview = document.getElementById('newImagePreview');
+    if (!input || !preview) return;
+    input.addEventListener('change', function () {
+      preview.innerHTML = '';
+      const files = Array.from(input.files || []);
+      preview.classList.toggle('hidden', files.length === 0);
+      files.forEach(function (file, index) {
+        const item = document.createElement('div');
+        item.className = 'relative rounded-lg overflow-hidden border border-[var(--border-light)] bg-[var(--card)]';
+        const image = document.createElement('img');
+        image.className = 'w-full aspect-[4/3] object-cover';
+        image.alt = 'รูปใหม่ ' + (index + 1);
+        image.src = URL.createObjectURL(file);
+        image.onload = function () { URL.revokeObjectURL(image.src); };
+        const name = document.createElement('div');
+        name.className = 'text-[10px] text-[var(--text-3)] truncate px-2 py-1.5';
+        name.textContent = file.name;
+        item.appendChild(image);
+        item.appendChild(name);
+        preview.appendChild(item);
+      });
+    });
+  })();
+</script>
