@@ -59,7 +59,8 @@ router.post('/register', (req, res) => {
   store.save();
   req.session.userId = user.id;
   req.flash('success', 'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับสู่ ' + store.data.settings.shopName);
-  res.redirect('/');
+  const musicHint = store.data.settings.music && store.data.settings.music.enabled ? '?music=autoplay' : '';
+  res.redirect('/' + musicHint);
 });
 
 router.get('/logout', (req, res) => {

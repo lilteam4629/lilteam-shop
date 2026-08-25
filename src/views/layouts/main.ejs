@@ -71,17 +71,27 @@
   %>
   <% if (musicVideoId) { %>
   <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>" data-start-seconds="<%= settings.music.startSeconds || 0 %>" data-end-seconds="<%= settings.music.endSeconds || 0 %>">
-    <button id="music-toggle-btn" type="button" class="w-12 h-12 rounded-full bg-[#1a160d] border border-[#3a3220] shadow-lg flex items-center justify-center text-lg hover:border-[#c8a63f]/60 transition">
-      <span id="music-icon">🎵</span>
+    <button id="music-toggle-btn" type="button" class="relative w-14 h-14 rounded-full bg-[#1a160d] border border-[#3a3220] shadow-lg flex items-center justify-center text-xl overflow-hidden hover:border-[#c8a63f]/60 transition">
+      <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="" />
+      <span id="music-icon" class="relative z-10">🎵</span>
+      <span id="music-playing-ring" class="hidden absolute inset-0 rounded-full border-2 border-[#c8a63f] animate-ping"></span>
     </button>
-    <div id="music-panel" class="hidden absolute bottom-14 right-0 w-56 bg-[#1a160d] border border-[#3a3220] rounded-xl shadow-xl p-3 text-[#f3ecd8]">
-      <div class="flex items-center justify-between mb-3">
-        <span class="text-xs text-[#a89a6c]">🎵 เพลงหน้าเว็บ</span>
-        <button id="music-collapse-btn" type="button" class="text-[#7a6f47] hover:text-[#c8a63f] text-sm leading-none">✕</button>
+
+    <div id="music-panel" class="hidden absolute bottom-16 right-0 w-64 bg-[#1a160d] border border-[#3a3220] rounded-2xl shadow-2xl overflow-hidden text-[#f3ecd8]">
+      <div class="relative aspect-video bg-[#0c0a06]">
+        <img src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" class="w-full h-full object-cover" alt="เพลงหน้าเว็บ" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#1a160d] via-transparent to-transparent"></div>
+        <button id="music-collapse-btn" type="button" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-sm leading-none">✕</button>
       </div>
-      <div class="flex items-center gap-2">
-        <button id="music-play-btn" type="button" class="w-9 h-9 rounded-full bg-[#c8a63f] text-[#100e08] flex items-center justify-center flex-shrink-0 text-sm">▶</button>
-        <input id="music-volume" type="range" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="flex-1 accent-[#c8a63f]" />
+      <div class="p-3">
+        <p id="music-title" class="text-xs text-[#d6c9a0] mb-3 line-clamp-2 leading-snug">เพลงหน้าเว็บ</p>
+        <div class="flex items-center gap-3">
+          <button id="music-play-btn" type="button" class="w-10 h-10 rounded-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] flex items-center justify-center flex-shrink-0 text-base transition">▶</button>
+          <div class="flex-1 flex items-center gap-2">
+            <span class="text-xs">🔉</span>
+            <input id="music-volume" type="range" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="flex-1 accent-[#c8a63f]" />
+          </div>
+        </div>
       </div>
     </div>
     <div id="music-yt-player" style="position:absolute; width:0; height:0; overflow:hidden;"></div>
@@ -99,48 +109,91 @@
       const playBtn = document.getElementById('music-play-btn');
       const volumeSlider = document.getElementById('music-volume');
       const icon = document.getElementById('music-icon');
+      const playingRing = document.getElementById('music-playing-ring');
+      const titleEl = document.getElementById('music-title');
+
+      const STORAGE_PLAYING = 'lilteam_music_playing';
+      const STORAGE_VOLUME = 'lilteam_music_volume';
+      const STORAGE_TIME = 'lilteam_music_time';
+      const STORAGE_TS = 'lilteam_music_ts';
 
       let player = null;
       let isPlaying = false;
       let segmentTimer = null;
+      let saveTimer = null;
       const startSeconds = parseInt(widget.dataset.startSeconds, 10) || 0;
       const endSeconds = parseInt(widget.dataset.endSeconds, 10) || 0;
-      const savedVolume = localStorage.getItem('lilteam_music_volume');
+
+      const savedVolume = localStorage.getItem(STORAGE_VOLUME);
       const initialVolume = savedVolume !== null ? parseInt(savedVolume, 10) : parseInt(widget.dataset.defaultVolume, 10);
       volumeSlider.value = initialVolume;
 
-      const playerVars = { autoplay: 0, controls: 0, loop: 1, playlist: videoId, start: startSeconds };
-      if (endSeconds > startSeconds) playerVars.end = endSeconds;
+      // Registration/login can request an autostart via ?music=autoplay
+      const urlParams = new URLSearchParams(window.location.search);
+      const forceAutoplay = urlParams.get('music') === 'autoplay';
+      if (forceAutoplay) {
+        urlParams.delete('music');
+        const cleanUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '') + window.location.hash;
+        window.history.replaceState({}, '', cleanUrl);
+        localStorage.setItem(STORAGE_PLAYING, 'true');
+      }
+
+      const wasPlaying = forceAutoplay || localStorage.getItem(STORAGE_PLAYING) === 'true';
+      let resumeAt = startSeconds;
+      const savedTime = parseFloat(localStorage.getItem(STORAGE_TIME));
+      const savedTs = parseInt(localStorage.getItem(STORAGE_TS), 10);
+      if (!Number.isNaN(savedTime) && wasPlaying) {
+        const elapsed = !Number.isNaN(savedTs) ? (Date.now() - savedTs) / 1000 : 0;
+        resumeAt = savedTime + Math.min(elapsed, 5); // small forward nudge, not a hard sync
+        if (endSeconds > startSeconds && resumeAt >= endSeconds) resumeAt = startSeconds;
+      }
+
+      function setPlayingUI(playing) {
+        isPlaying = playing;
+        playBtn.textContent = playing ? '⏸' : '▶';
+        icon.textContent = playing ? '🎶' : '🎵';
+        playingRing.classList.toggle('hidden', !playing);
+        localStorage.setItem(STORAGE_PLAYING, playing ? 'true' : 'false');
+      }
 
       function watchSegment() {
         if (segmentTimer) clearInterval(segmentTimer);
-        if (endSeconds <= startSeconds) return;
         segmentTimer = setInterval(function () {
           if (!player || typeof player.getCurrentTime !== 'function') return;
-          if (player.getCurrentTime() >= endSeconds) {
+          const t = player.getCurrentTime();
+          if (endSeconds > startSeconds && t >= endSeconds) {
             player.seekTo(startSeconds, true);
           }
-        }, 500);
+          localStorage.setItem(STORAGE_TIME, t);
+          localStorage.setItem(STORAGE_TS, Date.now());
+        }, 1500);
       }
 
       window.onYouTubeIframeAPIReady = function () {
         player = new YT.Player('music-yt-player', {
           videoId: videoId,
-          playerVars: playerVars,
+          playerVars: {
+            autoplay: wasPlaying ? 1 : 0,
+            mute: wasPlaying ? 1 : 0,
+            controls: 0,
+            loop: 1,
+            playlist: videoId,
+            start: Math.max(0, Math.floor(resumeAt)),
+          },
           events: {
             onReady: function (e) {
               e.target.setVolume(initialVolume);
+              if (wasPlaying) {
+                e.target.unMute();
+                e.target.playVideo();
+              }
             },
             onStateChange: function (e) {
               if (e.data === YT.PlayerState.PLAYING) {
-                isPlaying = true;
-                playBtn.textContent = '⏸';
-                icon.textContent = '🎶';
+                setPlayingUI(true);
                 watchSegment();
               } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
-                isPlaying = false;
-                playBtn.textContent = '▶';
-                icon.textContent = '🎵';
+                setPlayingUI(e.data === YT.PlayerState.ENDED);
                 if (segmentTimer) clearInterval(segmentTimer);
                 if (e.data === YT.PlayerState.ENDED) player.seekTo(startSeconds, true);
               }
@@ -148,6 +201,11 @@
           },
         });
       };
+
+      fetch('https://noembed.com/embed?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + videoId))
+        .then(function (r) { return r.json(); })
+        .then(function (data) { if (data && data.title) titleEl.textContent = data.title; })
+        .catch(function () {});
 
       toggleBtn.addEventListener('click', function () {
         panel.classList.toggle('hidden');
@@ -168,7 +226,15 @@
       volumeSlider.addEventListener('input', function () {
         const v = parseInt(volumeSlider.value, 10);
         if (player) player.setVolume(v);
-        localStorage.setItem('lilteam_music_volume', v);
+        localStorage.setItem(STORAGE_VOLUME, v);
+      });
+
+      window.addEventListener('beforeunload', function () {
+        if (player && typeof player.getCurrentTime === 'function') {
+          localStorage.setItem(STORAGE_TIME, player.getCurrentTime());
+          localStorage.setItem(STORAGE_TS, Date.now());
+          localStorage.setItem(STORAGE_PLAYING, isPlaying ? 'true' : 'false');
+        }
       });
     })();
   </script>
