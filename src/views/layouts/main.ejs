@@ -185,14 +185,15 @@
         window.history.replaceState({}, '', cleanUrl);
       }
 
-      // Music plays by default on every visit unless the visitor explicitly paused it.
+      // Music plays by default on every visit — the ONLY thing that turns this off is the
+      // visitor explicitly clicking the pause button (see playBtn handler below). Incidental
+      // browser-triggered pauses (autoplay policy, tab backgrounding, bfcache, etc.) must
+      // never write to this flag, or autoplay silently breaks itself on the next page.
       const wasPlaying = localStorage.getItem(STORAGE_PLAYING) !== 'false';
       let resumeAt = startSeconds;
       const savedTime = parseFloat(localStorage.getItem(STORAGE_TIME));
-      const savedTs = parseInt(localStorage.getItem(STORAGE_TS), 10);
-      if (!Number.isNaN(savedTime) && wasPlaying) {
-        const elapsed = !Number.isNaN(savedTs) ? (Date.now() - savedTs) / 1000 : 0;
-        resumeAt = savedTime + Math.min(elapsed, 5); // small forward nudge, not a hard sync
+      if (!Number.isNaN(savedTime) && savedTime >= 0 && wasPlaying) {
+        resumeAt = savedTime;
         if (endSeconds > startSeconds && resumeAt >= endSeconds) resumeAt = startSeconds;
       }
 
@@ -201,7 +202,6 @@
         playBtn.textContent = playing ? '⏸' : '▶';
         icon.textContent = playing ? '🎶' : '🎵';
         playingRing.classList.toggle('hidden', !playing);
-        localStorage.setItem(STORAGE_PLAYING, playing ? 'true' : 'false');
       }
 
       function watchSegment() {
@@ -287,8 +287,14 @@
 
       playBtn.addEventListener('click', function () {
         if (!player) return;
-        if (isPlaying) player.pauseVideo();
-        else player.playVideo();
+        if (isPlaying) {
+          player.pauseVideo();
+          localStorage.setItem(STORAGE_PLAYING, 'false');
+        } else {
+          player.unMute();
+          player.playVideo();
+          localStorage.setItem(STORAGE_PLAYING, 'true');
+        }
       });
 
       volumeSlider.addEventListener('input', function () {
@@ -301,8 +307,13 @@
         if (player && typeof player.getCurrentTime === 'function') {
           localStorage.setItem(STORAGE_TIME, player.getCurrentTime());
           localStorage.setItem(STORAGE_TS, Date.now());
-          localStorage.setItem(STORAGE_PLAYING, isPlaying ? 'true' : 'false');
         }
+      });
+
+      // Back/forward-cache restores don't re-run this script, so force a real reload
+      // to guarantee autoplay logic runs fresh every time the page becomes visible.
+      window.addEventListener('pageshow', function (e) {
+        if (e.persisted) window.location.reload();
       });
     })();
   </script>
