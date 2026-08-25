@@ -147,6 +147,11 @@ function defaultData() {
         bannerImage: null,
         bannerLink: '',
       },
+      music: {
+        enabled: false,
+        youtubeUrl: '',
+        defaultVolume: 50,
+      },
       payment: {
         promptpayId: '081-234-5678',
         promptpayName: 'LilTeam Shop (Demo)',
@@ -221,6 +226,10 @@ function migrate() {
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }
+  if (!db.settings.music) {
+    db.settings.music = { enabled: false, youtubeUrl: '', defaultVolume: 50 };
+    changed = true;
+  }
   if (changed) save();
 }
 

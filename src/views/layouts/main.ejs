@@ -59,5 +59,99 @@
       card.style.setProperty('--my', ((e.clientY - rect.top) / rect.height) * 100 + '%');
     });
   </script>
+
+  <%
+    function getYoutubeId(url) {
+      if (!url) return null;
+      const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+    const musicVideoId = (typeof settings !== 'undefined' && settings.music && settings.music.enabled)
+      ? getYoutubeId(settings.music.youtubeUrl) : null;
+  %>
+  <% if (musicVideoId) { %>
+  <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>">
+    <button id="music-toggle-btn" type="button" class="w-12 h-12 rounded-full bg-[#1a160d] border border-[#3a3220] shadow-lg flex items-center justify-center text-lg hover:border-[#c8a63f]/60 transition">
+      <span id="music-icon">🎵</span>
+    </button>
+    <div id="music-panel" class="hidden absolute bottom-14 right-0 w-56 bg-[#1a160d] border border-[#3a3220] rounded-xl shadow-xl p-3 text-[#f3ecd8]">
+      <div class="flex items-center justify-between mb-3">
+        <span class="text-xs text-[#a89a6c]">🎵 เพลงหน้าเว็บ</span>
+        <button id="music-collapse-btn" type="button" class="text-[#7a6f47] hover:text-[#c8a63f] text-sm leading-none">✕</button>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="music-play-btn" type="button" class="w-9 h-9 rounded-full bg-[#c8a63f] text-[#100e08] flex items-center justify-center flex-shrink-0 text-sm">▶</button>
+        <input id="music-volume" type="range" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="flex-1 accent-[#c8a63f]" />
+      </div>
+    </div>
+    <div id="music-yt-player" style="position:absolute; width:0; height:0; overflow:hidden;"></div>
+  </div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <script>
+    (function () {
+      const widget = document.getElementById('music-widget');
+      if (!widget) return;
+      const videoId = widget.dataset.videoId;
+      const toggleBtn = document.getElementById('music-toggle-btn');
+      const panel = document.getElementById('music-panel');
+      const collapseBtn = document.getElementById('music-collapse-btn');
+      const playBtn = document.getElementById('music-play-btn');
+      const volumeSlider = document.getElementById('music-volume');
+      const icon = document.getElementById('music-icon');
+
+      let player = null;
+      let isPlaying = false;
+      const savedVolume = localStorage.getItem('lilteam_music_volume');
+      const initialVolume = savedVolume !== null ? parseInt(savedVolume, 10) : parseInt(widget.dataset.defaultVolume, 10);
+      volumeSlider.value = initialVolume;
+
+      window.onYouTubeIframeAPIReady = function () {
+        player = new YT.Player('music-yt-player', {
+          videoId: videoId,
+          playerVars: { autoplay: 0, controls: 0, loop: 1, playlist: videoId },
+          events: {
+            onReady: function (e) {
+              e.target.setVolume(initialVolume);
+            },
+            onStateChange: function (e) {
+              if (e.data === YT.PlayerState.PLAYING) {
+                isPlaying = true;
+                playBtn.textContent = '⏸';
+                icon.textContent = '🎶';
+              } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
+                isPlaying = false;
+                playBtn.textContent = '▶';
+                icon.textContent = '🎵';
+              }
+            },
+          },
+        });
+      };
+
+      toggleBtn.addEventListener('click', function () {
+        panel.classList.toggle('hidden');
+      });
+      collapseBtn.addEventListener('click', function () {
+        panel.classList.add('hidden');
+      });
+      document.addEventListener('click', function (e) {
+        if (!widget.contains(e.target)) panel.classList.add('hidden');
+      });
+
+      playBtn.addEventListener('click', function () {
+        if (!player) return;
+        if (isPlaying) player.pauseVideo();
+        else player.playVideo();
+      });
+
+      volumeSlider.addEventListener('input', function () {
+        const v = parseInt(volumeSlider.value, 10);
+        if (player) player.setVolume(v);
+        localStorage.setItem('lilteam_music_volume', v);
+      });
+    })();
+  </script>
+  <% } %>
 </body>
 </html>

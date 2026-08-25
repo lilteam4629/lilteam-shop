@@ -398,6 +398,25 @@ router.post('/settings', (req, res) => {
   res.redirect('/admin/settings');
 });
 
+// ---------- Music player ----------
+router.post('/music-player', (req, res) => {
+  const enabled = req.body.enabled === 'on';
+  const youtubeUrl = (req.body.youtubeUrl || '').trim();
+  let defaultVolume = parseInt(req.body.defaultVolume, 10);
+  if (Number.isNaN(defaultVolume)) defaultVolume = 50;
+  defaultVolume = Math.max(0, Math.min(100, defaultVolume));
+
+  if (enabled && !youtubeUrl) {
+    req.flash('error', 'กรุณาใส่ลิงก์ YouTube ก่อนเปิดใช้งานเพลง');
+    return res.redirect('/admin/settings');
+  }
+
+  store.data.settings.music = { enabled, youtubeUrl, defaultVolume };
+  store.save();
+  req.flash('success', 'บันทึกการตั้งค่าเพลงหน้าเว็บแล้ว');
+  res.redirect('/admin/settings');
+});
+
 // ---------- Hero banner ----------
 router.post('/hero-banner/upload', (req, res) => {
   bannerUpload.single('bannerImage')(req, res, (err) => {
