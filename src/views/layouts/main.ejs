@@ -4,10 +4,45 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= typeof title !== 'undefined' ? title + ' | ' + settings.shopName : settings.shopName %></title>
+  <script>
+    (function () {
+      try {
+        if (localStorage.getItem('lilteam_theme') === 'light') document.documentElement.classList.add('light');
+      } catch (e) {}
+    })();
+  </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #100e08;
+      --card: #1a160d;
+      --border: #3a3220;
+      --border-light: #443a22;
+      --input: #211c11;
+      --gold: #c8a63f;
+      --gold-hover: #d9bc5e;
+      --text: #f3ecd8;
+      --text-2: #d6c9a0;
+      --text-3: #a89a6c;
+      --text-4: #7a6f47;
+      --coral: #e2836f;
+    }
+    html.light {
+      --bg: #faf6eb;
+      --card: #ffffff;
+      --border: #e2d8bd;
+      --border-light: #d6c9a8;
+      --input: #f3edd8;
+      --gold: #a88022;
+      --gold-hover: #946f1a;
+      --text: #2a2414;
+      --text-2: #4a4028;
+      --text-3: #6b5e3d;
+      --text-4: #8a7c5c;
+      --coral: #c44a3a;
+    }
     body { font-family: 'Kanit', sans-serif; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-thumb { background: #4a4028; border-radius: 4px; }
@@ -27,7 +62,7 @@
     .marquee-track:hover { animation-play-state: paused; }
   </style>
 </head>
-<body class="bg-[#100e08] text-[#f3ecd8] min-h-screen flex flex-col">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
 
   <main class="flex-1">
@@ -41,7 +76,7 @@
     <% if (messages.error && messages.error.length) { %>
       <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-4">
         <% messages.error.forEach(m => { %>
-          <div class="bg-[#e2836f]/10 border border-[#e2836f]/50 text-[#e2836f] px-4 py-2 rounded-lg mb-2 text-sm"><%= m %></div>
+          <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/50 text-[var(--coral)] px-4 py-2 rounded-lg mb-2 text-sm"><%= m %></div>
         <% }) %>
       </div>
     <% } %>
@@ -51,6 +86,20 @@
   <%- include('../partials/footer') %>
 
   <script>
+    (function () {
+      const btn = document.getElementById('theme-toggle-btn');
+      const icon = document.getElementById('theme-toggle-icon');
+      if (!btn) return;
+      function isLight() { return document.documentElement.classList.contains('light'); }
+      function updateIcon() { icon.textContent = isLight() ? '☀️' : '🌙'; }
+      updateIcon();
+      btn.addEventListener('click', function () {
+        document.documentElement.classList.toggle('light');
+        try { localStorage.setItem('lilteam_theme', isLight() ? 'light' : 'dark'); } catch (e) {}
+        updateIcon();
+      });
+    })();
+
     document.addEventListener('mousemove', (e) => {
       const card = e.target.closest('.spotlight-card');
       if (!card) return;
@@ -71,25 +120,25 @@
   %>
   <% if (musicVideoId) { %>
   <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>" data-start-seconds="<%= settings.music.startSeconds || 0 %>" data-end-seconds="<%= settings.music.endSeconds || 0 %>">
-    <button id="music-toggle-btn" type="button" class="relative w-14 h-14 rounded-full bg-[#1a160d] border border-[#3a3220] shadow-lg flex items-center justify-center text-xl overflow-hidden hover:border-[#c8a63f]/60 transition">
+    <button id="music-toggle-btn" type="button" class="relative w-14 h-14 rounded-full bg-[var(--card)] border border-[var(--border)] shadow-lg flex items-center justify-center text-xl overflow-hidden hover:border-[var(--gold)]/60 transition">
       <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="" />
       <span id="music-icon" class="relative z-10">🎵</span>
-      <span id="music-playing-ring" class="hidden absolute inset-0 rounded-full border-2 border-[#c8a63f] animate-ping"></span>
+      <span id="music-playing-ring" class="hidden absolute inset-0 rounded-full border-2 border-[var(--gold)] animate-ping"></span>
     </button>
 
-    <div id="music-panel" class="hidden absolute bottom-16 right-0 w-64 bg-[#1a160d] border border-[#3a3220] rounded-2xl shadow-2xl overflow-hidden text-[#f3ecd8]">
+    <div id="music-panel" class="hidden absolute bottom-16 right-0 w-64 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden text-[var(--text)]">
       <div class="relative aspect-video bg-[#0c0a06]">
         <img src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" class="w-full h-full object-cover" alt="เพลงหน้าเว็บ" />
-        <div class="absolute inset-0 bg-gradient-to-t from-[#1a160d] via-transparent to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-[var(--card)] via-transparent to-transparent"></div>
         <button id="music-collapse-btn" type="button" class="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center text-sm leading-none">✕</button>
       </div>
       <div class="p-3">
-        <p id="music-title" class="text-xs text-[#d6c9a0] mb-3 line-clamp-2 leading-snug">เพลงหน้าเว็บ</p>
+        <p id="music-title" class="text-xs text-[var(--text-2)] mb-3 line-clamp-2 leading-snug">เพลงหน้าเว็บ</p>
         <div class="flex items-center gap-3">
-          <button id="music-play-btn" type="button" class="w-10 h-10 rounded-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] flex items-center justify-center flex-shrink-0 text-base transition">▶</button>
+          <button id="music-play-btn" type="button" class="w-10 h-10 rounded-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] flex items-center justify-center flex-shrink-0 text-base transition">▶</button>
           <div class="flex-1 flex items-center gap-2">
             <span class="text-xs">🔉</span>
-            <input id="music-volume" type="range" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="flex-1 accent-[#c8a63f]" />
+            <input id="music-volume" type="range" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="flex-1 accent-[var(--gold)]" />
           </div>
         </div>
       </div>

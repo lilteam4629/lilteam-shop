@@ -1,18 +1,18 @@
 <section class="max-w-3xl mx-auto px-4 py-8">
   <h1 class="text-2xl font-bold mb-6">คำสั่งซื้อของฉัน</h1>
   <% if (!orders.length) { %>
-    <p class="text-[#a89a6c]">คุณยังไม่มีคำสั่งซื้อ</p>
+    <p class="text-[var(--text-3)]">คุณยังไม่มีคำสั่งซื้อ</p>
   <% } else { %>
     <div class="space-y-3">
       <% orders.forEach(o => { %>
-        <a href="/account/orders/<%= o.id %>" class="block bg-[#1a160d] border border-[#3a3220] hover:border-[#c8a63f]/50 rounded-xl p-4">
+        <a href="/account/orders/<%= o.id %>" class="block bg-[var(--card)] border border-[var(--border)] hover:border-[var(--gold)]/50 rounded-xl p-4">
           <div class="flex items-center justify-between mb-1">
             <span class="font-medium">คำสั่งซื้อ #<%= o.id %></span>
             <span class="text-emerald-400 text-sm"><%= o.status %></span>
           </div>
-          <div class="text-[#a89a6c] text-sm flex items-center justify-between">
+          <div class="text-[var(--text-3)] text-sm flex items-center justify-between">
             <span><%= new Date(o.createdAt).toLocaleString('th-TH') %> &middot; <%= o.items.length %> รายการ</span>
-            <span class="text-[#c8a63f] font-medium">฿<%= o.total.toLocaleString() %>.00</span>
+            <span class="text-[var(--gold)] font-medium">฿<%= o.total.toLocaleString() %>.00</span>
           </div>
         </a>
       <% }) %>

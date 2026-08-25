@@ -1,15 +1,15 @@
 <section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
-  <a href="javascript:history.back()" class="text-sm text-[#c8a63f]">← กลับหน้าร้าน</a>
+  <a href="javascript:history.back()" class="text-sm text-[var(--gold)]">← กลับหน้าร้าน</a>
 
   <div class="grid md:grid-cols-2 gap-8 mt-4">
     <div>
-      <div class="rounded-2xl overflow-hidden border border-[#3a3220] aspect-video bg-[#1a160d] mb-3">
+      <div class="rounded-2xl overflow-hidden border border-[var(--border)] aspect-video bg-[var(--card)] mb-3">
         <img src="<%= product.images[0] %>" class="w-full h-full object-cover" alt="<%= product.title %>" />
       </div>
       <% if (product.images.length > 1) { %>
         <div class="grid grid-cols-4 gap-2">
           <% product.images.slice(1).forEach(img => { %>
-            <div class="aspect-video rounded-lg overflow-hidden border border-[#3a3220]">
+            <div class="aspect-video rounded-lg overflow-hidden border border-[var(--border)]">
               <img src="<%= img %>" class="w-full h-full object-cover" />
             </div>
           <% }) %>
@@ -23,58 +23,58 @@
         <% if (product.stockCount > 0) { %>
           <span class="text-emerald-400 text-xs">พร้อมส่งทันที</span>
         <% } else { %>
-          <span class="text-[#e2836f] text-xs">สินค้าหมด</span>
+          <span class="text-[var(--coral)] text-xs">สินค้าหมด</span>
         <% } %>
         <button onclick="navigator.clipboard && navigator.clipboard.writeText(window.location.href); this.textContent='คัดลอกแล้ว'"
-          class="ml-auto text-xs text-[#a89a6c] hover:text-[#c8a63f] border border-[#443a22] rounded-lg px-2 py-1">คัดลอกลิงก์</button>
+          class="ml-auto text-xs text-[var(--text-3)] hover:text-[var(--gold)] border border-[var(--border-light)] rounded-lg px-2 py-1">คัดลอกลิงก์</button>
       </div>
 
       <h1 class="text-2xl font-bold mb-2"><%= product.title %></h1>
       <div class="flex flex-wrap gap-2 mb-3">
         <% genreNames.forEach(g => { %>
-          <span class="text-xs bg-[#211c11] border border-[#443a22] text-[#d6c9a0] px-2 py-1 rounded-full"><%= g %></span>
+          <span class="text-xs bg-[var(--input)] border border-[var(--border-light)] text-[var(--text-2)] px-2 py-1 rounded-full"><%= g %></span>
         <% }) %>
       </div>
-      <p class="text-sm text-[#a89a6c] mb-4">เล่นได้บน <span class="text-[#d6c9a0]"><%= product.platform %></span></p>
+      <p class="text-sm text-[var(--text-3)] mb-4">เล่นได้บน <span class="text-[var(--text-2)]"><%= product.platform %></span></p>
 
-      <div class="mb-1 text-xs text-[#a89a6c]">ราคา</div>
+      <div class="mb-1 text-xs text-[var(--text-3)]">ราคา</div>
       <div class="flex items-baseline gap-2 mb-5">
-        <% if (product.type === 'rental') { %><span class="text-sm text-[#a89a6c]">เริ่ม</span><% } %>
-        <span class="text-3xl font-bold text-[#c8a63f]">฿<%= product.price.toLocaleString() %>.00</span>
+        <% if (product.type === 'rental') { %><span class="text-sm text-[var(--text-3)]">เริ่ม</span><% } %>
+        <span class="text-3xl font-bold text-[var(--gold)]">฿<%= product.price.toLocaleString() %>.00</span>
         <% if (product.type === 'offline' && product.originalPrice > product.price) { %>
-          <span class="text-[#e2836f] line-through text-sm">฿<%= product.originalPrice.toLocaleString() %>.00</span>
+          <span class="text-[var(--coral)] line-through text-sm">฿<%= product.originalPrice.toLocaleString() %>.00</span>
         <% } %>
       </div>
 
       <% if (product.stockCount > 0) { %>
         <form action="/cart/add/<%= product.id %>" method="post">
-          <button class="w-full sm:w-auto px-8 py-3 rounded-lg font-medium bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08]">เพิ่มลงตะกร้า</button>
+          <button class="w-full sm:w-auto px-8 py-3 rounded-lg font-medium bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)]">เพิ่มลงตะกร้า</button>
         </form>
       <% } else { %>
-        <div class="bg-[#e2836f]/10 border border-[#e2836f]/40 text-[#e2836f] text-sm rounded-lg px-4 py-3">สินค้าหมด กรุณาเลือกสินค้าอื่น</div>
+        <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมด กรุณาเลือกสินค้าอื่น</div>
       <% } %>
 
-      <div class="mt-6 bg-[#1a160d] border border-[#3a3220] rounded-xl p-4 text-sm space-y-2">
-        <div class="font-medium text-[#c8a63f] mb-1">วิธีรับสินค้า</div>
-        <p class="text-[#d6c9a0]">✅ ได้รับ username และ password ของบัญชีเกมทันทีหลังชำระเงินสำเร็จ ดูได้ที่หน้าออเดอร์ของคุณ</p>
-        <p class="text-[#d6c9a0]">✅ ขอโค้ด Steam Guard สำหรับเข้าสู่ระบบได้สูงสุด 3 รอบ ผ่านหน้าออเดอร์ ไม่ต้องรอแอดมิน</p>
-        <p class="text-[#d6c9a0]">✅ ระบบส่งมอบอัตโนมัติตลอด 24 ชั่วโมง หากติดปัญหาแจ้งทางร้านได้ที่<a href="/contact" class="text-[#c8a63f]">หน้าติดต่อร้าน</a></p>
+      <div class="mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 text-sm space-y-2">
+        <div class="font-medium text-[var(--gold)] mb-1">วิธีรับสินค้า</div>
+        <p class="text-[var(--text-2)]">✅ ได้รับ username และ password ของบัญชีเกมทันทีหลังชำระเงินสำเร็จ ดูได้ที่หน้าออเดอร์ของคุณ</p>
+        <p class="text-[var(--text-2)]">✅ ขอโค้ด Steam Guard สำหรับเข้าสู่ระบบได้สูงสุด 3 รอบ ผ่านหน้าออเดอร์ ไม่ต้องรอแอดมิน</p>
+        <p class="text-[var(--text-2)]">✅ ระบบส่งมอบอัตโนมัติตลอด 24 ชั่วโมง หากติดปัญหาแจ้งทางร้านได้ที่<a href="/contact" class="text-[var(--gold)]">หน้าติดต่อร้าน</a></p>
       </div>
     </div>
   </div>
 
   <div class="mt-10">
-    <div class="flex gap-1 border-b border-[#3a3220] text-sm overflow-x-auto" id="tabbar">
-      <button data-tab="terms" class="tab-btn px-4 py-2 border-b-2 border-[#c8a63f] text-[#c8a63f] whitespace-nowrap">เงื่อนไข</button>
-      <button data-tab="gallery" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[#a89a6c] hover:text-[#d6c9a0] whitespace-nowrap">ภาพเกม</button>
-      <button data-tab="about" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[#a89a6c] hover:text-[#d6c9a0] whitespace-nowrap">รายละเอียด</button>
-      <button data-tab="specs" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[#a89a6c] hover:text-[#d6c9a0] whitespace-nowrap">สเปกเครื่อง</button>
-      <button data-tab="reviews" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[#a89a6c] hover:text-[#d6c9a0] whitespace-nowrap">รีวิว</button>
+    <div class="flex gap-1 border-b border-[var(--border)] text-sm overflow-x-auto" id="tabbar">
+      <button data-tab="terms" class="tab-btn px-4 py-2 border-b-2 border-[var(--gold)] text-[var(--gold)] whitespace-nowrap">เงื่อนไข</button>
+      <button data-tab="gallery" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">ภาพเกม</button>
+      <button data-tab="about" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">รายละเอียด</button>
+      <button data-tab="specs" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">สเปกเครื่อง</button>
+      <button data-tab="reviews" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">รีวิว</button>
     </div>
 
-    <div id="tab-terms" class="tab-panel py-6 text-sm text-[#d6c9a0] space-y-4">
+    <div id="tab-terms" class="tab-panel py-6 text-sm text-[var(--text-2)] space-y-4">
       <div>
-        <div class="font-medium text-[#f3ecd8] mb-2">เงื่อนไขก่อนสั่งซื้อ</div>
+        <div class="font-medium text-[var(--text)] mb-2">เงื่อนไขก่อนสั่งซื้อ</div>
         <ul class="list-disc pl-5 space-y-1">
           <li>รับประกันเฉพาะกรณี เข้ารหัสไม่ได้ / รหัสผ่านผิด / เกมหายจากบัญชี เท่านั้น</li>
           <li>ขอโค้ด Steam Guard ได้ 3 รอบต่อออเดอร์ ใช้ครบแล้วขอเพิ่มไม่ได้</li>
@@ -85,7 +85,7 @@
         </ul>
       </div>
       <div>
-        <div class="font-medium text-[#f3ecd8] mb-2">เงื่อนไขการรับประกันสินค้า</div>
+        <div class="font-medium text-[var(--text)] mb-2">เงื่อนไขการรับประกันสินค้า</div>
         <ul class="list-disc pl-5 space-y-1">
           <li>รับประกันสินค้า 90 วันนับจากวันสั่งซื้อ</li>
           <li>รับประกันเฉพาะ 3 กรณี: เข้ารหัสไม่ได้ / รหัสผ่านผิด / เกมหายจากบัญชี</li>
@@ -97,41 +97,41 @@
     <div id="tab-gallery" class="tab-panel py-6 hidden">
       <div class="grid sm:grid-cols-3 gap-3">
         <% product.images.forEach(img => { %>
-          <div class="aspect-video rounded-lg overflow-hidden border border-[#3a3220]"><img src="<%= img %>" class="w-full h-full object-cover" /></div>
+          <div class="aspect-video rounded-lg overflow-hidden border border-[var(--border)]"><img src="<%= img %>" class="w-full h-full object-cover" /></div>
         <% }) %>
       </div>
     </div>
 
-    <div id="tab-about" class="tab-panel py-6 hidden text-sm text-[#d6c9a0] leading-relaxed whitespace-pre-line"><%= product.aboutText %></div>
+    <div id="tab-about" class="tab-panel py-6 hidden text-sm text-[var(--text-2)] leading-relaxed whitespace-pre-line"><%= product.aboutText %></div>
 
     <div id="tab-specs" class="tab-panel py-6 hidden grid sm:grid-cols-2 gap-6 text-sm">
       <div>
-        <div class="font-medium text-[#f3ecd8] mb-2">ขั้นต่ำ</div>
-        <table class="w-full text-[#d6c9a0]">
+        <div class="font-medium text-[var(--text)] mb-2">ขั้นต่ำ</div>
+        <table class="w-full text-[var(--text-2)]">
           <% Object.entries(product.sysReqMin).forEach(([k,v]) => { %>
-            <tr class="border-b border-[#241f13]"><td class="py-1.5 pr-3 text-[#a89a6c] capitalize"><%= k %></td><td class="py-1.5"><%= v %></td></tr>
+            <tr class="border-b border-[#241f13]"><td class="py-1.5 pr-3 text-[var(--text-3)] capitalize"><%= k %></td><td class="py-1.5"><%= v %></td></tr>
           <% }) %>
         </table>
       </div>
       <div>
-        <div class="font-medium text-[#f3ecd8] mb-2">แนะนำ</div>
-        <table class="w-full text-[#d6c9a0]">
+        <div class="font-medium text-[var(--text)] mb-2">แนะนำ</div>
+        <table class="w-full text-[var(--text-2)]">
           <% Object.entries(product.sysReqRec).forEach(([k,v]) => { %>
-            <tr class="border-b border-[#241f13]"><td class="py-1.5 pr-3 text-[#a89a6c] capitalize"><%= k %></td><td class="py-1.5"><%= v %></td></tr>
+            <tr class="border-b border-[#241f13]"><td class="py-1.5 pr-3 text-[var(--text-3)] capitalize"><%= k %></td><td class="py-1.5"><%= v %></td></tr>
           <% }) %>
         </table>
       </div>
     </div>
 
-    <div id="tab-reviews" class="tab-panel py-6 hidden text-sm text-[#a89a6c]">
+    <div id="tab-reviews" class="tab-panel py-6 hidden text-sm text-[var(--text-3)]">
       <% if (!reviews.length) { %>
         ยังไม่มีรีวิวสำหรับเกมนี้ — เป็นคนแรกที่รีวิวหลังได้รับสินค้า
       <% } else { %>
         <div class="space-y-3">
           <% reviews.forEach(r => { %>
-            <div class="bg-[#1a160d] border border-[#3a3220] rounded-lg p-3">
-              <div class="text-[#c8a63f] text-xs mb-1"><%= '★'.repeat(r.rating) %><%= '☆'.repeat(5-r.rating) %></div>
-              <p class="text-[#d6c9a0]"><%= r.body %></p>
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-3">
+              <div class="text-[var(--gold)] text-xs mb-1"><%= '★'.repeat(r.rating) %><%= '☆'.repeat(5-r.rating) %></div>
+              <p class="text-[var(--text-2)]"><%= r.body %></p>
             </div>
           <% }) %>
         </div>
@@ -144,11 +144,11 @@
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('border-[#c8a63f]', 'text-[#c8a63f]');
-        b.classList.add('border-transparent', 'text-[#a89a6c]');
+        b.classList.remove('border-[var(--gold)]', 'text-[var(--gold)]');
+        b.classList.add('border-transparent', 'text-[var(--text-3)]');
       });
-      btn.classList.add('border-[#c8a63f]', 'text-[#c8a63f]');
-      btn.classList.remove('border-transparent', 'text-[#a89a6c]');
+      btn.classList.add('border-[var(--gold)]', 'text-[var(--gold)]');
+      btn.classList.remove('border-transparent', 'text-[var(--text-3)]');
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
       document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');
     });

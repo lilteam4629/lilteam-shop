@@ -1,89 +1,89 @@
-<form action="/admin/settings" method="post" class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-6 max-w-xl space-y-4">
+<form action="/admin/settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-xl space-y-4">
   <div>
-    <label class="block text-sm mb-1 text-[#a89a6c]">ชื่อร้าน</label>
-    <input name="shopName" value="<%= settings.shopName %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อร้าน</label>
+    <input name="shopName" value="<%= settings.shopName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[#a89a6c]">คำโปรย</label>
-    <input name="tagline" value="<%= settings.tagline %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    <label class="block text-sm mb-1 text-[var(--text-3)]">คำโปรย</label>
+    <input name="tagline" value="<%= settings.tagline %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[#a89a6c]">Line ID</label>
-    <input name="contactLine" value="<%= settings.contactLine %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    <label class="block text-sm mb-1 text-[var(--text-3)]">Line ID</label>
+    <input name="contactLine" value="<%= settings.contactLine %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[#a89a6c]">Facebook URL</label>
-    <input name="contactFacebook" value="<%= settings.contactFacebook %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    <label class="block text-sm mb-1 text-[var(--text-3)]">Facebook URL</label>
+    <input name="contactFacebook" value="<%= settings.contactFacebook %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
   </div>
   <div>
-    <label class="block text-sm mb-1 text-[#a89a6c]">เวลาเปิดบริการ</label>
-    <input name="openHours" value="<%= settings.openHours %>" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2" />
+    <label class="block text-sm mb-1 text-[var(--text-3)]">เวลาเปิดบริการ</label>
+    <input name="openHours" value="<%= settings.openHours %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
   </div>
 
-  <button class="bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium px-6 py-2 rounded-lg text-sm">บันทึกการตั้งค่า</button>
+  <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกการตั้งค่า</button>
 </form>
 
-<div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-6 max-w-xl mt-6">
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-xl mt-6">
   <h3 class="font-semibold mb-1">แบนเนอร์หน้าหลัก</h3>
-  <p class="text-xs text-[#7a6f47] mb-4">อัปโหลดรูปแบนเนอร์ของคุณเอง แล้วเลือกได้ว่าจะใช้แบนเนอร์นี้แทนหน้าหลักแบบเดิม (การ์ดเกมโค้งๆ) หรือไม่</p>
+  <p class="text-xs text-[var(--text-4)] mb-4">อัปโหลดรูปแบนเนอร์ของคุณเอง แล้วเลือกได้ว่าจะใช้แบนเนอร์นี้แทนหน้าหลักแบบเดิม (การ์ดเกมโค้งๆ) หรือไม่</p>
 
   <% if (settings.hero.bannerImage) { %>
-    <img src="<%= settings.hero.bannerImage %>" class="w-full rounded-lg border border-[#3a3220] mb-4" alt="แบนเนอร์หน้าหลัก" />
+    <img src="<%= settings.hero.bannerImage %>" class="w-full rounded-lg border border-[var(--border)] mb-4" alt="แบนเนอร์หน้าหลัก" />
   <% } else { %>
-    <div class="w-full aspect-[3/1] rounded-lg border border-dashed border-[#443a22] flex items-center justify-center text-[#7a6f47] text-sm mb-4">ยังไม่มีแบนเนอร์</div>
+    <div class="w-full aspect-[3/1] rounded-lg border border-dashed border-[var(--border-light)] flex items-center justify-center text-[var(--text-4)] text-sm mb-4">ยังไม่มีแบนเนอร์</div>
   <% } %>
 
   <form action="/admin/hero-banner/upload" method="post" enctype="multipart/form-data" class="flex gap-2 mb-5">
-    <input type="file" name="bannerImage" accept="image/*" required class="flex-1 text-sm text-[#a89a6c] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[#c8a63f] file:text-sm" />
-    <button class="bg-[#332b1a] hover:bg-[#4a3f26] border border-[#443a22] text-[#c8a63f] px-4 rounded-lg text-sm whitespace-nowrap">อัปโหลด</button>
+    <input type="file" name="bannerImage" accept="image/*" required class="flex-1 text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
+    <button class="bg-[#332b1a] hover:bg-[#4a3f26] border border-[var(--border-light)] text-[var(--gold)] px-4 rounded-lg text-sm whitespace-nowrap">อัปโหลด</button>
   </form>
 
   <form action="/admin/hero-banner/mode" method="post" class="space-y-3">
     <div>
-      <label class="block text-sm mb-1 text-[#a89a6c]">ลิงก์เมื่อคลิกแบนเนอร์ (ไม่บังคับ)</label>
-      <input name="bannerLink" value="<%= settings.hero.bannerLink %>" placeholder="/offline" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+      <label class="block text-sm mb-1 text-[var(--text-3)]">ลิงก์เมื่อคลิกแบนเนอร์ (ไม่บังคับ)</label>
+      <input name="bannerLink" value="<%= settings.hero.bannerLink %>" placeholder="/offline" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
     </div>
     <div class="flex items-center gap-3">
-      <label class="flex items-center gap-2 bg-[#211c11] border-2 <%= settings.hero.mode === 'default' ? 'border-[#c8a63f]' : 'border-[#443a22]' %> rounded-lg px-3 py-2 cursor-pointer text-sm flex-1">
-        <input type="radio" name="mode" value="default" <%= settings.hero.mode === 'default' ? 'checked' : '' %> class="accent-[#c8a63f]" onchange="this.form.submit()" />
+      <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.hero.mode === 'default' ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-lg px-3 py-2 cursor-pointer text-sm flex-1">
+        <input type="radio" name="mode" value="default" <%= settings.hero.mode === 'default' ? 'checked' : '' %> class="accent-[var(--gold)]" onchange="this.form.submit()" />
         ใช้หน้าหลักแบบเดิม
       </label>
-      <label class="flex items-center gap-2 bg-[#211c11] border-2 <%= settings.hero.mode === 'banner' ? 'border-[#c8a63f]' : 'border-[#443a22]' %> rounded-lg px-3 py-2 cursor-pointer text-sm flex-1">
-        <input type="radio" name="mode" value="banner" <%= settings.hero.mode === 'banner' ? 'checked' : '' %> class="accent-[#c8a63f]" onchange="this.form.submit()" />
+      <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.hero.mode === 'banner' ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-lg px-3 py-2 cursor-pointer text-sm flex-1">
+        <input type="radio" name="mode" value="banner" <%= settings.hero.mode === 'banner' ? 'checked' : '' %> class="accent-[var(--gold)]" onchange="this.form.submit()" />
         ใช้แบนเนอร์
       </label>
     </div>
   </form>
 </div>
 
-<div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-6 max-w-xl mt-6">
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-xl mt-6">
   <h3 class="font-semibold mb-1">เพลงหน้าเว็บ</h3>
-  <p class="text-xs text-[#7a6f47] mb-4">ใส่ลิงก์วิดีโอ YouTube เพื่อเปิดเป็นเพลงพื้นหลังของหน้าเว็บ ลูกค้าจะเห็นเป็นปุ่มเล่นเพลงเล็กๆ มุมจอ กดเล่น/หยุด/ปรับเสียงเองได้ และย่อเก็บได้</p>
+  <p class="text-xs text-[var(--text-4)] mb-4">ใส่ลิงก์วิดีโอ YouTube เพื่อเปิดเป็นเพลงพื้นหลังของหน้าเว็บ ลูกค้าจะเห็นเป็นปุ่มเล่นเพลงเล็กๆ มุมจอ กดเล่น/หยุด/ปรับเสียงเองได้ และย่อเก็บได้</p>
 
   <form action="/admin/music-player" method="post" class="space-y-3">
     <div>
-      <label class="block text-sm mb-1 text-[#a89a6c]">ลิงก์ YouTube</label>
-      <input name="youtubeUrl" value="<%= settings.music.youtubeUrl %>" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+      <label class="block text-sm mb-1 text-[var(--text-3)]">ลิงก์ YouTube</label>
+      <input name="youtubeUrl" value="<%= settings.music.youtubeUrl %>" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
     </div>
     <div class="grid grid-cols-2 gap-3">
       <div>
-        <label class="block text-sm mb-1 text-[#a89a6c]">เริ่มเล่นที่ (นาที:วินาที)</label>
-        <input name="startTime" value="<%= Math.floor(settings.music.startSeconds/60) %>:<%= String(settings.music.startSeconds%60).padStart(2,'0') %>" placeholder="0:00" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+        <label class="block text-sm mb-1 text-[var(--text-3)]">เริ่มเล่นที่ (นาที:วินาที)</label>
+        <input name="startTime" value="<%= Math.floor(settings.music.startSeconds/60) %>:<%= String(settings.music.startSeconds%60).padStart(2,'0') %>" placeholder="0:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       </div>
       <div>
-        <label class="block text-sm mb-1 text-[#a89a6c]">จบท่อนที่ (ไม่บังคับ)</label>
-        <input name="endTime" value="<%= settings.music.endSeconds ? Math.floor(settings.music.endSeconds/60) + ':' + String(settings.music.endSeconds%60).padStart(2,'0') : '' %>" placeholder="0:00" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+        <label class="block text-sm mb-1 text-[var(--text-3)]">จบท่อนที่ (ไม่บังคับ)</label>
+        <input name="endTime" value="<%= settings.music.endSeconds ? Math.floor(settings.music.endSeconds/60) + ':' + String(settings.music.endSeconds%60).padStart(2,'0') : '' %>" placeholder="0:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       </div>
     </div>
-    <p class="text-xs text-[#7a6f47] -mt-1">ใส่ทั้งสองช่องเพื่อเลือกเล่นเฉพาะท่อนที่ต้องการ (จะวนซ้ำเฉพาะช่วงนั้น) หรือใส่แค่ "เริ่มเล่นที่" อย่างเดียวก็ได้</p>
+    <p class="text-xs text-[var(--text-4)] -mt-1">ใส่ทั้งสองช่องเพื่อเลือกเล่นเฉพาะท่อนที่ต้องการ (จะวนซ้ำเฉพาะช่วงนั้น) หรือใส่แค่ "เริ่มเล่นที่" อย่างเดียวก็ได้</p>
     <div>
-      <label class="block text-sm mb-1 text-[#a89a6c]">ระดับเสียงเริ่มต้น (<%= settings.music.defaultVolume %>%)</label>
-      <input type="range" name="defaultVolume" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="w-full accent-[#c8a63f]" />
+      <label class="block text-sm mb-1 text-[var(--text-3)]">ระดับเสียงเริ่มต้น (<%= settings.music.defaultVolume %>%)</label>
+      <input type="range" name="defaultVolume" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="w-full accent-[var(--gold)]" />
     </div>
-    <label class="flex items-center gap-2 bg-[#211c11] border-2 <%= settings.music.enabled ? 'border-[#c8a63f]' : 'border-[#443a22]' %> rounded-lg px-3 py-2 cursor-pointer text-sm">
-      <input type="checkbox" name="enabled" <%= settings.music.enabled ? 'checked' : '' %> class="accent-[#c8a63f]" />
+    <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.music.enabled ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-lg px-3 py-2 cursor-pointer text-sm">
+      <input type="checkbox" name="enabled" <%= settings.music.enabled ? 'checked' : '' %> class="accent-[var(--gold)]" />
       เปิดใช้งานเพลงหน้าเว็บ
     </label>
-    <button class="bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium px-6 py-2 rounded-lg text-sm">บันทึกการตั้งค่าเพลง</button>
+    <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกการตั้งค่าเพลง</button>
   </form>
 </div>

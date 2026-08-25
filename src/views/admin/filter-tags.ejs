@@ -1,15 +1,15 @@
 <div class="grid lg:grid-cols-3 gap-6">
-  <div class="lg:col-span-2 bg-[#1a160d] border border-[#3a3220] rounded-xl p-5">
+  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
     <h3 class="font-semibold mb-4">ตัวกรองสินค้าทั้งหมด</h3>
     <% if (!filterTags.length) { %>
-      <p class="text-[#7a6f47] text-sm">ยังไม่มีตัวกรองสินค้า เพิ่มได้จากฟอร์มด้านขวา</p>
+      <p class="text-[var(--text-4)] text-sm">ยังไม่มีตัวกรองสินค้า เพิ่มได้จากฟอร์มด้านขวา</p>
     <% } %>
     <div class="grid grid-cols-3 sm:grid-cols-4 gap-4">
       <% filterTags.forEach(t => { %>
-        <div class="bg-[#211c11] border border-[#443a22] rounded-xl p-3 text-center">
+        <div class="bg-[var(--input)] border border-[var(--border-light)] rounded-xl p-3 text-center">
           <img src="<%= t.image %>" alt="<%= t.name %>" class="w-16 h-16 rounded-full object-cover mx-auto mb-2 border-2 border-[#4a4028]" />
           <div class="text-sm font-medium truncate"><%= t.name %></div>
-          <div class="text-xs text-[#7a6f47] mb-2"><%= t.productCount %> สินค้า</div>
+          <div class="text-xs text-[var(--text-4)] mb-2"><%= t.productCount %> สินค้า</div>
           <form action="/admin/filter-tags/<%= t.id %>/delete" method="post" onsubmit="return confirm('ลบตัวกรองนี้? (จะถูกลบออกจากสินค้าที่ผูกไว้ด้วย)')">
             <button class="text-rose-400 text-xs">ลบ</button>
           </form>
@@ -18,19 +18,19 @@
     </div>
   </div>
 
-  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-5">
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
     <h3 class="font-semibold mb-3">เพิ่มตัวกรองสินค้า</h3>
     <form action="/admin/filter-tags" method="post" class="space-y-3">
       <div>
-        <label class="block text-xs text-[#a89a6c] mb-1">ชื่อ (แสดงใต้รูป)</label>
-        <input name="name" required placeholder="เช่น แนะนำ, ขายดี, Denuvo" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+        <label class="block text-xs text-[var(--text-3)] mb-1">ชื่อ (แสดงใต้รูป)</label>
+        <input name="name" required placeholder="เช่น แนะนำ, ขายดี, Denuvo" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       </div>
       <div>
-        <label class="block text-xs text-[#a89a6c] mb-1">URL รูปภาพ</label>
-        <input name="image" required placeholder="https://..." class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+        <label class="block text-xs text-[var(--text-3)] mb-1">URL รูปภาพ</label>
+        <input name="image" required placeholder="https://..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       </div>
-      <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium rounded-lg py-2 text-sm">เพิ่มตัวกรอง</button>
+      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มตัวกรอง</button>
     </form>
-    <p class="text-xs text-[#7a6f47] mt-3">หลังเพิ่มแล้ว ไปที่หน้าแก้ไขสินค้าเพื่อเลือกว่าสินค้าไหนมีตัวกรองนี้บ้าง</p>
+    <p class="text-xs text-[var(--text-4)] mt-3">หลังเพิ่มแล้ว ไปที่หน้าแก้ไขสินค้าเพื่อเลือกว่าสินค้าไหนมีตัวกรองนี้บ้าง</p>
   </div>
 </div>

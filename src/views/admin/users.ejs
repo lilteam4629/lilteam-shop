@@ -1,20 +1,20 @@
 <div class="grid lg:grid-cols-3 gap-6">
-  <div class="lg:col-span-2 bg-[#1a160d] border border-[#3a3220] rounded-xl overflow-x-auto">
+  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
     <table class="w-full text-sm">
-      <thead class="text-[#7a6f47] text-left border-b border-[#3a3220]">
+      <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
         <tr><th class="p-3">ผู้ใช้</th><th class="p-3">Role</th><th class="p-3">กระเป๋าเงิน</th><th class="p-3">สถานะ</th><th class="p-3"></th></tr>
       </thead>
-      <tbody class="divide-y divide-[#3a3220]">
+      <tbody class="divide-y divide-[var(--border)]">
         <% users.forEach(u => { %>
           <tr>
-            <td class="p-3"><%= u.username %><div class="text-xs text-[#7a6f47]"><%= u.email %></div></td>
+            <td class="p-3"><%= u.username %><div class="text-xs text-[var(--text-4)]"><%= u.email %></div></td>
             <td class="p-3"><%= u.role %></td>
             <td class="p-3"><%= u.walletBalance.toLocaleString() %> ฿</td>
             <td class="p-3"><%= u.status === 'banned' ? '🔴 ระงับ' : '🟢 ปกติ' %></td>
             <td class="p-3 text-right space-x-2 whitespace-nowrap">
               <form action="/admin/users/<%= u.id %>/wallet" method="post" class="inline-flex gap-1">
-                <input type="number" name="amount" placeholder="+/-" class="w-20 bg-[#211c11] border border-[#443a22] rounded px-2 py-1 text-xs" />
-                <button class="text-[#c8a63f] text-xs">ปรับยอด</button>
+                <input type="number" name="amount" placeholder="+/-" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded px-2 py-1 text-xs" />
+                <button class="text-[var(--gold)] text-xs">ปรับยอด</button>
               </form>
               <% if (u.role !== 'admin') { %>
                 <form action="/admin/users/<%= u.id %>/toggle-ban" method="post" class="inline">
@@ -27,17 +27,17 @@
       </tbody>
     </table>
   </div>
-  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-5">
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
     <h3 class="font-semibold mb-3">เพิ่มสมาชิก / แอดมิน</h3>
     <form action="/admin/users/new" method="post" class="space-y-3">
-      <input name="username" required placeholder="ชื่อผู้ใช้" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
-      <input name="email" type="email" required placeholder="อีเมล" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
-      <input name="password" type="password" placeholder="รหัสผ่าน" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
-      <select name="role" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm">
+      <input name="username" required placeholder="ชื่อผู้ใช้" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      <input name="email" type="email" required placeholder="อีเมล" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      <input name="password" type="password" placeholder="รหัสผ่าน" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      <select name="role" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
         <option value="customer">ลูกค้า</option>
         <option value="admin">แอดมิน</option>
       </select>
-      <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium rounded-lg py-2 text-sm">เพิ่ม</button>
+      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่ม</button>
     </form>
   </div>
 </div>

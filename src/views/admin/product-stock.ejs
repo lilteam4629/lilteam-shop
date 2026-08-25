@@ -1,13 +1,13 @@
-<a href="/admin/products" class="text-sm text-[#c8a63f]">← กลับไปหน้าสินค้า</a>
+<a href="/admin/products" class="text-sm text-[var(--gold)]">← กลับไปหน้าสินค้า</a>
 <h2 class="font-semibold text-lg mt-2 mb-4"><%= product.title %></h2>
 
 <div class="grid lg:grid-cols-3 gap-6">
-  <div class="lg:col-span-2 bg-[#1a160d] border border-[#3a3220] rounded-xl overflow-x-auto">
+  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
     <table class="w-full text-sm">
-      <thead class="text-[#7a6f47] text-left border-b border-[#3a3220]">
+      <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
         <tr><th class="p-3">Username</th><th class="p-3">Password</th><th class="p-3">สถานะ</th><th class="p-3"></th></tr>
       </thead>
-      <tbody class="divide-y divide-[#3a3220]">
+      <tbody class="divide-y divide-[var(--border)]">
         <% stockItems.forEach(s => { %>
           <tr>
             <td class="p-3 font-mono"><%= s.username %></td>
@@ -22,16 +22,16 @@
             </td>
           </tr>
         <% }) %>
-        <% if (!stockItems.length) { %><tr><td class="p-3 text-[#7a6f47]" colspan="4">ยังไม่มีสต๊อกไอดี</td></tr><% } %>
+        <% if (!stockItems.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="4">ยังไม่มีสต๊อกไอดี</td></tr><% } %>
       </tbody>
     </table>
   </div>
-  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-5">
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
     <h3 class="font-semibold mb-2">เพิ่มสต๊อกไอดี (Bulk)</h3>
-    <p class="text-xs text-[#7a6f47] mb-2">รูปแบบ 1 บรรทัดต่อ 1 ไอดี: <code>username:password:หมายเหตุ</code></p>
+    <p class="text-xs text-[var(--text-4)] mb-2">รูปแบบ 1 บรรทัดต่อ 1 ไอดี: <code>username:password:หมายเหตุ</code></p>
     <form action="/admin/products/<%= product.id %>/stock/add" method="post" class="space-y-3">
-      <textarea name="bulk" rows="8" placeholder="user01:pass01:เปลี่ยนอีเมลได้&#10;user02:pass02" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm font-mono"></textarea>
-      <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-medium rounded-lg py-2 text-sm">เพิ่มเข้าสต๊อก</button>
+      <textarea name="bulk" rows="8" placeholder="user01:pass01:เปลี่ยนอีเมลได้&#10;user02:pass02" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono"></textarea>
+      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มเข้าสต๊อก</button>
     </form>
   </div>
 </div>

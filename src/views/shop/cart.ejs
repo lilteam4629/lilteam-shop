@@ -2,49 +2,49 @@
   <h1 class="text-2xl font-bold mb-6">ตะกร้าสินค้า</h1>
 
   <% if (!items.length) { %>
-    <div class="text-center py-16 text-[#a89a6c]">
+    <div class="text-center py-16 text-[var(--text-3)]">
       <p class="mb-4">ตะกร้าของคุณว่างเปล่า</p>
-      <a href="/offline" class="text-[#c8a63f]">เลือกซื้อสินค้า →</a>
+      <a href="/offline" class="text-[var(--gold)]">เลือกซื้อสินค้า →</a>
     </div>
   <% } else { %>
     <div class="space-y-3 mb-6">
       <% items.forEach(i => { %>
-        <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-4 flex items-center gap-4">
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex items-center gap-4">
           <img src="<%= i.product.images[0] %>" class="w-20 h-14 object-cover rounded-lg" />
           <div class="flex-1">
-            <a href="/game/<%= i.product.slug %>" class="font-medium hover:text-[#c8a63f]"><%= i.product.title %></a>
-            <div class="text-sm text-[#a89a6c]">฿<%= i.product.price.toLocaleString() %>.00 / รายการ &middot; คงเหลือ <%= i.stock %></div>
+            <a href="/game/<%= i.product.slug %>" class="font-medium hover:text-[var(--gold)]"><%= i.product.title %></a>
+            <div class="text-sm text-[var(--text-3)]">฿<%= i.product.price.toLocaleString() %>.00 / รายการ &middot; คงเหลือ <%= i.stock %></div>
           </div>
           <form action="/cart/update/<%= i.product.id %>" method="post" class="flex items-center gap-2">
-            <input type="number" name="qty" value="<%= i.qty %>" min="1" max="<%= i.stock %>" class="w-16 bg-[#211c11] border border-[#443a22] rounded-lg px-2 py-1 text-sm" />
-            <button class="text-xs text-[#c8a63f]">อัปเดต</button>
+            <input type="number" name="qty" value="<%= i.qty %>" min="1" max="<%= i.stock %>" class="w-16 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1 text-sm" />
+            <button class="text-xs text-[var(--gold)]">อัปเดต</button>
           </form>
-          <div class="w-24 text-right font-medium text-[#f3ecd8]">฿<%= i.subtotal.toLocaleString() %>.00</div>
+          <div class="w-24 text-right font-medium text-[var(--text)]">฿<%= i.subtotal.toLocaleString() %>.00</div>
           <form action="/cart/remove/<%= i.product.id %>" method="post">
-            <button class="text-[#e2836f] text-sm">ลบ</button>
+            <button class="text-[var(--coral)] text-sm">ลบ</button>
           </form>
         </div>
       <% }) %>
     </div>
 
-    <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-5 space-y-3">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3">
       <% if (coupon) { %>
         <div class="flex items-center justify-between text-sm">
           <span class="text-emerald-400">ใช้โค้ด "<%= coupon.code %>" แล้ว</span>
-          <form action="/cart/coupon/remove" method="post"><button class="text-[#e2836f]">ลบโค้ด</button></form>
+          <form action="/cart/coupon/remove" method="post"><button class="text-[var(--coral)]">ลบโค้ด</button></form>
         </div>
       <% } else { %>
         <form action="/cart/coupon" method="post" class="flex gap-2">
-          <input name="code" placeholder="โค้ดส่วนลด" class="flex-1 bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
-          <button class="bg-[#332b1a] hover:bg-[#4a3f26] border border-[#443a22] px-4 rounded-lg text-sm">ใช้โค้ด</button>
+          <input name="code" placeholder="โค้ดส่วนลด" class="flex-1 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+          <button class="bg-[#332b1a] hover:bg-[#4a3f26] border border-[var(--border-light)] px-4 rounded-lg text-sm">ใช้โค้ด</button>
         </form>
       <% } %>
-      <div class="flex items-center justify-between text-lg font-bold pt-2 border-t border-[#3a3220]">
+      <div class="flex items-center justify-between text-lg font-bold pt-2 border-t border-[var(--border)]">
         <span>ยอดรวม</span>
-        <span class="text-[#c8a63f]">฿<%= total.toLocaleString() %>.00</span>
+        <span class="text-[var(--gold)]">฿<%= total.toLocaleString() %>.00</span>
       </div>
       <form action="/cart/checkout" method="post">
-        <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] rounded-lg py-3 font-medium">ชำระเงินด้วยกระเป๋าเงิน (Demo)</button>
+        <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] rounded-lg py-3 font-medium">ชำระเงินด้วยกระเป๋าเงิน (Demo)</button>
       </form>
     </div>
   <% } %>

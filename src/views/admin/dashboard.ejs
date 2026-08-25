@@ -1,28 +1,28 @@
 <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-4">
-    <div class="text-[#7a6f47] text-xs mb-1">รายได้รวม</div>
-    <div class="text-xl font-bold text-[#c8a63f]"><%= stats.revenue.toLocaleString() %> ฿</div>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
+    <div class="text-[var(--text-4)] text-xs mb-1">รายได้รวม</div>
+    <div class="text-xl font-bold text-[var(--gold)]"><%= stats.revenue.toLocaleString() %> ฿</div>
   </div>
-  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-4">
-    <div class="text-[#7a6f47] text-xs mb-1">คำสั่งซื้อทั้งหมด</div>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
+    <div class="text-[var(--text-4)] text-xs mb-1">คำสั่งซื้อทั้งหมด</div>
     <div class="text-xl font-bold"><%= stats.orderCount %></div>
   </div>
-  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-4">
-    <div class="text-[#7a6f47] text-xs mb-1">สมาชิกทั้งหมด</div>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
+    <div class="text-[var(--text-4)] text-xs mb-1">สมาชิกทั้งหมด</div>
     <div class="text-xl font-bold"><%= stats.userCount %></div>
   </div>
-  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-4">
-    <div class="text-[#7a6f47] text-xs mb-1">สินค้าทั้งหมด</div>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
+    <div class="text-[var(--text-4)] text-xs mb-1">สินค้าทั้งหมด</div>
     <div class="text-xl font-bold"><%= stats.productCount %></div>
   </div>
-  <div class="bg-[#1a160d] border border-[#3a3220] rounded-xl p-4">
-    <div class="text-[#7a6f47] text-xs mb-1">สต๊อกไอดีคงเหลือ</div>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
+    <div class="text-[var(--text-4)] text-xs mb-1">สต๊อกไอดีคงเหลือ</div>
     <div class="text-xl font-bold text-emerald-400"><%= stats.availableStock %></div>
   </div>
 </div>
 
 <% if (stats.pendingTopups > 0) { %>
-  <a href="/admin/topups" class="block bg-[#c8a63f]/10 border border-[#c8a63f]/40 text-[#e2c084] rounded-lg px-4 py-3 mb-8 text-sm hover:bg-[#c8a63f]/15">
+  <a href="/admin/topups" class="block bg-[var(--gold)]/10 border border-[var(--gold)]/40 text-[#e2c084] rounded-lg px-4 py-3 mb-8 text-sm hover:bg-[var(--gold)]/15">
     💳 มีคำขอเติมเงินรอตรวจสอบ <b><%= stats.pendingTopups %></b> รายการ — คลิกเพื่อดู →
   </a>
 <% } %>
@@ -35,21 +35,21 @@
 <% } %>
 
 <h2 class="font-semibold mb-3">คำสั่งซื้อล่าสุด</h2>
-<div class="bg-[#1a160d] border border-[#3a3220] rounded-xl overflow-x-auto">
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
   <table class="w-full text-sm">
-    <thead class="text-[#7a6f47] text-left border-b border-[#3a3220]">
+    <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
       <tr><th class="p-3">รหัส</th><th class="p-3">วันที่</th><th class="p-3">ยอดรวม</th><th class="p-3">สถานะ</th></tr>
     </thead>
-    <tbody class="divide-y divide-[#3a3220]">
+    <tbody class="divide-y divide-[var(--border)]">
       <% recentOrders.forEach(o => { %>
-        <tr class="hover:bg-[#211c11]/50">
-          <td class="p-3"><a href="/admin/orders/<%= o.id %>" class="text-[#c8a63f]">#<%= o.id %></a></td>
-          <td class="p-3 text-[#a89a6c]"><%= new Date(o.createdAt).toLocaleString('th-TH') %></td>
+        <tr class="hover:bg-[var(--input)]/50">
+          <td class="p-3"><a href="/admin/orders/<%= o.id %>" class="text-[var(--gold)]">#<%= o.id %></a></td>
+          <td class="p-3 text-[var(--text-3)]"><%= new Date(o.createdAt).toLocaleString('th-TH') %></td>
           <td class="p-3"><%= o.total.toLocaleString() %> ฿</td>
           <td class="p-3"><%= o.status %></td>
         </tr>
       <% }) %>
-      <% if (!recentOrders.length) { %><tr><td class="p-3 text-[#7a6f47]" colspan="4">ยังไม่มีคำสั่งซื้อ</td></tr><% } %>
+      <% if (!recentOrders.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="4">ยังไม่มีคำสั่งซื้อ</td></tr><% } %>
     </tbody>
   </table>
 </div>

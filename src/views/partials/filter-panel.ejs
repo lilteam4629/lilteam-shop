@@ -1,38 +1,38 @@
-<div class="bg-[#1a160d] border border-[#3a3220] rounded-xl px-4 sm:px-5 py-4 mb-6" id="filterWidget">
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 sm:px-5 py-4 mb-6" id="filterWidget">
   <div class="flex items-center justify-between mb-3">
-    <span class="flex items-center gap-2 text-sm sm:text-base font-semibold text-[#f3ecd8]">
+    <span class="flex items-center gap-2 text-sm sm:text-base font-semibold text-[var(--text)]">
       <span class="text-lg">🏷️</span> ตัวกรองสินค้า
-      <span id="filterBadge" class="hidden bg-[#c8a63f] text-[#100e08] text-[10px] font-bold rounded-full min-w-[18px] px-1.5 py-0.5 text-center">0</span>
+      <span id="filterBadge" class="hidden bg-[var(--gold)] text-[var(--bg)] text-[10px] font-bold rounded-full min-w-[18px] px-1.5 py-0.5 text-center">0</span>
     </span>
-    <button type="button" id="filterClear" class="hidden text-xs sm:text-sm text-[#e2836f] hover:underline whitespace-nowrap">ล้างทั้งหมด</button>
+    <button type="button" id="filterClear" class="hidden text-xs sm:text-sm text-[var(--coral)] hover:underline whitespace-nowrap">ล้างทั้งหมด</button>
   </div>
 
   <div class="flex items-center gap-2">
     <button type="button" id="scrollLeftBtn"
-      class="hidden shrink-0 w-8 h-8 items-center justify-center rounded-full border border-[#443a22] text-[#a89a6c] hover:text-[#c8a63f] hover:border-[#c8a63f]/50 transition">
+      class="hidden shrink-0 w-8 h-8 items-center justify-center rounded-full border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">
       <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd"/></svg>
     </button>
 
     <div id="filterTags" class="filter-scroll flex-1 flex items-center gap-3 overflow-x-auto scroll-smooth py-1">
       <% filterTags.forEach(t => { %>
         <button type="button" data-tag="<%= t.id %>"
-          class="filter-chip relative shrink-0 w-20 h-28 sm:w-24 sm:h-32 rounded-xl overflow-hidden border-[3px] border-[#443a22] bg-[#211c11]
-                 transition-all duration-200 hover:-translate-y-1 hover:border-[#c8a63f]/60 hover:shadow-[0_8px_20px_-6px_rgba(200,166,63,0.5)]">
+          class="filter-chip relative shrink-0 w-20 h-28 sm:w-24 sm:h-32 rounded-xl overflow-hidden border-[3px] border-[var(--border-light)] bg-[var(--input)]
+                 transition-all duration-200 hover:-translate-y-1 hover:border-[var(--gold)]/60 hover:shadow-[0_8px_20px_-6px_rgba(200,166,63,0.5)]">
           <img src="<%= t.image %>" alt="<%= t.name %>" class="absolute inset-0 w-full h-full object-cover" />
-          <span class="check-badge absolute top-1.5 right-1.5 hidden w-5 h-5 rounded-full bg-[#c8a63f] text-[#100e08] text-[11px] font-bold items-center justify-center shadow">✓</span>
+          <span class="check-badge absolute top-1.5 right-1.5 hidden w-5 h-5 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[11px] font-bold items-center justify-center shadow">✓</span>
           <span class="chip-label absolute inset-x-0 bottom-0 bg-black/80 py-1 text-xs sm:text-sm font-medium text-white truncate px-1.5"><%= t.name %></span>
         </button>
       <% }) %>
     </div>
 
     <button type="button" id="scrollRightBtn"
-      class="hidden shrink-0 w-8 h-8 items-center justify-center rounded-full border border-[#443a22] text-[#a89a6c] hover:text-[#c8a63f] hover:border-[#c8a63f]/50 transition">
+      class="hidden shrink-0 w-8 h-8 items-center justify-center rounded-full border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">
       <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 010-1.06L10.94 10 7.21 6.29a.75.75 0 111.06-1.06l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0z" clip-rule="evenodd"/></svg>
     </button>
   </div>
 
-  <div class="mt-3 pt-3 border-t border-[#3a3220] text-center text-sm text-[#a89a6c]">
-    พบสินค้าที่ตรงกัน <b id="filterMatchCount" class="text-[#c8a63f]">0</b> รายการ
+  <div class="mt-3 pt-3 border-t border-[var(--border)] text-center text-sm text-[var(--text-3)]">
+    พบสินค้าที่ตรงกัน <b id="filterMatchCount" class="text-[var(--gold)]">0</b> รายการ
   </div>
 </div>
 
@@ -41,7 +41,7 @@
   .filter-scroll { scrollbar-width: none; -ms-overflow-style: none; }
 
   .filter-chip.active {
-    border-color: #c8a63f;
+    border-color: var(--gold);
     box-shadow: 0 8px 20px -5px rgba(200, 166, 63, 0.6);
   }
   .filter-chip.active .check-badge { display: flex; }

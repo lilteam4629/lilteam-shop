@@ -1,20 +1,20 @@
-<footer class="bg-[#1a160d] border-t border-[#3a3220] mt-10">
-  <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8 grid sm:grid-cols-3 gap-6 text-sm text-[#a89a6c]">
+<footer class="bg-[var(--card)] border-t border-[var(--border)] mt-10">
+  <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8 grid sm:grid-cols-3 gap-6 text-sm text-[var(--text-3)]">
     <div>
-      <div class="font-bold text-[#f3ecd8] mb-2"><%= settings.shopName %></div>
+      <div class="font-bold text-[var(--text)] mb-2"><%= settings.shopName %></div>
       <p><%= settings.tagline %></p>
       <p class="mt-1">เปิดบริการ: <%= settings.openHours %></p>
     </div>
     <div>
-      <div class="font-bold text-[#f3ecd8] mb-2">ติดต่อเรา</div>
+      <div class="font-bold text-[var(--text)] mb-2">ติดต่อเรา</div>
       <p>Line: <%= settings.contactLine %></p>
-      <p>Facebook: <a class="text-[#c8a63f]" href="<%= settings.contactFacebook %>" target="_blank" rel="noopener">แฟนเพจร้านค้า</a></p>
-      <p><a href="/contact" class="text-[#c8a63f]">ติดต่อร้าน →</a></p>
+      <p>Facebook: <a class="text-[var(--gold)]" href="<%= settings.contactFacebook %>" target="_blank" rel="noopener">แฟนเพจร้านค้า</a></p>
+      <p><a href="/contact" class="text-[var(--gold)]">ติดต่อร้าน →</a></p>
     </div>
     <div>
-      <div class="font-bold text-[#f3ecd8] mb-2">หมายเหตุ</div>
+      <div class="font-bold text-[var(--text)] mb-2">หมายเหตุ</div>
       <p>เว็บไซต์ตัวอย่าง (Demo) สำหรับสาธิตระบบร้านค้าไอดีเกมและระบบหลังบ้าน ไม่มีการชำระเงินจริง</p>
     </div>
   </div>
-  <div class="text-center text-xs text-[#7a6f47] pb-6">&copy; <%= new Date().getFullYear() %> <%= settings.shopName %>. Demo project.</div>
+  <div class="text-center text-xs text-[var(--text-4)] pb-6">&copy; <%= new Date().getFullYear() %> <%= settings.shopName %>. Demo project.</div>
 </footer>
