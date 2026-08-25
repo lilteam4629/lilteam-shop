@@ -18,6 +18,18 @@ const bannerUpload = multer({
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
+const logoUpload = multer({
+  storage: multer.diskStorage({
+    destination: path.join(__dirname, '..', '..', 'public', 'uploads', 'banner'),
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname) || '.png';
+      cb(null, `logo-${Date.now()}${ext}`);
+    },
+  }),
+  limits: { fileSize: 4 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
+});
+
 router.use(requireAdmin);
 router.use((req, res, next) => {
   res.locals.layout = 'layouts/admin';
@@ -390,6 +402,10 @@ router.get('/settings', (req, res) => {
   res.render('admin/settings', { title: 'ตั้งค่าร้าน', active: 'settings' });
 });
 
+router.get('/appearance', (req, res) => {
+  res.render('admin/appearance', { title: 'รูปหน้าเว็บและโลโก้', active: 'appearance' });
+});
+
 router.post('/settings', (req, res) => {
   const { shopName, tagline, contactLine, contactFacebook, openHours } = req.body;
   Object.assign(store.data.settings, { shopName, tagline, contactLine, contactFacebook, openHours });
@@ -445,16 +461,29 @@ router.post('/snow-toggle', (req, res) => {
 });
 
 // ---------- Hero banner ----------
+router.post('/site-logo/upload', (req, res) => {
+  logoUpload.single('logoImage')(req, res, (err) => {
+    if (err || !req.file) {
+      req.flash('error', 'อัปโหลดโลโก้ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
+      return res.redirect('/admin/appearance');
+    }
+    store.data.settings.branding.logoImage = `/uploads/banner/${req.file.filename}`;
+    store.save();
+    req.flash('success', 'อัปโหลดโลโก้เว็บไซต์แล้ว');
+    res.redirect('/admin/appearance');
+  });
+});
+
 router.post('/hero-banner/upload', (req, res) => {
   bannerUpload.single('bannerImage')(req, res, (err) => {
     if (err || !req.file) {
       req.flash('error', 'อัปโหลดแบนเนอร์ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 8MB)');
-      return res.redirect('/admin/settings');
+      return res.redirect('/admin/appearance');
     }
     store.data.settings.hero.bannerImage = `/uploads/banner/${req.file.filename}`;
     store.save();
     req.flash('success', 'อัปโหลดแบนเนอร์แล้ว');
-    res.redirect('/admin/settings');
+    res.redirect('/admin/appearance');
   });
 });
 
@@ -462,13 +491,13 @@ router.post('/hero-banner/mode', (req, res) => {
   const mode = req.body.mode === 'banner' ? 'banner' : 'default';
   if (mode === 'banner' && !store.data.settings.hero.bannerImage) {
     req.flash('error', 'กรุณาอัปโหลดรูปแบนเนอร์ก่อนเปิดใช้งานโหมดแบนเนอร์');
-    return res.redirect('/admin/settings');
+    return res.redirect('/admin/appearance');
   }
   store.data.settings.hero.mode = mode;
   store.data.settings.hero.bannerLink = req.body.bannerLink || '';
   store.save();
   req.flash('success', mode === 'banner' ? 'เปิดใช้งานแบนเนอร์หน้าหลักแล้ว' : 'กลับไปใช้หน้าหลักแบบเดิมแล้ว');
-  res.redirect('/admin/settings');
+  res.redirect('/admin/appearance');
 });
 
 module.exports = router;

@@ -147,6 +147,9 @@ function defaultData() {
         bannerImage: null,
         bannerLink: '',
       },
+      branding: {
+        logoImage: null,
+      },
       music: {
         enabled: false,
         youtubeUrl: '',
@@ -222,6 +225,10 @@ function migrate() {
   let changed = false;
   if (!db.settings.hero) {
     db.settings.hero = { mode: 'default', bannerImage: null, bannerLink: '' };
+    changed = true;
+  }
+  if (!db.settings.branding) {
+    db.settings.branding = { logoImage: null };
     changed = true;
   }
   if (!db.settings.payment) {

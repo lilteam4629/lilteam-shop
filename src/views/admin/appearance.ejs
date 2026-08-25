@@ -1,0 +1,68 @@
+<div class="grid xl:grid-cols-2 gap-6 max-w-6xl">
+  <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 md:p-6">
+    <div class="flex items-start gap-3 mb-5">
+      <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 text-[var(--gold)] flex items-center justify-center text-xl">🏷️</span>
+      <div>
+        <h2 class="font-semibold text-lg">โลโก้เว็บไซต์</h2>
+        <p class="text-xs text-[var(--text-4)]">โลโก้จะแสดงที่แถบเมนู ส่วนท้ายเว็บ และไอคอนแท็บเบราว์เซอร์</p>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-dashed border-[var(--border-light)] bg-[var(--input)] min-h-48 flex items-center justify-center p-6 mb-4">
+      <% if (settings.branding && settings.branding.logoImage) { %>
+        <img src="<%= settings.branding.logoImage %>" class="max-w-full max-h-40 object-contain" alt="โลโก้เว็บไซต์ปัจจุบัน" />
+      <% } else { %>
+        <div class="text-center text-[var(--text-4)]">
+          <div class="w-20 h-20 mx-auto mb-3 rounded-2xl bg-[var(--gold)] text-[var(--bg)] flex items-center justify-center text-4xl font-bold">L</div>
+          <p class="text-sm">ยังไม่ได้อัปโหลดโลโก้</p>
+        </div>
+      <% } %>
+    </div>
+
+    <form action="/admin/site-logo/upload" method="post" enctype="multipart/form-data" class="space-y-3">
+      <label class="block text-sm text-[var(--text-3)]">เลือกรูปโลโก้ (แนะนำ PNG พื้นหลังโปร่งใส หรือรูปสี่เหลี่ยมจัตุรัส)</label>
+      <input type="file" name="logoImage" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
+      <button class="w-full sm:w-auto bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2.5 rounded-lg text-sm">อัปโหลดโลโก้</button>
+    </form>
+  </section>
+
+  <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 md:p-6">
+    <div class="flex items-start gap-3 mb-5">
+      <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 text-[var(--gold)] flex items-center justify-center text-xl">🖼️</span>
+      <div>
+        <h2 class="font-semibold text-lg">ภาพแบนเนอร์หน้าหลัก</h2>
+        <p class="text-xs text-[var(--text-4)]">ใช้รูปภาพเต็มความกว้างแทนส่วนการ์ดเกมด้านบนของหน้าแรก</p>
+      </div>
+    </div>
+
+    <% if (settings.hero.bannerImage) { %>
+      <img src="<%= settings.hero.bannerImage %>" class="w-full aspect-[3/1] object-cover rounded-xl border border-[var(--border)] mb-4" alt="แบนเนอร์หน้าหลัก" />
+    <% } else { %>
+      <div class="w-full aspect-[3/1] rounded-xl border border-dashed border-[var(--border-light)] bg-[var(--input)] flex items-center justify-center text-[var(--text-4)] text-sm mb-4">ยังไม่มีภาพแบนเนอร์</div>
+    <% } %>
+
+    <form action="/admin/hero-banner/upload" method="post" enctype="multipart/form-data" class="space-y-3 mb-6">
+      <label class="block text-sm text-[var(--text-3)]">เลือกรูปแบนเนอร์ (แนะนำอัตราส่วน 3:1)</label>
+      <input type="file" name="bannerImage" accept="image/*" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
+      <button class="w-full sm:w-auto bg-[#332b1a] hover:bg-[#4a3f26] border border-[var(--border-light)] text-[var(--gold)] px-6 py-2.5 rounded-lg text-sm">อัปโหลดแบนเนอร์</button>
+    </form>
+
+    <form action="/admin/hero-banner/mode" method="post" class="space-y-4">
+      <div>
+        <label class="block text-sm mb-1 text-[var(--text-3)]">ลิงก์เมื่อคลิกแบนเนอร์ (ไม่บังคับ)</label>
+        <input name="bannerLink" value="<%= settings.hero.bannerLink %>" placeholder="/offline" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2.5 text-sm" />
+      </div>
+      <div class="grid sm:grid-cols-2 gap-3">
+        <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.hero.mode === 'default' ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-xl px-4 py-3 cursor-pointer text-sm">
+          <input type="radio" name="mode" value="default" <%= settings.hero.mode === 'default' ? 'checked' : '' %> class="accent-[var(--gold)]" />
+          ใช้การ์ดเกมแบบเดิม
+        </label>
+        <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.hero.mode === 'banner' ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-xl px-4 py-3 cursor-pointer text-sm">
+          <input type="radio" name="mode" value="banner" <%= settings.hero.mode === 'banner' ? 'checked' : '' %> class="accent-[var(--gold)]" />
+          ใช้ภาพแบนเนอร์
+        </label>
+      </div>
+      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2.5 rounded-lg text-sm">บันทึกรูปแบบหน้าแรก</button>
+    </form>
+  </section>
+</div>
