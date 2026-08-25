@@ -25,16 +25,16 @@
     </form>
 
     <div class="flex items-center gap-3 text-sm shrink-0">
+      <button id="theme-toggle-btn" type="button" title="สลับโหมดมืด/สว่าง"
+        class="w-9 h-9 rounded-full bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 flex items-center justify-center transition">
+        <span id="theme-toggle-icon">🌙</span>
+      </button>
       <a href="/cart" class="relative hover:text-[var(--gold)]">
         ตะกร้า
         <% if (cartCount > 0) { %>
           <span class="absolute -top-2 -right-3 bg-[var(--coral)] text-[var(--bg)] text-[10px] rounded-full px-1.5 py-0.5"><%= cartCount %></span>
         <% } %>
       </a>
-      <button id="theme-toggle-btn" type="button" title="สลับโหมดมืด/สว่าง"
-        class="w-9 h-9 rounded-full bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 flex items-center justify-center transition">
-        <span id="theme-toggle-icon">🌙</span>
-      </button>
       <% if (currentUser) { %>
         <a href="/account/topup" class="hidden sm:flex items-center gap-1.5 bg-[var(--input)] hover:bg-[#2b2416] border border-[var(--border-light)] hover:border-[var(--gold)]/50 rounded-full pl-3 pr-1.5 py-1 text-[var(--text-2)] transition-colors">
           <span>💰 <%= currentUser.walletBalance.toLocaleString() %> ฿</span>
