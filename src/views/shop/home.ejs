@@ -94,7 +94,7 @@
 
 <section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
   <h2 class="text-xl font-semibold mb-4 flex items-center gap-1.5"><span>✨</span>เกมมาใหม่</h2>
-  <div class="grid grid-cols-1 min-[480px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-5 min-[480px]:gap-4 mb-10">
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-10">
     <% newest.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
   </div>
 
@@ -102,7 +102,7 @@
     <h2 class="text-xl font-semibold">ไอดีเช่ารายวัน</h2>
     <a href="/rental" class="text-sm text-[var(--gold)]">ดูทั้งหมด <%= rentalTotal %> เกม →</a>
   </div>
-  <div class="grid grid-cols-1 min-[480px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-5 min-[480px]:gap-4 mb-10">
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-10">
     <% rental.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
     <% if (!rental.length) { %><p class="text-[var(--text-3)] text-sm col-span-full">ยังไม่มีไอดีเช่ารายวัน</p><% } %>
   </div>
@@ -111,7 +111,7 @@
     <h2 class="text-xl font-semibold">ไอดีออฟไลน์</h2>
     <a href="/offline" class="text-sm text-[var(--gold)]">เปิดหน้ารวม →</a>
   </div>
-  <div class="grid grid-cols-1 min-[480px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-5 min-[480px]:gap-4">
+  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
     <% offline.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
   </div>
   <p class="text-center text-[var(--text-4)] text-xs mt-6">แสดง <%= offline.length %> จาก <%= offlineTotal %> รายการ</p>
