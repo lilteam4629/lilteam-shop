@@ -1,121 +1,96 @@
-<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 sm:px-5 py-4 mb-6" id="filterWidget">
-  <div class="flex items-center justify-between mb-3">
-    <span class="flex items-center gap-2 text-sm sm:text-base font-semibold text-[var(--text)]">
-      <span class="text-lg">🏷️</span> ตัวกรองสินค้า
-      <span id="filterBadge" class="hidden bg-[var(--gold)] text-[var(--bg)] text-[10px] font-bold rounded-full min-w-[18px] px-1.5 py-0.5 text-center">0</span>
-    </span>
-    <button type="button" id="filterClear" class="hidden text-xs sm:text-sm text-[var(--coral)] hover:underline whitespace-nowrap">ล้างทั้งหมด</button>
+<div class="relative overflow-hidden bg-gradient-to-br from-[var(--card)] to-[var(--input)] border border-[var(--border)] rounded-2xl p-4 sm:p-5 mb-6" id="filterWidget">
+  <div class="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[var(--gold)]/5 blur-2xl pointer-events-none"></div>
+  <div class="relative flex flex-wrap items-center justify-between gap-3 mb-4">
+    <div class="flex items-center gap-3">
+      <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 border border-[var(--gold)]/20 flex items-center justify-center text-lg">🏷️</span>
+      <div>
+        <div class="flex items-center gap-2">
+          <h2 class="text-sm sm:text-base font-semibold text-[var(--text)]">เลือกประเภทที่สนใจ</h2>
+          <span id="filterBadge" class="hidden bg-[var(--gold)] text-[var(--bg)] text-[10px] font-bold rounded-full min-w-5 px-1.5 py-0.5 text-center">0</span>
+        </div>
+        <p class="text-[11px] sm:text-xs text-[var(--text-4)]">เลือกได้มากกว่าหนึ่งตัวกรอง</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <p class="text-xs sm:text-sm text-[var(--text-3)] whitespace-nowrap"><b id="filterMatchCount" class="text-[var(--gold)] text-sm sm:text-base">0</b> สินค้า</p>
+      <button type="button" id="filterClear" class="hidden text-xs text-[var(--coral)] border border-[var(--coral)]/30 hover:bg-[var(--coral)]/10 rounded-lg px-2.5 py-1.5 whitespace-nowrap transition">ล้างตัวกรอง</button>
+    </div>
   </div>
-
-  <div class="flex items-center gap-2">
-    <button type="button" id="scrollLeftBtn"
-      class="hidden shrink-0 w-8 h-8 items-center justify-center rounded-full border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">
-      <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd"/></svg>
-    </button>
-
-    <div id="filterTags" class="filter-scroll flex-1 flex items-center gap-3 overflow-x-auto scroll-smooth py-1">
+  <div class="relative flex items-center gap-2">
+    <button type="button" id="scrollLeftBtn" aria-label="เลื่อนตัวกรองไปทางซ้าย" class="hidden shrink-0 w-9 h-9 items-center justify-center rounded-full bg-[var(--card)] border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">‹</button>
+    <div id="filterTags" class="filter-scroll flex-1 flex items-center gap-2.5 overflow-x-auto scroll-smooth py-1">
       <% filterTags.forEach(t => { %>
-        <button type="button" data-tag="<%= t.id %>"
-          class="filter-chip relative shrink-0 w-20 h-28 sm:w-24 sm:h-32 rounded-xl overflow-hidden border-[3px] border-[var(--border-light)] bg-[var(--input)]
-                 transition-all duration-200 hover:-translate-y-1 hover:border-[var(--gold)]/60 hover:shadow-[0_8px_20px_-6px_rgba(200,166,63,0.5)]">
-          <img src="<%= t.image %>" alt="<%= t.name %>" class="absolute inset-0 w-full h-full object-cover" />
-          <span class="check-badge absolute top-1.5 right-1.5 hidden w-5 h-5 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[11px] font-bold items-center justify-center shadow">✓</span>
-          <span class="chip-label absolute inset-x-0 bottom-0 bg-black/80 py-1 text-xs sm:text-sm font-medium text-white truncate px-1.5"><%= t.name %></span>
+        <button type="button" data-tag="<%= t.id %>" aria-pressed="false" class="filter-chip group relative shrink-0 flex items-center gap-3 min-w-[145px] sm:min-w-[170px] h-16 rounded-xl px-2.5 pr-4 overflow-hidden border border-[var(--border-light)] bg-[var(--card)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--gold)]/60 hover:bg-[var(--gold)]/5">
+          <img src="<%= t.image %>" alt="" class="w-11 h-11 sm:w-12 sm:h-12 shrink-0 rounded-lg object-cover border border-white/10 transition group-hover:scale-105" />
+          <span class="min-w-0 text-left">
+            <span class="block text-sm font-medium text-[var(--text)] truncate"><%= t.name %></span>
+            <span class="chip-hint block text-[10px] text-[var(--text-4)] mt-0.5">แตะเพื่อเลือก</span>
+          </span>
+          <span class="check-badge absolute top-1.5 right-1.5 hidden w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[9px] font-bold items-center justify-center shadow">✓</span>
         </button>
       <% }) %>
     </div>
-
-    <button type="button" id="scrollRightBtn"
-      class="hidden shrink-0 w-8 h-8 items-center justify-center rounded-full border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">
-      <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 010-1.06L10.94 10 7.21 6.29a.75.75 0 111.06-1.06l4.25 4.25a.75.75 0 010 1.06l-4.25 4.25a.75.75 0 01-1.06 0z" clip-rule="evenodd"/></svg>
-    </button>
-  </div>
-
-  <div class="mt-3 pt-3 border-t border-[var(--border)] text-center text-sm text-[var(--text-3)]">
-    พบสินค้าที่ตรงกัน <b id="filterMatchCount" class="text-[var(--gold)]">0</b> รายการ
+    <button type="button" id="scrollRightBtn" aria-label="เลื่อนตัวกรองไปทางขวา" class="hidden shrink-0 w-9 h-9 items-center justify-center rounded-full bg-[var(--card)] border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">›</button>
   </div>
 </div>
 
 <style>
   .filter-scroll::-webkit-scrollbar { display: none; }
   .filter-scroll { scrollbar-width: none; -ms-overflow-style: none; }
-
-  .filter-chip.active {
-    border-color: var(--gold);
-    box-shadow: 0 8px 20px -5px rgba(200, 166, 63, 0.6);
-  }
+  .filter-chip.active { border-color: var(--gold); background: rgba(200,166,63,.12); box-shadow: 0 8px 24px -14px rgba(200,166,63,.9); }
   .filter-chip.active .check-badge { display: flex; }
-
-  .filterable-card.filtered-out {
-    opacity: 0;
-    transform: scale(0.92);
-    pointer-events: none;
-  }
-  .filterable-card {
-    transition: opacity 0.25s ease, transform 0.25s ease;
-  }
+  .filter-chip.active .chip-hint { color: var(--gold); }
+  .product-grid .filterable-card.filtered-out { display: none; }
 </style>
 
 <script>
   (function () {
     const widget = document.getElementById('filterWidget');
-    if (!widget) return;
+    if (!widget || widget.dataset.ready === 'true') return;
+    widget.dataset.ready = 'true';
     const tagsWrap = document.getElementById('filterTags');
     const clearBtn = document.getElementById('filterClear');
     const badge = document.getElementById('filterBadge');
     const matchCountEl = document.getElementById('filterMatchCount');
     const scrollLeftBtn = document.getElementById('scrollLeftBtn');
     const scrollRightBtn = document.getElementById('scrollRightBtn');
-
     const selected = new Set();
-
-    function cards() {
-      return Array.from(document.querySelectorAll('.filterable-card'));
-    }
-
+    function cards() { return Array.from(document.querySelectorAll('.product-grid .filterable-card')); }
     function matches(card) {
       if (selected.size === 0) return true;
-      const g = (card.dataset.tags || '').split(',').filter(Boolean);
-      return Array.from(selected).some((s) => g.includes(s));
+      const tags = (card.dataset.tags || '').split(',').filter(Boolean);
+      return Array.from(selected).some((tag) => tags.includes(tag));
     }
-
     function applyFilter() {
-      const matchCount = cards().filter((card) => {
-        const ok = matches(card);
-        card.classList.toggle('filtered-out', !ok);
-        return ok;
-      }).length;
-      matchCountEl.textContent = matchCount;
-      if (selected.size > 0) {
-        badge.textContent = selected.size;
-        badge.classList.remove('hidden');
-        clearBtn.classList.remove('hidden');
-      } else {
-        badge.classList.add('hidden');
-        clearBtn.classList.add('hidden');
-      }
+      const visibleProductIds = new Set();
+      cards().forEach((card) => {
+        const visible = matches(card);
+        card.classList.toggle('filtered-out', !visible);
+        if (visible) visibleProductIds.add(card.dataset.productId || card.getAttribute('href'));
+      });
+      matchCountEl.textContent = visibleProductIds.size;
+      badge.textContent = selected.size;
+      badge.classList.toggle('hidden', selected.size === 0);
+      clearBtn.classList.toggle('hidden', selected.size === 0);
     }
-
-    tagsWrap.addEventListener('click', (e) => {
-      const btn = e.target.closest('.filter-chip');
-      if (!btn) return;
-      const code = btn.dataset.tag;
-      if (selected.has(code)) {
-        selected.delete(code);
-        btn.classList.remove('active');
-      } else {
-        selected.add(code);
-        btn.classList.add('active');
-      }
+    tagsWrap.addEventListener('click', (event) => {
+      const button = event.target.closest('.filter-chip');
+      if (!button) return;
+      const tag = button.dataset.tag;
+      const active = !selected.has(tag);
+      if (active) selected.add(tag); else selected.delete(tag);
+      button.classList.toggle('active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
       applyFilter();
     });
-
     clearBtn.addEventListener('click', () => {
       selected.clear();
-      tagsWrap.querySelectorAll('.filter-chip.active').forEach((b) => b.classList.remove('active'));
+      tagsWrap.querySelectorAll('.filter-chip.active').forEach((button) => {
+        button.classList.remove('active');
+        button.setAttribute('aria-pressed', 'false');
+      });
       applyFilter();
     });
-
     function updateScrollButtons() {
       const overflowing = tagsWrap.scrollWidth > tagsWrap.clientWidth + 4;
       const atStart = tagsWrap.scrollLeft <= 4;
@@ -125,13 +100,18 @@
       scrollRightBtn.classList.toggle('sm:flex', overflowing && !atEnd);
       scrollRightBtn.classList.toggle('hidden', !(overflowing && !atEnd));
     }
-
-    scrollLeftBtn.addEventListener('click', () => tagsWrap.scrollBy({ left: -220, behavior: 'smooth' }));
-    scrollRightBtn.addEventListener('click', () => tagsWrap.scrollBy({ left: 220, behavior: 'smooth' }));
-    tagsWrap.addEventListener('scroll', updateScrollButtons);
+    scrollLeftBtn.addEventListener('click', () => tagsWrap.scrollBy({ left: -260, behavior: 'smooth' }));
+    scrollRightBtn.addEventListener('click', () => tagsWrap.scrollBy({ left: 260, behavior: 'smooth' }));
+    tagsWrap.addEventListener('scroll', updateScrollButtons, { passive: true });
     window.addEventListener('resize', updateScrollButtons);
-
-    applyFilter();
-    updateScrollButtons();
+    function initializeFilter() {
+      applyFilter();
+      updateScrollButtons();
+    }
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeFilter, { once: true });
+    } else {
+      initializeFilter();
+    }
   })();
 </script>
