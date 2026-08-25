@@ -459,6 +459,26 @@ function parseTimeToSeconds(str) {
   return Number.isNaN(n) ? 0 : n;
 }
 
+function extractYouTubeVideoId(input) {
+  const value = (input || '').trim();
+  const validId = id => (/^[a-zA-Z0-9_-]{11}$/.test(id || '') ? id : null);
+  if (validId(value)) return value;
+  try {
+    const url = new URL(value);
+    const host = url.hostname.replace(/^www\./, '').replace(/^music\./, '');
+    if (host === 'youtu.be') return validId(url.pathname.split('/').filter(Boolean)[0]);
+    if (host === 'youtube.com' || host === 'm.youtube.com') {
+      const queryId = url.searchParams.get('v');
+      if (queryId) return validId(queryId);
+      const parts = url.pathname.split('/').filter(Boolean);
+      if (['embed', 'shorts', 'live'].includes(parts[0])) return validId(parts[1]);
+    }
+  } catch (err) {
+    return null;
+  }
+  return null;
+}
+
 router.post('/music-player', (req, res) => {
   const enabled = req.body.enabled === 'on';
   const youtubeUrl = (req.body.youtubeUrl || '').trim();
@@ -471,6 +491,10 @@ router.post('/music-player', (req, res) => {
 
   if (enabled && !youtubeUrl) {
     req.flash('error', 'กรุณาใส่ลิงก์ YouTube ก่อนเปิดใช้งานเพลง');
+    return res.redirect('/admin/settings');
+  }
+  if (enabled && !extractYouTubeVideoId(youtubeUrl)) {
+    req.flash('error', 'ลิงก์นี้ไม่ใช่วิดีโอ YouTube ที่รองรับ กรุณาใช้ลิงก์วิดีโอแบบ watch, youtu.be, Shorts หรือ Live (ไม่รองรับลิงก์ Playlist อย่างเดียว)');
     return res.redirect('/admin/settings');
   }
   if (endSeconds > 0 && endSeconds <= startSeconds) {

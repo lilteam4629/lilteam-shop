@@ -276,8 +276,21 @@
   <%
     function getYoutubeId(url) {
       if (!url) return null;
-      const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([a-zA-Z0-9_-]{11})/);
-      return m ? m[1] : null;
+      const value = String(url).trim();
+      const validId = id => (/^[a-zA-Z0-9_-]{11}$/.test(id || '') ? id : null);
+      if (validId(value)) return value;
+      try {
+        const parsed = new URL(value);
+        const host = parsed.hostname.replace(/^www\./, '').replace(/^music\./, '');
+        if (host === 'youtu.be') return validId(parsed.pathname.split('/').filter(Boolean)[0]);
+        if (host === 'youtube.com' || host === 'm.youtube.com') {
+          const queryId = parsed.searchParams.get('v');
+          if (queryId) return validId(queryId);
+          const parts = parsed.pathname.split('/').filter(Boolean);
+          if (['embed', 'shorts', 'live'].includes(parts[0])) return validId(parts[1]);
+        }
+      } catch (e) {}
+      return null;
     }
     const musicVideoId = (typeof settings !== 'undefined' && settings.music && settings.music.enabled)
       ? getYoutubeId(settings.music.youtubeUrl) : null;
@@ -307,7 +320,7 @@
         </div>
       </div>
     </div>
-    <div id="music-yt-player" style="position:absolute; width:0; height:0; overflow:hidden;"></div>
+    <div id="music-yt-player" aria-hidden="true" style="position:fixed;width:200px;height:200px;left:-9999px;top:0;opacity:0;pointer-events:none;"></div>
   </div>
 
   <script src="https://www.youtube.com/iframe_api"></script>
@@ -412,6 +425,8 @@
             loop: 1,
             playlist: videoId,
             start: Math.max(0, Math.floor(resumeAt)),
+            playsinline: 1,
+            origin: window.location.origin,
           },
           events: {
             onReady: function (e) {
