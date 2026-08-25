@@ -177,17 +177,16 @@
       const initialVolume = savedVolume !== null ? parseInt(savedVolume, 10) : parseInt(widget.dataset.defaultVolume, 10);
       volumeSlider.value = initialVolume;
 
-      // Registration/login can request an autostart via ?music=autoplay
+      // Clean up the old registration autoplay hint if present (superseded by default-on below).
       const urlParams = new URLSearchParams(window.location.search);
-      const forceAutoplay = urlParams.get('music') === 'autoplay';
-      if (forceAutoplay) {
+      if (urlParams.has('music')) {
         urlParams.delete('music');
         const cleanUrl = window.location.pathname + (urlParams.toString() ? '?' + urlParams.toString() : '') + window.location.hash;
         window.history.replaceState({}, '', cleanUrl);
-        localStorage.setItem(STORAGE_PLAYING, 'true');
       }
 
-      const wasPlaying = forceAutoplay || localStorage.getItem(STORAGE_PLAYING) === 'true';
+      // Music plays by default on every visit unless the visitor explicitly paused it.
+      const wasPlaying = localStorage.getItem(STORAGE_PLAYING) !== 'false';
       let resumeAt = startSeconds;
       const savedTime = parseFloat(localStorage.getItem(STORAGE_TIME));
       const savedTs = parseInt(localStorage.getItem(STORAGE_TS), 10);
