@@ -9,12 +9,25 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>body { font-family: 'Kanit', sans-serif; }</style>
 </head>
-<body class="bg-[#100e08] text-[#f3ecd8] min-h-screen flex">
-  <aside class="w-60 shrink-0 bg-[#1a160d] border-r border-[#3a3220] min-h-screen p-4 hidden md:block">
-    <a href="/admin" class="flex items-center gap-2 font-bold text-lg mb-8">
-      <span class="bg-gradient-to-br from-[#c8a63f] to-[#d9bc5e] w-8 h-8 rounded-lg flex items-center justify-center">L</span>
+<body class="bg-[#100e08] text-[#f3ecd8] min-h-screen md:flex">
+  <div class="md:hidden sticky top-0 z-40 flex items-center justify-between bg-[#1a160d] border-b border-[#3a3220] px-4 py-3">
+    <a href="/admin" class="flex items-center gap-2 font-bold text-base">
+      <span class="bg-gradient-to-br from-[#c8a63f] to-[#d9bc5e] w-7 h-7 rounded-lg flex items-center justify-center text-sm">L</span>
       Admin Panel
     </a>
+    <button id="admin-menu-btn" type="button" class="w-9 h-9 flex items-center justify-center rounded-lg border border-[#3a3220] text-lg">☰</button>
+  </div>
+
+  <div id="admin-sidebar-backdrop" class="hidden fixed inset-0 bg-black/60 z-40 md:hidden"></div>
+
+  <aside id="admin-sidebar" class="w-64 shrink-0 bg-[#1a160d] border-r border-[#3a3220] min-h-screen p-4 fixed inset-y-0 left-0 z-50 -translate-x-full transition-transform duration-200 overflow-y-auto md:translate-x-0 md:static md:block">
+    <div class="flex items-center justify-between mb-8">
+      <a href="/admin" class="flex items-center gap-2 font-bold text-lg">
+        <span class="bg-gradient-to-br from-[#c8a63f] to-[#d9bc5e] w-8 h-8 rounded-lg flex items-center justify-center">L</span>
+        Admin Panel
+      </a>
+      <button id="admin-menu-close" type="button" class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg border border-[#3a3220] text-[#a89a6c]">✕</button>
+    </div>
     <nav class="space-y-1 text-sm">
       <a href="/admin" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='dashboard'?'bg-[#211c11] text-[#c8a63f]':'' %>">📊 แดชบอร์ด</a>
       <a href="/admin/products" class="block px-3 py-2 rounded-lg hover:bg-[#211c11] <%= active==='products'?'bg-[#211c11] text-[#c8a63f]':'' %>">🎮 สินค้า</a>
@@ -37,11 +50,12 @@
   </aside>
 
   <div class="flex-1 min-w-0">
-    <header class="bg-[#1a160d]/60 border-b border-[#3a3220] px-6 py-3 flex items-center justify-between">
+    <header class="hidden md:flex bg-[#1a160d]/60 border-b border-[#3a3220] px-6 py-3 items-center justify-between">
       <h1 class="font-semibold"><%= title %></h1>
       <span class="text-sm text-[#a89a6c]">👤 <%= currentUser.username %></span>
     </header>
-    <main class="p-6">
+    <main class="p-4 md:p-6 overflow-x-hidden">
+      <h1 class="md:hidden font-semibold text-lg mb-4"><%= title %></h1>
       <% if (messages.success && messages.success.length) { %>
         <% messages.success.forEach(m => { %>
           <div class="bg-emerald-900/60 border border-emerald-600 text-emerald-200 px-4 py-2 rounded-lg mb-4 text-sm"><%= m %></div>
@@ -55,5 +69,25 @@
       <%- body %>
     </main>
   </div>
+
+  <script>
+    (function () {
+      const sidebar = document.getElementById('admin-sidebar');
+      const backdrop = document.getElementById('admin-sidebar-backdrop');
+      const openBtn = document.getElementById('admin-menu-btn');
+      const closeBtn = document.getElementById('admin-menu-close');
+      function openMenu() {
+        sidebar.classList.remove('-translate-x-full');
+        backdrop.classList.remove('hidden');
+      }
+      function closeMenu() {
+        sidebar.classList.add('-translate-x-full');
+        backdrop.classList.add('hidden');
+      }
+      if (openBtn) openBtn.addEventListener('click', openMenu);
+      if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+      if (backdrop) backdrop.addEventListener('click', closeMenu);
+    })();
+  </script>
 </body>
 </html>

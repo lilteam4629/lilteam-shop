@@ -65,6 +65,17 @@
       <label class="block text-sm mb-1 text-[#a89a6c]">ลิงก์ YouTube</label>
       <input name="youtubeUrl" value="<%= settings.music.youtubeUrl %>" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
     </div>
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-sm mb-1 text-[#a89a6c]">เริ่มเล่นที่ (นาที:วินาที)</label>
+        <input name="startTime" value="<%= Math.floor(settings.music.startSeconds/60) %>:<%= String(settings.music.startSeconds%60).padStart(2,'0') %>" placeholder="0:00" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1 text-[#a89a6c]">จบท่อนที่ (ไม่บังคับ)</label>
+        <input name="endTime" value="<%= settings.music.endSeconds ? Math.floor(settings.music.endSeconds/60) + ':' + String(settings.music.endSeconds%60).padStart(2,'0') : '' %>" placeholder="0:00" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+      </div>
+    </div>
+    <p class="text-xs text-[#7a6f47] -mt-1">ใส่ทั้งสองช่องเพื่อเลือกเล่นเฉพาะท่อนที่ต้องการ (จะวนซ้ำเฉพาะช่วงนั้น) หรือใส่แค่ "เริ่มเล่นที่" อย่างเดียวก็ได้</p>
     <div>
       <label class="block text-sm mb-1 text-[#a89a6c]">ระดับเสียงเริ่มต้น (<%= settings.music.defaultVolume %>%)</label>
       <input type="range" name="defaultVolume" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="w-full accent-[#c8a63f]" />

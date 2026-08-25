@@ -151,6 +151,8 @@ function defaultData() {
         enabled: false,
         youtubeUrl: '',
         defaultVolume: 50,
+        startSeconds: 0,
+        endSeconds: 0,
       },
       payment: {
         promptpayId: '081-234-5678',
@@ -227,7 +229,12 @@ function migrate() {
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }
   if (!db.settings.music) {
-    db.settings.music = { enabled: false, youtubeUrl: '', defaultVolume: 50 };
+    db.settings.music = { enabled: false, youtubeUrl: '', defaultVolume: 50, startSeconds: 0, endSeconds: 0 };
+    changed = true;
+  }
+  if (db.settings.music && db.settings.music.startSeconds === undefined) {
+    db.settings.music.startSeconds = 0;
+    db.settings.music.endSeconds = 0;
     changed = true;
   }
   if (changed) save();

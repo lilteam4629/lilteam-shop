@@ -399,6 +399,18 @@ router.post('/settings', (req, res) => {
 });
 
 // ---------- Music player ----------
+function parseTimeToSeconds(str) {
+  if (!str) return 0;
+  const s = str.trim();
+  if (!s) return 0;
+  if (s.includes(':')) {
+    const parts = s.split(':').map((p) => parseInt(p, 10) || 0);
+    return parts.reduce((acc, p) => acc * 60 + p, 0);
+  }
+  const n = parseInt(s, 10);
+  return Number.isNaN(n) ? 0 : n;
+}
+
 router.post('/music-player', (req, res) => {
   const enabled = req.body.enabled === 'on';
   const youtubeUrl = (req.body.youtubeUrl || '').trim();
@@ -406,12 +418,19 @@ router.post('/music-player', (req, res) => {
   if (Number.isNaN(defaultVolume)) defaultVolume = 50;
   defaultVolume = Math.max(0, Math.min(100, defaultVolume));
 
+  const startSeconds = Math.max(0, parseTimeToSeconds(req.body.startTime));
+  const endSeconds = Math.max(0, parseTimeToSeconds(req.body.endTime));
+
   if (enabled && !youtubeUrl) {
     req.flash('error', 'กรุณาใส่ลิงก์ YouTube ก่อนเปิดใช้งานเพลง');
     return res.redirect('/admin/settings');
   }
+  if (endSeconds > 0 && endSeconds <= startSeconds) {
+    req.flash('error', 'เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มต้น');
+    return res.redirect('/admin/settings');
+  }
 
-  store.data.settings.music = { enabled, youtubeUrl, defaultVolume };
+  store.data.settings.music = { enabled, youtubeUrl, defaultVolume, startSeconds, endSeconds };
   store.save();
   req.flash('success', 'บันทึกการตั้งค่าเพลงหน้าเว็บแล้ว');
   res.redirect('/admin/settings');

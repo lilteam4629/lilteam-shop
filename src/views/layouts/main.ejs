@@ -70,7 +70,7 @@
       ? getYoutubeId(settings.music.youtubeUrl) : null;
   %>
   <% if (musicVideoId) { %>
-  <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>">
+  <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>" data-start-seconds="<%= settings.music.startSeconds || 0 %>" data-end-seconds="<%= settings.music.endSeconds || 0 %>">
     <button id="music-toggle-btn" type="button" class="w-12 h-12 rounded-full bg-[#1a160d] border border-[#3a3220] shadow-lg flex items-center justify-center text-lg hover:border-[#c8a63f]/60 transition">
       <span id="music-icon">🎵</span>
     </button>
@@ -102,14 +102,31 @@
 
       let player = null;
       let isPlaying = false;
+      let segmentTimer = null;
+      const startSeconds = parseInt(widget.dataset.startSeconds, 10) || 0;
+      const endSeconds = parseInt(widget.dataset.endSeconds, 10) || 0;
       const savedVolume = localStorage.getItem('lilteam_music_volume');
       const initialVolume = savedVolume !== null ? parseInt(savedVolume, 10) : parseInt(widget.dataset.defaultVolume, 10);
       volumeSlider.value = initialVolume;
 
+      const playerVars = { autoplay: 0, controls: 0, loop: 1, playlist: videoId, start: startSeconds };
+      if (endSeconds > startSeconds) playerVars.end = endSeconds;
+
+      function watchSegment() {
+        if (segmentTimer) clearInterval(segmentTimer);
+        if (endSeconds <= startSeconds) return;
+        segmentTimer = setInterval(function () {
+          if (!player || typeof player.getCurrentTime !== 'function') return;
+          if (player.getCurrentTime() >= endSeconds) {
+            player.seekTo(startSeconds, true);
+          }
+        }, 500);
+      }
+
       window.onYouTubeIframeAPIReady = function () {
         player = new YT.Player('music-yt-player', {
           videoId: videoId,
-          playerVars: { autoplay: 0, controls: 0, loop: 1, playlist: videoId },
+          playerVars: playerVars,
           events: {
             onReady: function (e) {
               e.target.setVolume(initialVolume);
@@ -119,10 +136,13 @@
                 isPlaying = true;
                 playBtn.textContent = '⏸';
                 icon.textContent = '🎶';
+                watchSegment();
               } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
                 isPlaying = false;
                 playBtn.textContent = '▶';
                 icon.textContent = '🎵';
+                if (segmentTimer) clearInterval(segmentTimer);
+                if (e.data === YT.PlayerState.ENDED) player.seekTo(startSeconds, true);
               }
             },
           },
