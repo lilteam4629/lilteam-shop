@@ -1,6 +1,7 @@
 const path = require('path');
 const express = require('express');
 const session = require('express-session');
+const MongoStore = require('connect-mongo').default;
 const flash = require('connect-flash');
 const expressLayouts = require('express-ejs-layouts');
 
@@ -24,10 +25,17 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use(session({
-  secret: 'lilteam-shop-demo-secret',
+  secret: process.env.SESSION_SECRET || 'lilteam-shop-demo-secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 1000 * 60 * 60 * 8 },
+  store: process.env.MONGODB_URI
+    ? MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        dbName: process.env.MONGODB_DB_NAME || 'lilteam_shop',
+        collectionName: 'sessions',
+      })
+    : undefined,
+  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
 }));
 app.use(flash());
 app.use(attachUser);
