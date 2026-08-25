@@ -235,6 +235,13 @@
               if (wasPlaying) {
                 e.target.unMute();
                 e.target.playVideo();
+                // Some browsers silently block the unmuted resume; retry once shortly after.
+                setTimeout(function () {
+                  if (player && player.getPlayerState && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+                    player.unMute();
+                    player.playVideo();
+                  }
+                }, 1200);
               }
             },
             onStateChange: function (e) {
@@ -247,9 +254,22 @@
                 if (e.data === YT.PlayerState.ENDED) player.seekTo(startSeconds, true);
               }
             },
+            onError: function () {
+              // Playback failed (e.g. blocked/restricted video) — don't get stuck claiming "playing".
+              setPlayingUI(false);
+            },
           },
         });
       };
+
+      // If autoplay-after-navigation still got blocked, the next tap anywhere on the
+      // page is a real user gesture — use it to silently resume music that should be playing.
+      document.addEventListener('click', function () {
+        if (wasPlaying && player && player.getPlayerState && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+          player.unMute();
+          player.playVideo();
+        }
+      }, { once: true, capture: true });
 
       fetch('https://noembed.com/embed?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + videoId))
         .then(function (r) { return r.json(); })
