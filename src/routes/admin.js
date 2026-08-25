@@ -1,46 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
-const fs = require('fs');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
-  storage: multer.diskStorage({
-    destination: path.join(__dirname, '..', '..', 'public', 'uploads', 'banner'),
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname) || '.jpg';
-      cb(null, `hero-${Date.now()}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 8 * 1024 * 1024 },
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
 const logoUpload = multer({
-  storage: multer.diskStorage({
-    destination: path.join(__dirname, '..', '..', 'public', 'uploads', 'banner'),
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname) || '.png';
-      cb(null, `logo-${Date.now()}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 4 * 1024 * 1024 },
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
-const productUploadDir = path.join(__dirname, '..', '..', 'public', 'uploads', 'products');
-fs.mkdirSync(productUploadDir, { recursive: true });
 const productImageUpload = multer({
-  storage: multer.diskStorage({
-    destination: productUploadDir,
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname) || '.jpg';
-      cb(null, `product-${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 8 * 1024 * 1024, files: 10 },
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
@@ -49,6 +27,7 @@ router.use(requireAdmin);
 router.use((req, res, next) => {
   res.locals.layout = 'layouts/admin';
   res.locals.pendingTopupCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
+  res.locals.persistentStorageEnabled = store.isPersistent();
   next();
 });
 
@@ -57,6 +36,10 @@ function slugify(str) {
     .replace(/[^a-z0-9ก-๙\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+}
+
+async function persistUploadedFiles(files) {
+  return Promise.all((files || []).map(file => store.saveMedia(file.buffer, file.originalname, file.mimetype)));
 }
 
 // ---------- Dashboard ----------
@@ -86,11 +69,10 @@ router.get('/', (req, res) => {
 });
 
 // ---------- Products ----------
-function parseProductBody(body, uploadedFiles = [], existingImages = []) {
+function parseProductBody(body, uploadedImages = [], existingImages = []) {
   const removedImages = new Set(Array.isArray(body.removeImages) ? body.removeImages : (body.removeImages ? [body.removeImages] : []));
   const keptImages = existingImages.filter(image => !removedImages.has(image));
   const urlImages = (body.images || '').split('\n').map(s => s.trim()).filter(Boolean);
-  const uploadedImages = uploadedFiles.map(file => `/uploads/products/${file.filename}`);
   const addedImages = body.newImagesFirst === 'on' ? [...uploadedImages, ...urlImages] : [...urlImages, ...uploadedImages];
   const images = body.newImagesFirst === 'on' ? [...addedImages, ...keptImages] : [...keptImages, ...addedImages];
   const genres = Array.isArray(body.genres) ? body.genres : (body.genres ? [body.genres] : []);
@@ -132,20 +114,26 @@ router.get('/products/new', (req, res) => {
 });
 
 router.post('/products/new', (req, res) => {
-  productImageUpload.array('productImages', 10)(req, res, (err) => {
+  productImageUpload.array('productImages', 10)(req, res, async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
       return res.redirect('/admin/products/new');
     }
-    const fields = parseProductBody(req.body, req.files || []);
-    const product = {
-      id: store.genId(8), slug: slugify(fields.title) + '-' + store.genId(4),
-      ...fields, status: 'active', createdAt: new Date().toISOString(),
-    };
-    store.data.products.push(product);
-    store.save();
-    req.flash('success', 'เพิ่มสินค้าแล้ว');
-    res.redirect('/admin/products');
+    try {
+      const uploadedImages = await persistUploadedFiles(req.files);
+      const fields = parseProductBody(req.body, uploadedImages);
+      const product = {
+        id: store.genId(8), slug: slugify(fields.title) + '-' + store.genId(4),
+        ...fields, status: 'active', createdAt: new Date().toISOString(),
+      };
+      store.data.products.push(product);
+      store.save();
+      req.flash('success', 'เพิ่มสินค้าแล้ว');
+      res.redirect('/admin/products');
+    } catch (saveError) {
+      req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
+      res.redirect('/admin/products/new');
+    }
   });
 });
 
@@ -158,16 +146,22 @@ router.get('/products/:id/edit', (req, res) => {
 router.post('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
-  productImageUpload.array('productImages', 10)(req, res, (err) => {
+  productImageUpload.array('productImages', 10)(req, res, async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
       return res.redirect(`/admin/products/${product.id}/edit`);
     }
-    const fields = parseProductBody(req.body, req.files || [], product.images || []);
-    Object.assign(product, fields, { status: req.body.status || 'active' });
-    store.save();
-    req.flash('success', 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
-    res.redirect('/admin/products');
+    try {
+      const uploadedImages = await persistUploadedFiles(req.files);
+      const fields = parseProductBody(req.body, uploadedImages, product.images || []);
+      Object.assign(product, fields, { status: req.body.status || 'active' });
+      store.save();
+      req.flash('success', 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
+      res.redirect('/admin/products');
+    } catch (saveError) {
+      req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
+      res.redirect(`/admin/products/${product.id}/edit`);
+    }
   });
 });
 
@@ -518,27 +512,35 @@ router.post('/snow-toggle', (req, res) => {
 
 // ---------- Hero banner ----------
 router.post('/site-logo/upload', (req, res) => {
-  logoUpload.single('logoImage')(req, res, (err) => {
+  logoUpload.single('logoImage')(req, res, async (err) => {
     if (err || !req.file) {
       req.flash('error', 'อัปโหลดโลโก้ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/appearance');
     }
-    store.data.settings.branding.logoImage = `/uploads/banner/${req.file.filename}`;
-    store.save();
-    req.flash('success', 'อัปโหลดโลโก้เว็บไซต์แล้ว');
+    try {
+      store.data.settings.branding.logoImage = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      store.save();
+      req.flash('success', 'อัปโหลดโลโก้เว็บไซต์แล้ว และจะไม่หายเมื่อ Deploy');
+    } catch (saveError) {
+      req.flash('error', 'บันทึกโลโก้ไม่สำเร็จ กรุณาลองใหม่');
+    }
     res.redirect('/admin/appearance');
   });
 });
 
 router.post('/hero-banner/upload', (req, res) => {
-  bannerUpload.single('bannerImage')(req, res, (err) => {
+  bannerUpload.single('bannerImage')(req, res, async (err) => {
     if (err || !req.file) {
       req.flash('error', 'อัปโหลดแบนเนอร์ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 8MB)');
       return res.redirect('/admin/appearance');
     }
-    store.data.settings.hero.bannerImage = `/uploads/banner/${req.file.filename}`;
-    store.save();
-    req.flash('success', 'อัปโหลดแบนเนอร์แล้ว');
+    try {
+      store.data.settings.hero.bannerImage = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      store.save();
+      req.flash('success', 'อัปโหลดแบนเนอร์แล้ว และจะไม่หายเมื่อ Deploy');
+    } catch (saveError) {
+      req.flash('error', 'บันทึกแบนเนอร์ไม่สำเร็จ กรุณาลองใหม่');
+    }
     res.redirect('/admin/appearance');
   });
 });

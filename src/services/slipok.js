@@ -32,14 +32,21 @@ function parseTransDateTime(transDate, transTime) {
  * Returns { checked, verified, message, raw } — checked is false when
  * SlipOK isn't configured (caller should fall back to manual review).
  */
-async function verifySlip(filePath, expectedAmount) {
+async function verifySlip(fileInput, expectedAmount, fileOptions = {}) {
   if (!isConfigured()) {
     return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipOK — ใช้การตรวจสอบด้วยแอดมินแทน', raw: null };
   }
 
   try {
     const form = new FormData();
-    form.append('files', fs.createReadStream(filePath));
+    if (Buffer.isBuffer(fileInput)) {
+      form.append('files', fileInput, {
+        filename: fileOptions.filename || 'slip.jpg',
+        contentType: fileOptions.contentType || 'image/jpeg',
+      });
+    } else {
+      form.append('files', fs.createReadStream(fileInput));
+    }
     form.append('amount', String(expectedAmount));
     form.append('log', 'true');
 

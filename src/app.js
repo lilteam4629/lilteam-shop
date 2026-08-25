@@ -22,6 +22,18 @@ app.set('layout', 'layouts/main');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.get('/media/:id/:filename?', async (req, res, next) => {
+  try {
+    const media = await store.getMedia(req.params.id);
+    if (!media) return res.sendStatus(404);
+    res.setHeader('Content-Type', media.file.metadata?.contentType || 'application/octet-stream');
+    res.setHeader('Content-Length', media.file.length);
+    res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    media.stream.on('error', next).pipe(res);
+  } catch (err) {
+    next(err);
+  }
+});
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.use(session({

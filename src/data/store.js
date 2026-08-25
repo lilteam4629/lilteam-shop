@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { nanoid } = require('nanoid');
 const bcrypt = require('bcryptjs');
-const { MongoClient } = require('mongodb');
+const { MongoClient, GridFSBucket, ObjectId } = require('mongodb');
 
 const DB_PATH = path.join(__dirname, 'db.json');
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -191,12 +191,15 @@ function defaultData() {
 let db = null;
 let mongoCollection = null;
 let mongoClient = null;
+let mediaBucket = null;
 
 async function init() {
   if (MONGODB_URI) {
     mongoClient = new MongoClient(MONGODB_URI);
     await mongoClient.connect();
-    mongoCollection = mongoClient.db(MONGODB_DB_NAME).collection('app_data');
+    const mongoDb = mongoClient.db(MONGODB_DB_NAME);
+    mongoCollection = mongoDb.collection('app_data');
+    mediaBucket = new GridFSBucket(mongoDb, { bucketName: 'media' });
 
     const existing = await mongoCollection.findOne({ _id: 'main' });
     if (existing) {
@@ -269,10 +272,39 @@ function reset() {
   return db;
 }
 
+async function saveMedia(buffer, filename, contentType) {
+  if (mediaBucket) {
+    const upload = mediaBucket.openUploadStream(filename, { metadata: { contentType } });
+    await new Promise((resolve, reject) => {
+      upload.on('finish', resolve);
+      upload.on('error', reject);
+      upload.end(buffer);
+    });
+    return `/media/${upload.id.toString()}/${encodeURIComponent(filename)}`;
+  }
+
+  const uploadDir = path.join(__dirname, '..', '..', 'public', 'uploads', 'media');
+  fs.mkdirSync(uploadDir, { recursive: true });
+  const safeName = `${Date.now()}-${nanoid(6)}-${path.basename(filename).replace(/[^a-zA-Z0-9._-]/g, '-')}`;
+  fs.writeFileSync(path.join(uploadDir, safeName), buffer);
+  return `/uploads/media/${safeName}`;
+}
+
+async function getMedia(id) {
+  if (!mediaBucket || !ObjectId.isValid(id)) return null;
+  const objectId = new ObjectId(id);
+  const file = await mediaBucket.find({ _id: objectId }).next();
+  if (!file) return null;
+  return { file, stream: mediaBucket.openDownloadStream(objectId) };
+}
+
 module.exports = {
   get data() { return db; },
   init,
   save,
   reset,
+  saveMedia,
+  getMedia,
+  isPersistent: () => Boolean(mongoCollection),
   genId: (len) => nanoid(len || 8),
 };

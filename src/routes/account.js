@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const path = require('path');
 const multer = require('multer');
 const QRCode = require('qrcode');
 const store = require('../data/store');
@@ -11,13 +10,7 @@ const { requireLogin, currentUser } = require('../middleware/auth');
 router.use(requireLogin);
 
 const upload = multer({
-  storage: multer.diskStorage({
-    destination: path.join(__dirname, '..', '..', 'public', 'uploads', 'slips'),
-    filename: (req, file, cb) => {
-      const ext = path.extname(file.originalname) || '.jpg';
-      cb(null, `${req.params.id}-${Date.now()}${ext}`);
-    },
-  }),
+  storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     cb(null, /^image\//.test(file.mimetype));
@@ -99,9 +92,17 @@ router.post('/topup/:id/slip', (req, res) => {
       req.flash('error', 'อัปโหลดสลิปไม่สำเร็จ กรุณาลองใหม่ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 5MB)');
       return res.redirect(`/account/topup/${request.id}`);
     }
-    request.slipPath = `/uploads/slips/${req.file.filename}`;
+    try {
+      request.slipPath = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+    } catch (saveError) {
+      req.flash('error', 'บันทึกไฟล์สลิปไม่สำเร็จ กรุณาลองใหม่');
+      return res.redirect(`/account/topup/${request.id}`);
+    }
 
-    const result = await slipok.verifySlip(req.file.path, request.amount);
+    const result = await slipok.verifySlip(req.file.buffer, request.amount, {
+      filename: req.file.originalname,
+      contentType: req.file.mimetype,
+    });
     request.slipCheck = { checked: result.checked, verified: result.verified, message: result.message };
 
     let verified = result.checked && result.verified;

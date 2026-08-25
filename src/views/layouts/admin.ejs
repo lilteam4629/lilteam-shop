@@ -100,6 +100,11 @@
     </header>
     <main class="p-4 md:p-6 overflow-x-hidden">
       <h1 class="md:hidden font-semibold text-lg mb-4"><%= title %></h1>
+      <% if (!persistentStorageEnabled) { %>
+        <div class="bg-amber-900/40 border border-amber-500/60 text-amber-200 px-4 py-3 rounded-xl mb-4 text-sm">
+          ⚠️ ยังไม่ได้เชื่อม MongoDB — ข้อมูลและรูปที่อัปโหลดอาจหายเมื่อ Deploy กรุณาตั้งค่า <code class="font-mono">MONGODB_URI</code> บนโฮสต์
+        </div>
+      <% } %>
       <% if (messages.success && messages.success.length) { %>
         <% messages.success.forEach(m => { %>
           <div class="bg-emerald-900/60 border border-emerald-600 text-emerald-200 px-4 py-2 rounded-lg mb-4 text-sm"><%= m %></div>
