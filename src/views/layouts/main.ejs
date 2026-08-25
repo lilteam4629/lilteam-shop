@@ -63,6 +63,7 @@
   </style>
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col">
+  <div id="site-page-shell" class="min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
 
   <main class="flex-1">
@@ -84,20 +85,23 @@
   </main>
 
   <%- include('../partials/footer') %>
+  </div>
 
   <script>
     (function () {
-      const btn = document.getElementById('theme-toggle-btn');
-      const icon = document.getElementById('theme-toggle-icon');
-      if (!btn) return;
       function isLight() { return document.documentElement.classList.contains('light'); }
-      function updateIcon() { icon.textContent = isLight() ? '☀️' : '🌙'; }
+      function updateIcon() {
+        const icon = document.getElementById('theme-toggle-icon');
+        if (icon) icon.textContent = isLight() ? '☀️' : '🌙';
+      }
       updateIcon();
-      btn.addEventListener('click', function () {
+      document.addEventListener('click', function (e) {
+        if (!e.target.closest('#theme-toggle-btn')) return;
         document.documentElement.classList.toggle('light');
         try { localStorage.setItem('lilteam_theme', isLight() ? 'light' : 'dark'); } catch (e) {}
         updateIcon();
       });
+      document.addEventListener('lilteam:page-loaded', updateIcon);
     })();
 
     document.addEventListener('mousemove', (e) => {
@@ -107,6 +111,163 @@
       card.style.setProperty('--mx', ((e.clientX - rect.left) / rect.width) * 100 + '%');
       card.style.setProperty('--my', ((e.clientY - rect.top) / rect.height) * 100 + '%');
     });
+  </script>
+
+  <script>
+    // Keep the outer document (and therefore the music player) alive while visitors
+    // move around the storefront. Only the server-rendered page shell is replaced.
+    (function () {
+      const SHELL_ID = 'site-page-shell';
+      let activeRequest = null;
+
+      function samePageHashOnly(url) {
+        return url.pathname === window.location.pathname
+          && url.search === window.location.search
+          && url.hash;
+      }
+
+      function canHandle(url) {
+        return url.origin === window.location.origin
+          && !url.pathname.startsWith('/admin')
+          && !url.pathname.startsWith('/uploads/');
+      }
+
+      function saveScrollPosition() {
+        const state = Object.assign({}, history.state || {}, {
+          lilteamNavigation: true,
+          scrollX: window.scrollX,
+          scrollY: window.scrollY,
+        });
+        history.replaceState(state, '', window.location.href);
+      }
+
+      function runPageScripts(shell) {
+        shell.querySelectorAll('script').forEach(function (oldScript) {
+          const script = document.createElement('script');
+          Array.from(oldScript.attributes).forEach(function (attr) {
+            script.setAttribute(attr.name, attr.value);
+          });
+          script.textContent = oldScript.textContent;
+          oldScript.replaceWith(script);
+        });
+      }
+
+      function restoreScroll(url, position) {
+        if (position) {
+          window.scrollTo(position.x || 0, position.y || 0);
+          return;
+        }
+        if (url.hash) {
+          const target = document.getElementById(decodeURIComponent(url.hash.slice(1)));
+          if (target) {
+            target.scrollIntoView();
+            return;
+          }
+        }
+        window.scrollTo(0, 0);
+      }
+
+      async function loadPage(url, options) {
+        options = options || {};
+        if (activeRequest) activeRequest.abort();
+        const request = new AbortController();
+        activeRequest = request;
+        document.documentElement.classList.add('lilteam-navigating');
+
+        try {
+          const response = await fetch(url.href, {
+            method: options.method || 'GET',
+            body: options.body || undefined,
+            credentials: 'same-origin',
+            headers: { 'X-Lilteam-Navigation': '1' },
+            signal: request.signal,
+          });
+          const finalUrl = new URL(response.url || url.href, window.location.href);
+          const contentType = response.headers.get('content-type') || '';
+          if (!contentType.includes('text/html') || !canHandle(finalUrl)) {
+            window.location.assign(finalUrl.href);
+            return;
+          }
+
+          const html = await response.text();
+          const nextDocument = new DOMParser().parseFromString(html, 'text/html');
+          const nextShell = nextDocument.getElementById(SHELL_ID);
+          const currentShell = document.getElementById(SHELL_ID);
+          if (!nextShell || !currentShell) {
+            window.location.assign(finalUrl.href);
+            return;
+          }
+
+          if (options.history !== 'pop') saveScrollPosition();
+          currentShell.replaceWith(nextShell);
+          document.title = nextDocument.title;
+          runPageScripts(nextShell);
+
+          if (options.history === 'push') {
+            history.pushState({ lilteamNavigation: true, scrollX: 0, scrollY: 0 }, '', finalUrl.href);
+          } else if (options.history === 'replace') {
+            history.replaceState({ lilteamNavigation: true, scrollX: 0, scrollY: 0 }, '', finalUrl.href);
+          }
+
+          restoreScroll(finalUrl, options.scrollPosition);
+          document.dispatchEvent(new CustomEvent('lilteam:page-loaded', { detail: { url: finalUrl.href } }));
+        } catch (error) {
+          if (error.name !== 'AbortError') window.location.assign(url.href);
+        } finally {
+          if (activeRequest === request) {
+            document.documentElement.classList.remove('lilteam-navigating');
+            activeRequest = null;
+          }
+        }
+      }
+
+      document.addEventListener('click', function (event) {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const link = event.target.closest('a[href]');
+        if (!link || link.target && link.target !== '_self' || link.hasAttribute('download')) return;
+        const rawHref = link.getAttribute('href') || '';
+        if (!rawHref || rawHref.startsWith('javascript:') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) return;
+        const url = new URL(link.href, window.location.href);
+        if (!canHandle(url) || samePageHashOnly(url)) return;
+        event.preventDefault();
+        loadPage(url, { history: 'push' });
+      });
+
+      document.addEventListener('submit', function (event) {
+        if (event.defaultPrevented) return;
+        const form = event.target;
+        if (!(form instanceof HTMLFormElement) || form.target && form.target !== '_self') return;
+        const method = (form.method || 'GET').toUpperCase();
+        const url = new URL(form.action || window.location.href, window.location.href);
+        if (!canHandle(url)) return;
+
+        const data = new FormData(form);
+        if (event.submitter && event.submitter.name) data.append(event.submitter.name, event.submitter.value);
+        if (method === 'GET') {
+          url.search = new URLSearchParams(data).toString();
+          event.preventDefault();
+          loadPage(url, { history: 'push' });
+          return;
+        }
+        if (method === 'POST') {
+          event.preventDefault();
+          loadPage(url, { history: 'push', method: 'POST', body: data });
+        }
+      });
+
+      window.addEventListener('popstate', function (event) {
+        loadPage(new URL(window.location.href), {
+          history: 'pop',
+          scrollPosition: event.state ? { x: event.state.scrollX, y: event.state.scrollY } : null,
+        });
+      });
+
+      history.replaceState(Object.assign({}, history.state || {}, {
+        lilteamNavigation: true,
+        scrollX: window.scrollX,
+        scrollY: window.scrollY,
+      }), '', window.location.href);
+    })();
   </script>
 
   <%
@@ -189,12 +350,16 @@
       // visitor explicitly clicking the pause button (see playBtn handler below). Incidental
       // browser-triggered pauses (autoplay policy, tab backgrounding, bfcache, etc.) must
       // never write to this flag, or autoplay silently breaks itself on the next page.
-      const wasPlaying = localStorage.getItem(STORAGE_PLAYING) !== 'false';
+      let playbackWanted = localStorage.getItem(STORAGE_PLAYING) !== 'false';
       let resumeAt = startSeconds;
       const savedTime = parseFloat(localStorage.getItem(STORAGE_TIME));
-      if (!Number.isNaN(savedTime) && savedTime >= 0 && wasPlaying) {
-        resumeAt = savedTime;
-        if (endSeconds > startSeconds && resumeAt >= endSeconds) resumeAt = startSeconds;
+      const savedTimestamp = parseInt(localStorage.getItem(STORAGE_TS), 10);
+      if (!Number.isNaN(savedTime) && savedTime >= 0 && playbackWanted) {
+        const elapsed = Number.isNaN(savedTimestamp) ? 0 : Math.max(0, (Date.now() - savedTimestamp) / 1000);
+        resumeAt = savedTime + elapsed;
+        if (endSeconds > startSeconds && resumeAt >= endSeconds) {
+          resumeAt = startSeconds + ((resumeAt - startSeconds) % (endSeconds - startSeconds));
+        }
       }
 
       function setPlayingUI(playing) {
@@ -221,8 +386,8 @@
         player = new YT.Player('music-yt-player', {
           videoId: videoId,
           playerVars: {
-            autoplay: wasPlaying ? 1 : 0,
-            mute: wasPlaying ? 1 : 0,
+            autoplay: playbackWanted ? 1 : 0,
+            mute: playbackWanted ? 1 : 0,
             controls: 0,
             loop: 1,
             playlist: videoId,
@@ -231,7 +396,7 @@
           events: {
             onReady: function (e) {
               e.target.setVolume(initialVolume);
-              if (wasPlaying) {
+              if (playbackWanted) {
                 e.target.unMute();
                 e.target.playVideo();
                 // Some browsers silently block the unmuted resume; keep nudging it for a
@@ -272,7 +437,7 @@
       // to resume — keep trying on every interaction for this page's whole lifetime,
       // not just the first one, since a single missed attempt shouldn't give up forever.
       function tryResumeOnGesture() {
-        if (wasPlaying && player && player.getPlayerState && player.getPlayerState() !== YT.PlayerState.PLAYING) {
+        if (playbackWanted && player && player.getPlayerState && player.getPlayerState() !== YT.PlayerState.PLAYING) {
           player.unMute();
           player.playVideo();
         }
@@ -299,9 +464,11 @@
       playBtn.addEventListener('click', function () {
         if (!player) return;
         if (isPlaying) {
+          playbackWanted = false;
           player.pauseVideo();
           localStorage.setItem(STORAGE_PLAYING, 'false');
         } else {
+          playbackWanted = true;
           player.unMute();
           player.playVideo();
           localStorage.setItem(STORAGE_PLAYING, 'true');
@@ -321,10 +488,10 @@
         }
       });
 
-      // Back/forward-cache restores don't re-run this script, so force a real reload
-      // to guarantee autoplay logic runs fresh every time the page becomes visible.
+      // A bfcache restore keeps the existing player. Never reload here: reloading would
+      // destroy the player and is exactly what makes back/forward playback jump around.
       window.addEventListener('pageshow', function (e) {
-        if (e.persisted) window.location.reload();
+        if (e.persisted && playbackWanted && player && player.playVideo) player.playVideo();
       });
     })();
   </script>
