@@ -436,6 +436,14 @@ router.post('/music-player', (req, res) => {
   res.redirect('/admin/settings');
 });
 
+// ---------- Snow effect ----------
+router.post('/snow-toggle', (req, res) => {
+  store.data.settings.snow = { enabled: req.body.enabled === 'on' };
+  store.save();
+  req.flash('success', store.data.settings.snow.enabled ? 'เปิดใช้งานหิมะตกแล้ว' : 'ปิดใช้งานหิมะตกแล้ว');
+  res.redirect('/admin/settings');
+});
+
 // ---------- Hero banner ----------
 router.post('/hero-banner/upload', (req, res) => {
   bannerUpload.single('bannerImage')(req, res, (err) => {

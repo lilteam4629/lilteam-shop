@@ -288,5 +288,50 @@
     })();
   </script>
   <% } %>
+
+  <% if (typeof settings !== 'undefined' && settings.snow && settings.snow.enabled) { %>
+  <div id="snow-container" class="fixed inset-0 pointer-events-none z-40 overflow-hidden"></div>
+  <style>
+    .snowflake {
+      position: absolute;
+      top: -5vh;
+      color: #fff;
+      text-shadow: 0 0 4px rgba(255,255,255,0.6);
+      user-select: none;
+      will-change: transform;
+      animation-name: snow-fall, snow-sway;
+      animation-timing-function: linear, ease-in-out;
+      animation-iteration-count: infinite, infinite;
+    }
+    @keyframes snow-fall {
+      from { transform: translateY(-5vh); }
+      to { transform: translateY(105vh); }
+    }
+    @keyframes snow-sway {
+      0%, 100% { margin-left: 0; }
+      50% { margin-left: 25px; }
+    }
+  </style>
+  <script>
+    (function () {
+      const container = document.getElementById('snow-container');
+      if (!container) return;
+      const count = window.innerWidth < 768 ? 22 : 45;
+      for (let i = 0; i < count; i++) {
+        const flake = document.createElement('span');
+        flake.className = 'snowflake';
+        flake.textContent = '❄';
+        flake.style.left = Math.random() * 100 + 'vw';
+        flake.style.fontSize = (8 + Math.random() * 14) + 'px';
+        flake.style.opacity = 0.35 + Math.random() * 0.55;
+        const fallDuration = 8 + Math.random() * 10;
+        const swayDuration = 3 + Math.random() * 4;
+        flake.style.animationDuration = fallDuration + 's, ' + swayDuration + 's';
+        flake.style.animationDelay = (-Math.random() * fallDuration) + 's, ' + (-Math.random() * swayDuration) + 's';
+        container.appendChild(flake);
+      }
+    })();
+  </script>
+  <% } %>
 </body>
 </html>

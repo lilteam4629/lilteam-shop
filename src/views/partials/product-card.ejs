@@ -16,23 +16,23 @@
   <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent"></div>
 
   <% if (soldOut) { %>
-    <span class="absolute top-2 left-2 z-10 bg-black/70 border border-[var(--coral)]/50 text-[var(--coral)] text-[10px] px-2 py-0.5 rounded-full">สินค้าหมด</span>
+    <span class="absolute top-2 left-2 z-10 bg-black/70 border border-[#e2836f]/50 text-[#e2836f] text-[10px] px-2 py-0.5 rounded-full">สินค้าหมด</span>
   <% } else { %>
     <span class="absolute top-2 left-2 z-10 bg-black/70 border border-emerald-700/60 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full">พร้อมส่ง</span>
   <% } %>
 
   <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1 min-w-0">
-    <h3 class="font-medium text-sm line-clamp-2 text-[var(--text)] drop-shadow"><%= p.title %></h3>
+    <h3 class="font-medium text-sm line-clamp-2 text-white drop-shadow"><%= p.title %></h3>
     <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 min-w-0">
       <% if (p.type === 'rental') { %>
-        <span class="text-[10px] text-[var(--text-2)]">เริ่ม</span>
+        <span class="text-[10px] text-white/70">เริ่ม</span>
       <% } %>
-      <span class="text-[var(--gold)] font-bold text-sm whitespace-nowrap">฿<%= p.price.toLocaleString() %>.00</span>
+      <span class="text-[#c8a63f] font-bold text-sm whitespace-nowrap">฿<%= p.price.toLocaleString() %>.00</span>
       <% if (p.type === 'offline' && p.originalPrice > p.price) { %>
-        <span class="text-[var(--coral)] text-[11px] line-through whitespace-nowrap">฿<%= p.originalPrice.toLocaleString() %>.00</span>
+        <span class="text-[#e2836f] text-[11px] line-through whitespace-nowrap">฿<%= p.originalPrice.toLocaleString() %>.00</span>
       <% } %>
     </div>
-    <span class="text-[10px] text-[var(--text-2)] truncate"><%= p.type === 'offline' ? 'ไอดี Offline Steam' : 'ไอดีเช่ารายวัน' %></span>
+    <span class="text-[10px] text-white/70 truncate"><%= p.type === 'offline' ? 'ไอดี Offline Steam' : 'ไอดีเช่ารายวัน' %></span>
   </div>
 
   <!-- mouse-tracking spotlight -->

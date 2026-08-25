@@ -154,6 +154,9 @@ function defaultData() {
         startSeconds: 0,
         endSeconds: 0,
       },
+      snow: {
+        enabled: false,
+      },
       payment: {
         promptpayId: '081-234-5678',
         promptpayName: 'LilTeam Shop (Demo)',
@@ -235,6 +238,10 @@ function migrate() {
   if (db.settings.music && db.settings.music.startSeconds === undefined) {
     db.settings.music.startSeconds = 0;
     db.settings.music.endSeconds = 0;
+    changed = true;
+  }
+  if (!db.settings.snow) {
+    db.settings.snow = { enabled: false };
     changed = true;
   }
   if (changed) save();
