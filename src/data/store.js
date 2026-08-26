@@ -226,6 +226,30 @@ async function init() {
 // Fills in fields added after a DB was first created, without touching existing data.
 function migrate() {
   let changed = false;
+  const managedAdminPassword = process.env.ADMIN_PASSWORD;
+  const managedAdminUsername = (process.env.ADMIN_USERNAME || 'admin').trim();
+
+  // Safe admin recovery for hosted deployments. Setting ADMIN_PASSWORD restores
+  // access without resetting products, users, orders, settings, or uploaded media.
+  if (managedAdminPassword) {
+    let admin = db.users.find(user => user.username === managedAdminUsername);
+    if (!admin) admin = db.users.find(user => user.role === 'admin');
+    if (!admin) {
+      admin = {
+        id: nanoid(8), username: managedAdminUsername, email: '', role: 'admin',
+        walletBalance: 0, status: 'active', createdAt: new Date().toISOString(),
+      };
+      db.users.push(admin);
+      changed = true;
+    }
+    if (admin.username !== managedAdminUsername) { admin.username = managedAdminUsername; changed = true; }
+    if (admin.role !== 'admin') { admin.role = 'admin'; changed = true; }
+    if (admin.status !== 'active') { admin.status = 'active'; changed = true; }
+    if (!admin.passwordHash || !bcrypt.compareSync(managedAdminPassword, admin.passwordHash)) {
+      admin.passwordHash = bcrypt.hashSync(managedAdminPassword, 10);
+      changed = true;
+    }
+  }
   if (!db.settings.hero) {
     db.settings.hero = { mode: 'default', bannerImage: null, bannerLink: '' };
     changed = true;

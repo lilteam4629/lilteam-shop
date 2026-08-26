@@ -50,6 +50,8 @@ public/                # ไฟล์ static (css, img)
 
 ดูวิธีตั้งค่า MongoDB Atlas แบบละเอียดได้ใน [.env.example](.env.example)
 
+หากเข้าแอดมินไม่ได้ ให้ตั้ง `ADMIN_USERNAME` และ `ADMIN_PASSWORD` ใน Environment Variables ของโฮสต์แล้ว Deploy ใหม่ ระบบจะกู้สิทธิ์และเปลี่ยนรหัสของบัญชีแอดมินให้โดยไม่ลบข้อมูลร้าน
+
 โครงสร้างข้อมูลทั้งหมด (settings, products, filterTags, stockItems, orders, coupons, announcements, users, reviews, walletTransactions) นิยามไว้ที่ `defaultData()` ใน `src/data/store.js` — นี่คือจุดเดียวที่ควรดูเพื่อเข้าใจ schema ทั้งหมดของระบบ
 
 ## ฟีเจอร์หลัก
