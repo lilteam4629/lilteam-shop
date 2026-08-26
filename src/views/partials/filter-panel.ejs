@@ -24,15 +24,13 @@
     <button type="button" id="scrollLeftBtn" aria-label="เลื่อนตัวกรองไปทางซ้าย" class="hidden shrink-0 w-9 h-9 items-center justify-center rounded-full bg-[var(--card)] border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">‹</button>
     <div id="filterTags" class="filter-scroll flex-1 grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2.5 overflow-visible sm:overflow-x-auto scroll-smooth py-1">
       <% filterTags.forEach(t => { %>
-        <button type="button" data-tag="<%= t.id %>" data-name="<%= t.name %>" aria-pressed="false" class="filter-chip group relative shrink-0 block w-full sm:w-[160px] aspect-[3/4] rounded-xl sm:rounded-2xl overflow-hidden border border-[var(--border-light)] bg-black transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--gold)]/60">
-          <span class="absolute inset-0 overflow-hidden">
-            <img src="<%= t.image %>" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-45" />
-            <img src="<%= t.image %>" alt="<%= t.name %>" class="relative w-full h-full object-contain transition duration-300 group-hover:scale-[1.025]" />
+        <button type="button" data-tag="<%= t.id %>" data-name="<%= t.name %>" aria-pressed="false" class="filter-chip group relative self-start shrink-0 flex flex-col w-full sm:w-[180px] rounded-xl sm:rounded-2xl overflow-hidden border border-[var(--border-light)] bg-[var(--card)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--gold)]/60">
+          <span class="w-full bg-black/20 flex items-center justify-center overflow-hidden border-b border-white/5">
+            <img src="<%= t.image %>" alt="<%= t.name %>" class="block w-full h-auto object-contain transition duration-300 group-hover:brightness-105" />
           </span>
-          <span class="absolute inset-x-0 bottom-0 h-2/5 bg-gradient-to-t from-black via-black/75 to-transparent pointer-events-none"></span>
-          <span class="absolute inset-x-0 bottom-0 min-w-0 text-left px-2 sm:px-3 pb-2 sm:pb-3 pt-5 sm:pt-7">
-            <span class="block text-[11px] sm:text-sm font-semibold text-white truncate [text-shadow:0_2px_8px_rgba(0,0,0,.9)]"><%= t.name %></span>
-            <span class="chip-hint hidden sm:block text-[10px] text-white/65">แตะเพื่อเลือก</span>
+          <span class="w-full min-w-0 text-left px-2 sm:px-3 py-2">
+            <span class="block text-[11px] sm:text-sm font-semibold text-[var(--text)] truncate"><%= t.name %></span>
+            <span class="chip-hint hidden sm:block text-[10px] text-[var(--text-4)]">แตะเพื่อเลือก</span>
           </span>
           <span class="check-badge absolute top-1.5 right-1.5 hidden w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[9px] font-bold items-center justify-center shadow">✓</span>
         </button>
