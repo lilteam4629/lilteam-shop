@@ -232,23 +232,27 @@ function migrate() {
   // Safe admin recovery for hosted deployments. Setting ADMIN_PASSWORD restores
   // access without resetting products, users, orders, settings, or uploaded media.
   if (managedAdminPassword) {
-    let admin = db.users.find(user => user.username === managedAdminUsername);
-    if (!admin) admin = db.users.find(user => user.role === 'admin');
-    if (!admin) {
-      admin = {
-        id: nanoid(8), username: managedAdminUsername, email: '', role: 'admin',
+    const usernameLower = managedAdminUsername.toLowerCase();
+    let managedAdmins = db.users.filter(user => (user.username || '').toLowerCase() === usernameLower);
+    if (!managedAdmins.length) {
+      const admin = {
+        id: nanoid(8), username: managedAdminUsername,
+        email: `${managedAdminUsername.toLowerCase()}@admin.local`, role: 'admin',
         walletBalance: 0, status: 'active', createdAt: new Date().toISOString(),
       };
       db.users.push(admin);
+      managedAdmins = [admin];
       changed = true;
     }
-    if (admin.username !== managedAdminUsername) { admin.username = managedAdminUsername; changed = true; }
-    if (admin.role !== 'admin') { admin.role = 'admin'; changed = true; }
-    if (admin.status !== 'active') { admin.status = 'active'; changed = true; }
-    if (!admin.passwordHash || !bcrypt.compareSync(managedAdminPassword, admin.passwordHash)) {
-      admin.passwordHash = bcrypt.hashSync(managedAdminPassword, 10);
-      changed = true;
-    }
+    managedAdmins.forEach(admin => {
+      if (admin.username !== managedAdminUsername) { admin.username = managedAdminUsername; changed = true; }
+      if (admin.role !== 'admin') { admin.role = 'admin'; changed = true; }
+      if (admin.status !== 'active') { admin.status = 'active'; changed = true; }
+      if (!admin.passwordHash || !bcrypt.compareSync(managedAdminPassword, admin.passwordHash)) {
+        admin.passwordHash = bcrypt.hashSync(managedAdminPassword, 10);
+        changed = true;
+      }
+    });
   }
   if (!db.settings.hero) {
     db.settings.hero = { mode: 'default', bannerImage: null, bannerLink: '' };
