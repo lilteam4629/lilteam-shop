@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
+const { pickPrize } = require('../services/minigame');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
@@ -24,6 +25,12 @@ const productImageUpload = multer({
 });
 
 const qrImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 4 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
+});
+
+const prizeImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 4 * 1024 * 1024 },
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
@@ -492,21 +499,75 @@ router.post('/minigame/toggle', (req, res) => {
 });
 
 router.post('/minigame/prizes', (req, res) => {
-  const { name, percent, stock, rewardAmount } = req.body;
-  if (!name || !name.trim()) {
-    req.flash('error', 'กรุณากรอกชื่อรางวัล');
-    return res.redirect('/admin/minigame');
-  }
-  store.data.miniGamePrizes.push({
-    id: store.genId(8), name: name.trim(),
-    percent: Math.max(0, Math.min(100, Number(percent) || 0)),
-    stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
-    rewardAmount: Math.max(0, Number(rewardAmount) || 0),
-    active: true, createdAt: new Date().toISOString(),
+  prizeImageUpload.single('image')(req, res, async (err) => {
+    if (err) {
+      req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
+      return res.redirect('/admin/minigame');
+    }
+    const { name, percent, stock, rewardAmount } = req.body;
+    if (!name || !name.trim()) {
+      req.flash('error', 'กรุณากรอกชื่อรางวัล');
+      return res.redirect('/admin/minigame');
+    }
+    let image = null;
+    if (req.file) {
+      try {
+        image = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      } catch (saveError) {
+        req.flash('error', 'บันทึกรูปไม่สำเร็จ กรุณาลองใหม่');
+        return res.redirect('/admin/minigame');
+      }
+    }
+    store.data.miniGamePrizes.push({
+      id: store.genId(8), name: name.trim(),
+      percent: Math.max(0, Math.min(100, Number(percent) || 0)),
+      stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
+      rewardAmount: Math.max(0, Number(rewardAmount) || 0),
+      image, active: true, createdAt: new Date().toISOString(),
+    });
+    store.save();
+    req.flash('success', 'เพิ่มของรางวัลแล้ว');
+    res.redirect('/admin/minigame');
   });
-  store.save();
-  req.flash('success', 'เพิ่มของรางวัลแล้ว');
+});
+
+router.post('/minigame/prizes/:id/image', (req, res) => {
+  prizeImageUpload.single('image')(req, res, async (err) => {
+    const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
+    if (err || !req.file || !prize) {
+      req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
+      return res.redirect('/admin/minigame');
+    }
+    try {
+      prize.image = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      store.save();
+      req.flash('success', `เปลี่ยนรูป "${prize.name}" แล้ว`);
+    } catch (saveError) {
+      req.flash('error', 'บันทึกรูปไม่สำเร็จ กรุณาลองใหม่');
+    }
+    res.redirect('/admin/minigame');
+  });
+});
+
+router.post('/minigame/prizes/:id/image/remove', (req, res) => {
+  const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
+  if (prize) { prize.image = null; store.save(); }
   res.redirect('/admin/minigame');
+});
+
+router.post('/minigame/preview', (req, res) => {
+  const prize = pickPrize(store.data.miniGamePrizes);
+  if (!prize) {
+    return res.status(400).json({ error: 'ของรางวัลหมดชั่วคราวหรือยังไม่ได้ตั้งค่าอัตราออก' });
+  }
+  const rewardAmount = Number(prize.rewardAmount) || 0;
+  res.json({
+    ok: true,
+    prizeName: prize.name,
+    image: prize.image || null,
+    rewardAmount,
+    isWin: rewardAmount > 0,
+  });
 });
 
 router.post('/minigame/prizes/:id', (req, res) => {

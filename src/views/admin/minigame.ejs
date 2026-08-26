@@ -25,6 +25,18 @@
   </form>
 </details>
 
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-6 max-w-sm">
+  <h3 class="font-semibold mb-3">🎮 ทดลองเล่น (ไม่หักเครดิตจริง)</h3>
+  <%- include('../partials/minigame-widget', {
+    endpoint: '/admin/minigame/preview',
+    cost: null,
+    ctaLabel: '🎲 สุ่มทดสอบ',
+    showLogin: false,
+    balance: null,
+  }) %>
+  <p class="text-xs text-[var(--text-4)] mt-3">ใช้อัตราออกและรูปของรางวัลจริงในการสุ่ม แต่ไม่หักเครดิตหรือตัดสต็อกจริง</p>
+</div>
+
 <div class="grid lg:grid-cols-3 gap-6 mb-6">
   <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
     <div class="p-4 border-b border-[var(--border)] flex items-center justify-between">
@@ -36,6 +48,7 @@
     <table class="w-full text-sm">
       <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
         <tr>
+          <th class="p-3">รูป</th>
           <th class="p-3">ชื่อรางวัล</th>
           <th class="p-3">อัตราออก (%)</th>
           <th class="p-3">สต็อก</th>
@@ -46,8 +59,21 @@
       </thead>
       <tbody class="divide-y divide-[var(--border)]">
         <% prizes.forEach(p => { %>
-          <% const formId = 'prize-form-' + p.id; %>
+          <% const formId = 'prize-form-' + p.id; const imgFormId = 'prize-img-form-' + p.id; %>
           <tr>
+            <td class="p-3">
+              <% if (p.image) { %>
+                <img src="<%= p.image %>" alt="<%= p.name %>" class="w-10 h-10 rounded-lg object-cover border border-[var(--border-light)] mb-1" />
+              <% } else { %>
+                <div class="w-10 h-10 rounded-lg border border-dashed border-[var(--border-light)] mb-1"></div>
+              <% } %>
+              <form id="<%= imgFormId %>" action="/admin/minigame/prizes/<%= p.id %>/image" method="post" enctype="multipart/form-data" class="hidden"></form>
+              <input form="<%= imgFormId %>" type="file" name="image" accept="image/*" onchange="this.form.submit()" class="hidden" id="<%= imgFormId %>-input" />
+              <label for="<%= imgFormId %>-input" class="text-[var(--gold)] text-[10px] cursor-pointer underline">เปลี่ยนรูป</label>
+              <% if (p.image) { %>
+                <form action="/admin/minigame/prizes/<%= p.id %>/image/remove" method="post" class="inline"><button class="text-[var(--coral)] text-[10px] underline ml-1">ลบรูป</button></form>
+              <% } %>
+            </td>
             <td class="p-3"><input form="<%= formId %>" name="name" value="<%= p.name %>" class="w-32 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
             <td class="p-3"><input form="<%= formId %>" type="number" min="0" max="100" step="0.1" name="percent" value="<%= p.percent %>" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
             <td class="p-3"><input form="<%= formId %>" type="number" min="0" name="stock" value="<%= p.stock === null ? '' : p.stock %>" placeholder="ไม่จำกัด" class="w-24 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
@@ -67,18 +93,22 @@
             </td>
           </tr>
         <% }) %>
-        <% if (!prizes.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="6">ยังไม่มีของรางวัล</td></tr><% } %>
+        <% if (!prizes.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="7">ยังไม่มีของรางวัล</td></tr><% } %>
       </tbody>
     </table>
   </div>
 
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 h-fit">
     <h3 class="font-semibold mb-3">➕ เพิ่มของรางวัล</h3>
-    <form action="/admin/minigame/prizes" method="post" class="space-y-3">
+    <form action="/admin/minigame/prizes" method="post" enctype="multipart/form-data" class="space-y-3">
       <input name="name" required placeholder="ชื่อรางวัล เช่น เครดิต 10 บาท" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       <input type="number" min="0" max="100" step="0.1" name="percent" required placeholder="อัตราออก (%)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       <input type="number" min="0" name="stock" placeholder="สต็อก (เว้นว่าง = ไม่จำกัด)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       <input type="number" min="0" name="rewardAmount" required placeholder="มูลค่าเครดิตที่ได้ (฿, 0 = ไม่ได้รางวัล)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      <div>
+        <label class="block text-xs mb-1 text-[var(--text-3)]">รูปของรางวัล (ไม่บังคับ ไม่ใส่จะใช้ไอคอนอัตโนมัติ)</label>
+        <input type="file" name="image" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-xs" />
+      </div>
       <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มของรางวัล</button>
     </form>
     <p class="text-xs text-[var(--text-4)] mt-3">💡 อัตราออกทั้งหมดควรรวมกันเป็น 100% ลูกค้าจะเห็นอัตรานี้ที่หน้าเว็บก่อนเล่นเสมอ</p>
