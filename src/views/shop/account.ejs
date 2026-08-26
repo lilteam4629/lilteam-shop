@@ -1,18 +1,47 @@
 <section class="max-w-3xl mx-auto px-4 py-8">
-  <h1 class="text-2xl font-bold mb-6">บัญชีของฉัน</h1>
+  <div class="relative overflow-hidden bg-gradient-to-br from-[#2a2415] via-[var(--card)] to-[#13110c] border border-[#725f2b]/70 rounded-3xl p-5 sm:p-6 mb-5 shadow-[0_14px_40px_rgba(0,0,0,.35)]">
+    <div class="absolute -right-12 -top-16 w-44 h-44 rounded-full bg-[var(--gold)]/10 blur-3xl"></div>
+    <div class="relative flex items-center gap-4">
+      <div class="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-[#f0ce66] to-[#94701d] text-[#171208] flex items-center justify-center text-xl font-bold shadow-[0_6px_20px_rgba(200,166,63,.25)]"><%= user.username.charAt(0).toUpperCase() %></div>
+      <div class="min-w-0">
+        <div class="text-xs text-[var(--gold)] mb-0.5">โปรไฟล์ของฉัน</div>
+        <h1 class="text-xl font-bold truncate"><%= user.username %></h1>
+        <p class="text-xs text-[var(--text-3)] truncate"><%= user.email %></p>
+        <p class="text-[10px] text-[var(--text-4)] mt-1">สมาชิกตั้งแต่ <%= new Date(user.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' }) %></p>
+      </div>
+    </div>
+  </div>
 
-  <div class="grid sm:grid-cols-2 gap-6 mb-8">
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-      <div class="text-[var(--text-3)] text-sm mb-1">ชื่อผู้ใช้</div>
-      <div class="font-medium mb-3"><%= user.username %></div>
-      <div class="text-[var(--text-3)] text-sm mb-1">อีเมล</div>
-      <div class="font-medium"><%= user.email %></div>
+  <div class="grid grid-cols-3 gap-2.5 mb-4">
+    <div class="col-span-3 sm:col-span-1 bg-gradient-to-br from-[#2d2512] to-[var(--card)] border border-[#80692e]/70 rounded-2xl p-4">
+      <div class="text-[var(--text-3)] text-xs mb-1">ยอดเงินคงเหลือ</div>
+      <div class="text-2xl font-bold text-[#f0cc59]">฿<%= user.walletBalance.toLocaleString() %>.00</div>
     </div>
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-      <div class="text-[var(--text-3)] text-sm mb-1">ยอดเงินในกระเป๋า</div>
-      <div class="text-2xl font-bold text-[var(--gold)] mb-3">฿<%= user.walletBalance.toLocaleString() %>.00</div>
-      <a href="/account/topup" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">+ เติมเงิน</a>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3 text-center flex flex-col justify-center">
+      <div class="text-xl font-bold"><%= orderCount %></div><div class="text-[10px] text-[var(--text-4)]">คำสั่งซื้อ</div>
     </div>
+    <div class="col-span-2 sm:col-span-1 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3 text-center flex flex-col justify-center">
+      <div class="text-lg font-bold text-[var(--gold)]">฿<%= totalSpent.toLocaleString() %></div><div class="text-[10px] text-[var(--text-4)]">ยอดซื้อทั้งหมด</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 gap-2.5 mb-8">
+    <a href="/account/topup" class="text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold px-4 py-2.5 rounded-xl text-sm">+ เติมเงิน</a>
+    <a href="/account/orders" class="text-center bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/50 text-[var(--text-2)] px-4 py-2.5 rounded-xl text-sm">ดูคำสั่งซื้อ</a>
+  </div>
+
+  <div class="flex items-center justify-between mb-3">
+    <h2 class="text-lg font-semibold">คำสั่งซื้อล่าสุด</h2>
+    <a href="/account/orders" class="text-xs text-[var(--gold)]">ดูทั้งหมด →</a>
+  </div>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl divide-y divide-[#241f13] mb-8 overflow-hidden">
+    <% if (!orders.length) { %><div class="p-4 text-[var(--text-3)] text-sm">ยังไม่มีคำสั่งซื้อ</div><% } %>
+    <% orders.forEach(o => { %>
+      <a href="/account/orders/<%= o.id %>" class="p-4 flex items-center justify-between gap-3 hover:bg-[var(--input)]/50">
+        <div class="min-w-0"><div class="text-sm font-medium truncate">คำสั่งซื้อ #<%= o.id %></div><div class="text-[10px] text-[var(--text-4)]"><%= new Date(o.createdAt).toLocaleString('th-TH') %> · <%= o.items.length %> รายการ</div></div>
+        <div class="text-right shrink-0"><div class="text-sm font-semibold text-[var(--gold)]">฿<%= o.total.toLocaleString() %></div><div class="text-[10px] text-emerald-400"><%= o.status %></div></div>
+      </a>
+    <% }) %>
   </div>
 
   <% if (topupRequests && topupRequests.length) { %>

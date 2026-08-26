@@ -42,10 +42,10 @@
           <span>💰 <%= currentUser.walletBalance.toLocaleString() %> ฿</span>
           <span class="bg-[var(--gold)] text-[var(--bg)] w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">+</span>
         </a>
-        <div class="relative group min-w-0">
-          <button aria-label="เมนูบัญชี <%= currentUser.username %>" class="w-9 sm:w-auto sm:max-w-[150px] h-9 sm:h-auto flex items-center justify-center sm:justify-start gap-0.5 rounded-full sm:rounded-none bg-[var(--input)] sm:bg-transparent border sm:border-0 border-[var(--border-light)] hover:text-[var(--gold)]">
-            <span class="sm:hidden" aria-hidden="true">👤</span>
-            <span class="hidden sm:inline truncate"><%= currentUser.username %></span><span class="shrink-0">▾</span>
+        <a href="/account" aria-label="บัญชีของฉัน" title="บัญชีของฉัน" class="sm:hidden w-9 h-9 shrink-0 rounded-full bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 flex items-center justify-center transition">👤</a>
+        <div class="relative group min-w-0 hidden sm:block">
+          <button aria-label="เมนูบัญชี <%= currentUser.username %>" class="max-w-[150px] flex items-center gap-0.5 hover:text-[var(--gold)]">
+            <span class="truncate"><%= currentUser.username %></span><span class="shrink-0">▾</span>
           </button>
           <div class="absolute right-0 mt-1 w-44 bg-[var(--input)] border border-[var(--border-light)] rounded-lg shadow-xl hidden group-hover:block group-focus-within:block">
             <a href="/account/topup" class="block px-4 py-2 hover:bg-[#2b2416] text-sm text-[var(--gold)] rounded-t-lg">💰 เติมเงิน</a>

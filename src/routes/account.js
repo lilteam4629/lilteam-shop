@@ -27,7 +27,15 @@ router.get('/', (req, res) => {
     .filter(t => t.userId === user.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 10);
-  res.render('shop/account', { title: 'บัญชีของฉัน', user, transactions, topupRequests });
+  const allOrders = store.data.orders
+    .filter(o => o.userId === user.id)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const orders = allOrders.slice(0, 5);
+  const totalSpent = allOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0);
+  res.render('shop/account', {
+    title: 'บัญชีของฉัน', user, transactions, topupRequests, orders,
+    orderCount: allOrders.length, totalSpent,
+  });
 });
 
 router.get('/topup', (req, res) => {
