@@ -166,6 +166,7 @@ function defaultData() {
         bankName: 'ธนาคารกสิกรไทย',
         bankAccountNumber: '123-4-56789-0',
         bankAccountName: 'LilTeam Shop (Demo)',
+        qrImage: null,
       },
     },
     users: [

@@ -33,9 +33,9 @@
     <div class="flex justify-between text-sm"><span class="text-[var(--text-3)]">ช่องทาง</span><span><%= request.method === 'promptpay' ? 'พร้อมเพย์ (PromptPay)' : 'โอนผ่านธนาคาร' %></span></div>
 
     <div class="border-t border-[var(--border)] pt-4">
-      <% if (request.method === 'promptpay' && qrDataUrl) { %>
+      <% if (request.method === 'promptpay' && (payment.qrImage || qrDataUrl)) { %>
         <div class="bg-white rounded-lg p-4 flex flex-col items-center mb-3">
-          <img src="<%= qrDataUrl %>" class="w-56 h-56" alt="พร้อมเพย์ QR" />
+          <img src="<%= payment.qrImage || qrDataUrl %>" class="w-56 h-56 object-contain" alt="พร้อมเพย์ QR" />
           <p class="text-[var(--bg)] text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
         </div>
         <div class="text-sm space-y-1">

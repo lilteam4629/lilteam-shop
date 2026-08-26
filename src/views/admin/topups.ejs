@@ -1,6 +1,19 @@
 <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-6 max-w-xl" open>
   <summary class="font-semibold cursor-pointer">ข้อมูลบัญชีรับเงิน</summary>
-  <form action="/admin/topups/payment-settings" method="post" class="space-y-4 mt-4">
+  <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="space-y-4 mt-4">
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-3)]">รูป QR (ถ้าไม่อัปโหลด ระบบจะสร้าง QR พร้อมเพย์อัตโนมัติจากเบอร์ด้านล่าง)</label>
+      <% if (payment.qrImage) { %>
+        <div class="flex items-center gap-3 mb-2">
+          <img src="<%= payment.qrImage %>" class="w-28 h-28 object-contain rounded-lg border border-[var(--border)] bg-white" alt="QR ปัจจุบัน" />
+          <label class="flex items-center gap-2 text-sm text-[var(--text-3)]">
+            <input type="checkbox" name="removeQrImage" class="accent-[var(--gold)]" />
+            ลบรูป QR นี้
+          </label>
+        </div>
+      <% } %>
+      <input type="file" name="qrImage" accept="image/*" class="w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
+    </div>
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">เบอร์/เลขพร้อมเพย์</label>
       <input name="promptpayId" value="<%= payment.promptpayId %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
