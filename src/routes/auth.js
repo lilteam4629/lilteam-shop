@@ -1,7 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const store = require('../data/store');
+
+function safeTextEqual(left, right) {
+  const leftBuffer = Buffer.from(String(left || ''), 'utf8');
+  const rightBuffer = Buffer.from(String(right || ''), 'utf8');
+  return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
+}
 
 router.get('/login', (req, res) => {
   res.render('shop/login', { title: 'เข้าสู่ระบบ' });
@@ -12,7 +19,21 @@ router.post('/login', (req, res) => {
   const username = (req.body.username || '').trim();
   const usernameLower = username.toLowerCase();
   const user = store.data.users.find(u =>
-    u.username.toLowerCase() === usernameLower || u.email.toLowerCase() === usernameLower);
+    (u.username || '').toLowerCase() === usernameLower || (u.email || '').toLowerCase() === usernameLower);
+
+  // Hosted emergency-admin access uses Railway's environment value directly.
+  // This avoids stale/corrupt password hashes while keeping the secret out of Git.
+  const managedUsername = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
+  const managedPassword = process.env.ADMIN_PASSWORD || '';
+  if (managedPassword && usernameLower === managedUsername && safeTextEqual(password, managedPassword)) {
+    const managedAdmin = store.data.users.find(u => (u.username || '').toLowerCase() === managedUsername && u.role === 'admin');
+    if (managedAdmin) {
+      req.session.userId = managedAdmin.id;
+      req.flash('success', `ยินดีต้อนรับ ${managedAdmin.username}`);
+      return res.redirect('/admin');
+    }
+  }
+
   if (!user || !bcrypt.compareSync(password || '', user.passwordHash)) {
     req.flash('error', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     return res.redirect('/login');
