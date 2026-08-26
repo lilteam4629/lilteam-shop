@@ -16,21 +16,6 @@
             <div>Password: <span class="text-emerald-400"><%= i.credentials.password %></span></div>
             <div class="text-[var(--text-3)] font-sans text-xs mt-1"><%= i.credentials.extra %></div>
           </div>
-          <div class="flex items-center justify-between text-sm">
-            <div class="text-[var(--text-3)]">
-              <% if (i.credentials.steamGuardCode) { %>
-                โค้ด Steam Guard ล่าสุด: <span class="text-[var(--gold)] font-mono"><%= i.credentials.steamGuardCode %></span>
-              <% } %>
-              (ใช้ไปแล้ว <%= i.credentials.steamGuardRequests %>/3 รอบ)
-            </div>
-            <% if (i.credentials.steamGuardRequests < 3) { %>
-              <form action="/account/orders/<%= order.id %>/steam-guard/<%= i.credentials.id %>" method="post">
-                <button class="text-xs bg-[#332b1a] hover:bg-[#4a3f26] border border-[var(--border-light)] text-[var(--gold)] px-3 py-1.5 rounded-lg">ขอโค้ด Steam Guard</button>
-              </form>
-            <% } else { %>
-              <span class="text-xs text-[var(--text-4)]">ขอครบโควตาแล้ว</span>
-            <% } %>
-          </div>
         <% } %>
       </div>
     <% }) %>

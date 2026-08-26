@@ -92,8 +92,7 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
   const filterTagIds = Array.isArray(body.filterTagIds) ? body.filterTagIds : (body.filterTagIds ? [body.filterTagIds] : []);
   return {
     title: body.title,
-    type: body.type === 'rental' ? 'rental' : 'offline',
-    platform: body.platform || 'Windows',
+    type: 'game',
     genres,
     filterTagIds,
     price: parseInt(body.price, 10) || 0,
@@ -101,16 +100,6 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     description: body.description || '',
     aboutText: body.aboutText || '',
     images: images.length ? images : ['https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800'],
-    sysReqMin: {
-      os: body.minOs || 'Windows 10 / 11 (64-bit)', processor: body.minProcessor || '-',
-      memory: body.minMemory || '-', graphics: body.minGraphics || '-',
-      directx: body.minDirectx || 'Version 12', storage: body.minStorage || '-',
-    },
-    sysReqRec: {
-      os: body.recOs || 'Windows 10 / 11 (64-bit)', processor: body.recProcessor || '-',
-      memory: body.recMemory || '-', graphics: body.recGraphics || '-',
-      directx: body.recDirectx || 'Version 12', storage: body.recStorage || '-',
-    },
   };
 }
 
@@ -260,7 +249,7 @@ router.get('/products/:id/stock', (req, res) => {
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   const stockItems = store.data.stockItems.filter(s => s.productId === product.id)
     .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
-  res.render('admin/product-stock', { title: `สต๊อกไอดี: ${product.title}`, active: 'products', product, stockItems });
+  res.render('admin/product-stock', { title: `สต๊อกสินค้า: ${product.title}`, active: 'products', product, stockItems });
 });
 
 router.post('/products/:id/stock/add', (req, res) => {
@@ -274,13 +263,12 @@ router.post('/products/:id/stock/add', (req, res) => {
     store.data.stockItems.push({
       id: store.genId(10), productId: product.id, username, password,
       extra: rest.join(':') || '', status: 'available', soldOrderId: null,
-      steamGuardRequests: 0, steamGuardCode: null,
       addedAt: new Date().toISOString(),
     });
     added++;
   });
   store.save();
-  req.flash('success', `เพิ่มสต๊อกไอดีแล้ว ${added} รายการ (รูปแบบ username:password:หมายเหตุ)`);
+  req.flash('success', `เพิ่มสต๊อกสินค้าแล้ว ${added} รายการ`);
   res.redirect(`/admin/products/${product.id}/stock`);
 });
 

@@ -19,7 +19,7 @@
 
     <div>
       <div class="flex items-center gap-2 mb-3">
-        <span class="bg-[#1b2838] text-[#66c0f4] text-xs px-2 py-1 rounded">Steam</span>
+        <span class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-[var(--gold)] text-xs px-2 py-1 rounded">สินค้าเกม</span>
         <% if (product.stockCount > 0) { %>
           <span class="text-emerald-400 text-xs">พร้อมส่งทันที</span>
         <% } else { %>
@@ -35,13 +35,10 @@
           <span class="text-xs bg-[var(--input)] border border-[var(--border-light)] text-[var(--text-2)] px-2 py-1 rounded-full"><%= g %></span>
         <% }) %>
       </div>
-      <p class="text-sm text-[var(--text-3)] mb-4">เล่นได้บน <span class="text-[var(--text-2)]"><%= product.platform %></span></p>
-
       <div class="mb-1 text-xs text-[var(--text-3)]">ราคา</div>
       <div class="flex items-baseline gap-2 mb-5">
-        <% if (product.type === 'rental') { %><span class="text-sm text-[var(--text-3)]">เริ่ม</span><% } %>
         <span class="text-3xl font-bold text-[var(--gold)]">฿<%= product.price.toLocaleString() %>.00</span>
-        <% if (product.type === 'offline' && product.originalPrice > product.price) { %>
+        <% if (product.originalPrice > product.price) { %>
           <span class="text-[var(--coral)] line-through text-sm">฿<%= product.originalPrice.toLocaleString() %>.00</span>
         <% } %>
       </div>
@@ -56,9 +53,9 @@
 
       <div class="mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 text-sm space-y-2">
         <div class="font-medium text-[var(--gold)] mb-1">วิธีรับสินค้า</div>
-        <p class="text-[var(--text-2)]">✅ ได้รับ username และ password ของบัญชีเกมทันทีหลังชำระเงินสำเร็จ ดูได้ที่หน้าออเดอร์ของคุณ</p>
-        <p class="text-[var(--text-2)]">✅ ขอโค้ด Steam Guard สำหรับเข้าสู่ระบบได้สูงสุด 3 รอบ ผ่านหน้าออเดอร์ ไม่ต้องรอแอดมิน</p>
-        <p class="text-[var(--text-2)]">✅ ระบบส่งมอบอัตโนมัติตลอด 24 ชั่วโมง หากติดปัญหาแจ้งทางร้านได้ที่<a href="/contact" class="text-[var(--gold)]">หน้าติดต่อร้าน</a></p>
+        <p class="text-[var(--text-2)]">✅ รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ ตรวจสอบได้ที่หน้าคำสั่งซื้อของคุณ</p>
+        <p class="text-[var(--text-2)]">✅ ระบบส่งมอบอัตโนมัติตลอด 24 ชั่วโมง</p>
+        <p class="text-[var(--text-2)]">✅ หากติดปัญหาแจ้งทางร้านได้ที่ <a href="/contact" class="text-[var(--gold)]">หน้าติดต่อร้าน</a></p>
       </div>
     </div>
   </div>
@@ -68,7 +65,6 @@
       <button data-tab="terms" class="tab-btn px-4 py-2 border-b-2 border-[var(--gold)] text-[var(--gold)] whitespace-nowrap">เงื่อนไข</button>
       <button data-tab="gallery" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">ภาพเกม</button>
       <button data-tab="about" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">รายละเอียด</button>
-      <button data-tab="specs" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">สเปกเครื่อง</button>
       <button data-tab="reviews" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">รีวิว</button>
     </div>
 
@@ -76,20 +72,18 @@
       <div>
         <div class="font-medium text-[var(--text)] mb-2">เงื่อนไขก่อนสั่งซื้อ</div>
         <ul class="list-disc pl-5 space-y-1">
-          <li>รับประกันเฉพาะกรณี เข้ารหัสไม่ได้ / รหัสผ่านผิด / เกมหายจากบัญชี เท่านั้น</li>
-          <li>ขอโค้ด Steam Guard ได้ 3 รอบต่อออเดอร์ ใช้ครบแล้วขอเพิ่มไม่ได้</li>
-          <li>สามารถเล่นในโหมด Offline เท่านั้น เป็นบัญชีแชร์ร่วมกัน</li>
-          <li>สามารถเล่นได้ในคอมตัวเองเท่านั้น ไม่รองรับ GeForce Now / มือถือ</li>
-          <li>ไม่สามารถเปลี่ยนข้อมูลบัญชีใดๆ ได้</li>
-          <li>ล้างเครื่องหรือลง Windows ใหม่ต้องสั่งซื้อใหม่เท่านั้น</li>
+          <li>กรุณาตรวจสอบชื่อสินค้า รายละเอียด และราคาก่อนยืนยันคำสั่งซื้อ</li>
+          <li>ข้อมูลสินค้าจะปรากฏในหน้าคำสั่งซื้อหลังชำระเงินสำเร็จ</li>
+          <li>ห้ามเผยแพร่หรือส่งต่อข้อมูลสินค้าที่ได้รับจากร้าน</li>
+          <li>หากพบปัญหา กรุณาติดต่อร้านพร้อมหมายเลขคำสั่งซื้อ</li>
         </ul>
       </div>
       <div>
         <div class="font-medium text-[var(--text)] mb-2">เงื่อนไขการรับประกันสินค้า</div>
         <ul class="list-disc pl-5 space-y-1">
           <li>รับประกันสินค้า 90 วันนับจากวันสั่งซื้อ</li>
-          <li>รับประกันเฉพาะ 3 กรณี: เข้ารหัสไม่ได้ / รหัสผ่านผิด / เกมหายจากบัญชี</li>
-          <li>โควตาโค้ด Steam Guard มี 3 รอบต่อออเดอร์ ใช้ครบแล้วขอเพิ่มไม่ได้ทุกกรณี</li>
+          <li>การรับประกันเป็นไปตามรายละเอียดที่ระบุไว้ในสินค้านั้น</li>
+          <li>กรุณาเก็บหลักฐานและหมายเลขคำสั่งซื้อไว้สำหรับติดต่อร้าน</li>
         </ul>
       </div>
     </div>
@@ -103,25 +97,6 @@
     </div>
 
     <div id="tab-about" class="tab-panel py-6 hidden text-sm text-[var(--text-2)] leading-relaxed whitespace-pre-line"><%= product.aboutText %></div>
-
-    <div id="tab-specs" class="tab-panel py-6 hidden grid sm:grid-cols-2 gap-6 text-sm">
-      <div>
-        <div class="font-medium text-[var(--text)] mb-2">ขั้นต่ำ</div>
-        <table class="w-full text-[var(--text-2)]">
-          <% Object.entries(product.sysReqMin).forEach(([k,v]) => { %>
-            <tr class="border-b border-[#241f13]"><td class="py-1.5 pr-3 text-[var(--text-3)] capitalize"><%= k %></td><td class="py-1.5"><%= v %></td></tr>
-          <% }) %>
-        </table>
-      </div>
-      <div>
-        <div class="font-medium text-[var(--text)] mb-2">แนะนำ</div>
-        <table class="w-full text-[var(--text-2)]">
-          <% Object.entries(product.sysReqRec).forEach(([k,v]) => { %>
-            <tr class="border-b border-[#241f13]"><td class="py-1.5 pr-3 text-[var(--text-3)] capitalize"><%= k %></td><td class="py-1.5"><%= v %></td></tr>
-          <% }) %>
-        </table>
-      </div>
-    </div>
 
     <div id="tab-reviews" class="tab-panel py-6 hidden text-sm text-[var(--text-3)]">
       <% if (!reviews.length) { %>

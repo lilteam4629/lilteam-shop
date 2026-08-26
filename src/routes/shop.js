@@ -31,33 +31,26 @@ function sortProducts(products, sort) {
 router.get('/', (req, res) => {
   const active = store.data.products.filter(p => p.status === 'active').map(withStock);
   const newest = [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
-  const rental = active.filter(p => p.type === 'rental').slice(0, 5);
-  const offline = active.filter(p => p.type === 'offline');
   res.render('shop/home', {
     title: 'หน้าแรก',
     stats: shopStats(),
     newest,
-    rental,
-    rentalTotal: active.filter(p => p.type === 'rental').length,
-    offline: offline.slice(0, 24),
-    offlineTotal: offline.length,
+    products: active.slice(0, 24),
+    productTotal: active.length,
     announcements: store.data.announcements.filter(a => a.active),
     filterTags: store.data.filterTags,
     miniGamePrizes: store.data.miniGamePrizes.filter(p => p.active),
   });
 });
 
-router.get('/offline', (req, res) => {
-  let products = store.data.products.filter(p => p.status === 'active' && p.type === 'offline').map(withStock);
+router.get('/products', (req, res) => {
+  let products = store.data.products.filter(p => p.status === 'active').map(withStock);
   products = sortProducts(products, req.query.sort);
-  res.render('shop/listing', { title: 'ไอดีออฟไลน์', products, listType: 'offline', sort: req.query.sort || '', filterTags: store.data.filterTags });
+  res.render('shop/listing', { title: 'สินค้าเกมทั้งหมด', products, listType: 'products', sort: req.query.sort || '', filterTags: store.data.filterTags });
 });
 
-router.get('/rental', (req, res) => {
-  let products = store.data.products.filter(p => p.status === 'active' && p.type === 'rental').map(withStock);
-  products = sortProducts(products, req.query.sort);
-  res.render('shop/listing', { title: 'ไอดีเช่ารายวัน', products, listType: 'rental', sort: req.query.sort || '', filterTags: store.data.filterTags });
-});
+router.get('/offline', (req, res) => res.redirect('/products'));
+router.get('/rental', (req, res) => res.redirect('/products'));
 
 router.get('/search', (req, res) => {
   const q = (req.query.q || '').trim().toLowerCase();

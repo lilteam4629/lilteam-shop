@@ -9,9 +9,7 @@
           <option value="newest" <%= sort==='newest' ? 'selected':'' %>>มาใหม่ล่าสุด</option>
           <option value="price_asc" <%= sort==='price_asc' ? 'selected':'' %>>ราคาน้อย → มาก</option>
           <option value="price_desc" <%= sort==='price_desc' ? 'selected':'' %>>ราคามาก → น้อย</option>
-          <% if (listType === 'offline') { %>
-            <option value="discount" <%= sort==='discount' ? 'selected':'' %>>ส่วนลดมากสุด</option>
-          <% } %>
+          <option value="discount" <%= sort==='discount' ? 'selected':'' %>>ส่วนลดมากสุด</option>
           <option value="name" <%= sort==='name' ? 'selected':'' %>>ชื่อ ก-ฮ / A-Z</option>
         </select>
       </form>

@@ -50,7 +50,7 @@
     <form action="/admin/hero-banner/mode" method="post" class="space-y-4">
       <div>
         <label class="block text-sm mb-1 text-[var(--text-3)]">ลิงก์เมื่อคลิกแบนเนอร์ (ไม่บังคับ)</label>
-        <input name="bannerLink" value="<%= settings.hero.bannerLink %>" placeholder="/offline" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2.5 text-sm" />
+        <input name="bannerLink" value="<%= settings.hero.bannerLink %>" placeholder="/products" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2.5 text-sm" />
       </div>
       <div class="grid sm:grid-cols-2 gap-3">
         <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.hero.mode === 'default' ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-xl px-4 py-3 cursor-pointer text-sm">

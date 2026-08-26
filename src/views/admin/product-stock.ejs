@@ -28,7 +28,7 @@
   </div>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
     <h3 class="font-semibold mb-2">เพิ่มสต๊อกไอดี (Bulk)</h3>
-    <p class="text-xs text-[var(--text-4)] mb-2">รูปแบบ 1 บรรทัดต่อ 1 ไอดี: <code>username:password:หมายเหตุ</code></p>
+    <p class="text-xs text-[var(--text-4)] mb-2">รูปแบบ 1 บรรทัดต่อ 1 สินค้า: <code>ข้อมูลหลัก:รหัสหรือข้อมูลสำรอง:หมายเหตุ</code></p>
     <form action="/admin/products/<%= product.id %>/stock/add" method="post" class="space-y-3">
       <textarea name="bulk" rows="8" placeholder="user01:pass01:เปลี่ยนอีเมลได้&#10;user02:pass02" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono"></textarea>
       <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มเข้าสต๊อก</button>

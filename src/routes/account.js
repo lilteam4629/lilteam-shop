@@ -175,23 +175,6 @@ router.get('/orders', (req, res) => {
   res.render('shop/orders', { title: 'คำสั่งซื้อของฉัน', orders });
 });
 
-router.post('/orders/:id/steam-guard/:stockItemId', (req, res) => {
-  const user = currentUser(req);
-  const order = store.data.orders.find(o => o.id === req.params.id && o.userId === user.id);
-  if (!order) return res.redirect('/account/orders');
-  const stockItem = store.data.stockItems.find(s => s.id === req.params.stockItemId && s.soldOrderId === order.id);
-  if (!stockItem) return res.redirect(`/account/orders/${order.id}`);
-  if (stockItem.steamGuardRequests >= 3) {
-    req.flash('error', 'ขอโค้ด Steam Guard ครบ 3 รอบแล้ว ไม่สามารถขอเพิ่มได้');
-    return res.redirect(`/account/orders/${order.id}`);
-  }
-  stockItem.steamGuardRequests += 1;
-  stockItem.steamGuardCode = String(Math.floor(10000 + Math.random() * 90000));
-  store.save();
-  req.flash('success', `โค้ด Steam Guard ของคุณคือ ${stockItem.steamGuardCode} (ใช้ไปแล้ว ${stockItem.steamGuardRequests}/3 รอบ)`);
-  res.redirect(`/account/orders/${order.id}`);
-});
-
 router.get('/orders/:id', (req, res) => {
   const user = currentUser(req);
   const order = store.data.orders.find(o => o.id === req.params.id && o.userId === user.id);

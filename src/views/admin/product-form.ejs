@@ -5,27 +5,15 @@
     <input name="title" required value="<%= product ? product.title : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
   </div>
 
-  <div class="grid sm:grid-cols-3 gap-4">
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ประเภท</label>
-      <select name="type" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
-        <option value="offline" <%= product && product.type==='offline' ? 'selected':'' %>>ไอดีออฟไลน์</option>
-        <option value="rental" <%= product && product.type==='rental' ? 'selected':'' %>>ไอดีเช่ารายวัน</option>
-      </select>
-    </div>
+  <div class="grid sm:grid-cols-2 gap-4">
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">ราคาขาย (บาท)</label>
       <input type="number" name="price" required value="<%= product ? product.price : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ราคาปกติ (สำหรับขีดฆ่า, ไอดีออฟไลน์)</label>
+      <label class="block text-sm mb-1 text-[var(--text-3)]">ราคาปกติ (สำหรับแสดงราคาขีดฆ่า)</label>
       <input type="number" name="originalPrice" value="<%= product ? product.originalPrice : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
-  </div>
-
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">แพลตฟอร์ม</label>
-    <input name="platform" value="<%= product ? product.platform : 'Windows' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
   </div>
 
   <div>
@@ -104,28 +92,6 @@
       <textarea name="images" rows="3" placeholder="https://...&#10;https://..." class="mt-2 w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 font-mono text-sm"></textarea>
     </details>
   </div>
-
-  <details class="bg-[var(--input)]/50 border border-[var(--border-light)] rounded-lg p-4">
-    <summary class="cursor-pointer text-sm text-[var(--text-2)]">สเปกเครื่องที่ต้องใช้ (ไม่บังคับ)</summary>
-    <div class="grid sm:grid-cols-2 gap-4 mt-4">
-      <div class="space-y-2">
-        <div class="text-xs text-[var(--text-3)] mb-1">ขั้นต่ำ</div>
-        <input name="minOs" placeholder="OS" value="<%= product ? product.sysReqMin.os : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-        <input name="minProcessor" placeholder="Processor" value="<%= product ? product.sysReqMin.processor : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-        <input name="minMemory" placeholder="Memory" value="<%= product ? product.sysReqMin.memory : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-        <input name="minGraphics" placeholder="Graphics" value="<%= product ? product.sysReqMin.graphics : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-        <input name="minStorage" placeholder="Storage" value="<%= product ? product.sysReqMin.storage : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-      </div>
-      <div class="space-y-2">
-        <div class="text-xs text-[var(--text-3)] mb-1">แนะนำ</div>
-        <input name="recOs" placeholder="OS" value="<%= product ? product.sysReqRec.os : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-        <input name="recProcessor" placeholder="Processor" value="<%= product ? product.sysReqRec.processor : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-        <input name="recMemory" placeholder="Memory" value="<%= product ? product.sysReqRec.memory : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-        <input name="recGraphics" placeholder="Graphics" value="<%= product ? product.sysReqRec.graphics : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-        <input name="recStorage" placeholder="Storage" value="<%= product ? product.sysReqRec.storage : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-      </div>
-    </div>
-  </details>
 
   <% if (product) { %>
     <div>
