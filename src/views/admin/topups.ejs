@@ -1,18 +1,33 @@
 <details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-6 max-w-xl" open>
   <summary class="font-semibold cursor-pointer">ข้อมูลบัญชีรับเงิน</summary>
   <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="space-y-4 mt-4">
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">รูป QR (แสดงทั้งช่องทางพร้อมเพย์และโอนธนาคาร ถ้าไม่อัปโหลด ช่องทางพร้อมเพย์จะสร้าง QR อัตโนมัติจากเบอร์ด้านล่างแทน)</label>
-      <% if (payment.qrImage) { %>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4">
+        <label class="block font-medium mb-1">QR พร้อมเพย์</label>
+        <p class="text-xs text-[var(--text-4)] mb-3">ถ้าไม่แนบ ระบบจะสร้าง QR จากหมายเลขพร้อมเพย์ให้อัตโนมัติ</p>
+      <% if (payment.promptpayQrImage) { %>
         <div class="flex items-center gap-3 mb-2">
-          <img src="<%= payment.qrImage %>" class="w-28 h-28 object-contain rounded-lg border border-[var(--border)] bg-white" alt="QR ปัจจุบัน" />
+          <img src="<%= payment.promptpayQrImage %>" class="w-28 h-28 object-contain rounded-lg bg-white" alt="QR พร้อมเพย์ปัจจุบัน" />
           <label class="flex items-center gap-2 text-sm text-[var(--text-3)]">
-            <input type="checkbox" name="removeQrImage" class="accent-[var(--gold)]" />
-            ลบรูป QR นี้
+            <input type="checkbox" name="removePromptpayQrImage" class="accent-[var(--gold)]" /> ลบรูปนี้
           </label>
         </div>
       <% } %>
-      <input type="file" name="qrImage" accept="image/*" class="w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
+        <input type="file" name="promptpayQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-xs" />
+      </div>
+      <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4">
+        <label class="block font-medium mb-1">QR โอนธนาคาร</label>
+        <p class="text-xs text-[var(--text-4)] mb-3">ใช้เฉพาะเมื่อลูกค้าเลือกช่องทางโอนผ่านธนาคาร</p>
+      <% if (payment.bankQrImage) { %>
+        <div class="flex items-center gap-3 mb-2">
+          <img src="<%= payment.bankQrImage %>" class="w-28 h-28 object-contain rounded-lg bg-white" alt="QR ธนาคารปัจจุบัน" />
+          <label class="flex items-center gap-2 text-sm text-[var(--text-3)]">
+            <input type="checkbox" name="removeBankQrImage" class="accent-[var(--gold)]" /> ลบรูปนี้
+          </label>
+        </div>
+      <% } %>
+        <input type="file" name="bankQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-xs" />
+      </div>
     </div>
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">เบอร์/เลขพร้อมเพย์</label>

@@ -26,7 +26,7 @@ const productImageUpload = multer({
 
 const qrImageUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 4 * 1024 * 1024 },
+  limits: { fileSize: 4 * 1024 * 1024, files: 2 },
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
@@ -366,7 +366,10 @@ router.get('/topups', (req, res) => {
 });
 
 router.post('/topups/payment-settings', (req, res) => {
-  qrImageUpload.single('qrImage')(req, res, async (err) => {
+  qrImageUpload.fields([
+    { name: 'promptpayQrImage', maxCount: 1 },
+    { name: 'bankQrImage', maxCount: 1 },
+  ])(req, res, async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูป QR ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/topups');
@@ -374,16 +377,20 @@ router.post('/topups/payment-settings', (req, res) => {
     const { promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName } = req.body;
     Object.assign(store.data.settings.payment, { promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName });
 
-    if (req.body.removeQrImage === 'on') {
-      store.data.settings.payment.qrImage = null;
-    }
-    if (req.file) {
-      try {
-        store.data.settings.payment.qrImage = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
-      } catch (saveError) {
-        req.flash('error', 'บันทึกรูป QR ไม่สำเร็จ กรุณาลองใหม่');
-        return res.redirect('/admin/topups');
+    if (req.body.removePromptpayQrImage === 'on') store.data.settings.payment.promptpayQrImage = null;
+    if (req.body.removeBankQrImage === 'on') store.data.settings.payment.bankQrImage = null;
+    try {
+      const promptpayFile = req.files && req.files.promptpayQrImage && req.files.promptpayQrImage[0];
+      const bankFile = req.files && req.files.bankQrImage && req.files.bankQrImage[0];
+      if (promptpayFile) {
+        store.data.settings.payment.promptpayQrImage = await store.saveMedia(promptpayFile.buffer, promptpayFile.originalname, promptpayFile.mimetype);
       }
+      if (bankFile) {
+        store.data.settings.payment.bankQrImage = await store.saveMedia(bankFile.buffer, bankFile.originalname, bankFile.mimetype);
+      }
+    } catch (saveError) {
+      req.flash('error', 'บันทึกรูป QR ไม่สำเร็จ กรุณาลองใหม่');
+      return res.redirect('/admin/topups');
     }
 
     store.save();

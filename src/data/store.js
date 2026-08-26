@@ -149,7 +149,8 @@ function defaultData() {
         bankName: 'ธนาคารกสิกรไทย',
         bankAccountNumber: '123-4-56789-0',
         bankAccountName: 'LilTeam Shop (Demo)',
-        qrImage: null,
+        promptpayQrImage: null,
+        bankQrImage: null,
       },
       miniGame: {
         enabled: true,
@@ -270,7 +271,16 @@ function migrate() {
   if (!db.settings.payment) {
     db.settings.payment = {
       promptpayId: '', promptpayName: '', bankName: '', bankAccountNumber: '', bankAccountName: '',
+      promptpayQrImage: null, bankQrImage: null,
     };
+    changed = true;
+  }
+  if (db.settings.payment.promptpayQrImage === undefined) {
+    db.settings.payment.promptpayQrImage = db.settings.payment.qrImage || null;
+    changed = true;
+  }
+  if (db.settings.payment.bankQrImage === undefined) {
+    db.settings.payment.bankQrImage = db.settings.payment.qrImage || null;
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }
