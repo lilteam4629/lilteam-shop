@@ -193,11 +193,11 @@ function defaultData() {
     walletTransactions: [],
     topupRequests: [],
     miniGamePrizes: [
-      { id: nanoid(8), name: 'เครดิต 5 บาท', percent: 40, stock: null, rewardAmount: 5, active: true, createdAt: now },
-      { id: nanoid(8), name: 'เครดิต 10 บาท', percent: 25, stock: 50, rewardAmount: 10, active: true, createdAt: now },
-      { id: nanoid(8), name: 'เครดิต 20 บาท', percent: 15, stock: 20, rewardAmount: 20, active: true, createdAt: now },
-      { id: nanoid(8), name: 'เครดิต 50 บาท', percent: 5, stock: 5, rewardAmount: 50, active: true, createdAt: now },
-      { id: nanoid(8), name: 'เสียใจด้วย ลองใหม่ครั้งหน้า', percent: 15, stock: null, rewardAmount: 0, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เครดิต 5 บาท', percent: 40, stock: null, rewardAmount: 5, image: null, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เครดิต 10 บาท', percent: 25, stock: 50, rewardAmount: 10, image: null, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เครดิต 20 บาท', percent: 15, stock: 20, rewardAmount: 20, image: null, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เครดิต 50 บาท', percent: 5, stock: 5, rewardAmount: 50, image: null, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เสียใจด้วย ลองใหม่ครั้งหน้า', percent: 15, stock: null, rewardAmount: 0, image: null, active: true, createdAt: now },
     ],
     miniGamePlays: [],
   };

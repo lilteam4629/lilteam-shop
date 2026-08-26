@@ -1,0 +1,191 @@
+<%
+  // locals: endpoint (string, required), cost (number|null — null hides the
+  // cost/balance display for a free preview), ctaLabel (string), showLogin
+  // (bool — show a login link instead of a play button), balance (number|null)
+  const mgCost = typeof cost === 'undefined' ? null : cost;
+  const mgBalance = typeof balance === 'undefined' ? null : balance;
+  const mgShowLogin = typeof showLogin !== 'undefined' && showLogin;
+%>
+<div class="mg-play-panel relative rounded-2xl border border-[var(--gold)]/30 p-6 flex flex-col items-center text-center gap-4">
+  <div class="mg-stage">
+    <div class="mg-box mg-box-el">🎁</div>
+    <div class="mg-card mg-card-el">
+      <div class="mg-card-icon mg-card-icon-el">🎉</div>
+      <img class="mg-card-image mg-card-image-el hidden" alt="" />
+      <div class="mg-card-name mg-card-name-el"></div>
+    </div>
+    <div class="mg-confetti mg-confetti-el"></div>
+  </div>
+  <div class="mg-result-el text-sm min-h-[1.5rem]"></div>
+  <% if (mgShowLogin) { %>
+    <a href="/login" class="mg-play-btn w-full block">เข้าสู่ระบบเพื่อเล่น</a>
+  <% } else { %>
+    <button type="button" class="mg-play-btn mg-play-btn-el w-full" data-endpoint="<%= endpoint %>">
+      <%= ctaLabel %><% if (mgCost !== null) { %> (฿<%= mgCost.toLocaleString() %>)<% } %>
+    </button>
+    <% if (mgBalance !== null) { %>
+      <p class="text-xs text-[var(--text-4)]">เครดิตคงเหลือ: ฿<span class="mg-balance-el"><%= mgBalance.toLocaleString() %></span></p>
+    <% } %>
+  <% } %>
+</div>
+
+<style>
+  .mg-play-panel {
+    background: linear-gradient(160deg, var(--input), var(--card));
+  }
+  .mg-stage { position: relative; width: 100%; height: 128px; display: flex; align-items: center; justify-content: center; }
+  .mg-box {
+    font-size: 4.5rem; line-height: 1; cursor: default;
+    filter: drop-shadow(0 0 18px rgba(200,166,63,.45));
+    animation: mg-float 2.6s ease-in-out infinite;
+  }
+  @keyframes mg-float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-6px) scale(1.03); }
+  }
+  .mg-box.mg-shaking { animation: mg-shake .6s ease-in-out 2; }
+  @keyframes mg-shake {
+    0%, 100% { transform: translate(0, 0) rotate(0); }
+    20% { transform: translate(-6px, 0) rotate(-8deg); }
+    40% { transform: translate(6px, 0) rotate(8deg); }
+    60% { transform: translate(-5px, -3px) rotate(-6deg); }
+    80% { transform: translate(5px, -3px) rotate(6deg); }
+  }
+  .mg-box.mg-hidden { opacity: 0; transform: scale(.4); transition: opacity .25s, transform .25s; }
+
+  .mg-card {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .4rem;
+    opacity: 0; transform: scale(.6) rotateY(90deg);
+    pointer-events: none;
+  }
+  .mg-card.mg-revealed {
+    opacity: 1; transform: scale(1) rotateY(0deg);
+    transition: opacity .45s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
+  }
+  .mg-card-icon { font-size: 3.4rem; line-height: 1; filter: drop-shadow(0 0 14px rgba(200,166,63,.5)); }
+  .mg-card-image { width: 4.5rem; height: 4.5rem; object-fit: cover; border-radius: .75rem; border: 1px solid var(--border-light); filter: drop-shadow(0 0 14px rgba(200,166,63,.5)); }
+  .mg-card-name { font-weight: 700; font-size: .95rem; max-width: 220px; }
+
+  .mg-confetti { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+  .mg-confetti-piece {
+    position: absolute; top: 50%; left: 50%;
+    width: 6px; height: 10px;
+    animation: mg-confetti-burst .9s ease-out forwards;
+  }
+  @keyframes mg-confetti-burst {
+    0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--mgx), var(--mgy)) rotate(var(--mgr)); opacity: 0; }
+  }
+
+  .mg-play-btn {
+    background: linear-gradient(135deg, var(--gold), var(--gold-hover));
+    color: var(--bg); font-weight: 700; border-radius: .75rem;
+    padding: .7rem 1rem; font-size: .9rem;
+    box-shadow: 0 8px 20px -8px rgba(200,166,63,.7);
+    transition: transform .15s, box-shadow .15s, opacity .15s;
+  }
+  .mg-play-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -10px rgba(200,166,63,.85); }
+  .mg-play-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mg-box, .mg-box.mg-shaking { animation: none; }
+  }
+</style>
+
+<script>
+  document.querySelectorAll('.mg-play-btn-el').forEach(function (btn) {
+    const panel = btn.closest('.mg-play-panel');
+    if (!panel || panel.dataset.mgBound === '1') return;
+    panel.dataset.mgBound = '1';
+
+    const box = panel.querySelector('.mg-box-el');
+    const card = panel.querySelector('.mg-card-el');
+    const cardIcon = panel.querySelector('.mg-card-icon-el');
+    const cardImage = panel.querySelector('.mg-card-image-el');
+    const cardName = panel.querySelector('.mg-card-name-el');
+    const confettiWrap = panel.querySelector('.mg-confetti-el');
+    const resultEl = panel.querySelector('.mg-result-el');
+    const balanceEl = panel.querySelector('.mg-balance-el');
+    const confettiColors = ['#c8a63f', '#e2836f', '#93bfff', '#8fe3a3', '#f3ecd8'];
+
+    function tierIconFor(rewardAmount) {
+      if (!rewardAmount) return '💨';
+      if (rewardAmount >= 50) return '💎';
+      if (rewardAmount >= 20) return '🌟';
+      return '🪙';
+    }
+
+    function burstConfetti() {
+      confettiWrap.innerHTML = '';
+      for (let i = 0; i < 26; i++) {
+        const piece = document.createElement('span');
+        piece.className = 'mg-confetti-piece';
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 60 + Math.random() * 70;
+        piece.style.setProperty('--mgx', (Math.cos(angle) * dist) + 'px');
+        piece.style.setProperty('--mgy', (Math.sin(angle) * dist) + 'px');
+        piece.style.setProperty('--mgr', (Math.random() * 720 - 360) + 'deg');
+        piece.style.background = confettiColors[i % confettiColors.length];
+        piece.style.animationDelay = (Math.random() * 0.15) + 's';
+        confettiWrap.appendChild(piece);
+      }
+      setTimeout(() => { confettiWrap.innerHTML = ''; }, 1100);
+    }
+
+    function resetStage() {
+      card.classList.remove('mg-revealed');
+      box.classList.remove('mg-hidden');
+    }
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      resultEl.textContent = '';
+      resetStage();
+      box.classList.add('mg-shaking');
+
+      const minShakeMs = 900;
+      const started = Date.now();
+
+      let response, data;
+      try {
+        response = await fetch(btn.dataset.endpoint, { method: 'POST', credentials: 'same-origin' });
+        data = await response.json();
+      } catch (err) {
+        data = null;
+      }
+
+      const elapsed = Date.now() - started;
+      setTimeout(() => {
+        box.classList.remove('mg-shaking');
+        if (!response || !response.ok || !data) {
+          resultEl.textContent = (data && data.error) || 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+          btn.disabled = false;
+          return;
+        }
+
+        box.classList.add('mg-hidden');
+        if (data.image) {
+          cardImage.src = data.image;
+          cardImage.classList.remove('hidden');
+          cardIcon.classList.add('hidden');
+        } else {
+          cardIcon.textContent = tierIconFor(data.rewardAmount);
+          cardIcon.classList.remove('hidden');
+          cardImage.classList.add('hidden');
+        }
+        cardName.textContent = data.prizeName;
+        card.classList.add('mg-revealed');
+        if (data.isWin) burstConfetti();
+
+        resultEl.textContent = '';
+        const resultSpan = document.createElement('span');
+        resultSpan.className = data.isWin ? 'text-emerald-400 font-medium' : 'text-[var(--text-3)]';
+        resultSpan.textContent = data.isWin ? ('ยินดีด้วย! ได้รับ ' + data.prizeName) : ('ผลลัพธ์: ' + data.prizeName);
+        resultEl.appendChild(resultSpan);
+        if (balanceEl && typeof data.walletBalance === 'number') balanceEl.textContent = data.walletBalance.toLocaleString();
+        btn.disabled = false;
+      }, Math.max(0, minShakeMs - elapsed));
+    });
+  });
+</script>
