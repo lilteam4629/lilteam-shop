@@ -209,15 +209,26 @@ router.get('/filter-tags', (req, res) => {
 });
 
 router.post('/filter-tags', (req, res) => {
-  const { name, image } = req.body;
-  if (!name || !image) {
-    req.flash('error', 'กรุณากรอกชื่อและ URL รูปภาพ');
-    return res.redirect('/admin/filter-tags');
-  }
-  store.data.filterTags.push({ id: store.genId(8), name, image, createdAt: new Date().toISOString() });
-  store.save();
-  req.flash('success', 'เพิ่มตัวกรองสินค้าแล้ว');
-  res.redirect('/admin/filter-tags');
+  productImageUpload.single('filterImage')(req, res, async (err) => {
+    if (err || !req.file) {
+      req.flash('error', 'กรุณาแนบรูปตัวกรอง (ไฟล์รูปไม่เกิน 8MB)');
+      return res.redirect('/admin/filter-tags');
+    }
+    const name = (req.body.name || '').trim();
+    if (!name) {
+      req.flash('error', 'กรุณากรอกชื่อตัวกรอง');
+      return res.redirect('/admin/filter-tags');
+    }
+    try {
+      const image = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      store.data.filterTags.push({ id: store.genId(8), name, image, createdAt: new Date().toISOString() });
+      store.save();
+      req.flash('success', 'เพิ่มตัวกรองและอัปโหลดรูปแล้ว');
+    } catch (saveError) {
+      req.flash('error', 'บันทึกรูปตัวกรองไม่สำเร็จ กรุณาลองใหม่');
+    }
+    res.redirect('/admin/filter-tags');
+  });
 });
 
 router.post('/filter-tags/:id/delete', (req, res) => {

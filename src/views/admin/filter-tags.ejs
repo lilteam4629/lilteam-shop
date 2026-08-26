@@ -20,17 +20,35 @@
 
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
     <h3 class="font-semibold mb-3">เพิ่มตัวกรองสินค้า</h3>
-    <form action="/admin/filter-tags" method="post" class="space-y-3">
+    <form action="/admin/filter-tags" method="post" enctype="multipart/form-data" class="space-y-3">
       <div>
         <label class="block text-xs text-[var(--text-3)] mb-1">ชื่อ (แสดงใต้รูป)</label>
         <input name="name" required placeholder="เช่น แนะนำ, ขายดี, Denuvo" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       </div>
       <div>
-        <label class="block text-xs text-[var(--text-3)] mb-1">URL รูปภาพ</label>
-        <input name="image" required placeholder="https://..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+        <label class="block text-xs text-[var(--text-3)] mb-1">แนบรูปตัวกรอง</label>
+        <input id="filterImageInput" type="file" name="filterImage" required accept="image/png,image/jpeg,image/webp,image/gif" class="block w-full text-xs text-[var(--text-3)] file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-xs" />
+        <div id="filterImagePreview" class="hidden mt-3 rounded-xl overflow-hidden border border-[var(--border-light)] bg-black/20">
+          <img class="w-full h-36 object-contain" alt="ตัวอย่างรูปตัวกรอง" />
+        </div>
       </div>
       <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มตัวกรอง</button>
     </form>
     <p class="text-xs text-[var(--text-4)] mt-3">หลังเพิ่มแล้ว ไปที่หน้าแก้ไขสินค้าเพื่อเลือกว่าสินค้าไหนมีตัวกรองนี้บ้าง</p>
   </div>
 </div>
+<script>
+  (function () {
+    const input = document.getElementById('filterImageInput');
+    const preview = document.getElementById('filterImagePreview');
+    if (!input || !preview) return;
+    input.addEventListener('change', function () {
+      const file = input.files && input.files[0];
+      preview.classList.toggle('hidden', !file);
+      if (!file) return;
+      const image = preview.querySelector('img');
+      image.src = URL.createObjectURL(file);
+      image.onload = function () { URL.revokeObjectURL(image.src); };
+    });
+  })();
+</script>
