@@ -173,6 +173,33 @@ router.post('/products/:id/delete', (req, res) => {
   res.redirect('/admin/products');
 });
 
+router.post('/products/:id/copy', (req, res) => {
+  const source = store.data.products.find(p => p.id === req.params.id);
+  if (!source) {
+    req.flash('error', 'ไม่พบสินค้าที่ต้องการคัดลอก');
+    return res.redirect('/admin/products');
+  }
+
+  // Clone product details and image references, but never duplicate stock
+  // credentials. Keep the copy hidden until the admin has reviewed it.
+  const copiedFields = JSON.parse(JSON.stringify(source));
+  delete copiedFields.id;
+  delete copiedFields.slug;
+  delete copiedFields.createdAt;
+  const product = {
+    ...copiedFields,
+    id: store.genId(8),
+    slug: slugify(`${source.title}-copy`) + '-' + store.genId(4),
+    title: `${source.title} (สำเนา)`,
+    status: 'hidden',
+    createdAt: new Date().toISOString(),
+  };
+  store.data.products.push(product);
+  store.save();
+  req.flash('success', 'คัดลอกสินค้าแล้ว กรุณาตรวจสอบข้อมูลก่อนเปิดขาย');
+  res.redirect(`/admin/products/${product.id}/edit`);
+});
+
 // ---------- Filter Tags ----------
 router.get('/filter-tags', (req, res) => {
   const filterTags = store.data.filterTags.map(t => ({

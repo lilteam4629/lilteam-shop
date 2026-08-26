@@ -26,6 +26,9 @@
           <td class="p-3"><%= p.status === 'active' ? '🟢 เปิดขาย' : '⚪ ซ่อน' %></td>
           <td class="p-3 text-right space-x-2 whitespace-nowrap">
             <a href="/admin/products/<%= p.id %>/edit" class="text-[var(--gold)]">แก้ไข</a>
+            <form action="/admin/products/<%= p.id %>/copy" method="post" class="inline" onsubmit="return confirm('คัดลอกสินค้านี้? สต๊อกไอดีจะไม่ถูกคัดลอก')">
+              <button class="text-sky-400">คัดลอก</button>
+            </form>
             <form action="/admin/products/<%= p.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบสินค้านี้?')">
               <button class="text-rose-400">ลบ</button>
             </form>
