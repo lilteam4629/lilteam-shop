@@ -1,4 +1,4 @@
-<a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
+<a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
   class="premium-product-card spotlight-card filterable-card group relative flex w-full h-full aspect-[3/4] rounded-2xl overflow-hidden border border-[#8c7430]/55
          transition-all duration-300 hover:border-[#f0cf64]/80">
 
