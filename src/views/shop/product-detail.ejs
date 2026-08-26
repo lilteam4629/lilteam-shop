@@ -3,14 +3,17 @@
 
   <div class="grid md:grid-cols-2 gap-8 mt-4">
     <div>
-      <div class="rounded-2xl overflow-hidden border border-[var(--border)] aspect-video bg-[var(--card)] mb-3">
-        <img src="<%= product.images[0] %>" class="w-full h-full object-cover" alt="<%= product.title %>" />
+      <div class="relative rounded-2xl overflow-hidden border border-[#8c7430]/55 bg-black mb-3 min-h-[260px] sm:min-h-[360px] flex items-center justify-center shadow-[0_12px_35px_rgba(0,0,0,.5)]">
+        <img src="<%= product.images[0] %>" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-35" />
+        <div class="absolute inset-0 bg-black/25"></div>
+        <img src="<%= product.images[0] %>" class="relative z-10 block w-full h-auto max-h-[75vh] object-contain" alt="<%= product.title %>" />
+        <div class="pointer-events-none absolute inset-0 z-20 ring-1 ring-inset ring-[#f6d66c]/20 rounded-2xl"></div>
       </div>
       <% if (product.images.length > 1) { %>
         <div class="grid grid-cols-4 gap-2">
           <% product.images.slice(1).forEach(img => { %>
             <div class="aspect-video rounded-lg overflow-hidden border border-[var(--border)]">
-              <img src="<%= img %>" class="w-full h-full object-cover" />
+              <img src="<%= img %>" class="w-full h-full object-contain bg-black" />
             </div>
           <% }) %>
         </div>
@@ -97,7 +100,7 @@
     <div id="tab-gallery" class="tab-panel py-6 hidden">
       <div class="grid sm:grid-cols-3 gap-3">
         <% product.images.forEach(img => { %>
-          <div class="aspect-video rounded-lg overflow-hidden border border-[var(--border)]"><img src="<%= img %>" class="w-full h-full object-cover" /></div>
+          <div class="aspect-video rounded-lg overflow-hidden border border-[var(--border)] bg-black"><img src="<%= img %>" class="w-full h-full object-contain" /></div>
         <% }) %>
       </div>
     </div>
