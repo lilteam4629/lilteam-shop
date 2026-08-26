@@ -96,6 +96,83 @@
 </div>
 <% } %>
 
+<% if (latestOrders && latestOrders.length) { %>
+<section class="latest-orders-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-5">
+  <div class="flex items-end justify-between gap-3 mb-3">
+    <div>
+      <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2"><span class="latest-orders-live"></span>รายการสั่งซื้อล่าสุด</h2>
+      <p class="text-[10px] sm:text-xs text-[var(--text-4)] mt-0.5">อัปเดตคำสั่งซื้อจากลูกค้าของร้าน</p>
+    </div>
+    <span class="text-[10px] text-emerald-400 border border-emerald-400/25 bg-emerald-400/10 rounded-full px-2.5 py-1">LIVE</span>
+  </div>
+  <div class="latest-orders-shell">
+    <div class="latest-orders-track">
+      <% for (let duplicate = 0; duplicate < 2; duplicate++) { %>
+        <div class="latest-orders-group" <%- duplicate ? 'aria-hidden="true"' : '' %>>
+          <% latestOrders.forEach(order => { %>
+            <a href="<%= order.slug ? '/game/' + order.slug : '/products' %>" class="latest-order-card">
+              <span class="latest-order-image-wrap">
+                <% if (order.image) { %><img src="<%= order.image %>" alt="<%= order.title %>" class="latest-order-image" /><% } else { %><span>🎮</span><% } %>
+              </span>
+              <span class="min-w-0 flex-1">
+                <span class="block text-xs sm:text-sm font-semibold truncate text-[var(--text)]"><%= order.title %><%= order.extraItems ? ' +' + order.extraItems + ' รายการ' : '' %></span>
+                <span class="block text-xs sm:text-sm font-bold text-[var(--gold)] mt-1">฿<%= order.amount.toLocaleString() %>.00</span>
+                <span class="flex items-center gap-1 text-[9px] sm:text-[10px] text-[var(--text-4)] mt-1 truncate">
+                  <span>◷</span><%= new Date(order.createdAt).toLocaleString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) %> <span>•</span> <%= order.buyer %>
+                </span>
+              </span>
+            </a>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+
+<style>
+  .latest-orders-live { width: .55rem; height: .55rem; border-radius: 999px; background: #34d399; box-shadow: 0 0 0 4px rgba(52,211,153,.1), 0 0 14px rgba(52,211,153,.7); }
+  .latest-orders-shell {
+    overflow: hidden; padding: .75rem;
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    background: linear-gradient(135deg, color-mix(in srgb, var(--card) 96%, transparent), color-mix(in srgb, var(--input) 90%, transparent));
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
+  }
+  .latest-orders-track { display: flex; width: max-content; gap: .75rem; animation: latest-orders-scroll 42s linear infinite; }
+  .latest-orders-shell:hover .latest-orders-track, .latest-orders-shell:active .latest-orders-track { animation-play-state: paused; }
+  .latest-orders-group { display: flex; gap: .75rem; }
+  .latest-order-card {
+    width: 20rem; min-height: 5.5rem; flex: 0 0 auto;
+    display: flex; align-items: center; gap: .8rem;
+    padding: .65rem .75rem;
+    border-radius: .85rem;
+    border: 1px solid var(--border-light);
+    background: color-mix(in srgb, var(--bg) 48%, var(--card));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+    transition: border-color .2s, transform .2s, background .2s;
+  }
+  .latest-order-card:hover { border-color: rgba(200,166,63,.65); transform: translateY(-1px); background: var(--input); }
+  .latest-order-image-wrap {
+    width: 3.6rem; height: 4.25rem; flex: 0 0 auto;
+    display: grid; place-items: center; overflow: hidden;
+    border-radius: .65rem; background: var(--input);
+  }
+  .latest-order-image { width: 100%; height: 100%; object-fit: contain; }
+  @keyframes latest-orders-scroll { to { transform: translateX(calc(-50% - .375rem)); } }
+  @media (max-width: 639px) {
+    .latest-orders-section { padding-top: 1rem; }
+    .latest-orders-shell { padding: .55rem; border-radius: .85rem; }
+    .latest-orders-track, .latest-orders-group { gap: .55rem; }
+    .latest-orders-track { animation-duration: 34s; }
+    .latest-order-card { width: 15.5rem; min-height: 4.75rem; padding: .5rem .6rem; gap: .6rem; border-radius: .75rem; }
+    .latest-order-image-wrap { width: 3rem; height: 3.65rem; border-radius: .55rem; }
+    @keyframes latest-orders-scroll { to { transform: translateX(calc(-50% - .275rem)); } }
+  }
+  @media (prefers-reduced-motion: reduce) { .latest-orders-track { animation: none; } }
+</style>
+<% } %>
+
 <% if (filterTags && filterTags.length) { %>
 <section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-4">
   <%- include('../partials/filter-panel', { filterTags }) %>

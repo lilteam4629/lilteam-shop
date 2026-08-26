@@ -28,6 +28,33 @@ function sortProducts(products, sort) {
   }
 }
 
+function maskUsername(username) {
+  const value = String(username || 'ลูกค้า');
+  if (value.length <= 2) return `${value.charAt(0) || 'ล'}***`;
+  return `${value.slice(0, 2)}***${value.slice(-1)}`;
+}
+
+function latestOrderCards() {
+  return [...store.data.orders]
+    .filter(order => order.status !== 'cancelled' && order.items && order.items.length)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 10)
+    .map(order => {
+      const firstItem = order.items[0];
+      const product = store.data.products.find(item => item.id === firstItem.productId);
+      const buyer = store.data.users.find(user => user.id === order.userId);
+      return {
+        title: firstItem.title,
+        extraItems: Math.max(0, order.items.length - 1),
+        amount: order.total,
+        image: product && product.images && product.images[0],
+        slug: product && product.slug,
+        buyer: maskUsername(buyer && buyer.username),
+        createdAt: order.createdAt,
+      };
+    });
+}
+
 router.get('/', (req, res) => {
   const active = store.data.products.filter(p => p.status === 'active').map(withStock);
   const newest = [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
@@ -38,6 +65,7 @@ router.get('/', (req, res) => {
     products: active.slice(0, 24),
     productTotal: active.length,
     announcements: store.data.announcements.filter(a => a.active),
+    latestOrders: latestOrderCards(),
     filterTags: store.data.filterTags,
     activeFilterTag: null,
     filterProductCount: active.length,
