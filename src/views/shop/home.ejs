@@ -136,15 +136,18 @@
       <% } %>
     </div>
 
-    <div class="relative flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
-      <div>
-        <p class="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-[var(--gold)] bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-full px-3 py-1 mb-3">🎰 มินิเกม</p>
-        <h2 class="text-2xl sm:text-3xl font-extrabold"><%= settings.miniGame.title %></h2>
-        <p class="text-[var(--text-3)] text-sm mt-2 max-w-lg"><%= settings.miniGame.description %></p>
+    <div class="mg-heading relative mb-8">
+      <div class="mg-heading-copy">
+        <div class="mg-heading-icon" aria-hidden="true">🎁</div>
+        <div class="min-w-0">
+          <p class="mg-kicker">🎰 มินิเกมลุ้นรางวัล</p>
+          <h2 class="mg-title"><%= settings.miniGame.title || 'เปิดกล่องลุ้นรางวัล' %></h2>
+          <p class="mg-description"><%= settings.miniGame.description || 'เปิดกล่องเพื่อลุ้นรับรางวัลจากสต๊อกจริงของร้าน' %></p>
+        </div>
       </div>
-      <div class="text-right shrink-0 bg-[var(--input)]/70 border border-[var(--border-light)] rounded-xl px-5 py-3">
-        <div class="text-[10px] uppercase tracking-wide text-[var(--text-4)]">ราคาต่อครั้ง</div>
-        <div class="text-3xl font-extrabold text-[var(--gold)]">฿<%= settings.miniGame.costPerPlay.toLocaleString() %></div>
+      <div class="mg-price">
+        <div class="mg-price-label">ราคาต่อครั้ง</div>
+        <div class="mg-price-value">฿<%= settings.miniGame.costPerPlay.toLocaleString() %></div>
       </div>
     </div>
 
@@ -193,6 +196,47 @@
       radial-gradient(circle at 85% 85%, rgba(200,166,63,.14), transparent 50%),
       linear-gradient(150deg, rgba(0,0,0,0), rgba(0,0,0,.25)), var(--card);
     box-shadow: 0 0 0 1px rgba(200,166,63,.08), 0 20px 50px -20px rgba(0,0,0,.6);
+  }
+  .mg-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border-light);
+    border-radius: 1rem;
+    background: color-mix(in srgb, var(--input) 78%, transparent);
+  }
+  .mg-heading-copy { display: flex; align-items: center; gap: .9rem; min-width: 0; }
+  .mg-heading-icon {
+    width: 3.5rem; height: 3.5rem; flex: 0 0 auto;
+    display: grid; place-items: center;
+    border-radius: .9rem;
+    font-size: 1.75rem;
+    background: linear-gradient(145deg, rgba(200,166,63,.24), rgba(200,166,63,.07));
+    border: 1px solid rgba(200,166,63,.35);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.12);
+  }
+  .mg-kicker { color: var(--gold); font-size: .7rem; font-weight: 700; letter-spacing: .04em; }
+  .mg-title { color: var(--text); font-size: clamp(1.15rem, 2vw, 1.65rem); line-height: 1.25; font-weight: 800; margin-top: .15rem; }
+  .mg-description { color: var(--text-3); font-size: .8rem; line-height: 1.45; margin-top: .25rem; }
+  .mg-price {
+    min-width: 8.25rem; flex: 0 0 auto;
+    text-align: right;
+    padding-left: 1rem;
+    border-left: 1px solid var(--border-light);
+  }
+  .mg-price-label { color: var(--text-3); font-size: .7rem; }
+  .mg-price-value { color: var(--gold); font-size: 2rem; line-height: 1.1; font-weight: 800; }
+  @media (max-width: 639px) {
+    .mg-panel { padding: 1rem; }
+    .mg-heading { padding: .8rem; gap: .65rem; }
+    .mg-heading-copy { gap: .65rem; }
+    .mg-heading-icon { width: 2.75rem; height: 2.75rem; border-radius: .75rem; font-size: 1.35rem; }
+    .mg-description { font-size: .7rem; }
+    .mg-price { min-width: 5.5rem; padding-left: .65rem; }
+    .mg-price-label { font-size: .6rem; }
+    .mg-price-value { font-size: 1.45rem; }
   }
   .mg-sparkle {
     position: absolute;
