@@ -414,6 +414,8 @@
 
       function setPlayingUI(playing) {
         isPlaying = playing;
+        toggleBtn.setAttribute('aria-label', playing ? 'หยุดเพลง' : 'เล่นเพลง');
+        toggleBtn.title = playing ? 'หยุดเพลง' : 'เล่นเพลง';
         playBtn.textContent = playing ? '⏸' : '▶';
         playBtn.setAttribute('aria-label', playing ? 'หยุดเพลง' : 'เล่นเพลง');
         playBtn.title = playing ? 'หยุดเพลง' : 'เล่นเพลง';
