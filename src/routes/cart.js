@@ -12,11 +12,19 @@ function availableStock(productId) {
   return store.data.stockItems.filter(s => s.productId === productId && s.status === 'available').length;
 }
 
+function isProductVisible(product) {
+  if (!product || product.status !== 'active') return false;
+  if (!product.publishAt) return true;
+  const value = String(product.publishAt);
+  const time = Date.parse(/[zZ]|[+-]\d\d:\d\d$/.test(value) ? value : `${value}:00+07:00`);
+  return time <= Date.now();
+}
+
 function buildCartView(req) {
   const cart = getCart(req);
   const items = cart.map(ci => {
     const product = store.data.products.find(p => p.id === ci.productId);
-    if (!product) return null;
+    if (!isProductVisible(product)) return null;
     const stock = availableStock(product.id);
     const qty = Math.min(ci.qty, Math.max(stock, 0));
     return { product, qty, stock, subtotal: product.price * qty };
@@ -27,7 +35,7 @@ function buildCartView(req) {
 
 router.post('/add/:productId', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.productId);
-  if (!product) {
+  if (!isProductVisible(product)) {
     req.flash('error', 'ไม่พบสินค้า');
     return res.redirect('back');
   }

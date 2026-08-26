@@ -2,6 +2,16 @@ const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
 
+function publishTime(product) {
+  if (!product.publishAt) return 0;
+  const value = String(product.publishAt);
+  return Date.parse(/[zZ]|[+-]\d\d:\d\d$/.test(value) ? value : `${value}:00+07:00`);
+}
+
+function isProductVisible(product) {
+  return product.status === 'active' && (!product.publishAt || publishTime(product) <= Date.now());
+}
+
 function withStock(product) {
   const stock = store.data.stockItems.filter(s => s.productId === product.id && s.status === 'available');
   return { ...product, stockCount: stock.length };
@@ -12,7 +22,7 @@ function shopStats() {
     orderCount: store.data.orders.length,
     customerCount: store.data.users.filter(u => u.role === 'customer').length,
     reviewCount: store.data.reviews.length,
-    gameCount: store.data.products.filter(p => p.status === 'active').length,
+    gameCount: store.data.products.filter(isProductVisible).length,
   };
 }
 
@@ -56,7 +66,11 @@ function latestOrderCards() {
 }
 
 router.get('/', (req, res) => {
-  const active = store.data.products.filter(p => p.status === 'active').map(withStock);
+  const active = store.data.products.filter(isProductVisible).map(withStock);
+  const scheduledProducts = store.data.products
+    .filter(product => product.status === 'active' && product.publishAt && publishTime(product) > Date.now())
+    .sort((a, b) => publishTime(a) - publishTime(b))
+    .slice(0, 8);
   const newest = [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
   res.render('shop/home', {
     title: 'หน้าแรก',
@@ -66,6 +80,7 @@ router.get('/', (req, res) => {
     productTotal: active.length,
     announcements: store.data.announcements.filter(a => a.active),
     latestOrders: latestOrderCards(),
+    scheduledProducts,
     filterTags: store.data.filterTags,
     activeFilterTag: null,
     filterProductCount: active.length,
@@ -74,7 +89,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/products', (req, res) => {
-  let products = store.data.products.filter(p => p.status === 'active').map(withStock);
+  let products = store.data.products.filter(isProductVisible).map(withStock);
   const requestedTag = String(req.query.tag || '').trim();
   const activeFilterTag = store.data.filterTags.find(tag => tag.id === requestedTag) || null;
   if (activeFilterTag) {
@@ -98,7 +113,7 @@ router.get('/rental', (req, res) => res.redirect('/products'));
 router.get('/search', (req, res) => {
   const q = (req.query.q || '').trim().toLowerCase();
   const products = store.data.products
-    .filter(p => p.status === 'active' && p.title.toLowerCase().includes(q))
+    .filter(p => isProductVisible(p) && p.title.toLowerCase().includes(q))
     .map(withStock);
   res.render('shop/listing', { title: `ผลการค้นหา: ${q}`, products, listType: null, sort: '', q, filterTags: null });
 });
@@ -113,7 +128,7 @@ router.get('/contact', (req, res) => {
 
 router.get('/game/:slug', (req, res) => {
   const product = store.data.products.find(p => p.slug === req.params.slug);
-  if (!product) return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });
+  if (!product || !isProductVisible(product)) return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });
   const reviews = store.data.reviews.filter(r => r.productId === product.id);
   res.render('shop/product-detail', {
     title: product.title,

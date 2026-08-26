@@ -93,6 +93,27 @@
     </details>
   </div>
 
+  <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4 space-y-3">
+    <div>
+      <h3 class="font-medium">⏰ EVENT UPDATE / ตั้งเวลาเปิดขาย</h3>
+      <p class="text-xs text-[var(--text-4)] mt-1">เว้นวันเวลาไว้หากต้องการเปิดขายทันที หากตั้งเวลา สินค้าจะถูกซ่อนไว้และเปิดขายอัตโนมัติเมื่อถึงเวลาไทย</p>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-sm mb-1 text-[var(--text-3)]">วันและเวลาเปิดขาย</label>
+        <input type="datetime-local" name="publishAt" value="<%= product && product.publishAt ? product.publishAt : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1 text-[var(--text-3)]">ป้ายกิจกรรม</label>
+        <input name="eventBadge" value="<%= product ? (product.eventBadge || '') : '' %>" placeholder="เช่น SPECIAL, LIMITED" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+      </div>
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-3)]">คำอธิบายบนการ์ดกิจกรรม</label>
+      <input name="eventDescription" value="<%= product ? (product.eventDescription || '') : '' %>" placeholder="เช่น เปิดขายจำนวนจำกัด เตรียมตัวให้พร้อม!" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+    </div>
+  </div>
+
   <% if (product) { %>
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">สถานะ</label>

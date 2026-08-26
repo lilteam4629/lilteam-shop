@@ -1,0 +1,18 @@
+<div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+  <div><h2 class="font-semibold text-lg">⏰ ตั้งเวลาเปิดขาย</h2><p class="text-xs text-[var(--text-4)]">สินค้าจะเปิดขายอัตโนมัติตามเวลาประเทศไทย</p></div>
+  <a href="/admin/products/new" class="bg-[var(--gold)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">+ สร้างสินค้าแบบตั้งเวลา</a>
+</div>
+<div class="grid lg:grid-cols-2 gap-4">
+  <% products.forEach(product => { const due = new Date(product.publishAt + (/Z$|[+-]\d\d:\d\d$/.test(product.publishAt) ? '' : ':00+07:00')); const waiting = due.getTime() > Date.now(); %>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex gap-3">
+      <img src="<%= product.images[0] %>" class="w-20 h-24 object-contain rounded-lg bg-[var(--input)]" alt="<%= product.title %>" />
+      <div class="min-w-0 flex-1">
+        <div class="flex items-center gap-2"><span class="text-[10px] rounded-full px-2 py-0.5 <%= waiting ? 'bg-amber-500/15 text-amber-400' : 'bg-emerald-500/15 text-emerald-400' %>"><%= waiting ? 'รอเปิดขาย' : 'เปิดขายแล้ว' %></span><span class="text-[10px] text-[var(--text-4)]"><%= product.eventBadge || 'EVENT' %></span></div>
+        <h3 class="font-semibold truncate mt-1"><%= product.title %></h3>
+        <p class="text-xs text-[var(--text-3)] mt-1">เวลาไทย: <%= due.toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Bangkok' }) %></p>
+        <a href="/admin/products/<%= product.id %>/edit" class="inline-block text-xs text-[var(--gold)] mt-3">แก้ไขสินค้าและเวลา →</a>
+      </div>
+    </div>
+  <% }) %>
+  <% if (!products.length) { %><div class="lg:col-span-2 text-center text-[var(--text-4)] bg-[var(--card)] border border-dashed border-[var(--border)] rounded-xl py-12">ยังไม่มีสินค้าที่ตั้งเวลาเปิดขาย</div><% } %>
+</div>

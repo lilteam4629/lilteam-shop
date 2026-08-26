@@ -99,6 +99,9 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     originalPrice: parseInt(body.originalPrice, 10) || 0,
     description: body.description || '',
     aboutText: body.aboutText || '',
+    publishAt: (body.publishAt || '').trim(),
+    eventBadge: (body.eventBadge || '').trim(),
+    eventDescription: (body.eventDescription || '').trim(),
     images: images.length ? images : ['https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800'],
   };
 }
@@ -250,6 +253,13 @@ router.get('/products/:id/stock', (req, res) => {
   const stockItems = store.data.stockItems.filter(s => s.productId === product.id)
     .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
   res.render('admin/product-stock', { title: `สต๊อกสินค้า: ${product.title}`, active: 'products', product, stockItems });
+});
+
+router.get('/scheduled-products', (req, res) => {
+  const products = store.data.products
+    .filter(product => product.publishAt)
+    .sort((a, b) => String(a.publishAt).localeCompare(String(b.publishAt)));
+  res.render('admin/scheduled-products', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products });
 });
 
 router.post('/products/:id/stock/settings', (req, res) => {
