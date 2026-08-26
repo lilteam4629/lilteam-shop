@@ -52,7 +52,7 @@
           <th class="p-3">ชื่อรางวัล</th>
           <th class="p-3">อัตราออก (%)</th>
           <th class="p-3">สต็อก</th>
-          <th class="p-3">มูลค่า (฿)</th>
+          <th class="p-3">รางวัลจริง?</th>
           <th class="p-3">สถานะ</th>
           <th class="p-3"></th>
         </tr>
@@ -77,7 +77,7 @@
             <td class="p-3"><input form="<%= formId %>" name="name" value="<%= p.name %>" class="w-32 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
             <td class="p-3"><input form="<%= formId %>" type="number" min="0" max="100" step="0.1" name="percent" value="<%= p.percent %>" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
             <td class="p-3"><input form="<%= formId %>" type="number" min="0" name="stock" value="<%= p.stock === null ? '' : p.stock %>" placeholder="ไม่จำกัด" class="w-24 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
-            <td class="p-3"><input form="<%= formId %>" type="number" min="0" name="rewardAmount" value="<%= p.rewardAmount %>" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
+            <td class="p-3"><input form="<%= formId %>" type="checkbox" name="isPrize" value="on" <%= p.isPrize ? 'checked' : '' %> class="w-4 h-4 accent-[var(--gold)]" /></td>
             <td class="p-3"><%= p.active ? '🟢 เปิด' : '⚪ ปิด' %></td>
             <td class="p-3 text-right space-x-2 whitespace-nowrap">
               <form id="<%= formId %>" action="/admin/minigame/prizes/<%= p.id %>" method="post" class="inline"></form>
@@ -101,10 +101,13 @@
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 h-fit">
     <h3 class="font-semibold mb-3">➕ เพิ่มของรางวัล</h3>
     <form action="/admin/minigame/prizes" method="post" enctype="multipart/form-data" class="space-y-3">
-      <input name="name" required placeholder="ชื่อรางวัล เช่น เครดิต 10 บาท" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      <input name="name" required placeholder="ชื่อรางวัล เช่น ไอดีเกม Valorant" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       <input type="number" min="0" max="100" step="0.1" name="percent" required placeholder="อัตราออก (%)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       <input type="number" min="0" name="stock" placeholder="สต็อก (เว้นว่าง = ไม่จำกัด)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <input type="number" min="0" name="rewardAmount" required placeholder="มูลค่าเครดิตที่ได้ (฿, 0 = ไม่ได้รางวัล)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      <label class="flex items-center gap-2 text-sm text-[var(--text-3)]">
+        <input type="checkbox" name="isPrize" value="on" checked class="w-4 h-4 accent-[var(--gold)]" />
+        เป็นของรางวัลจริง (ลูกค้าต้องทักแชทมารับ) — ไม่ติ๊กถ้าเป็นรายการ "ไม่ได้รางวัล"
+      </label>
       <div>
         <label class="block text-xs mb-1 text-[var(--text-3)]">รูปของรางวัล (ไม่บังคับ ไม่ใส่จะใช้ไอคอนอัตโนมัติ)</label>
         <input type="file" name="image" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-xs" />
@@ -119,18 +122,34 @@
   <div class="p-4 border-b border-[var(--border)]"><h3 class="font-semibold">📜 ประวัติการเล่นล่าสุด</h3></div>
   <table class="w-full text-sm">
     <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-      <tr><th class="p-3">ผู้เล่น</th><th class="p-3">ผลลัพธ์</th><th class="p-3">เครดิตที่ได้</th><th class="p-3">เวลา</th></tr>
+      <tr><th class="p-3">ผู้เล่น</th><th class="p-3">ผลลัพธ์</th><th class="p-3">โค้ดรับของ</th><th class="p-3">สถานะ</th><th class="p-3">เวลา</th><th class="p-3"></th></tr>
     </thead>
     <tbody class="divide-y divide-[var(--border)]">
       <% recentPlays.forEach(play => { %>
         <tr>
           <td class="p-3"><%= play.username %></td>
-          <td class="p-3"><%= play.prizeName %></td>
-          <td class="p-3 <%= play.rewardAmount > 0 ? 'text-emerald-400' : 'text-[var(--text-4)]' %>"><%= play.rewardAmount > 0 ? '+' + play.rewardAmount : '-' %></td>
+          <td class="p-3 <%= play.isWin ? 'text-emerald-400' : 'text-[var(--text-4)]' %>"><%= play.prizeName %></td>
+          <td class="p-3 font-mono text-xs"><%= play.claimCode || '-' %></td>
+          <td class="p-3">
+            <% if (!play.isWin) { %>
+              <span class="text-[var(--text-4)] text-xs">—</span>
+            <% } else if (play.status === 'delivered') { %>
+              <span class="text-emerald-400 text-xs">✓ รับแล้ว</span>
+            <% } else { %>
+              <span class="text-amber-400 text-xs">⏳ รอมารับ</span>
+            <% } %>
+          </td>
           <td class="p-3 text-[var(--text-4)] text-xs"><%= new Date(play.createdAt).toLocaleString('th-TH') %></td>
+          <td class="p-3 text-right whitespace-nowrap">
+            <% if (play.isWin) { %>
+              <form action="/admin/minigame/plays/<%= play.id %>/deliver" method="post" class="inline">
+                <button class="text-[var(--gold)] text-xs"><%= play.status === 'delivered' ? 'ยกเลิกรับแล้ว' : 'ทำเครื่องหมายว่ารับแล้ว' %></button>
+              </form>
+            <% } %>
+          </td>
         </tr>
       <% }) %>
-      <% if (!recentPlays.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="4">ยังไม่มีคนเล่น</td></tr><% } %>
+      <% if (!recentPlays.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="6">ยังไม่มีคนเล่น</td></tr><% } %>
     </tbody>
   </table>
 </div>

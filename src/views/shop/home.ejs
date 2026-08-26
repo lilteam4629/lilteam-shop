@@ -153,8 +153,8 @@
         <h3 class="text-sm font-semibold text-[var(--text-2)] mb-3 flex items-center gap-1.5">📋 อัตราการออกรางวัลทั้งหมด (เปิดเผย 100% โปร่งใส)</h3>
         <div class="grid sm:grid-cols-2 gap-3">
           <% miniGamePrizes.forEach(p => {
-               const tier = p.rewardAmount <= 0 ? 'none' : p.percent <= 5 ? 'legendary' : p.percent <= 15 ? 'rare' : 'common';
-               const tierIcon = { legendary: '💎', rare: '🌟', common: '🪙', none: '💨' }[tier];
+               const tier = !p.isPrize ? 'none' : p.percent <= 5 ? 'legendary' : p.percent <= 15 ? 'rare' : 'common';
+               const tierIcon = { legendary: '💎', rare: '🌟', common: '🎁', none: '💨' }[tier];
                const tierLabel = { legendary: 'ตำนาน', rare: 'หายาก', common: 'ทั่วไป', none: 'เสียใจด้วย' }[tier];
                const outOfStock = p.stock !== null && p.stock <= 0;
           %>
@@ -172,7 +172,7 @@
             </div>
           <% }) %>
         </div>
-        <p class="text-[10px] text-[var(--text-4)] mt-3">* นี่คืออัตราจริงที่ระบบใช้สุ่ม ตรวจสอบได้ทุกครั้งก่อนเล่น รางวัลที่หมดสต็อกจะถูกงดจ่ายชั่วคราวจนกว่าจะเติมสต็อก</p>
+        <p class="text-[10px] text-[var(--text-4)] mt-3">* นี่คืออัตราจริงที่ระบบใช้สุ่ม ตรวจสอบได้ทุกครั้งก่อนเล่น รางวัลที่หมดสต็อกจะถูกงดจ่ายชั่วคราวจนกว่าจะเติมสต็อก · ถูกรางวัลแล้วให้ทักแชท "ติดต่อร้าน" พร้อมแจ้งโค้ดที่ได้รับเพื่อขอรับของ</p>
       </div>
 
       <%- include('../partials/minigame-widget', {

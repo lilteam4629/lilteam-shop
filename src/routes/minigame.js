@@ -33,29 +33,24 @@ router.post('/play', (req, res) => {
 
   if (prize.stock !== null) prize.stock = Math.max(0, prize.stock - 1);
 
-  const rewardAmount = Number(prize.rewardAmount) || 0;
-  if (rewardAmount > 0) {
-    user.walletBalance += rewardAmount;
-    store.data.walletTransactions.push({
-      id: store.genId(10), userId: user.id, type: 'minigame_win', amount: rewardAmount,
-      note: `ถูกรางวัล "${prize.name}" จาก ${game.title}`, createdAt: new Date().toISOString(),
-    });
-  }
+  const isWin = Boolean(prize.isPrize);
+  const claimCode = isWin ? store.genId(6).toUpperCase() : null;
 
   store.data.miniGamePlays.unshift({
     id: store.genId(10), userId: user.id, username: user.username,
-    prizeName: prize.name, rewardAmount, cost, createdAt: new Date().toISOString(),
+    prizeName: prize.name, isWin, claimCode,
+    status: isWin ? 'pending' : 'none', cost, createdAt: new Date().toISOString(),
   });
-  store.data.miniGamePlays = store.data.miniGamePlays.slice(0, 100);
+  store.data.miniGamePlays = store.data.miniGamePlays.slice(0, 200);
 
   store.save();
   res.json({
     ok: true,
     prizeName: prize.name,
     image: prize.image || null,
-    rewardAmount,
+    isWin,
+    claimCode,
     walletBalance: user.walletBalance,
-    isWin: rewardAmount > 0,
   });
 });
 

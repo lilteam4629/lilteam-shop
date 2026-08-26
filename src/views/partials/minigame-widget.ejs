@@ -109,11 +109,8 @@
     const balanceEl = panel.querySelector('.mg-balance-el');
     const confettiColors = ['#c8a63f', '#e2836f', '#93bfff', '#8fe3a3', '#f3ecd8'];
 
-    function tierIconFor(rewardAmount) {
-      if (!rewardAmount) return '💨';
-      if (rewardAmount >= 50) return '💎';
-      if (rewardAmount >= 20) return '🌟';
-      return '🪙';
+    function tierIconFor(isWin) {
+      return isWin ? '🎁' : '💨';
     }
 
     function burstConfetti() {
@@ -170,7 +167,7 @@
           cardImage.classList.remove('hidden');
           cardIcon.classList.add('hidden');
         } else {
-          cardIcon.textContent = tierIconFor(data.rewardAmount);
+          cardIcon.textContent = tierIconFor(data.isWin);
           cardIcon.classList.remove('hidden');
           cardImage.classList.add('hidden');
         }
@@ -179,10 +176,16 @@
         if (data.isWin) burstConfetti();
 
         resultEl.textContent = '';
-        const resultSpan = document.createElement('span');
-        resultSpan.className = data.isWin ? 'text-emerald-400 font-medium' : 'text-[var(--text-3)]';
-        resultSpan.textContent = data.isWin ? ('ยินดีด้วย! ได้รับ ' + data.prizeName) : ('ผลลัพธ์: ' + data.prizeName);
-        resultEl.appendChild(resultSpan);
+        const resultLine = document.createElement('div');
+        resultLine.className = data.isWin ? 'text-emerald-400 font-medium' : 'text-[var(--text-3)]';
+        resultLine.textContent = data.isWin ? ('ยินดีด้วย! ได้รับ ' + data.prizeName) : ('ผลลัพธ์: ' + data.prizeName);
+        resultEl.appendChild(resultLine);
+        if (data.isWin && data.claimCode) {
+          const claimLine = document.createElement('div');
+          claimLine.className = 'text-xs text-[var(--gold)] mt-1';
+          claimLine.textContent = 'โค้ดรับของ: ' + data.claimCode + ' — ทักแชท "ติดต่อร้าน" เพื่อขอรับของรางวัล';
+          resultEl.appendChild(claimLine);
+        }
         if (balanceEl && typeof data.walletBalance === 'number') balanceEl.textContent = data.walletBalance.toLocaleString();
         btn.disabled = false;
       }, Math.max(0, minShakeMs - elapsed));

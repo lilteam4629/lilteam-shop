@@ -504,7 +504,7 @@ router.post('/minigame/prizes', (req, res) => {
       req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/minigame');
     }
-    const { name, percent, stock, rewardAmount } = req.body;
+    const { name, percent, stock } = req.body;
     if (!name || !name.trim()) {
       req.flash('error', 'กรุณากรอกชื่อรางวัล');
       return res.redirect('/admin/minigame');
@@ -522,7 +522,7 @@ router.post('/minigame/prizes', (req, res) => {
       id: store.genId(8), name: name.trim(),
       percent: Math.max(0, Math.min(100, Number(percent) || 0)),
       stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
-      rewardAmount: Math.max(0, Number(rewardAmount) || 0),
+      isPrize: req.body.isPrize === 'on',
       image, active: true, createdAt: new Date().toISOString(),
     });
     store.save();
@@ -560,25 +560,24 @@ router.post('/minigame/preview', (req, res) => {
   if (!prize) {
     return res.status(400).json({ error: 'ของรางวัลหมดชั่วคราวหรือยังไม่ได้ตั้งค่าอัตราออก' });
   }
-  const rewardAmount = Number(prize.rewardAmount) || 0;
   res.json({
     ok: true,
     prizeName: prize.name,
     image: prize.image || null,
-    rewardAmount,
-    isWin: rewardAmount > 0,
+    isWin: Boolean(prize.isPrize),
+    claimCode: prize.isPrize ? 'PREVIEW' : null,
   });
 });
 
 router.post('/minigame/prizes/:id', (req, res) => {
   const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
   if (!prize) { req.flash('error', 'ไม่พบของรางวัลนี้'); return res.redirect('/admin/minigame'); }
-  const { name, percent, stock, rewardAmount } = req.body;
+  const { name, percent, stock } = req.body;
   Object.assign(prize, {
     name: name && name.trim() ? name.trim() : prize.name,
     percent: Math.max(0, Math.min(100, Number(percent) || 0)),
     stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
-    rewardAmount: Math.max(0, Number(rewardAmount) || 0),
+    isPrize: req.body.isPrize === 'on',
   });
   store.save();
   req.flash('success', 'บันทึกของรางวัลแล้ว');
@@ -606,6 +605,15 @@ router.post('/minigame/prizes/:id/delete', (req, res) => {
   store.data.miniGamePrizes = store.data.miniGamePrizes.filter(p => p.id !== req.params.id);
   store.save();
   req.flash('success', 'ลบของรางวัลแล้ว');
+  res.redirect('/admin/minigame');
+});
+
+router.post('/minigame/plays/:id/deliver', (req, res) => {
+  const play = store.data.miniGamePlays.find(pl => pl.id === req.params.id);
+  if (play && play.isWin) {
+    play.status = play.status === 'delivered' ? 'pending' : 'delivered';
+    store.save();
+  }
   res.redirect('/admin/minigame');
 });
 
