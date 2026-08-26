@@ -12,6 +12,7 @@ const authRoutes = require('./routes/auth');
 const cartRoutes = require('./routes/cart');
 const accountRoutes = require('./routes/account');
 const adminRoutes = require('./routes/admin');
+const packageInfo = require('../package.json');
 
 const app = express();
 
@@ -22,6 +23,14 @@ app.set('layout', 'layouts/main');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.get('/health', (req, res) => {
+  res.json({
+    ok: true,
+    version: packageInfo.version,
+    commit: (process.env.RAILWAY_GIT_COMMIT_SHA || process.env.COMMIT_SHA || '').slice(0, 12) || null,
+    ...store.getSystemStatus(),
+  });
+});
 app.get('/media/:id/:filename?', async (req, res, next) => {
   try {
     const media = await store.getMedia(req.params.id);

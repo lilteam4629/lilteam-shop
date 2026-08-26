@@ -326,6 +326,16 @@ async function getMedia(id) {
   return { file, stream: mediaBucket.openDownloadStream(objectId) };
 }
 
+function getSystemStatus() {
+  const managedUsername = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
+  const managedAccount = db && db.users.find(user => (user.username || '').toLowerCase() === managedUsername);
+  return {
+    persistentStorage: Boolean(mongoCollection),
+    adminRecoveryConfigured: Boolean(process.env.ADMIN_PASSWORD),
+    managedAdminReady: Boolean(managedAccount && managedAccount.role === 'admin' && managedAccount.status === 'active'),
+  };
+}
+
 module.exports = {
   get data() { return db; },
   init,
@@ -334,5 +344,6 @@ module.exports = {
   saveMedia,
   getMedia,
   isPersistent: () => Boolean(mongoCollection),
+  getSystemStatus,
   genId: (len) => nanoid(len || 8),
 };
