@@ -10,6 +10,18 @@ function safeTextEqual(left, right) {
   return leftBuffer.length === rightBuffer.length && crypto.timingSafeEqual(leftBuffer, rightBuffer);
 }
 
+function normalizeEnvironmentValue(value) {
+  const trimmed = String(value || '').trim();
+  if (trimmed.length >= 2) {
+    const first = trimmed[0];
+    const last = trimmed[trimmed.length - 1];
+    if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
+      return trimmed.slice(1, -1).trim();
+    }
+  }
+  return trimmed;
+}
+
 router.get('/login', (req, res) => {
   res.render('shop/login', { title: 'เข้าสู่ระบบ' });
 });
@@ -23,8 +35,8 @@ router.post('/login', (req, res) => {
 
   // Hosted emergency-admin access uses Railway's environment value directly.
   // This avoids stale/corrupt password hashes while keeping the secret out of Git.
-  const managedUsername = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
-  const managedPassword = process.env.ADMIN_PASSWORD || '';
+  const managedUsername = normalizeEnvironmentValue(process.env.ADMIN_USERNAME || 'admin').toLowerCase();
+  const managedPassword = normalizeEnvironmentValue(process.env.ADMIN_PASSWORD);
   if (managedPassword && usernameLower === managedUsername && safeTextEqual(password, managedPassword)) {
     const managedAdmin = store.data.users.find(u => (u.username || '').toLowerCase() === managedUsername && u.role === 'admin');
     if (managedAdmin) {

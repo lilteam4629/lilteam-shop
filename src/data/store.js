@@ -226,8 +226,19 @@ async function init() {
 // Fills in fields added after a DB was first created, without touching existing data.
 function migrate() {
   let changed = false;
-  const managedAdminPassword = process.env.ADMIN_PASSWORD;
-  const managedAdminUsername = (process.env.ADMIN_USERNAME || 'admin').trim();
+  const normalizeEnvironmentValue = (value) => {
+    const trimmed = String(value || '').trim();
+    if (trimmed.length >= 2) {
+      const first = trimmed[0];
+      const last = trimmed[trimmed.length - 1];
+      if ((first === '"' && last === '"') || (first === "'" && last === "'")) {
+        return trimmed.slice(1, -1).trim();
+      }
+    }
+    return trimmed;
+  };
+  const managedAdminPassword = normalizeEnvironmentValue(process.env.ADMIN_PASSWORD);
+  const managedAdminUsername = normalizeEnvironmentValue(process.env.ADMIN_USERNAME || 'admin');
 
   // Safe admin recovery for hosted deployments. Setting ADMIN_PASSWORD restores
   // access without resetting products, users, orders, settings, or uploaded media.
