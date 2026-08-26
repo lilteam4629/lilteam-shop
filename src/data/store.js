@@ -171,7 +171,7 @@ function defaultData() {
       miniGame: {
         enabled: true,
         title: 'กล่องสุ่มลุ้นโชค',
-        description: 'เสี่ยงดวงลุ้นรับเครดิตร้านค้าฟรี! เปิดเผยอัตราการออกรางวัลของทุกรายการอย่างโปร่งใส',
+        description: 'เสี่ยงดวงลุ้นรับของรางวัลฟรี! เปิดเผยอัตราการออกรางวัลของทุกรายการอย่างโปร่งใส ถูกรางวัลแล้วทักแชทมารับได้เลย',
         costPerPlay: 20,
       },
     },
@@ -193,11 +193,10 @@ function defaultData() {
     walletTransactions: [],
     topupRequests: [],
     miniGamePrizes: [
-      { id: nanoid(8), name: 'เครดิต 5 บาท', percent: 40, stock: null, rewardAmount: 5, image: null, active: true, createdAt: now },
-      { id: nanoid(8), name: 'เครดิต 10 บาท', percent: 25, stock: 50, rewardAmount: 10, image: null, active: true, createdAt: now },
-      { id: nanoid(8), name: 'เครดิต 20 บาท', percent: 15, stock: 20, rewardAmount: 20, image: null, active: true, createdAt: now },
-      { id: nanoid(8), name: 'เครดิต 50 บาท', percent: 5, stock: 5, rewardAmount: 50, image: null, active: true, createdAt: now },
-      { id: nanoid(8), name: 'เสียใจด้วย ลองใหม่ครั้งหน้า', percent: 15, stock: null, rewardAmount: 0, image: null, active: true, createdAt: now },
+      { id: nanoid(8), name: 'ไอดีเกมมือสอง (สุ่ม 1 ไอดี)', percent: 10, stock: 5, isPrize: true, image: null, active: true, createdAt: now },
+      { id: nanoid(8), name: 'ส่วนลด 20 บาท (แจ้งแอดมิน)', percent: 20, stock: 20, isPrize: true, image: null, active: true, createdAt: now },
+      { id: nanoid(8), name: 'สติกเกอร์ที่ระลึก', percent: 30, stock: 50, isPrize: true, image: null, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เสียใจด้วย ลองใหม่ครั้งหน้า', percent: 40, stock: null, isPrize: false, image: null, active: true, createdAt: now },
     ],
     miniGamePlays: [],
   };
@@ -316,6 +315,12 @@ function migrate() {
   }
   if (!db.miniGamePrizes) { db.miniGamePrizes = []; changed = true; }
   if (!db.miniGamePlays) { db.miniGamePlays = []; changed = true; }
+  db.miniGamePrizes.forEach(prize => {
+    if (prize.isPrize === undefined) {
+      prize.isPrize = (Number(prize.rewardAmount) || 0) > 0;
+      changed = true;
+    }
+  });
   if (changed) save();
 }
 
