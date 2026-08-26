@@ -43,6 +43,7 @@ router.get('/', (req, res) => {
     offlineTotal: offline.length,
     announcements: store.data.announcements.filter(a => a.active),
     filterTags: store.data.filterTags,
+    miniGamePrizes: store.data.miniGamePrizes.filter(p => p.active),
   });
 });
 

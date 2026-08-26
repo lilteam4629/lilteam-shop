@@ -11,6 +11,7 @@ const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 const cartRoutes = require('./routes/cart');
 const accountRoutes = require('./routes/account');
+const minigameRoutes = require('./routes/minigame');
 const adminRoutes = require('./routes/admin');
 const packageInfo = require('../package.json');
 
@@ -73,6 +74,7 @@ app.use('/', shopRoutes);
 app.use('/', authRoutes);
 app.use('/cart', cartRoutes);
 app.use('/account', accountRoutes);
+app.use('/minigame', minigameRoutes);
 app.use('/admin', adminRoutes);
 
 app.use((req, res) => {

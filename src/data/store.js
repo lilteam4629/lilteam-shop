@@ -168,6 +168,12 @@ function defaultData() {
         bankAccountName: 'LilTeam Shop (Demo)',
         qrImage: null,
       },
+      miniGame: {
+        enabled: true,
+        title: 'กล่องสุ่มลุ้นโชค',
+        description: 'เสี่ยงดวงลุ้นรับเครดิตร้านค้าฟรี! เปิดเผยอัตราการออกรางวัลของทุกรายการอย่างโปร่งใส',
+        costPerPlay: 20,
+      },
     },
     users: [
       { id: nanoid(8), username: 'admin', email: 'admin@lilteam.shop', passwordHash: adminPasswordHash, role: 'admin', walletBalance: 0, status: 'active', createdAt: now },
@@ -186,6 +192,14 @@ function defaultData() {
     reviews: [],
     walletTransactions: [],
     topupRequests: [],
+    miniGamePrizes: [
+      { id: nanoid(8), name: 'เครดิต 5 บาท', percent: 40, stock: null, rewardAmount: 5, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เครดิต 10 บาท', percent: 25, stock: 50, rewardAmount: 10, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เครดิต 20 บาท', percent: 15, stock: 20, rewardAmount: 20, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เครดิต 50 บาท', percent: 5, stock: 5, rewardAmount: 50, active: true, createdAt: now },
+      { id: nanoid(8), name: 'เสียใจด้วย ลองใหม่ครั้งหน้า', percent: 15, stock: null, rewardAmount: 0, active: true, createdAt: now },
+    ],
+    miniGamePlays: [],
   };
 }
 
@@ -291,6 +305,17 @@ function migrate() {
     db.settings.snow = { enabled: false };
     changed = true;
   }
+  if (!db.settings.miniGame) {
+    db.settings.miniGame = {
+      enabled: false,
+      title: 'กล่องสุ่มลุ้นโชค',
+      description: 'เสี่ยงดวงลุ้นรับเครดิตร้านค้าฟรี! เปิดเผยอัตราการออกรางวัลของทุกรายการอย่างโปร่งใส',
+      costPerPlay: 20,
+    };
+    changed = true;
+  }
+  if (!db.miniGamePrizes) { db.miniGamePrizes = []; changed = true; }
+  if (!db.miniGamePlays) { db.miniGamePlays = []; changed = true; }
   if (changed) save();
 }
 

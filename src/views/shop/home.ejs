@@ -126,3 +126,97 @@
   </div>
   <p class="text-center text-[var(--text-4)] text-xs mt-6">แสดง <%= offline.length %> จาก <%= offlineTotal %> รายการ</p>
 </section>
+
+<% if (settings.miniGame && settings.miniGame.enabled && miniGamePrizes.length) { %>
+<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-10">
+  <div class="bg-gradient-to-br from-[var(--card)] to-[#1a160a] border border-[var(--gold)]/30 rounded-2xl p-6 sm:p-8">
+    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+      <div>
+        <h2 class="text-xl sm:text-2xl font-bold flex items-center gap-2"><span>🎰</span><%= settings.miniGame.title %></h2>
+        <p class="text-[var(--text-3)] text-sm mt-1 max-w-xl"><%= settings.miniGame.description %></p>
+      </div>
+      <div class="text-right shrink-0">
+        <div class="text-xs text-[var(--text-4)]">ราคาต่อครั้ง</div>
+        <div class="text-2xl font-bold text-[var(--gold)]">฿<%= settings.miniGame.costPerPlay.toLocaleString() %></div>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-[1fr_320px] gap-6">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
+            <tr><th class="py-2 pr-3">รางวัล</th><th class="py-2 pr-3">โอกาสออก</th><th class="py-2">คงเหลือ</th></tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border)]">
+            <% miniGamePrizes.forEach(p => { %>
+              <tr>
+                <td class="py-2 pr-3"><%= p.name %></td>
+                <td class="py-2 pr-3 text-[var(--gold)] font-medium"><%= p.percent %>%</td>
+                <td class="py-2 text-[var(--text-3)]"><%= p.stock === null ? 'ไม่จำกัด' : (p.stock > 0 ? p.stock + ' ชิ้น' : 'หมดชั่วคราว') %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+        <p class="text-[10px] text-[var(--text-4)] mt-2">* อัตราการออกรางวัลเปิดเผยตามจริงทุกรายการ รางวัลที่หมดสต็อกจะถูกงดจ่ายชั่วคราวจนกว่าจะเติมสต็อก</p>
+      </div>
+
+      <div class="bg-[var(--input)] border border-[var(--border-light)] rounded-xl p-5 flex flex-col items-center justify-center text-center gap-3">
+        <div id="minigame-box" class="text-6xl transition-transform duration-300">🎁</div>
+        <div id="minigame-result" class="text-sm text-[var(--text-3)] min-h-[2.5rem] flex items-center justify-center"></div>
+        <% if (currentUser) { %>
+          <button id="minigame-play-btn" class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm disabled:opacity-50">
+            🎲 เล่นเลย (฿<%= settings.miniGame.costPerPlay.toLocaleString() %>)
+          </button>
+          <p class="text-xs text-[var(--text-4)]">เครดิตคงเหลือ: ฿<span id="minigame-balance"><%= currentUser.walletBalance.toLocaleString() %></span></p>
+        <% } else { %>
+          <a href="/login" class="w-full block bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">เข้าสู่ระบบเพื่อเล่น</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (function () {
+    const btn = document.getElementById('minigame-play-btn');
+    if (!btn) return;
+    const box = document.getElementById('minigame-box');
+    const resultEl = document.getElementById('minigame-result');
+    const balanceEl = document.getElementById('minigame-balance');
+
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      resultEl.textContent = '';
+      box.textContent = '🎲';
+      box.classList.add('animate-spin');
+
+      try {
+        const res = await fetch('/minigame/play', { method: 'POST', credentials: 'same-origin' });
+        const data = await res.json();
+        setTimeout(() => {
+          box.classList.remove('animate-spin');
+          if (!res.ok) {
+            box.textContent = '⚠️';
+            resultEl.textContent = data.error || 'เกิดข้อผิดพลาด กรุณาลองใหม่';
+            btn.disabled = false;
+            return;
+          }
+          box.textContent = data.isWin ? '🎉' : '💨';
+          resultEl.textContent = '';
+          const resultSpan = document.createElement('span');
+          resultSpan.className = data.isWin ? 'text-emerald-400 font-medium' : '';
+          resultSpan.textContent = data.isWin ? ('ยินดีด้วย! ได้รับ ' + data.prizeName) : ('ผลลัพธ์: ' + data.prizeName);
+          resultEl.appendChild(resultSpan);
+          if (balanceEl) balanceEl.textContent = data.walletBalance.toLocaleString();
+          btn.disabled = false;
+        }, 700);
+      } catch (err) {
+        box.classList.remove('animate-spin');
+        box.textContent = '⚠️';
+        resultEl.textContent = 'เชื่อมต่อไม่สำเร็จ กรุณาลองใหม่';
+        btn.disabled = false;
+      }
+    });
+  })();
+</script>
+<% } %>
