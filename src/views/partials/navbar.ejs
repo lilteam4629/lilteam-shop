@@ -1,12 +1,12 @@
 <header class="bg-[var(--bg)]/90 backdrop-blur border-b border-[var(--border)] sticky top-0 z-50">
-  <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-3 flex items-center justify-between gap-4">
-    <a href="/" class="flex items-center gap-2 font-bold text-xl shrink-0">
+  <div class="w-full max-w-[1800px] px-3 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-3 flex items-center justify-between gap-2 sm:gap-4">
+    <a href="/" class="flex items-center gap-2 font-bold text-base sm:text-xl min-w-0 shrink">
       <% if (settings.branding && settings.branding.logoImage) { %>
-        <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" class="w-10 h-10 rounded-xl object-contain bg-white/5 border border-[var(--border-light)]" />
+        <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl object-contain bg-white/5 border border-[var(--border-light)]" />
       <% } else { %>
         <span class="bg-[var(--gold)] text-[var(--bg)] w-9 h-9 rounded-lg flex items-center justify-center">L</span>
       <% } %>
-      <span><%= settings.shopName %></span>
+      <span class="truncate max-w-[112px] sm:max-w-none"><%= settings.shopName %></span>
     </a>
 
     <nav class="hidden lg:flex items-center gap-5 text-sm text-[var(--text-2)]">
@@ -24,9 +24,9 @@
       <button class="bg-[#332b1a] hover:bg-[#4a3f26] border border-[var(--border-light)] border-l-0 rounded-r-lg px-3 text-sm text-[var(--gold)]">🔍</button>
     </form>
 
-    <div class="flex items-center gap-3 text-sm shrink-0">
+    <div class="flex items-center gap-1.5 sm:gap-3 text-sm shrink-0">
       <button id="theme-toggle-btn" type="button" title="สลับโหมดมืด/สว่าง"
-        class="w-9 h-9 rounded-full bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 flex items-center justify-center transition">
+        class="w-9 h-9 shrink-0 rounded-full bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 flex items-center justify-center transition">
         <span id="theme-toggle-icon">🌙</span>
       </button>
       <a href="/cart" aria-label="ตะกร้าสินค้า<%= cartCount > 0 ? ` ${cartCount} รายการ` : '' %>"
@@ -42,8 +42,11 @@
           <span>💰 <%= currentUser.walletBalance.toLocaleString() %> ฿</span>
           <span class="bg-[var(--gold)] text-[var(--bg)] w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">+</span>
         </a>
-        <div class="relative group">
-          <button class="hover:text-[var(--gold)]"><%= currentUser.username %> ▾</button>
+        <div class="relative group min-w-0">
+          <button aria-label="เมนูบัญชี <%= currentUser.username %>" class="w-9 sm:w-auto sm:max-w-[150px] h-9 sm:h-auto flex items-center justify-center sm:justify-start gap-0.5 rounded-full sm:rounded-none bg-[var(--input)] sm:bg-transparent border sm:border-0 border-[var(--border-light)] hover:text-[var(--gold)]">
+            <span class="sm:hidden" aria-hidden="true">👤</span>
+            <span class="hidden sm:inline truncate"><%= currentUser.username %></span><span class="shrink-0">▾</span>
+          </button>
           <div class="absolute right-0 mt-1 w-44 bg-[var(--input)] border border-[var(--border-light)] rounded-lg shadow-xl hidden group-hover:block">
             <a href="/account" class="block px-4 py-2 hover:bg-[#2b2416] text-sm rounded-t-lg">บัญชีของฉัน</a>
             <a href="/account/orders" class="block px-4 py-2 hover:bg-[#2b2416] text-sm">คำสั่งซื้อของฉัน</a>

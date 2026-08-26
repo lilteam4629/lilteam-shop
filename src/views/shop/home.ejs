@@ -18,7 +18,7 @@
 <% } else { %>
 <section class="border-b border-[var(--border)] overflow-hidden">
   <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-10 pb-6 text-center">
-    <p class="text-[var(--gold)] text-sm mb-2 flex items-center justify-center gap-1.5">
+    <p class="text-[var(--gold)] text-xs sm:text-sm mb-2 px-2 flex flex-wrap items-center justify-center gap-1.5">
       <span>🎮</span><%= stats.gameCount %> เกม — พร้อมส่งทันทีหลังชำระเงิน
     </p>
     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4">
@@ -29,16 +29,26 @@
 
   <% if (newest.length) { %>
   <!-- Compact 3-card fan for mobile -->
-  <div class="sm:hidden relative mx-auto mb-6" style="max-width: 420px; height: clamp(210px, 58vw, 260px);">
+  <div class="sm:hidden relative w-[92vw] max-w-[420px] mx-auto mb-6" style="height: clamp(210px, 62vw, 270px);">
     <%
-      const mRot = [-7, 0, 7];
-      const mTx = ['-25vw', '0vw', '25vw'];
-      const mWidths = ['32vw', '42vw', '32vw'];
-      const mTy = ['8vw', '0vw', '8vw'];
+      const mobileNewest = newest.slice(0,3);
+      const mobileLayouts = {
+        1: [{ left: '50%', width: '48%', y: '0vw', rotate: 0 }],
+        2: [
+          { left: '34%', width: '43%', y: '4vw', rotate: -5 },
+          { left: '66%', width: '43%', y: '4vw', rotate: 5 },
+        ],
+        3: [
+          { left: '22%', width: '36%', y: '8vw', rotate: -7 },
+          { left: '50%', width: '48%', y: '0vw', rotate: 0 },
+          { left: '78%', width: '36%', y: '8vw', rotate: 7 },
+        ],
+      };
+      const mobileLayout = mobileLayouts[mobileNewest.length];
     %>
-    <% newest.slice(0,3).forEach((p, i) => { %>
-      <div class="absolute top-0 left-1/2 aspect-[3/4]"
-        style="width: <%= mWidths[i] %>; margin-left: calc(<%= mTx[i] %> - <%= mWidths[i] %> / 2); transform: translateY(<%= mTy[i] %>) rotate(<%= mRot[i] %>deg); z-index: <%= 10 - Math.abs(1-i) %>;">
+    <% mobileNewest.forEach((p, i) => { const layout = mobileLayout[i]; %>
+      <div class="absolute top-0 aspect-[3/4]"
+        style="left:<%= layout.left %>; width:<%= layout.width %>; transform:translateX(-50%) translateY(<%= layout.y %>) rotate(<%= layout.rotate %>deg); z-index:<%= 10 - Math.abs((mobileNewest.length - 1) / 2 - i) %>;">
         <%- include('../partials/product-card', { p, compact: true }) %>
       </div>
     <% }) %>
