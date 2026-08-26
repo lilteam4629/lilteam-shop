@@ -253,8 +253,18 @@
           return;
         }
         if (method === 'POST') {
+          // Normal HTML forms use application/x-www-form-urlencoded. Passing
+          // FormData here changes them to multipart/form-data, which leaves
+          // req.body empty on routes that use Express's urlencoded parser
+          // (notably login and registration). Preserve multipart only for
+          // forms that explicitly request it, such as slip uploads.
+          const body = (form.enctype || '').toLowerCase() === 'multipart/form-data'
+            ? data
+            : new URLSearchParams(Array.from(data.entries()).map(function (entry) {
+                return [entry[0], typeof entry[1] === 'string' ? entry[1] : ''];
+              }));
           event.preventDefault();
-          loadPage(url, { history: 'push', method: 'POST', body: data });
+          loadPage(url, { history: 'push', method: 'POST', body: body });
         }
       });
 
