@@ -33,7 +33,7 @@
   .mg-play-panel {
     background: linear-gradient(160deg, var(--input), var(--card));
   }
-  .mg-stage { position: relative; width: 100%; height: 128px; display: flex; align-items: center; justify-content: center; }
+  .mg-stage { position: relative; width: 100%; height: 148px; display: flex; align-items: center; justify-content: center; }
   .mg-box {
     font-size: 4.5rem; line-height: 1; cursor: default;
     filter: drop-shadow(0 0 18px rgba(200,166,63,.45));
@@ -64,7 +64,7 @@
     transition: opacity .45s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
   }
   .mg-card-icon { font-size: 3.4rem; line-height: 1; filter: drop-shadow(0 0 14px rgba(200,166,63,.5)); }
-  .mg-card-image { width: 4.5rem; height: 4.5rem; object-fit: cover; border-radius: .75rem; border: 1px solid var(--border-light); filter: drop-shadow(0 0 14px rgba(200,166,63,.5)); }
+  .mg-card-image { width: 6rem; height: 6rem; object-fit: cover; border-radius: .75rem; border: 1px solid var(--border-light); filter: drop-shadow(0 0 14px rgba(200,166,63,.5)); }
   .mg-card-name { font-weight: 700; font-size: .95rem; max-width: 220px; }
 
   .mg-confetti { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
@@ -87,6 +87,21 @@
   }
   .mg-play-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -10px rgba(200,166,63,.85); }
   .mg-play-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
+  .mg-claim-box {
+    margin-top: .4rem;
+    padding: .5rem .75rem;
+    border-radius: .6rem;
+    background: rgba(200,166,63,.14);
+    border: 1px solid rgba(200,166,63,.4);
+  }
+  .mg-claim-code {
+    font-family: 'Kanit', monospace;
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: .12em;
+    color: var(--gold);
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .mg-box, .mg-box.mg-shaking { animation: none; }
@@ -181,10 +196,17 @@
         resultLine.textContent = data.isWin ? ('ยินดีด้วย! ได้รับ ' + data.prizeName) : ('ผลลัพธ์: ' + data.prizeName);
         resultEl.appendChild(resultLine);
         if (data.isWin && data.claimCode) {
-          const claimLine = document.createElement('div');
-          claimLine.className = 'text-xs text-[var(--gold)] mt-1';
-          claimLine.textContent = 'โค้ดรับของ: ' + data.claimCode + ' — ทักแชท "ติดต่อร้าน" เพื่อขอรับของรางวัล';
-          resultEl.appendChild(claimLine);
+          const claimBox = document.createElement('div');
+          claimBox.className = 'mg-claim-box';
+          const claimCodeEl = document.createElement('div');
+          claimCodeEl.className = 'mg-claim-code';
+          claimCodeEl.textContent = data.claimCode;
+          const claimNote = document.createElement('div');
+          claimNote.className = 'text-[11px] text-[var(--text-3)] mt-1';
+          claimNote.textContent = 'ทักแชท "ติดต่อร้าน" แจ้งโค้ดนี้เพื่อขอรับของรางวัล';
+          claimBox.appendChild(claimCodeEl);
+          claimBox.appendChild(claimNote);
+          resultEl.appendChild(claimBox);
         }
         if (balanceEl && typeof data.walletBalance === 'number') balanceEl.textContent = data.walletBalance.toLocaleString();
         btn.disabled = false;
