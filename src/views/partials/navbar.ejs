@@ -2,7 +2,7 @@
   <div class="w-full max-w-[1800px] px-3 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-3 flex items-center justify-between gap-2 sm:gap-4">
     <a href="/" class="flex items-center gap-2 font-bold text-base sm:text-xl min-w-0 shrink">
       <% if (settings.branding && settings.branding.logoImage) { %>
-        <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl object-contain bg-white/5 border border-[var(--border-light)]" />
+        <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" class="w-11 h-11 shrink-0 rounded-[14px] object-contain p-1 bg-gradient-to-br from-[#fff0ae] via-[#d8b84e] to-[#8d6818] border border-[#f3d56f]/80 ring-1 ring-[#f3d56f]/20 shadow-[0_0_20px_rgba(218,181,67,.34),0_6px_16px_rgba(0,0,0,.35)] brightness-110 contrast-125 saturate-110" />
       <% } else { %>
         <span class="bg-[var(--gold)] text-[var(--bg)] w-9 h-9 rounded-lg flex items-center justify-center">L</span>
       <% } %>

@@ -3,7 +3,7 @@
     <div>
       <div class="flex items-center gap-2 font-bold text-[var(--text)] mb-2">
         <% if (settings.branding && settings.branding.logoImage) { %>
-          <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" class="w-9 h-9 rounded-lg object-contain bg-white/5 border border-[var(--border-light)]" />
+          <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" class="w-10 h-10 rounded-xl object-contain p-1 bg-gradient-to-br from-[#fff0ae] via-[#d8b84e] to-[#8d6818] border border-[#f3d56f]/70 shadow-[0_0_16px_rgba(218,181,67,.24)] brightness-110 contrast-125 saturate-110" />
         <% } %>
         <span><%= settings.shopName %></span>
       </div>
