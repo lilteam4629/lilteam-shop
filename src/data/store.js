@@ -120,6 +120,9 @@ function defaultData() {
       tagline: 'สินค้าเกมราคาดี พร้อมส่งอัตโนมัติตลอด 24 ชั่วโมง',
       contactLine: '@lilteamshop',
       contactFacebook: 'https://facebook.com/lilteamshop',
+      contactMessenger: 'https://m.me/lilteamshop',
+      contactFacebookName: 'LilTeam Shop',
+      contactResponseTime: '5–15 นาที',
       openHours: '17:00 - 00:00',
       customerCount: 0,
       reviewCount: 0,
@@ -273,6 +276,18 @@ function migrate() {
       promptpayId: '', promptpayName: '', bankName: '', bankAccountNumber: '', bankAccountName: '',
       promptpayQrImage: null, bankQrImage: null,
     };
+    changed = true;
+  }
+  if (db.settings.contactMessenger === undefined) {
+    db.settings.contactMessenger = db.settings.contactFacebook || '';
+    changed = true;
+  }
+  if (db.settings.contactFacebookName === undefined) {
+    db.settings.contactFacebookName = db.settings.shopName || 'Facebook Page';
+    changed = true;
+  }
+  if (db.settings.contactResponseTime === undefined) {
+    db.settings.contactResponseTime = '5–15 นาที';
     changed = true;
   }
   if (db.settings.payment.promptpayQrImage === undefined) {

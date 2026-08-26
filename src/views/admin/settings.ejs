@@ -16,6 +16,18 @@
     <input name="contactFacebook" value="<%= settings.contactFacebook %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
   </div>
   <div>
+    <label class="block text-sm mb-1 text-[var(--text-3)]">Messenger URL</label>
+    <input name="contactMessenger" value="<%= settings.contactMessenger || '' %>" placeholder="https://m.me/ชื่อเพจ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อที่แสดงบนการ์ด Facebook</label>
+    <input name="contactFacebookName" value="<%= settings.contactFacebookName || '' %>" placeholder="ชื่อเพจหรือ @username" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+  </div>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-3)]">เวลาตอบกลับโดยประมาณ</label>
+    <input name="contactResponseTime" value="<%= settings.contactResponseTime || '' %>" placeholder="เช่น 5–15 นาที" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+  </div>
+  <div>
     <label class="block text-sm mb-1 text-[var(--text-3)]">เวลาเปิดบริการ</label>
     <input name="openHours" value="<%= settings.openHours %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
   </div>

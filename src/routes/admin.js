@@ -672,8 +672,8 @@ router.get('/appearance', (req, res) => {
 });
 
 router.post('/settings', (req, res) => {
-  const { shopName, tagline, contactLine, contactFacebook, openHours } = req.body;
-  Object.assign(store.data.settings, { shopName, tagline, contactLine, contactFacebook, openHours });
+  const { shopName, tagline, contactLine, contactFacebook, contactMessenger, contactFacebookName, contactResponseTime, openHours } = req.body;
+  Object.assign(store.data.settings, { shopName, tagline, contactLine, contactFacebook, contactMessenger, contactFacebookName, contactResponseTime, openHours });
   store.save();
   req.flash('success', 'บันทึกการตั้งค่าแล้ว');
   res.redirect('/admin/settings');

@@ -1,9 +1,33 @@
-<section class="max-w-2xl mx-auto px-4 py-10">
-  <h1 class="text-2xl font-bold mb-6">ติดต่อร้าน</h1>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 space-y-3 text-sm">
-    <div class="flex justify-between border-b border-[#241f13] pb-3"><span class="text-[var(--text-3)]">ชื่อร้าน</span><span><%= settings.shopName %></span></div>
-    <div class="flex justify-between border-b border-[#241f13] pb-3"><span class="text-[var(--text-3)]">Line</span><span class="text-[var(--gold)]"><%= settings.contactLine %></span></div>
-    <div class="flex justify-between border-b border-[#241f13] pb-3"><span class="text-[var(--text-3)]">Facebook</span><a href="<%= settings.contactFacebook %>" class="text-[var(--gold)]" target="_blank" rel="noopener">แฟนเพจร้านค้า</a></div>
-    <div class="flex justify-between"><span class="text-[var(--text-3)]">เวลาเปิดบริการ</span><span><%= settings.openHours %></span></div>
+<section class="contact-page max-w-2xl mx-auto px-4 py-8 sm:py-12">
+  <div class="mb-6">
+    <p class="text-xs font-semibold text-[var(--gold)] mb-1">SUPPORT CENTER</p>
+    <h1 class="text-2xl sm:text-3xl font-extrabold">ติดต่อร้าน</h1>
+    <p class="text-sm text-[var(--text-3)] mt-1">สอบถามสินค้า แจ้งปัญหา หรือติดต่อรับสินค้าได้ที่นี่</p>
   </div>
+  <div class="space-y-3">
+    <a href="<%= settings.contactMessenger || settings.contactFacebook %>" target="_blank" rel="noopener" class="contact-primary group">
+      <span class="contact-icon contact-icon-primary"><svg viewBox="0 0 24 24" class="w-7 h-7 fill-current"><path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.92 1.2 5.45 3.16 7.2V22l2.9-1.6c1.2.34 2.52.53 3.94.53 5.64 0 10-4.13 10-9.23S17.64 2 12 2Zm1 13-2.55-2.72L5.5 15l5.44-5.78L13.55 12l4.95-2.72L13 15Z"/></svg></span>
+      <span class="min-w-0 flex-1"><span class="block text-lg sm:text-xl font-extrabold">Messenger</span><span class="block text-xs sm:text-sm text-white/80 mt-0.5">ตอบเร็วที่สุด • เปิด <%= settings.openHours %></span></span>
+      <span class="contact-open">เปิด ›</span>
+    </a>
+    <a href="<%= settings.contactFacebook %>" target="_blank" rel="noopener" class="contact-row group">
+      <span class="contact-icon contact-icon-facebook"><svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M13.5 22v-9h3l.5-3.5h-3.5V7.25c0-1 .28-1.75 1.8-1.75H17V2.15A23 23 0 0 0 14.4 2C11.75 2 10 3.62 10 6.6v2.9H7V13h3v9h3.5Z"/></svg></span>
+      <span class="min-w-0 flex-1"><span class="block font-bold">Facebook Page</span><span class="block text-xs text-[var(--text-3)] mt-0.5 truncate"><%= settings.contactFacebookName || settings.shopName %></span></span>
+      <span class="text-xl text-[var(--text-4)] group-hover:text-[var(--gold)]">›</span>
+    </a>
+    <div class="contact-row">
+      <span class="contact-icon contact-icon-hours"><svg viewBox="0 0 24 24" class="w-6 h-6 fill-none stroke-current" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
+      <span class="min-w-0 flex-1"><span class="block text-sm text-[var(--text-3)]">ทีมงานพร้อมให้บริการ <b class="text-[var(--text)]">ทุกวัน <%= settings.openHours %></b></span><span class="block text-xs text-[var(--text-4)] mt-0.5">ตอบกลับภายใน <%= settings.contactResponseTime || '5–15 นาที' %></span></span>
+      <span class="contact-online"><i></i> ออนไลน์</span>
+    </div>
+  </div>
+  <p class="text-center text-[10px] sm:text-xs text-[var(--text-4)] mt-5">เพื่อความรวดเร็ว กรุณาแจ้งหมายเลขคำสั่งซื้อและรายละเอียดปัญหาให้ครบถ้วน</p>
 </section>
+
+<style>
+  .contact-primary,.contact-row{display:flex;align-items:center;gap:1rem;border-radius:1.15rem}.contact-primary{padding:1rem 1.1rem;color:#fff;background:linear-gradient(120deg,#dc2626,#b91c1c 60%,#991b1b);border:1px solid rgba(255,255,255,.12);box-shadow:0 16px 34px -18px rgba(220,38,38,.9),inset 0 1px 0 rgba(255,255,255,.14);transition:transform .2s,box-shadow .2s}.contact-primary:hover{transform:translateY(-2px);box-shadow:0 20px 40px -18px rgba(220,38,38,1),inset 0 1px 0 rgba(255,255,255,.18)}
+  .contact-row{padding:.9rem 1rem;color:var(--text);background:linear-gradient(135deg,var(--card),var(--input));border:1px solid var(--border);box-shadow:0 10px 28px -24px rgba(0,0,0,.9)}a.contact-row{transition:transform .2s,border-color .2s}a.contact-row:hover{transform:translateY(-1px);border-color:var(--gold)}
+  .contact-icon{width:3rem;height:3rem;flex:0 0 auto;display:grid;place-items:center;border-radius:.85rem}.contact-icon-primary{color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.12)}.contact-icon-facebook{color:#1877f2;background:rgba(24,119,242,.12)}.contact-icon-hours{color:var(--text-3);background:var(--bg);border:1px solid var(--border-light)}
+  .contact-open{flex:0 0 auto;padding:.55rem .85rem;border-radius:.7rem;background:rgba(255,255,255,.15);font-size:.8rem;font-weight:700}.contact-online{display:inline-flex;align-items:center;gap:.35rem;color:#34d399;font-size:.65rem;white-space:nowrap}.contact-online i{width:.45rem;height:.45rem;border-radius:99px;background:#34d399;box-shadow:0 0 10px rgba(52,211,153,.75)}
+  @media(max-width:639px){.contact-primary,.contact-row{gap:.7rem;border-radius:.9rem}.contact-primary{padding:.85rem}.contact-row{padding:.75rem .8rem}.contact-icon{width:2.65rem;height:2.65rem;border-radius:.7rem}.contact-open{padding:.45rem .65rem}.contact-online{display:none}}
+</style>
