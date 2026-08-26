@@ -18,13 +18,13 @@
   </div>
   <div class="relative mb-3">
     <svg viewBox="0 0 24 24" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 fill-none stroke-[var(--text-4)]" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-    <input id="filterSearch" type="search" autocomplete="off" placeholder="ค้นหาชื่อเกม..." class="w-full sm:max-w-sm h-11 bg-black/20 border border-[var(--border-light)] rounded-xl pl-10 pr-4 text-sm text-[var(--text)] placeholder:text-[var(--text-4)] focus:outline-none focus:border-[var(--gold)]/70 focus:ring-2 focus:ring-[var(--gold)]/10 transition" />
+    <input id="filterSearch" type="search" autocomplete="off" placeholder="ค้นหาตัวกรอง เช่น Messi, Denuvo..." class="w-full sm:max-w-sm h-11 bg-black/20 border border-[var(--border-light)] rounded-xl pl-10 pr-4 text-sm text-[var(--text)] placeholder:text-[var(--text-4)] focus:outline-none focus:border-[var(--gold)]/70 focus:ring-2 focus:ring-[var(--gold)]/10 transition" />
   </div>
   <div class="relative flex items-center gap-2">
     <button type="button" id="scrollLeftBtn" aria-label="เลื่อนตัวกรองไปทางซ้าย" class="hidden shrink-0 w-9 h-9 items-center justify-center rounded-full bg-[var(--card)] border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">‹</button>
     <div id="filterTags" class="filter-scroll flex-1 grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2.5 overflow-visible sm:overflow-x-auto scroll-smooth py-1">
       <% filterTags.forEach(t => { %>
-        <button type="button" data-tag="<%= t.id %>" aria-pressed="false" class="filter-chip group relative shrink-0 block w-full sm:w-[160px] aspect-[3/4] rounded-xl sm:rounded-2xl overflow-hidden border border-[var(--border-light)] bg-black transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--gold)]/60">
+        <button type="button" data-tag="<%= t.id %>" data-name="<%= t.name %>" aria-pressed="false" class="filter-chip group relative shrink-0 block w-full sm:w-[160px] aspect-[3/4] rounded-xl sm:rounded-2xl overflow-hidden border border-[var(--border-light)] bg-black transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--gold)]/60">
           <span class="absolute inset-0 overflow-hidden">
             <img src="<%= t.image %>" alt="" aria-hidden="true" class="absolute inset-0 w-full h-full object-cover scale-110 blur-xl opacity-45" />
             <img src="<%= t.image %>" alt="<%= t.name %>" class="relative w-full h-full object-contain transition duration-300 group-hover:scale-[1.025]" />
@@ -65,13 +65,20 @@
     const scrollRightBtn = document.getElementById('scrollRightBtn');
     const selected = new Set();
     let searchQuery = '';
+    function normalizeText(value) {
+      return String(value || '').normalize('NFKC').trim().toLocaleLowerCase('th-TH');
+    }
     function cards() { return Array.from(document.querySelectorAll('.product-grid .filterable-card')); }
     function matches(card) {
-      const titleMatches = !searchQuery || (card.dataset.title || '').includes(searchQuery);
-      if (!titleMatches) return false;
       if (selected.size === 0) return true;
       const tags = (card.dataset.tags || '').split(',').filter(Boolean);
       return Array.from(selected).some((tag) => tags.includes(tag));
+    }
+    function filterTagChoices() {
+      tagsWrap.querySelectorAll('.filter-chip').forEach((button) => {
+        const visible = !searchQuery || normalizeText(button.dataset.name).includes(searchQuery);
+        button.style.display = visible ? '' : 'none';
+      });
     }
     function applyFilter() {
       const visibleProductIds = new Set();
@@ -103,11 +110,14 @@
         button.classList.remove('active');
         button.setAttribute('aria-pressed', 'false');
       });
+      filterTagChoices();
       applyFilter();
     });
     searchInput.addEventListener('input', () => {
-      searchQuery = searchInput.value.trim().toLocaleLowerCase('th-TH');
-      applyFilter();
+      searchQuery = normalizeText(searchInput.value);
+      filterTagChoices();
+      clearBtn.classList.toggle('hidden', selected.size === 0 && !searchQuery);
+      updateScrollButtons();
     });
     function updateScrollButtons() {
       const overflowing = tagsWrap.scrollWidth > tagsWrap.clientWidth + 4;
@@ -123,6 +133,7 @@
     tagsWrap.addEventListener('scroll', updateScrollButtons, { passive: true });
     window.addEventListener('resize', updateScrollButtons);
     function initializeFilter() {
+      filterTagChoices();
       applyFilter();
       updateScrollButtons();
     }
