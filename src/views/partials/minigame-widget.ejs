@@ -6,7 +6,7 @@
   const mgBalance = typeof balance === 'undefined' ? null : balance;
   const mgShowLogin = typeof showLogin !== 'undefined' && showLogin;
 %>
-<div class="mg-play-panel relative rounded-2xl border border-[var(--gold)]/30 p-6 flex flex-col items-center text-center gap-4">
+<div class="mg-play-panel relative rounded-2xl p-6 flex flex-col items-center text-center gap-4">
   <div class="mg-stage">
     <div class="mg-box mg-box-el">🎁</div>
     <div class="mg-card mg-card-el">
@@ -33,7 +33,7 @@
   .mg-play-panel {
     background: linear-gradient(160deg, var(--input), var(--card));
   }
-  .mg-stage { position: relative; width: 100%; height: 148px; display: flex; align-items: center; justify-content: center; }
+  .mg-stage { position: relative; width: 100%; height: 220px; display: flex; align-items: center; justify-content: center; }
   .mg-box {
     font-size: 4.5rem; line-height: 1; cursor: default;
     filter: drop-shadow(0 0 18px rgba(200,166,63,.45));
@@ -64,7 +64,13 @@
     transition: opacity .45s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
   }
   .mg-card-icon { font-size: 3.4rem; line-height: 1; filter: drop-shadow(0 0 14px rgba(200,166,63,.5)); }
-  .mg-card-image { width: 6rem; height: 6rem; object-fit: cover; border-radius: .75rem; border: 1px solid var(--border-light); filter: drop-shadow(0 0 14px rgba(200,166,63,.5)); }
+  .mg-card-image {
+    width: auto; height: auto;
+    max-width: min(100%, 14rem); max-height: 11.5rem;
+    object-fit: contain;
+    border: 0; border-radius: 0;
+    filter: drop-shadow(0 8px 18px rgba(200,166,63,.32));
+  }
   .mg-card-name { font-weight: 700; font-size: .95rem; max-width: 220px; }
 
   .mg-confetti { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
@@ -101,6 +107,21 @@
     font-weight: 800;
     letter-spacing: .12em;
     color: var(--gold);
+  }
+  .mg-contact-btn {
+    display: flex; align-items: center; justify-content: center; gap: .45rem;
+    width: 100%; margin-top: .65rem; padding: .65rem .85rem;
+    border-radius: .7rem;
+    color: var(--text); background: var(--input);
+    border: 1px solid var(--border-light);
+    font-size: .8rem; font-weight: 700;
+    transition: border-color .2s, color .2s, transform .15s;
+  }
+  .mg-contact-btn:hover { color: var(--gold); border-color: var(--gold); transform: translateY(-1px); }
+
+  @media (max-width: 639px) {
+    .mg-stage { height: 205px; }
+    .mg-card-image { max-width: min(100%, 12rem); max-height: 10.5rem; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -207,6 +228,13 @@
           claimBox.appendChild(claimCodeEl);
           claimBox.appendChild(claimNote);
           resultEl.appendChild(claimBox);
+        }
+        if (data.isWin) {
+          const contactBtn = document.createElement('a');
+          contactBtn.href = '/contact';
+          contactBtn.className = 'mg-contact-btn';
+          contactBtn.textContent = '💬 ติดต่อร้านเพื่อรับรางวัล';
+          resultEl.appendChild(contactBtn);
         }
         if (balanceEl && typeof data.walletBalance === 'number') balanceEl.textContent = data.walletBalance.toLocaleString();
         btn.disabled = false;
