@@ -63,6 +63,29 @@
       animation: marquee-scroll 22s linear infinite;
     }
     .marquee-track:hover { animation-play-state: paused; }
+
+    @keyframes product-shimmer {
+      0%, 58% { transform: translateX(-170%) skewX(-18deg); opacity: 0; }
+      66% { opacity: .75; }
+      84%, 100% { transform: translateX(230%) skewX(-18deg); opacity: 0; }
+    }
+    @keyframes ready-pulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(52, 211, 153, .32), inset 0 0 8px rgba(52, 211, 153, .08); }
+      50% { box-shadow: 0 0 17px rgba(52, 211, 153, .62), inset 0 0 12px rgba(52, 211, 153, .16); }
+    }
+    .premium-product-card {
+      box-shadow: 0 9px 28px rgba(0, 0, 0, .5), 0 0 0 1px rgba(216, 183, 82, .12), 0 0 18px rgba(200, 166, 63, .09);
+    }
+    .premium-product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 15px 38px rgba(0, 0, 0, .58), 0 0 0 1px rgba(244, 210, 105, .48), 0 0 28px rgba(218, 181, 67, .28);
+    }
+    .product-shimmer { animation: product-shimmer 4.8s ease-in-out infinite; }
+    .ready-glow { animation: ready-pulse 2.2s ease-in-out infinite; }
+    @media (prefers-reduced-motion: reduce) {
+      .product-shimmer, .ready-glow { animation: none; }
+      .premium-product-card:hover { transform: none; }
+    }
   </style>
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col">
