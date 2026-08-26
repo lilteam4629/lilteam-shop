@@ -458,6 +458,96 @@ router.post('/coupons/:id/delete', (req, res) => {
   res.redirect('/admin/coupons');
 });
 
+// ---------- Mini game ----------
+router.get('/minigame', (req, res) => {
+  const totalPercent = store.data.miniGamePrizes
+    .filter(p => p.active)
+    .reduce((sum, p) => sum + Number(p.percent), 0);
+  res.render('admin/minigame', {
+    title: 'มินิเกม', active: 'minigame',
+    game: store.data.settings.miniGame,
+    prizes: store.data.miniGamePrizes,
+    totalPercent,
+    recentPlays: store.data.miniGamePlays.slice(0, 30),
+  });
+});
+
+router.post('/minigame/settings', (req, res) => {
+  const { title, description, costPerPlay } = req.body;
+  Object.assign(store.data.settings.miniGame, {
+    title: title || store.data.settings.miniGame.title,
+    description: description || '',
+    costPerPlay: Math.max(0, parseInt(costPerPlay, 10) || 0),
+  });
+  store.save();
+  req.flash('success', 'บันทึกการตั้งค่ามินิเกมแล้ว');
+  res.redirect('/admin/minigame');
+});
+
+router.post('/minigame/toggle', (req, res) => {
+  store.data.settings.miniGame.enabled = !store.data.settings.miniGame.enabled;
+  store.save();
+  req.flash('success', store.data.settings.miniGame.enabled ? 'เปิดใช้งานมินิเกมแล้ว' : 'ปิดใช้งานมินิเกมแล้ว');
+  res.redirect('/admin/minigame');
+});
+
+router.post('/minigame/prizes', (req, res) => {
+  const { name, percent, stock, rewardAmount } = req.body;
+  if (!name || !name.trim()) {
+    req.flash('error', 'กรุณากรอกชื่อรางวัล');
+    return res.redirect('/admin/minigame');
+  }
+  store.data.miniGamePrizes.push({
+    id: store.genId(8), name: name.trim(),
+    percent: Math.max(0, Math.min(100, Number(percent) || 0)),
+    stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
+    rewardAmount: Math.max(0, Number(rewardAmount) || 0),
+    active: true, createdAt: new Date().toISOString(),
+  });
+  store.save();
+  req.flash('success', 'เพิ่มของรางวัลแล้ว');
+  res.redirect('/admin/minigame');
+});
+
+router.post('/minigame/prizes/:id', (req, res) => {
+  const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
+  if (!prize) { req.flash('error', 'ไม่พบของรางวัลนี้'); return res.redirect('/admin/minigame'); }
+  const { name, percent, stock, rewardAmount } = req.body;
+  Object.assign(prize, {
+    name: name && name.trim() ? name.trim() : prize.name,
+    percent: Math.max(0, Math.min(100, Number(percent) || 0)),
+    stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
+    rewardAmount: Math.max(0, Number(rewardAmount) || 0),
+  });
+  store.save();
+  req.flash('success', 'บันทึกของรางวัลแล้ว');
+  res.redirect('/admin/minigame');
+});
+
+router.post('/minigame/prizes/:id/restock', (req, res) => {
+  const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
+  const addAmount = Math.max(0, parseInt(req.body.addStock, 10) || 0);
+  if (prize && prize.stock !== null) {
+    prize.stock += addAmount;
+    store.save();
+    req.flash('success', `เติมสต็อก "${prize.name}" อีก ${addAmount} ชิ้นแล้ว`);
+  }
+  res.redirect('/admin/minigame');
+});
+
+router.post('/minigame/prizes/:id/toggle', (req, res) => {
+  const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
+  if (prize) { prize.active = !prize.active; store.save(); }
+  res.redirect('/admin/minigame');
+});
+
+router.post('/minigame/prizes/:id/delete', (req, res) => {
+  store.data.miniGamePrizes = store.data.miniGamePrizes.filter(p => p.id !== req.params.id);
+  store.save();
+  req.flash('success', 'ลบของรางวัลแล้ว');
+  res.redirect('/admin/minigame');
+});
+
 // ---------- Announcements ----------
 router.get('/announcements', (req, res) => {
   res.render('admin/announcements', { title: 'ประกาศ', active: 'announcements', announcements: store.data.announcements });
