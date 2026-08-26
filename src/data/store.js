@@ -237,7 +237,8 @@ function migrate() {
     if (!managedAdmins.length) {
       const admin = {
         id: nanoid(8), username: managedAdminUsername,
-        email: `${managedAdminUsername.toLowerCase()}@admin.local`, role: 'admin',
+        email: `${managedAdminUsername.toLowerCase()}@admin.local`,
+        passwordHash: bcrypt.hashSync(managedAdminPassword, 10), role: 'admin',
         walletBalance: 0, status: 'active', createdAt: new Date().toISOString(),
       };
       db.users.push(admin);
@@ -248,10 +249,6 @@ function migrate() {
       if (admin.username !== managedAdminUsername) { admin.username = managedAdminUsername; changed = true; }
       if (admin.role !== 'admin') { admin.role = 'admin'; changed = true; }
       if (admin.status !== 'active') { admin.status = 'active'; changed = true; }
-      if (!admin.passwordHash || !bcrypt.compareSync(managedAdminPassword, admin.passwordHash)) {
-        admin.passwordHash = bcrypt.hashSync(managedAdminPassword, 10);
-        changed = true;
-      }
     });
   }
   if (!db.settings.hero) {
