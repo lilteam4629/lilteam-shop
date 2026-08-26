@@ -1,4 +1,4 @@
-<header class="bg-[var(--bg)]/90 backdrop-blur border-b border-[var(--border)] sticky top-0 z-50">
+<header class="relative bg-[var(--bg)]/90 backdrop-blur border-b border-[var(--border)] sticky top-0 z-50">
   <div class="w-full max-w-[1800px] px-3 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-3 flex items-center justify-between gap-2 sm:gap-4">
     <a href="/" class="flex items-center gap-2 font-bold text-base sm:text-xl min-w-0 shrink">
       <% if (settings.branding && settings.branding.logoImage) { %>
@@ -42,7 +42,21 @@
           <span>💰 <%= currentUser.walletBalance.toLocaleString() %> ฿</span>
           <span class="bg-[var(--gold)] text-[var(--bg)] w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold">+</span>
         </a>
-        <a href="/account" aria-label="บัญชีของฉัน" title="บัญชีของฉัน" class="sm:hidden w-9 h-9 shrink-0 rounded-full bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 flex items-center justify-center transition">👤</a>
+        <details class="sm:hidden static group/account">
+          <summary aria-label="เมนูบัญชี <%= currentUser.username %>" title="เมนูบัญชี" class="list-none [&::-webkit-details-marker]:hidden w-9 h-9 shrink-0 rounded-full bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 flex items-center justify-center gap-0.5 transition cursor-pointer">👤<span class="text-[8px] text-[var(--gold)]">▼</span></summary>
+          <div class="absolute left-3 right-3 top-full mt-2 overflow-hidden bg-[var(--card)] border border-[#75622d]/80 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,.6)] text-sm">
+            <div class="px-4 py-3 bg-gradient-to-r from-[var(--gold)]/10 to-transparent border-b border-[var(--border)]">
+              <div class="text-[10px] text-[var(--text-4)]">เข้าสู่ระบบเป็น</div>
+              <div class="font-semibold text-[var(--gold-hover)] truncate"><%= currentUser.username %></div>
+            </div>
+            <a href="/account" class="block px-4 py-3 hover:bg-[var(--input)]">👤 บัญชีของฉัน</a>
+            <a href="/account/orders" class="block px-4 py-3 hover:bg-[var(--input)]">🧾 คำสั่งซื้อของฉัน</a>
+            <% if (currentUser.role === 'admin') { %>
+              <a href="/admin" class="block px-4 py-3 hover:bg-[var(--input)]">⚙️ ระบบหลังบ้าน</a>
+            <% } %>
+            <a href="/logout" class="block px-4 py-3 hover:bg-[var(--input)] text-[var(--coral)] border-t border-[var(--border)]">ออกจากระบบ</a>
+          </div>
+        </details>
         <div class="relative group min-w-0 hidden sm:block">
           <button aria-label="เมนูบัญชี <%= currentUser.username %>" class="max-w-[150px] flex items-center gap-0.5 hover:text-[var(--gold)]">
             <span class="truncate"><%= currentUser.username %></span><span class="shrink-0">▾</span>
