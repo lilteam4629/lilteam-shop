@@ -48,6 +48,12 @@
           <div class="flex justify-between"><span class="text-[var(--text-3)]">ชื่อบัญชี</span><span><%= payment.promptpayName %></span></div>
         </div>
       <% } else { %>
+        <% if (payment.qrImage) { %>
+          <div class="bg-white rounded-lg p-4 flex flex-col items-center mb-3">
+            <img src="<%= payment.qrImage %>" class="w-56 h-56 object-contain" alt="QR โอนธนาคาร" />
+            <p class="text-[var(--bg)] text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
+          </div>
+        <% } %>
         <div class="text-sm space-y-1">
           <div class="flex justify-between"><span class="text-[var(--text-3)]">ธนาคาร</span><span><%= payment.bankName %></span></div>
           <div class="flex justify-between"><span class="text-[var(--text-3)]">เลขบัญชี</span><span class="font-mono"><%= payment.bankAccountNumber %></span></div>

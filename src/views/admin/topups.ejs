@@ -2,7 +2,7 @@
   <summary class="font-semibold cursor-pointer">ข้อมูลบัญชีรับเงิน</summary>
   <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="space-y-4 mt-4">
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">รูป QR (ถ้าไม่อัปโหลด ระบบจะสร้าง QR พร้อมเพย์อัตโนมัติจากเบอร์ด้านล่าง)</label>
+      <label class="block text-sm mb-1 text-[var(--text-3)]">รูป QR (แสดงทั้งช่องทางพร้อมเพย์และโอนธนาคาร ถ้าไม่อัปโหลด ช่องทางพร้อมเพย์จะสร้าง QR อัตโนมัติจากเบอร์ด้านล่างแทน)</label>
       <% if (payment.qrImage) { %>
         <div class="flex items-center gap-3 mb-2">
           <img src="<%= payment.qrImage %>" class="w-28 h-28 object-contain rounded-lg border border-[var(--border)] bg-white" alt="QR ปัจจุบัน" />
