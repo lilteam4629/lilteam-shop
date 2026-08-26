@@ -525,7 +525,7 @@
   <% } %>
 
   <% if (typeof settings !== 'undefined' && settings.snow && settings.snow.enabled) { %>
-  <div id="snow-container" class="fixed inset-0 pointer-events-none z-40 overflow-hidden"></div>
+  <div id="snow-container" class="fixed inset-0 pointer-events-none overflow-hidden" style="z-index: -1;"></div>
   <style>
     .snowflake {
       position: absolute;
