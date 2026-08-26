@@ -163,7 +163,10 @@
           %>
             <div class="mg-prize-chip mg-tier-<%= tier %> <%= outOfStock ? 'opacity-50' : '' %>">
               <% if (p.image) { %>
-                <img src="<%= p.image %>" alt="<%= p.name %>" class="w-14 h-14 rounded-lg object-cover shrink-0 border border-[var(--border-light)]" />
+                <a href="<%= p.image %>" target="_blank" rel="noopener" class="mg-prize-image-link" title="กดเพื่อดูรูป <%= p.name %> ขนาดเต็ม" aria-label="ดูรูป <%= p.name %> ขนาดเต็ม">
+                  <img src="<%= p.image %>" alt="<%= p.name %>" class="mg-prize-image" />
+                  <span class="mg-prize-zoom" aria-hidden="true">⌕</span>
+                </a>
               <% } else { %>
                 <div class="text-2xl leading-none"><%= tierIcon %></div>
               <% } %>
@@ -259,6 +262,32 @@
     transition: border-color .2s, transform .2s;
   }
   .mg-prize-chip:hover { transform: translateY(-1px); }
+  .mg-prize-image-link {
+    position: relative; flex: 0 0 auto;
+    width: 3.75rem; height: 4.75rem;
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+    border-radius: .65rem;
+    border: 1px solid var(--border-light);
+    background: color-mix(in srgb, var(--bg) 70%, transparent);
+    cursor: zoom-in;
+  }
+  .mg-prize-image {
+    display: block;
+    width: 100%; height: 100%;
+    object-fit: contain;
+  }
+  .mg-prize-zoom {
+    position: absolute; right: .2rem; bottom: .2rem;
+    width: 1.15rem; height: 1.15rem;
+    display: grid; place-items: center;
+    color: white; background: rgba(0,0,0,.68);
+    border-radius: 999px;
+    font-size: .75rem; line-height: 1;
+    opacity: .85;
+  }
+  .mg-prize-image-link:hover { border-color: var(--gold); }
+  .mg-prize-image-link:hover .mg-prize-zoom { opacity: 1; }
   .mg-tier-legendary { border-color: rgba(200,166,63,.55); box-shadow: 0 0 16px -6px rgba(200,166,63,.6); }
   .mg-tier-legendary .text-lg { color: var(--gold); }
   .mg-tier-rare { border-color: rgba(147,140,255,.4); }
