@@ -8,8 +8,11 @@ router.get('/login', (req, res) => {
 });
 
 router.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  const user = store.data.users.find(u => u.username === username || u.email === username);
+  const password = req.body.password;
+  const username = (req.body.username || '').trim();
+  const usernameLower = username.toLowerCase();
+  const user = store.data.users.find(u =>
+    u.username.toLowerCase() === usernameLower || u.email.toLowerCase() === usernameLower);
   if (!user || !bcrypt.compareSync(password || '', user.passwordHash)) {
     req.flash('error', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     return res.redirect('/login');
@@ -28,7 +31,9 @@ router.get('/register', (req, res) => {
 });
 
 router.post('/register', (req, res) => {
-  const { username, email, password, confirmPassword } = req.body;
+  const username = (req.body.username || '').trim();
+  const email = (req.body.email || '').trim();
+  const { password, confirmPassword } = req.body;
   if (!username || !email || !password) {
     req.flash('error', 'กรุณากรอกข้อมูลให้ครบถ้วน');
     return res.redirect('/register');
@@ -37,11 +42,11 @@ router.post('/register', (req, res) => {
     req.flash('error', 'รหัสผ่านไม่ตรงกัน');
     return res.redirect('/register');
   }
-  if (store.data.users.some(u => u.username === username)) {
+  if (store.data.users.some(u => u.username.toLowerCase() === username.toLowerCase())) {
     req.flash('error', 'ชื่อผู้ใช้นี้ถูกใช้งานแล้ว');
     return res.redirect('/register');
   }
-  if (store.data.users.some(u => u.email === email)) {
+  if (store.data.users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
     req.flash('error', 'อีเมลนี้ถูกใช้งานแล้ว');
     return res.redirect('/register');
   }
