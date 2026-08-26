@@ -185,8 +185,8 @@
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
     mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
   }
-  .latest-orders-track { display: flex; width: max-content; gap: .75rem; animation: latest-orders-scroll 42s linear infinite; }
-  .latest-orders-shell:hover .latest-orders-track, .latest-orders-shell:active .latest-orders-track { animation-play-state: paused; }
+  .latest-orders-track { display: flex; width: max-content; gap: .75rem; animation: latest-orders-scroll 28s linear infinite; will-change: transform; }
+  .latest-orders-shell:active .latest-orders-track { animation-play-state: paused; }
   .latest-orders-group { display: flex; gap: .75rem; }
   .latest-order-card {
     width: 20rem; min-height: 5.5rem; flex: 0 0 auto;
@@ -210,12 +210,11 @@
     .latest-orders-section { padding-top: 1rem; }
     .latest-orders-shell { padding: .55rem; border-radius: .85rem; }
     .latest-orders-track, .latest-orders-group { gap: .55rem; }
-    .latest-orders-track { animation-duration: 34s; }
+    .latest-orders-track { animation-duration: 24s; }
     .latest-order-card { width: 15.5rem; min-height: 4.75rem; padding: .5rem .6rem; gap: .6rem; border-radius: .75rem; }
     .latest-order-image-wrap { width: 3rem; height: 3.65rem; border-radius: .55rem; }
     @keyframes latest-orders-scroll { to { transform: translateX(calc(-50% - .275rem)); } }
   }
-  @media (prefers-reduced-motion: reduce) { .latest-orders-track { animation: none; } }
 </style>
 <% } %>
 
