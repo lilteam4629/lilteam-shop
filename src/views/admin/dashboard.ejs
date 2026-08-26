@@ -1,24 +1,31 @@
-<div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+<div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-4">
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-    <div class="text-[var(--text-4)] text-xs mb-1">รายได้รวม</div>
-    <div class="text-xl font-bold text-[var(--gold)]"><%= stats.revenue.toLocaleString() %> ฿</div>
+    <div class="text-[var(--text-4)] text-xs mb-1">รายได้วันนี้</div>
+    <div class="text-xl sm:text-2xl font-bold text-[var(--gold)]"><%= stats.revenueToday.toLocaleString() %> ฿</div>
+    <div class="text-[10px] text-[var(--text-4)] mt-1">ยอดขายตามเวลาไทย</div>
   </div>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-    <div class="text-[var(--text-4)] text-xs mb-1">คำสั่งซื้อทั้งหมด</div>
-    <div class="text-xl font-bold"><%= stats.orderCount %></div>
+    <div class="text-[var(--text-4)] text-xs mb-1">รายได้ 7 วัน</div>
+    <div class="text-xl sm:text-2xl font-bold"><%= stats.revenue7Days.toLocaleString() %> ฿</div>
+    <div class="text-[10px] text-[var(--text-4)] mt-1">30 วัน: <%= stats.revenue30Days.toLocaleString() %> ฿</div>
   </div>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-    <div class="text-[var(--text-4)] text-xs mb-1">สมาชิกทั้งหมด</div>
-    <div class="text-xl font-bold"><%= stats.userCount %></div>
+    <div class="text-[var(--text-4)] text-xs mb-1">ลูกค้าใหม่ 30 วัน</div>
+    <div class="text-xl sm:text-2xl font-bold"><%= stats.newCustomers30Days %> คน</div>
+    <div class="text-[10px] text-[var(--text-4)] mt-1">สมาชิกทั้งหมด <%= stats.userCount %> คน</div>
   </div>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-    <div class="text-[var(--text-4)] text-xs mb-1">สินค้าทั้งหมด</div>
-    <div class="text-xl font-bold"><%= stats.productCount %></div>
+    <div class="text-[var(--text-4)] text-xs mb-1">เติมเงินสำเร็จ</div>
+    <div class="text-xl sm:text-2xl font-bold text-emerald-400"><%= stats.topupSuccessRate %>%</div>
+    <div class="text-[10px] text-[var(--text-4)] mt-1">จาก <%= stats.reviewedTopups %> รายการที่ตรวจแล้ว</div>
   </div>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-    <div class="text-[var(--text-4)] text-xs mb-1">สต๊อกไอดีคงเหลือ</div>
-    <div class="text-xl font-bold text-emerald-400"><%= stats.availableStock %></div>
-  </div>
+</div>
+
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8 text-sm">
+  <div class="bg-[var(--input)] border border-[var(--border)] rounded-lg p-3"><span class="text-[var(--text-4)] text-xs">รายได้รวม</span><b class="block mt-1 text-[var(--gold)]"><%= stats.revenue.toLocaleString() %> ฿</b></div>
+  <div class="bg-[var(--input)] border border-[var(--border)] rounded-lg p-3"><span class="text-[var(--text-4)] text-xs">ออเดอร์ทั้งหมด</span><b class="block mt-1"><%= stats.orderCount %></b></div>
+  <div class="bg-[var(--input)] border border-[var(--border)] rounded-lg p-3"><span class="text-[var(--text-4)] text-xs">สินค้าทั้งหมด</span><b class="block mt-1"><%= stats.productCount %></b></div>
+  <div class="bg-[var(--input)] border border-[var(--border)] rounded-lg p-3"><span class="text-[var(--text-4)] text-xs">สต๊อกพร้อมขาย</span><b class="block mt-1 text-emerald-400"><%= stats.availableStock %></b></div>
 </div>
 
 <% if (stats.pendingTopups > 0) { %>
@@ -33,6 +40,30 @@
     <% lowStockProducts.forEach((p,i) => { %><a href="/admin/products/<%= p.id %>/stock" class="underline"><%= p.title %></a><%= i < lowStockProducts.length-1 ? ', ' : '' %><% }) %>
   </div>
 <% } %>
+
+<div class="grid lg:grid-cols-[1.35fr_.65fr] gap-5 mb-8">
+  <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 sm:p-5">
+    <div class="flex items-center justify-between mb-5"><div><h2 class="font-semibold">ยอดขาย 7 วันล่าสุด</h2><p class="text-[10px] text-[var(--text-4)]">รายได้ต่อวันตามเวลาประเทศไทย</p></div><span class="text-xs text-[var(--gold)]"><%= stats.revenue7Days.toLocaleString() %> ฿</span></div>
+    <div class="h-48 flex items-end gap-2 sm:gap-3 border-b border-[var(--border)]">
+      <% dailySales.forEach(day => { const height = Math.max(day.amount ? 8 : 2, Math.round((day.amount / maxDailyRevenue) * 100)); %>
+        <div class="flex-1 h-full flex flex-col justify-end items-center min-w-0 group">
+          <span class="text-[9px] text-[var(--text-3)] mb-1 opacity-0 group-hover:opacity-100 transition"><%= day.amount.toLocaleString() %></span>
+          <div class="w-full max-w-12 rounded-t-md bg-gradient-to-t from-[#8f6819] to-[#dfbe54] shadow-[0_0_14px_rgba(200,166,63,.12)]" style="height:<%= height %>%"></div>
+          <span class="text-[9px] sm:text-[10px] text-[var(--text-4)] py-2"><%= day.label %></span>
+        </div>
+      <% }) %>
+    </div>
+  </section>
+  <section class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 sm:p-5">
+    <h2 class="font-semibold mb-4">🏆 สินค้าขายดี</h2>
+    <div class="space-y-3">
+      <% topProducts.forEach((product, index) => { %>
+        <div class="flex items-center gap-3 text-sm"><span class="w-6 h-6 grid place-items-center rounded-full bg-[var(--gold)]/10 text-[var(--gold)] text-xs font-bold"><%= index + 1 %></span><span class="min-w-0 flex-1 truncate"><%= product.title %></span><span class="text-right"><b class="block"><%= product.units %> ชิ้น</b><small class="text-[var(--text-4)]"><%= product.revenue.toLocaleString() %> ฿</small></span></div>
+      <% }) %>
+      <% if (!topProducts.length) { %><p class="text-sm text-[var(--text-4)]">ยังไม่มีข้อมูลยอดขาย</p><% } %>
+    </div>
+  </section>
+</div>
 
 <h2 class="font-semibold mb-3">คำสั่งซื้อล่าสุด</h2>
 <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">

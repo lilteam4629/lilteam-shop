@@ -58,7 +58,37 @@ async function persistUploadedFiles(files) {
 // ---------- Dashboard ----------
 router.get('/', (req, res) => {
   const { orders, users, products, stockItems } = store.data;
-  const revenue = orders.reduce((sum, o) => sum + o.total, 0);
+  const paidOrders = orders.filter(order => order.status !== 'cancelled');
+  const revenue = paidOrders.reduce((sum, o) => sum + o.total, 0);
+  const now = new Date();
+  const bangkokKey = date => new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(date);
+  const todayKey = bangkokKey(now);
+  const revenueToday = paidOrders.filter(order => bangkokKey(new Date(order.createdAt)) === todayKey).reduce((sum, order) => sum + order.total, 0);
+  const since7Days = now.getTime() - (7 * 86400000);
+  const since30Days = now.getTime() - (30 * 86400000);
+  const revenue7Days = paidOrders.filter(order => new Date(order.createdAt).getTime() >= since7Days).reduce((sum, order) => sum + order.total, 0);
+  const revenue30Days = paidOrders.filter(order => new Date(order.createdAt).getTime() >= since30Days).reduce((sum, order) => sum + order.total, 0);
+  const newCustomers30Days = users.filter(user => user.role === 'customer' && new Date(user.createdAt).getTime() >= since30Days).length;
+  const dailySales = Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(now.getTime() - ((6 - index) * 86400000));
+    const key = bangkokKey(date);
+    const amount = paidOrders.filter(order => bangkokKey(new Date(order.createdAt)) === key).reduce((sum, order) => sum + order.total, 0);
+    return { key, label: date.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', weekday: 'short' }), amount };
+  });
+  const maxDailyRevenue = Math.max(1, ...dailySales.map(day => day.amount));
+  const productSales = new Map();
+  paidOrders.forEach(order => order.items.forEach(item => {
+    const current = productSales.get(item.productId) || { id: item.productId, title: item.title, units: 0, revenue: 0 };
+    current.units += 1;
+    current.revenue += item.price;
+    productSales.set(item.productId, current);
+  }));
+  const topProducts = [...productSales.values()].sort((a, b) => b.units - a.units || b.revenue - a.revenue).slice(0, 5);
+  const reviewedTopups = store.data.topupRequests.filter(request => request.status === 'approved' || request.status === 'rejected');
+  const approvedTopups = reviewedTopups.filter(request => request.status === 'approved').length;
+  const topupSuccessRate = reviewedTopups.length ? Math.round((approvedTopups / reviewedTopups.length) * 100) : 0;
   const availableStock = stockItems.filter(s => s.status === 'available').length;
   const lowStockProducts = store.data.products.filter(p => {
     const count = stockItems.filter(s => s.productId === p.id && s.status === 'available').length;
@@ -75,9 +105,18 @@ router.get('/', (req, res) => {
       productCount: products.length,
       availableStock,
       pendingTopups,
+      revenueToday,
+      revenue7Days,
+      revenue30Days,
+      newCustomers30Days,
+      topupSuccessRate,
+      reviewedTopups: reviewedTopups.length,
     },
     lowStockProducts,
     recentOrders,
+    dailySales,
+    maxDailyRevenue,
+    topProducts,
   });
 });
 

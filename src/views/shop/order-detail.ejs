@@ -14,7 +14,14 @@
           <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm">
             <div class="font-semibold text-[var(--gold)] mb-1">กรุณาติดต่อร้านเพื่อรับสินค้า</div>
             <% if (i.fulfillmentInstructions) { %><div class="text-[var(--text-2)] whitespace-pre-line mb-3"><%= i.fulfillmentInstructions %></div><% } %>
-            <a href="/contact" class="inline-flex items-center justify-center w-full sm:w-auto px-5 py-2.5 rounded-lg bg-[var(--gold)] text-[var(--bg)] font-medium">💬 ติดต่อร้านเพื่อรับสินค้า</a>
+            <textarea class="contact-order-message hidden">สวัสดีครับ ต้องการติดต่อรับสินค้า
+หมายเลขคำสั่งซื้อ: #<%= order.id %>
+สินค้า: <%= i.title %>
+ชื่อลูกค้า: <%= currentUser.username %>
+<% if (i.fulfillmentInstructions) { %>ข้อมูลที่ร้านขอให้เตรียม: <%= i.fulfillmentInstructions %>
+<% } %>กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ</textarea>
+            <button type="button" data-contact-url="<%= settings.contactMessenger || settings.contactFacebook %>" class="contact-order-btn inline-flex items-center justify-center w-full sm:w-auto px-5 py-2.5 rounded-lg bg-[var(--gold)] text-[var(--bg)] font-medium">💬 คัดลอกข้อความและเปิด Messenger</button>
+            <div class="contact-order-status text-[10px] text-[var(--text-4)] mt-2"></div>
           </div>
         <% } else if (i.credentials) { %>
           <div class="bg-[var(--bg)] border border-[var(--border)] rounded-lg p-3 text-sm font-mono space-y-1 mb-3">
@@ -35,3 +42,32 @@
     <div class="flex justify-between text-lg font-bold pt-2 border-t border-[var(--border)] mt-2"><span>ยอดชำระ</span><span class="text-[var(--gold)]">฿<%= order.total.toLocaleString() %>.00</span></div>
   </div>
 </section>
+
+<script>
+  (function () {
+    document.querySelectorAll('.contact-order-btn').forEach(function (button) {
+      if (button.dataset.bound === '1') return;
+      button.dataset.bound = '1';
+      button.addEventListener('click', function () {
+        const box = button.closest('.rounded-xl');
+        const source = box && box.querySelector('.contact-order-message');
+        const status = box && box.querySelector('.contact-order-status');
+        const message = source ? source.value.trim() : '';
+        const chatWindow = window.open(button.dataset.contactUrl || '/contact', '_blank');
+        if (chatWindow) chatWindow.opener = null;
+        const fallbackCopy = function () {
+          const temp = document.createElement('textarea');
+          temp.value = message; temp.style.position = 'fixed'; temp.style.opacity = '0';
+          document.body.appendChild(temp); temp.select(); document.execCommand('copy'); temp.remove();
+        };
+        const copied = navigator.clipboard && window.isSecureContext
+          ? navigator.clipboard.writeText(message).catch(fallbackCopy)
+          : Promise.resolve(fallbackCopy());
+        Promise.resolve(copied).finally(function () {
+          if (status) status.textContent = '✓ คัดลอกข้อความแล้ว ให้วางข้อความใน Messenger และกดส่ง';
+          if (!chatWindow) window.location.href = button.dataset.contactUrl || '/contact';
+        });
+      });
+    });
+  })();
+</script>
