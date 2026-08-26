@@ -330,11 +330,12 @@
   %>
   <% if (musicVideoId) { %>
   <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>" data-start-seconds="<%= settings.music.startSeconds || 0 %>" data-end-seconds="<%= settings.music.endSeconds || 0 %>">
-    <button id="music-toggle-btn" type="button" class="relative w-14 h-14 rounded-full bg-[var(--card)] border border-[var(--border)] shadow-lg flex items-center justify-center text-xl overflow-hidden hover:border-[var(--gold)]/60 transition">
+    <button id="music-toggle-btn" type="button" aria-label="เล่นเพลง" title="เล่นเพลง / หยุดเพลง" class="relative w-14 h-14 rounded-full bg-[var(--card)] border border-[var(--border)] shadow-lg flex items-center justify-center text-xl overflow-hidden hover:border-[var(--gold)]/60 transition">
       <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="" />
       <span id="music-icon" class="relative z-10">🎵</span>
       <span id="music-playing-ring" class="hidden absolute inset-0 rounded-full border-2 border-[var(--gold)] animate-ping"></span>
     </button>
+    <button id="music-settings-btn" type="button" aria-label="ตั้งค่าเพลง" title="ระดับเสียงและข้อมูลเพลง" class="absolute -top-2 -left-2 z-20 w-7 h-7 rounded-full bg-[var(--input)] border border-[var(--border-light)] text-xs shadow-lg hover:border-[var(--gold)]">⚙</button>
 
     <div id="music-panel" class="hidden absolute bottom-16 right-0 w-64 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden text-[var(--text)]">
       <div class="relative aspect-video bg-[#0c0a06]">
@@ -363,6 +364,7 @@
       if (!widget) return;
       const videoId = widget.dataset.videoId;
       const toggleBtn = document.getElementById('music-toggle-btn');
+      const settingsBtn = document.getElementById('music-settings-btn');
       const panel = document.getElementById('music-panel');
       const collapseBtn = document.getElementById('music-collapse-btn');
       const playBtn = document.getElementById('music-play-btn');
@@ -379,7 +381,6 @@
       let player = null;
       let isPlaying = false;
       let segmentTimer = null;
-      let saveTimer = null;
       const startSeconds = parseInt(widget.dataset.startSeconds, 10) || 0;
       const endSeconds = parseInt(widget.dataset.endSeconds, 10) || 0;
 
@@ -402,10 +403,10 @@
       let playbackWanted = localStorage.getItem(STORAGE_PLAYING) !== 'false';
       let resumeAt = startSeconds;
       const savedTime = parseFloat(localStorage.getItem(STORAGE_TIME));
-      const savedTimestamp = parseInt(localStorage.getItem(STORAGE_TS), 10);
       if (!Number.isNaN(savedTime) && savedTime >= 0 && playbackWanted) {
-        const elapsed = Number.isNaN(savedTimestamp) ? 0 : Math.max(0, (Date.now() - savedTimestamp) / 1000);
-        resumeAt = savedTime + elapsed;
+        // Resume the exact heard position. Adding time spent away from the site
+        // made the track jump unpredictably after refresh/back navigation.
+        resumeAt = savedTime;
         if (endSeconds > startSeconds && resumeAt >= endSeconds) {
           resumeAt = startSeconds + ((resumeAt - startSeconds) % (endSeconds - startSeconds));
         }
@@ -425,13 +426,16 @@
       function requestPlayback(wanted) {
         playbackWanted = wanted;
         localStorage.setItem(STORAGE_PLAYING, wanted ? 'true' : 'false');
-        setPlayingUI(wanted);
-        if (!player || typeof player.playVideo !== 'function') return;
+        if (!player || typeof player.playVideo !== 'function') {
+          setPlayingUI(false);
+          return;
+        }
         if (wanted) {
           player.unMute();
           player.playVideo();
         } else {
           player.pauseVideo();
+          setPlayingUI(false);
         }
       }
 
@@ -452,8 +456,8 @@
         player = new YT.Player('music-yt-player', {
           videoId: videoId,
           playerVars: {
-            autoplay: playbackWanted ? 1 : 0,
-            mute: playbackWanted ? 1 : 0,
+            autoplay: 0,
+            mute: 0,
             controls: 0,
             loop: 1,
             playlist: videoId,
@@ -465,20 +469,10 @@
             onReady: function (e) {
               e.target.setVolume(initialVolume);
               if (playbackWanted) {
-                requestPlayback(true);
-                // Some browsers silently block the unmuted resume; keep nudging it for a
-                // few seconds before giving up and waiting for a user gesture instead.
-                let attempts = 0;
-                const retryTimer = setInterval(function () {
-                  attempts++;
-                  if (!player || !player.getPlayerState) return;
-                  if (!playbackWanted || player.getPlayerState() === YT.PlayerState.PLAYING || attempts >= 5) {
-                    clearInterval(retryTimer);
-                    return;
-                  }
-                  player.unMute();
-                  player.playVideo();
-                }, 700);
+                // Try once. If the browser blocks autoplay the UI remains paused;
+                // an explicit tap on the music button will start it reliably.
+                e.target.unMute();
+                e.target.playVideo();
               }
             },
             onStateChange: function (e) {
@@ -502,26 +496,15 @@
         });
       };
 
-      // If autoplay-after-navigation gets blocked (common on Safari/Firefox, and even
-      // Chrome without enough site engagement), any real user gesture is a valid signal
-      // to resume — keep trying on every interaction for this page's whole lifetime,
-      // not just the first one, since a single missed attempt shouldn't give up forever.
-      function tryResumeOnGesture() {
-        if (playbackWanted && player && player.getPlayerState && player.getPlayerState() !== YT.PlayerState.PLAYING) {
-          player.unMute();
-          player.playVideo();
-        }
-      }
-      ['click', 'touchstart', 'keydown'].forEach(function (evt) {
-        document.addEventListener(evt, tryResumeOnGesture, { capture: true, passive: true });
-      });
-
       fetch('https://noembed.com/embed?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + videoId))
         .then(function (r) { return r.json(); })
         .then(function (data) { if (data && data.title) titleEl.textContent = data.title; })
         .catch(function () {});
 
       toggleBtn.addEventListener('click', function () {
+        requestPlayback(!isPlaying);
+      });
+      settingsBtn.addEventListener('click', function () {
         panel.classList.toggle('hidden');
       });
       collapseBtn.addEventListener('click', function () {
@@ -532,7 +515,7 @@
       });
 
       playBtn.addEventListener('click', function () {
-        requestPlayback(!playbackWanted);
+        requestPlayback(!isPlaying);
       });
 
       volumeSlider.addEventListener('input', function () {
