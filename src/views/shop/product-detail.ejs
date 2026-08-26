@@ -50,6 +50,14 @@
       <% } else { %>
         <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมด กรุณาเลือกสินค้าอื่น</div>
       <% } %>
+      <a href="/contact" class="inline-flex mt-2 w-full sm:w-auto px-6 py-3 rounded-lg font-medium justify-center bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)]">💬 ติดต่อร้าน</a>
+
+      <% if (product.fulfillmentMode === 'contact' && product.fulfillmentInstructions) { %>
+        <div class="mt-4 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm">
+          <div class="font-medium text-[var(--gold)] mb-1">ข้อมูลที่ต้องเตรียมสำหรับรับสินค้า</div>
+          <div class="text-[var(--text-2)] whitespace-pre-line"><%= product.fulfillmentInstructions %></div>
+        </div>
+      <% } %>
 
       <div class="mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 text-sm space-y-2">
         <div class="font-medium text-[var(--gold)] mb-1">วิธีรับสินค้า</div>

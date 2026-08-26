@@ -124,6 +124,8 @@ router.post('/checkout', requireLogin, (req, res) => {
         title: item.product.title,
         price: item.product.price,
         stockItemId: stockItem.id,
+        fulfillmentMode: item.product.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
+        fulfillmentInstructions: item.product.fulfillmentInstructions || '',
       });
     }
   }
@@ -136,7 +138,7 @@ router.post('/checkout', requireLogin, (req, res) => {
     discount,
     total: finalTotal,
     couponCode: coupon ? coupon.code : null,
-    status: 'completed',
+    status: orderItems.some(item => item.fulfillmentMode === 'contact') ? 'pending' : 'completed',
     paymentMethod: 'wallet',
     createdAt: new Date().toISOString(),
   };
@@ -163,7 +165,7 @@ router.post('/checkout', requireLogin, (req, res) => {
 
   req.session.cart = [];
   req.session.coupon = null;
-  req.flash('success', 'สั่งซื้อสำเร็จ! ตรวจสอบข้อมูลไอดีได้ที่หน้าคำสั่งซื้อ');
+  req.flash('success', 'สั่งซื้อสำเร็จ! ตรวจสอบวิธีรับสินค้าได้ที่หน้าคำสั่งซื้อ');
   res.redirect(`/account/orders/${order.id}`);
 });
 

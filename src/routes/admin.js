@@ -252,9 +252,31 @@ router.get('/products/:id/stock', (req, res) => {
   res.render('admin/product-stock', { title: `สต๊อกสินค้า: ${product.title}`, active: 'products', product, stockItems });
 });
 
+router.post('/products/:id/stock/settings', (req, res) => {
+  const product = store.data.products.find(p => p.id === req.params.id);
+  if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  product.fulfillmentMode = req.body.fulfillmentMode === 'contact' ? 'contact' : 'automatic';
+  product.fulfillmentInstructions = (req.body.fulfillmentInstructions || '').trim();
+  store.save();
+  req.flash('success', 'บันทึกวิธีรับสินค้าแล้ว');
+  res.redirect(`/admin/products/${product.id}/stock`);
+});
+
 router.post('/products/:id/stock/add', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  if (product.fulfillmentMode === 'contact') {
+    const quantity = Math.min(1000, Math.max(0, parseInt(req.body.quantity, 10) || 0));
+    for (let i = 0; i < quantity; i++) {
+      store.data.stockItems.push({
+        id: store.genId(10), productId: product.id, username: '', password: '', extra: '',
+        fulfillmentMode: 'contact', status: 'available', soldOrderId: null, addedAt: new Date().toISOString(),
+      });
+    }
+    store.save();
+    req.flash(quantity ? 'success' : 'error', quantity ? `เพิ่มจำนวนพร้อมขายแล้ว ${quantity} รายการ` : 'กรุณาระบุจำนวนที่ต้องการเพิ่ม');
+    return res.redirect(`/admin/products/${product.id}/stock`);
+  }
   const lines = (req.body.bulk || '').split('\n').map(l => l.trim()).filter(Boolean);
   let added = 0;
   lines.forEach(line => {
@@ -262,7 +284,7 @@ router.post('/products/:id/stock/add', (req, res) => {
     if (!username || !password) return;
     store.data.stockItems.push({
       id: store.genId(10), productId: product.id, username, password,
-      extra: rest.join(':') || '', status: 'available', soldOrderId: null,
+      extra: rest.join(':') || '', fulfillmentMode: 'automatic', status: 'available', soldOrderId: null,
       addedAt: new Date().toISOString(),
     });
     added++;

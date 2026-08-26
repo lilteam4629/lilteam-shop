@@ -308,6 +308,16 @@ function migrate() {
   }
   if (!db.miniGamePrizes) { db.miniGamePrizes = []; changed = true; }
   if (!db.miniGamePlays) { db.miniGamePlays = []; changed = true; }
+  db.products.forEach(product => {
+    if (!product.fulfillmentMode) {
+      product.fulfillmentMode = 'automatic';
+      changed = true;
+    }
+    if (product.fulfillmentInstructions === undefined) {
+      product.fulfillmentInstructions = '';
+      changed = true;
+    }
+  });
   db.miniGamePrizes.forEach(prize => {
     if (prize.isPrize === undefined) {
       prize.isPrize = (Number(prize.rewardAmount) || 0) > 0;
