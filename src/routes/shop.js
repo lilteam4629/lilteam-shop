@@ -39,14 +39,29 @@ router.get('/', (req, res) => {
     productTotal: active.length,
     announcements: store.data.announcements.filter(a => a.active),
     filterTags: store.data.filterTags,
+    activeFilterTag: null,
+    filterProductCount: active.length,
     miniGamePrizes: store.data.miniGamePrizes.filter(p => p.active),
   });
 });
 
 router.get('/products', (req, res) => {
   let products = store.data.products.filter(p => p.status === 'active').map(withStock);
+  const requestedTag = String(req.query.tag || '').trim();
+  const activeFilterTag = store.data.filterTags.find(tag => tag.id === requestedTag) || null;
+  if (activeFilterTag) {
+    products = products.filter(product => (product.filterTagIds || []).includes(activeFilterTag.id));
+  }
   products = sortProducts(products, req.query.sort);
-  res.render('shop/listing', { title: 'สินค้าเกมทั้งหมด', products, listType: 'products', sort: req.query.sort || '', filterTags: store.data.filterTags });
+  res.render('shop/listing', {
+    title: activeFilterTag ? `สินค้า: ${activeFilterTag.name}` : 'สินค้าเกมทั้งหมด',
+    products,
+    listType: 'products',
+    sort: req.query.sort || '',
+    filterTags: store.data.filterTags,
+    activeFilterTag,
+    filterProductCount: products.length,
+  });
 });
 
 router.get('/offline', (req, res) => res.redirect('/products'));
