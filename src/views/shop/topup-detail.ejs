@@ -66,6 +66,7 @@
           <img src="<%= request.slipPath %>" class="max-w-full rounded-lg border border-[var(--border)]" alt="สลิปที่แนบ" />
           <% if (request.slipCheck && request.slipCheck.checked && !request.slipCheck.verified) { %>
             <p class="text-xs text-[var(--coral)] mt-2">✕ ตรวจสอบอัตโนมัติไม่ผ่าน: <%= request.slipCheck.message %> — กรุณาตรวจสอบยอดเงิน/สลิปแล้วลองแนบใหม่อีกครั้ง</p>
+            <p class="text-xs text-[#e2c084] mt-1">⏳ คำขอนี้ยังอยู่ระหว่างรอแอดมินตรวจสอบด้วยตนเอง ไม่ได้ถูกปฏิเสธ</p>
           <% } else { %>
             <p class="text-xs text-emerald-400 mt-2">✓ แนบสลิปแล้ว รอการตรวจสอบ</p>
           <% } %>
