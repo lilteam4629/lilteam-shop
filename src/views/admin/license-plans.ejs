@@ -6,17 +6,29 @@
 
 <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-5 mb-6 flex items-center justify-between flex-wrap gap-3">
   <div>
-    <h3 class="font-semibold mb-1">🚀 ปล่อยอัพเดตให้เว็บลูกค้าทั้งหมด</h3>
-    <% if (releaseEnabled) { %>
-      <p class="text-xs text-[var(--text-3)]">ดึงโค้ดล่าสุดของคุณเข้า branch "release" — เว็บลูกค้าที่ผูกกับ branch นี้จะได้อัพเดตเมื่อพวกเขากด "ซิงค์ตอนนี้" เอง (บอกลูกค้าให้กดหลังจากนี้ได้เลย)</p>
-    <% } else { %>
-      <p class="text-xs text-amber-400">⚠️ ยังไม่ได้ตั้งค่า <code class="font-mono">GITHUB_TOKEN</code> ในร้าน — ต้องตั้งก่อนถึงจะใช้ปุ่มนี้ได้ (ดู .env.example)</p>
-    <% } %>
+    <h3 class="font-semibold mb-1">🔄 อัพเดตเว็บลูกค้าทั้งหมด</h3>
+    <p class="text-xs text-[var(--text-3)]">สั่งให้เว็บลูกค้าทุกคนดึงโค้ดล่าสุดจาก branch "release" มาใช้ทันที ไม่ต้องใส่คีย์ ไม่ต้องให้ลูกค้ากดอะไร</p>
   </div>
-  <form action="/admin/license-plans/release-update" method="post" onsubmit="return confirm('ปล่อยโค้ดล่าสุดให้เว็บลูกค้าทุกคนที่ผูกกับ release branch เลยใช่ไหม?')">
-    <button <%= releaseEnabled ? '' : 'disabled' %> class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] disabled:opacity-40 text-[var(--bg)] font-semibold rounded-lg px-4 py-2 text-sm whitespace-nowrap">🚀 ปล่อยอัพเดตตอนนี้</button>
+  <form action="/admin/license-plans/update-all" method="post" onsubmit="return confirm('อัพเดตเว็บลูกค้าทุกคนที่รองรับตอนนี้เลยใช่ไหม?')">
+    <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-4 py-2 text-sm whitespace-nowrap">🔄 อัพเดตทั้งหมดตอนนี้</button>
   </form>
 </div>
+
+<details class="mb-6 text-xs text-[var(--text-4)]">
+  <summary class="cursor-pointer select-none">⚙️ ขั้นสูง: ปล่อยโค้ดใหม่เข้า release branch เอง (ไม่จำเป็นต้องใช้ — ปกติแค่บอกแอดมิน/ผู้พัฒนาให้ปล่อยอัพเดตก็พอ)</summary>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 mt-2 flex items-center justify-between flex-wrap gap-3">
+    <div>
+      <% if (releaseEnabled) { %>
+        <p>ดึงโค้ดล่าสุดจาก branch หลักของคุณเข้า branch "release" (ทำครั้งเดียว เว็บลูกค้าจะอัพเดตเองอัตโนมัติ ไม่ต้องกด "อัพเดตทั้งหมด" ด้านบนซ้ำ)</p>
+      <% } else { %>
+        <p class="text-amber-400">⚠️ ยังไม่ได้ตั้งค่า <code class="font-mono">GITHUB_TOKEN</code> ในร้าน — ไม่จำเป็นต้องตั้งก็ได้ ถ้าไม่ได้ต้องการทำขั้นตอนนี้เอง</p>
+      <% } %>
+    </div>
+    <form action="/admin/license-plans/release-update" method="post" onsubmit="return confirm('ปล่อยโค้ดล่าสุดเข้า release branch เลยใช่ไหม?')">
+      <button <%= releaseEnabled ? '' : 'disabled' %> class="bg-[var(--input)] hover:bg-[#2b2416] disabled:opacity-40 border border-[var(--border-light)] rounded-lg px-4 py-2 text-sm whitespace-nowrap">ปล่อยโค้ดเข้า release</button>
+    </form>
+  </div>
+</details>
 
 <div class="grid lg:grid-cols-3 gap-6 mb-6">
   <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">

@@ -747,6 +747,28 @@ router.post('/license-plans/sale/:id/sync', async (req, res) => {
   res.redirect('/admin/license-plans');
 });
 
+// Update EVERY rented site in one click — no key entry needed, since it
+// reuses each site's own scoped token captured at provisioning time. This
+// only re-pulls whatever is currently on the release branch; it does NOT
+// merge your latest code into that branch (see /release-update below for
+// that optional, separate step).
+router.post('/license-plans/update-all', async (req, res) => {
+  const targets = store.data.licenseSales.filter(s => s.type === 'new_site' && s.provisioning && s.provisioning.projectToken);
+  if (!targets.length) {
+    req.flash('error', 'ยังไม่มีเว็บลูกค้าที่อัพเดตอัตโนมัติได้ (ต้องเป็นเว็บที่สร้างหลังมีฟีเจอร์นี้)');
+    return res.redirect('/admin/license-plans');
+  }
+  const results = await Promise.all(targets.map(sale => railway.redeployService({
+    railwayToken: sale.provisioning.projectToken,
+    serviceId: sale.provisioning.serviceId,
+    environmentId: sale.provisioning.environmentId,
+  }).then(r => ({ sale, r }))));
+  const okCount = results.filter(x => x.r.ok).length;
+  req.flash(okCount === results.length ? 'success' : 'error',
+    `สั่งอัพเดตเว็บลูกค้าสำเร็จ ${okCount}/${results.length} เว็บ`);
+  res.redirect('/admin/license-plans');
+});
+
 router.post('/license-plans/release-update', async (req, res) => {
   const result = await github.releaseUpdate();
   if (result.ok) {
