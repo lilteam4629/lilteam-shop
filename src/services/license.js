@@ -3,7 +3,13 @@ const crypto = require('crypto');
 const SECRET = process.env.LICENSE_SECRET;
 const PREFIX = 'LTS1-';
 
+// isEnabled: this deployment can sign/verify keys (needed by a "seller" shop
+// that issues keys for sale, even though that shop itself is never gated).
+// isGateOn: this deployment additionally requires a valid key to be usable
+// at all — a separate opt-in so the seller's own storefront never locks
+// itself out just because it has LICENSE_SECRET set to issue keys.
 const isEnabled = () => Boolean(SECRET);
+const isGateOn = () => isEnabled() && process.env.LICENSE_GATE === 'on';
 
 function base64urlEncode(input) {
   return Buffer.from(input).toString('base64url');
@@ -65,4 +71,4 @@ function verifyKey(key) {
   return { valid: true, label: payload.label, exp: payload.exp };
 }
 
-module.exports = { isEnabled, generateKey, verifyKey };
+module.exports = { isEnabled, isGateOn, generateKey, verifyKey };

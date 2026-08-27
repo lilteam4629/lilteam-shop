@@ -1,0 +1,43 @@
+<section class="max-w-lg mx-auto px-4 py-10">
+  <a href="/rent-website" class="text-sm text-[var(--gold)]">← กลับไปหน้าเช่าเว็บ</a>
+  <h1 class="text-2xl font-bold mt-2 mb-1">✅ ซื้อคีย์สำเร็จ</h1>
+  <p class="text-sm text-[var(--text-3)] mb-6">คีย์นี้ใช้ได้ <%= sale.days %> วัน — เอาไปกรอกที่หน้า <span class="font-mono">/license</span> ของเว็บที่ต้องการปลดล็อกหรือต่ออายุ</p>
+
+  <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-6 text-center mb-6">
+    <div class="text-xs text-[var(--text-4)] mb-2">คีย์เปิดใช้งาน</div>
+    <div id="sale-key" class="font-mono text-lg font-bold text-[var(--gold)] break-all select-all mb-4"><%= sale.key %></div>
+    <button id="copy-key-btn" data-key="<%= sale.key %>" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-6 py-2 text-sm">📋 คัดลอกคีย์</button>
+    <p id="copy-key-msg" class="text-xs text-emerald-400 mt-2 hidden">คัดลอกแล้ว!</p>
+  </div>
+
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 text-sm space-y-2">
+    <div class="flex justify-between"><span class="text-[var(--text-3)]">จำนวนวัน</span><span><%= sale.days %> วัน</span></div>
+    <div class="flex justify-between"><span class="text-[var(--text-3)]">ราคา</span><span class="text-[var(--gold)] font-semibold">฿<%= sale.price.toLocaleString() %></span></div>
+    <div class="flex justify-between"><span class="text-[var(--text-3)]">เวลาที่ซื้อ</span><span><%= new Date(sale.createdAt).toLocaleString('th-TH') %></span></div>
+  </div>
+
+  <p class="text-xs text-[var(--text-4)] mt-4 text-center">💡 วิธีใช้: เปิดเว็บที่ต้องการปลดล็อก → เข้าหน้า /license → วางคีย์นี้ → กดปลดล็อก</p>
+</section>
+
+<script>
+  (function () {
+    const btn = document.getElementById('copy-key-btn');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+      const key = btn.dataset.key;
+      try {
+        await navigator.clipboard.writeText(key);
+      } catch (err) {
+        const range = document.createRange();
+        range.selectNode(document.getElementById('sale-key'));
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+        document.execCommand('copy');
+        window.getSelection().removeAllRanges();
+      }
+      const msg = document.getElementById('copy-key-msg');
+      msg.classList.remove('hidden');
+      setTimeout(() => msg.classList.add('hidden'), 2000);
+    });
+  })();
+</script>
