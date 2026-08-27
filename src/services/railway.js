@@ -252,34 +252,4 @@ async function redeployService({ railwayToken, serviceId, environmentId }) {
   }
 }
 
-/**
- * Re-attach a service's GitHub source. Recovery tool for when a service's
- * source got disconnected (e.g. via Railway's "Disconnect" button) and the
- * owner's Railway UI can't find TEMPLATE_REPO to reconnect it manually —
- * that UI picker only lists repos visible to whichever GitHub account is
- * linked to their Railway login, which may not be the repo owner's account
- * even though the repo is public. This calls the same API used during
- * provisioning, which doesn't have that restriction.
- * @param {{ railwayToken: string, serviceId: string }} opts
- */
-async function connectServiceRepo({ railwayToken, serviceId }) {
-  const log = [];
-  if (!railwayToken) return { ok: false, log, error: 'ไม่มี Railway API Token' };
-  if (!serviceId) return { ok: false, log, error: 'ไม่พบข้อมูลเว็บนี้ (serviceId)' };
-  if (!TEMPLATE_REPO) return { ok: false, log, error: 'RAILWAY_TEMPLATE_REPO ยังไม่ได้ตั้งค่าในร้าน' };
-  try {
-    log.push(`กำลังเชื่อมต่อ service กับ repo ${TEMPLATE_REPO} ใหม่...`);
-    await gql(
-      railwayToken,
-      `mutation($id: String!, $input: ServiceConnectInput!) { serviceConnect(id: $id, input: $input) { id } }`,
-      { id: serviceId, input: { repo: TEMPLATE_REPO } },
-      log
-    );
-    log.push('✓ เชื่อมต่อใหม่แล้ว — เว็บจะเริ่ม build จากโค้ดล่าสุดเอง');
-    return { ok: true, log };
-  } catch (err) {
-    return { ok: false, log, error: err.message };
-  }
-}
-
-module.exports = { isEnabled, hasSellerToken, provisionNewSite, redeployService, connectServiceRepo };
+module.exports = { isEnabled, hasSellerToken, provisionNewSite, redeployService };
