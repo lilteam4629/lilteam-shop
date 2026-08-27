@@ -131,6 +131,10 @@ router.post('/buy', (req, res) => {
   res.redirect('/rent-website/sale/' + sale.id);
 });
 
+router.get('/guide', (req, res) => {
+  res.render('shop/rent-website-guide', { title: 'วิธีเปิดเว็บใหม่แบบละเอียด' });
+});
+
 router.get('/sale/:id', (req, res) => {
   const user = currentUser(req);
   const sale = store.data.licenseSales.find(s => s.id === req.params.id && s.userId === user.id);

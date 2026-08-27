@@ -1,0 +1,69 @@
+<section class="max-w-lg mx-auto px-4 py-10">
+  <a href="/rent-website" class="text-sm text-[var(--gold)]">← กลับไปหน้าเช่าเว็บ</a>
+  <h1 class="text-2xl font-bold mt-2 mb-1">📖 วิธีเปิดเว็บใหม่แบบละเอียด</h1>
+  <p class="text-sm text-[var(--text-3)] mb-8">ทำตามทีละขั้นตอน ใช้เวลารวมประมาณ 5-10 นาที ไม่ต้องมีความรู้ด้านโปรแกรมมิ่งเลย</p>
+
+  <!-- Step 1 -->
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-4">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="w-7 h-7 shrink-0 rounded-full bg-[var(--gold)] text-[var(--bg)] font-bold flex items-center justify-center text-sm">1</span>
+      <h2 class="font-semibold">สมัครบัญชี Railway (ถ้ายังไม่มี)</h2>
+    </div>
+    <p class="text-sm text-[var(--text-3)] mb-3">Railway คือบริการที่จะรันเว็บของคุณให้ออนไลน์ตลอด 24 ชม. สมัครฟรีได้เลย ไม่ต้องผูกบัตรก็ใช้งานเบื้องต้นได้</p>
+    <ol class="text-sm space-y-1.5 mb-3 list-decimal list-inside text-[var(--text-2)]">
+      <li>กดปุ่มด้านล่างเพื่อไปหน้าสมัคร</li>
+      <li>เลือกสมัครด้วย GitHub, Google หรืออีเมลก็ได้</li>
+      <li>ยืนยันอีเมล (ถ้าระบบขอ)</li>
+    </ol>
+    <a href="https://railway.com/login" target="_blank" rel="noopener" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">🚂 ไปสมัคร Railway →</a>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-4">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="w-7 h-7 shrink-0 rounded-full bg-[var(--gold)] text-[var(--bg)] font-bold flex items-center justify-center text-sm">2</span>
+      <h2 class="font-semibold">สร้าง API Token</h2>
+    </div>
+    <p class="text-sm text-[var(--text-3)] mb-3">Token คือรหัสที่ให้สิทธิ์ระบบของเราสร้างเว็บในบัญชี Railway ของคุณแทนคุณ (แค่ครั้งเดียว ไม่ถูกเก็บไว้)</p>
+    <ol class="text-sm space-y-1.5 mb-3 list-decimal list-inside text-[var(--text-2)]">
+      <li>กดปุ่มด้านล่าง จะพาไปหน้าสร้าง Token โดยตรง</li>
+      <li>ช่อง <b>Name</b> พิมพ์ชื่ออะไรก็ได้ เช่น <span class="font-mono">my-shop</span></li>
+      <li>ช่อง <b>Workspace</b> เลือกเวิร์กสเปซของคุณ (ถ้ามีแค่อันเดียวก็เลือกอันนั้น)</li>
+      <li>กดปุ่ม <b>Create</b></li>
+      <li>จะมีรหัสยาวๆ ขึ้นมา (ขึ้นครั้งเดียว!) กด<b>คัดลอก</b>ทันที แล้วเก็บไว้ก่อน (วางในโน้ตชั่วคราว) เตรียมเอาไปกรอกฟอร์มทีหลัง</li>
+    </ol>
+    <a href="https://railway.com/account/tokens" target="_blank" rel="noopener" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">🔑 ไปสร้าง Token →</a>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-4">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="w-7 h-7 shrink-0 rounded-full bg-[var(--gold)] text-[var(--bg)] font-bold flex items-center justify-center text-sm">3</span>
+      <h2 class="font-semibold">สมัคร MongoDB Atlas ฟรี (ที่เก็บข้อมูลร้าน)</h2>
+    </div>
+    <p class="text-sm text-[var(--text-3)] mb-3">MongoDB คือที่เก็บข้อมูลร้านค้าของคุณ (สินค้า ออเดอร์ สมาชิก ฯลฯ) สมัครฟรีตลอดชีพสำหรับเว็บขนาดเล็ก</p>
+    <ol class="text-sm space-y-1.5 mb-3 list-decimal list-inside text-[var(--text-2)]">
+      <li>กดปุ่มด้านล่าง สมัครบัญชีฟรี (อีเมลหรือ Google ก็ได้)</li>
+      <li>ระบบจะถามให้สร้างฐานข้อมูล → เลือกแบบ <b>M0 (FREE)</b></li>
+      <li>เลือกภูมิภาคเซิร์ฟเวอร์ใกล้ๆ (เช่น Singapore) → กด <b>Create</b></li>
+      <li>หน้า "Security Quickstart" → ตั้ง <b>Username/Password</b> สำหรับเข้าฐานข้อมูล (จำไว้ดีๆ) → กด Create User</li>
+      <li>หัวข้อ "Where would you like to connect from?" → เลือก <b>Allow access from anywhere</b> (หรือกรอก 0.0.0.0/0) → กด Finish</li>
+      <li>รอสักครู่ให้ฐานข้อมูลสร้างเสร็จ (วงกลมเขียว)</li>
+      <li>กด <b>Connect</b> → เลือก <b>Drivers</b> → คัดลอกข้อความที่ขึ้นต้นด้วย <span class="font-mono">mongodb+srv://...</span></li>
+      <li>ในข้อความนั้นจะมีคำว่า <span class="font-mono">&lt;password&gt;</span> ให้แก้เป็นรหัสผ่านจริงที่ตั้งไว้ข้อ 4 ก่อนเอาไปใช้</li>
+    </ol>
+    <a href="https://cloud.mongodb.com" target="_blank" rel="noopener" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">🍃 ไปสมัคร MongoDB Atlas →</a>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-5 mb-6">
+    <div class="flex items-center gap-2 mb-2">
+      <span class="w-7 h-7 shrink-0 rounded-full bg-[var(--gold)] text-[var(--bg)] font-bold flex items-center justify-center text-sm">4</span>
+      <h2 class="font-semibold">กลับมากรอกฟอร์มซื้อเว็บ</h2>
+    </div>
+    <p class="text-sm text-[var(--text-3)] mb-3">ตอนนี้คุณมีครบแล้ว: Token จากข้อ 2 และ MongoDB URI จากข้อ 3 กลับไปหน้าเช่าเว็บ วางค่าทั้งสองลงในฟอร์ม ตั้งชื่อผู้ใช้/รหัสผ่านแอดมินที่ต้องการ แล้วกด "สร้างเว็บใหม่" ได้เลย ระบบจะสร้างเว็บให้อัตโนมัติภายใน 1-3 นาที</p>
+    <a href="/rent-website" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">← กลับไปกรอกฟอร์ม</a>
+  </div>
+
+  <p class="text-xs text-[var(--text-4)] text-center">ติดปัญหาขั้นตอนไหน ถ่ายภาพหน้าจอส่งมาทักแชท "ติดต่อร้าน" ได้เลย</p>
+</section>
