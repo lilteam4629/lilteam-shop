@@ -14,6 +14,7 @@ const accountRoutes = require('./routes/account');
 const minigameRoutes = require('./routes/minigame');
 const adminRoutes = require('./routes/admin');
 const licenseRoutes = require('./routes/license');
+const rentWebsiteRoutes = require('./routes/rent-website');
 const license = require('./services/license');
 const packageInfo = require('../package.json');
 
@@ -74,7 +75,7 @@ app.use((req, res, next) => {
 
 app.use('/', licenseRoutes);
 app.use((req, res, next) => {
-  if (!license.isEnabled()) return next();
+  if (!license.isGateOn()) return next();
   const current = store.data.settings.license;
   const active = current.key && current.expiresAt && Date.now() < current.expiresAt;
   if (active) return next();
@@ -86,6 +87,7 @@ app.use('/', authRoutes);
 app.use('/cart', cartRoutes);
 app.use('/account', accountRoutes);
 app.use('/minigame', minigameRoutes);
+app.use('/rent-website', rentWebsiteRoutes);
 app.use('/admin', adminRoutes);
 
 app.use((req, res) => {

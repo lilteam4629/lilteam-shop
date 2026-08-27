@@ -51,6 +51,7 @@
             </div>
             <a href="/account" class="block px-4 py-3 hover:bg-[var(--input)]">👤 บัญชีของฉัน</a>
             <a href="/account/orders" class="block px-4 py-3 hover:bg-[var(--input)]">🧾 คำสั่งซื้อของฉัน</a>
+            <a href="/rent-website" class="block px-4 py-3 hover:bg-[var(--input)]">🌐 เช่าเว็บ / ต่ออายุคีย์</a>
             <% if (currentUser.role === 'admin') { %>
               <a href="/admin" class="block px-4 py-3 hover:bg-[var(--input)]">⚙️ ระบบหลังบ้าน</a>
             <% } %>
@@ -63,6 +64,7 @@
           </button>
           <div class="absolute right-0 mt-1 w-44 bg-[var(--input)] border border-[var(--border-light)] rounded-lg shadow-xl hidden group-hover:block group-focus-within:block">
             <a href="/account/topup" class="block px-4 py-2 hover:bg-[#2b2416] text-sm text-[var(--gold)] rounded-t-lg">💰 เติมเงิน</a>
+            <a href="/rent-website" class="block px-4 py-2 hover:bg-[#2b2416] text-sm">🌐 เช่าเว็บ / ต่ออายุคีย์</a>
             <a href="/account" class="block px-4 py-2 hover:bg-[#2b2416] text-sm">บัญชีของฉัน</a>
             <a href="/account/orders" class="block px-4 py-2 hover:bg-[#2b2416] text-sm">คำสั่งซื้อของฉัน</a>
             <% if (currentUser.role === 'admin') { %>

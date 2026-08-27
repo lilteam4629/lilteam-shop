@@ -704,6 +704,42 @@ router.post('/minigame/plays/:id/deliver', (req, res) => {
   res.redirect('/admin/minigame');
 });
 
+// ---------- License plans (sell rental keys) ----------
+router.get('/license-plans', (req, res) => {
+  res.render('admin/license-plans', {
+    title: 'ขายคีย์เช่าเว็บ', active: 'license-plans',
+    plans: store.data.licensePlans,
+    sales: store.data.licenseSales.slice(0, 50),
+    licenseEnabled: license.isEnabled(),
+  });
+});
+
+router.post('/license-plans', (req, res) => {
+  const days = Math.max(1, parseInt(req.body.days, 10) || 0);
+  const price = Math.max(0, Number(req.body.price) || 0);
+  if (!days || !price) {
+    req.flash('error', 'กรุณากรอกจำนวนวันและราคาให้ถูกต้อง');
+    return res.redirect('/admin/license-plans');
+  }
+  store.data.licensePlans.push({ id: store.genId(8), days, price, active: true, createdAt: new Date().toISOString() });
+  store.save();
+  req.flash('success', 'เพิ่มแพ็กเกจแล้ว');
+  res.redirect('/admin/license-plans');
+});
+
+router.post('/license-plans/:id/toggle', (req, res) => {
+  const plan = store.data.licensePlans.find(p => p.id === req.params.id);
+  if (plan) { plan.active = !plan.active; store.save(); }
+  res.redirect('/admin/license-plans');
+});
+
+router.post('/license-plans/:id/delete', (req, res) => {
+  store.data.licensePlans = store.data.licensePlans.filter(p => p.id !== req.params.id);
+  store.save();
+  req.flash('success', 'ลบแพ็กเกจแล้ว');
+  res.redirect('/admin/license-plans');
+});
+
 // ---------- Announcements ----------
 router.get('/announcements', (req, res) => {
   res.render('admin/announcements', { title: 'ประกาศ', active: 'announcements', announcements: store.data.announcements });
@@ -734,7 +770,7 @@ router.post('/announcements/:id/delete', (req, res) => {
 
 // ---------- Settings ----------
 router.get('/settings', (req, res) => {
-  res.render('admin/settings', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isEnabled() });
+  res.render('admin/settings', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isGateOn() });
 });
 
 router.get('/appearance', (req, res) => {

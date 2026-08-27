@@ -191,6 +191,12 @@ function defaultData() {
       { id: nanoid(8), name: 'เสียใจด้วย ลองใหม่ครั้งหน้า', percent: 40, stock: null, isPrize: false, image: null, active: true, createdAt: now },
     ],
     miniGamePlays: [],
+    licensePlans: [
+      { id: nanoid(8), days: 7, price: 199, active: true, createdAt: now },
+      { id: nanoid(8), days: 30, price: 599, active: true, createdAt: now },
+      { id: nanoid(8), days: 90, price: 1499, active: true, createdAt: now },
+    ],
+    licenseSales: [],
   };
 }
 
@@ -332,6 +338,8 @@ function migrate() {
   }
   if (!db.miniGamePrizes) { db.miniGamePrizes = []; changed = true; }
   if (!db.miniGamePlays) { db.miniGamePlays = []; changed = true; }
+  if (!db.licensePlans) { db.licensePlans = []; changed = true; }
+  if (!db.licenseSales) { db.licenseSales = []; changed = true; }
   db.products.forEach(product => {
     if (!product.fulfillmentMode) {
       product.fulfillmentMode = 'automatic';

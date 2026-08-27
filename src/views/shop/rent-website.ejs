@@ -1,0 +1,41 @@
+<section class="max-w-xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold mb-1">🌐 เช่าเว็บ / ต่ออายุคีย์</h1>
+  <p class="text-sm text-[var(--text-3)] mb-6">ซื้อคีย์เปิดใช้งาน/ต่ออายุเว็บที่คุณเช่าไว้ ได้คีย์ทันทีหลังชำระเงิน เอาไปกรอกที่หน้า <span class="font-mono">/license</span> ของเว็บนั้นได้เลย</p>
+
+  <% if (!licenseReady) { %>
+    <div class="bg-amber-900/30 border border-amber-600/50 text-amber-300 rounded-xl p-4 text-sm mb-6">
+      ระบบขายคีย์ยังไม่เปิดใช้งานในขณะนี้ กรุณาติดต่อร้านค้า
+    </div>
+  <% } %>
+
+  <div class="grid sm:grid-cols-3 gap-4 mb-8">
+    <% plans.forEach(plan => { %>
+      <form action="/rent-website/buy" method="post" class="bg-[var(--card)] border border-[var(--border)] hover:border-[var(--gold)]/60 rounded-xl p-5 text-center flex flex-col items-center gap-2">
+        <input type="hidden" name="planId" value="<%= plan.id %>" />
+        <div class="text-3xl font-extrabold text-[var(--gold)]"><%= plan.days %></div>
+        <div class="text-xs text-[var(--text-4)] -mt-1">วัน</div>
+        <div class="text-lg font-semibold mt-2">฿<%= plan.price.toLocaleString() %></div>
+        <button <%= licenseReady ? '' : 'disabled' %> class="w-full mt-2 bg-[var(--gold)] hover:bg-[var(--gold-hover)] disabled:opacity-40 text-[var(--bg)] font-semibold rounded-lg py-2 text-sm">ซื้อเลย</button>
+      </form>
+    <% }) %>
+    <% if (!plans.length) { %>
+      <p class="text-sm text-[var(--text-4)] col-span-full text-center py-8">ยังไม่มีแพ็กเกจให้ซื้อในขณะนี้</p>
+    <% } %>
+  </div>
+
+  <h2 class="text-lg font-semibold mb-3">ประวัติการซื้อของคุณ</h2>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[#241f13]">
+    <% if (!mySales.length) { %>
+      <div class="p-4 text-[var(--text-3)] text-sm">ยังไม่มีประวัติการซื้อ</div>
+    <% } %>
+    <% mySales.forEach(sale => { %>
+      <a href="/rent-website/sale/<%= sale.id %>" class="p-4 flex items-center justify-between text-sm hover:bg-[var(--input)]">
+        <div>
+          <div><%= sale.days %> วัน — ฿<%= sale.price.toLocaleString() %></div>
+          <div class="text-[var(--text-4)] text-xs"><%= new Date(sale.createdAt).toLocaleString('th-TH') %></div>
+        </div>
+        <span class="text-[var(--gold)] text-xs">ดูคีย์ →</span>
+      </a>
+    <% }) %>
+  </div>
+</section>
