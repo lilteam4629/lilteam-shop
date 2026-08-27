@@ -43,6 +43,21 @@ router.post('/buy', (req, res) => {
     req.flash('error', 'ระบบสร้างเว็บใหม่อัตโนมัติยังไม่พร้อมใช้งาน กรุณาติดต่อแอดมิน');
     return res.redirect('/rent-website');
   }
+
+  let adminUsername, adminPassword;
+  if (wantsNewSite) {
+    adminUsername = String(req.body.adminUsername || '').trim();
+    adminPassword = String(req.body.adminPassword || '');
+    if (!/^[a-zA-Z0-9_]{3,20}$/.test(adminUsername)) {
+      req.flash('error', 'ชื่อผู้ใช้แอดมินต้องเป็นตัวอักษร a-z, 0-9 และ _ เท่านั้น ยาว 3-20 ตัว');
+      return res.redirect('/rent-website');
+    }
+    if (adminPassword.length < 8) {
+      req.flash('error', 'รหัสผ่านแอดมินต้องมีอย่างน้อย 8 ตัวอักษร');
+      return res.redirect('/rent-website');
+    }
+  }
+
   if (user.walletBalance < plan.price) {
     req.flash('error', 'ยอดเครดิตไม่พอ กรุณาเติมเงินก่อน');
     return res.redirect('/rent-website');
@@ -63,8 +78,6 @@ router.post('/buy', (req, res) => {
   };
 
   if (wantsNewSite) {
-    const adminUsername = `owner_${user.username}`.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20);
-    const adminPassword = randomToken(16);
     const dbName = `tenant_${sale.id}`;
     sale.provisioning = {
       status: 'creating', log: ['กำลังเริ่มสร้างเว็บใหม่...'],

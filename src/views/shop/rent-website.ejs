@@ -19,20 +19,39 @@
           <input type="hidden" name="type" value="renewal" />
           <button <%= licenseReady ? '' : 'disabled' %> class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] disabled:opacity-40 text-[var(--bg)] font-semibold rounded-lg py-2 text-sm">🔄 ต่ออายุ (รับคีย์)</button>
         </form>
-        <% if (newSiteReady) { %>
-          <form action="/rent-website/buy" method="post" class="w-full">
-            <input type="hidden" name="planId" value="<%= plan.id %>" />
-            <input type="hidden" name="type" value="new_site" />
-            <button class="w-full border border-[var(--gold)]/50 text-[var(--gold)] hover:bg-[var(--gold)]/10 font-semibold rounded-lg py-2 text-sm">🆕 เปิดเว็บใหม่</button>
-          </form>
-        <% } %>
       </div>
     <% }) %>
     <% if (!plans.length) { %>
       <p class="text-sm text-[var(--text-4)] col-span-full text-center py-8">ยังไม่มีแพ็กเกจให้ซื้อในขณะนี้</p>
     <% } %>
   </div>
-  <% if (!newSiteReady) { %>
+
+  <% if (newSiteReady && plans.length) { %>
+    <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-5 mb-8">
+      <h2 class="text-lg font-semibold mb-1">🆕 เปิดเว็บใหม่ของคุณเอง</h2>
+      <p class="text-xs text-[var(--text-4)] mb-4">ระบบจะสร้างเว็บใหม่ให้อัตโนมัติ พร้อมตั้งชื่อผู้ใช้/รหัสผ่านแอดมินตามที่คุณกำหนดเอง</p>
+      <form action="/rent-website/buy" method="post" class="space-y-3">
+        <input type="hidden" name="type" value="new_site" />
+        <div>
+          <label class="block text-xs mb-1 text-[var(--text-3)]">เลือกแพ็กเกจ</label>
+          <select name="planId" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
+            <% plans.forEach(plan => { %>
+              <option value="<%= plan.id %>"><%= plan.days %> วัน — ฿<%= plan.price.toLocaleString() %></option>
+            <% }) %>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs mb-1 text-[var(--text-3)]">ชื่อผู้ใช้แอดมิน (สำหรับเข้า /admin ของเว็บใหม่)</label>
+          <input name="adminUsername" required pattern="[a-zA-Z0-9_]{3,20}" title="ตัวอักษร a-z, 0-9 และ _ เท่านั้น ยาว 3-20 ตัว" placeholder="เช่น myshop_admin" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs mb-1 text-[var(--text-3)]">รหัสผ่านแอดมิน (อย่างน้อย 8 ตัว)</label>
+          <input name="adminPassword" type="text" required minlength="8" placeholder="ตั้งรหัสผ่านที่จำได้" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
+        </div>
+        <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">🆕 สร้างเว็บใหม่</button>
+      </form>
+    </div>
+  <% } else if (!newSiteReady) { %>
     <p class="text-xs text-[var(--text-4)] -mt-5 mb-8">💡 "เปิดเว็บใหม่อัตโนมัติ" ยังไม่เปิดใช้งาน — ซื้อได้เฉพาะคีย์ต่ออายุตอนนี้</p>
   <% } %>
 
