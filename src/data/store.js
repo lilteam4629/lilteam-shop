@@ -161,6 +161,11 @@ function defaultData() {
         description: 'เสี่ยงดวงลุ้นรับของรางวัลฟรี! เปิดเผยอัตราการออกรางวัลของทุกรายการอย่างโปร่งใส ถูกรางวัลแล้วทักแชทมารับได้เลย',
         costPerPlay: 20,
       },
+      license: {
+        key: null,
+        label: null,
+        expiresAt: null,
+      },
     },
     users: [
       { id: nanoid(8), username: 'admin', email: 'admin@lilteam.shop', passwordHash: adminPasswordHash, role: 'admin', walletBalance: 0, status: 'active', createdAt: now },
@@ -319,6 +324,10 @@ function migrate() {
       description: 'เสี่ยงดวงลุ้นรับเครดิตร้านค้าฟรี! เปิดเผยอัตราการออกรางวัลของทุกรายการอย่างโปร่งใส',
       costPerPlay: 20,
     };
+    changed = true;
+  }
+  if (!db.settings.license) {
+    db.settings.license = { key: null, label: null, expiresAt: null };
     changed = true;
   }
   if (!db.miniGamePrizes) { db.miniGamePrizes = []; changed = true; }

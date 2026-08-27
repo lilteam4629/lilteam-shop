@@ -13,6 +13,8 @@ const cartRoutes = require('./routes/cart');
 const accountRoutes = require('./routes/account');
 const minigameRoutes = require('./routes/minigame');
 const adminRoutes = require('./routes/admin');
+const licenseRoutes = require('./routes/license');
+const license = require('./services/license');
 const packageInfo = require('../package.json');
 
 const app = express();
@@ -68,6 +70,15 @@ app.use((req, res, next) => {
     error: req.flash('error'),
   };
   next();
+});
+
+app.use('/', licenseRoutes);
+app.use((req, res, next) => {
+  if (!license.isEnabled()) return next();
+  const current = store.data.settings.license;
+  const active = current.key && current.expiresAt && Date.now() < current.expiresAt;
+  if (active) return next();
+  res.redirect('/license');
 });
 
 app.use('/', shopRoutes);

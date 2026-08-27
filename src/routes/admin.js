@@ -4,6 +4,7 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
+const license = require('../services/license');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
@@ -733,7 +734,7 @@ router.post('/announcements/:id/delete', (req, res) => {
 
 // ---------- Settings ----------
 router.get('/settings', (req, res) => {
-  res.render('admin/settings', { title: 'ตั้งค่าร้าน', active: 'settings' });
+  res.render('admin/settings', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isEnabled() });
 });
 
 router.get('/appearance', (req, res) => {
