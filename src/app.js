@@ -70,6 +70,10 @@ app.use((req, res, next) => {
     success: req.flash('success'),
     error: req.flash('error'),
   };
+  // The reseller system (/rent-website) only exists on YOUR OWN shop.
+  // Rented deployments (LICENSE_GATE=on) never get it, so a customer can't
+  // turn around and rent out their own copy to someone else.
+  res.locals.rentWebsiteEnabled = !license.isGateOn();
   next();
 });
 
@@ -87,7 +91,7 @@ app.use('/', authRoutes);
 app.use('/cart', cartRoutes);
 app.use('/account', accountRoutes);
 app.use('/minigame', minigameRoutes);
-app.use('/rent-website', rentWebsiteRoutes);
+if (!license.isGateOn()) app.use('/rent-website', rentWebsiteRoutes);
 app.use('/admin', adminRoutes);
 
 app.use((req, res) => {

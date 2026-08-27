@@ -5,6 +5,8 @@ const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
+const railway = require('../services/railway');
+const github = require('../services/github');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
@@ -705,13 +707,54 @@ router.post('/minigame/plays/:id/deliver', (req, res) => {
 });
 
 // ---------- License plans (sell rental keys) ----------
+// Only exists on the seller's own shop, never on a rented deployment
+// (LICENSE_GATE=on) — a customer must not be able to resell this system.
+router.use('/license-plans', (req, res, next) => {
+  if (license.isGateOn()) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบหน้านี้' });
+  next();
+});
+
 router.get('/license-plans', (req, res) => {
+  const sales = store.data.licenseSales.slice(0, 50).map(sale => {
+    const verified = license.isEnabled() ? license.verifyKey(sale.key) : {};
+    return { ...sale, exp: verified.exp || null };
+  });
   res.render('admin/license-plans', {
     title: 'ขายคีย์เช่าเว็บ', active: 'license-plans',
     plans: store.data.licensePlans,
-    sales: store.data.licenseSales.slice(0, 50),
+    sales,
     licenseEnabled: license.isEnabled(),
+    releaseEnabled: github.isEnabled(),
   });
+});
+
+// Admin picks a specific rented site and updates just that one, on demand —
+// uses the scoped per-project token captured at provisioning time (never
+// the customer's real account token), so no need to involve the customer.
+router.post('/license-plans/sale/:id/sync', async (req, res) => {
+  const sale = store.data.licenseSales.find(s => s.id === req.params.id);
+  const p = sale && sale.provisioning;
+  if (!p || !p.projectToken || !p.serviceId || !p.environmentId) {
+    req.flash('error', 'เว็บนี้ยังไม่มีโทเค็นสำหรับอัพเดตอัตโนมัติ (อาจเป็นเว็บเก่าก่อนมีฟีเจอร์นี้) ให้ลูกค้ากดปุ่ม "ซิงค์ตอนนี้" ที่หน้าใบเสร็จของเขาแทน');
+    return res.redirect('/admin/license-plans');
+  }
+  const result = await railway.redeployService({
+    railwayToken: p.projectToken, serviceId: p.serviceId, environmentId: p.environmentId,
+  });
+  req.flash(result.ok ? 'success' : 'error', result.ok
+    ? `สั่งอัพเดตเว็บของ ${sale.username} แล้ว รอสักครู่`
+    : `อัพเดตไม่สำเร็จ: ${result.error}`);
+  res.redirect('/admin/license-plans');
+});
+
+router.post('/license-plans/release-update', async (req, res) => {
+  const result = await github.releaseUpdate();
+  if (result.ok) {
+    req.flash('success', result.note || 'ปล่อยอัพเดตให้เว็บลูกค้าแล้ว! บอกลูกค้าให้กดปุ่ม "ซิงค์ตอนนี้" ที่หน้าใบเสร็จของเขาเพื่อดึงอัพเดตเข้าเว็บตัวเอง');
+  } else {
+    req.flash('error', 'ปล่อยอัพเดตไม่สำเร็จ: ' + result.error);
+  }
+  res.redirect('/admin/license-plans');
 });
 
 router.post('/license-plans', (req, res) => {
@@ -724,6 +767,25 @@ router.post('/license-plans', (req, res) => {
   store.data.licensePlans.push({ id: store.genId(8), days, price, active: true, createdAt: new Date().toISOString() });
   store.save();
   req.flash('success', 'เพิ่มแพ็กเกจแล้ว');
+  res.redirect('/admin/license-plans');
+});
+
+router.post('/license-plans/:id/edit', (req, res) => {
+  const plan = store.data.licensePlans.find(p => p.id === req.params.id);
+  if (!plan) {
+    req.flash('error', 'ไม่พบแพ็กเกจนี้');
+    return res.redirect('/admin/license-plans');
+  }
+  const days = Math.max(1, parseInt(req.body.days, 10) || 0);
+  const price = Math.max(0, Number(req.body.price) || 0);
+  if (!days || !price) {
+    req.flash('error', 'กรุณากรอกจำนวนวันและราคาให้ถูกต้อง');
+    return res.redirect('/admin/license-plans');
+  }
+  plan.days = days;
+  plan.price = price;
+  store.save();
+  req.flash('success', 'แก้ไขแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');
 });
 
