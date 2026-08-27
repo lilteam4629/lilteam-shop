@@ -28,8 +28,11 @@
 
   <% if (newSiteReady && plans.length) { %>
     <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-5 mb-8">
-      <h2 class="text-lg font-semibold mb-1">🆕 เปิดเว็บใหม่ของคุณเอง</h2>
-      <p class="text-xs text-[var(--text-4)] mb-4">ระบบจะสร้างเว็บใหม่ให้อัตโนมัติ พร้อมตั้งชื่อผู้ใช้/รหัสผ่านแอดมินตามที่คุณกำหนดเอง</p>
+      <div class="flex items-center justify-between gap-2 mb-1">
+        <h2 class="text-lg font-semibold">🆕 เปิดเว็บใหม่ของคุณเอง</h2>
+        <a href="/rent-website/guide" class="shrink-0 text-xs text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-3 py-1 whitespace-nowrap">📖 ดูวิธีทำแบบละเอียด</a>
+      </div>
+      <p class="text-xs text-[var(--text-4)] mb-4">ระบบจะสร้างเว็บใหม่ให้อัตโนมัติ พร้อมตั้งชื่อผู้ใช้/รหัสผ่านแอดมินตามที่คุณกำหนดเอง — ทำไม่เป็น? กดปุ่ม "ดูวิธีทำแบบละเอียด" ด้านบนได้เลย มีสอนทีละขั้นตอน</p>
       <form action="/rent-website/buy" method="post" class="space-y-3">
         <input type="hidden" name="type" value="new_site" />
         <div>
@@ -50,12 +53,15 @@
         </div>
 
         <div class="border-t border-[var(--border)] pt-3">
-          <div class="flex items-center justify-between mb-1">
+          <div class="flex items-center justify-between mb-1 flex-wrap gap-1">
             <label class="text-xs text-[var(--text-3)]">Railway API Token (ของคุณเอง)</label>
-            <a href="https://railway.com/account/tokens" target="_blank" rel="noopener" class="text-[10px] text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-2 py-1 whitespace-nowrap">🔑 ไปสร้าง Token →</a>
+            <div class="flex gap-1.5">
+              <a href="https://railway.com/login" target="_blank" rel="noopener" class="text-[10px] text-[var(--text-3)] border border-[var(--border-light)] rounded-full px-2 py-1 whitespace-nowrap">🚂 สมัคร Railway</a>
+              <a href="https://railway.com/account/tokens" target="_blank" rel="noopener" class="text-[10px] text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-2 py-1 whitespace-nowrap">🔑 ไปสร้าง Token →</a>
+            </div>
           </div>
           <input name="railwayToken" required placeholder="วางโทเค็นที่คัดลอกมาที่นี่" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
-          <p class="text-[10px] text-[var(--text-4)] mt-1">กดปุ่มด้านบน → กด "New Token" → ตั้งชื่ออะไรก็ได้ → กด Create → คัดลอกค่าที่ได้มาวางที่ช่องนี้</p>
+          <p class="text-[10px] text-[var(--text-4)] mt-1">ยังไม่มีบัญชี? กด "สมัคร Railway" ก่อน แล้วค่อยกด "ไปสร้าง Token" → ตั้งชื่ออะไรก็ได้ → เลือก Workspace → กด Create → คัดลอกค่าที่ได้มาวางที่ช่องนี้ (<a href="/rent-website/guide" class="underline text-[var(--gold)]">ดูวิธีแบบละเอียด</a>)</p>
         </div>
 
         <div>
