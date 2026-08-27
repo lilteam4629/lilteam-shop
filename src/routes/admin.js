@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
+const github = require('../services/github');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
@@ -715,7 +716,18 @@ router.get('/license-plans', (req, res) => {
     plans: store.data.licensePlans,
     sales,
     licenseEnabled: license.isEnabled(),
+    releaseEnabled: github.isEnabled(),
   });
+});
+
+router.post('/license-plans/release-update', async (req, res) => {
+  const result = await github.releaseUpdate();
+  if (result.ok) {
+    req.flash('success', result.note || 'ปล่อยอัพเดตให้เว็บลูกค้าแล้ว! บอกลูกค้าให้กดปุ่ม "ซิงค์ตอนนี้" ที่หน้าใบเสร็จของเขาเพื่อดึงอัพเดตเข้าเว็บตัวเอง');
+  } else {
+    req.flash('error', 'ปล่อยอัพเดตไม่สำเร็จ: ' + result.error);
+  }
+  res.redirect('/admin/license-plans');
 });
 
 router.post('/license-plans', (req, res) => {
