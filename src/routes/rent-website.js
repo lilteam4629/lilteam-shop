@@ -181,4 +181,28 @@ router.post('/sale/:id/sync', async (req, res) => {
   res.redirect('/rent-website/sale/' + sale.id);
 });
 
+// Recovery tool: re-attach the GitHub source if it ever gets disconnected
+// (e.g. from Railway's own "Disconnect" button) — Railway's own repo picker
+// can fail to find the template repo if it's owned by a different GitHub
+// account than the one linked to this buyer's Railway login, even though
+// the repo is public, so this goes around that UI limitation via the API.
+router.post('/sale/:id/reconnect', async (req, res) => {
+  const user = currentUser(req);
+  const sale = store.data.licenseSales.find(s => s.id === req.params.id && s.userId === user.id);
+  if (!sale || !sale.provisioning || sale.provisioning.status !== 'success') {
+    req.flash('error', 'ไม่พบเว็บนี้ หรือเว็บยังสร้างไม่เสร็จ');
+    return res.redirect('/rent-website');
+  }
+  const railwayToken = String(req.body.railwayToken || '').trim();
+  if (!railwayToken) {
+    req.flash('error', 'กรุณากรอก Railway API Token ของคุณ');
+    return res.redirect('/rent-website/sale/' + sale.id);
+  }
+  const result = await railway.connectServiceRepo({ railwayToken, serviceId: sale.provisioning.serviceId });
+  req.flash(result.ok ? 'success' : 'error', result.ok
+    ? 'เชื่อมต่อ source ใหม่แล้ว! เว็บจะเริ่ม build เองภายในไม่กี่นาที'
+    : ('เชื่อมต่อไม่สำเร็จ: ' + result.error));
+  res.redirect('/rent-website/sale/' + sale.id);
+});
+
 module.exports = router;
