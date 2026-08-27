@@ -1,7 +1,50 @@
 <section class="max-w-lg mx-auto px-4 py-10">
   <a href="/rent-website" class="text-sm text-[var(--gold)]">← กลับไปหน้าเช่าเว็บ</a>
-  <h1 class="text-2xl font-bold mt-2 mb-1">✅ ซื้อคีย์สำเร็จ</h1>
-  <p class="text-sm text-[var(--text-3)] mb-6">คีย์นี้ใช้ได้ <%= sale.days %> วัน — เอาไปกรอกที่หน้า <span class="font-mono">/license</span> ของเว็บที่ต้องการปลดล็อกหรือต่ออายุ</p>
+  <h1 class="text-2xl font-bold mt-2 mb-1">✅ ซื้อสำเร็จ</h1>
+  <p class="text-sm text-[var(--text-3)] mb-6">
+    <% if (sale.type === 'new_site') { %>
+      คีย์และเว็บใหม่นี้ใช้ได้ <%= sale.days %> วัน
+    <% } else { %>
+      คีย์นี้ใช้ได้ <%= sale.days %> วัน — เอาไปกรอกที่หน้า <span class="font-mono">/license</span> ของเว็บที่ต้องการปลดล็อกหรือต่ออายุ
+    <% } %>
+  </p>
+
+  <% if (sale.type === 'new_site') { %>
+    <div id="provisioning-panel" class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-6 mb-6" data-sale-id="<%= sale.id %>">
+      <div id="provisioning-loading" class="text-center <%= sale.provisioning && sale.provisioning.status !== 'creating' ? 'hidden' : '' %>">
+        <div class="animate-spin w-8 h-8 border-2 border-[var(--gold)] border-t-transparent rounded-full mx-auto mb-3"></div>
+        <p class="text-sm text-[var(--text-2)]">กำลังสร้างเว็บใหม่ให้อัตโนมัติ...</p>
+        <p class="text-xs text-[var(--text-4)] mt-1">ใช้เวลาประมาณ 1-3 นาที ไม่ต้องปิดหน้านี้</p>
+      </div>
+
+      <div id="provisioning-success" class="text-center <%= sale.provisioning && sale.provisioning.status === 'success' ? '' : 'hidden' %>">
+        <div class="text-3xl mb-2">🎉</div>
+        <p class="text-emerald-400 font-semibold mb-4">สร้างเว็บใหม่สำเร็จแล้ว!</p>
+        <div class="space-y-3 text-left text-sm">
+          <div>
+            <div class="text-xs text-[var(--text-4)] mb-1">ลิงก์เว็บของคุณ</div>
+            <a id="site-url" href="<%= sale.provisioning ? sale.provisioning.url : '#' %>" target="_blank" class="font-mono text-[var(--gold)] break-all underline"><%= sale.provisioning ? sale.provisioning.url : '' %></a>
+          </div>
+          <div>
+            <div class="text-xs text-[var(--text-4)] mb-1">ชื่อผู้ใช้แอดมิน</div>
+            <div id="site-admin-user" class="font-mono select-all"><%= sale.provisioning ? sale.provisioning.adminUsername : '' %></div>
+          </div>
+          <div>
+            <div class="text-xs text-[var(--text-4)] mb-1">รหัสผ่านแอดมิน</div>
+            <div id="site-admin-pass" class="font-mono select-all"><%= sale.provisioning ? sale.provisioning.adminPassword : '' %></div>
+          </div>
+        </div>
+        <p class="text-xs text-[var(--text-4)] mt-4">💡 เข้า <span class="font-mono">/admin</span> ของเว็บใหม่ด้วยข้อมูลด้านบน แล้วตั้งค่าร้านของคุณต่อได้เลย</p>
+      </div>
+
+      <div id="provisioning-failed" class="text-center <%= sale.provisioning && sale.provisioning.status === 'failed' ? '' : 'hidden' %>">
+        <div class="text-3xl mb-2">⚠️</div>
+        <p class="text-[var(--coral)] font-semibold mb-2">สร้างเว็บใหม่ไม่สำเร็จ</p>
+        <p id="provisioning-error" class="text-xs text-[var(--text-3)] mb-3"><%= sale.provisioning ? sale.provisioning.error : '' %></p>
+        <p class="text-xs text-[var(--text-4)]">คีย์ที่ซื้อยังใช้ได้ปกติ — ทักแชท "ติดต่อร้าน" แจ้งรหัสอ้างอิง <span class="font-mono"><%= sale.id %></span> เพื่อให้แอดมินช่วยตั้งเว็บให้ด้วยมือแทน</p>
+      </div>
+    </div>
+  <% } %>
 
   <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-6 text-center mb-6">
     <div class="text-xs text-[var(--text-4)] mb-2">คีย์เปิดใช้งาน</div>
@@ -16,7 +59,9 @@
     <div class="flex justify-between"><span class="text-[var(--text-3)]">เวลาที่ซื้อ</span><span><%= new Date(sale.createdAt).toLocaleString('th-TH') %></span></div>
   </div>
 
-  <p class="text-xs text-[var(--text-4)] mt-4 text-center">💡 วิธีใช้: เปิดเว็บที่ต้องการปลดล็อก → เข้าหน้า /license → วางคีย์นี้ → กดปลดล็อก</p>
+  <% if (sale.type !== 'new_site') { %>
+    <p class="text-xs text-[var(--text-4)] mt-4 text-center">💡 วิธีใช้: เปิดเว็บที่ต้องการปลดล็อก → เข้าหน้า /license → วางคีย์นี้ → กดปลดล็อก</p>
+  <% } %>
 </section>
 
 <script>
@@ -39,5 +84,41 @@
       msg.classList.remove('hidden');
       setTimeout(() => msg.classList.add('hidden'), 2000);
     });
+  })();
+
+  (function () {
+    const panel = document.getElementById('provisioning-panel');
+    if (!panel) return;
+    const loadingEl = document.getElementById('provisioning-loading');
+    const successEl = document.getElementById('provisioning-success');
+    const failedEl = document.getElementById('provisioning-failed');
+    if (loadingEl.classList.contains('hidden')) return;
+
+    const saleId = panel.dataset.saleId;
+    const poll = async () => {
+      try {
+        const res = await fetch('/rent-website/sale/' + saleId + '/status', { credentials: 'same-origin' });
+        const data = await res.json();
+        const p = data.provisioning;
+        if (!p || p.status === 'creating') {
+          setTimeout(poll, 4000);
+          return;
+        }
+        loadingEl.classList.add('hidden');
+        if (p.status === 'success') {
+          document.getElementById('site-url').href = p.url;
+          document.getElementById('site-url').textContent = p.url;
+          document.getElementById('site-admin-user').textContent = p.adminUsername;
+          document.getElementById('site-admin-pass').textContent = p.adminPassword;
+          successEl.classList.remove('hidden');
+        } else {
+          document.getElementById('provisioning-error').textContent = p.error || 'เกิดข้อผิดพลาดไม่ทราบสาเหตุ';
+          failedEl.classList.remove('hidden');
+        }
+      } catch (err) {
+        setTimeout(poll, 5000);
+      }
+    };
+    setTimeout(poll, 3000);
   })();
 </script>
