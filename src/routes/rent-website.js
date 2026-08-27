@@ -18,7 +18,8 @@ router.get('/', (req, res) => {
   const mySales = store.data.licenseSales
     .filter(s => s.userId === user.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 20);
+    .slice(0, 20)
+    .map(s => ({ ...s, exp: license.isEnabled() ? (license.verifyKey(s.key).exp || null) : null }));
   res.render('shop/rent-website', {
     title: 'เช่าเว็บ / ต่ออายุคีย์', plans, mySales,
     licenseReady: license.isEnabled(),
@@ -44,11 +45,16 @@ router.post('/buy', (req, res) => {
     return res.redirect('/rent-website');
   }
 
-  let adminUsername, adminPassword, railwayToken;
+  let adminUsername, adminPassword, railwayToken, siteName;
   if (wantsNewSite) {
+    siteName = String(req.body.siteName || '').trim().toLowerCase();
     adminUsername = String(req.body.adminUsername || '').trim();
     adminPassword = String(req.body.adminPassword || '');
     railwayToken = String(req.body.railwayToken || '').trim();
+    if (!/^[a-z0-9-]{3,30}$/.test(siteName)) {
+      req.flash('error', 'ชื่อเว็บต้องเป็นตัวอักษร a-z, 0-9 และ - เท่านั้น ยาว 3-30 ตัว');
+      return res.redirect('/rent-website');
+    }
     if (!/^[a-zA-Z0-9_]{3,20}$/.test(adminUsername)) {
       req.flash('error', 'ชื่อผู้ใช้แอดมินต้องเป็นตัวอักษร a-z, 0-9 และ _ เท่านั้น ยาว 3-20 ตัว');
       return res.redirect('/rent-website');
@@ -97,7 +103,7 @@ router.post('/buy', (req, res) => {
       LICENSE_SECRET: process.env.LICENSE_SECRET,
       LICENSE_GATE: 'on',
     };
-    const projectName = `shop-${user.username}-${sale.id}`.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    const projectName = siteName.toLowerCase().replace(/[^a-z0-9-]/g, '-');
 
     railway.provisionNewSite({ projectName, envVars, railwayToken }).then((result) => {
       const current = store.data.licenseSales.find(s => s.id === sale.id);
@@ -106,6 +112,9 @@ router.post('/buy', (req, res) => {
       current.provisioning.log = result.log;
       current.provisioning.url = result.url || null;
       current.provisioning.error = result.error || null;
+      current.provisioning.serviceId = result.serviceId || null;
+      current.provisioning.environmentId = result.environmentId || null;
+      current.provisioning.projectToken = result.projectToken || null;
       store.save();
     }).catch((err) => {
       const current = store.data.licenseSales.find(s => s.id === sale.id);
@@ -136,7 +145,8 @@ router.get('/sale/:id', (req, res) => {
     req.flash('error', 'ไม่พบรายการนี้');
     return res.redirect('/rent-website');
   }
-  res.render('shop/rent-website-sale', { title: 'คีย์เช่าเว็บของคุณ', sale });
+  const verified = license.isEnabled() ? license.verifyKey(sale.key) : {};
+  res.render('shop/rent-website-sale', { title: 'คีย์เช่าเว็บของคุณ', sale, exp: verified.exp || null });
 });
 
 router.get('/sale/:id/status', (req, res) => {
@@ -144,6 +154,32 @@ router.get('/sale/:id/status', (req, res) => {
   const sale = store.data.licenseSales.find(s => s.id === req.params.id && s.userId === user.id);
   if (!sale) return res.status(404).json({ error: 'not found' });
   res.json({ provisioning: sale.provisioning || null });
+});
+
+// Customer self-service: pull the latest release into JUST this one site,
+// without touching anyone else's. Needs the buyer's Railway token again
+// (never stored) since it's their own project.
+router.post('/sale/:id/sync', async (req, res) => {
+  const user = currentUser(req);
+  const sale = store.data.licenseSales.find(s => s.id === req.params.id && s.userId === user.id);
+  if (!sale || !sale.provisioning || sale.provisioning.status !== 'success') {
+    req.flash('error', 'ไม่พบเว็บนี้ หรือเว็บยังสร้างไม่เสร็จ');
+    return res.redirect('/rent-website');
+  }
+  const railwayToken = String(req.body.railwayToken || '').trim();
+  if (!railwayToken) {
+    req.flash('error', 'กรุณากรอก Railway API Token ของคุณ');
+    return res.redirect('/rent-website/sale/' + sale.id);
+  }
+  const result = await railway.redeployService({
+    railwayToken,
+    serviceId: sale.provisioning.serviceId,
+    environmentId: sale.provisioning.environmentId,
+  });
+  req.flash(result.ok ? 'success' : 'error', result.ok
+    ? 'สั่งอัพเดตเว็บของคุณแล้ว รอสักครู่แล้วรีเฟรชเว็บของคุณ'
+    : ('อัพเดตไม่สำเร็จ: ' + result.error));
+  res.redirect('/rent-website/sale/' + sale.id);
 });
 
 module.exports = router;
