@@ -1,3 +1,16 @@
+<% if (licenseEnabled) { %>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-xl mb-6">
+    <h3 class="font-semibold mb-2">🔒 ใบอนุญาตใช้งาน</h3>
+    <% if (settings.license && settings.license.key && settings.license.expiresAt && Date.now() < settings.license.expiresAt) { %>
+      <p class="text-sm text-emerald-400">✓ ใช้งานอยู่<% if (settings.license.label) { %> — <%= settings.license.label %><% } %></p>
+      <p class="text-xs text-[var(--text-4)] mt-1">หมดอายุ: <%= new Date(settings.license.expiresAt).toLocaleString('th-TH') %></p>
+    <% } else { %>
+      <p class="text-sm text-[var(--coral)]">✕ ยังไม่ได้ปลดล็อก หรือหมดอายุแล้ว</p>
+    <% } %>
+    <a href="/license" class="inline-block text-xs text-[var(--gold)] underline mt-2">ไปหน้ากรอกคีย์ →</a>
+  </div>
+<% } %>
+
 <form action="/admin/settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-xl space-y-4">
   <div>
     <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อร้าน</label>
