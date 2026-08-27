@@ -112,6 +112,8 @@ router.post('/buy', (req, res) => {
       current.provisioning.log = result.log;
       current.provisioning.url = result.url || null;
       current.provisioning.error = result.error || null;
+      current.provisioning.serviceId = result.serviceId || null;
+      current.provisioning.environmentId = result.environmentId || null;
       store.save();
     }).catch((err) => {
       const current = store.data.licenseSales.find(s => s.id === sale.id);
@@ -151,6 +153,32 @@ router.get('/sale/:id/status', (req, res) => {
   const sale = store.data.licenseSales.find(s => s.id === req.params.id && s.userId === user.id);
   if (!sale) return res.status(404).json({ error: 'not found' });
   res.json({ provisioning: sale.provisioning || null });
+});
+
+// Customer self-service: pull the latest release into JUST this one site,
+// without touching anyone else's. Needs the buyer's Railway token again
+// (never stored) since it's their own project.
+router.post('/sale/:id/sync', async (req, res) => {
+  const user = currentUser(req);
+  const sale = store.data.licenseSales.find(s => s.id === req.params.id && s.userId === user.id);
+  if (!sale || !sale.provisioning || sale.provisioning.status !== 'success') {
+    req.flash('error', 'ไม่พบเว็บนี้ หรือเว็บยังสร้างไม่เสร็จ');
+    return res.redirect('/rent-website');
+  }
+  const railwayToken = String(req.body.railwayToken || '').trim();
+  if (!railwayToken) {
+    req.flash('error', 'กรุณากรอก Railway API Token ของคุณ');
+    return res.redirect('/rent-website/sale/' + sale.id);
+  }
+  const result = await railway.redeployService({
+    railwayToken,
+    serviceId: sale.provisioning.serviceId,
+    environmentId: sale.provisioning.environmentId,
+  });
+  req.flash(result.ok ? 'success' : 'error', result.ok
+    ? 'สั่งอัพเดตเว็บของคุณแล้ว รอสักครู่แล้วรีเฟรชเว็บของคุณ'
+    : ('อัพเดตไม่สำเร็จ: ' + result.error));
+  res.redirect('/rent-website/sale/' + sale.id);
 });
 
 module.exports = router;
