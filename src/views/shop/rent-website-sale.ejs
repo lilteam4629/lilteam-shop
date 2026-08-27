@@ -37,7 +37,7 @@
         <p class="text-xs text-[var(--text-4)] mt-4">💡 เข้า <span class="font-mono">/admin</span> ของเว็บใหม่ด้วยข้อมูลด้านบน แล้วตั้งค่าร้านของคุณต่อได้เลย</p>
 
         <div class="border-t border-[var(--border)] mt-4 pt-4 text-left">
-          <p class="text-xs text-[var(--text-3)] mb-2">🔄 เมื่อร้านมีอัพเดตใหม่ ทางร้านจะกดอัพเดตให้เว็บนี้ได้เองโดยไม่ต้องรบกวนคุณ แต่ถ้าอยากอัพเดตเองตอนนี้เลยก็ทำได้:</p>
+          <p class="text-xs text-[var(--text-3)] mb-2">🔄 ปกติเว็บนี้จะอัพเดตเองอัตโนมัติทุกครั้งที่ร้านมีเวอร์ชันใหม่ ไม่ต้องทำอะไร แต่ถ้าอยากสั่งอัพเดตเองตอนนี้เลยก็ทำได้:</p>
           <form action="/rent-website/sale/<%= sale.id %>/sync" method="post" class="flex gap-2">
             <input name="railwayToken" required placeholder="วาง Railway API Token ของคุณอีกครั้ง" class="flex-1 min-w-0 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-xs font-mono" />
             <button class="shrink-0 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-3 py-2 text-xs">ซิงค์ตอนนี้</button>
