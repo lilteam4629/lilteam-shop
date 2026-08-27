@@ -44,6 +44,11 @@
           </select>
         </div>
         <div>
+          <label class="block text-xs mb-1 text-[var(--text-3)]">ตั้งชื่อเว็บของคุณ (จะใช้เป็นส่วนหนึ่งของโดเมน)</label>
+          <input name="siteName" required pattern="[a-zA-Z0-9-]{3,30}" title="ตัวอักษร a-z, 0-9 และ - เท่านั้น ยาว 3-30 ตัว" placeholder="เช่น my-cool-shop" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+          <p class="text-[10px] text-[var(--text-4)] mt-1">โดเมนจะออกมาประมาณ <span class="font-mono">ชื่อที่ตั้ง-xxxxx.up.railway.app</span> (Railway จะเติมรหัสท้ายให้เองเพื่อกันชื่อซ้ำ)</p>
+        </div>
+        <div>
           <label class="block text-xs mb-1 text-[var(--text-3)]">ชื่อผู้ใช้แอดมิน (สำหรับเข้า /admin ของเว็บใหม่)</label>
           <input name="adminUsername" required pattern="[a-zA-Z0-9_]{3,20}" title="ตัวอักษร a-z, 0-9 และ _ เท่านั้น ยาว 3-20 ตัว" placeholder="เช่น myshop_admin" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
         </div>

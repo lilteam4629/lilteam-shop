@@ -44,11 +44,16 @@ router.post('/buy', (req, res) => {
     return res.redirect('/rent-website');
   }
 
-  let adminUsername, adminPassword, railwayToken;
+  let adminUsername, adminPassword, railwayToken, siteName;
   if (wantsNewSite) {
+    siteName = String(req.body.siteName || '').trim().toLowerCase();
     adminUsername = String(req.body.adminUsername || '').trim();
     adminPassword = String(req.body.adminPassword || '');
     railwayToken = String(req.body.railwayToken || '').trim();
+    if (!/^[a-z0-9-]{3,30}$/.test(siteName)) {
+      req.flash('error', 'ชื่อเว็บต้องเป็นตัวอักษร a-z, 0-9 และ - เท่านั้น ยาว 3-30 ตัว');
+      return res.redirect('/rent-website');
+    }
     if (!/^[a-zA-Z0-9_]{3,20}$/.test(adminUsername)) {
       req.flash('error', 'ชื่อผู้ใช้แอดมินต้องเป็นตัวอักษร a-z, 0-9 และ _ เท่านั้น ยาว 3-20 ตัว');
       return res.redirect('/rent-website');
@@ -97,7 +102,7 @@ router.post('/buy', (req, res) => {
       LICENSE_SECRET: process.env.LICENSE_SECRET,
       LICENSE_GATE: 'on',
     };
-    const projectName = `shop-${user.username}-${sale.id}`.toLowerCase().replace(/[^a-z0-9-]/g, '-');
+    const projectName = siteName.toLowerCase().replace(/[^a-z0-9-]/g, '-');
 
     railway.provisionNewSite({ projectName, envVars, railwayToken }).then((result) => {
       const current = store.data.licenseSales.find(s => s.id === sale.id);
