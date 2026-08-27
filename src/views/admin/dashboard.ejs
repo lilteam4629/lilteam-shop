@@ -1,6 +1,13 @@
 <% if (licenseGateOn && licenseExpiresAt) { %>
   <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-4 mb-6 flex items-center justify-between flex-wrap gap-2">
-    <div class="text-sm text-[var(--text-3)]">🔑 อายุการใช้งานเว็บนี้เหลือ</div>
+    <div class="text-sm text-[var(--text-3)]">
+      🔑 อายุการใช้งานเว็บนี้เหลือ
+      <% if (licenseLabel) { %><span class="text-[var(--text-4)]"> — <%= licenseLabel %></span><% } %>
+      <form action="/admin/license-label" method="post" class="inline-flex items-center gap-1 ml-1 align-middle">
+        <input name="label" value="<%= licenseLabel || '' %>" placeholder="ชื่อที่แสดง" class="w-28 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-0.5 text-xs" />
+        <button class="text-[10px] text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-2 py-0.5">แก้ไข</button>
+      </form>
+    </div>
     <div class="flex items-center gap-3">
       <span id="license-countdown" class="font-mono font-bold text-lg text-[var(--gold)]" data-exp="<%= licenseExpiresAt %>">…</span>
       <a href="/license" class="text-xs text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-3 py-1 whitespace-nowrap">ต่ออายุ →</a>
