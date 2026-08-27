@@ -22,7 +22,7 @@ router.get('/', (req, res) => {
   res.render('shop/rent-website', {
     title: 'เช่าเว็บ / ต่ออายุคีย์', plans, mySales,
     licenseReady: license.isEnabled(),
-    newSiteReady: railway.isEnabled() && Boolean(process.env.MONGODB_URI),
+    newSiteReady: railway.isEnabled(),
   });
 });
 
@@ -39,21 +39,31 @@ router.post('/buy', (req, res) => {
     req.flash('error', 'ไม่พบแพ็กเกจนี้');
     return res.redirect('/rent-website');
   }
-  if (wantsNewSite && !(railway.isEnabled() && process.env.MONGODB_URI)) {
+  if (wantsNewSite && !railway.isEnabled()) {
     req.flash('error', 'ระบบสร้างเว็บใหม่อัตโนมัติยังไม่พร้อมใช้งาน กรุณาติดต่อแอดมิน');
     return res.redirect('/rent-website');
   }
 
-  let adminUsername, adminPassword;
+  let adminUsername, adminPassword, railwayToken, mongodbUri;
   if (wantsNewSite) {
     adminUsername = String(req.body.adminUsername || '').trim();
     adminPassword = String(req.body.adminPassword || '');
+    railwayToken = String(req.body.railwayToken || '').trim();
+    mongodbUri = String(req.body.mongodbUri || '').trim();
     if (!/^[a-zA-Z0-9_]{3,20}$/.test(adminUsername)) {
       req.flash('error', 'ชื่อผู้ใช้แอดมินต้องเป็นตัวอักษร a-z, 0-9 และ _ เท่านั้น ยาว 3-20 ตัว');
       return res.redirect('/rent-website');
     }
     if (adminPassword.length < 8) {
       req.flash('error', 'รหัสผ่านแอดมินต้องมีอย่างน้อย 8 ตัวอักษร');
+      return res.redirect('/rent-website');
+    }
+    if (!railwayToken && !railway.hasSellerToken()) {
+      req.flash('error', 'กรุณากรอก Railway API Token ของคุณเอง');
+      return res.redirect('/rent-website');
+    }
+    if (!/^mongodb(\+srv)?:\/\/.+/.test(mongodbUri) && !process.env.MONGODB_URI) {
+      req.flash('error', 'กรุณากรอก MongoDB URI ของคุณเอง (ต้องขึ้นต้นด้วย mongodb:// หรือ mongodb+srv://)');
       return res.redirect('/rent-website');
     }
   }
@@ -78,7 +88,6 @@ router.post('/buy', (req, res) => {
   };
 
   if (wantsNewSite) {
-    const dbName = `tenant_${sale.id}`;
     sale.provisioning = {
       status: 'creating', log: ['กำลังเริ่มสร้างเว็บใหม่...'],
       url: null, adminUsername, adminPassword, error: null,
@@ -89,15 +98,14 @@ router.post('/buy', (req, res) => {
     const envVars = {
       ADMIN_USERNAME: adminUsername,
       ADMIN_PASSWORD: adminPassword,
-      MONGODB_URI: process.env.MONGODB_URI,
-      MONGODB_DB_NAME: dbName,
+      MONGODB_URI: mongodbUri || process.env.MONGODB_URI,
       SESSION_SECRET: randomToken(32),
       LICENSE_SECRET: process.env.LICENSE_SECRET,
       LICENSE_GATE: 'on',
     };
     const projectName = `shop-${user.username}-${sale.id}`.toLowerCase().replace(/[^a-z0-9-]/g, '-');
 
-    railway.provisionNewSite({ projectName, envVars }).then((result) => {
+    railway.provisionNewSite({ projectName, envVars, railwayToken }).then((result) => {
       const current = store.data.licenseSales.find(s => s.id === sale.id);
       if (!current) return;
       current.provisioning.status = result.ok ? 'success' : 'failed';

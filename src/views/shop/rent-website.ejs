@@ -48,7 +48,27 @@
           <label class="block text-xs mb-1 text-[var(--text-3)]">รหัสผ่านแอดมิน (อย่างน้อย 8 ตัว)</label>
           <input name="adminPassword" type="text" required minlength="8" placeholder="ตั้งรหัสผ่านที่จำได้" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
         </div>
+
+        <div class="border-t border-[var(--border)] pt-3">
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs text-[var(--text-3)]">Railway API Token (ของคุณเอง)</label>
+            <a href="https://railway.com/account/tokens" target="_blank" rel="noopener" class="text-[10px] text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-2 py-1 whitespace-nowrap">🔑 ไปสร้าง Token →</a>
+          </div>
+          <input name="railwayToken" required placeholder="วางโทเค็นที่คัดลอกมาที่นี่" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
+          <p class="text-[10px] text-[var(--text-4)] mt-1">กดปุ่มด้านบน → กด "New Token" → ตั้งชื่ออะไรก็ได้ → กด Create → คัดลอกค่าที่ได้มาวางที่ช่องนี้</p>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="text-xs text-[var(--text-3)]">MongoDB URI (ฟรี ของคุณเอง)</label>
+            <a href="https://cloud.mongodb.com" target="_blank" rel="noopener" class="text-[10px] text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-2 py-1 whitespace-nowrap">🍃 ไปสมัคร MongoDB →</a>
+          </div>
+          <input name="mongodbUri" required placeholder="mongodb+srv://..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
+          <p class="text-[10px] text-[var(--text-4)] mt-1">กดปุ่มด้านบน → สมัครฟรี → สร้าง Free cluster (M0) → Database Access ตั้ง user/password → Network Access เลือก Allow from anywhere → Connect → Drivers → คัดลอก connection string มาวางที่ช่องนี้</p>
+        </div>
+
         <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">🆕 สร้างเว็บใหม่</button>
+        <p class="text-[10px] text-[var(--text-4)] text-center">Token และ URI จะถูกใช้แค่ตอนสร้างเว็บครั้งนี้เท่านั้น ระบบไม่บันทึกเก็บไว้</p>
       </form>
     </div>
   <% } else if (!newSiteReady) { %>
