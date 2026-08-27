@@ -31,9 +31,10 @@
 
       <h1 class="text-2xl font-bold mb-2"><%= product.title %></h1>
       <% if (product.flashSaleActive || product.flashSaleUpcoming) { %>
-        <div class="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--gold)]/40 bg-gradient-to-r from-[#33280d] to-[#17140d] px-4 py-3 shadow-[0_0_24px_rgba(216,184,77,.12)]">
+        <% const detailFlashTarget = product.flashSaleActive ? product.flashSaleEndsAt : product.flashSaleStartsAt; const detailFlashSeconds = Math.max(0, Math.floor((detailFlashTarget - Date.now()) / 1000)); const detailFlashInitial = (Math.floor(detailFlashSeconds / 86400) ? Math.floor(detailFlashSeconds / 86400) + ' วัน ' : '') + [Math.floor((detailFlashSeconds % 86400) / 3600), Math.floor((detailFlashSeconds % 3600) / 60), detailFlashSeconds % 60].map(n => String(n).padStart(2, '0')).join(':'); %>
+        <div class="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--gold)]/55 bg-gradient-to-r from-[#33280d] to-[#17140d] px-4 py-3">
           <div><div class="font-black text-[var(--gold)]">⚡ FLASH SALE</div><div class="text-xs text-[var(--text-3)]"><%= product.flashSaleActive ? 'ราคาพิเศษกำลังเปิดขาย' : 'เตรียมพบราคาพิเศษ' %></div></div>
-          <div class="text-right"><div class="text-[10px] text-[var(--text-4)]"><%= product.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></div><div class="flash-countdown font-mono font-bold text-lg text-[#ffe27a]" <% if (product.flashSaleActive) { %>data-flash-end="<%= product.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= product.flashSaleStartsAt %>"<% } %>></div></div>
+          <div class="min-w-[7.5rem] rounded-lg border border-[#d9b640]/45 bg-black/35 px-3 py-2 text-center"><div class="text-[10px] font-medium text-[#c9aa4b]"><%= product.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></div><div class="flash-countdown mt-0.5 whitespace-nowrap font-mono text-xl sm:text-2xl font-black tracking-wide text-[#ffe68a]" <% if (product.flashSaleActive) { %>data-flash-end="<%= product.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= product.flashSaleStartsAt %>"<% } %>><%= detailFlashInitial %></div></div>
         </div>
       <% } %>
       <div class="flex flex-wrap gap-2 mb-3">

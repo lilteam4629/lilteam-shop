@@ -2,7 +2,7 @@
   class="premium-product-card spotlight-card filterable-card group relative flex w-full h-full aspect-[3/4] rounded-2xl overflow-hidden border <%= p.flashSaleActive ? 'border-[#e8bd3e]' : 'border-[#8c7430]/55' %>
          transition-all duration-300 hover:border-[#f0cf64]/80">
 
-  <% const soldOut = p.stockCount < 1; %>
+  <% const soldOut = p.stockCount < 1; const flashTarget = p.flashSaleActive ? p.flashSaleEndsAt : p.flashSaleStartsAt; const flashSeconds = Math.max(0, Math.floor((flashTarget - Date.now()) / 1000)); const flashInitial = (Math.floor(flashSeconds / 86400) ? Math.floor(flashSeconds / 86400) + 'ว ' : '') + [Math.floor((flashSeconds % 86400) / 3600), Math.floor((flashSeconds % 3600) / 60), flashSeconds % 60].map(n => String(n).padStart(2, '0')).join(':'); %>
   <img src="<%= p.images[0] %>" alt="<%= p.title %>"
     class="absolute inset-0 w-full h-full object-cover transition duration-500
            <%= soldOut
@@ -39,9 +39,9 @@
 
   <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1 min-w-0">
     <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
-      <div class="mb-0.5 flex min-w-0 items-center justify-between gap-1.5 border-l-2 border-[#e7bb36] pl-2">
-        <span class="truncate text-[7px] font-bold tracking-wider text-[#e7bb36]"><%= p.flashSaleActive ? 'FLASH SALE เหลือเวลา' : 'FLASH SALE เริ่มใน' %></span>
-        <span class="flash-countdown shrink-0 font-mono text-[9px] font-bold text-[#ffe58a]" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>></span>
+      <div class="mb-0.5 flex min-h-7 min-w-0 items-center justify-between gap-1.5 rounded-md border border-[#d6ab32]/45 bg-[#17140c]/90 px-2">
+        <span class="truncate text-[8px] font-bold tracking-wide text-[#dcb741]"><%= p.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></span>
+        <span class="flash-countdown shrink-0 font-mono text-[12px] font-black tracking-wide text-[#ffe990] [text-shadow:0_0_8px_rgba(255,220,92,.3)]" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>><%= flashInitial %></span>
       </div>
     <% } %>
     <h3 class="font-semibold text-sm line-clamp-2 text-white [text-shadow:0_2px_8px_rgba(0,0,0,.95)] group-hover:text-[#fff6d4] transition-colors"><%= p.title %></h3>
