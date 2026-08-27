@@ -5,8 +5,6 @@ const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
-const railway = require('../services/railway');
-const github = require('../services/github');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
@@ -726,60 +724,7 @@ router.get('/license-plans', (req, res) => {
     plans: store.data.licensePlans,
     sales,
     licenseEnabled: license.isEnabled(),
-    releaseEnabled: github.isEnabled(),
   });
-});
-
-// Admin picks a specific rented site and updates just that one, on demand —
-// uses the scoped per-project token captured at provisioning time (never
-// the customer's real account token), so no need to involve the customer.
-router.post('/license-plans/sale/:id/sync', async (req, res) => {
-  const sale = store.data.licenseSales.find(s => s.id === req.params.id);
-  const p = sale && sale.provisioning;
-  if (!p || !p.projectToken || !p.serviceId || !p.environmentId) {
-    req.flash('error', 'เว็บนี้ยังไม่มีโทเค็นสำหรับอัพเดตอัตโนมัติ (อาจเป็นเว็บเก่าก่อนมีฟีเจอร์นี้) ให้ลูกค้ากดปุ่ม "ซิงค์ตอนนี้" ที่หน้าใบเสร็จของเขาแทน');
-    return res.redirect('/admin/license-plans');
-  }
-  const result = await railway.redeployService({
-    railwayToken: p.projectToken, serviceId: p.serviceId, environmentId: p.environmentId, isProjectToken: true,
-  });
-  req.flash(result.ok ? 'success' : 'error', result.ok
-    ? `สั่งอัพเดตเว็บของ ${sale.username} แล้ว รอสักครู่`
-    : `อัพเดตไม่สำเร็จ: ${result.error}`);
-  res.redirect('/admin/license-plans');
-});
-
-// Update EVERY rented site in one click — no key entry needed, since it
-// reuses each site's own scoped token captured at provisioning time. This
-// only re-pulls whatever is currently on the release branch; it does NOT
-// merge your latest code into that branch (see /release-update below for
-// that optional, separate step).
-router.post('/license-plans/update-all', async (req, res) => {
-  const targets = store.data.licenseSales.filter(s => s.type === 'new_site' && s.provisioning && s.provisioning.projectToken);
-  if (!targets.length) {
-    req.flash('error', 'ยังไม่มีเว็บลูกค้าที่อัพเดตอัตโนมัติได้ (ต้องเป็นเว็บที่สร้างหลังมีฟีเจอร์นี้)');
-    return res.redirect('/admin/license-plans');
-  }
-  const results = await Promise.all(targets.map(sale => railway.redeployService({
-    railwayToken: sale.provisioning.projectToken,
-    serviceId: sale.provisioning.serviceId,
-    environmentId: sale.provisioning.environmentId,
-    isProjectToken: true,
-  }).then(r => ({ sale, r }))));
-  const okCount = results.filter(x => x.r.ok).length;
-  req.flash(okCount === results.length ? 'success' : 'error',
-    `สั่งอัพเดตเว็บลูกค้าสำเร็จ ${okCount}/${results.length} เว็บ`);
-  res.redirect('/admin/license-plans');
-});
-
-router.post('/license-plans/release-update', async (req, res) => {
-  const result = await github.releaseUpdate();
-  if (result.ok) {
-    req.flash('success', result.note || 'ปล่อยอัพเดตให้เว็บลูกค้าแล้ว! บอกลูกค้าให้กดปุ่ม "ซิงค์ตอนนี้" ที่หน้าใบเสร็จของเขาเพื่อดึงอัพเดตเข้าเว็บตัวเอง');
-  } else {
-    req.flash('error', 'ปล่อยอัพเดตไม่สำเร็จ: ' + result.error);
-  }
-  res.redirect('/admin/license-plans');
 });
 
 router.post('/license-plans', (req, res) => {

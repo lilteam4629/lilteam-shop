@@ -31,12 +31,14 @@
 // one thing that's the same regardless of whose token is used, since it's
 // just a public GitHub repo URL to deploy from.
 //
-// Customer sites deploy from RAILWAY_RELEASE_BRANCH (default "release"),
-// NOT the seller's normal dev branch. This means pushing to your usual
-// branch only updates YOUR OWN shop; customer sites stay frozen until you
-// merge into the release branch, and each customer can independently pull
-// the latest release into just their own site via redeployService() below
-// (their "sync ตอนนี้" button) without affecting anyone else's site.
+// Every rented site deploys from the repo's default branch, and Railway's
+// own GitHub webhook auto-deploy keeps it updated automatically on every
+// push — confirmed working in production. Earlier versions of this file
+// tried to build custom update automation on top (a separate release
+// branch, per-project tokens, admin "push update" buttons); all of that
+// was guesswork against an API this session can't call live to verify, and
+// it broke real purchases more than once. Removed in favor of just
+// trusting Railway's own auto-deploy, which needs none of that.
 
 const axios = require('axios');
 const crypto = require('crypto');
@@ -45,11 +47,6 @@ const API_URL = 'https://backboard.railway.app/graphql/v2';
 const SELLER_TOKEN = process.env.RAILWAY_API_TOKEN || null;
 const TEMPLATE_REPO = process.env.RAILWAY_TEMPLATE_REPO;
 const MONGO_SERVICE_NAME = 'mongodb';
-// Customer sites deploy from this branch instead of your default branch, so
-// pushing to your normal dev branch (e.g. main) only affects YOUR OWN shop —
-// customer sites stay untouched until you deliberately merge into this
-// branch (see README "อัพเดทเว็บลูกค้า").
-const RELEASE_BRANCH = process.env.RAILWAY_RELEASE_BRANCH || 'release';
 
 // "Enabled" only means the template repo is configured — a per-request
 // customer token is enough to provision on its own.
@@ -86,13 +83,6 @@ async function gqlRequest(headers, query, variables, log) {
 // A buyer's own Railway account token (or the seller's fallback token).
 async function gql(token, query, variables, log) {
   return gqlRequest({ Authorization: `Bearer ${token}` }, query, variables, log);
-}
-
-// A token scoped to just one project (minted via projectTokenCreate during
-// provisioning) — Railway authenticates these via a different header than
-// account tokens, not Authorization: Bearer.
-async function gqlProject(token, query, variables, log) {
-  return gqlRequest({ 'Project-Access-Token': token }, query, variables, log);
 }
 
 /**
@@ -185,12 +175,11 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
     const mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${MONGO_SERVICE_NAME}.railway.internal:27017/lilteam_shop?authSource=admin`;
 
     // --- App service ---
-    // NOTE: branch is deliberately NOT passed to serviceCreate here — an
-    // earlier attempt to pin it to RELEASE_BRANCH at creation time broke
-    // real purchases with an HTTP 400 (that field likely isn't valid on
-    // ServiceCreateInput.source). We try to switch the branch AFTER
-    // creation instead, in its own try/catch below, so a failure there
-    // never blocks the site itself from being created.
+    // Deliberately no branch override here — this deploys from the repo's
+    // default branch and Railway's own GitHub webhook auto-deploy keeps it
+    // updated on every push automatically (confirmed working in
+    // production), which is simpler and more reliable than anything we can
+    // build on top of the (largely unverified-from-here) Railway API.
     log.push(`กำลังสร้าง service เว็บจาก repo ${TEMPLATE_REPO}...`);
     const serviceCreated = await gql(
       token,
@@ -200,20 +189,6 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
     );
     const serviceId = serviceCreated.serviceCreate.id;
     log.push(`✓ สร้าง service เว็บแล้ว (id: ${serviceId})`);
-
-    if (RELEASE_BRANCH && RELEASE_BRANCH !== 'main') {
-      try {
-        await gql(
-          token,
-          `mutation($id: String!, $input: ServiceConnectInput!) { serviceConnect(id: $id, input: $input) { id } }`,
-          { id: serviceId, input: { repo: TEMPLATE_REPO, branch: RELEASE_BRANCH } },
-          log
-        );
-        log.push(`✓ ผูกเว็บนี้กับ branch "${RELEASE_BRANCH}" แล้ว`);
-      } catch (err) {
-        log.push(`⚠ สลับไปใช้ branch "${RELEASE_BRANCH}" ไม่สำเร็จ (ไม่กระทบเว็บที่สร้างแล้ว แต่จะยังผูกกับ branch หลักแทน): ${err.message}`);
-      }
-    }
 
     log.push('กำลังตั้งค่า Environment Variables ของเว็บ...');
     await gql(
@@ -241,65 +216,35 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
       { serviceId, environmentId },
       log
     );
-    log.push('✓ สั่ง deploy แล้ว — เว็บจะพร้อมใช้งานภายในไม่กี่นาที');
+    log.push('✓ สั่ง deploy แล้ว — เว็บจะพร้อมใช้งานภายในไม่กี่นาที และจะอัพเดตเองอัตโนมัติทุกครั้งที่มีโค้ดใหม่');
 
-    // Mint a token scoped to just THIS project/environment (not the buyer's
-    // full account token) so the seller's admin panel can push future
-    // updates to this one site on its own, without ever holding the
-    // buyer's real account credentials. Best-effort: if this fails (e.g.
-    // API shape differs), the site itself is still fine — the buyer can
-    // always fall back to pasting their own token on their sale page.
-    let projectToken = null;
-    try {
-      log.push('กำลังสร้างโทเค็นสำหรับอัพเดตเว็บนี้ในอนาคต...');
-      const tokenResult = await gql(
-        token,
-        `mutation($input: ProjectTokenCreateInput!) { projectTokenCreate(input: $input) }`,
-        { input: { projectId, environmentId, name: `${projectName}-updates` } },
-        log
-      );
-      projectToken = tokenResult.projectTokenCreate || null;
-      log.push(projectToken ? '✓ สร้างโทเค็นสำหรับอัพเดตแล้ว' : '⚠ ไม่ได้รับโทเค็นสำหรับอัพเดต (จะต้องขอโทเค็นจากลูกค้าเองภายหลัง)');
-    } catch (err) {
-      log.push(`⚠ สร้างโทเค็นสำหรับอัพเดตอัตโนมัติไม่สำเร็จ (ไม่กระทบเว็บที่สร้างแล้ว): ${err.message}`);
-    }
-
-    return { ok: true, url: `https://${domain}`, projectId, serviceId, mongoServiceId, environmentId, projectToken, log };
+    return { ok: true, url: `https://${domain}`, projectId, serviceId, mongoServiceId, environmentId, log };
   } catch (err) {
     return { ok: false, log, error: err.message };
   }
 }
 
 /**
- * Redeploy a single already-provisioned site's app service, pulling in
- * whatever is currently on RELEASE_BRANCH. Used both for the customer's own
- * "sync ตอนนี้" self-service button (their real account token, isProjectToken
- * false) and the admin's per-site / bulk update buttons (the scoped token
- * minted at provisioning time, isProjectToken true) — only touches that one
- * project/service, never any other rented site.
- * @param {{ railwayToken: string, serviceId: string, environmentId: string, isProjectToken?: boolean }} opts
+ * Redeploy a single already-provisioned site's app service. Used for the
+ * customer's own "sync ตอนนี้" self-service button (their real Railway
+ * account token) — only touches that one project/service, never any other
+ * rented site. In normal operation this shouldn't be needed at all, since
+ * Railway's own GitHub auto-deploy already redeploys every rented site the
+ * moment new code is pushed; this is just a manual fallback.
+ * @param {{ railwayToken: string, serviceId: string, environmentId: string }} opts
  */
-async function redeployService({ railwayToken, serviceId, environmentId, isProjectToken }) {
+async function redeployService({ railwayToken, serviceId, environmentId }) {
   const log = [];
   if (!railwayToken) return { ok: false, log, error: 'ไม่มี Railway API Token' };
   if (!serviceId || !environmentId) return { ok: false, log, error: 'ไม่พบข้อมูลเว็บนี้ (serviceId/environmentId)' };
-  const mutation = `mutation($serviceId: String!, $environmentId: String!) { serviceInstanceRedeploy(serviceId: $serviceId, environmentId: $environmentId) }`;
-  const vars = { serviceId, environmentId };
   try {
     log.push('กำลังสั่งอัพเดตเว็บเป็นเวอร์ชันล่าสุด...');
-    if (isProjectToken) {
-      // Project-scoped tokens authenticate via a different header than
-      // account tokens — try that first, fall back to Bearer since this
-      // hasn't been verified against Railway's live API from this session.
-      try {
-        await gqlProject(railwayToken, mutation, vars, log);
-      } catch (err) {
-        log.push('⚠ ลองใหม่ด้วย Authorization header แบบบัญชีทั่วไป...');
-        await gql(railwayToken, mutation, vars, log);
-      }
-    } else {
-      await gql(railwayToken, mutation, vars, log);
-    }
+    await gql(
+      railwayToken,
+      `mutation($serviceId: String!, $environmentId: String!) { serviceInstanceRedeploy(serviceId: $serviceId, environmentId: $environmentId) }`,
+      { serviceId, environmentId },
+      log
+    );
     log.push('✓ สั่งอัพเดตแล้ว — เว็บจะพร้อมใช้งานภายในไม่กี่นาที');
     return { ok: true, log };
   } catch (err) {
