@@ -602,5 +602,29 @@
     })();
   </script>
   <% } %>
+<script>
+  (function () {
+    const clocks = Array.from(document.querySelectorAll('.flash-countdown'));
+    if (!clocks.length) return;
+    function render() {
+      const now = Date.now();
+      let reloadNeeded = false;
+      clocks.forEach(function (clock) {
+        const target = Number(clock.dataset.flashEnd || clock.dataset.flashStart || 0);
+        const remaining = Math.max(0, target - now);
+        if (!remaining) reloadNeeded = true;
+        const totalSeconds = Math.floor(remaining / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        clock.textContent = (days ? days + 'วัน ' : '') + [hours, minutes, seconds].map(function (n) { return String(n).padStart(2, '0'); }).join(':');
+      });
+      if (reloadNeeded) window.location.reload();
+    }
+    render();
+    window.setInterval(render, 1000);
+  })();
+</script>
 </body>
 </html>

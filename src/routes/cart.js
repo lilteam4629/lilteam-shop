@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
 const { requireLogin, currentUser } = require('../middleware/auth');
+const { withEffectivePrice } = require('../services/pricing');
 
 function getCart(req) {
   if (!req.session.cart) req.session.cart = [];
@@ -23,8 +24,9 @@ function isProductVisible(product) {
 function buildCartView(req) {
   const cart = getCart(req);
   const items = cart.map(ci => {
-    const product = store.data.products.find(p => p.id === ci.productId);
-    if (!isProductVisible(product)) return null;
+    const storedProduct = store.data.products.find(p => p.id === ci.productId);
+    if (!isProductVisible(storedProduct)) return null;
+    const product = withEffectivePrice(storedProduct);
     const stock = availableStock(product.id);
     const qty = Math.min(ci.qty, Math.max(stock, 0));
     return { product, qty, stock, subtotal: product.price * qty };

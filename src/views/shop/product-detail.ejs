@@ -30,6 +30,12 @@
       </div>
 
       <h1 class="text-2xl font-bold mb-2"><%= product.title %></h1>
+      <% if (product.flashSaleActive || product.flashSaleUpcoming) { %>
+        <div class="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--gold)]/40 bg-gradient-to-r from-[#33280d] to-[#17140d] px-4 py-3 shadow-[0_0_24px_rgba(216,184,77,.12)]">
+          <div><div class="font-black text-[var(--gold)]">⚡ FLASH SALE</div><div class="text-xs text-[var(--text-3)]"><%= product.flashSaleActive ? 'ราคาพิเศษกำลังเปิดขาย' : 'เตรียมพบราคาพิเศษ' %></div></div>
+          <div class="text-right"><div class="text-[10px] text-[var(--text-4)]"><%= product.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></div><div class="flash-countdown font-mono font-bold text-lg text-[#ffe27a]" <%= product.flashSaleActive ? `data-flash-end="${product.flashSaleEndsAt}"` : `data-flash-start="${product.flashSaleStartsAt}"` %>></div></div>
+        </div>
+      <% } %>
       <div class="flex flex-wrap gap-2 mb-3">
         <% genreNames.forEach(g => { %>
           <span class="text-xs bg-[var(--input)] border border-[var(--border-light)] text-[var(--text-2)] px-2 py-1 rounded-full"><%= g %></span>
@@ -38,8 +44,9 @@
       <div class="mb-1 text-xs text-[var(--text-3)]">ราคา</div>
       <div class="flex items-baseline gap-2 mb-5">
         <span class="text-3xl font-bold text-[var(--gold)]">฿<%= product.price.toLocaleString() %>.00</span>
-        <% if (product.originalPrice > product.price) { %>
-          <span class="text-[var(--coral)] line-through text-sm">฿<%= product.originalPrice.toLocaleString() %>.00</span>
+        <% const crossedPrice = product.flashSaleActive ? product.regularPrice : product.originalPrice; %>
+        <% if (crossedPrice > product.price) { %>
+          <span class="text-[var(--coral)] line-through text-sm">฿<%= crossedPrice.toLocaleString() %>.00</span>
         <% } %>
       </div>
 

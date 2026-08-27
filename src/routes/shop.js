@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
+const { withEffectivePrice } = require('../services/pricing');
 
 function publishTime(product) {
   if (!product.publishAt) return 0;
@@ -14,7 +15,7 @@ function isProductVisible(product) {
 
 function withStock(product) {
   const stock = store.data.stockItems.filter(s => s.productId === product.id && s.status === 'available');
-  return { ...product, stockCount: stock.length };
+  return { ...withEffectivePrice(product), stockCount: stock.length };
 }
 
 function shopStats() {

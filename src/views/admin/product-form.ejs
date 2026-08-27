@@ -16,6 +16,28 @@
     </div>
   </div>
 
+  <div class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4 space-y-4">
+    <div>
+      <h3 class="font-medium text-[var(--gold)]">⚡ Flash Sale</h3>
+      <p class="text-xs text-[var(--text-4)] mt-1">ตั้งราคาพิเศษและเวลาไทยล่วงหน้า ระบบจะเริ่มลดราคาและคืนราคาขายเดิมให้อัตโนมัติเมื่อหมดเวลา เว้นว่างทั้งหมดหากไม่ใช้</p>
+    </div>
+    <div class="grid sm:grid-cols-3 gap-3">
+      <div>
+        <label class="block text-sm mb-1 text-[var(--text-3)]">ราคา Flash Sale (บาท)</label>
+        <input type="number" min="0" name="flashSalePrice" value="<%= product && product.flashSalePrice != null ? product.flashSalePrice : '' %>" placeholder="เช่น 49" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1 text-[var(--text-3)]">เริ่มโปรโมชั่น</label>
+        <input type="datetime-local" name="flashSaleStartAt" value="<%= product && product.flashSaleStartAt ? product.flashSaleStartAt : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1 text-[var(--text-3)]">สิ้นสุดโปรโมชั่น</label>
+        <input type="datetime-local" name="flashSaleEndAt" value="<%= product && product.flashSaleEndAt ? product.flashSaleEndAt : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+      </div>
+    </div>
+    <p class="text-xs text-[var(--text-4)]">ราคาพิเศษต้องต่ำกว่าราคาขาย และเวลาสิ้นสุดต้องอยู่หลังเวลาเริ่ม</p>
+  </div>
+
   <div>
     <label class="block text-sm mb-1 text-[var(--text-3)]">แนวเกม</label>
     <div class="flex flex-wrap gap-3 text-sm">

@@ -13,7 +13,10 @@
           <img src="<%= i.product.images[0] %>" class="w-20 h-14 object-cover rounded-lg" />
           <div class="flex-1">
             <a href="/game/<%= i.product.slug %>" class="font-medium hover:text-[var(--gold)]"><%= i.product.title %></a>
-            <div class="text-sm text-[var(--text-3)]">฿<%= i.product.price.toLocaleString() %>.00 / รายการ &middot; คงเหลือ <%= i.stock %></div>
+            <div class="text-sm text-[var(--text-3)]">
+              <% if (i.product.flashSaleActive) { %><span class="font-bold text-[var(--gold)]">⚡ Flash Sale</span> · <% } %>
+              ฿<%= i.product.price.toLocaleString() %>.00 / รายการ &middot; คงเหลือ <%= i.stock %>
+            </div>
           </div>
           <form action="/cart/update/<%= i.product.id %>" method="post" class="flex items-center gap-2">
             <input type="number" name="qty" value="<%= i.qty %>" min="1" max="<%= i.stock %>" class="w-16 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1 text-sm" />
