@@ -211,7 +211,28 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
     );
     log.push('✓ สั่ง deploy แล้ว — เว็บจะพร้อมใช้งานภายในไม่กี่นาที');
 
-    return { ok: true, url: `https://${domain}`, projectId, serviceId, mongoServiceId, environmentId, log };
+    // Mint a token scoped to just THIS project/environment (not the buyer's
+    // full account token) so the seller's admin panel can push future
+    // updates to this one site on its own, without ever holding the
+    // buyer's real account credentials. Best-effort: if this fails (e.g.
+    // API shape differs), the site itself is still fine — the buyer can
+    // always fall back to pasting their own token on their sale page.
+    let projectToken = null;
+    try {
+      log.push('กำลังสร้างโทเค็นสำหรับอัพเดตเว็บนี้ในอนาคต...');
+      const tokenResult = await gql(
+        token,
+        `mutation($input: ProjectTokenCreateInput!) { projectTokenCreate(input: $input) }`,
+        { input: { projectId, environmentId, name: `${projectName}-updates` } },
+        log
+      );
+      projectToken = tokenResult.projectTokenCreate || null;
+      log.push(projectToken ? '✓ สร้างโทเค็นสำหรับอัพเดตแล้ว' : '⚠ ไม่ได้รับโทเค็นสำหรับอัพเดต (จะต้องขอโทเค็นจากลูกค้าเองภายหลัง)');
+    } catch (err) {
+      log.push(`⚠ สร้างโทเค็นสำหรับอัพเดตอัตโนมัติไม่สำเร็จ (ไม่กระทบเว็บที่สร้างแล้ว): ${err.message}`);
+    }
+
+    return { ok: true, url: `https://${domain}`, projectId, serviceId, mongoServiceId, environmentId, projectToken, log };
   } catch (err) {
     return { ok: false, log, error: err.message };
   }

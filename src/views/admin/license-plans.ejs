@@ -58,7 +58,7 @@
   <div class="p-4 border-b border-[var(--border)]"><h3 class="font-semibold">📜 ประวัติการขายคีย์ / เว็บเช่าทั้งหมด</h3></div>
   <table class="w-full text-sm">
     <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-      <tr><th class="p-3">ผู้ซื้อ</th><th class="p-3">จำนวนวัน</th><th class="p-3">ราคา</th><th class="p-3">ประเภท</th><th class="p-3">เหลือเวลา</th><th class="p-3">คีย์</th><th class="p-3">เวลาซื้อ</th></tr>
+      <tr><th class="p-3">ผู้ซื้อ</th><th class="p-3">จำนวนวัน</th><th class="p-3">ราคา</th><th class="p-3">ประเภท</th><th class="p-3">เหลือเวลา</th><th class="p-3">คีย์</th><th class="p-3">เวลาซื้อ</th><th class="p-3"></th></tr>
     </thead>
     <tbody class="divide-y divide-[var(--border)]">
       <% sales.forEach(sale => { %>
@@ -88,9 +88,20 @@
           </td>
           <td class="p-3 font-mono text-xs break-all"><%= sale.key %></td>
           <td class="p-3 text-[var(--text-4)] text-xs"><%= new Date(sale.createdAt).toLocaleString('th-TH') %></td>
+          <td class="p-3 text-right whitespace-nowrap">
+            <% if (sale.type === 'new_site' && sale.provisioning && sale.provisioning.status === 'success') { %>
+              <% if (sale.provisioning.projectToken) { %>
+                <form action="/admin/license-plans/sale/<%= sale.id %>/sync" method="post" class="inline">
+                  <button class="text-xs text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-2 py-1">🔄 อัพเดตเว็บนี้</button>
+                </form>
+              <% } else { %>
+                <span class="text-[10px] text-[var(--text-4)]" title="เว็บเก่าก่อนมีฟีเจอร์นี้ ต้องให้ลูกค้ากดซิงค์เองที่หน้าใบเสร็จ">-</span>
+              <% } %>
+            <% } %>
+          </td>
         </tr>
       <% }) %>
-      <% if (!sales.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="7">ยังไม่มีการขาย</td></tr><% } %>
+      <% if (!sales.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="8">ยังไม่มีการขาย</td></tr><% } %>
     </tbody>
   </table>
 </div>

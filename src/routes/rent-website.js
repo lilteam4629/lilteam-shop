@@ -114,6 +114,7 @@ router.post('/buy', (req, res) => {
       current.provisioning.error = result.error || null;
       current.provisioning.serviceId = result.serviceId || null;
       current.provisioning.environmentId = result.environmentId || null;
+      current.provisioning.projectToken = result.projectToken || null;
       store.save();
     }).catch((err) => {
       const current = store.data.licenseSales.find(s => s.id === sale.id);
