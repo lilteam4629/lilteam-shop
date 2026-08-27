@@ -3,12 +3,17 @@ const router = express.Router();
 const store = require('../data/store');
 const license = require('../services/license');
 
+// Railway auto-sets this to the deployed commit — shown on the page so it's
+// possible to tell at a glance whether a site is actually on the latest
+// code, instead of guessing about caching or deploy delay.
+const buildId = (process.env.RAILWAY_GIT_COMMIT_SHA || 'dev').slice(0, 7);
+
 router.get('/license', (req, res) => {
   const current = store.data.settings.license;
   const active = current.key && current.expiresAt && Date.now() < current.expiresAt;
   res.render('shop/license', {
     title: 'ปลดล็อกระบบ', layout: false,
-    active, label: current.label, expiresAt: current.expiresAt,
+    active, label: current.label, expiresAt: current.expiresAt, buildId,
   });
 });
 
