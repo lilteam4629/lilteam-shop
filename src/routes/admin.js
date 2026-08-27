@@ -120,6 +120,8 @@ router.get('/', (req, res) => {
     dailySales,
     maxDailyRevenue,
     topProducts,
+    licenseGateOn: license.isGateOn(),
+    licenseExpiresAt: license.isGateOn() ? store.data.settings.license.expiresAt : null,
   });
 });
 
