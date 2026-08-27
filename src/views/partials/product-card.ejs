@@ -1,5 +1,5 @@
 <a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
-  class="premium-product-card spotlight-card filterable-card group relative flex w-full h-full aspect-[3/4] rounded-2xl overflow-hidden border <%= p.flashSaleActive ? 'flash-sale-card border-[#f3ca45]' : 'border-[#8c7430]/55' %>
+  class="premium-product-card spotlight-card filterable-card group relative flex w-full h-full aspect-[3/4] rounded-2xl overflow-hidden border <%= p.flashSaleActive ? 'border-[#e8bd3e]' : 'border-[#8c7430]/55' %>
          transition-all duration-300 hover:border-[#f0cf64]/80">
 
   <% const soldOut = p.stockCount < 1; %>
@@ -13,14 +13,12 @@
   <% } %>
 
   <% if (p.flashSaleActive) { %>
-    <div class="flash-sale-chip absolute top-2 right-2 z-20 flex items-center gap-1.5 rounded-xl border border-[#f5d05d]/65 bg-[#0c0d0b]/85 py-1.5 pl-1.5 pr-2.5 text-[#ffe27a] shadow-[0_5px_20px_rgba(0,0,0,.4)] backdrop-blur-md">
-      <span class="grid h-7 w-7 place-items-center rounded-lg bg-gradient-to-br from-[#ffe47c] to-[#b97608] text-[14px] text-[#171207] shadow-[0_0_14px_rgba(245,208,93,.45)]">⚡</span>
-      <span class="flash-chip-copy leading-none"><b class="block text-[9px] font-black tracking-[.12em]">FLASH</b><small class="mt-0.5 block text-[7px] font-bold tracking-[.22em] text-white/70">SALE</small></span>
+    <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center bg-[#e7bb36] pl-4 pr-2 text-[9px] font-black tracking-wider text-[#171207]">
+      ⚡ <span class="hidden min-[380px]:inline">ลดพิเศษ</span><span class="min-[380px]:hidden">SALE</span>
     </div>
   <% } else if (p.flashSaleUpcoming) { %>
-    <div class="absolute top-2 right-2 z-20 flex items-center gap-1.5 rounded-xl border border-[#d7b84c]/50 bg-[#0c0d0b]/85 py-1.5 pl-1.5 pr-2.5 text-[#ffe27a] shadow-[0_5px_20px_rgba(0,0,0,.4)] backdrop-blur-md">
-      <span class="grid h-7 w-7 place-items-center rounded-lg bg-[#332b16] text-[13px]">⚡</span>
-      <span class="flash-chip-copy leading-none"><b class="block text-[8px] font-black tracking-wider">เร็วๆ นี้</b><small class="mt-1 block text-[6px] tracking-wider text-white/60">FLASH SALE</small></span>
+    <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center border-b border-l border-[#d7b84c]/50 bg-[#18150c] pl-4 pr-2 text-[9px] font-black tracking-wider text-[#f0ca58]">
+      ⚡ เร็วๆ นี้
     </div>
   <% } %>
 
@@ -41,9 +39,9 @@
 
   <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1 min-w-0">
     <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
-      <div class="flash-timer-hud relative mb-0.5 flex h-6 min-w-0 items-center justify-between gap-1.5 overflow-hidden rounded-lg border border-[#e6bd42]/40 bg-black/65 px-2 backdrop-blur-md">
-        <span class="truncate text-[7px] font-bold uppercase tracking-wider text-[#f7d66b]"><%= p.flashSaleActive ? 'ดีลสิ้นสุดใน' : 'เริ่มโปรโมชั่นใน' %></span>
-        <span class="flash-countdown shrink-0 font-mono text-[9px] font-black text-white" data-flash-compact="1" <%= p.flashSaleActive ? `data-flash-end="${p.flashSaleEndsAt}"` : `data-flash-start="${p.flashSaleStartsAt}"` %>></span>
+      <div class="mb-0.5 flex min-w-0 items-center justify-between gap-1.5 border-l-2 border-[#e7bb36] pl-2">
+        <span class="truncate text-[7px] font-bold tracking-wider text-[#e7bb36]"><%= p.flashSaleActive ? 'FLASH SALE เหลือเวลา' : 'FLASH SALE เริ่มใน' %></span>
+        <span class="flash-countdown shrink-0 font-mono text-[9px] font-bold text-[#ffe58a]" data-flash-compact="1" <%= p.flashSaleActive ? `data-flash-end="${p.flashSaleEndsAt}"` : `data-flash-start="${p.flashSaleStartsAt}"` %>></span>
       </div>
     <% } %>
     <h3 class="font-semibold text-sm line-clamp-2 text-white [text-shadow:0_2px_8px_rgba(0,0,0,.95)] group-hover:text-[#fff6d4] transition-colors"><%= p.title %></h3>

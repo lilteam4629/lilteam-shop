@@ -98,33 +98,9 @@
     }
     .product-shimmer { animation: product-shimmer 4.8s ease-in-out infinite; }
     .ready-glow { animation: ready-pulse 2.2s ease-in-out infinite; }
-    @keyframes flash-sale-glow {
-      0%, 100% { box-shadow: 0 0 0 1px rgba(244,202,69,.22), 0 8px 26px rgba(184,126,11,.16); }
-      50% { box-shadow: 0 0 0 1px rgba(255,229,123,.55), 0 8px 32px rgba(244,202,69,.34); }
-    }
-    @keyframes flash-chip-pulse {
-      0%, 100% { transform: translateY(0); filter: brightness(1); }
-      50% { transform: translateY(-1px); filter: brightness(1.12); }
-    }
-    .flash-sale-card { animation: flash-sale-glow 2.2s ease-in-out infinite; }
-    .flash-sale-chip { animation: flash-chip-pulse 2s ease-in-out infinite; }
-    @media (max-width: 640px) {
-      .flash-sale-chip { padding-right: .375rem; }
-      .flash-sale-chip .flash-chip-copy { display: none; }
-    }
-    .flash-timer-hud::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #f4cb4c;
-      box-shadow: 0 0 9px #f4cb4c;
-      pointer-events: none;
-    }
+    .flash-corner-tag { clip-path: polygon(12px 0, 100% 0, 100% 100%, 0 100%); }
     @media (prefers-reduced-motion: reduce) {
-      .product-shimmer, .ready-glow, .flash-sale-card, .flash-sale-chip { animation: none; }
+      .product-shimmer, .ready-glow { animation: none; }
       .premium-product-card:hover { transform: none; }
     }
   </style>
