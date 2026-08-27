@@ -1,13 +1,22 @@
 // Automates provisioning a brand-new Railway deployment (a fresh copy of
-// this shop) for a customer who buys a "new site" plan at /rent-website.
+// this shop, PLUS its own MongoDB database) for a customer who buys a
+// "new site" plan at /rent-website.
 //
 // Two modes:
 //  - Customer-funded (default, no cost to the seller): the buyer supplies
-//    their own Railway API token + MongoDB URI in the purchase form, and
-//    the new project is created on THEIR Railway account/billing.
+//    only their own Railway API token in the purchase form, and the new
+//    project (app service + MongoDB service, in the same project) is
+//    created on THEIR Railway account/billing.
 //  - Seller-funded (optional fallback): if RAILWAY_API_TOKEN is set on the
 //    seller's own shop, that token is used instead when the buyer doesn't
 //    provide their own.
+//
+// The buyer never has to sign up for MongoDB Atlas separately — a MongoDB
+// service is deployed (official `mongo` Docker image, with a persistent
+// volume) inside the same Railway project as the app, and the app is
+// pointed at it over Railway's private network
+// (`<service-name>.railway.internal`), which never touches the public
+// internet.
 //
 // IMPORTANT: this talks to Railway's public GraphQL API (v2). The exact
 // field names below are a best-effort implementation based on Railway's
@@ -23,15 +32,21 @@
 // just a public GitHub repo URL to deploy from.
 
 const axios = require('axios');
+const crypto = require('crypto');
 
 const API_URL = 'https://backboard.railway.app/graphql/v2';
 const SELLER_TOKEN = process.env.RAILWAY_API_TOKEN || null;
 const TEMPLATE_REPO = process.env.RAILWAY_TEMPLATE_REPO;
+const MONGO_SERVICE_NAME = 'mongodb';
 
 // "Enabled" only means the template repo is configured — a per-request
 // customer token is enough to provision on its own.
 const isEnabled = () => Boolean(TEMPLATE_REPO);
 const hasSellerToken = () => Boolean(SELLER_TOKEN);
+
+function randomPassword(len) {
+  return crypto.randomBytes(len).toString('base64url').slice(0, len);
+}
 
 async function gql(token, query, variables, log) {
   try {
@@ -57,8 +72,10 @@ async function gql(token, query, variables, log) {
 }
 
 /**
- * Provision a brand-new Railway deployment of this shop for a buyer.
+ * Provision a brand-new Railway deployment of this shop (with its own
+ * MongoDB database, created automatically in the same project) for a buyer.
  * @param {{ projectName: string, envVars: Record<string,string>, railwayToken?: string }} opts
+ *   envVars should NOT include MONGODB_URI - it's set automatically.
  *   railwayToken - the buyer's own Railway API token. Falls back to the
  *   seller's RAILWAY_API_TOKEN (if set) when omitted. Never persisted.
  * @returns {Promise<{ ok: boolean, url?: string, projectId?: string, log: string[], error?: string }>}
@@ -96,7 +113,55 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
     if (!environmentId) throw new Error('ไม่พบ environment เริ่มต้นของโปรเจกต์ใหม่');
     log.push(`✓ ใช้ environment: ${environmentId}`);
 
-    log.push(`กำลังสร้าง service จาก repo ${TEMPLATE_REPO}...`);
+    // --- MongoDB service (own database, no Atlas signup needed) ---
+    log.push('กำลังสร้างฐานข้อมูล MongoDB ในโปรเจกต์เดียวกัน...');
+    const mongoCreated = await gql(
+      token,
+      `mutation($input: ServiceCreateInput!) { serviceCreate(input: $input) { id } }`,
+      { input: { projectId, name: MONGO_SERVICE_NAME, source: { image: 'mongo:7' } } },
+      log
+    );
+    const mongoServiceId = mongoCreated.serviceCreate.id;
+    log.push(`✓ สร้าง service ฐานข้อมูลแล้ว (id: ${mongoServiceId})`);
+
+    const mongoUser = 'root';
+    const mongoPassword = randomPassword(20);
+    log.push('กำลังเพิ่มพื้นที่เก็บข้อมูลถาวร (volume)...');
+    await gql(
+      token,
+      `mutation($input: VolumeCreateInput!) { volumeCreate(input: $input) { id } }`,
+      { input: { projectId, environmentId, serviceId: mongoServiceId, mountPath: '/data/db' } },
+      log
+    );
+    log.push('✓ เพิ่ม volume แล้ว');
+
+    log.push('กำลังตั้งค่าฐานข้อมูล...');
+    await gql(
+      token,
+      `mutation($input: VariableCollectionUpsertInput!) { variableCollectionUpsert(input: $input) }`,
+      {
+        input: {
+          projectId, environmentId, serviceId: mongoServiceId,
+          variables: { MONGO_INITDB_ROOT_USERNAME: mongoUser, MONGO_INITDB_ROOT_PASSWORD: mongoPassword },
+        },
+      },
+      log
+    );
+    log.push('✓ ตั้งค่าฐานข้อมูลแล้ว');
+
+    log.push('กำลังสั่ง deploy ฐานข้อมูล...');
+    await gql(
+      token,
+      `mutation($serviceId: String!, $environmentId: String!) { serviceInstanceRedeploy(serviceId: $serviceId, environmentId: $environmentId) }`,
+      { serviceId: mongoServiceId, environmentId },
+      log
+    );
+    log.push('✓ ฐานข้อมูลกำลัง deploy');
+
+    const mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${MONGO_SERVICE_NAME}.railway.internal:27017/lilteam_shop?authSource=admin`;
+
+    // --- App service ---
+    log.push(`กำลังสร้าง service เว็บจาก repo ${TEMPLATE_REPO}...`);
     const serviceCreated = await gql(
       token,
       `mutation($input: ServiceCreateInput!) { serviceCreate(input: $input) { id } }`,
@@ -104,13 +169,13 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
       log
     );
     const serviceId = serviceCreated.serviceCreate.id;
-    log.push(`✓ สร้าง service แล้ว (id: ${serviceId})`);
+    log.push(`✓ สร้าง service เว็บแล้ว (id: ${serviceId})`);
 
-    log.push('กำลังตั้งค่า Environment Variables...');
+    log.push('กำลังตั้งค่า Environment Variables ของเว็บ...');
     await gql(
       token,
       `mutation($input: VariableCollectionUpsertInput!) { variableCollectionUpsert(input: $input) }`,
-      { input: { projectId, environmentId, serviceId, variables: envVars } },
+      { input: { projectId, environmentId, serviceId, variables: { ...envVars, MONGODB_URI: mongoUri } } },
       log
     );
     log.push('✓ ตั้งค่าตัวแปรแล้ว');
@@ -125,7 +190,7 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
     const domain = domainResult.serviceDomainCreate.domain;
     log.push(`✓ ได้โดเมน: ${domain}`);
 
-    log.push('กำลังสั่ง deploy...');
+    log.push('กำลังสั่ง deploy เว็บ...');
     await gql(
       token,
       `mutation($serviceId: String!, $environmentId: String!) { serviceInstanceRedeploy(serviceId: $serviceId, environmentId: $environmentId) }`,
@@ -134,7 +199,7 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
     );
     log.push('✓ สั่ง deploy แล้ว — เว็บจะพร้อมใช้งานภายในไม่กี่นาที');
 
-    return { ok: true, url: `https://${domain}`, projectId, serviceId, environmentId, log };
+    return { ok: true, url: `https://${domain}`, projectId, serviceId, mongoServiceId, environmentId, log };
   } catch (err) {
     return { ok: false, log, error: err.message };
   }

@@ -1,7 +1,7 @@
 <section class="max-w-lg mx-auto px-4 py-10">
   <a href="/rent-website" class="text-sm text-[var(--gold)]">← กลับไปหน้าเช่าเว็บ</a>
   <h1 class="text-2xl font-bold mt-2 mb-1">📖 วิธีเปิดเว็บใหม่แบบละเอียด</h1>
-  <p class="text-sm text-[var(--text-3)] mb-8">ทำตามทีละขั้นตอน ใช้เวลารวมประมาณ 5-10 นาที ไม่ต้องมีความรู้ด้านโปรแกรมมิ่งเลย</p>
+  <p class="text-sm text-[var(--text-3)] mb-8">ทำตามทีละขั้นตอน ใช้เวลารวมประมาณ 2-3 นาที ไม่ต้องมีความรู้ด้านโปรแกรมมิ่งเลย (ไม่ต้องสมัคร MongoDB แยก ระบบสร้างฐานข้อมูลให้อัตโนมัติ)</p>
 
   <!-- Step 1 -->
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-4">
@@ -36,32 +36,12 @@
   </div>
 
   <!-- Step 3 -->
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-4">
-    <div class="flex items-center gap-2 mb-2">
-      <span class="w-7 h-7 shrink-0 rounded-full bg-[var(--gold)] text-[var(--bg)] font-bold flex items-center justify-center text-sm">3</span>
-      <h2 class="font-semibold">สมัคร MongoDB Atlas ฟรี (ที่เก็บข้อมูลร้าน)</h2>
-    </div>
-    <p class="text-sm text-[var(--text-3)] mb-3">MongoDB คือที่เก็บข้อมูลร้านค้าของคุณ (สินค้า ออเดอร์ สมาชิก ฯลฯ) สมัครฟรีตลอดชีพสำหรับเว็บขนาดเล็ก</p>
-    <ol class="text-sm space-y-1.5 mb-3 list-decimal list-inside text-[var(--text-2)]">
-      <li>กดปุ่มด้านล่าง สมัครบัญชีฟรี (อีเมลหรือ Google ก็ได้)</li>
-      <li>ระบบจะถามให้สร้างฐานข้อมูล → เลือกแบบ <b>M0 (FREE)</b></li>
-      <li>เลือกภูมิภาคเซิร์ฟเวอร์ใกล้ๆ (เช่น Singapore) → กด <b>Create</b></li>
-      <li>หน้า "Security Quickstart" → ตั้ง <b>Username/Password</b> สำหรับเข้าฐานข้อมูล (จำไว้ดีๆ) → กด Create User</li>
-      <li>หัวข้อ "Where would you like to connect from?" → เลือก <b>Allow access from anywhere</b> (หรือกรอก 0.0.0.0/0) → กด Finish</li>
-      <li>รอสักครู่ให้ฐานข้อมูลสร้างเสร็จ (วงกลมเขียว)</li>
-      <li>กด <b>Connect</b> → เลือก <b>Drivers</b> → คัดลอกข้อความที่ขึ้นต้นด้วย <span class="font-mono">mongodb+srv://...</span></li>
-      <li>ในข้อความนั้นจะมีคำว่า <span class="font-mono">&lt;password&gt;</span> ให้แก้เป็นรหัสผ่านจริงที่ตั้งไว้ข้อ 4 ก่อนเอาไปใช้</li>
-    </ol>
-    <a href="https://cloud.mongodb.com" target="_blank" rel="noopener" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">🍃 ไปสมัคร MongoDB Atlas →</a>
-  </div>
-
-  <!-- Step 4 -->
   <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-5 mb-6">
     <div class="flex items-center gap-2 mb-2">
-      <span class="w-7 h-7 shrink-0 rounded-full bg-[var(--gold)] text-[var(--bg)] font-bold flex items-center justify-center text-sm">4</span>
+      <span class="w-7 h-7 shrink-0 rounded-full bg-[var(--gold)] text-[var(--bg)] font-bold flex items-center justify-center text-sm">3</span>
       <h2 class="font-semibold">กลับมากรอกฟอร์มซื้อเว็บ</h2>
     </div>
-    <p class="text-sm text-[var(--text-3)] mb-3">ตอนนี้คุณมีครบแล้ว: Token จากข้อ 2 และ MongoDB URI จากข้อ 3 กลับไปหน้าเช่าเว็บ วางค่าทั้งสองลงในฟอร์ม ตั้งชื่อผู้ใช้/รหัสผ่านแอดมินที่ต้องการ แล้วกด "สร้างเว็บใหม่" ได้เลย ระบบจะสร้างเว็บให้อัตโนมัติภายใน 1-3 นาที</p>
+    <p class="text-sm text-[var(--text-3)] mb-3">ตอนนี้คุณมี Token จากข้อ 2 แล้ว กลับไปหน้าเช่าเว็บ วาง Token ลงในฟอร์ม ตั้งชื่อผู้ใช้/รหัสผ่านแอดมินที่ต้องการ แล้วกด "สร้างเว็บใหม่" ได้เลย ระบบจะสร้างเว็บ**พร้อมฐานข้อมูลให้อัตโนมัติ**ภายใน 1-3 นาที ไม่ต้องสมัครที่ไหนเพิ่มอีกแล้ว</p>
     <a href="/rent-website" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">← กลับไปกรอกฟอร์ม</a>
   </div>
 

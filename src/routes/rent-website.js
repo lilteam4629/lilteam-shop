@@ -44,12 +44,11 @@ router.post('/buy', (req, res) => {
     return res.redirect('/rent-website');
   }
 
-  let adminUsername, adminPassword, railwayToken, mongodbUri;
+  let adminUsername, adminPassword, railwayToken;
   if (wantsNewSite) {
     adminUsername = String(req.body.adminUsername || '').trim();
     adminPassword = String(req.body.adminPassword || '');
     railwayToken = String(req.body.railwayToken || '').trim();
-    mongodbUri = String(req.body.mongodbUri || '').trim();
     if (!/^[a-zA-Z0-9_]{3,20}$/.test(adminUsername)) {
       req.flash('error', 'ชื่อผู้ใช้แอดมินต้องเป็นตัวอักษร a-z, 0-9 และ _ เท่านั้น ยาว 3-20 ตัว');
       return res.redirect('/rent-website');
@@ -60,10 +59,6 @@ router.post('/buy', (req, res) => {
     }
     if (!railwayToken && !railway.hasSellerToken()) {
       req.flash('error', 'กรุณากรอก Railway API Token ของคุณเอง');
-      return res.redirect('/rent-website');
-    }
-    if (!/^mongodb(\+srv)?:\/\/.+/.test(mongodbUri) && !process.env.MONGODB_URI) {
-      req.flash('error', 'กรุณากรอก MongoDB URI ของคุณเอง (ต้องขึ้นต้นด้วย mongodb:// หรือ mongodb+srv://)');
       return res.redirect('/rent-website');
     }
   }
@@ -98,7 +93,6 @@ router.post('/buy', (req, res) => {
     const envVars = {
       ADMIN_USERNAME: adminUsername,
       ADMIN_PASSWORD: adminPassword,
-      MONGODB_URI: mongodbUri || process.env.MONGODB_URI,
       SESSION_SECRET: randomToken(32),
       LICENSE_SECRET: process.env.LICENSE_SECRET,
       LICENSE_GATE: 'on',
