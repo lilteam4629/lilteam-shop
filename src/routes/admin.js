@@ -706,10 +706,14 @@ router.post('/minigame/plays/:id/deliver', (req, res) => {
 
 // ---------- License plans (sell rental keys) ----------
 router.get('/license-plans', (req, res) => {
+  const sales = store.data.licenseSales.slice(0, 50).map(sale => {
+    const verified = license.isEnabled() ? license.verifyKey(sale.key) : {};
+    return { ...sale, exp: verified.exp || null };
+  });
   res.render('admin/license-plans', {
     title: 'ขายคีย์เช่าเว็บ', active: 'license-plans',
     plans: store.data.licensePlans,
-    sales: store.data.licenseSales.slice(0, 50),
+    sales,
     licenseEnabled: license.isEnabled(),
   });
 });
@@ -724,6 +728,25 @@ router.post('/license-plans', (req, res) => {
   store.data.licensePlans.push({ id: store.genId(8), days, price, active: true, createdAt: new Date().toISOString() });
   store.save();
   req.flash('success', 'เพิ่มแพ็กเกจแล้ว');
+  res.redirect('/admin/license-plans');
+});
+
+router.post('/license-plans/:id/edit', (req, res) => {
+  const plan = store.data.licensePlans.find(p => p.id === req.params.id);
+  if (!plan) {
+    req.flash('error', 'ไม่พบแพ็กเกจนี้');
+    return res.redirect('/admin/license-plans');
+  }
+  const days = Math.max(1, parseInt(req.body.days, 10) || 0);
+  const price = Math.max(0, Number(req.body.price) || 0);
+  if (!days || !price) {
+    req.flash('error', 'กรุณากรอกจำนวนวันและราคาให้ถูกต้อง');
+    return res.redirect('/admin/license-plans');
+  }
+  plan.days = days;
+  plan.price = price;
+  store.save();
+  req.flash('success', 'แก้ไขแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');
 });
 

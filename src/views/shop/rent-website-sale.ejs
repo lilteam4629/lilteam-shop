@@ -57,6 +57,9 @@
     <div class="flex justify-between"><span class="text-[var(--text-3)]">จำนวนวัน</span><span><%= sale.days %> วัน</span></div>
     <div class="flex justify-between"><span class="text-[var(--text-3)]">ราคา</span><span class="text-[var(--gold)] font-semibold">฿<%= sale.price.toLocaleString() %></span></div>
     <div class="flex justify-between"><span class="text-[var(--text-3)]">เวลาที่ซื้อ</span><span><%= new Date(sale.createdAt).toLocaleString('th-TH') %></span></div>
+    <% if (exp) { %>
+      <div class="flex justify-between"><span class="text-[var(--text-3)]">เหลือเวลา</span><span id="sale-countdown" class="font-mono font-semibold" data-exp="<%= exp %>">…</span></div>
+    <% } %>
   </div>
 
   <% if (sale.type !== 'new_site') { %>
@@ -120,5 +123,23 @@
       }
     };
     setTimeout(poll, 3000);
+  })();
+
+  (function () {
+    const el = document.getElementById('sale-countdown');
+    if (!el) return;
+    const exp = Number(el.dataset.exp);
+    const tick = () => {
+      const ms = exp - Date.now();
+      if (ms <= 0) { el.textContent = '✕ หมดอายุแล้ว'; el.classList.add('text-[var(--coral)]'); return; }
+      const s = Math.floor(ms / 1000);
+      const d = Math.floor(s / 86400);
+      const h = Math.floor((s % 86400) / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      el.textContent = `${d} วัน ${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    };
+    tick();
+    setInterval(tick, 1000);
   })();
 </script>

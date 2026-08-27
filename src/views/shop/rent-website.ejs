@@ -88,9 +88,35 @@
         <div>
           <div><%= sale.days %> วัน — ฿<%= sale.price.toLocaleString() %> <% if (sale.type === 'new_site') { %><span class="text-[10px] text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-1.5 py-0.5 ml-1">เว็บใหม่</span><% } %></div>
           <div class="text-[var(--text-4)] text-xs"><%= new Date(sale.createdAt).toLocaleString('th-TH') %></div>
+          <% if (sale.exp) { %>
+            <div class="countdown text-xs font-mono mt-0.5" data-exp="<%= sale.exp %>">…</div>
+          <% } %>
         </div>
         <span class="text-[var(--gold)] text-xs">ดู →</span>
       </a>
     <% }) %>
   </div>
 </section>
+
+<script>
+  function fmtCountdown(ms) {
+    if (ms <= 0) return '✕ หมดอายุแล้ว';
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    if (d > 0) return `เหลือ ${d} วัน ${h} ชม.`;
+    if (h > 0) return `เหลือ ${h} ชม. ${m} นาที`;
+    return `เหลือ ${m} นาที`;
+  }
+  function tickCountdowns() {
+    document.querySelectorAll('.countdown[data-exp]').forEach(el => {
+      const ms = Number(el.dataset.exp) - Date.now();
+      el.textContent = fmtCountdown(ms);
+      el.classList.toggle('text-[var(--coral)]', ms <= 0);
+      el.classList.toggle('text-emerald-400', ms > 0);
+    });
+  }
+  tickCountdowns();
+  setInterval(tickCountdowns, 30000);
+</script>

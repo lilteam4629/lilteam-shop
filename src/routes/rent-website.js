@@ -18,7 +18,8 @@ router.get('/', (req, res) => {
   const mySales = store.data.licenseSales
     .filter(s => s.userId === user.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .slice(0, 20);
+    .slice(0, 20)
+    .map(s => ({ ...s, exp: license.isEnabled() ? (license.verifyKey(s.key).exp || null) : null }));
   res.render('shop/rent-website', {
     title: 'เช่าเว็บ / ต่ออายุคีย์', plans, mySales,
     licenseReady: license.isEnabled(),
@@ -141,7 +142,8 @@ router.get('/sale/:id', (req, res) => {
     req.flash('error', 'ไม่พบรายการนี้');
     return res.redirect('/rent-website');
   }
-  res.render('shop/rent-website-sale', { title: 'คีย์เช่าเว็บของคุณ', sale });
+  const verified = license.isEnabled() ? license.verifyKey(sale.key) : {};
+  res.render('shop/rent-website-sale', { title: 'คีย์เช่าเว็บของคุณ', sale, exp: verified.exp || null });
 });
 
 router.get('/sale/:id/status', (req, res) => {
