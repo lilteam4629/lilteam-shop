@@ -42,7 +42,7 @@
   <div class="p-4 border-b border-[var(--border)]"><h3 class="font-semibold">📜 ประวัติการขายคีย์</h3></div>
   <table class="w-full text-sm">
     <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-      <tr><th class="p-3">ผู้ซื้อ</th><th class="p-3">จำนวนวัน</th><th class="p-3">ราคา</th><th class="p-3">คีย์</th><th class="p-3">เวลา</th></tr>
+      <tr><th class="p-3">ผู้ซื้อ</th><th class="p-3">จำนวนวัน</th><th class="p-3">ราคา</th><th class="p-3">ประเภท</th><th class="p-3">คีย์</th><th class="p-3">เวลา</th></tr>
     </thead>
     <tbody class="divide-y divide-[var(--border)]">
       <% sales.forEach(sale => { %>
@@ -50,11 +50,24 @@
           <td class="p-3"><%= sale.username %></td>
           <td class="p-3"><%= sale.days %> วัน</td>
           <td class="p-3 text-emerald-400">฿<%= sale.price.toLocaleString() %></td>
+          <td class="p-3 text-xs">
+            <% if (sale.type === 'new_site') { %>
+              <% if (!sale.provisioning || sale.provisioning.status === 'creating') { %>
+                <span class="text-amber-400">⏳ กำลังสร้างเว็บ</span>
+              <% } else if (sale.provisioning.status === 'success') { %>
+                <a href="<%= sale.provisioning.url %>" target="_blank" class="text-emerald-400 underline">✓ <%= sale.provisioning.url %></a>
+              <% } else { %>
+                <span class="text-[var(--coral)]" title="<%= sale.provisioning.error %>">✕ ล้มเหลว</span>
+              <% } %>
+            <% } else { %>
+              <span class="text-[var(--text-4)]">ต่ออายุ</span>
+            <% } %>
+          </td>
           <td class="p-3 font-mono text-xs break-all"><%= sale.key %></td>
           <td class="p-3 text-[var(--text-4)] text-xs"><%= new Date(sale.createdAt).toLocaleString('th-TH') %></td>
         </tr>
       <% }) %>
-      <% if (!sales.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="5">ยังไม่มีการขาย</td></tr><% } %>
+      <% if (!sales.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="6">ยังไม่มีการขาย</td></tr><% } %>
     </tbody>
   </table>
 </div>

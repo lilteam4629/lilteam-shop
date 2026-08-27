@@ -10,18 +10,31 @@
 
   <div class="grid sm:grid-cols-3 gap-4 mb-8">
     <% plans.forEach(plan => { %>
-      <form action="/rent-website/buy" method="post" class="bg-[var(--card)] border border-[var(--border)] hover:border-[var(--gold)]/60 rounded-xl p-5 text-center flex flex-col items-center gap-2">
-        <input type="hidden" name="planId" value="<%= plan.id %>" />
+      <div class="bg-[var(--card)] border border-[var(--border)] hover:border-[var(--gold)]/60 rounded-xl p-5 text-center flex flex-col items-center gap-2">
         <div class="text-3xl font-extrabold text-[var(--gold)]"><%= plan.days %></div>
         <div class="text-xs text-[var(--text-4)] -mt-1">วัน</div>
-        <div class="text-lg font-semibold mt-2">฿<%= plan.price.toLocaleString() %></div>
-        <button <%= licenseReady ? '' : 'disabled' %> class="w-full mt-2 bg-[var(--gold)] hover:bg-[var(--gold-hover)] disabled:opacity-40 text-[var(--bg)] font-semibold rounded-lg py-2 text-sm">ซื้อเลย</button>
-      </form>
+        <div class="text-lg font-semibold mt-2 mb-1">฿<%= plan.price.toLocaleString() %></div>
+        <form action="/rent-website/buy" method="post" class="w-full">
+          <input type="hidden" name="planId" value="<%= plan.id %>" />
+          <input type="hidden" name="type" value="renewal" />
+          <button <%= licenseReady ? '' : 'disabled' %> class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] disabled:opacity-40 text-[var(--bg)] font-semibold rounded-lg py-2 text-sm">🔄 ต่ออายุ (รับคีย์)</button>
+        </form>
+        <% if (newSiteReady) { %>
+          <form action="/rent-website/buy" method="post" class="w-full">
+            <input type="hidden" name="planId" value="<%= plan.id %>" />
+            <input type="hidden" name="type" value="new_site" />
+            <button class="w-full border border-[var(--gold)]/50 text-[var(--gold)] hover:bg-[var(--gold)]/10 font-semibold rounded-lg py-2 text-sm">🆕 เปิดเว็บใหม่</button>
+          </form>
+        <% } %>
+      </div>
     <% }) %>
     <% if (!plans.length) { %>
       <p class="text-sm text-[var(--text-4)] col-span-full text-center py-8">ยังไม่มีแพ็กเกจให้ซื้อในขณะนี้</p>
     <% } %>
   </div>
+  <% if (!newSiteReady) { %>
+    <p class="text-xs text-[var(--text-4)] -mt-5 mb-8">💡 "เปิดเว็บใหม่อัตโนมัติ" ยังไม่เปิดใช้งาน — ซื้อได้เฉพาะคีย์ต่ออายุตอนนี้</p>
+  <% } %>
 
   <h2 class="text-lg font-semibold mb-3">ประวัติการซื้อของคุณ</h2>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[#241f13]">
@@ -31,10 +44,10 @@
     <% mySales.forEach(sale => { %>
       <a href="/rent-website/sale/<%= sale.id %>" class="p-4 flex items-center justify-between text-sm hover:bg-[var(--input)]">
         <div>
-          <div><%= sale.days %> วัน — ฿<%= sale.price.toLocaleString() %></div>
+          <div><%= sale.days %> วัน — ฿<%= sale.price.toLocaleString() %> <% if (sale.type === 'new_site') { %><span class="text-[10px] text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-1.5 py-0.5 ml-1">เว็บใหม่</span><% } %></div>
           <div class="text-[var(--text-4)] text-xs"><%= new Date(sale.createdAt).toLocaleString('th-TH') %></div>
         </div>
-        <span class="text-[var(--gold)] text-xs">ดูคีย์ →</span>
+        <span class="text-[var(--gold)] text-xs">ดู →</span>
       </a>
     <% }) %>
   </div>
