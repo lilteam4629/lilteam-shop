@@ -41,7 +41,7 @@
     <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
       <div class="mb-0.5 flex min-w-0 items-center justify-between gap-1.5 border-l-2 border-[#e7bb36] pl-2">
         <span class="truncate text-[7px] font-bold tracking-wider text-[#e7bb36]"><%= p.flashSaleActive ? 'FLASH SALE เหลือเวลา' : 'FLASH SALE เริ่มใน' %></span>
-        <span class="flash-countdown shrink-0 font-mono text-[9px] font-bold text-[#ffe58a]" data-flash-compact="1" <%= p.flashSaleActive ? `data-flash-end="${p.flashSaleEndsAt}"` : `data-flash-start="${p.flashSaleStartsAt}"` %>></span>
+        <span class="flash-countdown shrink-0 font-mono text-[9px] font-bold text-[#ffe58a]" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>></span>
       </div>
     <% } %>
     <h3 class="font-semibold text-sm line-clamp-2 text-white [text-shadow:0_2px_8px_rgba(0,0,0,.95)] group-hover:text-[#fff6d4] transition-colors"><%= p.title %></h3>

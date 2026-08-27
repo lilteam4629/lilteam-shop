@@ -33,7 +33,7 @@
       <% if (product.flashSaleActive || product.flashSaleUpcoming) { %>
         <div class="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--gold)]/40 bg-gradient-to-r from-[#33280d] to-[#17140d] px-4 py-3 shadow-[0_0_24px_rgba(216,184,77,.12)]">
           <div><div class="font-black text-[var(--gold)]">⚡ FLASH SALE</div><div class="text-xs text-[var(--text-3)]"><%= product.flashSaleActive ? 'ราคาพิเศษกำลังเปิดขาย' : 'เตรียมพบราคาพิเศษ' %></div></div>
-          <div class="text-right"><div class="text-[10px] text-[var(--text-4)]"><%= product.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></div><div class="flash-countdown font-mono font-bold text-lg text-[#ffe27a]" <%= product.flashSaleActive ? `data-flash-end="${product.flashSaleEndsAt}"` : `data-flash-start="${product.flashSaleStartsAt}"` %>></div></div>
+          <div class="text-right"><div class="text-[10px] text-[var(--text-4)]"><%= product.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></div><div class="flash-countdown font-mono font-bold text-lg text-[#ffe27a]" <% if (product.flashSaleActive) { %>data-flash-end="<%= product.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= product.flashSaleStartsAt %>"<% } %>></div></div>
         </div>
       <% } %>
       <div class="flex flex-wrap gap-2 mb-3">

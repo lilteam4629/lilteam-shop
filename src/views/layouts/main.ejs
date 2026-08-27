@@ -612,6 +612,10 @@
       let reloadNeeded = false;
       clocks.forEach(function (clock) {
         const target = Number(clock.dataset.flashEnd || clock.dataset.flashStart || 0);
+        if (!Number.isFinite(target) || target <= 0) {
+          clock.textContent = '--:--:--';
+          return;
+        }
         const remaining = Math.max(0, target - now);
         if (!remaining) reloadNeeded = true;
         const totalSeconds = Math.floor(remaining / 1000);
