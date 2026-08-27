@@ -741,7 +741,7 @@ router.post('/license-plans/sale/:id/sync', async (req, res) => {
     return res.redirect('/admin/license-plans');
   }
   const result = await railway.redeployService({
-    railwayToken: p.projectToken, serviceId: p.serviceId, environmentId: p.environmentId,
+    railwayToken: p.projectToken, serviceId: p.serviceId, environmentId: p.environmentId, isProjectToken: true,
   });
   req.flash(result.ok ? 'success' : 'error', result.ok
     ? `สั่งอัพเดตเว็บของ ${sale.username} แล้ว รอสักครู่`
@@ -764,6 +764,7 @@ router.post('/license-plans/update-all', async (req, res) => {
     railwayToken: sale.provisioning.projectToken,
     serviceId: sale.provisioning.serviceId,
     environmentId: sale.provisioning.environmentId,
+    isProjectToken: true,
   }).then(r => ({ sale, r }))));
   const okCount = results.filter(x => x.r.ok).length;
   req.flash(okCount === results.length ? 'success' : 'error',
