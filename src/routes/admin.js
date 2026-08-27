@@ -383,7 +383,14 @@ router.post('/orders/:id/status', (req, res) => {
 
 // ---------- Users ----------
 router.get('/users', (req, res) => {
-  res.render('admin/users', { title: 'สมาชิก', active: 'users', users: store.data.users });
+  const q = String(req.query.q || '').trim();
+  const needle = q.toLocaleLowerCase('th-TH');
+  const users = [...store.data.users]
+    .filter(user => !needle
+      || String(user.username || '').toLocaleLowerCase('th-TH').includes(needle)
+      || String(user.email || '').toLocaleLowerCase('th-TH').includes(needle))
+    .sort((a, b) => String(a.username || '').localeCompare(String(b.username || ''), 'th'));
+  res.render('admin/users', { title: 'สมาชิก', active: 'users', users, q, totalUsers: store.data.users.length });
 });
 
 router.post('/users/:id/wallet', (req, res) => {
@@ -428,15 +435,25 @@ router.post('/users/new', (req, res) => {
 
 // ---------- Top-up requests ----------
 router.get('/topups', (req, res) => {
+  const q = String(req.query.q || '').trim();
+  const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : '';
+  const needle = q.toLocaleLowerCase('th-TH');
   const requests = [...store.data.topupRequests]
+    .map(t => ({ ...t, buyer: store.data.users.find(u => u.id === t.userId) }))
+    .filter(request => {
+      if (status && request.status !== status) return false;
+      if (!needle) return true;
+      return String(request.refCode || '').toLocaleLowerCase('th-TH').includes(needle)
+        || String(request.buyer && request.buyer.username || '').toLocaleLowerCase('th-TH').includes(needle)
+        || String(request.buyer && request.buyer.email || '').toLocaleLowerCase('th-TH').includes(needle);
+    })
     .sort((a, b) => {
       if (a.status === 'pending' && b.status !== 'pending') return -1;
       if (a.status !== 'pending' && b.status === 'pending') return 1;
       return new Date(b.createdAt) - new Date(a.createdAt);
-    })
-    .map(t => ({ ...t, buyer: store.data.users.find(u => u.id === t.userId) }));
+    });
   const pendingCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
-  res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment: store.data.settings.payment });
+  res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment: store.data.settings.payment, q, status });
 });
 
 router.post('/topups/payment-settings', (req, res) => {

@@ -1,5 +1,15 @@
 <div class="grid lg:grid-cols-3 gap-6">
-  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
+  <div class="lg:col-span-2 space-y-3">
+    <form method="get" action="/admin/users" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 flex flex-col sm:flex-row gap-2">
+      <div class="relative flex-1">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-4)]">⌕</span>
+        <input name="q" value="<%= q %>" autocomplete="off" placeholder="ค้นหาชื่อผู้ใช้หรืออีเมล" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg pl-9 pr-3 py-2 text-sm focus:border-[var(--gold)] outline-none" />
+      </div>
+      <button class="bg-[var(--gold)] text-[var(--bg)] font-medium rounded-lg px-5 py-2 text-sm">ค้นหา</button>
+      <% if (q) { %><a href="/admin/users" class="border border-[var(--border-light)] rounded-lg px-4 py-2 text-sm text-center hover:border-[var(--gold)]">ล้าง</a><% } %>
+    </form>
+    <div class="text-xs text-[var(--text-4)] px-1"><%= q ? `พบ ${users.length} จาก ${totalUsers} บัญชี` : `สมาชิกทั้งหมด ${totalUsers} บัญชี` %></div>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
     <table class="w-full text-sm">
       <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
         <tr><th class="p-3">ผู้ใช้</th><th class="p-3">Role</th><th class="p-3">กระเป๋าเงิน</th><th class="p-3">สถานะ</th><th class="p-3"></th></tr>
@@ -16,6 +26,7 @@
                 <input type="number" name="amount" placeholder="+/-" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded px-2 py-1 text-xs" />
                 <button class="text-[var(--gold)] text-xs">ปรับยอด</button>
               </form>
+              <a href="/admin/topups?q=<%= encodeURIComponent(u.username) %>" class="text-sky-400 text-xs">ประวัติเติมเงิน</a>
               <% if (u.role !== 'admin') { %>
                 <form action="/admin/users/<%= u.id %>/toggle-ban" method="post" class="inline">
                   <button class="text-rose-400 text-xs"><%= u.status==='banned' ? 'ปลดระงับ' : 'ระงับ' %></button>
@@ -26,6 +37,8 @@
         <% }) %>
       </tbody>
     </table>
+    <% if (!users.length) { %><div class="py-12 text-center text-sm text-[var(--text-4)]">ไม่พบสมาชิกที่ตรงกับ “<%= q %>”</div><% } %>
+    </div>
   </div>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
     <h3 class="font-semibold mb-3">เพิ่มสมาชิก / แอดมิน</h3>

@@ -53,6 +53,23 @@
   </form>
 </details>
 
+<form method="get" action="/admin/topups" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 mb-4 flex flex-col sm:flex-row gap-2">
+  <div class="relative flex-1">
+    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-4)]">⌕</span>
+    <input name="q" value="<%= q %>" autocomplete="off" placeholder="ค้นหาชื่อผู้ใช้ อีเมล หรือเลขอ้างอิง" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg pl-9 pr-3 py-2 text-sm focus:border-[var(--gold)] outline-none" />
+  </div>
+  <select name="status" class="bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
+    <option value="">ทุกสถานะ</option>
+    <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>รอตรวจสอบ</option>
+    <option value="approved" <%= status === 'approved' ? 'selected' : '' %>>อนุมัติแล้ว</option>
+    <option value="rejected" <%= status === 'rejected' ? 'selected' : '' %>>ปฏิเสธ</option>
+  </select>
+  <button class="bg-[var(--gold)] text-[var(--bg)] font-medium rounded-lg px-5 py-2 text-sm">ค้นหาประวัติ</button>
+  <% if (q || status) { %><a href="/admin/topups" class="border border-[var(--border-light)] rounded-lg px-4 py-2 text-sm text-center hover:border-[var(--gold)]">ล้าง</a><% } %>
+</form>
+
+<div class="text-xs text-[var(--text-4)] mb-3">พบประวัติการเติมเงิน <%= requests.length %> รายการ</div>
+
 <div class="space-y-3">
   <% requests.forEach(r => { %>
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
@@ -83,4 +100,7 @@
       <% } %>
     </div>
   <% }) %>
+  <% if (!requests.length) { %>
+    <div class="bg-[var(--card)] border border-dashed border-[var(--border-light)] rounded-xl py-12 text-center text-sm text-[var(--text-4)]">ไม่พบประวัติการเติมเงินที่ค้นหา</div>
+  <% } %>
 </div>
