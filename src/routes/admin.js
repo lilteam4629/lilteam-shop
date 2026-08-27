@@ -120,7 +120,27 @@ router.get('/', (req, res) => {
     topProducts,
     licenseGateOn: license.isGateOn(),
     licenseExpiresAt: license.isGateOn() ? store.data.settings.license.expiresAt : null,
+    licenseLabel: license.isGateOn() ? store.data.settings.license.label : null,
   });
+});
+
+// Lets the owner of a rented site rename the label shown on their own
+// /license page (independent of whatever name was baked into the key they
+// redeemed) — purely cosmetic, no effect on the key's actual validity.
+router.post('/license-label', (req, res) => {
+  if (!license.isGateOn() || !store.data.settings.license.key) {
+    req.flash('error', 'เว็บนี้ยังไม่ได้ปลดล็อกด้วยคีย์');
+    return res.redirect('/admin');
+  }
+  const label = String(req.body.label || '').trim().slice(0, 60);
+  if (!label) {
+    req.flash('error', 'กรุณากรอกชื่อ');
+    return res.redirect('/admin');
+  }
+  store.data.settings.license.label = label;
+  store.save();
+  req.flash('success', 'แก้ไขชื่อแล้ว');
+  res.redirect('/admin');
 });
 
 // ---------- Products ----------
