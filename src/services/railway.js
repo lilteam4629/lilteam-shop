@@ -60,12 +60,12 @@ function randomPassword(len) {
   return crypto.randomBytes(len).toString('base64url').slice(0, len);
 }
 
-async function gql(token, query, variables, log) {
+async function gqlRequest(headers, query, variables, log) {
   try {
     const res = await axios.post(
       API_URL,
       { query, variables },
-      { headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, timeout: 30000 }
+      { headers: { ...headers, 'Content-Type': 'application/json' }, timeout: 30000 }
     );
     if (res.data.errors && res.data.errors.length) {
       const message = res.data.errors.map(e => e.message).join('; ');
@@ -81,6 +81,18 @@ async function gql(token, query, variables, log) {
     }
     throw err;
   }
+}
+
+// A buyer's own Railway account token (or the seller's fallback token).
+async function gql(token, query, variables, log) {
+  return gqlRequest({ Authorization: `Bearer ${token}` }, query, variables, log);
+}
+
+// A token scoped to just one project (minted via projectTokenCreate during
+// provisioning) — Railway authenticates these via a different header than
+// account tokens, not Authorization: Bearer.
+async function gqlProject(token, query, variables, log) {
+  return gqlRequest({ 'Project-Access-Token': token }, query, variables, log);
 }
 
 /**
@@ -260,23 +272,34 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
 
 /**
  * Redeploy a single already-provisioned site's app service, pulling in
- * whatever is currently on RELEASE_BRANCH. Used for the customer's own
- * "sync ตอนนี้" self-service button — only touches that one project/service,
- * never any other rented site.
- * @param {{ railwayToken: string, serviceId: string, environmentId: string }} opts
+ * whatever is currently on RELEASE_BRANCH. Used both for the customer's own
+ * "sync ตอนนี้" self-service button (their real account token, isProjectToken
+ * false) and the admin's per-site / bulk update buttons (the scoped token
+ * minted at provisioning time, isProjectToken true) — only touches that one
+ * project/service, never any other rented site.
+ * @param {{ railwayToken: string, serviceId: string, environmentId: string, isProjectToken?: boolean }} opts
  */
-async function redeployService({ railwayToken, serviceId, environmentId }) {
+async function redeployService({ railwayToken, serviceId, environmentId, isProjectToken }) {
   const log = [];
   if (!railwayToken) return { ok: false, log, error: 'ไม่มี Railway API Token' };
   if (!serviceId || !environmentId) return { ok: false, log, error: 'ไม่พบข้อมูลเว็บนี้ (serviceId/environmentId)' };
+  const mutation = `mutation($serviceId: String!, $environmentId: String!) { serviceInstanceRedeploy(serviceId: $serviceId, environmentId: $environmentId) }`;
+  const vars = { serviceId, environmentId };
   try {
     log.push('กำลังสั่งอัพเดตเว็บเป็นเวอร์ชันล่าสุด...');
-    await gql(
-      railwayToken,
-      `mutation($serviceId: String!, $environmentId: String!) { serviceInstanceRedeploy(serviceId: $serviceId, environmentId: $environmentId) }`,
-      { serviceId, environmentId },
-      log
-    );
+    if (isProjectToken) {
+      // Project-scoped tokens authenticate via a different header than
+      // account tokens — try that first, fall back to Bearer since this
+      // hasn't been verified against Railway's live API from this session.
+      try {
+        await gqlProject(railwayToken, mutation, vars, log);
+      } catch (err) {
+        log.push('⚠ ลองใหม่ด้วย Authorization header แบบบัญชีทั่วไป...');
+        await gql(railwayToken, mutation, vars, log);
+      }
+    } else {
+      await gql(railwayToken, mutation, vars, log);
+    }
     log.push('✓ สั่งอัพเดตแล้ว — เว็บจะพร้อมใช้งานภายในไม่กี่นาที');
     return { ok: true, log };
   } catch (err) {
