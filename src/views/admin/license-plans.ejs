@@ -85,7 +85,10 @@
               <% } else if (sale.provisioning.status === 'success') { %>
                 <a href="<%= sale.provisioning.url %>" target="_blank" class="text-emerald-400 underline">✓ <%= sale.provisioning.url %></a>
               <% } else { %>
-                <span class="text-[var(--coral)]" title="<%= sale.provisioning.error %>">✕ ล้มเหลว</span>
+                <details>
+                  <summary class="text-[var(--coral)] cursor-pointer select-none">✕ ล้มเหลว: <%= sale.provisioning.error %></summary>
+                  <pre class="whitespace-pre-wrap text-[10px] text-[var(--text-4)] mt-1 max-w-xs"><%= (sale.provisioning.log || []).join('\n') %></pre>
+                </details>
               <% } %>
             <% } else { %>
               <span class="text-[var(--text-4)]">ต่ออายุ</span>

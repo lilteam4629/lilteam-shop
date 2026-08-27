@@ -173,15 +173,35 @@ async function provisionNewSite({ projectName, envVars, railwayToken }) {
     const mongoUri = `mongodb://${mongoUser}:${mongoPassword}@${MONGO_SERVICE_NAME}.railway.internal:27017/lilteam_shop?authSource=admin`;
 
     // --- App service ---
+    // NOTE: branch is deliberately NOT passed to serviceCreate here — an
+    // earlier attempt to pin it to RELEASE_BRANCH at creation time broke
+    // real purchases with an HTTP 400 (that field likely isn't valid on
+    // ServiceCreateInput.source). We try to switch the branch AFTER
+    // creation instead, in its own try/catch below, so a failure there
+    // never blocks the site itself from being created.
     log.push(`กำลังสร้าง service เว็บจาก repo ${TEMPLATE_REPO}...`);
     const serviceCreated = await gql(
       token,
       `mutation($input: ServiceCreateInput!) { serviceCreate(input: $input) { id } }`,
-      { input: { projectId, name: projectName, source: { repo: TEMPLATE_REPO, branch: RELEASE_BRANCH } } },
+      { input: { projectId, name: projectName, source: { repo: TEMPLATE_REPO } } },
       log
     );
     const serviceId = serviceCreated.serviceCreate.id;
     log.push(`✓ สร้าง service เว็บแล้ว (id: ${serviceId})`);
+
+    if (RELEASE_BRANCH && RELEASE_BRANCH !== 'main') {
+      try {
+        await gql(
+          token,
+          `mutation($id: String!, $input: ServiceConnectInput!) { serviceConnect(id: $id, input: $input) { id } }`,
+          { id: serviceId, input: { repo: TEMPLATE_REPO, branch: RELEASE_BRANCH } },
+          log
+        );
+        log.push(`✓ ผูกเว็บนี้กับ branch "${RELEASE_BRANCH}" แล้ว`);
+      } catch (err) {
+        log.push(`⚠ สลับไปใช้ branch "${RELEASE_BRANCH}" ไม่สำเร็จ (ไม่กระทบเว็บที่สร้างแล้ว แต่จะยังผูกกับ branch หลักแทน): ${err.message}`);
+      }
+    }
 
     log.push('กำลังตั้งค่า Environment Variables ของเว็บ...');
     await gql(
