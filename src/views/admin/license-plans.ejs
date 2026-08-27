@@ -33,9 +33,9 @@
 <div class="grid lg:grid-cols-3 gap-6 mb-6">
   <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
     <div class="p-4 border-b border-[var(--border)]"><h3 class="font-semibold">📦 แพ็กเกจเช่าเว็บ (ลูกค้าเห็นที่หน้า /rent-website)</h3></div>
-    <table class="w-full text-sm">
+    <table class="w-full text-sm min-w-[480px]">
       <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-        <tr><th class="p-3">จำนวนวัน</th><th class="p-3">ราคา (฿)</th><th class="p-3">สถานะ</th><th class="p-3"></th></tr>
+        <tr><th class="p-3 whitespace-nowrap">จำนวนวัน</th><th class="p-3 whitespace-nowrap">ราคา (฿)</th><th class="p-3 whitespace-nowrap">สถานะ</th><th class="p-3"></th></tr>
       </thead>
       <tbody class="divide-y divide-[var(--border)]">
         <% plans.forEach(p => { %>
@@ -68,22 +68,31 @@
 
 <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
   <div class="p-4 border-b border-[var(--border)]"><h3 class="font-semibold">📜 ประวัติการขายคีย์ / เว็บเช่าทั้งหมด</h3></div>
-  <table class="w-full text-sm">
+  <table class="w-full text-sm min-w-[1000px]">
     <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-      <tr><th class="p-3">ผู้ซื้อ</th><th class="p-3">จำนวนวัน</th><th class="p-3">ราคา</th><th class="p-3">ประเภท</th><th class="p-3">เหลือเวลา</th><th class="p-3">คีย์</th><th class="p-3">เวลาซื้อ</th><th class="p-3"></th></tr>
+      <tr>
+        <th class="p-3 whitespace-nowrap">ผู้ซื้อ</th>
+        <th class="p-3 whitespace-nowrap">จำนวนวัน</th>
+        <th class="p-3 whitespace-nowrap">ราคา</th>
+        <th class="p-3 whitespace-nowrap">ประเภท</th>
+        <th class="p-3 whitespace-nowrap">เหลือเวลา</th>
+        <th class="p-3 whitespace-nowrap">คีย์</th>
+        <th class="p-3 whitespace-nowrap">เวลาซื้อ</th>
+        <th class="p-3"></th>
+      </tr>
     </thead>
     <tbody class="divide-y divide-[var(--border)]">
       <% sales.forEach(sale => { %>
         <tr>
-          <td class="p-3"><%= sale.username %></td>
-          <td class="p-3"><%= sale.days %> วัน</td>
-          <td class="p-3 text-emerald-400">฿<%= sale.price.toLocaleString() %></td>
-          <td class="p-3 text-xs">
+          <td class="p-3 whitespace-nowrap"><%= sale.username %></td>
+          <td class="p-3 whitespace-nowrap"><%= sale.days %> วัน</td>
+          <td class="p-3 text-emerald-400 whitespace-nowrap">฿<%= sale.price.toLocaleString() %></td>
+          <td class="p-3 text-xs max-w-[220px]">
             <% if (sale.type === 'new_site') { %>
               <% if (!sale.provisioning || sale.provisioning.status === 'creating') { %>
-                <span class="text-amber-400">⏳ กำลังสร้างเว็บ</span>
+                <span class="text-amber-400 whitespace-nowrap">⏳ กำลังสร้างเว็บ</span>
               <% } else if (sale.provisioning.status === 'success') { %>
-                <a href="<%= sale.provisioning.url %>" target="_blank" class="text-emerald-400 underline">✓ <%= sale.provisioning.url %></a>
+                <a href="<%= sale.provisioning.url %>" target="_blank" class="text-emerald-400 underline break-all">✓ <%= sale.provisioning.url %></a>
               <% } else { %>
                 <details>
                   <summary class="text-[var(--coral)] cursor-pointer select-none">✕ ล้มเหลว: <%= sale.provisioning.error %></summary>
@@ -91,7 +100,7 @@
                 </details>
               <% } %>
             <% } else { %>
-              <span class="text-[var(--text-4)]">ต่ออายุ</span>
+              <span class="text-[var(--text-4)] whitespace-nowrap">ต่ออายุ</span>
             <% } %>
           </td>
           <td class="p-3 text-xs font-mono whitespace-nowrap">
@@ -101,8 +110,8 @@
               <span class="text-[var(--text-4)]">-</span>
             <% } %>
           </td>
-          <td class="p-3 font-mono text-xs break-all"><%= sale.key %></td>
-          <td class="p-3 text-[var(--text-4)] text-xs"><%= new Date(sale.createdAt).toLocaleString('th-TH') %></td>
+          <td class="p-3 font-mono text-xs break-all max-w-[200px]"><%= sale.key %></td>
+          <td class="p-3 text-[var(--text-4)] text-xs whitespace-nowrap"><%= new Date(sale.createdAt).toLocaleString('th-TH') %></td>
           <td class="p-3 text-right whitespace-nowrap">
             <% if (sale.type === 'new_site' && sale.provisioning && sale.provisioning.status === 'success') { %>
               <% if (sale.provisioning.projectToken) { %>
