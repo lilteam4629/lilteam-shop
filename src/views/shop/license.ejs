@@ -32,7 +32,12 @@
         ✓ ใช้งานอยู่<% if (label) { %> — <%= label %><% } %><br />
         หมดอายุ: <%= new Date(expiresAt).toLocaleDateString('th-TH') %>
       </div>
-      <a href="/" class="block text-center bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-semibold rounded-lg py-2.5 text-sm">กลับหน้าร้าน →</a>
+      <a href="/" class="block text-center bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-semibold rounded-lg py-2.5 text-sm mb-4">กลับหน้าร้าน →</a>
+      <p class="text-xs text-[#7a6f47] text-center mb-2">มีคีย์ต่ออายุใหม่? กรอกที่นี่เพื่อเพิ่มเวลา (จะบวกเพิ่มจากเวลาที่เหลืออยู่ ไม่เสียเวลาเดิม)</p>
+      <form action="/license" method="post" class="space-y-3">
+        <input name="key" required placeholder="กรอกคีย์ต่ออายุที่นี่" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm text-center font-mono" />
+        <button class="w-full bg-[#443a22] hover:bg-[#544824] text-[#f3ecd8] font-semibold rounded-lg py-2.5 text-sm">ต่ออายุ</button>
+      </form>
     <% } else { %>
       <form action="/license" method="post" class="space-y-3">
         <input name="key" required placeholder="กรอกคีย์เปิดใช้งานที่นี่" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm text-center font-mono" />
