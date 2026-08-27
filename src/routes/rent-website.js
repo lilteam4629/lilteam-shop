@@ -81,7 +81,12 @@ router.post('/buy', (req, res) => {
     createdAt: new Date().toISOString(),
   });
 
-  const key = license.generateKey(user.username, plan.days);
+  // Label the key with the SITE's name (what shows on the rented site's own
+  // /license page) for a new site, since that's more meaningful to the
+  // renter than their account username on this seller's shop — falls back
+  // to the account username for plain renewal keys, which aren't tied to a
+  // specific site name.
+  const key = license.generateKey(wantsNewSite ? siteName : user.username, plan.days);
   const sale = {
     id: store.genId(10), userId: user.id, username: user.username,
     days: plan.days, price: plan.price, key, type: wantsNewSite ? 'new_site' : 'renewal',
