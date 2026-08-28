@@ -1,0 +1,20 @@
+<%
+  // Usage: <%- include('../partials/image-placeholder', { w: 1800, h: 600, ratioClass: 'aspect-[3/1]' }) %>
+  // Shows a faded "example" box with the recommended pixel size, so an
+  // empty image slot tells the admin what to upload instead of just being
+  // blank. ratioClass is an optional Tailwind aspect-ratio class; when
+  // omitted the box just fills its container's existing height.
+  const _w = typeof w !== 'undefined' ? w : null;
+  const _h = typeof h !== 'undefined' ? h : null;
+  const _ratioClass = typeof ratioClass !== 'undefined' ? ratioClass : '';
+%>
+<div class="w-full <%= _ratioClass %> rounded-xl border border-dashed border-[var(--border-light)] bg-[var(--input)] flex items-center justify-center overflow-hidden relative">
+  <div class="absolute inset-0 opacity-[0.07] bg-[repeating-linear-gradient(45deg,var(--gold)_0,var(--gold)_2px,transparent_2px,transparent_14px)]"></div>
+  <div class="relative text-center px-4 py-6">
+    <div class="text-[var(--gold)]/40 text-3xl mb-2">🖼️</div>
+    <div class="text-[var(--text-4)] text-xs sm:text-sm font-medium">ตัวอย่างรูปภาพ</div>
+    <% if (_w && _h) { %>
+      <div class="text-[var(--gold)]/70 text-[10px] sm:text-xs font-mono mt-1">ขนาดแนะนำ: <%= _w %> x <%= _h %></div>
+    <% } %>
+  </div>
+</div>

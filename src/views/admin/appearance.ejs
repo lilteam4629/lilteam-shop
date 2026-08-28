@@ -15,6 +15,7 @@
         <div class="text-center text-[var(--text-4)]">
           <div class="w-20 h-20 mx-auto mb-3 rounded-2xl bg-[var(--gold)] text-[var(--bg)] flex items-center justify-center text-4xl font-bold">L</div>
           <p class="text-sm">ยังไม่ได้อัปโหลดโลโก้</p>
+          <p class="text-[var(--gold)]/70 text-[10px] font-mono mt-1">ขนาดแนะนำ: 512 x 512</p>
         </div>
       <% } %>
     </div>
@@ -38,7 +39,7 @@
     <% if (settings.hero.bannerImage) { %>
       <img src="<%= settings.hero.bannerImage %>" class="w-full aspect-[3/1] object-cover rounded-xl border border-[var(--border)] mb-4" alt="แบนเนอร์หน้าหลัก" />
     <% } else { %>
-      <div class="w-full aspect-[3/1] rounded-xl border border-dashed border-[var(--border-light)] bg-[var(--input)] flex items-center justify-center text-[var(--text-4)] text-sm mb-4">ยังไม่มีภาพแบนเนอร์</div>
+      <div class="mb-4"><%- include('../partials/image-placeholder', { w: 1800, h: 600, ratioClass: 'aspect-[3/1]' }) %></div>
     <% } %>
 
     <form action="/admin/hero-banner/upload" method="post" enctype="multipart/form-data" class="space-y-3 mb-6">
