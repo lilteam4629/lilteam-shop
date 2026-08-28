@@ -39,6 +39,11 @@ async function tenantResolver(req, res, next) {
     if (!tenantDb) {
       return res.status(404).send('ร้านนี้ยังไม่พร้อมใช้งาน');
     }
+    // The shop's own expiresAt lives in the MAIN db's `shops` directory, not
+    // inside its own dataset — stash it on req so routes (e.g. the admin
+    // dashboard's expiry countdown) can read it without needing to leave
+    // the tenant context to look it up.
+    req.tenantShop = shop;
     store.runInTenant(shop.id, tenantDb, next);
   } catch (err) {
     next(err);
