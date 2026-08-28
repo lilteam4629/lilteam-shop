@@ -1,34 +1,8 @@
 <section class="max-w-xl mx-auto px-4 py-10">
-  <h1 class="text-2xl font-bold mb-1">🌐 เช่าเว็บ / ต่ออายุคีย์</h1>
-  <p class="text-sm text-[var(--text-3)] mb-6">ซื้อคีย์เปิดใช้งาน/ต่ออายุเว็บที่คุณเช่าไว้ ได้คีย์ทันทีหลังชำระเงิน เอาไปกรอกที่หน้า <span class="font-mono">/license</span> ของเว็บนั้นได้เลย</p>
-
-  <% if (!licenseReady) { %>
-    <div class="bg-amber-900/30 border border-amber-600/50 text-amber-300 rounded-xl p-4 text-sm mb-6">
-      ระบบขายคีย์ยังไม่เปิดใช้งานในขณะนี้ กรุณาติดต่อร้านค้า
-    </div>
-  <% } %>
-
-  <div class="grid sm:grid-cols-3 gap-4 mb-8">
-    <% plans.forEach(plan => { %>
-      <div class="bg-[var(--card)] border border-[var(--border)] hover:border-[var(--gold)]/60 rounded-xl p-5 text-center flex flex-col items-center gap-2">
-        <div class="text-3xl font-extrabold text-[var(--gold)]"><%= plan.days %></div>
-        <div class="text-xs text-[var(--text-4)] -mt-1">วัน</div>
-        <div class="text-lg font-semibold mt-2 mb-1">฿<%= plan.price.toLocaleString() %></div>
-        <form action="/rent-website/buy" method="post" class="w-full">
-          <input type="hidden" name="planId" value="<%= plan.id %>" />
-          <input type="hidden" name="type" value="renewal" />
-          <button <%= licenseReady ? '' : 'disabled' %> class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] disabled:opacity-40 text-[var(--bg)] font-semibold rounded-lg py-2 text-sm">🔄 ต่ออายุ (รับคีย์)</button>
-        </form>
-      </div>
-    <% }) %>
-    <% if (!plans.length) { %>
-      <p class="text-sm text-[var(--text-4)] col-span-full text-center py-8">ยังไม่มีแพ็กเกจให้ซื้อในขณะนี้</p>
-    <% } %>
-  </div>
+  <h1 class="text-2xl font-bold mb-1">🌐 เปิดร้านใหม่ของคุณเอง</h1>
+  <p class="text-sm text-[var(--text-3)] mb-6">ได้ร้านทันที พร้อมระบบสินค้า/สต๊อก/ออเดอร์/กระเป๋าเงินครบเหมือนร้านนี้ทุกอย่าง — ไม่ต้องสมัคร Railway ไม่ต้องมี GitHub เลย</p>
 
   <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-5 mb-8">
-    <h2 class="text-lg font-semibold mb-1">🆕 เปิดร้านใหม่ของคุณเอง</h2>
-    <p class="text-xs text-[var(--text-4)] mb-4">ได้ร้านทันที พร้อมระบบสินค้า/สต๊อก/ออเดอร์/กระเป๋าเงินครบเหมือนร้านนี้ทุกอย่าง — ไม่ต้องสมัคร Railway ไม่ต้องมี GitHub เลย</p>
     <a href="/start" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">🚀 เปิดร้านตอนนี้ →</a>
     <a href="/my-shops" class="block text-center text-xs text-[var(--text-4)] mt-2 underline">มีร้านอยู่แล้ว? ดู/ต่ออายุร้านของฉัน →</a>
   </div>
