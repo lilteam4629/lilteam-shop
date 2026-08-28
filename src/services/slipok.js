@@ -2,8 +2,8 @@ const fs = require('fs');
 const axios = require('axios');
 const FormData = require('form-data');
 
-const BRANCH_ID = process.env.SLIPOK_BRANCH_ID;
-const API_KEY = process.env.SLIPOK_API_KEY;
+const DEFAULT_BRANCH_ID = process.env.SLIPOK_BRANCH_ID;
+const DEFAULT_API_KEY = process.env.SLIPOK_API_KEY;
 
 const ERROR_MESSAGES = {
   1010: 'สลิปนี้เป็นรายการที่โอนมานานเกินไป (delay slip)',
@@ -12,7 +12,21 @@ const ERROR_MESSAGES = {
   1014: 'บัญชีผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า',
 };
 
-const isConfigured = () => Boolean(BRANCH_ID && API_KEY);
+// A shop may bring its own SlipOK branch (see settings.payment.slipokBranchId/
+// slipokApiKey, set at /admin/topups) so slip checks verify against ITS OWN
+// bank account rather than the main site's. Falls back to the global
+// SLIPOK_BRANCH_ID/SLIPOK_API_KEY env vars when a shop hasn't set its own.
+function resolveCredentials(credentials = {}) {
+  return {
+    branchId: credentials.branchId || DEFAULT_BRANCH_ID,
+    apiKey: credentials.apiKey || DEFAULT_API_KEY,
+  };
+}
+
+const isConfigured = (credentials) => {
+  const { branchId, apiKey } = resolveCredentials(credentials);
+  return Boolean(branchId && apiKey);
+};
 
 /**
  * Parse SlipOK's transDate (yyyyMMdd) + transTime (HH:mm:ss) — always Thai
@@ -32,8 +46,9 @@ function parseTransDateTime(transDate, transTime) {
  * Returns { checked, verified, message, raw } — checked is false when
  * SlipOK isn't configured (caller should fall back to manual review).
  */
-async function verifySlip(fileInput, expectedAmount, fileOptions = {}) {
-  if (!isConfigured()) {
+async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentials) {
+  const { branchId: BRANCH_ID, apiKey: API_KEY } = resolveCredentials(credentials);
+  if (!BRANCH_ID || !API_KEY) {
     return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipOK — ใช้การตรวจสอบด้วยแอดมินแทน', raw: null };
   }
 

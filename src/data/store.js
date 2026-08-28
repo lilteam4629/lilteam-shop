@@ -166,6 +166,20 @@ function defaultData() {
         bankAccountName: 'LilTeam Shop (Demo)',
         promptpayQrImage: null,
         bankQrImage: null,
+        // Optional per-shop SlipOK credentials (see /admin/topups). When set,
+        // this shop's own slip checks use these instead of the global
+        // SLIPOK_BRANCH_ID/SLIPOK_API_KEY env vars — lets each tenant shop
+        // auto-verify against its own bank account.
+        slipokBranchId: '',
+        slipokApiKey: '',
+        // EasySlip: this shop's own receiving bank account, auto-registered
+        // with the PLATFORM's single central EasySlip API key (see
+        // src/services/easyslip.js) when saved at /admin/topups — the shop
+        // owner never touches EasySlip directly.
+        easyslipBankCode: '',
+        easyslipAccountType: 'NATURAL',
+        easyslipAccountId: null,
+        easyslipStatus: '',
       },
       miniGame: {
         enabled: true,
@@ -324,6 +338,18 @@ function migrate() {
   }
   if (db.settings.payment.bankQrImage === undefined) {
     db.settings.payment.bankQrImage = db.settings.payment.qrImage || null;
+    changed = true;
+  }
+  if (db.settings.payment.slipokBranchId === undefined) {
+    db.settings.payment.slipokBranchId = '';
+    db.settings.payment.slipokApiKey = '';
+    changed = true;
+  }
+  if (db.settings.payment.easyslipAccountId === undefined) {
+    db.settings.payment.easyslipBankCode = '';
+    db.settings.payment.easyslipAccountType = 'NATURAL';
+    db.settings.payment.easyslipAccountId = null;
+    db.settings.payment.easyslipStatus = '';
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }

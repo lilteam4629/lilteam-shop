@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
+const easyslip = require('../services/easyslip');
 const { MAIN_SITE_URL } = require('../middleware/tenant');
 const { requireAdmin } = require('../middleware/auth');
 
@@ -463,7 +464,8 @@ router.post('/users/new', (req, res) => {
 });
 
 // ---------- Top-up requests ----------
-router.get('/topups', (req, res) => {
+router.get('/topups', async (req, res) => {
+  const banks = await easyslip.getBanks();
   const q = String(req.query.q || '').trim();
   const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : '';
   const needle = q.toLocaleLowerCase('th-TH');
@@ -482,7 +484,7 @@ router.get('/topups', (req, res) => {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
   const pendingCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
-  res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment: store.data.settings.payment, q, status });
+  res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment: store.data.settings.payment, banks, q, status });
 });
 
 router.post('/topups/payment-settings', (req, res) => {
@@ -494,8 +496,38 @@ router.post('/topups/payment-settings', (req, res) => {
       req.flash('error', 'อัปโหลดรูป QR ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/topups');
     }
-    const { promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName } = req.body;
-    Object.assign(store.data.settings.payment, { promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName });
+    const {
+      promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName,
+      slipokBranchId, slipokApiKey, easyslipBankCode, easyslipAccountType,
+    } = req.body;
+    const payment = store.data.settings.payment;
+    Object.assign(payment, {
+      promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName,
+      slipokBranchId: (slipokBranchId || '').trim(),
+      slipokApiKey: (slipokApiKey || '').trim(),
+    });
+
+    const bankCode = (easyslipBankCode || '').trim();
+    const accountType = easyslipAccountType === 'JURISTIC' ? 'JURISTIC' : 'NATURAL';
+    const detailsChanged = bankCode !== payment.easyslipBankCode
+      || accountType !== payment.easyslipAccountType
+      || !payment.easyslipAccountId;
+    payment.easyslipBankCode = bankCode;
+    payment.easyslipAccountType = accountType;
+    if (bankCode && bankAccountNumber && bankAccountName && easyslip.isConfigured() && detailsChanged) {
+      const result = await easyslip.createBankAccount({
+        bankCode, bankNumber: bankAccountNumber, nameTh: bankAccountName,
+        nameEn: bankAccountName, type: accountType,
+      });
+      if (result.ok) {
+        payment.easyslipAccountId = result.account.id;
+        payment.easyslipStatus = 'เชื่อมต่อ EasySlip สำเร็จ — ตรวจสลิปอัตโนมัติพร้อมใช้งาน';
+      } else if (result.code === 'BANK_ACCOUNT_DUPLICATE') {
+        payment.easyslipStatus = 'บัญชีนี้เชื่อมต่อ EasySlip ไว้แล้ว';
+      } else {
+        payment.easyslipStatus = `เชื่อมต่อ EasySlip ไม่สำเร็จ: ${result.message}`;
+      }
+    }
 
     if (req.body.removePromptpayQrImage === 'on') store.data.settings.payment.promptpayQrImage = null;
     if (req.body.removeBankQrImage === 'on') store.data.settings.payment.bankQrImage = null;
