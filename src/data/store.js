@@ -394,11 +394,15 @@ function save() {
 
 function saveTenantDb(shopId, tenantDb) {
   if (mongoCollection) {
-    mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...tenantDb }, { upsert: true })
+    // Returned (not fire-and-forget) so createTenantDb can await it — a
+    // shop created and then immediately redirected to must already be
+    // readable by loadTenantDb on the very next request, or that request
+    // sees no data yet and shows "ร้านนี้ยังไม่พร้อมใช้งาน".
+    return mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...tenantDb }, { upsert: true })
       .catch((err) => console.error(`[store] MongoDB save failed for shop ${shopId}:`, err.message));
-  } else {
-    fs.writeFileSync(tenantDbPath(shopId), JSON.stringify(tenantDb, null, 2));
   }
+  fs.writeFileSync(tenantDbPath(shopId), JSON.stringify(tenantDb, null, 2));
+  return Promise.resolve();
 }
 
 /**
@@ -439,7 +443,7 @@ async function createTenantDb(shopId, { shopName, adminUsername, adminEmail, adm
   tenantDb.coupons = [];
   tenantDb.announcements = [];
   tenantDb.miniGamePrizes = [];
-  saveTenantDb(shopId, tenantDb);
+  await saveTenantDb(shopId, tenantDb);
   return tenantDb;
 }
 
