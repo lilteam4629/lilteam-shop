@@ -96,7 +96,7 @@ router.post('/topup/:id/slip', (req, res) => {
     req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว ไม่สามารถแนบสลิปใหม่ได้');
     return res.redirect(`/account/topup/${request.id}`);
   }
-  upload.single('slip')(req, res, async (err) => {
+  upload.single('slip')(req, res, store.bindTenantContext(async (err) => {
     if (err || !req.file) {
       req.flash('error', 'อัปโหลดสลิปไม่สำเร็จ กรุณาลองใหม่ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 5MB)');
       return res.redirect(`/account/topup/${request.id}`);
@@ -116,13 +116,6 @@ router.post('/topup/:id/slip', (req, res) => {
       provider = 'easyslip';
       const expectedNumbers = Object.values(payment.easyslipAccounts).map(a => a.bankNumber).filter(Boolean);
       result = await easyslip.verifySlip(req.file.buffer, request.amount, fileOptions, expectedNumbers);
-      if (!result.verified) {
-        console.log('[easyslip] verify failed', {
-          shopExpectedNumbers: expectedNumbers,
-          matchedAccount: result.raw && result.raw.matchedAccount,
-          message: result.message,
-        });
-      }
     } else {
       provider = 'slipok';
       result = await slipok.verifySlip(req.file.buffer, request.amount, fileOptions, {
@@ -190,7 +183,7 @@ router.post('/topup/:id/slip', (req, res) => {
       }
     }
     res.redirect(`/account/topup/${request.id}`);
-  });
+  }));
 });
 
 router.get('/orders', (req, res) => {

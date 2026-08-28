@@ -548,4 +548,10 @@ module.exports = {
   loadTenantDb,
   createTenantDb,
   runInTenant,
+  // Wrap a callback with the CURRENT tenant context so it still resolves
+  // the right shop's data even if invoked later through a non-Express
+  // callback API (e.g. multer's manual upload.single(...)(req, res, cb)
+  // form) whose internal event/stream plumbing can lose AsyncLocalStorage
+  // continuity and silently fall back to the main site's db.
+  bindTenantContext: (fn) => tenantContext.bind(fn),
 };
