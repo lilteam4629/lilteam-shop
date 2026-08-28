@@ -78,7 +78,7 @@
           <% } %>
         </div>
       <% } %>
-      <form action="/account/topup/<%= request.id %>/slip" method="post" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-2">
+      <form id="slipUploadForm" action="/account/topup/<%= request.id %>/slip" method="post" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-2">
         <input type="file" name="slip" accept="image/*" required class="min-w-0 flex-1 text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
         <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 sm:py-0 rounded-lg text-sm whitespace-nowrap"><%= request.slipPath ? 'แนบใหม่' : 'แนบสลิป' %></button>
       </form>
@@ -86,3 +86,24 @@
     </div>
   <% } %>
 </section>
+
+<div id="slipUploadOverlay" class="hidden fixed inset-0 z-50 bg-[var(--bg)]/95 backdrop-blur-sm flex flex-col items-center justify-center px-6 text-center">
+  <% if (settings.branding && settings.branding.logoImage) { %>
+    <img src="<%= settings.branding.logoImage %>" alt="<%= settings.shopName %>" class="w-20 h-20 rounded-2xl object-cover mb-5 shadow-[0_10px_30px_rgba(200,166,63,.25)]" />
+  <% } else { %>
+    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#f0ce66] to-[#94701d] text-[#171208] flex items-center justify-center text-3xl font-bold mb-5 shadow-[0_10px_30px_rgba(200,166,63,.25)]"><%= (settings.shopName || 'S').charAt(0).toUpperCase() %></div>
+  <% } %>
+  <div class="w-10 h-10 border-[3px] border-[var(--gold)]/25 border-t-[var(--gold)] rounded-full animate-spin mb-5"></div>
+  <div class="text-lg font-semibold mb-1">กำลังตรวจสอบสลิป...</div>
+  <p class="text-sm text-[var(--text-3)]">กรุณารอสักครู่ ระบบกำลังตรวจสอบอัตโนมัติ</p>
+</div>
+<script>
+  (function () {
+    var form = document.getElementById('slipUploadForm');
+    var overlay = document.getElementById('slipUploadOverlay');
+    if (!form || !overlay) return;
+    form.addEventListener('submit', function () {
+      overlay.classList.remove('hidden');
+    });
+  })();
+</script>
