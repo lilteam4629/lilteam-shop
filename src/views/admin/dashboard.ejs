@@ -34,6 +34,35 @@
   </script>
 <% } %>
 
+<% if (shopExpiresAt) { %>
+  <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-4 mb-6 flex items-center justify-between flex-wrap gap-2">
+    <div class="text-sm text-[var(--text-3)]">🏪 อายุการใช้งานร้านนี้เหลือ<% if (shopName) { %><span class="text-[var(--text-4)]"> — <%= shopName %></span><% } %></div>
+    <div class="flex items-center gap-3">
+      <span id="shop-countdown" class="font-mono font-bold text-lg text-[var(--gold)]" data-exp="<%= shopExpiresAt %>">…</span>
+      <% if (shopRenewUrl) { %><a href="<%= shopRenewUrl %>" class="text-xs text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-3 py-1 whitespace-nowrap">ต่ออายุ →</a><% } %>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const el = document.getElementById('shop-countdown');
+      if (!el) return;
+      const exp = Number(el.dataset.exp);
+      const tick = () => {
+        const ms = exp - Date.now();
+        if (ms <= 0) { el.textContent = '✕ หมดอายุแล้ว'; el.classList.add('text-[var(--coral)]'); return; }
+        const s = Math.floor(ms / 1000);
+        const d = Math.floor(s / 86400);
+        const h = Math.floor((s % 86400) / 3600);
+        const m = Math.floor((s % 3600) / 60);
+        const sec = s % 60;
+        el.textContent = `${d} วัน ${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+      };
+      tick();
+      setInterval(tick, 1000);
+    })();
+  </script>
+<% } %>
+
 <div class="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-4">
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
     <div class="text-[var(--text-4)] text-xs mb-1">รายได้วันนี้</div>

@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
+const { MAIN_DOMAIN } = require('../middleware/tenant');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
@@ -121,6 +122,11 @@ router.get('/', (req, res) => {
     licenseGateOn: license.isGateOn(),
     licenseExpiresAt: license.isGateOn() ? store.data.settings.license.expiresAt : null,
     licenseLabel: license.isGateOn() ? store.data.settings.license.label : null,
+    // Multi-tenant shop (see src/middleware/tenant.js) — expiresAt lives in
+    // the main site's shops directory, stashed on req by that middleware.
+    shopExpiresAt: req.tenantShop ? req.tenantShop.expiresAt : null,
+    shopName: req.tenantShop ? req.tenantShop.name : null,
+    shopRenewUrl: MAIN_DOMAIN ? `https://${MAIN_DOMAIN}/my-shops` : null,
   });
 });
 
