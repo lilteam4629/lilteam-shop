@@ -116,6 +116,13 @@ router.post('/topup/:id/slip', (req, res) => {
       provider = 'easyslip';
       const expectedNumbers = Object.values(payment.easyslipAccounts).map(a => a.bankNumber).filter(Boolean);
       result = await easyslip.verifySlip(req.file.buffer, request.amount, fileOptions, expectedNumbers);
+      if (!result.verified) {
+        console.log('[easyslip] verify failed', {
+          shopExpectedNumbers: expectedNumbers,
+          matchedAccount: result.raw && result.raw.matchedAccount,
+          message: result.message,
+        });
+      }
     } else {
       provider = 'slipok';
       result = await slipok.verifySlip(req.file.buffer, request.amount, fileOptions, {
