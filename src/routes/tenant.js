@@ -1,22 +1,16 @@
-// Multi-tenant SaaS prototype: one signup form creates a new "shop"
-// instantly (no Railway, no GitHub, no per-customer infrastructure at all)
-// — every shop just lives as data in the SAME running app/database,
-// isolated by URL (/s/:slug/...).
-//
-// Deliberately kept on its OWN data collections (`shops`, `tenantProducts`)
-// completely separate from the existing single-tenant collections
-// (`products`, `orders`, `users`, ...) so this can never affect or break
-// the main storefront/admin that's already live. Shop-owner auth is its
-// own lightweight session field (req.session.shopOwnerId), independent of
-// the main app's user/session model.
-//
-// Still missing vs. the main store: cart/checkout, wallet, real orders,
-// stock/claim-code delivery, coupons, appearance customization — this is a
-// product catalog + admin only so far.
+// Multi-tenant SaaS signup: one form creates a new shop that gets the
+// SAME full app every other shop (and the seller's own site) runs — real
+// products, stock, wallet, orders, coupons, minigame, appearance settings,
+// all of it — because it's literally the same codebase, just pointed at
+// that shop's own dataset (see src/middleware/tenant.js and
+// src/data/store.js runInTenant/createTenantDb). No Railway, no GitHub,
+// no per-customer deployment, and every existing route/view works
+// unmodified for a shop's own subdomain.
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
+const { MAIN_DOMAIN } = require('../middleware/tenant');
 
 function slugify(str) {
   return String(str || '').toLowerCase().trim()
@@ -25,30 +19,23 @@ function slugify(str) {
     .replace(/-+/g, '-');
 }
 
-function findShop(slug) {
-  return store.data.shops.find(s => s.slug === slug);
-}
-
-function requireShopOwner(req, res, next) {
-  const shop = findShop(req.params.slug);
-  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
-  if (req.session.shopOwnerId !== shop.id) {
-    req.flash('error', 'กรุณาเข้าสู่ระบบร้านนี้ก่อน');
-    return res.redirect(`/s/${shop.slug}/login`);
-  }
-  req.shop = shop;
-  next();
-}
-
 router.get('/start', (req, res) => {
-  res.render('tenant/start', { title: 'เปิดร้านของคุณเอง', layout: false, messages: { error: req.flash('error') } });
+  res.render('tenant/start', {
+    title: 'เปิดร้านของคุณเอง', layout: false,
+    domainReady: Boolean(MAIN_DOMAIN),
+    mainDomain: MAIN_DOMAIN,
+    messages: { error: req.flash('error') },
+  });
 });
 
-router.post('/start', (req, res) => {
+router.post('/start', async (req, res) => {
+  if (!MAIN_DOMAIN) {
+    req.flash('error', 'ระบบเปิดร้านยังไม่พร้อมใช้งาน (ต้องตั้งค่าโดเมนก่อน) กรุณาติดต่อผู้ดูแลเว็บ');
+    return res.redirect('/start');
+  }
   const name = String(req.body.name || '').trim();
   const shopName = String(req.body.shopName || '').trim();
   const email = String(req.body.email || '').trim().toLowerCase();
-  const phone = String(req.body.phone || '').trim();
   const password = String(req.body.password || '');
 
   if (!name || !shopName || !email || password.length < 8) {
@@ -63,168 +50,26 @@ router.post('/start', (req, res) => {
   let slug = slugify(shopName) || 'shop';
   if (store.data.shops.some(s => s.slug === slug)) slug = `${slug}-${store.genId(4)}`;
 
-  const shop = {
-    id: store.genId(10),
-    slug,
-    name: shopName,
-    ownerName: name,
-    ownerEmail: email,
-    ownerPhone: phone,
-    ownerPasswordHash: bcrypt.hashSync(password, 10),
-    plan: 'trial',
-    createdAt: new Date().toISOString(),
-  };
-  store.data.shops.push(shop);
+  let adminUsername = email.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '').slice(0, 20) || 'owner';
+  if (adminUsername.length < 3) adminUsername = `${adminUsername}${store.genId(3)}`;
+
+  const shopId = store.genId(10);
+  store.data.shops.push({ id: shopId, slug, name: shopName, ownerName: name, ownerEmail: email, createdAt: new Date().toISOString() });
   store.save();
 
-  req.session.shopOwnerId = shop.id;
-  req.flash('success', `เปิดร้าน "${shop.name}" สำเร็จ!`);
-  res.redirect(`/s/${shop.slug}/admin`);
-});
-
-router.get('/s/:slug/login', (req, res) => {
-  const shop = findShop(req.params.slug);
-  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
-  res.render('tenant/login', { title: `เข้าสู่ระบบ — ${shop.name}`, layout: false, shop, messages: { error: req.flash('error') } });
-});
-
-router.post('/s/:slug/login', (req, res) => {
-  const shop = findShop(req.params.slug);
-  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
-  const password = String(req.body.password || '');
-  if (!bcrypt.compareSync(password, shop.ownerPasswordHash)) {
-    req.flash('error', 'รหัสผ่านไม่ถูกต้อง');
-    return res.redirect(`/s/${shop.slug}/login`);
-  }
-  req.session.shopOwnerId = shop.id;
-  res.redirect(`/s/${shop.slug}/admin`);
-});
-
-router.get('/s/:slug/logout', (req, res) => {
-  req.session.shopOwnerId = null;
-  res.redirect(`/s/${req.params.slug}`);
-});
-
-router.get('/s/:slug/admin', requireShopOwner, (req, res) => {
-  const products = store.data.tenantProducts.filter(p => p.shopId === req.shop.id);
-  res.render('tenant/admin', {
-    title: `หลังบ้าน — ${req.shop.name}`, layout: false, shop: req.shop, products,
-    messages: { success: req.flash('success'), error: req.flash('error') },
-  });
-});
-
-router.post('/s/:slug/admin/products', requireShopOwner, (req, res) => {
-  const title = String(req.body.title || '').trim();
-  const price = Math.max(0, Number(req.body.price) || 0);
-  const stock = Math.max(0, parseInt(req.body.stock, 10) || 0);
-  const image = String(req.body.image || '').trim();
-  const description = String(req.body.description || '').trim();
-  if (!title || !price) {
-    req.flash('error', 'กรุณากรอกชื่อสินค้าและราคาให้ถูกต้อง');
-    return res.redirect(`/s/${req.shop.slug}/admin`);
-  }
-  store.data.tenantProducts.push({
-    id: store.genId(8), shopId: req.shop.id, title, price, stock, image, description,
-    active: true, createdAt: new Date().toISOString(),
-  });
-  store.save();
-  req.flash('success', 'เพิ่มสินค้าแล้ว');
-  res.redirect(`/s/${req.shop.slug}/admin`);
-});
-
-router.post('/s/:slug/admin/products/:id/delete', requireShopOwner, (req, res) => {
-  store.data.tenantProducts = store.data.tenantProducts.filter(p => !(p.id === req.params.id && p.shopId === req.shop.id));
-  store.save();
-  req.flash('success', 'ลบสินค้าแล้ว');
-  res.redirect(`/s/${req.shop.slug}/admin`);
-});
-
-router.post('/s/:slug/admin/products/:id/toggle', requireShopOwner, (req, res) => {
-  const product = store.data.tenantProducts.find(p => p.id === req.params.id && p.shopId === req.shop.id);
-  if (product) { product.active = !product.active; store.save(); }
-  res.redirect(`/s/${req.shop.slug}/admin`);
-});
-
-// Public storefront — every shop's own isolated page and product list.
-router.get('/s/:slug', (req, res) => {
-  const shop = findShop(req.params.slug);
-  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
-  const products = store.data.tenantProducts.filter(p => p.shopId === shop.id && p.active);
-  res.render('tenant/storefront', { title: shop.name, layout: false, shop, products });
-});
-
-// --- Checkout (Phase 3): no wallet/payment gateway yet — buyer leaves
-// contact info, shop owner confirms payment manually in their admin, same
-// spirit as how the main store's slip-review flow works before SlipOK.
-router.get('/s/:slug/buy/:productId', (req, res) => {
-  const shop = findShop(req.params.slug);
-  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
-  const product = store.data.tenantProducts.find(p => p.id === req.params.productId && p.shopId === shop.id && p.active);
-  if (!product) {
-    req.flash('error', 'ไม่พบสินค้านี้');
-    return res.redirect(`/s/${shop.slug}`);
-  }
-  res.render('tenant/buy', { title: `สั่งซื้อ — ${product.title}`, layout: false, shop, product, messages: { error: req.flash('error') } });
-});
-
-router.post('/s/:slug/buy/:productId', (req, res) => {
-  const shop = findShop(req.params.slug);
-  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
-  const product = store.data.tenantProducts.find(p => p.id === req.params.productId && p.shopId === shop.id && p.active);
-  if (!product) {
-    req.flash('error', 'ไม่พบสินค้านี้');
-    return res.redirect(`/s/${shop.slug}`);
-  }
-  if (product.stock <= 0) {
-    req.flash('error', 'สินค้าหมดสต๊อกแล้ว');
-    return res.redirect(`/s/${shop.slug}/buy/${product.id}`);
-  }
-  const buyerName = String(req.body.buyerName || '').trim();
-  const buyerContact = String(req.body.buyerContact || '').trim();
-  if (!buyerName || !buyerContact) {
-    req.flash('error', 'กรุณากรอกชื่อและช่องทางติดต่อกลับ');
-    return res.redirect(`/s/${shop.slug}/buy/${product.id}`);
+  try {
+    await store.createTenantDb(shopId, {
+      shopName, adminUsername, adminEmail: email, adminPasswordHash: bcrypt.hashSync(password, 10),
+    });
+  } catch (err) {
+    store.data.shops = store.data.shops.filter(s => s.id !== shopId);
+    store.save();
+    req.flash('error', 'สร้างร้านไม่สำเร็จ ลองใหม่อีกครั้ง');
+    return res.redirect('/start');
   }
 
-  product.stock -= 1;
-  const order = {
-    id: store.genId(10), shopId: shop.id, productId: product.id, productTitle: product.title,
-    price: product.price, buyerName, buyerContact, status: 'pending', createdAt: new Date().toISOString(),
-  };
-  store.data.tenantOrders.push(order);
-  store.save();
-
-  res.redirect(`/s/${shop.slug}/order/${order.id}`);
-});
-
-router.get('/s/:slug/order/:id', (req, res) => {
-  const shop = findShop(req.params.slug);
-  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
-  const order = store.data.tenantOrders.find(o => o.id === req.params.id && o.shopId === shop.id);
-  if (!order) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบออเดอร์นี้' });
-  res.render('tenant/order-status', { title: 'สถานะออเดอร์', layout: false, shop, order });
-});
-
-// --- Admin: order management ---
-router.get('/s/:slug/admin/orders', requireShopOwner, (req, res) => {
-  const orders = store.data.tenantOrders.filter(o => o.shopId === req.shop.id).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  res.render('tenant/admin-orders', {
-    title: `ออเดอร์ — ${req.shop.name}`, layout: false, shop: req.shop, orders,
-    messages: { success: req.flash('success'), error: req.flash('error') },
-  });
-});
-
-router.post('/s/:slug/admin/orders/:id/status', requireShopOwner, (req, res) => {
-  const order = store.data.tenantOrders.find(o => o.id === req.params.id && o.shopId === req.shop.id);
-  const status = String(req.body.status || '');
-  if (!order || !['pending', 'paid', 'fulfilled', 'cancelled'].includes(status)) {
-    req.flash('error', 'ไม่พบออเดอร์นี้');
-    return res.redirect(`/s/${req.shop.slug}/admin/orders`);
-  }
-  order.status = status;
-  store.save();
-  req.flash('success', 'อัพเดตสถานะแล้ว');
-  res.redirect(`/s/${req.shop.slug}/admin/orders`);
+  req.flash('success', `เปิดร้าน "${shopName}" สำเร็จ! เข้าสู่ระบบด้วยชื่อผู้ใช้ ${adminUsername}`);
+  res.redirect(`https://${slug}.${MAIN_DOMAIN}/login`);
 });
 
 module.exports = router;

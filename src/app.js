@@ -16,6 +16,7 @@ const adminRoutes = require('./routes/admin');
 const licenseRoutes = require('./routes/license');
 const rentWebsiteRoutes = require('./routes/rent-website');
 const tenantRoutes = require('./routes/tenant');
+const { tenantResolver } = require('./middleware/tenant');
 const license = require('./services/license');
 const packageInfo = require('../package.json');
 
@@ -49,6 +50,12 @@ app.get('/media/:id/:filename?', async (req, res, next) => {
   }
 });
 app.use(express.static(path.join(__dirname, '..', 'public')));
+
+// Resolves store.data to the right shop's own dataset based on subdomain,
+// BEFORE session/auth/every route below — see src/middleware/tenant.js.
+// No-ops entirely until MAIN_DOMAIN is set, so this is safe to deploy
+// ahead of DNS being finished.
+app.use(tenantResolver);
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'lilteam-shop-demo-secret',

@@ -25,30 +25,33 @@
       <% }) %>
     <% } %>
 
-    <form action="/start" method="post" class="space-y-3">
-      <div>
-        <label class="block text-xs mb-1 text-[#a89a6c]">ชื่อของคุณ</label>
-        <input name="name" required placeholder="ชื่อของคุณ" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
+    <% if (!domainReady) { %>
+      <div class="bg-amber-900/30 border border-amber-600/50 text-amber-300 rounded-lg px-4 py-3 text-sm text-center">
+        ⚠️ ระบบเปิดร้านยังไม่พร้อมใช้งาน (ต้องตั้งค่า MAIN_DOMAIN + DNS ก่อน)
       </div>
-      <div>
-        <label class="block text-xs mb-1 text-[#a89a6c]">ชื่อร้านค้า</label>
-        <input name="shopName" required placeholder="เช่น My Game Shop" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
-      </div>
-      <div>
-        <label class="block text-xs mb-1 text-[#a89a6c]">อีเมล</label>
-        <input name="email" type="email" required placeholder="you@example.com" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
-      </div>
-      <div>
-        <label class="block text-xs mb-1 text-[#a89a6c]">เบอร์โทร</label>
-        <input name="phone" placeholder="0812345678" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
-      </div>
-      <div>
-        <label class="block text-xs mb-1 text-[#a89a6c]">รหัสผ่าน (อย่างน้อย 8 ตัว)</label>
-        <input name="password" type="password" required minlength="8" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
-      </div>
-      <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-semibold rounded-lg py-2.5 text-sm mt-2">🚀 เปิดร้านตอนนี้</button>
-    </form>
-    <p class="text-[10px] text-[#5a5133] text-center mt-4">Phase 1 prototype — ยังไม่เชื่อมกับระบบสินค้า/ออเดอร์จริง</p>
+    <% } else { %>
+      <form action="/start" method="post" class="space-y-3">
+        <div>
+          <label class="block text-xs mb-1 text-[#a89a6c]">ชื่อของคุณ</label>
+          <input name="name" required placeholder="ชื่อของคุณ" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs mb-1 text-[#a89a6c]">ชื่อร้านค้า</label>
+          <input name="shopName" required placeholder="เช่น My Game Shop" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
+          <p class="text-[10px] text-[#5a5133] mt-1">ร้านของคุณจะอยู่ที่ ชื่อร้าน.<%= mainDomain %></p>
+        </div>
+        <div>
+          <label class="block text-xs mb-1 text-[#a89a6c]">อีเมล</label>
+          <input name="email" type="email" required placeholder="you@example.com" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
+        </div>
+        <div>
+          <label class="block text-xs mb-1 text-[#a89a6c]">รหัสผ่าน (อย่างน้อย 8 ตัว)</label>
+          <input name="password" type="password" required minlength="8" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
+        </div>
+        <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-semibold rounded-lg py-2.5 text-sm mt-2">🚀 เปิดร้านตอนนี้</button>
+      </form>
+    <% } %>
+    <p class="text-[10px] text-[#5a5133] text-center mt-4">ร้านที่เปิดจะได้ระบบสินค้า/สต๊อก/ออเดอร์/หลังบ้านครบเหมือนร้านนี้ทุกอย่าง</p>
   </div>
 </body>
 </html>

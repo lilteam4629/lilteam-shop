@@ -4,6 +4,18 @@ const path = require('path');
 const { nanoid } = require('nanoid');
 const bcrypt = require('bcryptjs');
 const { MongoClient, GridFSBucket, ObjectId } = require('mongodb');
+const { AsyncLocalStorage } = require('async_hooks');
+
+// Multi-tenant support: each rented "shop" (see src/routes/tenant.js) gets
+// its OWN full copy of this exact data shape (products, orders, users,
+// wallet, settings — everything), reusing every existing route/view
+// unmodified. A request handled under a shop's subdomain runs inside
+// tenantContext.run({shopId, db}, ...) so `store.data` below transparently
+// resolves to THAT shop's db instead of the main site's — no route file
+// needed to know or care which one it's operating on. Outside that
+// context (the main site, on its own domain), `store.data` behaves
+// exactly as it always has.
+const tenantContext = new AsyncLocalStorage();
 
 const DB_PATH = path.join(__dirname, 'db.json');
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -197,13 +209,11 @@ function defaultData() {
       { id: nanoid(8), days: 90, price: 1499, active: true, createdAt: now },
     ],
     licenseSales: [],
-    // Multi-tenant SaaS prototype — a `shops` collection alongside the
-    // existing single-tenant data, deliberately kept separate from
-    // `products`/`orders`/etc. so it can never affect the main storefront.
-    // See src/routes/tenant.js.
+    // Multi-tenant SaaS: a lightweight directory (slug -> shop id) used to
+    // resolve a subdomain to that shop's own separately-stored full
+    // dataset (see loadTenantDb/createTenantDb below). This directory
+    // itself only ever lives in the MAIN site's db, never a tenant's.
     shops: [],
-    tenantProducts: [],
-    tenantOrders: [],
   };
 }
 
@@ -348,8 +358,6 @@ function migrate() {
   if (!db.licensePlans) { db.licensePlans = []; changed = true; }
   if (!db.licenseSales) { db.licenseSales = []; changed = true; }
   if (!db.shops) { db.shops = []; changed = true; }
-  if (!db.tenantProducts) { db.tenantProducts = []; changed = true; }
-  if (!db.tenantOrders) { db.tenantOrders = []; changed = true; }
   db.products.forEach(product => {
     if (!product.fulfillmentMode) {
       product.fulfillmentMode = 'automatic';
@@ -369,13 +377,80 @@ function migrate() {
   if (changed) save();
 }
 
+function tenantDbPath(shopId) {
+  return path.join(__dirname, `db.shop.${shopId}.json`);
+}
+
 function save() {
+  const ctx = tenantContext.getStore();
+  if (ctx) return saveTenantDb(ctx.shopId, ctx.db);
   if (mongoCollection) {
     mongoCollection.replaceOne({ _id: 'main' }, { _id: 'main', ...db }, { upsert: true })
       .catch((err) => console.error('[store] MongoDB save failed:', err.message));
   } else {
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
   }
+}
+
+function saveTenantDb(shopId, tenantDb) {
+  if (mongoCollection) {
+    mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...tenantDb }, { upsert: true })
+      .catch((err) => console.error(`[store] MongoDB save failed for shop ${shopId}:`, err.message));
+  } else {
+    fs.writeFileSync(tenantDbPath(shopId), JSON.stringify(tenantDb, null, 2));
+  }
+}
+
+/**
+ * Load an existing tenant's full dataset, or null if that shop has none yet.
+ */
+async function loadTenantDb(shopId) {
+  if (mongoCollection) {
+    const existing = await mongoCollection.findOne({ _id: `shop:${shopId}` });
+    if (!existing) return null;
+    delete existing._id;
+    return existing;
+  }
+  const file = tenantDbPath(shopId);
+  if (!fs.existsSync(file)) return null;
+  return JSON.parse(fs.readFileSync(file, 'utf-8'));
+}
+
+/**
+ * Create a brand-new tenant dataset (same shape as the main site's,
+ * customized with the shop's own name and first admin account) and
+ * persist it immediately.
+ */
+async function createTenantDb(shopId, { shopName, adminUsername, adminEmail, adminPasswordHash }) {
+  const tenantDb = defaultData();
+  tenantDb.settings.shopName = shopName;
+  tenantDb.users = [
+    {
+      id: nanoid(8), username: adminUsername, email: adminEmail, passwordHash: adminPasswordHash,
+      role: 'admin', walletBalance: 0, status: 'active', createdAt: new Date().toISOString(),
+    },
+  ];
+  // A fresh shop starts with an empty catalog — the sample products are only
+  // useful for the seller's own demo/main site.
+  tenantDb.products = [];
+  tenantDb.stockItems = [];
+  tenantDb.orders = [];
+  tenantDb.filterTags = [];
+  tenantDb.coupons = [];
+  tenantDb.announcements = [];
+  tenantDb.miniGamePrizes = [];
+  saveTenantDb(shopId, tenantDb);
+  return tenantDb;
+}
+
+/**
+ * Run `fn` with `store.data` resolving to the given shop's own dataset for
+ * the duration of the call (and anything awaited inside it) — used by the
+ * subdomain-resolution middleware so every existing route works unmodified
+ * against a specific tenant's data.
+ */
+function runInTenant(shopId, tenantDb, fn) {
+  return tenantContext.run({ shopId, db: tenantDb }, fn);
 }
 
 function reset() {
@@ -421,7 +496,7 @@ function getSystemStatus() {
 }
 
 module.exports = {
-  get data() { return db; },
+  get data() { return tenantContext.getStore()?.db || db; },
   init,
   save,
   reset,
@@ -430,4 +505,7 @@ module.exports = {
   isPersistent: () => Boolean(mongoCollection),
   getSystemStatus,
   genId: (len) => nanoid(len || 8),
+  loadTenantDb,
+  createTenantDb,
+  runInTenant,
 };
