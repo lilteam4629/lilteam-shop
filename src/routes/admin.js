@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
-const { MAIN_DOMAIN } = require('../middleware/tenant');
+const { MAIN_SITE_URL } = require('../middleware/tenant');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
@@ -126,7 +126,7 @@ router.get('/', (req, res) => {
     // the main site's shops directory, stashed on req by that middleware.
     shopExpiresAt: req.tenantShop ? req.tenantShop.expiresAt : null,
     shopName: req.tenantShop ? req.tenantShop.name : null,
-    shopRenewUrl: MAIN_DOMAIN ? `https://${MAIN_DOMAIN}/my-shops` : null,
+    shopRenewUrl: MAIN_SITE_URL ? `${MAIN_SITE_URL}/my-shops` : null,
   });
 });
 
