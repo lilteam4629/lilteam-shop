@@ -78,14 +78,21 @@ app.use((req, res, next) => {
     success: req.flash('success'),
     error: req.flash('error'),
   };
-  // The reseller system (/rent-website) only exists on YOUR OWN shop.
-  // Rented deployments (LICENSE_GATE=on) never get it, so a customer can't
-  // turn around and rent out their own copy to someone else.
-  res.locals.rentWebsiteEnabled = !license.isGateOn();
+  // The reseller system (/rent-website) only exists on YOUR OWN main shop.
+  // Rented deployments (LICENSE_GATE=on) never get it, and neither does a
+  // multi-tenant shop's own subdomain (req.tenantShop) — otherwise a shop
+  // you rented out could turn around and "open a new shop" itself.
+  res.locals.rentWebsiteEnabled = !license.isGateOn() && !req.tenantShop;
   next();
 });
 
-app.use('/', tenantRoutes);
+// /start and /my-shops (opening/renewing a multi-tenant shop) only make
+// sense on the MAIN site — a rented shop's own subdomain shouldn't be able
+// to turn around and open another shop from inside itself.
+app.use('/', (req, res, next) => {
+  if (req.tenantShop) return next();
+  tenantRoutes(req, res, next);
+});
 app.use('/', licenseRoutes);
 app.use((req, res, next) => {
   if (!license.isGateOn()) return next();
@@ -100,7 +107,12 @@ app.use('/', authRoutes);
 app.use('/cart', cartRoutes);
 app.use('/account', accountRoutes);
 app.use('/minigame', minigameRoutes);
-if (!license.isGateOn()) app.use('/rent-website', rentWebsiteRoutes);
+if (!license.isGateOn()) {
+  app.use('/rent-website', (req, res, next) => {
+    if (req.tenantShop) return next();
+    rentWebsiteRoutes(req, res, next);
+  });
+}
 app.use('/admin', adminRoutes);
 
 app.use((req, res) => {
