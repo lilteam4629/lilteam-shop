@@ -30,16 +30,20 @@
             <div class="p-4">
               <div class="font-semibold mb-1"><%= p.title %></div>
               <% if (p.description) { %><p class="text-xs text-[#a89a6c] mb-2 line-clamp-2"><%= p.description %></p><% } %>
-              <div class="flex items-center justify-between">
+              <div class="flex items-center justify-between mb-3">
                 <span class="text-[#c8a63f] font-bold">฿<%= p.price.toLocaleString() %></span>
                 <span class="text-[10px] text-[#5a5133]">สต๊อก <%= p.stock %></span>
               </div>
+              <% if (p.stock > 0) { %>
+                <a href="/s/<%= shop.slug %>/buy/<%= p.id %>" class="block text-center bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-semibold rounded-lg py-2 text-sm">สั่งซื้อ</a>
+              <% } else { %>
+                <div class="block text-center bg-[#211c11] text-[#5a5133] font-semibold rounded-lg py-2 text-sm">สินค้าหมด</div>
+              <% } %>
             </div>
           </div>
         <% }) %>
       </div>
     <% } %>
-    <p class="text-[10px] text-[#5a5133] text-center mt-6">ระบบตะกร้า/ชำระเงินยังไม่เปิดใช้งาน (อยู่ระหว่างพัฒนา)</p>
   </div>
 </body>
 </html>

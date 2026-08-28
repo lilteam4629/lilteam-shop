@@ -203,6 +203,7 @@ function defaultData() {
     // See src/routes/tenant.js.
     shops: [],
     tenantProducts: [],
+    tenantOrders: [],
   };
 }
 
@@ -348,6 +349,7 @@ function migrate() {
   if (!db.licenseSales) { db.licenseSales = []; changed = true; }
   if (!db.shops) { db.shops = []; changed = true; }
   if (!db.tenantProducts) { db.tenantProducts = []; changed = true; }
+  if (!db.tenantOrders) { db.tenantOrders = []; changed = true; }
   db.products.forEach(product => {
     if (!product.fulfillmentMode) {
       product.fulfillmentMode = 'automatic';

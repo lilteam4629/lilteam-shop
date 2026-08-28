@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Kanit', sans-serif; background: #100e08; color: #f3ecd8; }</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-sm bg-[#1a160d] border border-[#3a3220] rounded-2xl p-6 text-center">
+    <div class="text-3xl mb-2">✅</div>
+    <h1 class="text-lg font-bold mb-1">สั่งซื้อสำเร็จ</h1>
+    <p class="text-sm text-[#a89a6c] mb-4">ร้าน <%= shop.name %> จะติดต่อกลับที่ <%= order.buyerContact %></p>
+
+    <div class="bg-[#211c11] border border-[#443a22] rounded-lg p-4 text-left text-sm space-y-1 mb-4">
+      <div class="flex justify-between"><span class="text-[#a89a6c]">สินค้า</span><span><%= order.productTitle %></span></div>
+      <div class="flex justify-between"><span class="text-[#a89a6c]">ราคา</span><span class="text-[#c8a63f]">฿<%= order.price.toLocaleString() %></span></div>
+      <div class="flex justify-between"><span class="text-[#a89a6c]">สถานะ</span>
+        <span class="<%= order.status === 'pending' ? 'text-amber-400' : order.status === 'cancelled' ? 'text-[#e2836f]' : 'text-emerald-400' %>">
+          <%= { pending: 'รอดำเนินการ', paid: 'ชำระแล้ว', fulfilled: 'ส่งมอบแล้ว', cancelled: 'ยกเลิก' }[order.status] %>
+        </span>
+      </div>
+      <div class="flex justify-between"><span class="text-[#a89a6c]">รหัสออเดอร์</span><span class="font-mono text-xs"><%= order.id %></span></div>
+    </div>
+    <a href="/s/<%= shop.slug %>" class="block text-center bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-semibold rounded-lg py-2.5 text-sm">กลับหน้าร้าน →</a>
+  </div>
+</body>
+</html>
