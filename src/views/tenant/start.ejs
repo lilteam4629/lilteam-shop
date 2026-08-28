@@ -56,8 +56,14 @@
           <label class="block text-xs mb-1 text-[#a89a6c]">รหัสผ่านแอดมิน (อย่างน้อย 8 ตัว)</label>
           <input name="adminPassword" type="password" required minlength="8" class="w-full bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2.5 text-sm" />
         </div>
+        <% if (recaptchaSiteKey) { %>
+          <div class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></div>
+        <% } %>
         <button class="w-full bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-semibold rounded-lg py-2.5 text-sm mt-2">🚀 เปิดร้านตอนนี้</button>
       </form>
+      <% if (recaptchaSiteKey) { %>
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+      <% } %>
     <% } %>
     <p class="text-[10px] text-[#5a5133] text-center mt-4">ร้านที่เปิดจะได้ระบบสินค้า/สต๊อก/ออเดอร์/หลังบ้านครบเหมือนร้านนี้ทุกอย่าง — จ่ายจากเครดิตร้านนี้ (<a href="/account/topup" class="underline">เติมเงิน</a> ถ้ายังไม่พอ)</p>
   </div>

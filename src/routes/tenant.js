@@ -19,6 +19,7 @@ const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { MAIN_DOMAIN } = require('../middleware/tenant');
 const { requireLogin, currentUser } = require('../middleware/auth');
+const recaptcha = require('../services/recaptcha');
 
 function slugify(str) {
   return String(str || '').toLowerCase().trim()
@@ -32,6 +33,7 @@ router.get('/start', requireLogin, (req, res) => {
   res.render('tenant/start', {
     title: 'เปิดร้านของคุณเอง', layout: false,
     domainReady: Boolean(MAIN_DOMAIN), mainDomain: MAIN_DOMAIN, plans,
+    recaptchaSiteKey: recaptcha.siteKey(),
     messages: { error: req.flash('error') },
   });
 });
@@ -40,6 +42,10 @@ router.post('/start', requireLogin, async (req, res) => {
   const user = currentUser(req);
   if (!MAIN_DOMAIN) {
     req.flash('error', 'ระบบเปิดร้านยังไม่พร้อมใช้งาน (ต้องตั้งค่าโดเมนก่อน) กรุณาติดต่อผู้ดูแลเว็บ');
+    return res.redirect('/start');
+  }
+  if (!(await recaptcha.verify(req.body['g-recaptcha-response'], req.ip))) {
+    req.flash('error', 'กรุณายืนยันแคปช่าให้ถูกต้อง');
     return res.redirect('/start');
   }
   const plan = store.data.licensePlans.find(p => p.id === req.body.planId && p.active);

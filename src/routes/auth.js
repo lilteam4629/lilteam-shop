@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 const store = require('../data/store');
+const recaptcha = require('../services/recaptcha');
 
 function safeTextEqual(left, right) {
   const leftBuffer = Buffer.from(String(left || ''), 'utf8');
@@ -60,15 +61,19 @@ router.post('/login', (req, res) => {
 });
 
 router.get('/register', (req, res) => {
-  res.render('shop/register', { title: 'สมัครสมาชิก' });
+  res.render('shop/register', { title: 'สมัครสมาชิก', recaptchaSiteKey: recaptcha.siteKey() });
 });
 
-router.post('/register', (req, res) => {
+router.post('/register', async (req, res) => {
   const username = (req.body.username || '').trim();
   const email = (req.body.email || '').trim();
   const { password, confirmPassword } = req.body;
   if (!username || !email || !password) {
     req.flash('error', 'กรุณากรอกข้อมูลให้ครบถ้วน');
+    return res.redirect('/register');
+  }
+  if (!(await recaptcha.verify(req.body['g-recaptcha-response'], req.ip))) {
+    req.flash('error', 'กรุณายืนยันแคปช่าให้ถูกต้อง');
     return res.redirect('/register');
   }
   if (password !== confirmPassword) {
