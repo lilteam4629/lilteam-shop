@@ -27,6 +27,7 @@
       </div>
       <div>
         <label class="block text-xs text-[var(--text-3)] mb-1">แนบรูปตัวกรอง</label>
+        <div class="max-w-[140px] mb-2"><%- include('../partials/image-placeholder', { w: 200, h: 200, ratioClass: 'aspect-square' }) %></div>
         <input id="filterImageInput" type="file" name="filterImage" required accept="image/png,image/jpeg,image/webp,image/gif" class="block w-full text-xs text-[var(--text-3)] file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-xs" />
         <div id="filterImagePreview" class="hidden mt-3 rounded-xl overflow-hidden border border-[var(--border-light)] bg-black/20">
           <img class="w-full h-36 object-contain" alt="ตัวอย่างรูปตัวกรอง" />
