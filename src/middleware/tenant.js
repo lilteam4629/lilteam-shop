@@ -12,6 +12,12 @@
 const store = require('../data/store');
 
 const MAIN_DOMAIN = (process.env.MAIN_DOMAIN || '').trim().toLowerCase();
+// Where to send people for anything that must run on the MAIN site itself
+// (signup, renewals) rather than a shop's subdomain. Defaults to
+// MAIN_DOMAIN, but the bare apex domain often isn't reachable on its own
+// (e.g. if only the wildcard *.MAIN_DOMAIN got its DNS/CNAME set up) — set
+// MAIN_SITE_URL explicitly (e.g. your Railway *.up.railway.app URL) if so.
+const MAIN_SITE_URL = (process.env.MAIN_SITE_URL || '').trim().replace(/\/$/, '') || (MAIN_DOMAIN ? `https://${MAIN_DOMAIN}` : '');
 
 async function tenantResolver(req, res, next) {
   if (!MAIN_DOMAIN) return next();
@@ -31,7 +37,7 @@ async function tenantResolver(req, res, next) {
       `<title>ร้านหมดอายุ</title><style>body{font-family:sans-serif;background:#100e08;color:#f3ecd8;display:flex;align-items:center;` +
       `justify-content:center;min-height:100vh;margin:0;padding:16px;text-align:center}a{color:#c8a63f}</style></head><body>` +
       `<div><h1>ร้าน "${shop.name}" หมดอายุแล้ว</h1><p>เจ้าของร้านต้องต่ออายุก่อนถึงจะใช้งานต่อได้</p>` +
-      `<p><a href="https://${MAIN_DOMAIN}/my-shops">ไปหน้าต่ออายุ →</a></p></div></body></html>`
+      `<p><a href="${MAIN_SITE_URL}/my-shops">ไปหน้าต่ออายุ →</a></p></div></body></html>`
     );
   }
   try {
@@ -50,4 +56,4 @@ async function tenantResolver(req, res, next) {
   }
 }
 
-module.exports = { tenantResolver, MAIN_DOMAIN };
+module.exports = { tenantResolver, MAIN_DOMAIN, MAIN_SITE_URL };
