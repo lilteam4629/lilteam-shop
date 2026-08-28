@@ -175,11 +175,18 @@ function defaultData() {
         // EasySlip: this shop's own receiving bank account, auto-registered
         // with the PLATFORM's single central EasySlip API key (see
         // src/services/easyslip.js) when saved at /admin/topups — the shop
-        // owner never touches EasySlip directly.
-        easyslipBankCode: '',
-        easyslipAccountType: 'NATURAL',
-        easyslipAccountId: null,
+        // owner never touches EasySlip directly. Registered under EVERY bank
+        // code the shop selects (its own bank AND/OR PromptPay etc) because
+        // an interbank PromptPay transfer's slip can report the receiver's
+        // bank as the generic "PromptPay" entry rather than the shop's real
+        // bank — matching only the real bank would miss those slips.
+        // easyslipAccounts: { [bankCode]: { accountId, status } }
+        easyslipAccounts: {},
         easyslipStatus: '',
+        // "bankAccountNumber|bankAccountName" the accounts above were last
+        // registered against — used to detect when those details changed
+        // and every selected channel needs re-registering.
+        easyslipRegisteredFor: '',
       },
       miniGame: {
         enabled: true,
@@ -345,11 +352,17 @@ function migrate() {
     db.settings.payment.slipokApiKey = '';
     changed = true;
   }
-  if (db.settings.payment.easyslipAccountId === undefined) {
-    db.settings.payment.easyslipBankCode = '';
-    db.settings.payment.easyslipAccountType = 'NATURAL';
-    db.settings.payment.easyslipAccountId = null;
-    db.settings.payment.easyslipStatus = '';
+  if (db.settings.payment.easyslipAccounts === undefined) {
+    // Migrate the old single-bank shape (easyslipBankCode/easyslipAccountId)
+    // into the new multi-select map, if it was ever set.
+    const oldCode = db.settings.payment.easyslipBankCode;
+    const oldId = db.settings.payment.easyslipAccountId;
+    db.settings.payment.easyslipAccounts = (oldCode && oldId) ? { [oldCode]: { accountId: oldId, status: 'ok' } } : {};
+    delete db.settings.payment.easyslipBankCode;
+    delete db.settings.payment.easyslipAccountId;
+    delete db.settings.payment.easyslipAccountType;
+    if (db.settings.payment.easyslipStatus === undefined) db.settings.payment.easyslipStatus = '';
+    if (db.settings.payment.easyslipRegisteredFor === undefined) db.settings.payment.easyslipRegisteredFor = '';
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }

@@ -112,7 +112,7 @@ router.post('/topup/:id/slip', (req, res) => {
     const fileOptions = { filename: req.file.originalname, contentType: req.file.mimetype };
     let provider = null;
     let result;
-    if (easyslip.isConfigured() && payment.easyslipAccountId) {
+    if (easyslip.isConfigured() && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
       provider = 'easyslip';
       result = await easyslip.verifySlip(req.file.buffer, request.amount, fileOptions, {
         bankNumber: payment.bankAccountNumber,

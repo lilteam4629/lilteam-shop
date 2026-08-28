@@ -497,36 +497,55 @@ router.post('/topups/payment-settings', (req, res) => {
       return res.redirect('/admin/topups');
     }
     const {
-      promptpayId, promptpayName, bankAccountNumber, bankAccountName, easyslipBankCode,
+      promptpayId, promptpayName, bankAccountNumber, bankAccountName,
     } = req.body;
+    // Checkboxes with the same name come through as a string (one checked)
+    // or an array (multiple checked) — never as undefined if none checked
+    // (then the key is simply absent from req.body).
+    const rawCodes = req.body.easyslipBankCodes;
+    const selectedCodes = Array.isArray(rawCodes) ? rawCodes : (rawCodes ? [rawCodes] : []);
+
     const payment = store.data.settings.payment;
-    const bankCode = (easyslipBankCode || '').trim();
     const banks = await easyslip.getBanks();
-    const selectedBank = banks.find(b => b.code === bankCode);
+    const primaryBank = banks.find(b => b.code === selectedCodes[0]);
     Object.assign(payment, {
       promptpayId, promptpayName, bankAccountNumber, bankAccountName,
-      bankName: selectedBank ? selectedBank.nameTh : payment.bankName,
+      bankName: primaryBank ? primaryBank.nameTh : payment.bankName,
     });
 
-    const accountType = 'NATURAL';
-    const detailsChanged = bankCode !== payment.easyslipBankCode
-      || accountType !== payment.easyslipAccountType
-      || !payment.easyslipAccountId;
-    payment.easyslipBankCode = bankCode;
-    payment.easyslipAccountType = accountType;
-    if (bankCode && bankAccountNumber && bankAccountName && easyslip.isConfigured() && detailsChanged) {
-      const result = await easyslip.createBankAccount({
-        bankCode, bankNumber: bankAccountNumber, nameTh: bankAccountName,
-        nameEn: bankAccountName, type: accountType,
-      });
-      if (result.ok) {
-        payment.easyslipAccountId = result.account.id;
-        payment.easyslipStatus = 'เชื่อมต่อ EasySlip สำเร็จ — ตรวจสลิปอัตโนมัติพร้อมใช้งาน';
-      } else if (result.code === 'BANK_ACCOUNT_DUPLICATE') {
-        payment.easyslipStatus = 'บัญชีนี้เชื่อมต่อ EasySlip ไว้แล้ว';
-      } else {
-        payment.easyslipStatus = `เชื่อมต่อ EasySlip ไม่สำเร็จ: ${result.message}`;
+    // A shop's account gets registered with EasySlip under EVERY channel it
+    // selected (its own bank AND/OR PromptPay etc) — an interbank PromptPay
+    // transfer's slip can report the receiver's bank as the generic
+    // "PromptPay" entry rather than the shop's real bank, so matching only
+    // the real bank would miss those slips.
+    const accountKey = `${bankAccountNumber}|${bankAccountName}`;
+    const accountKeyChanged = payment.easyslipRegisteredFor !== accountKey;
+    payment.easyslipRegisteredFor = accountKey;
+    if (easyslip.isConfigured() && bankAccountNumber && bankAccountName) {
+      const statuses = [];
+      for (const code of selectedCodes) {
+        const already = payment.easyslipAccounts[code];
+        if (already && already.accountId && !accountKeyChanged) continue;
+        const result = await easyslip.createBankAccount({
+          bankCode: code, bankNumber: bankAccountNumber, nameTh: bankAccountName,
+          nameEn: bankAccountName, type: 'NATURAL',
+        });
+        const bankLabel = (banks.find(b => b.code === code) || {}).nameTh || code;
+        if (result.ok) {
+          payment.easyslipAccounts[code] = { accountId: result.account.id, status: 'ok' };
+          statuses.push(`${bankLabel}: เชื่อมต่อสำเร็จ`);
+        } else if (result.code === 'BANK_ACCOUNT_DUPLICATE') {
+          payment.easyslipAccounts[code] = { accountId: (already && already.accountId) || null, status: 'ok' };
+          statuses.push(`${bankLabel}: เชื่อมต่อไว้แล้ว`);
+        } else {
+          statuses.push(`${bankLabel}: ไม่สำเร็จ (${result.message})`);
+        }
       }
+      // Drop channels the admin unchecked so the UI reflects what's active.
+      Object.keys(payment.easyslipAccounts).forEach((code) => {
+        if (!selectedCodes.includes(code)) delete payment.easyslipAccounts[code];
+      });
+      if (statuses.length) payment.easyslipStatus = statuses.join(' · ');
     }
 
     if (req.body.removePromptpayQrImage === 'on') store.data.settings.payment.promptpayQrImage = null;

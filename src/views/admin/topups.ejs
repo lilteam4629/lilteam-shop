@@ -38,17 +38,19 @@
       <input name="promptpayName" value="<%= payment.promptpayName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
     <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ธนาคาร</label>
+      <label class="block text-sm mb-2 text-[var(--text-3)]">ช่องทางที่ต้องตรวจสลิปอัตโนมัติ <span class="text-[var(--text-4)] font-normal">(เลือกได้หลายอัน — เลือกทั้งธนาคารจริงและพร้อมเพย์ เพื่อให้จับสลิปโอนข้ามธนาคารผ่านพร้อมเพย์ได้ด้วย)</span></label>
       <% if (banks.length) { %>
-        <select name="easyslipBankCode" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
-          <option value="">-- เลือกธนาคาร --</option>
-          <% banks.forEach(bank => { %>
-            <option value="<%= bank.code %>" <%= payment.easyslipBankCode === bank.code ? 'selected' : '' %>><%= bank.nameTh %> (<%= bank.shortCode %>)</option>
+        <div class="flex flex-wrap gap-2">
+          <% banks.forEach(bank => { const connected = payment.easyslipAccounts && payment.easyslipAccounts[bank.code]; %>
+            <label class="flex items-center gap-1.5 cursor-pointer bg-[var(--input)] hover:bg-[var(--input)]/70 border border-[var(--border-light)] has-[:checked]:border-[var(--gold)] has-[:checked]:bg-[var(--gold)]/10 rounded-full pl-2 pr-3 py-1.5 text-sm transition-colors">
+              <input type="checkbox" name="easyslipBankCodes" value="<%= bank.code %>" <%= payment.easyslipAccounts && payment.easyslipAccounts[bank.code] ? 'checked' : '' %> class="accent-[var(--gold)]" />
+              <span><%= bank.nameTh %></span>
+              <% if (connected) { %><span class="text-emerald-400 text-xs">✓</span><% } %>
+            </label>
           <% }) %>
-        </select>
+        </div>
       <% } else { %>
-        <input name="easyslipBankCode" value="<%= payment.easyslipBankCode %>" placeholder="เช่น 004 = กสิกรไทย, 014 = ไทยพาณิชย์" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-        <p class="text-[10px] text-[var(--text-4)] mt-1">ยังโหลดรายชื่อธนาคารจาก EasySlip ไม่ได้ (เช็คว่าตั้งค่า EASYSLIP_API_KEY แล้วหรือยัง)</p>
+        <p class="text-[10px] text-[var(--text-4)]">ยังโหลดรายชื่อธนาคารจาก EasySlip ไม่ได้ (เช็คว่าตั้งค่า EASYSLIP_API_KEY แล้วหรือยัง)</p>
       <% } %>
     </div>
     <div>
