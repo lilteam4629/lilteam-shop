@@ -166,6 +166,12 @@ function defaultData() {
         bankAccountName: 'LilTeam Shop (Demo)',
         promptpayQrImage: null,
         bankQrImage: null,
+        // Optional per-shop SlipOK credentials (see /admin/topups). When set,
+        // this shop's own slip checks use these instead of the global
+        // SLIPOK_BRANCH_ID/SLIPOK_API_KEY env vars — lets each tenant shop
+        // auto-verify against its own bank account.
+        slipokBranchId: '',
+        slipokApiKey: '',
       },
       miniGame: {
         enabled: true,
@@ -324,6 +330,11 @@ function migrate() {
   }
   if (db.settings.payment.bankQrImage === undefined) {
     db.settings.payment.bankQrImage = db.settings.payment.qrImage || null;
+    changed = true;
+  }
+  if (db.settings.payment.slipokBranchId === undefined) {
+    db.settings.payment.slipokBranchId = '';
+    db.settings.payment.slipokApiKey = '';
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }

@@ -110,6 +110,9 @@ router.post('/topup/:id/slip', (req, res) => {
     const result = await slipok.verifySlip(req.file.buffer, request.amount, {
       filename: req.file.originalname,
       contentType: req.file.mimetype,
+    }, {
+      branchId: store.data.settings.payment.slipokBranchId,
+      apiKey: store.data.settings.payment.slipokApiKey,
     });
     request.slipCheck = { checked: result.checked, verified: result.verified, message: result.message };
 

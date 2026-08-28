@@ -494,8 +494,12 @@ router.post('/topups/payment-settings', (req, res) => {
       req.flash('error', 'อัปโหลดรูป QR ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/topups');
     }
-    const { promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName } = req.body;
-    Object.assign(store.data.settings.payment, { promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName });
+    const { promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName, slipokBranchId, slipokApiKey } = req.body;
+    Object.assign(store.data.settings.payment, {
+      promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName,
+      slipokBranchId: (slipokBranchId || '').trim(),
+      slipokApiKey: (slipokApiKey || '').trim(),
+    });
 
     if (req.body.removePromptpayQrImage === 'on') store.data.settings.payment.promptpayQrImage = null;
     if (req.body.removeBankQrImage === 'on') store.data.settings.payment.bankQrImage = null;

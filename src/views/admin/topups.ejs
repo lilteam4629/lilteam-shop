@@ -49,6 +49,24 @@
       <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อบัญชีธนาคาร</label>
       <input name="bankAccountName" value="<%= payment.bankAccountName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
+    <div class="border-t border-[var(--border-light)] pt-4">
+      <label class="block font-medium mb-1">🤖 ตรวจสลิปอัตโนมัติ (SlipOK) — ไม่บังคับ</label>
+      <p class="text-xs text-[var(--text-4)] mb-3">
+        ใส่ไว้ให้สลิปที่โอนเข้าบัญชีร้านนี้ (ด้านบน) ถูกตรวจสอบและอนุมัติอัตโนมัติทันที ไม่ต้องกดอนุมัติเอง —
+        ถ้าไม่ใส่ ระบบจะยังใช้งานได้ปกติ แค่ต้องกดอนุมัติสลิปเองในหน้านี้ทีละรายการ
+        สมัครฟรีได้ที่ <a href="https://slipok.com" target="_blank" rel="noopener" class="text-[var(--gold)] underline">slipok.com</a> — เอา Branch ID กับ API Key จากแดชบอร์ดมาใส่ที่นี่
+      </p>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm mb-1 text-[var(--text-3)]">SlipOK Branch ID</label>
+          <input name="slipokBranchId" value="<%= payment.slipokBranchId %>" placeholder="เช่น 12345" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+        </div>
+        <div>
+          <label class="block text-sm mb-1 text-[var(--text-3)]">SlipOK API Key</label>
+          <input name="slipokApiKey" value="<%= payment.slipokApiKey %>" placeholder="SLIPOK..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+        </div>
+      </div>
+    </div>
     <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกข้อมูลบัญชี</button>
   </form>
 </details>
