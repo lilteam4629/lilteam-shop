@@ -26,57 +26,12 @@
     <% } %>
   </div>
 
-  <% if (newSiteReady && plans.length) { %>
-    <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-5 mb-8">
-      <div class="flex items-center justify-between gap-2 mb-1">
-        <h2 class="text-lg font-semibold">🆕 เปิดเว็บใหม่ของคุณเอง</h2>
-        <a href="/rent-website/guide" class="shrink-0 text-xs text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-3 py-1 whitespace-nowrap">📖 ดูวิธีทำแบบละเอียด</a>
-      </div>
-      <p class="text-xs text-[var(--text-4)] mb-4">ระบบจะสร้างเว็บใหม่ให้อัตโนมัติ พร้อมตั้งชื่อผู้ใช้/รหัสผ่านแอดมินตามที่คุณกำหนดเอง — ทำไม่เป็น? กดปุ่ม "ดูวิธีทำแบบละเอียด" ด้านบนได้เลย มีสอนทีละขั้นตอน</p>
-      <form action="/rent-website/buy" method="post" class="space-y-3">
-        <input type="hidden" name="type" value="new_site" />
-        <div>
-          <label class="block text-xs mb-1 text-[var(--text-3)]">เลือกแพ็กเกจ</label>
-          <select name="planId" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
-            <% plans.forEach(plan => { %>
-              <option value="<%= plan.id %>"><%= plan.days %> วัน — ฿<%= plan.price.toLocaleString() %></option>
-            <% }) %>
-          </select>
-        </div>
-        <div>
-          <label class="block text-xs mb-1 text-[var(--text-3)]">ตั้งชื่อเว็บของคุณ (จะใช้เป็นส่วนหนึ่งของโดเมน)</label>
-          <input name="siteName" required pattern="[a-zA-Z0-9-]{3,30}" title="ตัวอักษร a-z, 0-9 และ - เท่านั้น ยาว 3-30 ตัว" placeholder="เช่น my-cool-shop" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-          <p class="text-[10px] text-[var(--text-4)] mt-1">โดเมนจะออกมาประมาณ <span class="font-mono">ชื่อที่ตั้ง-xxxxx.up.railway.app</span> (Railway จะเติมรหัสท้ายให้เองเพื่อกันชื่อซ้ำ)</p>
-        </div>
-        <div>
-          <label class="block text-xs mb-1 text-[var(--text-3)]">ชื่อผู้ใช้แอดมิน (สำหรับเข้า /admin ของเว็บใหม่)</label>
-          <input name="adminUsername" required pattern="[a-zA-Z0-9_]{3,20}" title="ตัวอักษร a-z, 0-9 และ _ เท่านั้น ยาว 3-20 ตัว" placeholder="เช่น myshop_admin" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-        </div>
-        <div>
-          <label class="block text-xs mb-1 text-[var(--text-3)]">รหัสผ่านแอดมิน (อย่างน้อย 8 ตัว)</label>
-          <input name="adminPassword" type="text" required minlength="8" placeholder="ตั้งรหัสผ่านที่จำได้" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
-        </div>
-
-        <div class="border-t border-[var(--border)] pt-3">
-          <div class="flex items-center justify-between mb-1 flex-wrap gap-1">
-            <label class="text-xs text-[var(--text-3)]">Railway API Token (ของคุณเอง)</label>
-            <div class="flex gap-1.5">
-              <a href="https://railway.com/login" target="_blank" rel="noopener" class="text-[10px] text-[var(--text-3)] border border-[var(--border-light)] rounded-full px-2 py-1 whitespace-nowrap">🚂 สมัคร Railway</a>
-              <a href="https://railway.com/account/tokens" target="_blank" rel="noopener" class="text-[10px] text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-2 py-1 whitespace-nowrap">🔑 ไปสร้าง Token →</a>
-            </div>
-          </div>
-          <input name="railwayToken" required placeholder="วางโทเค็นที่คัดลอกมาที่นี่" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
-          <p class="text-[10px] text-[var(--text-4)] mt-1">ยังไม่มีบัญชี? กด "สมัคร Railway" ก่อน แล้วค่อยกด "ไปสร้าง Token" → ตั้งชื่ออะไรก็ได้ → เลือก Workspace → กด Create → คัดลอกค่าที่ได้มาวางที่ช่องนี้ (<a href="/rent-website/guide" class="underline text-[var(--gold)]">ดูวิธีแบบละเอียด</a>)</p>
-          <p class="text-[10px] text-emerald-400 mt-1">✓ ไม่ต้องสมัคร MongoDB แยก ระบบสร้างฐานข้อมูลให้อัตโนมัติในขั้นตอนเดียวกันนี้เลย</p>
-        </div>
-
-        <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">🆕 สร้างเว็บใหม่</button>
-        <p class="text-[10px] text-[var(--text-4)] text-center">Token จะถูกใช้แค่ตอนสร้างเว็บครั้งนี้เท่านั้น ระบบไม่บันทึกเก็บไว้</p>
-      </form>
-    </div>
-  <% } else if (!newSiteReady) { %>
-    <p class="text-xs text-[var(--text-4)] -mt-5 mb-8">💡 "เปิดเว็บใหม่อัตโนมัติ" ยังไม่เปิดใช้งาน — ซื้อได้เฉพาะคีย์ต่ออายุตอนนี้</p>
-  <% } %>
+  <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-5 mb-8">
+    <h2 class="text-lg font-semibold mb-1">🆕 เปิดร้านใหม่ของคุณเอง</h2>
+    <p class="text-xs text-[var(--text-4)] mb-4">ได้ร้านทันที พร้อมระบบสินค้า/สต๊อก/ออเดอร์/กระเป๋าเงินครบเหมือนร้านนี้ทุกอย่าง — ไม่ต้องสมัคร Railway ไม่ต้องมี GitHub เลย</p>
+    <a href="/start" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">🚀 เปิดร้านตอนนี้ →</a>
+    <a href="/my-shops" class="block text-center text-xs text-[var(--text-4)] mt-2 underline">มีร้านอยู่แล้ว? ดู/ต่ออายุร้านของฉัน →</a>
+  </div>
 
   <h2 class="text-lg font-semibold mb-3">ประวัติการซื้อของคุณ</h2>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[#241f13]">

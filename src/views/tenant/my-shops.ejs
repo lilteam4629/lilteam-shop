@@ -1,0 +1,55 @@
+<section class="max-w-xl mx-auto px-4 py-10">
+  <h1 class="text-2xl font-bold mb-1">🏪 ร้านของฉัน</h1>
+  <p class="text-sm text-[var(--text-3)] mb-6">ร้านที่คุณเปิดผ่าน <span class="font-mono">/start</span> ทั้งหมด ต่ออายุได้จากตรงนี้เลย</p>
+
+  <% if (!shops.length) { %>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-8 text-center text-sm text-[var(--text-4)] mb-6">
+      ยังไม่มีร้าน — <a href="/start" class="text-[var(--gold)] underline">เปิดร้านแรกของคุณ</a>
+    </div>
+  <% } %>
+
+  <div class="space-y-4">
+    <% shops.forEach(shop => { %>
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+        <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+          <div>
+            <div class="font-semibold"><%= shop.name %></div>
+            <a href="https://<%= shop.slug %>.<%= mainDomain %>" target="_blank" class="text-xs text-[var(--gold)] underline font-mono"><%= shop.slug %>.<%= mainDomain %> →</a>
+          </div>
+          <span class="countdown text-xs font-mono px-2 py-1 rounded-full border border-[var(--border-light)]" data-exp="<%= shop.expiresAt %>">…</span>
+        </div>
+        <form action="/my-shops/<%= shop.id %>/renew" method="post" class="flex gap-2">
+          <select name="planId" required class="flex-1 min-w-0 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
+            <% plans.forEach(plan => { %>
+              <option value="<%= plan.id %>"><%= plan.days %> วัน — ฿<%= plan.price.toLocaleString() %></option>
+            <% }) %>
+          </select>
+          <button class="shrink-0 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-4 py-2 text-sm">ต่ออายุ</button>
+        </form>
+      </div>
+    <% }) %>
+  </div>
+</section>
+
+<script>
+  function fmtCountdown(ms) {
+    if (ms <= 0) return '✕ หมดอายุแล้ว';
+    const s = Math.floor(ms / 1000);
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    if (d > 0) return `เหลือ ${d} วัน ${h} ชม.`;
+    const m = Math.floor((s % 3600) / 60);
+    if (h > 0) return `เหลือ ${h} ชม. ${m} นาที`;
+    return `เหลือ ${m} นาที`;
+  }
+  function tickCountdowns() {
+    document.querySelectorAll('.countdown[data-exp]').forEach(el => {
+      const ms = Number(el.dataset.exp) - Date.now();
+      el.textContent = fmtCountdown(ms);
+      el.classList.toggle('text-[var(--coral)]', ms <= 0);
+      el.classList.toggle('text-emerald-400', ms > 0);
+    });
+  }
+  tickCountdowns();
+  setInterval(tickCountdowns, 30000);
+</script>
