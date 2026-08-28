@@ -153,4 +153,78 @@ router.get('/s/:slug', (req, res) => {
   res.render('tenant/storefront', { title: shop.name, layout: false, shop, products });
 });
 
+// --- Checkout (Phase 3): no wallet/payment gateway yet — buyer leaves
+// contact info, shop owner confirms payment manually in their admin, same
+// spirit as how the main store's slip-review flow works before SlipOK.
+router.get('/s/:slug/buy/:productId', (req, res) => {
+  const shop = findShop(req.params.slug);
+  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
+  const product = store.data.tenantProducts.find(p => p.id === req.params.productId && p.shopId === shop.id && p.active);
+  if (!product) {
+    req.flash('error', 'ไม่พบสินค้านี้');
+    return res.redirect(`/s/${shop.slug}`);
+  }
+  res.render('tenant/buy', { title: `สั่งซื้อ — ${product.title}`, layout: false, shop, product, messages: { error: req.flash('error') } });
+});
+
+router.post('/s/:slug/buy/:productId', (req, res) => {
+  const shop = findShop(req.params.slug);
+  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
+  const product = store.data.tenantProducts.find(p => p.id === req.params.productId && p.shopId === shop.id && p.active);
+  if (!product) {
+    req.flash('error', 'ไม่พบสินค้านี้');
+    return res.redirect(`/s/${shop.slug}`);
+  }
+  if (product.stock <= 0) {
+    req.flash('error', 'สินค้าหมดสต๊อกแล้ว');
+    return res.redirect(`/s/${shop.slug}/buy/${product.id}`);
+  }
+  const buyerName = String(req.body.buyerName || '').trim();
+  const buyerContact = String(req.body.buyerContact || '').trim();
+  if (!buyerName || !buyerContact) {
+    req.flash('error', 'กรุณากรอกชื่อและช่องทางติดต่อกลับ');
+    return res.redirect(`/s/${shop.slug}/buy/${product.id}`);
+  }
+
+  product.stock -= 1;
+  const order = {
+    id: store.genId(10), shopId: shop.id, productId: product.id, productTitle: product.title,
+    price: product.price, buyerName, buyerContact, status: 'pending', createdAt: new Date().toISOString(),
+  };
+  store.data.tenantOrders.push(order);
+  store.save();
+
+  res.redirect(`/s/${shop.slug}/order/${order.id}`);
+});
+
+router.get('/s/:slug/order/:id', (req, res) => {
+  const shop = findShop(req.params.slug);
+  if (!shop) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบร้านนี้' });
+  const order = store.data.tenantOrders.find(o => o.id === req.params.id && o.shopId === shop.id);
+  if (!order) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบออเดอร์นี้' });
+  res.render('tenant/order-status', { title: 'สถานะออเดอร์', layout: false, shop, order });
+});
+
+// --- Admin: order management ---
+router.get('/s/:slug/admin/orders', requireShopOwner, (req, res) => {
+  const orders = store.data.tenantOrders.filter(o => o.shopId === req.shop.id).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  res.render('tenant/admin-orders', {
+    title: `ออเดอร์ — ${req.shop.name}`, layout: false, shop: req.shop, orders,
+    messages: { success: req.flash('success'), error: req.flash('error') },
+  });
+});
+
+router.post('/s/:slug/admin/orders/:id/status', requireShopOwner, (req, res) => {
+  const order = store.data.tenantOrders.find(o => o.id === req.params.id && o.shopId === req.shop.id);
+  const status = String(req.body.status || '');
+  if (!order || !['pending', 'paid', 'fulfilled', 'cancelled'].includes(status)) {
+    req.flash('error', 'ไม่พบออเดอร์นี้');
+    return res.redirect(`/s/${req.shop.slug}/admin/orders`);
+  }
+  order.status = status;
+  store.save();
+  req.flash('success', 'อัพเดตสถานะแล้ว');
+  res.redirect(`/s/${req.shop.slug}/admin/orders`);
+});
+
 module.exports = router;
