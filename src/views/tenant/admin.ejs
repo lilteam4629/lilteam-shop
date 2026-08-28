@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Kanit', sans-serif; background: #100e08; color: #f3ecd8; }</style>
+</head>
+<body class="min-h-screen p-4">
+  <div class="max-w-2xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-xl font-bold">⚙️ หลังบ้าน — <%= shop.name %></h1>
+        <p class="text-xs text-[#a89a6c]">/s/<%= shop.slug %></p>
+      </div>
+      <div class="flex gap-2">
+        <a href="/s/<%= shop.slug %>" class="text-xs text-[#a89a6c] border border-[#443a22] rounded-full px-3 py-1.5">ดูหน้าร้าน →</a>
+        <a href="/s/<%= shop.slug %>/logout" class="text-xs text-[#e2836f] border border-[#e2836f]/40 rounded-full px-3 py-1.5">ออกจากระบบ</a>
+      </div>
+    </div>
+
+    <% if (messages.error && messages.error.length) { %>
+      <% messages.error.forEach(m => { %>
+        <div class="bg-[#e2836f]/10 border border-[#e2836f]/50 text-[#e2836f] px-4 py-2 rounded-lg mb-3 text-sm text-center"><%= m %></div>
+      <% }) %>
+    <% } %>
+    <% if (messages.success && messages.success.length) { %>
+      <% messages.success.forEach(m => { %>
+        <div class="bg-emerald-900/30 border border-emerald-700 text-emerald-300 px-4 py-2 rounded-lg mb-3 text-sm text-center"><%= m %></div>
+      <% }) %>
+    <% } %>
+
+    <div class="bg-[#1a160d] border border-[#3a3220] rounded-2xl p-5 mb-6">
+      <h2 class="font-semibold mb-3">➕ เพิ่มสินค้า</h2>
+      <form action="/s/<%= shop.slug %>/admin/products" method="post" class="grid sm:grid-cols-2 gap-3">
+        <input name="title" required placeholder="ชื่อสินค้า" class="bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm sm:col-span-2" />
+        <input name="price" type="number" min="0" required placeholder="ราคา (฿)" class="bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+        <input name="stock" type="number" min="0" placeholder="จำนวนสต๊อก" class="bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm" />
+        <input name="image" placeholder="ลิงก์รูปภาพ (ไม่บังคับ)" class="bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm sm:col-span-2" />
+        <textarea name="description" placeholder="รายละเอียดสินค้า" class="bg-[#211c11] border border-[#443a22] rounded-lg px-3 py-2 text-sm sm:col-span-2" rows="2"></textarea>
+        <button class="sm:col-span-2 bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-semibold rounded-lg py-2 text-sm">เพิ่มสินค้า</button>
+      </form>
+    </div>
+
+    <div class="bg-[#1a160d] border border-[#3a3220] rounded-2xl overflow-hidden">
+      <div class="p-4 border-b border-[#3a3220] font-semibold">📦 สินค้าของร้าน (<%= products.length %>)</div>
+      <% if (!products.length) { %>
+        <div class="p-4 text-sm text-[#a89a6c]">ยังไม่มีสินค้า</div>
+      <% } %>
+      <div class="divide-y divide-[#3a3220]">
+        <% products.forEach(p => { %>
+          <div class="p-4 flex items-center justify-between gap-3 text-sm">
+            <div class="min-w-0">
+              <div class="font-medium truncate"><%= p.title %> <%= p.active ? '' : '(ปิดขาย)' %></div>
+              <div class="text-[#a89a6c] text-xs">฿<%= p.price.toLocaleString() %> — สต๊อก <%= p.stock %></div>
+            </div>
+            <div class="flex gap-2 shrink-0">
+              <form action="/s/<%= shop.slug %>/admin/products/<%= p.id %>/toggle" method="post">
+                <button class="text-xs text-[#a89a6c] border border-[#443a22] rounded-full px-2 py-1"><%= p.active ? 'ปิดขาย' : 'เปิดขาย' %></button>
+              </form>
+              <form action="/s/<%= shop.slug %>/admin/products/<%= p.id %>/delete" method="post" onsubmit="return confirm('ลบสินค้านี้?')">
+                <button class="text-xs text-[#e2836f] border border-[#e2836f]/40 rounded-full px-2 py-1">ลบ</button>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
