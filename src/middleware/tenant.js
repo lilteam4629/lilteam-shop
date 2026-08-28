@@ -25,6 +25,15 @@ async function tenantResolver(req, res, next) {
   if (!shop) {
     return res.status(404).send('ไม่พบร้านนี้');
   }
+  if (shop.expiresAt && Date.now() > shop.expiresAt) {
+    return res.status(402).send(
+      `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">` +
+      `<title>ร้านหมดอายุ</title><style>body{font-family:sans-serif;background:#100e08;color:#f3ecd8;display:flex;align-items:center;` +
+      `justify-content:center;min-height:100vh;margin:0;padding:16px;text-align:center}a{color:#c8a63f}</style></head><body>` +
+      `<div><h1>ร้าน "${shop.name}" หมดอายุแล้ว</h1><p>เจ้าของร้านต้องต่ออายุก่อนถึงจะใช้งานต่อได้</p>` +
+      `<p><a href="https://${MAIN_DOMAIN}/my-shops">ไปหน้าต่ออายุ →</a></p></div></body></html>`
+    );
+  }
   try {
     const tenantDb = await store.loadTenantDb(shop.id);
     if (!tenantDb) {
