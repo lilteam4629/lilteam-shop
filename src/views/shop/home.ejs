@@ -227,7 +227,11 @@
 <section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
   <h2 class="text-xl font-semibold mb-4 flex items-center gap-1.5"><span>✨</span>เกมมาใหม่</h2>
   <div class="product-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-10">
-    <% newest.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
+    <% if (newest.length) { %>
+      <% newest.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
+    <% } else { %>
+      <% for (let i = 1; i <= 5; i++) { %><%- include('../partials/example-product-card', { n: i }) %><% } %>
+    <% } %>
   </div>
 
   <div class="flex items-center justify-between mb-4">
@@ -235,9 +239,17 @@
     <a href="/products" class="text-sm text-[var(--gold)]">เปิดหน้ารวม →</a>
   </div>
   <div class="product-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-    <% products.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
+    <% if (products.length) { %>
+      <% products.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
+    <% } else { %>
+      <% for (let i = 1; i <= 5; i++) { %><%- include('../partials/example-product-card', { n: i }) %><% } %>
+    <% } %>
   </div>
-  <p class="text-center text-[var(--text-4)] text-xs mt-6">แสดง <%= products.length %> จาก <%= productTotal %> รายการ</p>
+  <% if (products.length) { %>
+    <p class="text-center text-[var(--text-4)] text-xs mt-6">แสดง <%= products.length %> จาก <%= productTotal %> รายการ</p>
+  <% } else { %>
+    <p class="text-center text-[var(--text-4)] text-xs mt-6">ยังไม่มีสินค้า — เพิ่มสินค้าได้ที่หน้าแอดมิน (รูปด้านบนเป็นแค่ตัวอย่าง)</p>
+  <% } %>
 </section>
 
 <% if (settings.miniGame && settings.miniGame.enabled && miniGamePrizes.length) { %>
