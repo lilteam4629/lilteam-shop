@@ -53,7 +53,7 @@
           <% }) %>
         </select>
       <% } else { %>
-        <p class="text-[10px] text-[var(--text-4)]">ยังโหลดรายชื่อธนาคารจาก EasySlip ไม่ได้ (เช็คว่าตั้งค่า EASYSLIP_API_KEY แล้วหรือยัง)</p>
+        <p class="text-[10px] text-[var(--text-4)]">ยังโหลดรายชื่อธนาคารไม่ได้ กรุณาลองใหม่ภายหลัง</p>
       <% } %>
     </div>
     <div>
@@ -74,9 +74,6 @@
           <input name="promptpayEasyslipNumber" value="<%= promptpayConnected ? payment.easyslipAccounts[promptpayBank.code].bankNumber : payment.promptpayId %>" placeholder="เลขพร้อมเพย์ เช่น 0812345678" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
         </div>
       </div>
-    <% } %>
-    <% if (payment.easyslipStatus) { %>
-      <p class="text-xs text-[var(--gold)]">🤖 <%= payment.easyslipStatus %></p>
     <% } %>
     <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกข้อมูลบัญชี</button>
   </form>
@@ -120,7 +117,7 @@
 
       <% if (r.status === 'pending') { %>
         <span class="shrink-0 text-xs bg-[var(--gold)]/15 text-[#e2c084] px-3 py-1.5 rounded-full text-center">
-          <%= r.slipPath ? 'รอ SlipOK ตรวจสอบ' : 'รอลูกค้าแนบสลิป' %>
+          <%= r.slipPath ? 'รอระบบตรวจสอบ' : 'รอลูกค้าแนบสลิป' %>
         </span>
       <% } else if (r.status === 'approved') { %>
         <span class="shrink-0 text-xs bg-emerald-900/40 text-emerald-400 px-3 py-1.5 rounded-full text-center">อนุมัติแล้ว</span>

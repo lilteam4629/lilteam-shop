@@ -9,7 +9,7 @@
       <div class="text-emerald-300 font-semibold mb-1">อนุมัติแล้ว เติมเงินสำเร็จ</div>
       <div class="text-2xl font-bold text-[var(--gold)]">฿<%= request.amount.toLocaleString() %>.00</div>
       <% if (request.slipCheck && request.slipCheck.verified) { %>
-        <p class="text-xs text-emerald-400 mt-2">⚡ ตรวจสอบและอนุมัติอัตโนมัติผ่าน SlipOK</p>
+        <p class="text-xs text-emerald-400 mt-2">⚡ ตรวจสอบและอนุมัติอัตโนมัติแล้ว</p>
       <% } %>
     </div>
   <% } else if (request.status === 'rejected') { %>

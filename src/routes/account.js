@@ -166,12 +166,12 @@ router.post('/topup/:id/slip', (req, res) => {
       user.walletBalance += request.amount;
       store.data.walletTransactions.push({
         id: store.genId(10), userId: user.id, type: 'topup', amount: request.amount,
-        note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติผ่าน ${provider === 'easyslip' ? 'EasySlip' : 'SlipOK'}, อ้างอิง ${request.refCode})`,
+        note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${request.refCode})`,
         createdAt: new Date().toISOString(),
       });
       request.status = 'approved';
       request.reviewedAt = new Date().toISOString();
-      request.reviewNote = `ตรวจสอบและอนุมัติอัตโนมัติผ่าน ${provider === 'easyslip' ? 'EasySlip' : 'SlipOK'}`;
+      request.reviewNote = 'ตรวจสอบและอนุมัติอัตโนมัติ';
       store.save();
       req.flash('success', `ตรวจสอบสลิปสำเร็จ! เติมเงิน ${request.amount.toLocaleString()} บาทเข้ากระเป๋าเรียบร้อยแล้ว`);
     } else {
