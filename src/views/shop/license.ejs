@@ -30,7 +30,7 @@
     <% if (active) { %>
       <div class="bg-emerald-900/30 border border-emerald-700 text-emerald-300 px-4 py-3 rounded-lg mb-4 text-sm text-center">
         ✓ ใช้งานอยู่<% if (label) { %> — <%= label %><% } %><br />
-        หมดอายุ: <%= new Date(expiresAt).toLocaleDateString('th-TH') %>
+        หมดอายุ: <%= new Date(expiresAt).toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
       </div>
       <a href="/" class="block text-center bg-[#c8a63f] hover:bg-[#d9bc5e] text-[#100e08] font-semibold rounded-lg py-2.5 text-sm mb-4">กลับหน้าร้าน →</a>
       <p class="text-xs text-[#7a6f47] text-center mb-2">มีคีย์ต่ออายุใหม่? กรอกที่นี่เพื่อเพิ่มเวลา (จะบวกเพิ่มจากเวลาที่เหลืออยู่ ไม่เสียเวลาเดิม)</p>

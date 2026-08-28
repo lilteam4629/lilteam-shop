@@ -11,7 +11,7 @@
             <span class="text-emerald-400 text-sm"><%= o.status %></span>
           </div>
           <div class="text-[var(--text-3)] text-sm flex items-center justify-between">
-            <span><%= new Date(o.createdAt).toLocaleString('th-TH') %> &middot; <%= o.items.length %> รายการ</span>
+            <span><%= new Date(o.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %> &middot; <%= o.items.length %> รายการ</span>
             <span class="text-[var(--gold)] font-medium">฿<%= o.total.toLocaleString() %>.00</span>
           </div>
         </a>

@@ -99,7 +99,7 @@
       <div class="flex-1 text-sm">
         <div class="font-medium"><%= r.buyer ? r.buyer.username : 'ไม่พบผู้ใช้' %> <span class="text-[var(--text-4)] font-normal">(<%= r.buyer ? r.buyer.email : '-' %>)</span></div>
         <div class="text-[var(--text-3)] font-mono text-xs">#<%= r.refCode %> &middot; <%= r.method === 'promptpay' ? 'พร้อมเพย์' : 'โอนธนาคาร' %></div>
-        <div class="text-[var(--text-4)] text-xs"><%= new Date(r.createdAt).toLocaleString('th-TH') %></div>
+        <div class="text-[var(--text-4)] text-xs"><%= new Date(r.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></div>
       </div>
 
       <div class="text-xl font-bold text-[var(--gold)] sm:w-32 sm:text-right">฿<%= r.amount.toLocaleString() %>.00</div>

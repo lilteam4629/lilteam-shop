@@ -139,7 +139,7 @@
               <span class="text-amber-400 text-xs">⏳ รอมารับ</span>
             <% } %>
           </td>
-          <td class="p-3 text-[var(--text-4)] text-xs"><%= new Date(play.createdAt).toLocaleString('th-TH') %></td>
+          <td class="p-3 text-[var(--text-4)] text-xs"><%= new Date(play.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></td>
           <td class="p-3 text-right whitespace-nowrap">
             <% if (play.isWin) { %>
               <form action="/admin/minigame/plays/<%= play.id %>/deliver" method="post" class="inline">

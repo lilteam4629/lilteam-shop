@@ -42,7 +42,7 @@
       <a href="/rent-website/sale/<%= sale.id %>" class="p-4 flex items-center justify-between text-sm hover:bg-[var(--input)]">
         <div>
           <div><%= sale.days %> วัน — ฿<%= sale.price.toLocaleString() %> <% if (sale.type === 'new_site') { %><span class="text-[10px] text-[var(--gold)] border border-[var(--gold)]/40 rounded-full px-1.5 py-0.5 ml-1">เว็บใหม่</span><% } %></div>
-          <div class="text-[var(--text-4)] text-xs"><%= new Date(sale.createdAt).toLocaleString('th-TH') %></div>
+          <div class="text-[var(--text-4)] text-xs"><%= new Date(sale.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></div>
           <% if (sale.exp) { %>
             <div class="countdown text-xs font-mono mt-0.5" data-exp="<%= sale.exp %>">…</div>
           <% } %>

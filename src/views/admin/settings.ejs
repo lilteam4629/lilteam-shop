@@ -3,7 +3,7 @@
     <h3 class="font-semibold mb-2">🔒 ใบอนุญาตใช้งาน</h3>
     <% if (settings.license && settings.license.key && settings.license.expiresAt && Date.now() < settings.license.expiresAt) { %>
       <p class="text-sm text-emerald-400">✓ ใช้งานอยู่<% if (settings.license.label) { %> — <%= settings.license.label %><% } %></p>
-      <p class="text-xs text-[var(--text-4)] mt-1">หมดอายุ: <%= new Date(settings.license.expiresAt).toLocaleString('th-TH') %></p>
+      <p class="text-xs text-[var(--text-4)] mt-1">หมดอายุ: <%= new Date(settings.license.expiresAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></p>
     <% } else { %>
       <p class="text-sm text-[var(--coral)]">✕ ยังไม่ได้ปลดล็อก หรือหมดอายุแล้ว</p>
     <% } %>

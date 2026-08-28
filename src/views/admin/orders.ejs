@@ -8,7 +8,7 @@
         <tr class="hover:bg-[var(--input)]/50">
           <td class="p-3">#<%= o.id %></td>
           <td class="p-3"><%= o.buyer ? o.buyer.username : '-' %></td>
-          <td class="p-3 text-[var(--text-3)]"><%= new Date(o.createdAt).toLocaleString('th-TH') %></td>
+          <td class="p-3 text-[var(--text-3)]"><%= new Date(o.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></td>
           <td class="p-3"><%= o.total.toLocaleString() %> ฿</td>
           <td class="p-3"><%= o.status %></td>
           <td class="p-3 text-right"><a href="/admin/orders/<%= o.id %>" class="text-[var(--gold)]">ดูรายละเอียด</a></td>

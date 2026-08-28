@@ -88,7 +88,7 @@
             <% } %>
           </td>
           <td class="p-3 font-mono text-xs break-all max-w-[200px]"><%= sale.key %></td>
-          <td class="p-3 text-[var(--text-4)] text-xs whitespace-nowrap"><%= new Date(sale.createdAt).toLocaleString('th-TH') %></td>
+          <td class="p-3 text-[var(--text-4)] text-xs whitespace-nowrap"><%= new Date(sale.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></td>
         </tr>
       <% }) %>
       <% if (!sales.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="7">ยังไม่มีการขาย</td></tr><% } %>

@@ -67,7 +67,7 @@
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 text-sm space-y-2">
     <div class="flex justify-between"><span class="text-[var(--text-3)]">จำนวนวัน</span><span><%= sale.days %> วัน</span></div>
     <div class="flex justify-between"><span class="text-[var(--text-3)]">ราคา</span><span class="text-[var(--gold)] font-semibold">฿<%= sale.price.toLocaleString() %></span></div>
-    <div class="flex justify-between"><span class="text-[var(--text-3)]">เวลาที่ซื้อ</span><span><%= new Date(sale.createdAt).toLocaleString('th-TH') %></span></div>
+    <div class="flex justify-between"><span class="text-[var(--text-3)]">เวลาที่ซื้อ</span><span><%= new Date(sale.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></span></div>
     <% if (exp) { %>
       <div class="flex justify-between"><span class="text-[var(--text-3)]">เหลือเวลา</span><span id="sale-countdown" class="font-mono font-semibold" data-exp="<%= exp %>">…</span></div>
     <% } %>

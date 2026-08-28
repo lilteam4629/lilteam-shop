@@ -1,7 +1,7 @@
 <section class="max-w-lg mx-auto px-4 py-10">
   <a href="/account" class="text-sm text-[var(--gold)]">← กลับไปหน้าบัญชี</a>
   <h1 class="text-2xl font-bold mt-2 mb-1">คำขอเติมเงิน #<%= request.refCode %></h1>
-  <p class="text-sm text-[var(--text-3)] mb-6"><%= new Date(request.createdAt).toLocaleString('th-TH') %></p>
+  <p class="text-sm text-[var(--text-3)] mb-6"><%= new Date(request.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></p>
 
   <% if (request.status === 'approved') { %>
     <div class="bg-emerald-900/30 border border-emerald-700 rounded-xl p-5 text-center mb-6">

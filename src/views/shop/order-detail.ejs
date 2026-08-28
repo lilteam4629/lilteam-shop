@@ -1,7 +1,7 @@
 <section class="max-w-3xl mx-auto px-4 py-8">
   <a href="/account/orders" class="text-sm text-[var(--gold)]">← กลับไปหน้าคำสั่งซื้อ</a>
   <h1 class="text-2xl font-bold mt-2 mb-1">คำสั่งซื้อ #<%= order.id %></h1>
-  <p class="text-[var(--text-3)] text-sm mb-6"><%= new Date(order.createdAt).toLocaleString('th-TH') %> &middot; สถานะ: <span class="text-emerald-400"><%= order.status %></span></p>
+  <p class="text-[var(--text-3)] text-sm mb-6"><%= new Date(order.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %> &middot; สถานะ: <span class="text-emerald-400"><%= order.status %></span></p>
 
   <div class="space-y-3 mb-6">
     <% itemsWithCreds.forEach(i => { %>
