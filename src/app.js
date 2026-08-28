@@ -15,6 +15,7 @@ const minigameRoutes = require('./routes/minigame');
 const adminRoutes = require('./routes/admin');
 const licenseRoutes = require('./routes/license');
 const rentWebsiteRoutes = require('./routes/rent-website');
+const tenantRoutes = require('./routes/tenant');
 const license = require('./services/license');
 const packageInfo = require('../package.json');
 
@@ -77,6 +78,7 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use('/', tenantRoutes);
 app.use('/', licenseRoutes);
 app.use((req, res, next) => {
   if (!license.isGateOn()) return next();

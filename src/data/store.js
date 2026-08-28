@@ -197,6 +197,10 @@ function defaultData() {
       { id: nanoid(8), days: 90, price: 1499, active: true, createdAt: now },
     ],
     licenseSales: [],
+    // Multi-tenant SaaS prototype (Phase 1) — a `shops` collection alongside
+    // the existing single-tenant data, deliberately not wired into the main
+    // storefront/admin yet. See src/routes/tenant.js.
+    shops: [],
   };
 }
 
@@ -340,6 +344,7 @@ function migrate() {
   if (!db.miniGamePlays) { db.miniGamePlays = []; changed = true; }
   if (!db.licensePlans) { db.licensePlans = []; changed = true; }
   if (!db.licenseSales) { db.licenseSales = []; changed = true; }
+  if (!db.shops) { db.shops = []; changed = true; }
   db.products.forEach(product => {
     if (!product.fulfillmentMode) {
       product.fulfillmentMode = 'automatic';
