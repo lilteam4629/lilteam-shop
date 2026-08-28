@@ -58,8 +58,18 @@
       </p>
       <div class="grid sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm mb-1 text-[var(--text-3)]">รหัสธนาคาร (bankCode)</label>
-          <input name="easyslipBankCode" value="<%= payment.easyslipBankCode %>" placeholder="เช่น 004 = กสิกรไทย, 014 = ไทยพาณิชย์" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+          <label class="block text-sm mb-1 text-[var(--text-3)]">ธนาคาร</label>
+          <% if (banks.length) { %>
+            <select name="easyslipBankCode" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
+              <option value="">-- เลือกธนาคาร --</option>
+              <% banks.forEach(bank => { %>
+                <option value="<%= bank.code %>" <%= payment.easyslipBankCode === bank.code ? 'selected' : '' %>><%= bank.nameTh %> (<%= bank.shortCode %>)</option>
+              <% }) %>
+            </select>
+          <% } else { %>
+            <input name="easyslipBankCode" value="<%= payment.easyslipBankCode %>" placeholder="เช่น 004 = กสิกรไทย, 014 = ไทยพาณิชย์" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+            <p class="text-[10px] text-[var(--text-4)] mt-1">ยังโหลดรายชื่อธนาคารจาก EasySlip ไม่ได้ (เช็คว่าตั้งค่า EASYSLIP_API_KEY แล้วหรือยัง)</p>
+          <% } %>
           <p class="text-[10px] text-[var(--text-4)] mt-1">ใช้เลขบัญชีธนาคาร + ชื่อบัญชีธนาคารด้านบนเป็นข้อมูลผูกบัญชี</p>
         </div>
         <div>

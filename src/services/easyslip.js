@@ -25,6 +25,28 @@ function authHeaders() {
   return { Authorization: `Bearer ${API_KEY}`, 'Content-Type': 'application/json' };
 }
 
+let banksCache = null;
+
+/**
+ * Fixed list of the 17 banks EasySlip supports (GET /v2/banks) — cached in
+ * memory for the life of the process since the list is documented as
+ * static. Returns [] if not configured or the request fails.
+ */
+async function getBanks() {
+  if (banksCache) return banksCache;
+  if (!isConfigured()) return [];
+  try {
+    const res = await axios.get(`${BASE_URL}/banks`, { headers: authHeaders(), timeout: 15000 });
+    if (res.data && res.data.success && Array.isArray(res.data.data)) {
+      banksCache = res.data.data;
+      return banksCache;
+    }
+    return [];
+  } catch (err) {
+    return [];
+  }
+}
+
 /**
  * Register a tenant's own bank account with EasySlip, linked automatically
  * to our platform's Branch (serviceId is derived server-side from API_KEY —
@@ -119,4 +141,4 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedA
   }
 }
 
-module.exports = { isConfigured, createBankAccount, verifySlip };
+module.exports = { isConfigured, createBankAccount, verifySlip, getBanks };

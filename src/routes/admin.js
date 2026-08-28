@@ -464,7 +464,8 @@ router.post('/users/new', (req, res) => {
 });
 
 // ---------- Top-up requests ----------
-router.get('/topups', (req, res) => {
+router.get('/topups', async (req, res) => {
+  const banks = await easyslip.getBanks();
   const q = String(req.query.q || '').trim();
   const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : '';
   const needle = q.toLocaleLowerCase('th-TH');
@@ -483,7 +484,7 @@ router.get('/topups', (req, res) => {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
   const pendingCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
-  res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment: store.data.settings.payment, q, status });
+  res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment: store.data.settings.payment, banks, q, status });
 });
 
 router.post('/topups/payment-settings', (req, res) => {
