@@ -497,18 +497,18 @@ router.post('/topups/payment-settings', (req, res) => {
       return res.redirect('/admin/topups');
     }
     const {
-      promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName,
-      slipokBranchId, slipokApiKey, easyslipBankCode, easyslipAccountType,
+      promptpayId, promptpayName, bankAccountNumber, bankAccountName, easyslipBankCode,
     } = req.body;
     const payment = store.data.settings.payment;
+    const bankCode = (easyslipBankCode || '').trim();
+    const banks = await easyslip.getBanks();
+    const selectedBank = banks.find(b => b.code === bankCode);
     Object.assign(payment, {
-      promptpayId, promptpayName, bankName, bankAccountNumber, bankAccountName,
-      slipokBranchId: (slipokBranchId || '').trim(),
-      slipokApiKey: (slipokApiKey || '').trim(),
+      promptpayId, promptpayName, bankAccountNumber, bankAccountName,
+      bankName: selectedBank ? selectedBank.nameTh : payment.bankName,
     });
 
-    const bankCode = (easyslipBankCode || '').trim();
-    const accountType = easyslipAccountType === 'JURISTIC' ? 'JURISTIC' : 'NATURAL';
+    const accountType = 'NATURAL';
     const detailsChanged = bankCode !== payment.easyslipBankCode
       || accountType !== payment.easyslipAccountType
       || !payment.easyslipAccountId;

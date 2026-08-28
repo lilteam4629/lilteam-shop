@@ -39,7 +39,17 @@
     </div>
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">ธนาคาร</label>
-      <input name="bankName" value="<%= payment.bankName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+      <% if (banks.length) { %>
+        <select name="easyslipBankCode" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
+          <option value="">-- เลือกธนาคาร --</option>
+          <% banks.forEach(bank => { %>
+            <option value="<%= bank.code %>" <%= payment.easyslipBankCode === bank.code ? 'selected' : '' %>><%= bank.nameTh %> (<%= bank.shortCode %>)</option>
+          <% }) %>
+        </select>
+      <% } else { %>
+        <input name="easyslipBankCode" value="<%= payment.easyslipBankCode %>" placeholder="เช่น 004 = กสิกรไทย, 014 = ไทยพาณิชย์" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+        <p class="text-[10px] text-[var(--text-4)] mt-1">ยังโหลดรายชื่อธนาคารจาก EasySlip ไม่ได้ (เช็คว่าตั้งค่า EASYSLIP_API_KEY แล้วหรือยัง)</p>
+      <% } %>
     </div>
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">เลขบัญชีธนาคาร</label>
@@ -49,51 +59,9 @@
       <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อบัญชีธนาคาร</label>
       <input name="bankAccountName" value="<%= payment.bankAccountName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
-    <div class="border-t border-[var(--border-light)] pt-4">
-      <label class="block font-medium mb-1">🤖 ตรวจสลิปอัตโนมัติ (EasySlip) — แนะนำ</label>
-      <p class="text-xs text-[var(--text-4)] mb-3">
-        กรอกรหัสธนาคาร (bankCode) ให้ตรงกับบัญชีด้านบนแล้วบันทึก ระบบจะเชื่อมบัญชีนี้เข้า EasySlip ให้อัตโนมัติเบื้องหลัง
-        ไม่ต้องไปสมัคร EasySlip เอง — เมื่อลูกค้าโอนเงินเข้าบัญชีนี้แล้วแนบสลิป ระบบจะตรวจสอบอัตโนมัติ
-        <% if (payment.easyslipStatus) { %><br /><span class="text-[var(--gold)]"><%= payment.easyslipStatus %></span><% } %>
-      </p>
-      <div class="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-sm mb-1 text-[var(--text-3)]">ธนาคาร</label>
-          <% if (banks.length) { %>
-            <select name="easyslipBankCode" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
-              <option value="">-- เลือกธนาคาร --</option>
-              <% banks.forEach(bank => { %>
-                <option value="<%= bank.code %>" <%= payment.easyslipBankCode === bank.code ? 'selected' : '' %>><%= bank.nameTh %> (<%= bank.shortCode %>)</option>
-              <% }) %>
-            </select>
-          <% } else { %>
-            <input name="easyslipBankCode" value="<%= payment.easyslipBankCode %>" placeholder="เช่น 004 = กสิกรไทย, 014 = ไทยพาณิชย์" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-            <p class="text-[10px] text-[var(--text-4)] mt-1">ยังโหลดรายชื่อธนาคารจาก EasySlip ไม่ได้ (เช็คว่าตั้งค่า EASYSLIP_API_KEY แล้วหรือยัง)</p>
-          <% } %>
-          <p class="text-[10px] text-[var(--text-4)] mt-1">ใช้เลขบัญชีธนาคาร + ชื่อบัญชีธนาคารด้านบนเป็นข้อมูลผูกบัญชี</p>
-        </div>
-        <div>
-          <label class="block text-sm mb-1 text-[var(--text-3)]">ประเภทบัญชี</label>
-          <select name="easyslipAccountType" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
-            <option value="NATURAL" <%= payment.easyslipAccountType !== 'JURISTIC' ? 'selected' : '' %>>บุคคลธรรมดา</option>
-            <option value="JURISTIC" <%= payment.easyslipAccountType === 'JURISTIC' ? 'selected' : '' %>>นิติบุคคล</option>
-          </select>
-        </div>
-      </div>
-    </div>
-    <details class="border-t border-[var(--border-light)] pt-4">
-      <summary class="text-sm text-[var(--text-3)] cursor-pointer">ตัวเลือกเสริม: SlipOK (สำรอง)</summary>
-      <div class="grid sm:grid-cols-2 gap-4 mt-3">
-        <div>
-          <label class="block text-sm mb-1 text-[var(--text-3)]">SlipOK Branch ID</label>
-          <input name="slipokBranchId" value="<%= payment.slipokBranchId %>" placeholder="เช่น 12345" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-        </div>
-        <div>
-          <label class="block text-sm mb-1 text-[var(--text-3)]">SlipOK API Key</label>
-          <input name="slipokApiKey" value="<%= payment.slipokApiKey %>" placeholder="SLIPOK..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-        </div>
-      </div>
-    </details>
+    <% if (payment.easyslipStatus) { %>
+      <p class="text-xs text-[var(--gold)]">🤖 <%= payment.easyslipStatus %></p>
+    <% } %>
     <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกข้อมูลบัญชี</button>
   </form>
 </details>
