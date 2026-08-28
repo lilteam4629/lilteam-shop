@@ -37,18 +37,21 @@
       <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์</label>
       <input name="promptpayName" value="<%= payment.promptpayName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
+    <%
+      const promptpayBank = banks.find(b => /พร้อมเพย์|promptpay/i.test(`${b.nameTh} ${b.nameEn}`));
+      const otherBanks = banks.filter(b => !promptpayBank || b.code !== promptpayBank.code);
+      const primaryBank = banks.find(b => b.nameTh === payment.bankName);
+      const promptpayConnected = payment.easyslipAccounts && promptpayBank && payment.easyslipAccounts[promptpayBank.code];
+    %>
     <div>
-      <label class="block text-sm mb-2 text-[var(--text-3)]">ช่องทางที่ต้องตรวจสลิปอัตโนมัติ <span class="text-[var(--text-4)] font-normal">(เลือกได้หลายอัน — เลือกทั้งธนาคารจริงและพร้อมเพย์ เพื่อให้จับสลิปโอนข้ามธนาคารผ่านพร้อมเพย์ได้ด้วย)</span></label>
-      <% if (banks.length) { %>
-        <div class="flex flex-wrap gap-2">
-          <% banks.forEach(bank => { const connected = payment.easyslipAccounts && payment.easyslipAccounts[bank.code]; %>
-            <label class="flex items-center gap-1.5 cursor-pointer bg-[var(--input)] hover:bg-[var(--input)]/70 border border-[var(--border-light)] has-[:checked]:border-[var(--gold)] has-[:checked]:bg-[var(--gold)]/10 rounded-full pl-2 pr-3 py-1.5 text-sm transition-colors">
-              <input type="checkbox" name="easyslipBankCodes" value="<%= bank.code %>" <%= payment.easyslipAccounts && payment.easyslipAccounts[bank.code] ? 'checked' : '' %> class="accent-[var(--gold)]" />
-              <span><%= bank.nameTh %></span>
-              <% if (connected) { %><span class="text-emerald-400 text-xs">✓</span><% } %>
-            </label>
+      <label class="block text-sm mb-1 text-[var(--text-3)]">ธนาคาร</label>
+      <% if (otherBanks.length) { %>
+        <select name="easyslipBankCode" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
+          <option value="">-- เลือกธนาคาร --</option>
+          <% otherBanks.forEach(bank => { %>
+            <option value="<%= bank.code %>" <%= primaryBank && primaryBank.code === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
           <% }) %>
-        </div>
+        </select>
       <% } else { %>
         <p class="text-[10px] text-[var(--text-4)]">ยังโหลดรายชื่อธนาคารจาก EasySlip ไม่ได้ (เช็คว่าตั้งค่า EASYSLIP_API_KEY แล้วหรือยัง)</p>
       <% } %>
@@ -61,6 +64,17 @@
       <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อบัญชีธนาคาร</label>
       <input name="bankAccountName" value="<%= payment.bankAccountName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
+    <% if (promptpayBank) { %>
+      <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-3">
+        <label class="flex items-center gap-2 text-sm cursor-pointer">
+          <input type="checkbox" name="registerPromptpay" id="registerPromptpay" <%= promptpayConnected ? 'checked' : '' %> onchange="document.getElementById('promptpayNumberField').classList.toggle('hidden', !this.checked)" class="accent-[var(--gold)]" />
+          เชื่อมต่อพร้อมเพย์ด้วย <span class="text-[var(--text-4)]">(กันสลิปโอนข้ามธนาคารผ่านพร้อมเพย์ตรวจไม่ผ่าน)</span>
+        </label>
+        <div id="promptpayNumberField" class="mt-2 <%= promptpayConnected ? '' : 'hidden' %>">
+          <input name="promptpayEasyslipNumber" value="<%= promptpayConnected ? payment.easyslipAccounts[promptpayBank.code].bankNumber : payment.promptpayId %>" placeholder="เลขพร้อมเพย์ เช่น 0812345678" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+        </div>
+      </div>
+    <% } %>
     <% if (payment.easyslipStatus) { %>
       <p class="text-xs text-[var(--gold)]">🤖 <%= payment.easyslipStatus %></p>
     <% } %>

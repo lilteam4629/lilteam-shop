@@ -180,13 +180,11 @@ function defaultData() {
         // an interbank PromptPay transfer's slip can report the receiver's
         // bank as the generic "PromptPay" entry rather than the shop's real
         // bank — matching only the real bank would miss those slips.
-        // easyslipAccounts: { [bankCode]: { accountId, status } }
+        // easyslipAccounts: { [bankCode]: { accountId, status, bankNumber } }
+        // — bankNumber is per-channel because PromptPay identifies by
+        // phone/ID number, not the underlying bank account number.
         easyslipAccounts: {},
         easyslipStatus: '',
-        // "bankAccountNumber|bankAccountName" the accounts above were last
-        // registered against — used to detect when those details changed
-        // and every selected channel needs re-registering.
-        easyslipRegisteredFor: '',
       },
       miniGame: {
         enabled: true,
@@ -362,7 +360,6 @@ function migrate() {
     delete db.settings.payment.easyslipAccountId;
     delete db.settings.payment.easyslipAccountType;
     if (db.settings.payment.easyslipStatus === undefined) db.settings.payment.easyslipStatus = '';
-    if (db.settings.payment.easyslipRegisteredFor === undefined) db.settings.payment.easyslipRegisteredFor = '';
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }

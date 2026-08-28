@@ -499,53 +499,58 @@ router.post('/topups/payment-settings', (req, res) => {
     const {
       promptpayId, promptpayName, bankAccountNumber, bankAccountName,
     } = req.body;
-    // Checkboxes with the same name come through as a string (one checked)
-    // or an array (multiple checked) — never as undefined if none checked
-    // (then the key is simply absent from req.body).
-    const rawCodes = req.body.easyslipBankCodes;
-    const selectedCodes = Array.isArray(rawCodes) ? rawCodes : (rawCodes ? [rawCodes] : []);
+    const bankCode = (req.body.easyslipBankCode || '').trim();
+    const registerPromptpay = req.body.registerPromptpay === 'on';
+    const promptpayEasyslipNumber = (req.body.promptpayEasyslipNumber || promptpayId || '').trim();
 
     const payment = store.data.settings.payment;
     const banks = await easyslip.getBanks();
-    const primaryBank = banks.find(b => b.code === selectedCodes[0]);
+    const primaryBank = banks.find(b => b.code === bankCode);
+    const promptpayBank = banks.find(b => /พร้อมเพย์|promptpay/i.test(`${b.nameTh} ${b.nameEn}`));
     Object.assign(payment, {
       promptpayId, promptpayName, bankAccountNumber, bankAccountName,
       bankName: primaryBank ? primaryBank.nameTh : payment.bankName,
     });
 
-    // A shop's account gets registered with EasySlip under EVERY channel it
-    // selected (its own bank AND/OR PromptPay etc) — an interbank PromptPay
-    // transfer's slip can report the receiver's bank as the generic
-    // "PromptPay" entry rather than the shop's real bank, so matching only
-    // the real bank would miss those slips.
-    const accountKey = `${bankAccountNumber}|${bankAccountName}`;
-    const accountKeyChanged = payment.easyslipRegisteredFor !== accountKey;
-    payment.easyslipRegisteredFor = accountKey;
-    if (easyslip.isConfigured() && bankAccountNumber && bankAccountName) {
+    // Registered as its own bank (matches a normal transfer) AND, if
+    // opted in, again under the PromptPay channel — an interbank
+    // PromptPay transfer's slip can report the receiver's bank as the
+    // generic "PromptPay" entry rather than the shop's real bank, and
+    // PromptPay's own identifier (phone/ID) isn't the bank account
+    // number, so it needs its own separate registration.
+    const channels = [];
+    if (bankCode && bankAccountNumber && bankAccountName) channels.push({ code: bankCode, number: bankAccountNumber, name: bankAccountName });
+    if (registerPromptpay && promptpayBank && promptpayEasyslipNumber) {
+      channels.push({ code: promptpayBank.code, number: promptpayEasyslipNumber, name: promptpayName || bankAccountName });
+    }
+
+    if (easyslip.isConfigured() && channels.length) {
       const statuses = [];
-      for (const code of selectedCodes) {
-        const already = payment.easyslipAccounts[code];
-        if (already && already.accountId && !accountKeyChanged) continue;
+      for (const channel of channels) {
+        const already = payment.easyslipAccounts[channel.code];
+        if (already && already.accountId && already.bankNumber === channel.number) continue;
         const result = await easyslip.createBankAccount({
-          bankCode: code, bankNumber: bankAccountNumber, nameTh: bankAccountName,
-          nameEn: bankAccountName, type: 'NATURAL',
+          bankCode: channel.code, bankNumber: channel.number, nameTh: channel.name,
+          nameEn: channel.name, type: 'NATURAL',
         });
-        const bankLabel = (banks.find(b => b.code === code) || {}).nameTh || code;
+        const bankLabel = (banks.find(b => b.code === channel.code) || {}).nameTh || channel.code;
         if (result.ok) {
-          payment.easyslipAccounts[code] = { accountId: result.account.id, status: 'ok' };
+          payment.easyslipAccounts[channel.code] = { accountId: result.account.id, status: 'ok', bankNumber: channel.number };
           statuses.push(`${bankLabel}: เชื่อมต่อสำเร็จ`);
         } else if (result.code === 'BANK_ACCOUNT_DUPLICATE') {
-          payment.easyslipAccounts[code] = { accountId: (already && already.accountId) || null, status: 'ok' };
+          payment.easyslipAccounts[channel.code] = { accountId: (already && already.accountId) || null, status: 'ok', bankNumber: channel.number };
           statuses.push(`${bankLabel}: เชื่อมต่อไว้แล้ว`);
         } else {
           statuses.push(`${bankLabel}: ไม่สำเร็จ (${result.message})`);
         }
       }
-      // Drop channels the admin unchecked so the UI reflects what's active.
+      const activeCodes = channels.map(c => c.code);
       Object.keys(payment.easyslipAccounts).forEach((code) => {
-        if (!selectedCodes.includes(code)) delete payment.easyslipAccounts[code];
+        if (!activeCodes.includes(code)) delete payment.easyslipAccounts[code];
       });
       if (statuses.length) payment.easyslipStatus = statuses.join(' · ');
+    } else {
+      payment.easyslipAccounts = {};
     }
 
     if (req.body.removePromptpayQrImage === 'on') store.data.settings.payment.promptpayQrImage = null;

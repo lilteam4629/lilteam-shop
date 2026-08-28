@@ -80,16 +80,18 @@ async function createBankAccount({ bankCode, bankNumber, nameTh, nameEn, type, e
 
 /**
  * Verify a slip image against an expected amount AND expected receiving
- * account via EasySlip (POST /v2/verify/bank). `expectedAccount` should be
- * the CURRENT shop's own registered account ({ bankNumber, bankCode }) —
- * matchAccount:true makes EasySlip resolve the slip's receiver against
- * every bank account registered on our platform's branch (i.e. every
- * tenant shop's account), so we still must confirm the match belongs to
- * THIS shop and not some other tenant sharing the same branch.
+ * account via EasySlip (POST /v2/verify/bank). `expectedNumbers` should be
+ * every number the CURRENT shop registered its account under (its real
+ * bank account number AND, if also registered, its PromptPay number —
+ * they can differ, since PromptPay identifies by phone/ID, not the bank
+ * account number) — matchAccount:true makes EasySlip resolve the slip's
+ * receiver against every bank account registered on our platform's branch
+ * (i.e. every tenant shop's account), so we still must confirm the match
+ * belongs to THIS shop and not some other tenant sharing the same branch.
  * Returns { checked, verified, message, raw } — checked is false when
  * EasySlip isn't configured (caller should fall back to manual review).
  */
-async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedAccount = {}) {
+async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedNumbers = []) {
   if (!isConfigured()) {
     return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า EasySlip — ใช้การตรวจสอบด้วยแอดมินแทน', raw: null };
   }
@@ -123,8 +125,9 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedA
     if (!matched) {
       return { checked: true, verified: false, message: 'ไม่พบบัญชีผู้รับที่ตรงกับบัญชีที่ลงทะเบียนไว้', raw: data };
     }
-    const accountMatches = !expectedAccount.bankNumber
-      || normalizeAccountNumber(matched.bankNumber) === normalizeAccountNumber(expectedAccount.bankNumber);
+    const normalizedExpected = expectedNumbers.map(normalizeAccountNumber).filter(Boolean);
+    const accountMatches = !normalizedExpected.length
+      || normalizedExpected.includes(normalizeAccountNumber(matched.bankNumber));
     if (!accountMatches) {
       return { checked: true, verified: false, message: 'บัญชีผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: data };
     }

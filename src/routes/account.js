@@ -114,9 +114,8 @@ router.post('/topup/:id/slip', (req, res) => {
     let result;
     if (easyslip.isConfigured() && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
       provider = 'easyslip';
-      result = await easyslip.verifySlip(req.file.buffer, request.amount, fileOptions, {
-        bankNumber: payment.bankAccountNumber,
-      });
+      const expectedNumbers = Object.values(payment.easyslipAccounts).map(a => a.bankNumber).filter(Boolean);
+      result = await easyslip.verifySlip(req.file.buffer, request.amount, fileOptions, expectedNumbers);
     } else {
       provider = 'slipok';
       result = await slipok.verifySlip(req.file.buffer, request.amount, fileOptions, {
