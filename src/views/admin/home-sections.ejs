@@ -50,14 +50,19 @@
               <input type="number" name="limit" min="1" max="30" value="<%= s.limit %>" class="w-full bg-black/20 border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
             </div>
             <div class="section-products-field" <%= s.mode !== 'manual' ? 'hidden' : '' %>>
-              <label class="block text-xs text-[var(--text-3)] mb-1">เลือกสินค้าที่จะแสดง (เรียงตามลำดับที่ติ๊ก)</label>
-              <div class="max-h-48 overflow-y-auto border border-[var(--border-light)] rounded-lg p-2 space-y-1 bg-black/20">
-                <% products.forEach(p => { %>
-                  <label class="flex items-center gap-2 text-xs py-1">
-                    <input type="checkbox" name="productIds" value="<%= p.id %>" <%= s.productIds.includes(p.id) ? 'checked' : '' %> />
-                    <span class="truncate"><%= p.title %></span>
-                  </label>
-                <% }) %>
+              <label class="block text-xs text-[var(--text-3)] mb-1">เลือกสินค้าที่จะแสดง (ติ๊กรูปเพื่อเลือก)</label>
+              <div class="max-h-96 overflow-y-auto border border-[var(--border-light)] rounded-lg p-2 bg-black/20">
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <% products.forEach(p => { %>
+                    <label class="product-pick-card relative block rounded-lg overflow-hidden border-2 border-transparent cursor-pointer">
+                      <input type="checkbox" name="productIds" value="<%= p.id %>" <%= s.productIds.includes(p.id) ? 'checked' : '' %> class="peer sr-only" />
+                      <img src="<%= p.images && p.images[0] %>" alt="<%= p.title %>" class="w-full aspect-square object-cover" />
+                      <span class="absolute inset-0 peer-checked:border-2 peer-checked:border-[var(--gold)] peer-checked:bg-[var(--gold)]/20 rounded-lg pointer-events-none"></span>
+                      <span class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 border border-white/40 flex items-center justify-center text-[10px] peer-checked:bg-[var(--gold)] peer-checked:text-[var(--bg)] peer-checked:border-[var(--gold)]">✓</span>
+                      <span class="block text-[10px] px-1.5 py-1 bg-black/50 truncate"><%= p.title %></span>
+                    </label>
+                  <% }) %>
+                </div>
               </div>
             </div>
             <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">บันทึกหมวดหมู่นี้</button>
@@ -86,14 +91,19 @@
         <input type="number" name="limit" min="1" max="30" value="5" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       </div>
       <div class="section-products-field" hidden>
-        <label class="block text-xs text-[var(--text-3)] mb-1">เลือกสินค้าที่จะแสดง</label>
-        <div class="max-h-48 overflow-y-auto border border-[var(--border-light)] rounded-lg p-2 space-y-1 bg-[var(--input)]">
-          <% products.forEach(p => { %>
-            <label class="flex items-center gap-2 text-xs py-1">
-              <input type="checkbox" name="productIds" value="<%= p.id %>" />
-              <span class="truncate"><%= p.title %></span>
-            </label>
-          <% }) %>
+        <label class="block text-xs text-[var(--text-3)] mb-1">เลือกสินค้าที่จะแสดง (ติ๊กรูปเพื่อเลือก)</label>
+        <div class="max-h-96 overflow-y-auto border border-[var(--border-light)] rounded-lg p-2 bg-[var(--input)]">
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <% products.forEach(p => { %>
+              <label class="product-pick-card relative block rounded-lg overflow-hidden border-2 border-transparent cursor-pointer">
+                <input type="checkbox" name="productIds" value="<%= p.id %>" class="peer sr-only" />
+                <img src="<%= p.images && p.images[0] %>" alt="<%= p.title %>" class="w-full aspect-square object-cover" />
+                <span class="absolute inset-0 peer-checked:border-2 peer-checked:border-[var(--gold)] peer-checked:bg-[var(--gold)]/20 rounded-lg pointer-events-none"></span>
+                <span class="absolute top-1 right-1 w-5 h-5 rounded-full bg-black/60 border border-white/40 flex items-center justify-center text-[10px] peer-checked:bg-[var(--gold)] peer-checked:text-[var(--bg)] peer-checked:border-[var(--gold)]">✓</span>
+                <span class="block text-[10px] px-1.5 py-1 bg-black/50 truncate"><%= p.title %></span>
+              </label>
+            <% }) %>
+          </div>
         </div>
       </div>
       <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มหมวดหมู่</button>

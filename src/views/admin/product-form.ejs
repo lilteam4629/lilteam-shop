@@ -39,18 +39,6 @@
   </div>
 
   <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">แนวเกม</label>
-    <div class="flex flex-wrap gap-3 text-sm">
-      <% Object.entries(genres).forEach(([key, label]) => { %>
-        <label class="flex items-center gap-1.5 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5">
-          <input type="checkbox" name="genres" value="<%= key %>" <%= product && product.genres.includes(key) ? 'checked':'' %> />
-          <%= label %>
-        </label>
-      <% }) %>
-    </div>
-  </div>
-
-  <div>
     <label class="block text-sm mb-1 text-[var(--text-3)]">ตัวกรองสินค้า (สินค้านี้มีสิ่งนี้)</label>
     <% if (!filterTags.length) { %>
       <p class="text-xs text-[var(--text-4)]">ยังไม่มีตัวกรองสินค้า — ไปเพิ่มได้ที่เมนู "🏷️ ตัวกรองสินค้า"</p>
