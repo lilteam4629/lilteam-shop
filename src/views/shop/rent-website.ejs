@@ -10,12 +10,12 @@
       <div class="relative overflow-hidden rounded-[15px] bg-gradient-to-br from-[#fff8e4] via-[#fbedbb] to-[#eed787] p-4">
         <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/40 blur-2xl pointer-events-none"></div>
         <div class="absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-white/25 blur-2xl pointer-events-none"></div>
-        <h2 class="relative flex items-center gap-1.5 font-bold text-[#7a5f13] text-sm mb-3">
+        <h2 class="relative flex items-center gap-1.5 font-bold text-[var(--gold-dark)] text-sm mb-3">
           <span class="promo-flame">🔥</span> โปรโมชั่นตอนนี้
         </h2>
         <div class="relative flex flex-col gap-2">
           <% promoPlans.forEach(plan => { %>
-            <a href="/start?plan=<%= plan.id %>" class="flex items-center justify-between gap-2 bg-white/55 hover:bg-white/75 border border-[#a8842b]/30 hover:border-[#a8842b]/70 rounded-xl px-3.5 py-2.5 transition">
+            <a href="/start?plan=<%= plan.id %>" class="flex items-center justify-between gap-2 bg-white/55 hover:bg-white/75 border border-[var(--gold-dark)]/30 hover:border-[var(--gold-dark)]/70 rounded-xl px-3.5 py-2.5 transition">
               <div>
                 <div class="text-sm font-semibold text-[#4a3d1c]"><%= plan.days %> วัน</div>
                 <div class="text-[10px] text-[#8a7c5c]">
@@ -24,7 +24,7 @@
                   <% if (plan.promoExpiresAt) { %>หมดเขต <%= new Date(plan.promoExpiresAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }) %><% } %>
                 </div>
               </div>
-              <div class="text-base font-bold text-[#9a7616]">฿<%= plan.price.toLocaleString() %></div>
+              <div class="text-base font-bold text-[var(--gold-dark)]">฿<%= plan.price.toLocaleString() %></div>
             </a>
           <% }) %>
         </div>
@@ -40,7 +40,7 @@
       <a href="/start?plan=<%= plan.id %>" class="tilt3d-card group relative block w-full aspect-[3/4] rounded-2xl p-[2px] neon-border">
         <div class="relative w-full h-full rounded-[14px] overflow-hidden bg-gradient-to-br from-[#fff8e4] via-[#fbedbb] to-[#eed787] flex flex-col">
           <% if (plan.id === bestValuePlanId) { %>
-            <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-7 items-center bg-gradient-to-r from-[#a8842b] to-[#c8a63f] pl-3 pr-2 text-[9px] font-black tracking-wider text-white">⭐ คุ้มสุด</div>
+            <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-7 items-center bg-gradient-to-r from-[var(--gold-dark)] to-[var(--gold)] pl-3 pr-2 text-[9px] font-black tracking-wider text-white">⭐ คุ้มสุด</div>
           <% } %>
           <span class="ready-glow absolute top-2 left-2 z-10 bg-white/70 border border-emerald-600/60 text-emerald-800 font-medium text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm">● เปิดได้ทันที</span>
 
@@ -93,7 +93,7 @@
 </section>
 
 <style>
-  .promo-border { background: linear-gradient(120deg, #e7bb36, #7a5f13, #ffe487, #7a5f13, #e7bb36); background-size: 300% 300%; animation: promo-border-flow 6s ease infinite; }
+  .promo-border { background: linear-gradient(120deg, var(--gold), var(--gold-dark), var(--gold-light), var(--gold-dark), var(--gold)); background-size: 300% 300%; animation: promo-border-flow 6s ease infinite; }
   @keyframes promo-border-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
   .promo-flame { display: inline-block; animation: promo-flame-bounce 1.4s ease-in-out infinite; }
   @keyframes promo-flame-bounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.12); } }
@@ -106,7 +106,7 @@
   }
   @keyframes neon-border-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
   .neon-logo-glow { filter: drop-shadow(0 0 8px rgba(255,255,255,.85)) drop-shadow(0 2px 4px rgba(93,71,10,.25)); }
-  .neon-price { color: #9a7616; text-shadow: 0 0 10px rgba(255,255,255,.6); }
+  .neon-price { color: var(--gold-dark); text-shadow: 0 0 10px rgba(255,255,255,.6); }
 
   .tilt3d-card { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale3d(1,1,1); transition: transform .35s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; }
   .tilt3d-card.tilting { transition: none; }

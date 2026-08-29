@@ -36,7 +36,7 @@
   .mg-stage { position: relative; width: 100%; height: 220px; display: flex; align-items: center; justify-content: center; }
   .mg-box {
     font-size: 4.5rem; line-height: 1; cursor: default;
-    filter: drop-shadow(0 0 18px rgba(200,166,63,.45));
+    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--gold) 45%, transparent));
     animation: mg-float 2.6s ease-in-out infinite;
   }
   @keyframes mg-float {
@@ -63,13 +63,13 @@
     opacity: 1; transform: scale(1) rotateY(0deg);
     transition: opacity .45s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
   }
-  .mg-card-icon { font-size: 3.4rem; line-height: 1; filter: drop-shadow(0 0 14px rgba(200,166,63,.5)); }
+  .mg-card-icon { font-size: 3.4rem; line-height: 1; filter: drop-shadow(0 0 14px color-mix(in srgb, var(--gold) 50%, transparent)); }
   .mg-card-image {
     width: auto; height: auto;
     max-width: min(100%, 14rem); max-height: 11.5rem;
     object-fit: contain;
     border: 0; border-radius: 0;
-    filter: drop-shadow(0 8px 18px rgba(200,166,63,.32));
+    filter: drop-shadow(0 8px 18px color-mix(in srgb, var(--gold) 32%, transparent));
   }
   .mg-card-name { font-weight: 700; font-size: .95rem; max-width: 220px; }
 
@@ -88,18 +88,18 @@
     background: linear-gradient(135deg, var(--gold), var(--gold-hover));
     color: var(--bg); font-weight: 700; border-radius: .75rem;
     padding: .7rem 1rem; font-size: .9rem;
-    box-shadow: 0 8px 20px -8px rgba(200,166,63,.7);
+    box-shadow: 0 8px 20px -8px color-mix(in srgb, var(--gold) 70%, transparent);
     transition: transform .15s, box-shadow .15s, opacity .15s;
   }
-  .mg-play-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -10px rgba(200,166,63,.85); }
+  .mg-play-btn:hover { transform: translateY(-1px); box-shadow: 0 12px 26px -10px color-mix(in srgb, var(--gold) 85%, transparent); }
   .mg-play-btn:disabled { opacity: .55; cursor: not-allowed; transform: none; }
 
   .mg-claim-box {
     margin-top: .4rem;
     padding: .5rem .75rem;
     border-radius: .6rem;
-    background: rgba(200,166,63,.14);
-    border: 1px solid rgba(200,166,63,.4);
+    background: color-mix(in srgb, var(--gold) 14%, transparent);
+    border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
   }
   .mg-claim-code {
     font-family: 'Kanit', monospace;

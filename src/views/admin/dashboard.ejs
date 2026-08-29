@@ -94,7 +94,7 @@
 </div>
 
 <% if (stats.pendingTopups > 0) { %>
-  <a href="/admin/topups" class="block bg-[var(--gold)]/10 border border-[var(--gold)]/40 text-[#e2c084] rounded-lg px-4 py-3 mb-8 text-sm hover:bg-[var(--gold)]/15">
+  <a href="/admin/topups" class="block bg-[var(--gold)]/10 border border-[var(--gold)]/40 text-[var(--gold-light)] rounded-lg px-4 py-3 mb-8 text-sm hover:bg-[var(--gold)]/15">
     💳 มีคำขอเติมเงินรอตรวจสอบ <b><%= stats.pendingTopups %></b> รายการ — คลิกเพื่อดู →
   </a>
 <% } %>
@@ -113,7 +113,7 @@
       <% dailySales.forEach(day => { const height = Math.max(day.amount ? 8 : 2, Math.round((day.amount / maxDailyRevenue) * 100)); %>
         <div class="flex-1 h-full flex flex-col justify-end items-center min-w-0 group">
           <span class="text-[9px] text-[var(--text-3)] mb-1 opacity-0 group-hover:opacity-100 transition"><%= day.amount.toLocaleString() %></span>
-          <div class="w-full max-w-12 rounded-t-md bg-gradient-to-t from-[#8f6819] to-[#dfbe54] shadow-[0_0_14px_rgba(200,166,63,.12)]" style="height:<%= height %>%"></div>
+          <div class="w-full max-w-12 rounded-t-md bg-gradient-to-t from-[var(--gold-dark)] to-[var(--gold-light)] shadow-[0_0_14px_color-mix(in_srgb,var(--gold)_12%,transparent)]" style="height:<%= height %>%"></div>
           <span class="text-[9px] sm:text-[10px] text-[var(--text-4)] py-2"><%= day.label %></span>
         </div>
       <% }) %>

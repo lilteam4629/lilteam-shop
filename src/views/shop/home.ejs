@@ -3,13 +3,13 @@
     <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6">
       <% if (settings.hero.bannerLink) { %>
         <a href="<%= settings.hero.bannerLink %>"
-          class="group block rounded-2xl overflow-hidden border border-[var(--border)] shadow-[0_0_40px_-14px_rgba(200,166,63,0.35)]
-                 transition-all duration-300 hover:border-[var(--gold)]/60 hover:shadow-[0_0_50px_-10px_rgba(200,166,63,0.5)]">
+          class="group block rounded-2xl overflow-hidden border border-[var(--border)] shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]
+                 transition-all duration-300 hover:border-[var(--gold)]/60 hover:shadow-[0_0_50px_-10px_color-mix(in_srgb,var(--gold)_50%,transparent)]">
           <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>"
             class="w-full object-cover transition duration-500 group-hover:scale-[1.02] group-hover:brightness-105" />
         </a>
       <% } else { %>
-        <div class="rounded-2xl overflow-hidden border border-[var(--border)] shadow-[0_0_40px_-14px_rgba(200,166,63,0.35)]">
+        <div class="rounded-2xl overflow-hidden border border-[var(--border)] shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]">
           <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" class="w-full object-cover" />
         </div>
       <% } %>
@@ -122,13 +122,13 @@
 </section>
 
 <style>
-  .event-clock{display:grid;place-items:center;width:1.35rem;height:1.35rem;border-radius:99px;background:linear-gradient(145deg,#e5c65f,#9a721b);color:#171207;font-size:.8rem;box-shadow:0 0 14px rgba(200,166,63,.4)}
-  .event-card{position:relative;display:flex;align-items:center;gap:1rem;min-width:0;padding:.8rem 1rem;border-radius:1rem;border:1px solid rgba(200,166,63,.38);border-top:2px solid var(--gold);background:linear-gradient(110deg,var(--card),var(--input));box-shadow:0 12px 30px -24px rgba(200,166,63,.85);overflow:hidden}
-  .event-card:before{content:'';position:absolute;inset:auto -3rem -4rem auto;width:10rem;height:10rem;border-radius:99px;background:rgba(200,166,63,.08);filter:blur(10px)}
+  .event-clock{display:grid;place-items:center;width:1.35rem;height:1.35rem;border-radius:99px;background:linear-gradient(145deg,var(--gold-light),var(--gold-dark));color:#171207;font-size:.8rem;box-shadow:0 0 14px color-mix(in srgb, var(--gold) 40%, transparent)}
+  .event-card{position:relative;display:flex;align-items:center;gap:1rem;min-width:0;padding:.8rem 1rem;border-radius:1rem;border:1px solid color-mix(in srgb, var(--gold) 38%, transparent);border-top:2px solid var(--gold);background:linear-gradient(110deg,var(--card),var(--input));box-shadow:0 12px 30px -24px color-mix(in srgb, var(--gold) 85%, transparent);overflow:hidden}
+  .event-card:before{content:'';position:absolute;inset:auto -3rem -4rem auto;width:10rem;height:10rem;border-radius:99px;background:color-mix(in srgb, var(--gold) 8%, transparent);filter:blur(10px)}
   .event-image-wrap{width:5rem;height:5.5rem;flex:0 0 auto;display:grid;place-items:center}.event-image{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 10px rgba(0,0,0,.25))}
-  .event-badge{display:inline-flex;padding:.2rem .55rem;border-radius:99px;background:linear-gradient(135deg,#dfbd4e,#9d751c);color:#171207;font-size:.58rem;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}.event-title{font-size:.95rem;font-weight:800;line-height:1.25;margin-top:.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-description{font-size:.7rem;color:var(--text-4);margin-top:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .event-countdown-wrap{width:9.5rem;flex:0 0 auto;text-align:center;padding:.55rem .7rem;border-radius:.8rem;border:1px solid rgba(200,166,63,.5);background:rgba(200,166,63,.09)}.event-countdown-wrap span{display:block;color:var(--text-4);font-size:.58rem}.event-countdown{display:block;color:var(--gold);font-size:1.25rem;line-height:1.25;font-variant-numeric:tabular-nums;text-shadow:0 0 14px rgba(200,166,63,.25)}
-  .event-arrow{position:relative;width:2.35rem;height:2.35rem;flex:0 0 auto;border-radius:.7rem;background:linear-gradient(145deg,#dfbd4e,#98701b);color:#171207;font-size:1.7rem;font-weight:800;box-shadow:0 8px 16px -8px rgba(200,166,63,.9),inset 0 1px 0 rgba(255,255,255,.35);opacity:.9}
+  .event-badge{display:inline-flex;padding:.2rem .55rem;border-radius:99px;background:linear-gradient(135deg,var(--gold-light),var(--gold-dark));color:#171207;font-size:.58rem;font-weight:800;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}.event-title{font-size:.95rem;font-weight:800;line-height:1.25;margin-top:.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.event-description{font-size:.7rem;color:var(--text-4);margin-top:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .event-countdown-wrap{width:9.5rem;flex:0 0 auto;text-align:center;padding:.55rem .7rem;border-radius:.8rem;border:1px solid color-mix(in srgb, var(--gold) 50%, transparent);background:color-mix(in srgb, var(--gold) 9%, transparent)}.event-countdown-wrap span{display:block;color:var(--text-4);font-size:.58rem}.event-countdown{display:block;color:var(--gold);font-size:1.25rem;line-height:1.25;font-variant-numeric:tabular-nums;text-shadow:0 0 14px color-mix(in srgb, var(--gold) 25%, transparent)}
+  .event-arrow{position:relative;width:2.35rem;height:2.35rem;flex:0 0 auto;border-radius:.7rem;background:linear-gradient(145deg,var(--gold-light),var(--gold-dark));color:#171207;font-size:1.7rem;font-weight:800;box-shadow:0 8px 16px -8px color-mix(in srgb, var(--gold) 90%, transparent),inset 0 1px 0 rgba(255,255,255,.35);opacity:.9}
   @media(max-width:639px){.event-card{display:grid;grid-template-columns:3.75rem minmax(0,1fr) auto;gap:.65rem;padding:.7rem}.event-image-wrap{width:3.75rem;height:4.5rem;grid-row:1 / span 2}.event-countdown-wrap{grid-column:2;width:100%;padding:.4rem .55rem;text-align:left;display:flex;align-items:center;justify-content:space-between}.event-countdown{font-size:1rem}.event-arrow{grid-column:3;grid-row:1 / span 2;align-self:center;width:2rem;height:2rem;font-size:1.35rem}.event-title{font-size:.82rem}.event-description{font-size:.62rem}}
 </style>
 <script>
@@ -198,7 +198,7 @@
     box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     transition: border-color .2s, transform .2s, background .2s;
   }
-  .latest-order-card:hover { border-color: rgba(200,166,63,.65); transform: translateY(-1px); background: var(--input); }
+  .latest-order-card:hover { border-color: color-mix(in srgb, var(--gold) 65%, transparent); transform: translateY(-1px); background: var(--input); }
   .latest-order-image-wrap {
     width: 3.6rem; height: 4.25rem; flex: 0 0 auto;
     display: grid; place-items: center; overflow: hidden;
@@ -331,10 +331,10 @@
 <style>
   .mg-panel {
     background:
-      radial-gradient(circle at 15% 15%, rgba(200,166,63,.20), transparent 55%),
-      radial-gradient(circle at 85% 85%, rgba(200,166,63,.14), transparent 50%),
+      radial-gradient(circle at 15% 15%, color-mix(in srgb, var(--gold) 20%, transparent), transparent 55%),
+      radial-gradient(circle at 85% 85%, color-mix(in srgb, var(--gold) 14%, transparent), transparent 50%),
       linear-gradient(150deg, rgba(0,0,0,0), rgba(0,0,0,.25)), var(--card);
-    box-shadow: 0 0 0 1px rgba(200,166,63,.08), 0 20px 50px -20px rgba(0,0,0,.6);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--gold) 8%, transparent), 0 20px 50px -20px rgba(0,0,0,.6);
   }
   .mg-heading {
     display: grid;
@@ -342,12 +342,12 @@
     align-items: center;
     gap: clamp(1rem, 3vw, 2.5rem);
     padding: 1.15rem 1.25rem;
-    border: 1px solid rgba(200,166,63,.35);
+    border: 1px solid color-mix(in srgb, var(--gold) 35%, transparent);
     border-radius: 1.25rem;
     background:
-      radial-gradient(circle at 12% 50%, rgba(200,166,63,.17), transparent 30%),
+      radial-gradient(circle at 12% 50%, color-mix(in srgb, var(--gold) 17%, transparent), transparent 30%),
       linear-gradient(115deg, color-mix(in srgb, var(--input) 88%, transparent), color-mix(in srgb, var(--card) 96%, transparent));
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 14px 32px -24px rgba(200,166,63,.8);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 14px 32px -24px color-mix(in srgb, var(--gold) 80%, transparent);
   }
   .mg-heading-copy { display: flex; align-items: center; gap: .9rem; min-width: 0; }
   .mg-heading-icon {
@@ -355,9 +355,9 @@
     display: grid; place-items: center;
     border-radius: 1.1rem;
     font-size: 2rem;
-    background: linear-gradient(145deg, #e4c45d, #98701b);
-    border: 1px solid rgba(255,231,143,.55);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 8px 24px -10px rgba(200,166,63,.8);
+    background: linear-gradient(145deg, var(--gold-light), var(--gold-dark));
+    border: 1px solid color-mix(in srgb, var(--gold-light) 55%, transparent);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.4), 0 8px 24px -10px color-mix(in srgb, var(--gold) 80%, transparent);
   }
   .mg-kicker { color: var(--gold); font-size: .7rem; font-weight: 700; letter-spacing: .04em; }
   .mg-title { color: var(--text); font-size: clamp(1.15rem, 2vw, 1.65rem); line-height: 1.25; font-weight: 800; margin-top: .15rem; }
@@ -377,9 +377,9 @@
     text-align: center;
     padding: .7rem 1rem;
     border-radius: 1rem;
-    background: linear-gradient(145deg, #e2c257, #a47a1d);
+    background: linear-gradient(145deg, var(--gold-light), var(--gold-dark));
     color: #171207;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 10px 25px -12px rgba(200,166,63,.9);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 10px 25px -12px color-mix(in srgb, var(--gold) 90%, transparent);
   }
   .mg-price-label { color: rgba(23,18,7,.68); font-size: .62rem; font-weight: 600; }
   .mg-price-value { color: #171207; font-size: 2rem; line-height: 1; font-weight: 900; }
@@ -447,7 +447,7 @@
   }
   .mg-prize-image-link:hover { border-color: var(--gold); }
   .mg-prize-image-link:hover .mg-prize-zoom { opacity: 1; }
-  .mg-tier-legendary { border-color: rgba(200,166,63,.55); box-shadow: 0 0 16px -6px rgba(200,166,63,.6); }
+  .mg-tier-legendary { border-color: color-mix(in srgb, var(--gold) 55%, transparent); box-shadow: 0 0 16px -6px color-mix(in srgb, var(--gold) 60%, transparent); }
   .mg-tier-legendary .text-lg { color: var(--gold); }
   .mg-tier-rare { border-color: rgba(147,140,255,.4); }
   .mg-tier-rare .text-lg { color: #a89aff; }

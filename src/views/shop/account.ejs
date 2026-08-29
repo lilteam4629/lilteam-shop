@@ -1,8 +1,8 @@
 <section class="max-w-3xl mx-auto px-4 py-8">
-  <div class="relative overflow-hidden bg-gradient-to-br from-[#2a2415] via-[var(--card)] to-[#13110c] border border-[#725f2b]/70 rounded-3xl p-5 sm:p-6 mb-5 shadow-[0_14px_40px_rgba(0,0,0,.35)]">
+  <div class="relative overflow-hidden bg-gradient-to-br from-[var(--input)] via-[var(--card)] to-[var(--bg)] border border-[var(--gold)]/40 rounded-3xl p-5 sm:p-6 mb-5 shadow-[0_14px_40px_rgba(0,0,0,.35)]">
     <div class="absolute -right-12 -top-16 w-44 h-44 rounded-full bg-[var(--gold)]/10 blur-3xl"></div>
     <div class="relative flex items-center gap-4">
-      <div class="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-[#f0ce66] to-[#94701d] text-[#171208] flex items-center justify-center text-xl font-bold shadow-[0_6px_20px_rgba(200,166,63,.25)]"><%= user.username.charAt(0).toUpperCase() %></div>
+      <div class="w-14 h-14 shrink-0 rounded-2xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[#171208] flex items-center justify-center text-xl font-bold shadow-[0_6px_20px_color-mix(in_srgb,var(--gold)_25%,transparent)]"><%= user.username.charAt(0).toUpperCase() %></div>
       <div class="min-w-0">
         <div class="text-xs text-[var(--gold)] mb-0.5">โปรไฟล์ของฉัน</div>
         <h1 class="text-xl font-bold truncate"><%= user.username %></h1>
@@ -13,9 +13,9 @@
   </div>
 
   <div class="grid grid-cols-3 gap-2.5 mb-4">
-    <div class="col-span-3 sm:col-span-1 bg-gradient-to-br from-[#2d2512] to-[var(--card)] border border-[#80692e]/70 rounded-2xl p-4">
+    <div class="col-span-3 sm:col-span-1 bg-gradient-to-br from-[var(--input)] to-[var(--card)] border border-[var(--gold)]/40 rounded-2xl p-4">
       <div class="text-[var(--text-3)] text-xs mb-1">ยอดเงินคงเหลือ</div>
-      <div class="text-2xl font-bold text-[#f0cc59]">฿<%= user.walletBalance.toLocaleString() %>.00</div>
+      <div class="text-2xl font-bold text-[var(--gold)]">฿<%= user.walletBalance.toLocaleString() %>.00</div>
     </div>
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-3 text-center flex flex-col justify-center">
       <div class="text-xl font-bold"><%= orderCount %></div><div class="text-[10px] text-[var(--text-4)]">คำสั่งซื้อ</div>
@@ -56,7 +56,7 @@
         <div class="flex items-center gap-3">
           <span class="font-medium">฿<%= t.amount.toLocaleString() %>.00</span>
           <% if (t.status === 'pending') { %>
-            <span class="text-[10px] bg-[var(--gold)]/15 text-[#e2c084] px-2 py-0.5 rounded-full">รอตรวจสอบ</span>
+            <span class="text-[10px] bg-[var(--gold)]/15 text-[var(--gold-light)] px-2 py-0.5 rounded-full">รอตรวจสอบ</span>
           <% } else if (t.status === 'approved') { %>
             <span class="text-[10px] bg-emerald-900/40 text-emerald-400 px-2 py-0.5 rounded-full">อนุมัติแล้ว</span>
           <% } else { %>

@@ -116,7 +116,7 @@
       <div class="text-xl font-bold text-[var(--gold)] sm:w-32 sm:text-right">฿<%= r.amount.toLocaleString() %>.00</div>
 
       <% if (r.status === 'pending') { %>
-        <span class="shrink-0 text-xs bg-[var(--gold)]/15 text-[#e2c084] px-3 py-1.5 rounded-full text-center">
+        <span class="shrink-0 text-xs bg-[var(--gold)]/15 text-[var(--gold-light)] px-3 py-1.5 rounded-full text-center">
           <%= r.slipPath ? 'รอระบบตรวจสอบ' : 'รอลูกค้าแนบสลิป' %>
         </span>
       <% } else if (r.status === 'approved') { %>

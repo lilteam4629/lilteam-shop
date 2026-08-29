@@ -19,11 +19,11 @@
       <% if (request.reviewNote) { %><p class="text-sm text-[var(--text-3)]"><%= request.reviewNote %></p><% } %>
     </div>
   <% } else if (request.slipPath) { %>
-    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[#e2c084]">
+    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
       ⏳ ระบบกำลังตรวจสอบสลิปโดยอัตโนมัติ — เติมเงินให้ทันทีถ้ายอดถูกต้อง
     </div>
   <% } else { %>
-    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[#e2c084]">
+    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
       ⏳ โอนเงินแล้วแนบสลิปด้านล่าง ระบบจะตรวจสอบและเติมเงินให้อัตโนมัติทันที
     </div>
   <% } %>
@@ -72,7 +72,7 @@
           <img src="<%= request.slipPath %>" class="max-w-full rounded-lg border border-[var(--border)]" alt="สลิปที่แนบ" />
           <% if (request.slipCheck && request.slipCheck.checked && !request.slipCheck.verified) { %>
             <p class="text-xs text-[var(--coral)] mt-2">✕ ตรวจสอบอัตโนมัติไม่ผ่าน: <%= request.slipCheck.message %> — กรุณาตรวจสอบยอดเงิน/สลิปแล้วลองแนบใหม่อีกครั้ง</p>
-            <p class="text-xs text-[#e2c084] mt-1">⏳ คำขอนี้ยังอยู่ระหว่างรอแอดมินตรวจสอบด้วยตนเอง ไม่ได้ถูกปฏิเสธ</p>
+            <p class="text-xs text-[var(--gold-light)] mt-1">⏳ คำขอนี้ยังอยู่ระหว่างรอแอดมินตรวจสอบด้วยตนเอง ไม่ได้ถูกปฏิเสธ</p>
           <% } else { %>
             <p class="text-xs text-emerald-400 mt-2">✓ แนบสลิปแล้ว รอการตรวจสอบ</p>
           <% } %>
@@ -89,9 +89,9 @@
 
 <div id="slipUploadOverlay" class="hidden fixed inset-0 z-50 bg-[var(--bg)]/95 backdrop-blur-sm flex flex-col items-center justify-center px-6 text-center">
   <% if (settings.branding && settings.branding.logoImage) { %>
-    <img src="<%= settings.branding.logoImage %>" alt="<%= settings.shopName %>" class="w-20 h-20 rounded-2xl object-cover mb-5 shadow-[0_10px_30px_rgba(200,166,63,.25)]" />
+    <img src="<%= settings.branding.logoImage %>" alt="<%= settings.shopName %>" class="w-20 h-20 rounded-2xl object-cover mb-5 shadow-[0_10px_30px_color-mix(in_srgb,var(--gold)_25%,transparent)]" />
   <% } else { %>
-    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#f0ce66] to-[#94701d] text-[#171208] flex items-center justify-center text-3xl font-bold mb-5 shadow-[0_10px_30px_rgba(200,166,63,.25)]"><%= (settings.shopName || 'S').charAt(0).toUpperCase() %></div>
+    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[#171208] flex items-center justify-center text-3xl font-bold mb-5 shadow-[0_10px_30px_color-mix(in_srgb,var(--gold)_25%,transparent)]"><%= (settings.shopName || 'S').charAt(0).toUpperCase() %></div>
   <% } %>
   <div class="w-10 h-10 border-[3px] border-[var(--gold)]/25 border-t-[var(--gold)] rounded-full animate-spin mb-5"></div>
   <div class="text-lg font-semibold mb-1">กำลังตรวจสอบสลิป...</div>
