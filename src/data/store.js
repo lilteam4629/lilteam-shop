@@ -154,6 +154,7 @@ function defaultData() {
         bgColor: null,
         style: 'normal',
       },
+      productCardStyle: 'natural', // 'natural' = full uncropped image, price below; 'classic' = cropped cover photo with price overlaid
       music: {
         enabled: false,
         youtubeUrl: '',
@@ -337,6 +338,10 @@ function migrate() {
   }
   if (db.settings.theme.style === undefined) {
     db.settings.theme.style = 'normal';
+    changed = true;
+  }
+  if (!db.settings.productCardStyle) {
+    db.settings.productCardStyle = 'natural';
     changed = true;
   }
   if (!db.settings.payment) {

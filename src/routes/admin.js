@@ -390,6 +390,7 @@ router.get('/theme', (req, res) => {
     accentPresets: theme.getAccentPresets(),
     bgPresets: theme.getBgPresets(),
     styles: theme.getStyles(),
+    productCardStyle: store.data.settings.productCardStyle || 'natural',
   });
 });
 
@@ -405,6 +406,7 @@ router.post('/theme', (req, res) => {
   }
   const style = theme.getStyles().some(s => s.key === req.body.style) ? req.body.style : 'normal';
   store.data.settings.theme = { accent, bgPreset, bgColor, style };
+  store.data.settings.productCardStyle = req.body.productCardStyle === 'natural' ? 'natural' : 'classic';
   store.save();
   req.flash('success', 'บันทึกธีมสีแล้ว');
   res.redirect('/admin/theme');
