@@ -13,7 +13,7 @@
     <div class="p-4 border-b border-[var(--border)]"><h3 class="font-semibold">📦 แพ็กเกจเช่าเว็บ (ลูกค้าเห็นที่หน้า /rent-website)</h3></div>
     <table class="w-full text-sm min-w-[480px]">
       <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-        <tr><th class="p-3 whitespace-nowrap">จำนวนวัน</th><th class="p-3 whitespace-nowrap">ราคา (฿)</th><th class="p-3 whitespace-nowrap">สถานะ</th><th class="p-3"></th></tr>
+        <tr><th class="p-3 whitespace-nowrap">จำนวนวัน</th><th class="p-3 whitespace-nowrap">ราคา (฿)</th><th class="p-3 whitespace-nowrap">โปรโมชั่น</th><th class="p-3 whitespace-nowrap">สถานะ</th><th class="p-3"></th></tr>
       </thead>
       <tbody class="divide-y divide-[var(--border)]">
         <% plans.forEach(p => { %>
@@ -21,15 +21,25 @@
             <form id="edit-plan-<%= p.id %>" action="/admin/license-plans/<%= p.id %>/edit" method="post"></form>
             <td class="p-3"><input form="edit-plan-<%= p.id %>" type="number" min="1" name="days" value="<%= p.days %>" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1 text-sm" /> วัน</td>
             <td class="p-3">฿<input form="edit-plan-<%= p.id %>" type="number" min="0" name="price" value="<%= p.price %>" class="w-24 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1 text-sm" /></td>
+            <td class="p-3 text-xs">
+              <label class="flex items-center gap-1.5 mb-1">
+                <input form="edit-plan-<%= p.id %>" type="checkbox" name="promo" <%= p.promo ? 'checked' : '' %> /> 🔥 โปรโมชั่น
+              </label>
+              <div class="flex flex-col gap-1">
+                <input form="edit-plan-<%= p.id %>" type="number" min="1" name="promoLimit" value="<%= p.promoLimit || '' %>" placeholder="จำกัดจำนวนคน (ไม่บังคับ)" class="w-40 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" />
+                <input form="edit-plan-<%= p.id %>" type="datetime-local" name="promoExpiresAt" value="<%= p.promoExpiresAt ? new Date(p.promoExpiresAt).toISOString().slice(0,16) : '' %>" class="w-40 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" />
+                <% if (p.promo) { %><span class="text-[var(--text-4)]">ใช้ไปแล้ว <%= p.promoUsedCount || 0 %><% if (p.promoLimit) { %>/<%= p.promoLimit %><% } %></span><% } %>
+              </div>
+            </td>
             <td class="p-3"><%= p.active ? '🟢 เปิดขาย' : '⚪ ปิดขาย' %></td>
-            <td class="p-3 text-right space-x-2 whitespace-nowrap">
+            <td class="p-3 text-right space-x-2 whitespace-nowrap align-top">
               <button form="edit-plan-<%= p.id %>" class="text-[var(--gold)] text-xs">บันทึก</button>
               <form action="/admin/license-plans/<%= p.id %>/toggle" method="post" class="inline"><button class="text-[var(--text-3)] text-xs"><%= p.active ? 'ปิดขาย' : 'เปิดขาย' %></button></form>
               <form action="/admin/license-plans/<%= p.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบแพ็กเกจนี้?')"><button class="text-rose-400 text-xs">ลบ</button></form>
             </td>
           </tr>
         <% }) %>
-        <% if (!plans.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="4">ยังไม่มีแพ็กเกจ</td></tr><% } %>
+        <% if (!plans.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="5">ยังไม่มีแพ็กเกจ</td></tr><% } %>
       </tbody>
     </table>
   </div>
@@ -39,8 +49,20 @@
     <form action="/admin/license-plans" method="post" class="space-y-3">
       <input type="number" min="1" name="days" required placeholder="จำนวนวัน เช่น 30" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       <input type="number" min="0" name="price" required placeholder="ราคา (฿)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      <label class="flex items-center gap-2 text-sm cursor-pointer">
+        <input type="checkbox" name="promo" class="accent-[var(--gold)]" /> 🔥 ทำเป็นโปรโมชั่น
+      </label>
+      <div>
+        <label class="block text-xs text-[var(--text-3)] mb-1">จำกัดจำนวนคนซื้อ (ไม่บังคับ)</label>
+        <input type="number" min="1" name="promoLimit" placeholder="เช่น 20" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label class="block text-xs text-[var(--text-3)] mb-1">หมดเขตโปรโมชั่น (ไม่บังคับ)</label>
+        <input type="datetime-local" name="promoExpiresAt" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      </div>
       <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มแพ็กเกจ</button>
     </form>
+    <p class="text-xs text-[var(--text-4)] mt-3">โปรโมชั่นที่หมดเขต หรือมีคนซื้อครบจำนวนที่จำกัดแล้ว จะหายไปจากหน้าเปิดร้าน/ต่ออายุอัตโนมัติ</p>
   </div>
 </div>
 

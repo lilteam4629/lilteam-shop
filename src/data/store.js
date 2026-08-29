@@ -397,6 +397,15 @@ function migrate() {
   if (!db.licensePlans) { db.licensePlans = []; changed = true; }
   if (!db.licenseSales) { db.licenseSales = []; changed = true; }
   if (!db.shops) { db.shops = []; changed = true; }
+  db.licensePlans.forEach(plan => {
+    if (plan.promoUsedCount === undefined) {
+      plan.promo = Boolean(plan.promo);
+      plan.promoLimit = plan.promoLimit || null;
+      plan.promoExpiresAt = plan.promoExpiresAt || null;
+      plan.promoUsedCount = 0;
+      changed = true;
+    }
+  });
   if (!db.homeSections) {
     // Migrates every existing shop onto the new admin-configurable
     // homepage-sections system, seeded with one section that reproduces

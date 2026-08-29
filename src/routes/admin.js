@@ -872,6 +872,13 @@ router.get('/license-plans', (req, res) => {
   });
 });
 
+function parsePromoFields(body) {
+  const promo = body.promo === 'on';
+  const promoLimit = promo && body.promoLimit ? Math.max(1, parseInt(body.promoLimit, 10) || 0) || null : null;
+  const promoExpiresAt = promo && body.promoExpiresAt ? new Date(body.promoExpiresAt).getTime() || null : null;
+  return { promo, promoLimit, promoExpiresAt };
+}
+
 router.post('/license-plans', (req, res) => {
   const days = Math.max(1, parseInt(req.body.days, 10) || 0);
   const price = Math.max(0, Number(req.body.price) || 0);
@@ -879,7 +886,10 @@ router.post('/license-plans', (req, res) => {
     req.flash('error', 'กรุณากรอกจำนวนวันและราคาให้ถูกต้อง');
     return res.redirect('/admin/license-plans');
   }
-  store.data.licensePlans.push({ id: store.genId(8), days, price, active: true, createdAt: new Date().toISOString() });
+  store.data.licensePlans.push({
+    id: store.genId(8), days, price, active: true, createdAt: new Date().toISOString(),
+    promoUsedCount: 0, ...parsePromoFields(req.body),
+  });
   store.save();
   req.flash('success', 'เพิ่มแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');
@@ -899,6 +909,7 @@ router.post('/license-plans/:id/edit', (req, res) => {
   }
   plan.days = days;
   plan.price = price;
+  Object.assign(plan, parsePromoFields(req.body));
   store.save();
   req.flash('success', 'แก้ไขแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');

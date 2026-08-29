@@ -21,6 +21,16 @@ const { MAIN_DOMAIN } = require('../middleware/tenant');
 const { requireLogin, currentUser } = require('../middleware/auth');
 const recaptcha = require('../services/recaptcha');
 
+// A promo plan disappears on its own once it expires or sells out — no
+// admin cleanup needed. Non-promo plans are unaffected.
+function isPlanAvailable(plan) {
+  if (!plan.active) return false;
+  if (!plan.promo) return true;
+  if (plan.promoExpiresAt && Date.now() > plan.promoExpiresAt) return false;
+  if (plan.promoLimit && (plan.promoUsedCount || 0) >= plan.promoLimit) return false;
+  return true;
+}
+
 function slugify(str) {
   return String(str || '').toLowerCase().trim()
     .replace(/[^a-z0-9ก-๙\s-]/g, '')
@@ -29,10 +39,11 @@ function slugify(str) {
 }
 
 router.get('/start', requireLogin, (req, res) => {
-  const plans = store.data.licensePlans.filter(p => p.active).sort((a, b) => a.days - b.days);
+  const plans = store.data.licensePlans.filter(isPlanAvailable).sort((a, b) => a.days - b.days);
   res.render('tenant/start', {
     title: 'เปิดร้านของคุณเอง', layout: false,
     domainReady: Boolean(MAIN_DOMAIN), mainDomain: MAIN_DOMAIN, plans,
+    logoImage: store.data.settings.branding && store.data.settings.branding.logoImage,
     recaptchaSiteKey: recaptcha.siteKey(),
     messages: { error: req.flash('error') },
   });
@@ -48,7 +59,7 @@ router.post('/start', requireLogin, async (req, res) => {
     req.flash('error', 'กรุณายืนยันแคปช่าให้ถูกต้อง');
     return res.redirect('/start');
   }
-  const plan = store.data.licensePlans.find(p => p.id === req.body.planId && p.active);
+  const plan = store.data.licensePlans.find(p => p.id === req.body.planId && isPlanAvailable(p));
   const shopName = String(req.body.shopName || '').trim();
   const adminUsername = String(req.body.adminUsername || '').trim();
   const adminPassword = String(req.body.adminPassword || '');
@@ -78,6 +89,7 @@ router.post('/start', requireLogin, async (req, res) => {
   if (store.data.shops.some(s => s.slug === slug)) slug = `${slug}-${store.genId(4)}`;
 
   user.walletBalance -= plan.price;
+  if (plan.promo) plan.promoUsedCount = (plan.promoUsedCount || 0) + 1;
   store.data.walletTransactions.push({
     id: store.genId(10), userId: user.id, type: 'shop_purchase', amount: -plan.price,
     note: `เปิดร้านใหม่ "${shopName}" (${plan.days} วัน)`, createdAt: new Date().toISOString(),
@@ -116,7 +128,7 @@ router.post('/start', requireLogin, async (req, res) => {
 router.get('/my-shops', requireLogin, (req, res) => {
   const user = currentUser(req);
   const shops = store.data.shops.filter(s => s.ownerId === user.id).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  const plans = store.data.licensePlans.filter(p => p.active).sort((a, b) => a.days - b.days);
+  const plans = store.data.licensePlans.filter(isPlanAvailable).sort((a, b) => a.days - b.days);
   res.render('tenant/my-shops', {
     title: 'ร้านของฉัน', shops, plans, mainDomain: MAIN_DOMAIN,
   });
@@ -125,7 +137,7 @@ router.get('/my-shops', requireLogin, (req, res) => {
 router.post('/my-shops/:id/renew', requireLogin, (req, res) => {
   const user = currentUser(req);
   const shop = store.data.shops.find(s => s.id === req.params.id && s.ownerId === user.id);
-  const plan = store.data.licensePlans.find(p => p.id === req.body.planId && p.active);
+  const plan = store.data.licensePlans.find(p => p.id === req.body.planId && isPlanAvailable(p));
   if (!shop || !plan) {
     req.flash('error', 'ไม่พบร้านหรือแพ็กเกจนี้');
     return res.redirect('/my-shops');
@@ -135,6 +147,7 @@ router.post('/my-shops/:id/renew', requireLogin, (req, res) => {
     return res.redirect('/my-shops');
   }
   user.walletBalance -= plan.price;
+  if (plan.promo) plan.promoUsedCount = (plan.promoUsedCount || 0) + 1;
   store.data.walletTransactions.push({
     id: store.genId(10), userId: user.id, type: 'shop_renewal', amount: -plan.price,
     note: `ต่ออายุร้าน "${shop.name}" (${plan.days} วัน)`, createdAt: new Date().toISOString(),
