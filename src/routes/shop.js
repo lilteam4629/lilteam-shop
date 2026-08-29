@@ -91,7 +91,7 @@ router.get('/', (req, res) => {
     latestOrders: latestOrderCards(),
     scheduledProducts,
     filterTags: store.data.filterTags,
-    activeFilterTag: null,
+    activeFilterTags: [],
     filterProductCount: active.length,
     miniGamePrizes: store.data.miniGamePrizes.filter(p => p.active),
   });
@@ -99,19 +99,27 @@ router.get('/', (req, res) => {
 
 router.get('/products', (req, res) => {
   let products = store.data.products.filter(isProductVisible).map(withStock);
-  const requestedTag = String(req.query.tag || '').trim();
-  const activeFilterTag = store.data.filterTags.find(tag => tag.id === requestedTag) || null;
-  if (activeFilterTag) {
-    products = products.filter(product => (product.filterTagIds || []).includes(activeFilterTag.id));
+  const requestedIds = String(req.query.tags || req.query.tag || '').split(',').map(s => s.trim()).filter(Boolean);
+  const activeFilterTags = requestedIds
+    .map(id => store.data.filterTags.find(tag => tag.id === id))
+    .filter(Boolean);
+  // AND match: a product must carry every selected tag (it can have MORE
+  // tags beyond those selected — extra tags on the product don't exclude
+  // it, only a MISSING selected tag does).
+  if (activeFilterTags.length) {
+    products = products.filter(product => {
+      const productTagIds = product.filterTagIds || [];
+      return activeFilterTags.every(tag => productTagIds.includes(tag.id));
+    });
   }
   products = sortProducts(products, req.query.sort);
   res.render('shop/listing', {
-    title: activeFilterTag ? `สินค้า: ${activeFilterTag.name}` : 'สินค้าเกมทั้งหมด',
+    title: activeFilterTags.length ? `สินค้า: ${activeFilterTags.map(t => t.name).join(' + ')}` : 'สินค้าเกมทั้งหมด',
     products,
     listType: 'products',
     sort: req.query.sort || '',
     filterTags: store.data.filterTags,
-    activeFilterTag,
+    activeFilterTags,
     filterProductCount: products.length,
   });
 });

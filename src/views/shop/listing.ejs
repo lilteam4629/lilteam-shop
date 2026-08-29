@@ -3,7 +3,7 @@
     <h1 class="text-2xl font-bold"><%= title %></h1>
     <% if (listType) { %>
       <form method="get" class="flex items-center gap-2 text-sm">
-        <% if (typeof activeFilterTag !== 'undefined' && activeFilterTag) { %><input type="hidden" name="tag" value="<%= activeFilterTag.id %>" /><% } %>
+        <% if (typeof activeFilterTags !== 'undefined' && activeFilterTags.length) { %><input type="hidden" name="tags" value="<%= activeFilterTags.map(t => t.id).join(',') %>" /><% } %>
         <label class="text-[var(--text-3)]">เรียงตาม</label>
         <select name="sort" onchange="this.form.submit()" class="bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
           <option value="" <%= sort==='' ? 'selected':'' %>>ยอดนิยม</option>
@@ -21,9 +21,9 @@
     <%- include('../partials/filter-panel', { filterTags }) %>
   <% } %>
 
-  <% if (typeof activeFilterTag !== 'undefined' && activeFilterTag) { %>
+  <% if (typeof activeFilterTags !== 'undefined' && activeFilterTags.length) { %>
     <div class="flex items-center justify-between gap-3 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl px-4 py-3 mb-5">
-      <div class="text-sm">กำลังแสดงเฉพาะ <b class="text-[var(--gold)]"><%= activeFilterTag.name %></b></div>
+      <div class="text-sm">กำลังแสดงเฉพาะ <b class="text-[var(--gold)]"><%= activeFilterTags.map(t => t.name).join(' + ') %></b></div>
       <a href="/products" class="text-xs text-[var(--coral)] hover:underline whitespace-nowrap">ดูสินค้าทั้งหมด</a>
     </div>
   <% } %>

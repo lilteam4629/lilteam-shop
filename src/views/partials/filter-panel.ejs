@@ -1,19 +1,23 @@
+<%
+  const _activeFilterTags = typeof activeFilterTags !== 'undefined' ? activeFilterTags : [];
+  const _activeIds = _activeFilterTags.map(t => t.id);
+%>
 <div class="relative overflow-hidden bg-gradient-to-br from-[var(--card)] to-[var(--input)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 mb-6" id="filterWidget">
   <div class="absolute -top-16 -right-16 w-44 h-44 rounded-full bg-[var(--gold)]/5 blur-2xl pointer-events-none"></div>
   <div class="relative flex flex-wrap items-center justify-between gap-3 mb-4">
     <div class="flex items-center gap-3">
       <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 border border-[var(--gold)]/20 flex items-center justify-center text-lg">🏷️</span>
       <div>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-sm sm:text-base font-semibold text-[var(--text)]">เลือกประเภทที่สนใจ</h2>
-          <% if (typeof activeFilterTag !== 'undefined' && activeFilterTag) { %><span class="bg-[var(--gold)] text-[var(--bg)] text-[10px] font-bold rounded-full px-2 py-0.5"><%= activeFilterTag.name %></span><% } %>
+          <% _activeFilterTags.forEach(t => { %><span class="bg-[var(--gold)] text-[var(--bg)] text-[10px] font-bold rounded-full px-2 py-0.5"><%= t.name %></span><% }) %>
         </div>
-        <p class="text-[11px] sm:text-xs text-[var(--text-4)]">กดเพื่อเปิดหน้าสินค้าประเภทที่เลือก</p>
+        <p class="text-[11px] sm:text-xs text-[var(--text-4)]">เลือกได้หลายประเภท — สินค้าต้องมีครบทุกประเภทที่เลือก</p>
       </div>
     </div>
     <div class="flex items-center gap-3">
       <p class="text-xs sm:text-sm text-[var(--text-3)] whitespace-nowrap"><b class="text-[var(--gold)] text-sm sm:text-base"><%= typeof filterProductCount !== 'undefined' ? filterProductCount : 0 %></b> สินค้า</p>
-      <% if (typeof activeFilterTag !== 'undefined' && activeFilterTag) { %><a href="/products" class="text-xs text-[var(--coral)] border border-[var(--coral)]/30 hover:bg-[var(--coral)]/10 rounded-lg px-2.5 py-1.5 whitespace-nowrap transition">ล้างตัวกรอง</a><% } %>
+      <% if (_activeFilterTags.length) { %><a href="/products" class="text-xs text-[var(--coral)] border border-[var(--coral)]/30 hover:bg-[var(--coral)]/10 rounded-lg px-2.5 py-1.5 whitespace-nowrap transition">ล้างตัวกรอง</a><% } %>
     </div>
   </div>
   <div class="relative mb-3">
@@ -24,20 +28,21 @@
     <button type="button" id="scrollLeftBtn" aria-label="เลื่อนตัวกรองไปทางซ้าย" class="hidden shrink-0 w-9 h-9 items-center justify-center rounded-full bg-[var(--card)] border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">‹</button>
     <div id="filterTags" class="filter-scroll flex-1 grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2.5 overflow-visible sm:overflow-x-auto scroll-smooth py-1">
       <% filterTags.forEach(t => { %>
-        <a href="/products?tag=<%= encodeURIComponent(t.id) %>" data-name="<%= t.name %>" class="filter-chip <%= typeof activeFilterTag !== 'undefined' && activeFilterTag && activeFilterTag.id === t.id ? 'active' : '' %> group relative self-start shrink-0 flex flex-col w-full sm:w-[180px] rounded-xl sm:rounded-2xl overflow-hidden border border-[var(--border-light)] bg-[var(--card)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--gold)]/60">
+        <button type="button" data-tag-id="<%= t.id %>" data-name="<%= t.name %>" class="filter-chip <%= _activeIds.includes(t.id) ? 'active' : '' %> group relative self-start shrink-0 flex flex-col w-full sm:w-[180px] rounded-xl sm:rounded-2xl overflow-hidden border border-[var(--border-light)] bg-[var(--card)] transition-all duration-200 hover:-translate-y-0.5 hover:border-[var(--gold)]/60 text-left">
           <span class="w-full bg-black/20 flex items-center justify-center overflow-hidden border-b border-white/5">
             <img src="<%= t.image %>" alt="<%= t.name %>" class="block w-full h-auto object-contain transition duration-300 group-hover:brightness-105" />
           </span>
           <span class="w-full min-w-0 text-left px-2 sm:px-3 py-2">
             <span class="block text-[11px] sm:text-sm font-semibold text-[var(--text)] truncate"><%= t.name %></span>
-            <span class="chip-hint hidden sm:block text-[10px] text-[var(--text-4)]">เปิดดูสินค้าประเภทนี้</span>
+            <span class="chip-hint hidden sm:block text-[10px] text-[var(--text-4)]">แตะเพื่อเลือก/ยกเลิก</span>
           </span>
           <span class="check-badge absolute top-1.5 right-1.5 hidden w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[9px] font-bold items-center justify-center shadow">✓</span>
-        </a>
+        </button>
       <% }) %>
     </div>
     <button type="button" id="scrollRightBtn" aria-label="เลื่อนตัวกรองไปทางขวา" class="hidden shrink-0 w-9 h-9 items-center justify-center rounded-full bg-[var(--card)] border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">›</button>
   </div>
+  <button type="button" id="filterApplyBtn" disabled class="mt-3 w-full sm:w-auto bg-[var(--gold)] hover:bg-[var(--gold-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--bg)] font-semibold rounded-xl px-5 py-2.5 text-sm transition">ดูสินค้าที่เลือก</button>
 </div>
 
 <style>
@@ -57,7 +62,10 @@
     const searchInput = document.getElementById('filterSearch');
     const scrollLeftBtn = document.getElementById('scrollLeftBtn');
     const scrollRightBtn = document.getElementById('scrollRightBtn');
+    const applyBtn = document.getElementById('filterApplyBtn');
+    const selected = new Set(<%- JSON.stringify(_activeIds) %>);
     let searchQuery = '';
+
     function normalizeText(value) {
       return String(value || '').normalize('NFKC').trim().toLocaleLowerCase('th-TH');
     }
@@ -67,6 +75,22 @@
         button.style.display = visible ? '' : 'none';
       });
     }
+    function updateApplyBtn() {
+      applyBtn.disabled = selected.size === 0;
+      applyBtn.textContent = selected.size ? `ดูสินค้าที่เลือก (${selected.size})` : 'ดูสินค้าที่เลือก';
+    }
+    tagsWrap.querySelectorAll('.filter-chip').forEach((button) => {
+      button.addEventListener('click', () => {
+        const id = button.dataset.tagId;
+        if (selected.has(id)) { selected.delete(id); button.classList.remove('active'); }
+        else { selected.add(id); button.classList.add('active'); }
+        updateApplyBtn();
+      });
+    });
+    applyBtn.addEventListener('click', () => {
+      if (!selected.size) return;
+      window.location.href = '/products?tags=' + Array.from(selected).map(encodeURIComponent).join(',');
+    });
     searchInput.addEventListener('input', () => {
       searchQuery = normalizeText(searchInput.value);
       filterTagChoices();
@@ -88,6 +112,7 @@
     function initializeFilter() {
       filterTagChoices();
       updateScrollButtons();
+      updateApplyBtn();
     }
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initializeFilter, { once: true });
