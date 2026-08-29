@@ -63,9 +63,10 @@
 </style>
 <script>
   (function () {
+    const form = document.querySelector('form[action="/admin/theme"]');
     const customInput = document.getElementById('accentCustomInput');
     const radios = document.querySelectorAll('.accent-swatch-input');
-    customInput.addEventListener('input', () => {
+    function useCustomAccent() {
       radios.forEach(r => { r.checked = false; });
       let hidden = document.getElementById('accentCustomRadio');
       if (!hidden) {
@@ -78,7 +79,9 @@
       }
       hidden.value = customInput.value;
       hidden.checked = true;
-    });
+    }
+    customInput.addEventListener('input', useCustomAccent);
+    customInput.addEventListener('change', useCustomAccent);
 
     const bgPresetCards = document.querySelectorAll('.bg-preset-card');
     const bgPresetInputs = document.querySelectorAll('.bg-preset-input');
@@ -99,12 +102,14 @@
       });
       syncBgCard(card);
     });
-    bgCustomInput.addEventListener('input', () => {
+    function useCustomBg() {
       bgPresetInputs.forEach(r => { r.checked = false; });
       bgPresetCards.forEach(c => c.classList.remove('border-[var(--gold)]'));
       bgModeInput.value = 'custom';
       bgColorInput.value = bgCustomInput.value;
-    });
+    }
+    bgCustomInput.addEventListener('input', useCustomBg);
+    bgCustomInput.addEventListener('change', useCustomBg);
 
     document.querySelectorAll('.style-card').forEach((card) => {
       const input = card.querySelector('.style-input');
@@ -115,5 +120,15 @@
       });
       sync();
     });
+
+    // Safety net: some mobile browsers are inconsistent about firing input/change
+    // on <input type="color">. Re-sync the hidden fields from the live picker
+    // values right before submit so a custom pick is never silently lost.
+    if (form) {
+      form.addEventListener('submit', () => {
+        const anyPresetChecked = Array.from(bgPresetInputs).some(r => r.checked);
+        if (!anyPresetChecked) useCustomBg();
+      });
+    }
   })();
 </script>
