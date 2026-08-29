@@ -553,5 +553,5 @@ module.exports = {
   // callback API (e.g. multer's manual upload.single(...)(req, res, cb)
   // form) whose internal event/stream plumbing can lose AsyncLocalStorage
   // continuity and silently fall back to the main site's db.
-  bindTenantContext: (fn) => tenantContext.bind(fn),
+  bindTenantContext: (fn) => AsyncLocalStorage.bind(fn),
 };
