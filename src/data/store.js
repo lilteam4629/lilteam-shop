@@ -151,6 +151,8 @@ function defaultData() {
       theme: {
         accent: '#c8a63f',
         bgPreset: 'warmDark',
+        bgColor: null,
+        style: 'normal',
       },
       music: {
         enabled: false,
@@ -326,7 +328,15 @@ function migrate() {
     changed = true;
   }
   if (!db.settings.theme) {
-    db.settings.theme = { accent: '#c8a63f', bgPreset: 'warmDark' };
+    db.settings.theme = { accent: '#c8a63f', bgPreset: 'warmDark', bgColor: null, style: 'normal' };
+    changed = true;
+  }
+  if (db.settings.theme.bgColor === undefined) {
+    db.settings.theme.bgColor = null;
+    changed = true;
+  }
+  if (db.settings.theme.style === undefined) {
+    db.settings.theme.style = 'normal';
     changed = true;
   }
   if (!db.settings.payment) {

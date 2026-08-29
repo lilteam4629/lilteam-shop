@@ -389,13 +389,22 @@ router.get('/theme', (req, res) => {
     currentTheme: store.data.settings.theme,
     accentPresets: theme.getAccentPresets(),
     bgPresets: theme.getBgPresets(),
+    styles: theme.getStyles(),
   });
 });
 
 router.post('/theme', (req, res) => {
   const accent = /^#[0-9a-fA-F]{6}$/.test(req.body.accent || '') ? req.body.accent : store.data.settings.theme.accent;
-  const bgPreset = theme.getBgPresets().some(p => p.key === req.body.bgPreset) ? req.body.bgPreset : store.data.settings.theme.bgPreset;
-  store.data.settings.theme = { accent, bgPreset };
+  const bgMode = req.body.bgMode === 'custom' ? 'custom' : 'preset';
+  let bgPreset = store.data.settings.theme.bgPreset;
+  let bgColor = null;
+  if (bgMode === 'custom' && /^#[0-9a-fA-F]{6}$/.test(req.body.bgColor || '')) {
+    bgColor = req.body.bgColor;
+  } else {
+    bgPreset = theme.getBgPresets().some(p => p.key === req.body.bgPreset) ? req.body.bgPreset : store.data.settings.theme.bgPreset;
+  }
+  const style = theme.getStyles().some(s => s.key === req.body.style) ? req.body.style : 'normal';
+  store.data.settings.theme = { accent, bgPreset, bgColor, style };
   store.save();
   req.flash('success', 'บันทึกธีมสีแล้ว');
   res.redirect('/admin/theme');

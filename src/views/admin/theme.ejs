@@ -22,12 +22,32 @@
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
     <h3 class="font-semibold mb-1">🌗 โทนพื้นหลัง</h3>
     <p class="text-xs text-[var(--text-4)] mb-4">คุมพื้นหลัง/การ์ด/ตัวหนังสือให้เข้ากันเป็นชุด (มีทั้งโหมดมืดและสว่างในตัว สลับได้ด้วยปุ่ม 🌙 บนเว็บ)</p>
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
       <% bgPresets.forEach(p => { %>
         <label class="bg-preset-card relative flex flex-col gap-1 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer">
-          <input type="radio" name="bgPreset" value="<%= p.key %>" class="bg-preset-input sr-only" <%= currentTheme.bgPreset === p.key ? 'checked' : '' %> />
+          <input type="radio" name="bgPreset" value="<%= p.key %>" class="bg-preset-input sr-only" <%= (!currentTheme.bgColor && currentTheme.bgPreset === p.key) ? 'checked' : '' %> />
           <span class="text-xs font-medium"><%= p.label %></span>
           <span class="bg-preset-check hidden absolute top-2 right-2 text-[var(--gold)] text-xs">✓</span>
+        </label>
+      <% }) %>
+    </div>
+    <label class="flex items-center gap-3 text-sm">
+      <span class="text-[var(--text-3)]">หรือเลือกสีพื้นหลังเอง:</span>
+      <input type="color" id="bgCustomInput" value="<%= currentTheme.bgColor || '#c8a63f' %>" class="w-12 h-9 rounded-lg border border-[var(--border-light)] bg-transparent cursor-pointer" />
+    </label>
+    <input type="hidden" name="bgMode" id="bgModeInput" value="<%= currentTheme.bgColor ? 'custom' : 'preset' %>" />
+    <input type="hidden" name="bgColor" id="bgColorInput" value="<%= currentTheme.bgColor || '' %>" />
+  </div>
+
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+    <h3 class="font-semibold mb-1">✨ ลูกเล่นพิเศษ</h3>
+    <p class="text-xs text-[var(--text-4)] mb-4">เพิ่มลูกเล่นให้ปุ่มและจุดเด่นในเว็บ</p>
+    <div class="grid grid-cols-3 gap-3">
+      <% styles.forEach(s => { %>
+        <label class="style-card relative flex flex-col items-center gap-1 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer text-center">
+          <input type="radio" name="style" value="<%= s.key %>" class="style-input sr-only" <%= currentTheme.style === s.key ? 'checked' : '' %> />
+          <span class="text-xs font-medium"><%= s.label %></span>
+          <span class="style-check hidden absolute top-2 right-2 text-[var(--gold)] text-xs">✓</span>
         </label>
       <% }) %>
     </div>
@@ -39,6 +59,7 @@
 <style>
   .accent-swatch-input:checked + .accent-swatch { border-color: var(--text); box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--gold); }
   .bg-preset-input:checked ~ .bg-preset-check { display: block; }
+  .style-input:checked ~ .style-check { display: block; }
 </style>
 <script>
   (function () {
@@ -59,11 +80,37 @@
       hidden.checked = true;
     });
 
-    document.querySelectorAll('.bg-preset-card').forEach((card) => {
+    const bgPresetCards = document.querySelectorAll('.bg-preset-card');
+    const bgPresetInputs = document.querySelectorAll('.bg-preset-input');
+    const bgCustomInput = document.getElementById('bgCustomInput');
+    const bgModeInput = document.getElementById('bgModeInput');
+    const bgColorInput = document.getElementById('bgColorInput');
+
+    function syncBgCard(card) {
       const input = card.querySelector('.bg-preset-input');
+      card.classList.toggle('border-[var(--gold)]', input.checked);
+    }
+    bgPresetCards.forEach((card) => {
+      const input = card.querySelector('.bg-preset-input');
+      input.addEventListener('change', () => {
+        bgModeInput.value = 'preset';
+        bgColorInput.value = '';
+        bgPresetCards.forEach(syncBgCard);
+      });
+      syncBgCard(card);
+    });
+    bgCustomInput.addEventListener('input', () => {
+      bgPresetInputs.forEach(r => { r.checked = false; });
+      bgPresetCards.forEach(c => c.classList.remove('border-[var(--gold)]'));
+      bgModeInput.value = 'custom';
+      bgColorInput.value = bgCustomInput.value;
+    });
+
+    document.querySelectorAll('.style-card').forEach((card) => {
+      const input = card.querySelector('.style-input');
       function sync() { card.classList.toggle('border-[var(--gold)]', input.checked); }
       input.addEventListener('change', () => {
-        document.querySelectorAll('.bg-preset-card').forEach(c => c.classList.remove('border-[var(--gold)]'));
+        document.querySelectorAll('.style-card').forEach(c => c.classList.remove('border-[var(--gold)]'));
         sync();
       });
       sync();

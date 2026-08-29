@@ -58,6 +58,16 @@ const ACCENT_PRESETS = [
   { key: 'black', label: 'ดำ', color: '#3a3a3a' },
 ];
 
+const STYLE_LABELS = {
+  normal: 'ปกติ',
+  glow: '✨ เรืองแสง',
+  gradient: '🌈 หลายสีปนกัน',
+};
+
+function getStyles() {
+  return Object.entries(STYLE_LABELS).map(([key, label]) => ({ key, label }));
+}
+
 function getBgPresets() {
   return Object.entries(BG_PRESETS).map(([key, p]) => ({ key, label: p.label }));
 }
@@ -90,16 +100,79 @@ function darken(hex, amount = 0.45) {
   return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
+function hexToHsl(hex) {
+  const clean = String(hex || '').replace('#', '');
+  const r = parseInt(clean.slice(0, 2), 16) / 255;
+  const g = parseInt(clean.slice(2, 4), 16) / 255;
+  const b = parseInt(clean.slice(4, 6), 16) / 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s = 0;
+  const l = (max + min) / 2;
+  const d = max - min;
+  if (d !== 0) {
+    s = d / (1 - Math.abs(2 * l - 1));
+    switch (max) {
+      case r: h = 60 * (((g - b) / d) % 6); break;
+      case g: h = 60 * ((b - r) / d + 2); break;
+      case b: h = 60 * ((r - g) / d + 4); break;
+    }
+  }
+  if (h < 0) h += 360;
+  return { h, s, l };
+}
+
+function hslToHex(h, s, l) {
+  h = ((h % 360) + 360) % 360;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+  const m = l - c / 2;
+  let [r, g, b] = [0, 0, 0];
+  if (h < 60) [r, g, b] = [c, x, 0];
+  else if (h < 120) [r, g, b] = [x, c, 0];
+  else if (h < 180) [r, g, b] = [0, c, x];
+  else if (h < 240) [r, g, b] = [0, x, c];
+  else if (h < 300) [r, g, b] = [x, 0, c];
+  else [r, g, b] = [c, 0, x];
+  const toHex = (v) => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  return '#' + toHex(r) + toHex(g) + toHex(b);
+}
+
+// Generates a full dark+light bg preset tinted with a hue picked freely by
+// the shop owner, instead of only the curated presets — near-black/near-
+// white lightness kept for readability, just shifted toward the chosen hue.
+function generateBgFromColor(hex) {
+  const { h } = hexToHsl(hex);
+  const dark = (l, s = 0.28) => hslToHex(h, s, l);
+  const light = (l, s = 0.35) => hslToHex(h, s, l);
+  return {
+    dark: {
+      bg: dark(0.06), card: dark(0.1), border: dark(0.22), borderLight: dark(0.27),
+      input: dark(0.13), text: dark(0.94, 0.08), text2: dark(0.82, 0.1),
+      text3: dark(0.63, 0.12), text4: dark(0.46, 0.14),
+    },
+    light: {
+      bg: light(0.96, 0.3), card: '#ffffff', border: light(0.85, 0.28), borderLight: light(0.78, 0.28),
+      input: light(0.93, 0.3), text: light(0.14, 0.1), text2: light(0.26, 0.1),
+      text3: light(0.4, 0.1), text4: light(0.55, 0.1),
+    },
+  };
+}
+
 /**
  * Renders the CSS variable declarations for a shop's chosen theme, to be
  * dropped straight into a <style> tag in place of the hardcoded defaults.
  */
 function renderCss(theme) {
-  const preset = BG_PRESETS[theme && theme.bgPreset] || BG_PRESETS.warmDark;
+  const customBg = theme && /^#[0-9a-fA-F]{6}$/.test(theme.bgColor) ? theme.bgColor : null;
+  const preset = customBg ? generateBgFromColor(customBg) : (BG_PRESETS[theme && theme.bgPreset] || BG_PRESETS.warmDark);
   const accent = (theme && /^#[0-9a-fA-F]{6}$/.test(theme.accent)) ? theme.accent : ACCENT_PRESETS[0].color;
   const accentHover = lighten(accent);
   const accentLight = lighten(accent, 0.45);
   const accentDark = darken(accent, 0.42);
+  const style = (theme && STYLE_LABELS[theme.style]) ? theme.style : 'normal';
+  const { h: accentHue } = hexToHsl(accent);
+  const gradA = accent, gradB = hslToHex(accentHue + 40, 0.75, 0.55), gradC = hslToHex(accentHue - 40, 0.75, 0.5);
+
   const block = (vars) => `
       --bg: ${vars.bg};
       --card: ${vars.card};
@@ -115,10 +188,35 @@ function renderCss(theme) {
       --text-3: ${vars.text3};
       --text-4: ${vars.text4};
       --coral: #e2836f;`;
+
+  let extra = '';
+  if (style === 'glow') {
+    // Matches elements whose class attribute contains the literal
+    // "bg-[var(--gold)]" utility (an attribute-value substring match, not
+    // a CSS class selector, so Tailwind's bracket syntax needs no escaping)
+    // — adds a soft glow to every gold-filled button/badge across the site.
+    extra = `
+    a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"] {
+      box-shadow: 0 0 16px 1px color-mix(in srgb, var(--gold) 55%, transparent), 0 0 32px color-mix(in srgb, var(--gold) 25%, transparent);
+    }
+    .premium-product-card, .ready-glow {
+      box-shadow: 0 0 14px color-mix(in srgb, var(--gold) 35%, transparent);
+    }`;
+  } else if (style === 'gradient') {
+    extra = `
+    @keyframes theme-gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"] {
+      background: linear-gradient(120deg, ${gradA}, ${gradB}, ${gradC}, ${gradA}) !important;
+      background-size: 300% 300%;
+      animation: theme-gradient-flow 6s ease infinite;
+    }`;
+  }
+
   return `:root {${block(preset.dark)}
     }
     html.light {${block(preset.light)}
-    }`;
+    }
+    ${extra}`;
 }
 
-module.exports = { getBgPresets, getAccentPresets, renderCss };
+module.exports = { getBgPresets, getAccentPresets, getStyles, renderCss };
