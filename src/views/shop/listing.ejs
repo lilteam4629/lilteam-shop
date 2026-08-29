@@ -31,7 +31,7 @@
   <% if (!products.length) { %>
     <p class="text-[var(--text-3)]">ไม่พบสินค้าที่ค้นหา</p>
   <% } else { %>
-    <div id="filterResults" class="product-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+    <div id="filterResults" class="product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
       <% products.forEach(p => { %>
         <%- include('../partials/product-card', { p }) %>
       <% }) %>

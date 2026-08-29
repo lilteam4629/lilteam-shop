@@ -1,8 +1,16 @@
+<%
+  const soldOut = p.stockCount < 1;
+  const flashTarget = p.flashSaleActive ? p.flashSaleEndsAt : p.flashSaleStartsAt;
+  const flashSeconds = Math.max(0, Math.floor((flashTarget - Date.now()) / 1000));
+  const flashInitial = (Math.floor(flashSeconds / 86400) ? Math.floor(flashSeconds / 86400) + 'ว ' : '') + [Math.floor((flashSeconds % 86400) / 3600), Math.floor((flashSeconds % 3600) / 60), flashSeconds % 60].map(n => String(n).padStart(2, '0')).join(':');
+  const crossedPrice = p.flashSaleActive ? p.regularPrice : p.originalPrice;
+%>
+<% if (typeof compact !== 'undefined' && compact) { %>
+<!-- Compact mode: fixed frame, used only in the decorative rotated "fan" carousel where cards must share one size -->
 <a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
   class="premium-product-card spotlight-card filterable-card group relative flex w-full h-full aspect-[4/3] rounded-2xl overflow-hidden border bg-[var(--card)] <%= p.flashSaleActive ? 'border-[#e8bd3e]' : 'border-[#8c7430]/55' %>
          transition-all duration-300 hover:border-[#f0cf64]/80">
 
-  <% const soldOut = p.stockCount < 1; const flashTarget = p.flashSaleActive ? p.flashSaleEndsAt : p.flashSaleStartsAt; const flashSeconds = Math.max(0, Math.floor((flashTarget - Date.now()) / 1000)); const flashInitial = (Math.floor(flashSeconds / 86400) ? Math.floor(flashSeconds / 86400) + 'ว ' : '') + [Math.floor((flashSeconds % 86400) / 3600), Math.floor((flashSeconds % 3600) / 60), flashSeconds % 60].map(n => String(n).padStart(2, '0')).join(':'); %>
   <img src="<%= p.images[0] %>" alt="<%= p.title %>"
     class="absolute inset-0 w-full h-full object-contain transition duration-500
            <%= soldOut
@@ -22,10 +30,6 @@
     </div>
   <% } %>
 
-  <!-- bottom scrim for text legibility -->
-  <div class="absolute inset-0 bg-gradient-to-br from-[#ffe995]/10 via-transparent to-emerald-400/10"></div>
-  <div class="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent"></div>
-  <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/55 to-transparent"></div>
   <div class="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-[#f6d66c]/25 group-hover:ring-[#ffe487]/60 transition"></div>
   <% if (!soldOut) { %>
     <div class="product-shimmer pointer-events-none absolute -inset-y-1 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent blur-[1px]"></div>
@@ -37,7 +41,7 @@
     <span class="ready-glow absolute top-2 left-2 z-10 bg-emerald-950/80 border border-emerald-400/70 text-emerald-300 font-medium text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm">● พร้อมส่ง</span>
   <% } %>
 
-  <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1 min-w-0">
+  <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1 min-w-0 bg-gradient-to-t from-black via-black/55 to-transparent">
     <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
       <div class="mb-0.5 flex min-h-7 min-w-0 items-center justify-between gap-1.5 rounded-md border border-[#d6ab32]/45 bg-[#17140c]/90 px-2">
         <span class="truncate text-[8px] font-bold tracking-wide text-[#dcb741]"><%= p.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></span>
@@ -47,15 +51,66 @@
     <h3 class="font-semibold text-sm line-clamp-2 text-white [text-shadow:0_2px_8px_rgba(0,0,0,.95)] group-hover:text-[#fff6d4] transition-colors"><%= p.title %></h3>
     <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 min-w-0">
       <span class="text-[#f2cc4d] font-bold text-[15px] whitespace-nowrap [text-shadow:0_0_12px_rgba(242,204,77,.5)]">฿<%= p.price.toLocaleString() %>.00</span>
-      <% const crossedPrice = p.flashSaleActive ? p.regularPrice : p.originalPrice; %>
       <% if (crossedPrice > p.price) { %>
         <span class="text-[#e2836f] text-[11px] line-through whitespace-nowrap">฿<%= crossedPrice.toLocaleString() %>.00</span>
       <% } %>
     </div>
-    <span class="text-[10px] text-white/85 truncate">สินค้าเกมพร้อมส่ง</span>
   </div>
 
-  <!-- mouse-tracking spotlight -->
   <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
     style="background: radial-gradient(220px circle at var(--mx) var(--my), rgba(230,196,132,0.35), transparent 70%);"></div>
 </a>
+<% } else { %>
+<!-- Full mode: image shown exactly as uploaded, full size, nothing drawn on top of it -->
+<a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
+  class="premium-product-card spotlight-card filterable-card group relative flex flex-col w-full self-start rounded-2xl overflow-hidden border bg-[var(--card)] <%= p.flashSaleActive ? 'border-[#e8bd3e]' : 'border-[#8c7430]/55' %>
+         transition-all duration-300 hover:border-[#f0cf64]/80">
+
+  <div class="relative w-full overflow-hidden">
+    <img src="<%= p.images[0] %>" alt="<%= p.title %>"
+      class="block w-full h-auto transition duration-500
+             <%= soldOut
+               ? 'grayscale-[70%] brightness-[0.35] contrast-[1.05] group-hover:brightness-[0.45]'
+               : 'group-hover:scale-[1.03]' %>" />
+    <% if (soldOut) { %>
+      <div class="absolute inset-0 bg-black/35"></div>
+    <% } %>
+
+    <% if (p.flashSaleActive) { %>
+      <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center bg-[#e7bb36] pl-4 pr-2 text-[9px] font-black tracking-wider text-[#171207]">
+        ⚡ <span class="hidden min-[380px]:inline">ลดพิเศษ</span><span class="min-[380px]:hidden">SALE</span>
+      </div>
+    <% } else if (p.flashSaleUpcoming) { %>
+      <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center border-b border-l border-[#d7b84c]/50 bg-[#18150c] pl-4 pr-2 text-[9px] font-black tracking-wider text-[#f0ca58]">
+        ⚡ เร็วๆ นี้
+      </div>
+    <% } %>
+
+    <% if (soldOut) { %>
+      <span class="absolute top-2 left-2 z-10 bg-black/70 border border-[#e2836f]/50 text-[#e2836f] text-[10px] px-2 py-0.5 rounded-full">สินค้าหมด</span>
+    <% } else { %>
+      <span class="ready-glow absolute top-2 left-2 z-10 bg-emerald-950/80 border border-emerald-400/70 text-emerald-300 font-medium text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm">● พร้อมส่ง</span>
+    <% } %>
+
+    <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+      style="background: radial-gradient(220px circle at var(--mx) var(--my), rgba(230,196,132,0.25), transparent 70%);"></div>
+  </div>
+
+  <div class="p-3 flex flex-col gap-1 min-w-0">
+    <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
+      <div class="mb-0.5 flex min-h-7 min-w-0 items-center justify-between gap-1.5 rounded-md border border-[#d6ab32]/45 bg-[var(--input)] px-2">
+        <span class="truncate text-[8px] font-bold tracking-wide text-[#dcb741]"><%= p.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></span>
+        <span class="flash-countdown shrink-0 font-mono text-[12px] font-black tracking-wide text-[#c8a028]" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>><%= flashInitial %></span>
+      </div>
+    <% } %>
+    <h3 class="font-semibold text-sm line-clamp-2 text-[var(--text)] group-hover:text-[var(--gold)] transition-colors"><%= p.title %></h3>
+    <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 min-w-0">
+      <span class="text-[var(--gold)] font-bold text-[15px] whitespace-nowrap">฿<%= p.price.toLocaleString() %>.00</span>
+      <% if (crossedPrice > p.price) { %>
+        <span class="text-[var(--coral)] text-[11px] line-through whitespace-nowrap">฿<%= crossedPrice.toLocaleString() %>.00</span>
+      <% } %>
+    </div>
+    <span class="text-[10px] text-[var(--text-4)] truncate">สินค้าเกมพร้อมส่ง</span>
+  </div>
+</a>
+<% } %>
