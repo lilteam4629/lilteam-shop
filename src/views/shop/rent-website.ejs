@@ -40,12 +40,12 @@
       <a href="/start?plan=<%= plan.id %>" class="tilt3d-card group relative block w-full aspect-[3/4] rounded-2xl p-[2px] neon-border">
         <div class="relative w-full h-full rounded-[14px] overflow-hidden bg-gradient-to-br from-[#1a1622] via-[#12101a] to-[#0a0910] flex flex-col">
           <% if (plan.id === bestValuePlanId) { %>
-            <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-7 items-center bg-gradient-to-r from-[#ff2fd1] to-[#a742ff] pl-3 pr-2 text-[9px] font-black tracking-wider text-white">⭐ คุ้มสุด</div>
+            <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-7 items-center bg-gradient-to-r from-[#e7bb36] to-[#ffe487] pl-3 pr-2 text-[9px] font-black tracking-wider text-[#171207]">⭐ คุ้มสุด</div>
           <% } %>
-          <span class="ready-glow absolute top-2 left-2 z-10 bg-black/60 border border-cyan-400/70 text-cyan-300 font-medium text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm">● เปิดได้ทันที</span>
+          <span class="ready-glow absolute top-2 left-2 z-10 bg-black/60 border border-[#ffe487]/70 text-[#ffe487] font-medium text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm">● เปิดได้ทันที</span>
 
           <div class="flex-1 flex items-center justify-center p-7 relative">
-            <div class="absolute inset-0 opacity-40" style="background: radial-gradient(60% 60% at 50% 40%, rgba(167,66,255,.35), transparent 70%);"></div>
+            <div class="absolute inset-0 opacity-40" style="background: radial-gradient(60% 60% at 50% 40%, rgba(200,166,63,.35), transparent 70%);"></div>
             <% if (settings.branding && settings.branding.logoImage) { %>
               <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>"
                 class="relative max-w-full max-h-full object-contain neon-logo-glow transition-transform duration-500 group-hover:scale-[1.08]" />
@@ -99,14 +99,14 @@
   @keyframes promo-flame-bounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.12); } }
 
   .neon-border {
-    background: linear-gradient(115deg, #ff2fd1, #a742ff, #22e6ff, #ffcf4d, #ff2fd1);
+    background: linear-gradient(115deg, #c8a63f, #fff0ae, #8d6818, #ffe487, #c8a63f);
     background-size: 400% 400%;
     animation: neon-border-flow 5s ease infinite;
-    box-shadow: 0 10px 30px -10px rgba(167,66,255,.5);
+    box-shadow: 0 10px 30px -10px rgba(200,166,63,.5);
   }
   @keyframes neon-border-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-  .neon-logo-glow { filter: drop-shadow(0 0 10px rgba(167,66,255,.55)) drop-shadow(0 0 18px rgba(34,230,255,.35)); }
-  .neon-price { color: #ffcf4d; text-shadow: 0 0 10px rgba(255,207,77,.7), 0 0 18px rgba(255,47,209,.35); }
+  .neon-logo-glow { filter: drop-shadow(0 0 10px rgba(231,187,54,.6)) drop-shadow(0 0 18px rgba(255,228,135,.4)); }
+  .neon-price { color: #ffe487; text-shadow: 0 0 10px rgba(255,228,135,.7), 0 0 18px rgba(200,166,63,.5); }
 
   .tilt3d-card { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale3d(1,1,1); transition: transform .35s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; }
   .tilt3d-card.tilting { transition: none; }
