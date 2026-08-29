@@ -7,6 +7,16 @@ const { requireLogin, currentUser } = require('../middleware/auth');
 
 router.use(requireLogin);
 
+// Mirrors src/routes/tenant.js's isPlanAvailable — a promo plan drops off
+// on its own once it expires or sells out.
+function isPlanAvailable(plan) {
+  if (!plan.active) return false;
+  if (!plan.promo) return true;
+  if (plan.promoExpiresAt && Date.now() > plan.promoExpiresAt) return false;
+  if (plan.promoLimit && (plan.promoUsedCount || 0) >= plan.promoLimit) return false;
+  return true;
+}
+
 router.get('/', (req, res) => {
   const user = currentUser(req);
   const mySales = store.data.licenseSales
@@ -14,7 +24,12 @@ router.get('/', (req, res) => {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 20)
     .map(s => ({ ...s, exp: license.isEnabled() ? (license.verifyKey(s.key).exp || null) : null }));
-  res.render('shop/rent-website', { title: 'เปิดร้านใหม่ของคุณเอง', mySales });
+  const availablePlans = store.data.licensePlans.filter(isPlanAvailable).sort((a, b) => a.days - b.days);
+  res.render('shop/rent-website', {
+    title: 'เปิดร้านใหม่ของคุณเอง', mySales,
+    plans: availablePlans.filter(p => !p.promo),
+    promoPlans: availablePlans.filter(p => p.promo),
+  });
 });
 
 // Selling new license keys (the old "rent a separate Railway deployment"

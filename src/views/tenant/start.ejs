@@ -44,7 +44,7 @@
           <div class="space-y-2">
             <% plans.forEach((plan, i) => { %>
               <label class="plan-pick-card relative flex items-center justify-between gap-2 rounded-lg border border-[#443a22] bg-[#211c11] px-3 py-2.5 cursor-pointer">
-                <input type="radio" name="planId" value="<%= plan.id %>" required <%= i === 0 ? 'checked' : '' %> class="peer sr-only" />
+                <input type="radio" name="planId" value="<%= plan.id %>" required <%= (preselectedPlanId ? plan.id === preselectedPlanId : i === 0) ? 'checked' : '' %> class="peer sr-only" />
                 <span class="absolute inset-0 rounded-lg border-2 border-transparent peer-checked:border-[#c8a63f] peer-checked:bg-[#c8a63f]/10 pointer-events-none"></span>
                 <span class="relative flex items-center gap-2">
                   <span class="text-sm font-medium"><%= plan.days %> วัน</span>

@@ -43,6 +43,7 @@ router.get('/start', requireLogin, (req, res) => {
   res.render('tenant/start', {
     title: 'เปิดร้านของคุณเอง', layout: false,
     domainReady: Boolean(MAIN_DOMAIN), mainDomain: MAIN_DOMAIN, plans,
+    preselectedPlanId: String(req.query.plan || ''),
     logoImage: store.data.settings.branding && store.data.settings.branding.logoImage,
     recaptchaSiteKey: recaptcha.siteKey(),
     messages: { error: req.flash('error') },
