@@ -142,17 +142,17 @@ function hslToHex(h, s, l) {
 // white lightness kept for readability, just shifted toward the chosen hue.
 function generateBgFromColor(hex) {
   const { h } = hexToHsl(hex);
-  const dark = (l, s = 0.28) => hslToHex(h, s, l);
-  const light = (l, s = 0.35) => hslToHex(h, s, l);
+  const dark = (l, s = 0.46) => hslToHex(h, s, l);
+  const light = (l, s = 0.5) => hslToHex(h, s, l);
   return {
     dark: {
-      bg: dark(0.06), card: dark(0.1), border: dark(0.22), borderLight: dark(0.27),
-      input: dark(0.13), text: dark(0.94, 0.08), text2: dark(0.82, 0.1),
+      bg: dark(0.08), card: dark(0.13), border: dark(0.26), borderLight: dark(0.31),
+      input: dark(0.16), text: dark(0.94, 0.08), text2: dark(0.82, 0.1),
       text3: dark(0.63, 0.12), text4: dark(0.46, 0.14),
     },
     light: {
-      bg: light(0.96, 0.3), card: '#ffffff', border: light(0.85, 0.28), borderLight: light(0.78, 0.28),
-      input: light(0.93, 0.3), text: light(0.14, 0.1), text2: light(0.26, 0.1),
+      bg: light(0.89, 0.5), card: light(0.98, 0.35), border: light(0.78, 0.4), borderLight: light(0.72, 0.4),
+      input: light(0.86, 0.42), text: light(0.14, 0.1), text2: light(0.26, 0.1),
       text3: light(0.4, 0.1), text4: light(0.55, 0.1),
     },
   };
