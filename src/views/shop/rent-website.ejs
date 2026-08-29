@@ -7,24 +7,24 @@
 
   <% if (promoPlans.length) { %>
     <div class="relative overflow-hidden rounded-2xl p-[1.5px] mb-6 promo-border">
-      <div class="relative overflow-hidden rounded-[15px] bg-gradient-to-br from-[#2a2107] via-[#1a160d] to-[#100e08] p-4">
-        <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-[#e7bb36]/20 blur-2xl pointer-events-none"></div>
-        <div class="absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-[#e7bb36]/10 blur-2xl pointer-events-none"></div>
-        <h2 class="relative flex items-center gap-1.5 font-bold text-[#ffe487] text-sm mb-3">
+      <div class="relative overflow-hidden rounded-[15px] bg-gradient-to-br from-[#fff8e4] via-[#fbedbb] to-[#eed787] p-4">
+        <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/40 blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-white/25 blur-2xl pointer-events-none"></div>
+        <h2 class="relative flex items-center gap-1.5 font-bold text-[#7a5f13] text-sm mb-3">
           <span class="promo-flame">🔥</span> โปรโมชั่นตอนนี้
         </h2>
         <div class="relative flex flex-col gap-2">
           <% promoPlans.forEach(plan => { %>
-            <a href="/start?plan=<%= plan.id %>" class="flex items-center justify-between gap-2 bg-black/25 hover:bg-black/45 border border-[#e7bb36]/30 hover:border-[#ffe487]/70 rounded-xl px-3.5 py-2.5 transition">
+            <a href="/start?plan=<%= plan.id %>" class="flex items-center justify-between gap-2 bg-white/55 hover:bg-white/75 border border-[#a8842b]/30 hover:border-[#a8842b]/70 rounded-xl px-3.5 py-2.5 transition">
               <div>
-                <div class="text-sm font-semibold text-white"><%= plan.days %> วัน</div>
-                <div class="text-[10px] text-[#c9b98a]">
+                <div class="text-sm font-semibold text-[#4a3d1c]"><%= plan.days %> วัน</div>
+                <div class="text-[10px] text-[#8a7c5c]">
                   <% if (plan.promoLimit) { %>เหลือ <%= Math.max(0, plan.promoLimit - (plan.promoUsedCount || 0)) %>/<%= plan.promoLimit %> สิทธิ์<% } %>
                   <% if (plan.promoLimit && plan.promoExpiresAt) { %> · <% } %>
                   <% if (plan.promoExpiresAt) { %>หมดเขต <%= new Date(plan.promoExpiresAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }) %><% } %>
                 </div>
               </div>
-              <div class="text-base font-bold text-[#ffe487] [text-shadow:0_0_12px_rgba(255,228,135,.5)]">฿<%= plan.price.toLocaleString() %></div>
+              <div class="text-base font-bold text-[#9a7616]">฿<%= plan.price.toLocaleString() %></div>
             </a>
           <% }) %>
         </div>
