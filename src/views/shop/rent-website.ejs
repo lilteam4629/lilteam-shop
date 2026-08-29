@@ -1,23 +1,33 @@
+<%
+  const bestValuePlanId = plans.length > 1
+    ? [...plans].sort((a, b) => (a.price / a.days) - (b.price / b.days))[0].id
+    : null;
+%>
 <section class="max-w-xl mx-auto px-4 py-10">
 
   <% if (promoPlans.length) { %>
-    <div class="relative overflow-hidden rounded-2xl border border-[#e7bb36]/50 bg-gradient-to-br from-[#2a2107] via-[#1a160d] to-[#100e08] p-4 mb-5">
-      <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-[#e7bb36]/15 blur-2xl pointer-events-none"></div>
-      <h2 class="relative flex items-center gap-1.5 font-bold text-[#ffe487] text-sm mb-3">🔥 โปรโมชั่นตอนนี้</h2>
-      <div class="relative flex flex-col gap-2">
-        <% promoPlans.forEach(plan => { %>
-          <a href="/start?plan=<%= plan.id %>" class="flex items-center justify-between gap-2 bg-black/25 hover:bg-black/40 border border-[#e7bb36]/30 rounded-xl px-3.5 py-2.5 transition">
-            <div>
-              <div class="text-sm font-semibold text-white"><%= plan.days %> วัน</div>
-              <div class="text-[10px] text-[#c9b98a]">
-                <% if (plan.promoLimit) { %>เหลือ <%= Math.max(0, plan.promoLimit - (plan.promoUsedCount || 0)) %>/<%= plan.promoLimit %> สิทธิ์<% } %>
-                <% if (plan.promoLimit && plan.promoExpiresAt) { %> · <% } %>
-                <% if (plan.promoExpiresAt) { %>หมดเขต <%= new Date(plan.promoExpiresAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }) %><% } %>
+    <div class="relative overflow-hidden rounded-2xl p-[1.5px] mb-6 promo-border">
+      <div class="relative overflow-hidden rounded-[15px] bg-gradient-to-br from-[#2a2107] via-[#1a160d] to-[#100e08] p-4">
+        <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-[#e7bb36]/20 blur-2xl pointer-events-none"></div>
+        <div class="absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-[#e7bb36]/10 blur-2xl pointer-events-none"></div>
+        <h2 class="relative flex items-center gap-1.5 font-bold text-[#ffe487] text-sm mb-3">
+          <span class="promo-flame">🔥</span> โปรโมชั่นตอนนี้
+        </h2>
+        <div class="relative flex flex-col gap-2">
+          <% promoPlans.forEach(plan => { %>
+            <a href="/start?plan=<%= plan.id %>" class="flex items-center justify-between gap-2 bg-black/25 hover:bg-black/45 border border-[#e7bb36]/30 hover:border-[#ffe487]/70 rounded-xl px-3.5 py-2.5 transition">
+              <div>
+                <div class="text-sm font-semibold text-white"><%= plan.days %> วัน</div>
+                <div class="text-[10px] text-[#c9b98a]">
+                  <% if (plan.promoLimit) { %>เหลือ <%= Math.max(0, plan.promoLimit - (plan.promoUsedCount || 0)) %>/<%= plan.promoLimit %> สิทธิ์<% } %>
+                  <% if (plan.promoLimit && plan.promoExpiresAt) { %> · <% } %>
+                  <% if (plan.promoExpiresAt) { %>หมดเขต <%= new Date(plan.promoExpiresAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }) %><% } %>
+                </div>
               </div>
-            </div>
-            <div class="text-base font-bold text-[#ffe487]">฿<%= plan.price.toLocaleString() %></div>
-          </a>
-        <% }) %>
+              <div class="text-base font-bold text-[#ffe487] [text-shadow:0_0_12px_rgba(255,228,135,.5)]">฿<%= plan.price.toLocaleString() %></div>
+            </a>
+          <% }) %>
+        </div>
       </div>
     </div>
   <% } %>
@@ -25,25 +35,32 @@
   <h1 class="text-lg font-bold mb-1">เปิดร้านใหม่ของคุณเอง</h1>
   <p class="text-xs text-[var(--text-3)] mb-4">ได้ร้านทันที พร้อมระบบสินค้า/สต๊อก/ออเดอร์/กระเป๋าเงินครบเหมือนร้านนี้ทุกอย่าง — เลือกแพ็กเกจที่ต้องการ</p>
 
-  <div class="grid grid-cols-2 gap-4 mb-3">
+  <div class="grid grid-cols-2 gap-4 mb-5">
     <% plans.forEach(plan => { %>
-      <a href="/start?plan=<%= plan.id %>" class="group relative flex w-full aspect-[3/4] rounded-2xl overflow-hidden border border-[#8c7430]/55 transition-all duration-300 hover:border-[#f0cf64]/80">
+      <a href="/start?plan=<%= plan.id %>" style="--mx:50%;--my:50%;" class="premium-product-card spotlight-card group relative flex w-full aspect-[3/4] rounded-2xl overflow-hidden border border-[#8c7430]/55 transition-all duration-300 hover:border-[#f0cf64]/80">
         <% if (settings.branding && settings.branding.logoImage) { %>
           <div class="absolute inset-0 bg-gradient-to-br from-[#fff0ae] via-[#d8b84e] to-[#8d6818] flex items-center justify-center p-8">
             <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>"
-              class="max-w-full max-h-full object-contain transition duration-500 group-hover:scale-[1.055]" />
+              class="max-w-full max-h-full object-contain transition duration-500 group-hover:scale-[1.08] group-hover:rotate-[-2deg]" />
           </div>
         <% } else { %>
           <div class="absolute inset-0 flex items-center justify-center text-5xl bg-gradient-to-br from-[#fff0ae] via-[#d8b84e] to-[#8d6818]">🌐</div>
         <% } %>
+
+        <div class="product-shimmer pointer-events-none absolute -inset-y-1 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-[1px]"></div>
         <div class="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent"></div>
         <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/55 to-transparent"></div>
         <div class="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-[#f6d66c]/25 group-hover:ring-[#ffe487]/60 transition"></div>
+        <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          style="background: radial-gradient(220px circle at var(--mx) var(--my), rgba(230,196,132,0.35), transparent 70%);"></div>
 
+        <% if (plan.id === bestValuePlanId) { %>
+          <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-7 items-center bg-[#e7bb36] pl-3 pr-2 text-[9px] font-black tracking-wider text-[#171207]">⭐ คุ้มสุด</div>
+        <% } %>
         <span class="ready-glow absolute top-2 left-2 z-10 bg-emerald-950/80 border border-emerald-400/70 text-emerald-300 font-medium text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm">● เปิดได้ทันที</span>
 
         <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1">
-          <h3 class="font-semibold text-sm text-white [text-shadow:0_2px_8px_rgba(0,0,0,.95)]">แพ็กเกจ <%= plan.days %> วัน</h3>
+          <h3 class="font-semibold text-sm text-white [text-shadow:0_2px_8px_rgba(0,0,0,.95)] group-hover:text-[#fff6d4] transition-colors">แพ็กเกจ <%= plan.days %> วัน</h3>
           <span class="text-[#f2cc4d] font-bold text-[15px] [text-shadow:0_0_12px_rgba(242,204,77,.5)]">฿<%= plan.price.toLocaleString() %></span>
         </div>
       </a>
@@ -52,7 +69,12 @@
   <% if (!plans.length) { %>
     <p class="text-[var(--text-4)] text-xs mb-3">ยังไม่มีแพ็กเกจให้เลือก กรุณาติดต่อผู้ดูแลเว็บ</p>
   <% } %>
-  <a href="/my-shops" class="block text-center text-xs text-[var(--text-4)] mb-8 underline">มีร้านอยู่แล้ว? ดู/ต่ออายุร้านของฉัน →</a>
+
+  <a href="/my-shops" class="group relative flex items-center justify-center gap-2 overflow-hidden bg-[var(--card)] border border-[var(--gold)]/50 hover:border-[var(--gold)] text-[var(--gold)] font-semibold rounded-xl py-3 text-sm mb-8 transition-all duration-300 hover:-translate-y-0.5">
+    <div class="product-shimmer pointer-events-none absolute -inset-y-1 left-0 w-1/3 bg-gradient-to-r from-transparent via-[var(--gold)]/25 to-transparent blur-[1px]"></div>
+    <span class="relative">🔄 มีร้านอยู่แล้ว? ต่ออายุร้านของฉัน</span>
+    <span class="relative transition-transform group-hover:translate-x-1">→</span>
+  </a>
 
   <h2 class="text-lg font-semibold mb-3">ประวัติการซื้อของคุณ</h2>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[#241f13]">
@@ -73,6 +95,16 @@
     <% }) %>
   </div>
 </section>
+
+<style>
+  .promo-border { background: linear-gradient(120deg, #e7bb36, #7a5f13, #ffe487, #7a5f13, #e7bb36); background-size: 300% 300%; animation: promo-border-flow 6s ease infinite; }
+  @keyframes promo-border-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  .promo-flame { display: inline-block; animation: promo-flame-bounce 1.4s ease-in-out infinite; }
+  @keyframes promo-flame-bounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.12); } }
+  @media (prefers-reduced-motion: reduce) {
+    .promo-border, .promo-flame { animation: none; }
+  }
+</style>
 
 <script>
   function fmtCountdown(ms) {
