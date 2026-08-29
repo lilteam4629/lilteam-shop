@@ -191,7 +191,7 @@ router.get('/products/new', (req, res) => {
 });
 
 router.post('/products/new', (req, res) => {
-  productImageUpload.array('productImages', 10)(req, res, async (err) => {
+  productImageUpload.array('productImages', 10)(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
       return res.redirect('/admin/products/new');
@@ -211,7 +211,7 @@ router.post('/products/new', (req, res) => {
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
       res.redirect('/admin/products/new');
     }
-  });
+  }));
 });
 
 router.get('/products/:id/edit', (req, res) => {
@@ -223,7 +223,7 @@ router.get('/products/:id/edit', (req, res) => {
 router.post('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
-  productImageUpload.array('productImages', 10)(req, res, async (err) => {
+  productImageUpload.array('productImages', 10)(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
       return res.redirect(`/admin/products/${product.id}/edit`);
@@ -239,7 +239,7 @@ router.post('/products/:id/edit', (req, res) => {
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
       res.redirect(`/admin/products/${product.id}/edit`);
     }
-  });
+  }));
 });
 
 router.post('/products/:id/delete', (req, res) => {
@@ -286,7 +286,7 @@ router.get('/filter-tags', (req, res) => {
 });
 
 router.post('/filter-tags', (req, res) => {
-  productImageUpload.single('filterImage')(req, res, async (err) => {
+  productImageUpload.single('filterImage')(req, res, store.bindTenantContext(async (err) => {
     if (err || !req.file) {
       req.flash('error', 'กรุณาแนบรูปตัวกรอง (ไฟล์รูปไม่เกิน 8MB)');
       return res.redirect('/admin/filter-tags');
@@ -305,7 +305,7 @@ router.post('/filter-tags', (req, res) => {
       req.flash('error', 'บันทึกรูปตัวกรองไม่สำเร็จ กรุณาลองใหม่');
     }
     res.redirect('/admin/filter-tags');
-  });
+  }));
 });
 
 router.post('/filter-tags/:id/delete', (req, res) => {
@@ -554,7 +554,7 @@ router.post('/topups/payment-settings', (req, res) => {
   qrImageUpload.fields([
     { name: 'promptpayQrImage', maxCount: 1 },
     { name: 'bankQrImage', maxCount: 1 },
-  ])(req, res, async (err) => {
+  ])(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูป QR ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/topups');
@@ -635,7 +635,7 @@ router.post('/topups/payment-settings', (req, res) => {
     store.save();
     req.flash('success', 'บันทึกข้อมูลบัญชีรับเงินแล้ว');
     res.redirect('/admin/topups');
-  });
+  }));
 });
 
 router.post('/topups/:id/approve', (req, res) => {
@@ -733,7 +733,7 @@ router.post('/minigame/toggle', (req, res) => {
 });
 
 router.post('/minigame/prizes', (req, res) => {
-  prizeImageUpload.single('image')(req, res, async (err) => {
+  prizeImageUpload.single('image')(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/minigame');
@@ -762,11 +762,11 @@ router.post('/minigame/prizes', (req, res) => {
     store.save();
     req.flash('success', 'เพิ่มของรางวัลแล้ว');
     res.redirect('/admin/minigame');
-  });
+  }));
 });
 
 router.post('/minigame/prizes/:id/image', (req, res) => {
-  prizeImageUpload.single('image')(req, res, async (err) => {
+  prizeImageUpload.single('image')(req, res, store.bindTenantContext(async (err) => {
     const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
     if (err || !req.file || !prize) {
       req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
@@ -780,7 +780,7 @@ router.post('/minigame/prizes/:id/image', (req, res) => {
       req.flash('error', 'บันทึกรูปไม่สำเร็จ กรุณาลองใหม่');
     }
     res.redirect('/admin/minigame');
-  });
+  }));
 });
 
 router.post('/minigame/prizes/:id/image/remove', (req, res) => {
@@ -1045,7 +1045,7 @@ router.post('/snow-toggle', (req, res) => {
 
 // ---------- Hero banner ----------
 router.post('/site-logo/upload', (req, res) => {
-  logoUpload.single('logoImage')(req, res, async (err) => {
+  logoUpload.single('logoImage')(req, res, store.bindTenantContext(async (err) => {
     if (err || !req.file) {
       req.flash('error', 'อัปโหลดโลโก้ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/appearance');
@@ -1058,11 +1058,11 @@ router.post('/site-logo/upload', (req, res) => {
       req.flash('error', 'บันทึกโลโก้ไม่สำเร็จ กรุณาลองใหม่');
     }
     res.redirect('/admin/appearance');
-  });
+  }));
 });
 
 router.post('/hero-banner/upload', (req, res) => {
-  bannerUpload.single('bannerImage')(req, res, async (err) => {
+  bannerUpload.single('bannerImage')(req, res, store.bindTenantContext(async (err) => {
     if (err || !req.file) {
       req.flash('error', 'อัปโหลดแบนเนอร์ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 8MB)');
       return res.redirect('/admin/appearance');
@@ -1075,7 +1075,7 @@ router.post('/hero-banner/upload', (req, res) => {
       req.flash('error', 'บันทึกแบนเนอร์ไม่สำเร็จ กรุณาลองใหม่');
     }
     res.redirect('/admin/appearance');
-  });
+  }));
 });
 
 router.post('/hero-banner/mode', (req, res) => {
