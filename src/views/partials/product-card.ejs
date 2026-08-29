@@ -1,13 +1,13 @@
 <a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
-  class="premium-product-card spotlight-card filterable-card group relative flex w-full h-full aspect-[3/4] rounded-2xl overflow-hidden border <%= p.flashSaleActive ? 'border-[#e8bd3e]' : 'border-[#8c7430]/55' %>
+  class="premium-product-card spotlight-card filterable-card group relative flex w-full h-full aspect-[4/3] rounded-2xl overflow-hidden border bg-[var(--card)] <%= p.flashSaleActive ? 'border-[#e8bd3e]' : 'border-[#8c7430]/55' %>
          transition-all duration-300 hover:border-[#f0cf64]/80">
 
   <% const soldOut = p.stockCount < 1; const flashTarget = p.flashSaleActive ? p.flashSaleEndsAt : p.flashSaleStartsAt; const flashSeconds = Math.max(0, Math.floor((flashTarget - Date.now()) / 1000)); const flashInitial = (Math.floor(flashSeconds / 86400) ? Math.floor(flashSeconds / 86400) + 'ว ' : '') + [Math.floor((flashSeconds % 86400) / 3600), Math.floor((flashSeconds % 3600) / 60), flashSeconds % 60].map(n => String(n).padStart(2, '0')).join(':'); %>
   <img src="<%= p.images[0] %>" alt="<%= p.title %>"
-    class="absolute inset-0 w-full h-full object-cover transition duration-500
+    class="absolute inset-0 w-full h-full object-contain transition duration-500
            <%= soldOut
              ? 'grayscale-[70%] brightness-[0.35] contrast-[1.05] group-hover:brightness-[0.45]'
-             : 'brightness-[0.98] contrast-[1.1] saturate-[1.16] group-hover:scale-[1.055] group-hover:brightness-[1.08] group-hover:saturate-[1.28]' %>" />
+             : 'brightness-[0.98] contrast-[1.1] saturate-[1.16] group-hover:scale-[1.03] group-hover:brightness-[1.08] group-hover:saturate-[1.28]' %>" />
   <% if (soldOut) { %>
     <div class="absolute inset-0 bg-black/35"></div>
   <% } %>

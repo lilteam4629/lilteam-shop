@@ -75,7 +75,7 @@
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           <% product.images.forEach((image, index) => { %>
             <label class="group relative rounded-xl overflow-hidden border border-[var(--border-light)] bg-[var(--card)] cursor-pointer">
-              <img src="<%= image %>" alt="รูปสินค้า <%= index + 1 %>" class="w-full aspect-[4/3] object-cover" />
+              <img src="<%= image %>" alt="รูปสินค้า <%= index + 1 %>" class="w-full aspect-[4/3] object-contain" />
               <% if (index === 0) { %><span class="absolute top-2 left-2 bg-[var(--gold)] text-[var(--bg)] rounded-full px-2 py-0.5 text-[10px] font-bold">ภาพหน้าปก</span><% } %>
               <span class="flex items-center justify-center gap-1.5 p-2 text-xs text-rose-400 group-hover:bg-rose-500/10">
                 <input type="checkbox" name="removeImages" value="<%= image %>" class="accent-rose-500" /> ลบรูปนี้
@@ -155,7 +155,7 @@
         const item = document.createElement('div');
         item.className = 'relative rounded-lg overflow-hidden border border-[var(--border-light)] bg-[var(--card)]';
         const image = document.createElement('img');
-        image.className = 'w-full aspect-[4/3] object-cover';
+        image.className = 'w-full aspect-[4/3] object-contain';
         image.alt = 'รูปใหม่ ' + (index + 1);
         image.src = URL.createObjectURL(file);
         image.onload = function () { URL.revokeObjectURL(image.src); };

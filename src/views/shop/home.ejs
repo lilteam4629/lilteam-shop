@@ -47,7 +47,7 @@
       const mobileLayout = mobileLayouts[mobileNewest.length];
     %>
     <% mobileNewest.forEach((p, i) => { const layout = mobileLayout[i]; %>
-      <div class="absolute top-0 aspect-[3/4]"
+      <div class="absolute top-0 aspect-[4/3]"
         style="left:<%= layout.left %>; width:<%= layout.width %>; transform:translateX(-50%) translateY(<%= layout.y %>) rotate(<%= layout.rotate %>deg); z-index:<%= 10 - Math.abs((mobileNewest.length - 1) / 2 - i) %>;">
         <%- include('../partials/product-card', { p, compact: true }) %>
       </div>
@@ -63,7 +63,7 @@
       const widths = ['clamp(150px,18vw,200px)', 'clamp(172px,21vw,230px)', 'clamp(198px,24vw,265px)', 'clamp(172px,21vw,230px)', 'clamp(150px,18vw,200px)'];
     %>
     <% newest.slice(0,5).forEach((p, i) => { %>
-      <div class="absolute top-0 left-1/2 aspect-[3/4] hover:z-30"
+      <div class="absolute top-0 left-1/2 aspect-[4/3] hover:z-30"
         style="width: <%= widths[i] %>; margin-left: calc(<%= tx[i] %> - <%= widths[i] %> / 2); transform: translateY(<%= ty[i] %>px) rotate(<%= rot[i] %>deg); z-index: <%= 10 - Math.abs(2-i) %>;">
         <%- include('../partials/product-card', { p, compact: true }) %>
       </div>
