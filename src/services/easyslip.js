@@ -79,6 +79,41 @@ async function createBankAccount({ bankCode, bankNumber, nameTh, nameEn, type, e
 }
 
 /**
+ * Fixes up an already-registered account in place (e.g. one created before
+ * this app started sending extraVerify, so it exists but with no
+ * verification method) — createBankAccount can't do this since a duplicate
+ * bankNumber is rejected outright rather than merged. Only fields passed
+ * are changed; per EasySlip's docs, omitting extraVerify here keeps
+ * whatever it already had, so callers must pass it explicitly (or `null`
+ * to clear it) when that's what they mean to change.
+ * Returns { ok: true, account } or { ok: false, code, message }.
+ */
+async function updateBankAccount(accountId, { extraVerify }) {
+  if (!isConfigured()) {
+    return { ok: false, code: 'NOT_CONFIGURED', message: 'ยังไม่ได้ตั้งค่า EASYSLIP_API_KEY' };
+  }
+  try {
+    const res = await axios.patch(
+      `${BASE_URL}/bank-accounts/${accountId}`,
+      { extraVerify },
+      { headers: authHeaders(), timeout: 15000 }
+    );
+    if (res.data && res.data.success) {
+      return { ok: true, account: res.data.data };
+    }
+    return { ok: false, code: 'UNKNOWN', message: 'แก้ไขบัญชีไม่สำเร็จ' };
+  } catch (err) {
+    const body = err.response && err.response.data;
+    const error = body && body.error;
+    return {
+      ok: false,
+      code: (error && error.code) || 'REQUEST_FAILED',
+      message: (error && error.message) || err.message || 'เชื่อมต่อ EasySlip ไม่สำเร็จ',
+    };
+  }
+}
+
+/**
  * Verify a slip image against an expected amount AND expected receiving
  * account via EasySlip (POST /v2/verify/bank). `expectedNumbers` should be
  * every number the CURRENT shop registered its account under (its real
@@ -144,4 +179,4 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
   }
 }
 
-module.exports = { isConfigured, createBankAccount, verifySlip, getBanks };
+module.exports = { isConfigured, createBankAccount, updateBankAccount, verifySlip, getBanks };
