@@ -35,33 +35,29 @@
   <h1 class="text-lg font-bold mb-1">เปิดร้านใหม่ของคุณเอง</h1>
   <p class="text-xs text-[var(--text-3)] mb-4">ได้ร้านทันที พร้อมระบบสินค้า/สต๊อก/ออเดอร์/กระเป๋าเงินครบเหมือนร้านนี้ทุกอย่าง — เลือกแพ็กเกจที่ต้องการ</p>
 
-  <div class="grid grid-cols-2 gap-4 mb-5">
+  <div class="grid grid-cols-2 gap-4 mb-5" style="perspective: 900px;">
     <% plans.forEach(plan => { %>
-      <a href="/start?plan=<%= plan.id %>" style="--mx:50%;--my:50%;" class="premium-product-card spotlight-card group relative flex w-full aspect-[3/4] rounded-2xl overflow-hidden border border-[#8c7430]/55 transition-all duration-300 hover:border-[#f0cf64]/80">
-        <% if (settings.branding && settings.branding.logoImage) { %>
-          <div class="absolute inset-0 bg-gradient-to-br from-[#fff0ae] via-[#d8b84e] to-[#8d6818] flex items-center justify-center p-8">
-            <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>"
-              class="max-w-full max-h-full object-contain transition duration-500 group-hover:scale-[1.08] group-hover:rotate-[-2deg]" />
+      <a href="/start?plan=<%= plan.id %>" class="tilt3d-card group relative block w-full aspect-[3/4] rounded-2xl p-[2px] neon-border">
+        <div class="relative w-full h-full rounded-[14px] overflow-hidden bg-gradient-to-br from-[#1a1622] via-[#12101a] to-[#0a0910] flex flex-col">
+          <% if (plan.id === bestValuePlanId) { %>
+            <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-7 items-center bg-gradient-to-r from-[#ff2fd1] to-[#a742ff] pl-3 pr-2 text-[9px] font-black tracking-wider text-white">⭐ คุ้มสุด</div>
+          <% } %>
+          <span class="ready-glow absolute top-2 left-2 z-10 bg-black/60 border border-cyan-400/70 text-cyan-300 font-medium text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm">● เปิดได้ทันที</span>
+
+          <div class="flex-1 flex items-center justify-center p-7 relative">
+            <div class="absolute inset-0 opacity-40" style="background: radial-gradient(60% 60% at 50% 40%, rgba(167,66,255,.35), transparent 70%);"></div>
+            <% if (settings.branding && settings.branding.logoImage) { %>
+              <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>"
+                class="relative max-w-full max-h-full object-contain neon-logo-glow transition-transform duration-500 group-hover:scale-[1.08]" />
+            <% } else { %>
+              <span class="relative text-5xl">🌐</span>
+            <% } %>
           </div>
-        <% } else { %>
-          <div class="absolute inset-0 flex items-center justify-center text-5xl bg-gradient-to-br from-[#fff0ae] via-[#d8b84e] to-[#8d6818]">🌐</div>
-        <% } %>
 
-        <div class="product-shimmer pointer-events-none absolute -inset-y-1 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/40 to-transparent blur-[1px]"></div>
-        <div class="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/10 to-transparent"></div>
-        <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/55 to-transparent"></div>
-        <div class="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-[#f6d66c]/25 group-hover:ring-[#ffe487]/60 transition"></div>
-        <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-          style="background: radial-gradient(220px circle at var(--mx) var(--my), rgba(230,196,132,0.35), transparent 70%);"></div>
-
-        <% if (plan.id === bestValuePlanId) { %>
-          <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-7 items-center bg-[#e7bb36] pl-3 pr-2 text-[9px] font-black tracking-wider text-[#171207]">⭐ คุ้มสุด</div>
-        <% } %>
-        <span class="ready-glow absolute top-2 left-2 z-10 bg-emerald-950/80 border border-emerald-400/70 text-emerald-300 font-medium text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm">● เปิดได้ทันที</span>
-
-        <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1">
-          <h3 class="font-semibold text-sm text-white [text-shadow:0_2px_8px_rgba(0,0,0,.95)] group-hover:text-[#fff6d4] transition-colors">แพ็กเกจ <%= plan.days %> วัน</h3>
-          <span class="text-[#f2cc4d] font-bold text-[15px] [text-shadow:0_0_12px_rgba(242,204,77,.5)]">฿<%= plan.price.toLocaleString() %></span>
+          <div class="relative p-3 flex flex-col gap-0.5 bg-black/40 border-t border-white/10">
+            <h3 class="font-semibold text-sm text-white">แพ็กเกจ <%= plan.days %> วัน</h3>
+            <span class="text-[15px] font-bold neon-price">฿<%= plan.price.toLocaleString() %></span>
+          </div>
         </div>
       </a>
     <% }) %>
@@ -101,10 +97,48 @@
   @keyframes promo-border-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
   .promo-flame { display: inline-block; animation: promo-flame-bounce 1.4s ease-in-out infinite; }
   @keyframes promo-flame-bounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.12); } }
+
+  .neon-border {
+    background: linear-gradient(115deg, #ff2fd1, #a742ff, #22e6ff, #ffcf4d, #ff2fd1);
+    background-size: 400% 400%;
+    animation: neon-border-flow 5s ease infinite;
+    box-shadow: 0 10px 30px -10px rgba(167,66,255,.5);
+  }
+  @keyframes neon-border-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+  .neon-logo-glow { filter: drop-shadow(0 0 10px rgba(167,66,255,.55)) drop-shadow(0 0 18px rgba(34,230,255,.35)); }
+  .neon-price { color: #ffcf4d; text-shadow: 0 0 10px rgba(255,207,77,.7), 0 0 18px rgba(255,47,209,.35); }
+
+  .tilt3d-card { transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale3d(1,1,1); transition: transform .35s cubic-bezier(.2,.8,.2,1); transform-style: preserve-3d; }
+  .tilt3d-card.tilting { transition: none; }
+
   @media (prefers-reduced-motion: reduce) {
-    .promo-border, .promo-flame { animation: none; }
+    .promo-border, .promo-flame, .neon-border { animation: none; }
+    .tilt3d-card { transition: none; }
   }
 </style>
+
+<script>
+  (function () {
+    document.querySelectorAll('.tilt3d-card').forEach((card) => {
+      function setTilt(clientX, clientY) {
+        const rect = card.getBoundingClientRect();
+        const px = (clientX - rect.left) / rect.width - 0.5;
+        const py = (clientY - rect.top) / rect.height - 0.5;
+        card.style.setProperty('--ry', (px * 16) + 'deg');
+        card.style.setProperty('--rx', (py * -16) + 'deg');
+      }
+      card.addEventListener('pointermove', (e) => {
+        card.classList.add('tilting');
+        setTilt(e.clientX, e.clientY);
+      });
+      card.addEventListener('pointerleave', () => {
+        card.classList.remove('tilting');
+        card.style.setProperty('--rx', '0deg');
+        card.style.setProperty('--ry', '0deg');
+      });
+    });
+  })();
+</script>
 
 <script>
   function fmtCountdown(ms) {
