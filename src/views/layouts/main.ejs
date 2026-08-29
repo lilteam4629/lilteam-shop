@@ -20,21 +20,26 @@
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
 
+    html.theme-switching, html.theme-switching * {
+      transition: none !important;
+      animation: none !important;
+    }
+
     html.light .mobile-quick-card {
-      background: linear-gradient(145deg, #fffdf7, #f2ead6) !important;
-      border-color: #cbb675 !important;
-      box-shadow: 0 7px 20px rgba(75, 58, 18, .13), inset 0 1px 0 rgba(255, 255, 255, .9) !important;
+      background: linear-gradient(145deg, var(--card), var(--input)) !important;
+      border-color: var(--border-light) !important;
+      box-shadow: 0 7px 20px rgba(0, 0, 0, .1), inset 0 1px 0 rgba(255, 255, 255, .6) !important;
     }
     html.light .mobile-quick-card--topup {
-      background: linear-gradient(145deg, #fff8dc, #eddda3) !important;
-      border-color: #b79331 !important;
+      background: linear-gradient(145deg, var(--card), color-mix(in srgb, var(--gold) 20%, var(--input))) !important;
+      border-color: color-mix(in srgb, var(--gold) 55%, var(--border-light)) !important;
     }
-    html.light .mobile-quick-title { color: #2d260f !important; }
-    html.light .mobile-quick-subtitle { color: #74653e !important; }
+    html.light .mobile-quick-title { color: var(--gold-hover) !important; }
+    html.light .mobile-quick-subtitle { color: var(--text-4) !important; }
     html.light .mobile-quick-icon--contact {
-      color: #3c3420 !important;
-      background: rgba(108, 87, 34, .08) !important;
-      border-color: rgba(108, 87, 34, .18) !important;
+      color: var(--text-2) !important;
+      background: color-mix(in srgb, var(--text) 8%, transparent) !important;
+      border-color: color-mix(in srgb, var(--text) 18%, transparent) !important;
     }
     body { font-family: 'Kanit', sans-serif; }
     ::-webkit-scrollbar { width: 8px; height: 8px; }
@@ -114,9 +119,12 @@
       updateIcon();
       document.addEventListener('click', function (e) {
         if (!e.target.closest('#theme-toggle-btn')) return;
-        document.documentElement.classList.toggle('light');
+        const root = document.documentElement;
+        root.classList.add('theme-switching');
+        root.classList.toggle('light');
         try { localStorage.setItem('lilteam_theme', isLight() ? 'light' : 'dark'); } catch (e) {}
         updateIcon();
+        requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.remove('theme-switching'); }); });
       });
       document.addEventListener('lilteam:page-loaded', updateIcon);
     })();

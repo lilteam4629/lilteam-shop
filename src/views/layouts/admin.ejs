@@ -16,6 +16,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
+    html.theme-switching, html.theme-switching * {
+      transition: none !important;
+      animation: none !important;
+    }
     body { font-family: 'Kanit', sans-serif; }
   </style>
 </head>
@@ -124,9 +128,12 @@
       updateIcons();
       buttons.forEach(function (btn) {
         btn.addEventListener('click', function () {
-          document.documentElement.classList.toggle('light');
+          const root = document.documentElement;
+          root.classList.add('theme-switching');
+          root.classList.toggle('light');
           try { localStorage.setItem('lilteam_theme', isLight() ? 'light' : 'dark'); } catch (e) {}
           updateIcons();
+          requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.remove('theme-switching'); }); });
         });
       });
     })();
