@@ -33,16 +33,29 @@ const BG_PRESETS = {
 
 const ACCENT_PRESETS = [
   { key: 'gold', label: 'ทอง (ค่าเริ่มต้น)', color: '#c8a63f' },
+  { key: 'champagne', label: 'แชมเปญ', color: '#e8c873' },
+  { key: 'bronze', label: 'บรอนซ์', color: '#a9762f' },
   { key: 'amber', label: 'อำพัน', color: '#d9891f' },
+  { key: 'orange', label: 'ส้ม', color: '#e0722b' },
   { key: 'crimson', label: 'แดงเลือดหมู', color: '#c0392b' },
+  { key: 'ruby', label: 'ทับทิม', color: '#e0344e' },
   { key: 'rose', label: 'ชมพูกุหลาบ', color: '#d6547a' },
+  { key: 'magenta', label: 'บานเย็น', color: '#c23bce' },
   { key: 'violet', label: 'ม่วง', color: '#8b5cf6' },
+  { key: 'purple', label: 'ม่วงเข้ม', color: '#6d28d9' },
   { key: 'indigo', label: 'คราม', color: '#4f5fd6' },
   { key: 'azure', label: 'ฟ้า', color: '#2f8fd0' },
+  { key: 'skyblue', label: 'ฟ้าใส', color: '#38bdf8' },
   { key: 'teal', label: 'ฟ้าอมเขียว', color: '#1f9c8c' },
+  { key: 'mint', label: 'มินต์', color: '#2dd4a7' },
   { key: 'emerald', label: 'เขียวมรกต', color: '#2ea86e' },
+  { key: 'green', label: 'เขียว', color: '#3f9142' },
   { key: 'lime', label: 'เขียวมะนาว', color: '#7cb342' },
+  { key: 'yellow', label: 'เหลือง', color: '#e0b31e' },
+  { key: 'brown', label: 'น้ำตาล', color: '#8a5a3a' },
+  { key: 'slate', label: 'เทาน้ำเงิน', color: '#64748b' },
   { key: 'silver', label: 'เงิน', color: '#9aa1ac' },
+  { key: 'black', label: 'ดำ', color: '#3a3a3a' },
 ];
 
 function getBgPresets() {
@@ -53,7 +66,10 @@ function getAccentPresets() {
   return ACCENT_PRESETS;
 }
 
-// Slightly lighten a hex color for the hover-state variant.
+// Slightly lighten a hex color for the hover-state variant (and a bigger
+// lighten/darken pair for gradient boxes like the logo tile and quick-
+// action icons, so those follow the chosen accent too instead of a
+// hardcoded gold gradient).
 function lighten(hex, amount = 0.14) {
   const clean = String(hex || '').replace('#', '');
   if (!/^[0-9a-fA-F]{6}$/.test(clean)) return hex;
@@ -61,6 +77,16 @@ function lighten(hex, amount = 0.14) {
   const r = Math.min(255, Math.round(((num >> 16) & 255) + (255 - ((num >> 16) & 255)) * amount));
   const g = Math.min(255, Math.round(((num >> 8) & 255) + (255 - ((num >> 8) & 255)) * amount));
   const b = Math.min(255, Math.round((num & 255) + (255 - (num & 255)) * amount));
+  return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+function darken(hex, amount = 0.45) {
+  const clean = String(hex || '').replace('#', '');
+  if (!/^[0-9a-fA-F]{6}$/.test(clean)) return hex;
+  const num = parseInt(clean, 16);
+  const r = Math.max(0, Math.round(((num >> 16) & 255) * (1 - amount)));
+  const g = Math.max(0, Math.round(((num >> 8) & 255) * (1 - amount)));
+  const b = Math.max(0, Math.round((num & 255) * (1 - amount)));
   return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
 }
 
@@ -72,6 +98,8 @@ function renderCss(theme) {
   const preset = BG_PRESETS[theme && theme.bgPreset] || BG_PRESETS.warmDark;
   const accent = (theme && /^#[0-9a-fA-F]{6}$/.test(theme.accent)) ? theme.accent : ACCENT_PRESETS[0].color;
   const accentHover = lighten(accent);
+  const accentLight = lighten(accent, 0.45);
+  const accentDark = darken(accent, 0.42);
   const block = (vars) => `
       --bg: ${vars.bg};
       --card: ${vars.card};
@@ -80,6 +108,8 @@ function renderCss(theme) {
       --input: ${vars.input};
       --gold: ${accent};
       --gold-hover: ${accentHover};
+      --gold-light: ${accentLight};
+      --gold-dark: ${accentDark};
       --text: ${vars.text};
       --text-2: ${vars.text2};
       --text-3: ${vars.text3};

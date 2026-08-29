@@ -99,10 +99,10 @@
   @keyframes promo-flame-bounce { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-2px) scale(1.12); } }
 
   .neon-border {
-    background: linear-gradient(115deg, #c8a63f, #fff0ae, #8d6818, #ffe487, #c8a63f);
+    background: linear-gradient(115deg, var(--gold), var(--gold-light), var(--gold-dark), var(--gold-hover), var(--gold));
     background-size: 400% 400%;
     animation: neon-border-flow 5s ease infinite;
-    box-shadow: 0 10px 30px -10px rgba(200,166,63,.5);
+    box-shadow: 0 10px 30px -10px color-mix(in srgb, var(--gold) 50%, transparent);
   }
   @keyframes neon-border-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
   .neon-logo-glow { filter: drop-shadow(0 0 8px rgba(255,255,255,.85)) drop-shadow(0 2px 4px rgba(93,71,10,.25)); }
