@@ -20,6 +20,32 @@
     <label class="block text-sm text-[var(--text-3)] mb-1">รายละเอียดที่ให้ลูกค้าเตรียมก่อนติดต่อ</label>
     <textarea name="fulfillmentInstructions" rows="3" placeholder="เช่น ส่งเลขคำสั่งซื้อ ชื่อในเกม และ UID ให้ทางร้าน" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= product.fulfillmentInstructions || '' %></textarea>
   </div>
+
+  <div class="border-t border-[var(--border)] pt-4 space-y-4">
+    <div>
+      <h3 class="font-semibold">ข้อความในหน้าสินค้า</h3>
+      <p class="text-xs text-[var(--text-4)] mt-1">แก้ไขหรือปิดการแสดงผลได้แยกทีละส่วน เฉพาะสินค้านี้ (ขึ้นบรรทัดใหม่ = แยกเป็นข้อๆ)</p>
+    </div>
+
+    <label class="flex items-center gap-2 text-sm cursor-pointer w-fit">
+      <input type="checkbox" name="howToReceiveEnabled" <%= product.howToReceiveEnabled !== false ? 'checked' : '' %> class="accent-[var(--gold)]" />
+      แสดงส่วน "วิธีรับสินค้า"
+    </label>
+    <textarea name="howToReceiveText" rows="3" placeholder="รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= product.howToReceiveText || '' %></textarea>
+
+    <label class="flex items-center gap-2 text-sm cursor-pointer w-fit">
+      <input type="checkbox" name="termsBeforeOrderEnabled" <%= product.termsBeforeOrderEnabled !== false ? 'checked' : '' %> class="accent-[var(--gold)]" />
+      แสดงส่วน "เงื่อนไขก่อนสั่งซื้อ"
+    </label>
+    <textarea name="termsBeforeOrderText" rows="4" placeholder="กรุณาตรวจสอบชื่อสินค้า รายละเอียด และราคาก่อนยืนยันคำสั่งซื้อ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= product.termsBeforeOrderText || '' %></textarea>
+
+    <label class="flex items-center gap-2 text-sm cursor-pointer w-fit">
+      <input type="checkbox" name="warrantyEnabled" <%= product.warrantyEnabled !== false ? 'checked' : '' %> class="accent-[var(--gold)]" />
+      แสดงส่วน "เงื่อนไขการรับประกันสินค้า"
+    </label>
+    <textarea name="warrantyText" rows="3" placeholder="รับประกันสินค้า 90 วันนับจากวันสั่งซื้อ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= product.warrantyText || '' %></textarea>
+  </div>
+
   <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg px-5 py-2 text-sm">บันทึกวิธีรับสินค้า</button>
 </form>
 

@@ -67,12 +67,15 @@
         </div>
       <% } %>
 
-      <div class="mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 text-sm space-y-2">
-        <div class="font-medium text-[var(--gold)] mb-1">วิธีรับสินค้า</div>
-        <p class="text-[var(--text-2)]">✅ รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ ตรวจสอบได้ที่หน้าคำสั่งซื้อของคุณ</p>
-        <p class="text-[var(--text-2)]">✅ ระบบส่งมอบอัตโนมัติตลอด 24 ชั่วโมง</p>
-        <p class="text-[var(--text-2)]">✅ หากติดปัญหาแจ้งทางร้านได้ที่ <a href="/contact" class="text-[var(--gold)]">หน้าติดต่อร้าน</a></p>
-      </div>
+      <% if (product.howToReceiveEnabled !== false) { %>
+        <% const howToReceiveText = product.howToReceiveText || 'รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ ตรวจสอบได้ที่หน้าคำสั่งซื้อของคุณ\nระบบส่งมอบอัตโนมัติตลอด 24 ชั่วโมง\nหากติดปัญหาแจ้งทางร้านได้ที่หน้าติดต่อร้าน'; %>
+        <div class="mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 text-sm space-y-2">
+          <div class="font-medium text-[var(--gold)] mb-1">วิธีรับสินค้า</div>
+          <% howToReceiveText.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => { %>
+            <p class="text-[var(--text-2)]">✅ <%= line %></p>
+          <% }) %>
+        </div>
+      <% } %>
     </div>
   </div>
 
@@ -85,23 +88,28 @@
     </div>
 
     <div id="tab-terms" class="tab-panel py-6 text-sm text-[var(--text-2)] space-y-4">
-      <div>
-        <div class="font-medium text-[var(--text)] mb-2">เงื่อนไขก่อนสั่งซื้อ</div>
-        <ul class="list-disc pl-5 space-y-1">
-          <li>กรุณาตรวจสอบชื่อสินค้า รายละเอียด และราคาก่อนยืนยันคำสั่งซื้อ</li>
-          <li>ข้อมูลสินค้าจะปรากฏในหน้าคำสั่งซื้อหลังชำระเงินสำเร็จ</li>
-          <li>ห้ามเผยแพร่หรือส่งต่อข้อมูลสินค้าที่ได้รับจากร้าน</li>
-          <li>หากพบปัญหา กรุณาติดต่อร้านพร้อมหมายเลขคำสั่งซื้อ</li>
-        </ul>
-      </div>
-      <div>
-        <div class="font-medium text-[var(--text)] mb-2">เงื่อนไขการรับประกันสินค้า</div>
-        <ul class="list-disc pl-5 space-y-1">
-          <li>รับประกันสินค้า 90 วันนับจากวันสั่งซื้อ</li>
-          <li>การรับประกันเป็นไปตามรายละเอียดที่ระบุไว้ในสินค้านั้น</li>
-          <li>กรุณาเก็บหลักฐานและหมายเลขคำสั่งซื้อไว้สำหรับติดต่อร้าน</li>
-        </ul>
-      </div>
+      <% if (product.termsBeforeOrderEnabled !== false) { %>
+        <% const termsBeforeOrderText = product.termsBeforeOrderText || 'กรุณาตรวจสอบชื่อสินค้า รายละเอียด และราคาก่อนยืนยันคำสั่งซื้อ\nข้อมูลสินค้าจะปรากฏในหน้าคำสั่งซื้อหลังชำระเงินสำเร็จ\nห้ามเผยแพร่หรือส่งต่อข้อมูลสินค้าที่ได้รับจากร้าน\nหากพบปัญหา กรุณาติดต่อร้านพร้อมหมายเลขคำสั่งซื้อ'; %>
+        <div>
+          <div class="font-medium text-[var(--text)] mb-2">เงื่อนไขก่อนสั่งซื้อ</div>
+          <ul class="list-disc pl-5 space-y-1">
+            <% termsBeforeOrderText.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => { %>
+              <li><%= line %></li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
+      <% if (product.warrantyEnabled !== false) { %>
+        <% const warrantyText = product.warrantyText || 'รับประกันสินค้า 90 วันนับจากวันสั่งซื้อ\nการรับประกันเป็นไปตามรายละเอียดที่ระบุไว้ในสินค้านั้น\nกรุณาเก็บหลักฐานและหมายเลขคำสั่งซื้อไว้สำหรับติดต่อร้าน'; %>
+        <div>
+          <div class="font-medium text-[var(--text)] mb-2">เงื่อนไขการรับประกันสินค้า</div>
+          <ul class="list-disc pl-5 space-y-1">
+            <% warrantyText.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => { %>
+              <li><%= line %></li>
+            <% }) %>
+          </ul>
+        </div>
+      <% } %>
     </div>
 
     <div id="tab-gallery" class="tab-panel py-6 hidden">

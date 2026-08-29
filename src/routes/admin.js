@@ -438,6 +438,12 @@ router.post('/products/:id/stock/settings', (req, res) => {
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   product.fulfillmentMode = req.body.fulfillmentMode === 'contact' ? 'contact' : 'automatic';
   product.fulfillmentInstructions = (req.body.fulfillmentInstructions || '').trim();
+  product.howToReceiveEnabled = req.body.howToReceiveEnabled === 'on';
+  product.howToReceiveText = (req.body.howToReceiveText || '').trim();
+  product.termsBeforeOrderEnabled = req.body.termsBeforeOrderEnabled === 'on';
+  product.termsBeforeOrderText = (req.body.termsBeforeOrderText || '').trim();
+  product.warrantyEnabled = req.body.warrantyEnabled === 'on';
+  product.warrantyText = (req.body.warrantyText || '').trim();
   store.save();
   req.flash('success', 'บันทึกวิธีรับสินค้าแล้ว');
   res.redirect(`/admin/products/${product.id}/stock`);

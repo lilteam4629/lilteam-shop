@@ -463,6 +463,21 @@ function migrateSchema(db) {
       product.fulfillmentInstructions = '';
       changed = true;
     }
+    if (product.howToReceiveText === undefined) {
+      product.howToReceiveEnabled = true;
+      product.howToReceiveText = 'รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ ตรวจสอบได้ที่หน้าคำสั่งซื้อของคุณ\nระบบส่งมอบอัตโนมัติตลอด 24 ชั่วโมง\nหากติดปัญหาแจ้งทางร้านได้ที่หน้าติดต่อร้าน';
+      changed = true;
+    }
+    if (product.termsBeforeOrderText === undefined) {
+      product.termsBeforeOrderEnabled = true;
+      product.termsBeforeOrderText = 'กรุณาตรวจสอบชื่อสินค้า รายละเอียด และราคาก่อนยืนยันคำสั่งซื้อ\nข้อมูลสินค้าจะปรากฏในหน้าคำสั่งซื้อหลังชำระเงินสำเร็จ\nห้ามเผยแพร่หรือส่งต่อข้อมูลสินค้าที่ได้รับจากร้าน\nหากพบปัญหา กรุณาติดต่อร้านพร้อมหมายเลขคำสั่งซื้อ';
+      changed = true;
+    }
+    if (product.warrantyText === undefined) {
+      product.warrantyEnabled = true;
+      product.warrantyText = 'รับประกันสินค้า 90 วันนับจากวันสั่งซื้อ\nการรับประกันเป็นไปตามรายละเอียดที่ระบุไว้ในสินค้านั้น\nกรุณาเก็บหลักฐานและหมายเลขคำสั่งซื้อไว้สำหรับติดต่อร้าน';
+      changed = true;
+    }
   });
   db.miniGamePrizes.forEach(prize => {
     if (prize.isPrize === undefined) {
