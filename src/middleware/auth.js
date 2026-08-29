@@ -6,10 +6,25 @@ function currentUser(req) {
   return store.data.users.find(u => u.id === req.session.userId) || null;
 }
 
+// A contact link saved without "http(s)://" (e.g. just "m.me/page") resolves
+// as a path on this site itself when used as a raw <a href>, leading to a
+// 404 instead of opening Messenger/Facebook. Normalized here too (not just
+// on save in admin.js) so a link already saved that way before this fix
+// existed starts working immediately, without needing anyone to resave it.
+function normalizeExternalLink(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return '';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
 function attachUser(req, res, next) {
   res.locals.currentUser = currentUser(req);
   res.locals.cartCount = (req.session.cart || []).length;
-  res.locals.settings = store.data.settings;
+  res.locals.settings = {
+    ...store.data.settings,
+    contactFacebook: normalizeExternalLink(store.data.settings.contactFacebook),
+    contactMessenger: normalizeExternalLink(store.data.settings.contactMessenger),
+  };
   res.locals.themeCss = theme.renderCss(store.data.settings.theme);
   next();
 }

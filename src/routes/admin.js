@@ -1001,9 +1001,24 @@ router.get('/appearance', (req, res) => {
   res.render('admin/appearance', { title: 'รูปหน้าเว็บและโลโก้', active: 'appearance' });
 });
 
+// A link saved without "http(s)://" (e.g. just "m.me/page" or a bare page
+// name) resolves as a path on this site itself when used as a raw <a href>,
+// leading to a 404 instead of opening Messenger/Facebook. Normalize it here
+// so it always resolves as an absolute external URL.
+function normalizeExternalLink(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) return '';
+  return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+}
+
 router.post('/settings', (req, res) => {
   const { shopName, tagline, contactLine, contactFacebook, contactMessenger, contactFacebookName, contactResponseTime, openHours } = req.body;
-  Object.assign(store.data.settings, { shopName, tagline, contactLine, contactFacebook, contactMessenger, contactFacebookName, contactResponseTime, openHours });
+  Object.assign(store.data.settings, {
+    shopName, tagline, contactLine,
+    contactFacebook: normalizeExternalLink(contactFacebook),
+    contactMessenger: normalizeExternalLink(contactMessenger),
+    contactFacebookName, contactResponseTime, openHours,
+  });
   store.save();
   req.flash('success', 'บันทึกการตั้งค่าแล้ว');
   res.redirect('/admin/settings');
