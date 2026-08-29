@@ -53,24 +53,7 @@
     </div>
   </div>
 
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-    <h3 class="font-semibold mb-1">🃏 รูปแบบการ์ดสินค้า</h3>
-    <p class="text-xs text-[var(--text-4)] mb-4">เลือกได้ปุ่มเดียว เปลี่ยนการ์ดสินค้าทุกใบทั่วร้านพร้อมกัน</p>
-    <div class="grid grid-cols-2 gap-3">
-      <label class="card-style-card relative flex flex-col gap-1 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer">
-        <input type="radio" name="productCardStyle" value="classic" class="card-style-input sr-only" <%= productCardStyle === 'classic' ? 'checked' : '' %> />
-        <span class="text-xs font-medium">🎴 การ์ดคลาสสิก</span>
-        <span class="text-[10px] text-[var(--text-4)]">ครอปรูปเต็มการ์ด ราคา/ชื่อวางทับบนรูป มีกรอบเรืองแสง</span>
-        <span class="card-style-check hidden absolute top-2 right-2 text-[var(--gold)] text-xs">✓</span>
-      </label>
-      <label class="card-style-card relative flex flex-col gap-1 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer">
-        <input type="radio" name="productCardStyle" value="natural" class="card-style-input sr-only" <%= productCardStyle === 'natural' ? 'checked' : '' %> />
-        <span class="text-xs font-medium">🖼️ การ์ดเต็มรูป</span>
-        <span class="text-[10px] text-[var(--text-4)]">โชว์รูปเต็มขนาดจริงไม่ครอป ราคา/ชื่ออยู่ใต้รูป</span>
-        <span class="card-style-check hidden absolute top-2 right-2 text-[var(--gold)] text-xs">✓</span>
-      </label>
-    </div>
-  </div>
+  <p class="text-xs text-[var(--text-4)]">💡 อยากเปลี่ยนรูปแบบการ์ดสินค้า (คลาสสิก/เต็มรูป) ไปตั้งได้ที่หน้า <a href="/admin/products" class="text-[var(--gold)] underline">สินค้า</a> ด้านบนตารางเลยครับ</p>
 
   <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2.5 text-sm">บันทึกธีมสี</button>
 </form>
@@ -79,7 +62,6 @@
   .accent-swatch-input:checked + .accent-swatch { border-color: var(--text); box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--gold); }
   .bg-preset-input:checked ~ .bg-preset-check { display: block; }
   .style-input:checked ~ .style-check { display: block; }
-  .card-style-input:checked ~ .card-style-check { display: block; }
 </style>
 <script>
   (function () {
@@ -136,16 +118,6 @@
       function sync() { card.classList.toggle('border-[var(--gold)]', input.checked); }
       input.addEventListener('change', () => {
         document.querySelectorAll('.style-card').forEach(c => c.classList.remove('border-[var(--gold)]'));
-        sync();
-      });
-      sync();
-    });
-
-    document.querySelectorAll('.card-style-card').forEach((card) => {
-      const input = card.querySelector('.card-style-input');
-      function sync() { card.classList.toggle('border-[var(--gold)]', input.checked); }
-      input.addEventListener('change', () => {
-        document.querySelectorAll('.card-style-card').forEach(c => c.classList.remove('border-[var(--gold)]'));
         sync();
       });
       sync();

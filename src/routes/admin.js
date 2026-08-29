@@ -184,7 +184,14 @@ router.get('/products', (req, res) => {
     const stockCount = store.data.stockItems.filter(s => s.productId === p.id && s.status === 'available').length;
     return { ...p, stockCount };
   });
-  res.render('admin/products', { title: 'สินค้า', active: 'products', products });
+  res.render('admin/products', { title: 'สินค้า', active: 'products', products, productCardStyle: store.data.settings.productCardStyle || 'natural' });
+});
+
+router.post('/products/card-style', (req, res) => {
+  store.data.settings.productCardStyle = req.body.productCardStyle === 'natural' ? 'natural' : 'classic';
+  store.save();
+  req.flash('success', 'เปลี่ยนรูปแบบการ์ดสินค้าแล้ว');
+  res.redirect('/admin/products');
 });
 
 router.get('/products/new', (req, res) => {
@@ -390,7 +397,6 @@ router.get('/theme', (req, res) => {
     accentPresets: theme.getAccentPresets(),
     bgPresets: theme.getBgPresets(),
     styles: theme.getStyles(),
-    productCardStyle: store.data.settings.productCardStyle || 'natural',
   });
 });
 
@@ -406,7 +412,6 @@ router.post('/theme', (req, res) => {
   }
   const style = theme.getStyles().some(s => s.key === req.body.style) ? req.body.style : 'normal';
   store.data.settings.theme = { accent, bgPreset, bgColor, style };
-  store.data.settings.productCardStyle = req.body.productCardStyle === 'natural' ? 'natural' : 'classic';
   store.save();
   req.flash('success', 'บันทึกธีมสีแล้ว');
   res.redirect('/admin/theme');

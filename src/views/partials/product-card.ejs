@@ -68,8 +68,8 @@
 <!-- Natural card (opt-in via settings.productCardStyle): image shown exactly as uploaded,
      full size, nothing drawn on top of it -->
 <a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
-  class="premium-product-card spotlight-card filterable-card group relative flex flex-col w-full self-start rounded-2xl overflow-hidden border bg-[var(--card)] <%= p.flashSaleActive ? 'border-[#e8bd3e]' : 'border-[#8c7430]/55' %>
-         transition-all duration-300 hover:border-[#f0cf64]/80">
+  class="premium-product-card spotlight-card filterable-card group relative flex flex-col w-full self-start rounded-2xl overflow-hidden border bg-[var(--card)] <%= p.flashSaleActive ? 'border-[var(--gold)]' : 'border-[var(--gold)]/40' %>
+         transition-all duration-300 hover:border-[var(--gold)]">
 
   <div class="relative w-full overflow-hidden">
     <img src="<%= p.images[0] %>" alt="<%= p.title %>"
@@ -81,12 +81,17 @@
       <div class="absolute inset-0 bg-black/35"></div>
     <% } %>
 
+    <div class="pointer-events-none absolute inset-0 ring-1 ring-inset ring-[var(--gold)]/25 group-hover:ring-[var(--gold-light)]/60 transition"></div>
+    <% if (!soldOut) { %>
+      <div class="product-shimmer pointer-events-none absolute -inset-y-1 left-0 w-1/3 bg-gradient-to-r from-transparent via-white/30 to-transparent blur-[1px]"></div>
+    <% } %>
+
     <% if (p.flashSaleActive) { %>
-      <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center bg-[#e7bb36] pl-4 pr-2 text-[9px] font-black tracking-wider text-[#171207]">
+      <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center bg-[var(--gold)] pl-4 pr-2 text-[9px] font-black tracking-wider text-[var(--bg)]">
         ⚡ <span class="hidden min-[380px]:inline">ลดพิเศษ</span><span class="min-[380px]:hidden">SALE</span>
       </div>
     <% } else if (p.flashSaleUpcoming) { %>
-      <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center border-b border-l border-[#d7b84c]/50 bg-[#18150c] pl-4 pr-2 text-[9px] font-black tracking-wider text-[#f0ca58]">
+      <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center border-b border-l border-[var(--gold)]/50 bg-[#18150c] pl-4 pr-2 text-[9px] font-black tracking-wider text-[var(--gold-light)]">
         ⚡ เร็วๆ นี้
       </div>
     <% } %>
@@ -103,9 +108,9 @@
 
   <div class="p-3 flex flex-col gap-1 min-w-0">
     <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
-      <div class="mb-0.5 flex min-h-7 min-w-0 items-center justify-between gap-1.5 rounded-md border border-[#d6ab32]/45 bg-[var(--input)] px-2">
-        <span class="truncate text-[8px] font-bold tracking-wide text-[#dcb741]"><%= p.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></span>
-        <span class="flash-countdown shrink-0 font-mono text-[12px] font-black tracking-wide text-[#c8a028]" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>><%= flashInitial %></span>
+      <div class="mb-0.5 flex min-h-7 min-w-0 items-center justify-between gap-1.5 rounded-md border border-[var(--gold)]/45 bg-[var(--input)] px-2">
+        <span class="truncate text-[8px] font-bold tracking-wide text-[var(--gold)]"><%= p.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></span>
+        <span class="flash-countdown shrink-0 font-mono text-[12px] font-black tracking-wide text-[var(--gold)]" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>><%= flashInitial %></span>
       </div>
     <% } %>
     <h3 class="font-semibold text-sm line-clamp-2 text-[var(--text)] group-hover:text-[var(--gold)] transition-colors"><%= p.title %></h3>
