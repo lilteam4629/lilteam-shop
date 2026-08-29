@@ -6,6 +6,7 @@ const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
 const easyslip = require('../services/easyslip');
+const theme = require('../services/theme');
 const { MAIN_SITE_URL } = require('../middleware/tenant');
 const { requireAdmin } = require('../middleware/auth');
 
@@ -379,6 +380,25 @@ router.post('/home-sections/:id/move', (req, res) => {
   [list[index], list[target]] = [list[target], list[index]];
   store.save();
   res.redirect('/admin/home-sections');
+});
+
+// ---------- Storefront color theme ----------
+router.get('/theme', (req, res) => {
+  res.render('admin/theme', {
+    title: 'ธีมสี', active: 'theme',
+    currentTheme: store.data.settings.theme,
+    accentPresets: theme.getAccentPresets(),
+    bgPresets: theme.getBgPresets(),
+  });
+});
+
+router.post('/theme', (req, res) => {
+  const accent = /^#[0-9a-fA-F]{6}$/.test(req.body.accent || '') ? req.body.accent : store.data.settings.theme.accent;
+  const bgPreset = theme.getBgPresets().some(p => p.key === req.body.bgPreset) ? req.body.bgPreset : store.data.settings.theme.bgPreset;
+  store.data.settings.theme = { accent, bgPreset };
+  store.save();
+  req.flash('success', 'บันทึกธีมสีแล้ว');
+  res.redirect('/admin/theme');
 });
 
 // ---------- Stock management ----------

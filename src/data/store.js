@@ -148,6 +148,10 @@ function defaultData() {
       branding: {
         logoImage: null,
       },
+      theme: {
+        accent: '#c8a63f',
+        bgPreset: 'warmDark',
+      },
       music: {
         enabled: false,
         youtubeUrl: '',
@@ -319,6 +323,10 @@ function migrate() {
   }
   if (!db.settings.branding) {
     db.settings.branding = { logoImage: null };
+    changed = true;
+  }
+  if (!db.settings.theme) {
+    db.settings.theme = { accent: '#c8a63f', bgPreset: 'warmDark' };
     changed = true;
   }
   if (!db.settings.payment) {

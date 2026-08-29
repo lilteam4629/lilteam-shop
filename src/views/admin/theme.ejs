@@ -1,0 +1,72 @@
+<p class="text-sm text-[var(--text-3)] mb-4">ปรับสีของหน้าร้าน (ไม่กระทบหน้าแอดมิน) — เลือก <b>สีหลัก</b> ที่ใช้กับปุ่ม, ราคา, กรอบการ์ดสินค้า และจุดเด่นทั้งหมด กับ <b>โทนพื้นหลัง</b> ที่คุมพื้นหลัง/ตัวหนังสือให้เข้ากันแบบสำเร็จรูป</p>
+
+<form action="/admin/theme" method="post" class="space-y-6 max-w-2xl">
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+    <h3 class="font-semibold mb-1">🎯 สีหลัก (ปุ่ม / ราคา / จุดเด่น)</h3>
+    <p class="text-xs text-[var(--text-4)] mb-4">ใช้กับปุ่ม, ตัวหนังสือราคา, กรอบการ์ดสินค้า, ป้ายต่างๆ ทั่วเว็บ</p>
+    <div class="grid grid-cols-4 sm:grid-cols-6 gap-3 mb-4">
+      <% accentPresets.forEach(p => { %>
+        <label class="flex flex-col items-center gap-1 cursor-pointer">
+          <input type="radio" name="accent" value="<%= p.color %>" class="accent-swatch-input sr-only" <%= currentTheme.accent === p.color ? 'checked' : '' %> />
+          <span class="accent-swatch w-10 h-10 rounded-full border-2 border-transparent transition" style="background: <%= p.color %>;"></span>
+          <span class="text-[9px] text-[var(--text-4)] text-center leading-tight"><%= p.label %></span>
+        </label>
+      <% }) %>
+    </div>
+    <label class="flex items-center gap-3 text-sm">
+      <span class="text-[var(--text-3)]">หรือเลือกสีเอง:</span>
+      <input type="color" id="accentCustomInput" value="<%= currentTheme.accent %>" class="w-12 h-9 rounded-lg border border-[var(--border-light)] bg-transparent cursor-pointer" />
+    </label>
+  </div>
+
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+    <h3 class="font-semibold mb-1">🌗 โทนพื้นหลัง</h3>
+    <p class="text-xs text-[var(--text-4)] mb-4">คุมพื้นหลัง/การ์ด/ตัวหนังสือให้เข้ากันเป็นชุด (มีทั้งโหมดมืดและสว่างในตัว สลับได้ด้วยปุ่ม 🌙 บนเว็บ)</p>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+      <% bgPresets.forEach(p => { %>
+        <label class="bg-preset-card relative flex flex-col gap-1 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer">
+          <input type="radio" name="bgPreset" value="<%= p.key %>" class="bg-preset-input sr-only" <%= currentTheme.bgPreset === p.key ? 'checked' : '' %> />
+          <span class="text-xs font-medium"><%= p.label %></span>
+          <span class="bg-preset-check hidden absolute top-2 right-2 text-[var(--gold)] text-xs">✓</span>
+        </label>
+      <% }) %>
+    </div>
+  </div>
+
+  <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2.5 text-sm">บันทึกธีมสี</button>
+</form>
+
+<style>
+  .accent-swatch-input:checked + .accent-swatch { border-color: var(--text); box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--gold); }
+  .bg-preset-input:checked ~ .bg-preset-check { display: block; }
+</style>
+<script>
+  (function () {
+    const customInput = document.getElementById('accentCustomInput');
+    const radios = document.querySelectorAll('.accent-swatch-input');
+    customInput.addEventListener('input', () => {
+      radios.forEach(r => { r.checked = false; });
+      let hidden = document.getElementById('accentCustomRadio');
+      if (!hidden) {
+        hidden = document.createElement('input');
+        hidden.type = 'radio';
+        hidden.name = 'accent';
+        hidden.id = 'accentCustomRadio';
+        hidden.className = 'sr-only';
+        customInput.closest('form').appendChild(hidden);
+      }
+      hidden.value = customInput.value;
+      hidden.checked = true;
+    });
+
+    document.querySelectorAll('.bg-preset-card').forEach((card) => {
+      const input = card.querySelector('.bg-preset-input');
+      function sync() { card.classList.toggle('border-[var(--gold)]', input.checked); }
+      input.addEventListener('change', () => {
+        document.querySelectorAll('.bg-preset-card').forEach(c => c.classList.remove('border-[var(--gold)]'));
+        sync();
+      });
+      sync();
+    });
+  })();
+</script>

@@ -18,34 +18,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --bg: #100e08;
-      --card: #1a160d;
-      --border: #3a3220;
-      --border-light: #443a22;
-      --input: #211c11;
-      --gold: #c8a63f;
-      --gold-hover: #d9bc5e;
-      --text: #f3ecd8;
-      --text-2: #d6c9a0;
-      --text-3: #a89a6c;
-      --text-4: #7a6f47;
-      --coral: #e2836f;
-    }
-    html.light {
-      --bg: #faf6eb;
-      --card: #ffffff;
-      --border: #e2d8bd;
-      --border-light: #d6c9a8;
-      --input: #f3edd8;
-      --gold: #a88022;
-      --gold-hover: #946f1a;
-      --text: #2a2414;
-      --text-2: #4a4028;
-      --text-3: #6b5e3d;
-      --text-4: #8a7c5c;
-      --coral: #c44a3a;
-    }
+    <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
+
     html.light .mobile-quick-card {
       background: linear-gradient(145deg, #fffdf7, #f2ead6) !important;
       border-color: #cbb675 !important;

@@ -1,4 +1,5 @@
 const store = require('../data/store');
+const theme = require('../services/theme');
 
 function currentUser(req) {
   if (!req.session.userId) return null;
@@ -9,6 +10,7 @@ function attachUser(req, res, next) {
   res.locals.currentUser = currentUser(req);
   res.locals.cartCount = (req.session.cart || []).length;
   res.locals.settings = store.data.settings;
+  res.locals.themeCss = theme.renderCss(store.data.settings.theme);
   next();
 }
 
