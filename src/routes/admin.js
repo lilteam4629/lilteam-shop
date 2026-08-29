@@ -318,6 +318,69 @@ router.post('/filter-tags/:id/delete', (req, res) => {
   res.redirect('/admin/filter-tags');
 });
 
+// ---------- Home page sections ----------
+// Admin-configurable sections shown on the storefront homepage, each
+// either auto-filled with the shop's newest products or a manually
+// picked/ordered list — replaces the old hardcoded "เกมมาใหม่" block.
+router.get('/home-sections', (req, res) => {
+  const products = store.data.products.filter(p => p.status === 'active');
+  res.render('admin/home-sections', {
+    title: 'จัดหมวดหมู่หน้าแรก', active: 'home-sections',
+    homeSections: store.data.homeSections, products,
+  });
+});
+
+router.post('/home-sections', (req, res) => {
+  const title = (req.body.title || '').trim();
+  const mode = req.body.mode === 'manual' ? 'manual' : 'newest';
+  if (!title) {
+    req.flash('error', 'กรุณากรอกชื่อหมวดหมู่');
+    return res.redirect('/admin/home-sections');
+  }
+  const limit = Math.min(30, Math.max(1, parseInt(req.body.limit, 10) || 5));
+  const productIds = mode === 'manual' ? [].concat(req.body.productIds || []).filter(Boolean) : [];
+  store.data.homeSections.push({ id: store.genId(8), title, mode, limit, productIds });
+  store.save();
+  req.flash('success', 'เพิ่มหมวดหมู่แล้ว');
+  res.redirect('/admin/home-sections');
+});
+
+router.post('/home-sections/:id/edit', (req, res) => {
+  const section = store.data.homeSections.find(s => s.id === req.params.id);
+  if (!section) { req.flash('error', 'ไม่พบหมวดหมู่นี้'); return res.redirect('/admin/home-sections'); }
+  const title = (req.body.title || '').trim();
+  if (!title) {
+    req.flash('error', 'กรุณากรอกชื่อหมวดหมู่');
+    return res.redirect('/admin/home-sections');
+  }
+  section.title = title;
+  section.mode = req.body.mode === 'manual' ? 'manual' : 'newest';
+  section.limit = Math.min(30, Math.max(1, parseInt(req.body.limit, 10) || 5));
+  section.productIds = section.mode === 'manual' ? [].concat(req.body.productIds || []).filter(Boolean) : [];
+  store.save();
+  req.flash('success', 'บันทึกหมวดหมู่แล้ว');
+  res.redirect('/admin/home-sections');
+});
+
+router.post('/home-sections/:id/delete', (req, res) => {
+  store.data.homeSections = store.data.homeSections.filter(s => s.id !== req.params.id);
+  store.save();
+  req.flash('success', 'ลบหมวดหมู่แล้ว');
+  res.redirect('/admin/home-sections');
+});
+
+router.post('/home-sections/:id/move', (req, res) => {
+  const list = store.data.homeSections;
+  const index = list.findIndex(s => s.id === req.params.id);
+  if (index === -1) return res.redirect('/admin/home-sections');
+  const direction = req.body.direction === 'down' ? 1 : -1;
+  const target = index + direction;
+  if (target < 0 || target >= list.length) return res.redirect('/admin/home-sections');
+  [list[index], list[target]] = [list[target], list[index]];
+  store.save();
+  res.redirect('/admin/home-sections');
+});
+
 // ---------- Stock management ----------
 router.get('/products/:id/stock', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);

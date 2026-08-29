@@ -73,10 +73,18 @@ router.get('/', (req, res) => {
     .sort((a, b) => publishTime(a) - publishTime(b))
     .slice(0, 8);
   const newest = [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  const byId = new Map(active.map(p => [p.id, p]));
+  const homeSections = (store.data.homeSections || []).map(section => {
+    const products = section.mode === 'manual'
+      ? (section.productIds || []).map(id => byId.get(id)).filter(Boolean)
+      : [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, section.limit || 5);
+    return { id: section.id, title: section.title, products };
+  }).filter(section => section.products.length);
   res.render('shop/home', {
     title: 'หน้าแรก',
     stats: shopStats(),
     newest,
+    homeSections,
     products: active.slice(0, 24),
     productTotal: active.length,
     announcements: store.data.announcements.filter(a => a.active),

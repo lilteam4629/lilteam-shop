@@ -204,6 +204,9 @@ function defaultData() {
     ],
     products,
     filterTags,
+    homeSections: [
+      { id: nanoid(8), title: 'เกมมาใหม่', mode: 'newest', limit: 5, productIds: [] },
+    ],
     stockItems,
     orders: [],
     coupons: [
@@ -394,6 +397,14 @@ function migrate() {
   if (!db.licensePlans) { db.licensePlans = []; changed = true; }
   if (!db.licenseSales) { db.licenseSales = []; changed = true; }
   if (!db.shops) { db.shops = []; changed = true; }
+  if (!db.homeSections) {
+    // Migrates every existing shop onto the new admin-configurable
+    // homepage-sections system, seeded with one section that reproduces
+    // the old hardcoded "เกมมาใหม่" behavior (newest 5 products) so nothing
+    // visibly changes until the admin edits/adds sections.
+    db.homeSections = [{ id: nanoid(8), title: 'เกมมาใหม่', mode: 'newest', limit: 5, productIds: [] }];
+    changed = true;
+  }
   db.products.forEach(product => {
     if (!product.fulfillmentMode) {
       product.fulfillmentMode = 'automatic';

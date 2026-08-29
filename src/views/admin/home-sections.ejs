@@ -1,0 +1,116 @@
+<p class="text-sm text-[var(--text-3)] mb-4">จัดการหมวดหมู่ที่แสดงบนหน้าแรกของร้าน เพิ่มได้กี่หมวดก็ได้ แต่ละหมวดเลือกได้ว่าจะโชว์ "สินค้าใหม่ล่าสุด" อัตโนมัติ หรือเลือกสินค้าเองทีละรายการ</p>
+
+<div class="grid lg:grid-cols-3 gap-6">
+  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+    <h3 class="font-semibold mb-4">หมวดหมู่ทั้งหมด (<%= homeSections.length %>)</h3>
+    <% if (!homeSections.length) { %>
+      <p class="text-[var(--text-4)] text-sm">ยังไม่มีหมวดหมู่ เพิ่มได้จากฟอร์มด้านขวา</p>
+    <% } %>
+    <div class="space-y-3">
+      <% homeSections.forEach((s, i) => { %>
+        <details class="bg-[var(--input)] border border-[var(--border-light)] rounded-xl p-3">
+          <summary class="flex items-center justify-between cursor-pointer list-none">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-sm font-medium truncate"><%= s.title %></span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-black/30 text-[var(--gold)] shrink-0">
+                <%= s.mode === 'manual' ? `เลือกเอง (${s.productIds.length})` : `ใหม่ล่าสุด ${s.limit} รายการ` %>
+              </span>
+            </div>
+            <span class="text-[var(--text-4)] text-xs shrink-0">แก้ไข ▾</span>
+          </summary>
+
+          <div class="flex items-center gap-2 mt-3 mb-3">
+            <form action="/admin/home-sections/<%= s.id %>/move" method="post">
+              <input type="hidden" name="direction" value="up" />
+              <button class="text-xs px-2 py-1 rounded bg-black/30 disabled:opacity-30" <%= i === 0 ? 'disabled' : '' %>>▲ ขึ้น</button>
+            </form>
+            <form action="/admin/home-sections/<%= s.id %>/move" method="post">
+              <input type="hidden" name="direction" value="down" />
+              <button class="text-xs px-2 py-1 rounded bg-black/30 disabled:opacity-30" <%= i === homeSections.length - 1 ? 'disabled' : '' %>>▼ ลง</button>
+            </form>
+            <form action="/admin/home-sections/<%= s.id %>/delete" method="post" onsubmit="return confirm('ลบหมวดหมู่นี้?')" class="ml-auto">
+              <button class="text-xs text-rose-400">ลบหมวดหมู่</button>
+            </form>
+          </div>
+
+          <form action="/admin/home-sections/<%= s.id %>/edit" method="post" class="space-y-3">
+            <div>
+              <label class="block text-xs text-[var(--text-3)] mb-1">ชื่อหมวดหมู่</label>
+              <input name="title" required value="<%= s.title %>" class="w-full bg-black/20 border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label class="block text-xs text-[var(--text-3)] mb-1">รูปแบบการแสดงสินค้า</label>
+              <select name="mode" class="section-mode-select w-full bg-black/20 border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
+                <option value="newest" <%= s.mode !== 'manual' ? 'selected' : '' %>>สินค้าใหม่ล่าสุดอัตโนมัติ</option>
+                <option value="manual" <%= s.mode === 'manual' ? 'selected' : '' %>>เลือกสินค้าเอง</option>
+              </select>
+            </div>
+            <div class="section-limit-field" <%= s.mode === 'manual' ? 'hidden' : '' %>>
+              <label class="block text-xs text-[var(--text-3)] mb-1">จำนวนที่แสดง</label>
+              <input type="number" name="limit" min="1" max="30" value="<%= s.limit %>" class="w-full bg-black/20 border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+            </div>
+            <div class="section-products-field" <%= s.mode !== 'manual' ? 'hidden' : '' %>>
+              <label class="block text-xs text-[var(--text-3)] mb-1">เลือกสินค้าที่จะแสดง (เรียงตามลำดับที่ติ๊ก)</label>
+              <div class="max-h-48 overflow-y-auto border border-[var(--border-light)] rounded-lg p-2 space-y-1 bg-black/20">
+                <% products.forEach(p => { %>
+                  <label class="flex items-center gap-2 text-xs py-1">
+                    <input type="checkbox" name="productIds" value="<%= p.id %>" <%= s.productIds.includes(p.id) ? 'checked' : '' %> />
+                    <span class="truncate"><%= p.title %></span>
+                  </label>
+                <% }) %>
+              </div>
+            </div>
+            <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">บันทึกหมวดหมู่นี้</button>
+          </form>
+        </details>
+      <% }) %>
+    </div>
+  </div>
+
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+    <h3 class="font-semibold mb-3">เพิ่มหมวดหมู่ใหม่</h3>
+    <form action="/admin/home-sections" method="post" class="space-y-3">
+      <div>
+        <label class="block text-xs text-[var(--text-3)] mb-1">ชื่อหมวดหมู่</label>
+        <input name="title" required placeholder="เช่น เกมยอดนิยม, ลดราคาพิเศษ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      </div>
+      <div>
+        <label class="block text-xs text-[var(--text-3)] mb-1">รูปแบบการแสดงสินค้า</label>
+        <select name="mode" class="section-mode-select w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
+          <option value="newest">สินค้าใหม่ล่าสุดอัตโนมัติ</option>
+          <option value="manual">เลือกสินค้าเอง</option>
+        </select>
+      </div>
+      <div class="section-limit-field">
+        <label class="block text-xs text-[var(--text-3)] mb-1">จำนวนที่แสดง</label>
+        <input type="number" name="limit" min="1" max="30" value="5" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      </div>
+      <div class="section-products-field" hidden>
+        <label class="block text-xs text-[var(--text-3)] mb-1">เลือกสินค้าที่จะแสดง</label>
+        <div class="max-h-48 overflow-y-auto border border-[var(--border-light)] rounded-lg p-2 space-y-1 bg-[var(--input)]">
+          <% products.forEach(p => { %>
+            <label class="flex items-center gap-2 text-xs py-1">
+              <input type="checkbox" name="productIds" value="<%= p.id %>" />
+              <span class="truncate"><%= p.title %></span>
+            </label>
+          <% }) %>
+        </div>
+      </div>
+      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มหมวดหมู่</button>
+    </form>
+    <p class="text-xs text-[var(--text-4)] mt-3">หมวดหมู่จะแสดงบนหน้าแรกตามลำดับด้านซ้าย เรียงลำดับใหม่ได้ด้วยปุ่ม ▲ ▼</p>
+  </div>
+</div>
+
+<script>
+  document.querySelectorAll('.section-mode-select').forEach(function (select) {
+    function sync() {
+      const form = select.closest('form');
+      const isManual = select.value === 'manual';
+      form.querySelector('.section-limit-field').hidden = isManual;
+      form.querySelector('.section-products-field').hidden = !isManual;
+    }
+    select.addEventListener('change', sync);
+    sync();
+  });
+</script>

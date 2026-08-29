@@ -225,14 +225,19 @@
 <% } %>
 
 <section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
-  <h2 class="text-xl font-semibold mb-4 flex items-center gap-1.5"><span>✨</span>เกมมาใหม่</h2>
-  <div class="product-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-10">
-    <% if (newest.length) { %>
-      <% newest.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
-    <% } else { %>
+  <% if (homeSections.length) { %>
+    <% homeSections.forEach(section => { %>
+      <h2 class="text-xl font-semibold mb-4 flex items-center gap-1.5"><span>✨</span><%= section.title %></h2>
+      <div class="product-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-10">
+        <% section.products.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
+      </div>
+    <% }) %>
+  <% } else if (!products.length) { %>
+    <h2 class="text-xl font-semibold mb-4 flex items-center gap-1.5"><span>✨</span>เกมมาใหม่</h2>
+    <div class="product-grid grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-10">
       <% [1,2,3,4,5].forEach(n => { %><%- include('../partials/example-product-card', { n }) %><% }) %>
-    <% } %>
-  </div>
+    </div>
+  <% } %>
 
   <div class="flex items-center justify-between mb-4">
     <h2 class="text-xl font-semibold">สินค้าเกมทั้งหมด</h2>
