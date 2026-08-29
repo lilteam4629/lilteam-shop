@@ -75,6 +75,9 @@
         </div>
       </div>
     <% } %>
+    <% if (payment.easyslipStatus) { %>
+      <p class="text-xs <%= payment.easyslipStatus.includes('ไม่สำเร็จ') ? 'text-[var(--coral)]' : 'text-emerald-400' %>">สถานะเชื่อมต่อ EasySlip ล่าสุด: <%= payment.easyslipStatus %></p>
+    <% } %>
     <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกข้อมูลบัญชี</button>
   </form>
 </details>
