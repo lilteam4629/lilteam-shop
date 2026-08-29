@@ -519,10 +519,17 @@ async function loadTenantDb(shopId) {
   // A tenant's dataset can have been created at an arbitrarily older point
   // in this app's history — fields added since (theme, homeSections, etc.)
   // are otherwise never backfilled onto it, unlike the main site's db which
-  // gets migrate() at every startup. Self-heal it here, lazily, on load.
-  if (migrateSchema(tenantDb)) {
-    await saveTenantDb(shopId, tenantDb);
-  }
+  // gets migrate() at every startup. Backfill it here, in memory, on every
+  // load so pages don't crash reading a missing field.
+  //
+  // Deliberately NOT persisted back to storage here: loadTenantDb runs on
+  // every request to the shop, so writing back a full-document replaceOne
+  // from here would race any concurrent request that is itself in the
+  // middle of saving a real change (e.g. an admin adding a product) — an
+  // older snapshot's write-back could land after and silently revert that
+  // change. The backfilled fields get persisted safely the normal way, the
+  // next time this tenant's own request path calls store.save().
+  migrateSchema(tenantDb);
   return tenantDb;
 }
 
