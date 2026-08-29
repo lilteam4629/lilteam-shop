@@ -626,25 +626,36 @@ router.post('/topups/payment-settings', (req, res) => {
     const channels = [];
     if (bankCode && bankAccountNumber && bankAccountName) channels.push({ code: bankCode, number: bankAccountNumber, name: bankAccountName });
     if (registerPromptpay && promptpayBank && promptpayEasyslipNumber) {
-      channels.push({ code: promptpayBank.code, number: promptpayEasyslipNumber, name: promptpayName || bankAccountName });
+      // A mobile-number PromptPay account needs extraVerify explicitly set to
+      // MSISDN (EasySlip's own field name for phone numbers, per their QR
+      // generation API's PromptPayRequest.msisdn) or the account is created
+      // with no verification method at all, which silently breaks slip
+      // matching for every PromptPay transfer registered this way.
+      channels.push({ code: promptpayBank.code, number: promptpayEasyslipNumber, name: promptpayName || bankAccountName, extraVerify: 'MSISDN' });
     }
 
     if (easyslip.isConfigured() && channels.length) {
       const statuses = [];
       for (const channel of channels) {
         const already = payment.easyslipAccounts[channel.code];
-        if (already && already.accountId && already.bankNumber === channel.number) continue;
+        if (already && already.accountId && already.bankNumber === channel.number && already.extraVerify === (channel.extraVerify || null)) continue;
         const result = await easyslip.createBankAccount({
           bankCode: channel.code, bankNumber: channel.number, nameTh: channel.name,
-          nameEn: channel.name, type: 'NATURAL',
+          nameEn: channel.name, type: 'NATURAL', extraVerify: channel.extraVerify,
         });
         const bankLabel = (banks.find(b => b.code === channel.code) || {}).nameTh || channel.code;
         if (result.ok) {
-          payment.easyslipAccounts[channel.code] = { accountId: result.account.id, status: 'ok', bankNumber: channel.number };
+          payment.easyslipAccounts[channel.code] = { accountId: result.account.id, status: 'ok', bankNumber: channel.number, extraVerify: channel.extraVerify || null };
           statuses.push(`${bankLabel}: เชื่อมต่อสำเร็จ`);
         } else if (result.code === 'BANK_ACCOUNT_DUPLICATE') {
-          payment.easyslipAccounts[channel.code] = { accountId: (already && already.accountId) || null, status: 'ok', bankNumber: channel.number };
-          statuses.push(`${bankLabel}: เชื่อมต่อไว้แล้ว`);
+          // The number is already registered from before this fix — creating
+          // again doesn't update its verification method, so it may still
+          // need a manual fix in the EasySlip dashboard (ดู/แก้ไขบัญชี →
+          // เลือกประเภทพร้อมเพย์) if it was set up without one originally.
+          payment.easyslipAccounts[channel.code] = { accountId: (already && already.accountId) || null, status: 'ok', bankNumber: channel.number, extraVerify: channel.extraVerify || null };
+          statuses.push(channel.extraVerify
+            ? `${bankLabel}: เชื่อมต่อไว้แล้ว (ถ้าเคยลงทะเบียนไว้ก่อนหน้านี้โดยไม่มีวิธีตรวจสอบ อาจต้องเข้าไปแก้ที่แดชบอร์ด EasySlip โดยตรง)`
+            : `${bankLabel}: เชื่อมต่อไว้แล้ว`);
         } else {
           statuses.push(`${bankLabel}: ไม่สำเร็จ (${result.message})`);
         }
