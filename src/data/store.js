@@ -282,7 +282,18 @@ async function init() {
 }
 
 // Fills in fields added after a DB was first created, without touching existing data.
+// Runs against the main site's db at startup. Tenant dbs are migrated
+// separately (schema-only, no admin-recovery) the moment they're loaded —
+// see migrateSchema()/loadTenantDb() below — since each tenant's dataset can
+// have been created at an arbitrarily older point in this app's history and
+// is never touched by this startup-only pass otherwise.
 function migrate() {
+  let changed = migrateAdminRecovery(db);
+  if (migrateSchema(db)) changed = true;
+  if (changed) save();
+}
+
+function migrateAdminRecovery(db) {
   let changed = false;
   const normalizeEnvironmentValue = (value) => {
     const trimmed = String(value || '').trim();
@@ -320,6 +331,12 @@ function migrate() {
       if (admin.status !== 'active') { admin.status = 'active'; changed = true; }
     });
   }
+  return changed;
+}
+
+// Generic schema backfill — safe to run against any db, main or tenant.
+function migrateSchema(db) {
+  let changed = false;
   if (!db.settings.hero) {
     db.settings.hero = { mode: 'default', bannerImage: null, bannerLink: '' };
     changed = true;
@@ -453,7 +470,7 @@ function migrate() {
       changed = true;
     }
   });
-  if (changed) save();
+  return changed;
 }
 
 function tenantDbPath(shopId) {
@@ -488,15 +505,25 @@ function saveTenantDb(shopId, tenantDb) {
  * Load an existing tenant's full dataset, or null if that shop has none yet.
  */
 async function loadTenantDb(shopId) {
+  let tenantDb;
   if (mongoCollection) {
     const existing = await mongoCollection.findOne({ _id: `shop:${shopId}` });
     if (!existing) return null;
     delete existing._id;
-    return existing;
+    tenantDb = existing;
+  } else {
+    const file = tenantDbPath(shopId);
+    if (!fs.existsSync(file)) return null;
+    tenantDb = JSON.parse(fs.readFileSync(file, 'utf-8'));
   }
-  const file = tenantDbPath(shopId);
-  if (!fs.existsSync(file)) return null;
-  return JSON.parse(fs.readFileSync(file, 'utf-8'));
+  // A tenant's dataset can have been created at an arbitrarily older point
+  // in this app's history — fields added since (theme, homeSections, etc.)
+  // are otherwise never backfilled onto it, unlike the main site's db which
+  // gets migrate() at every startup. Self-heal it here, lazily, on load.
+  if (migrateSchema(tenantDb)) {
+    await saveTenantDb(shopId, tenantDb);
+  }
+  return tenantDb;
 }
 
 /**
