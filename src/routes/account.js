@@ -47,8 +47,8 @@ router.post('/topup', (req, res) => {
   const user = currentUser(req);
   const amount = parseInt(req.body.amount, 10);
   const method = req.body.method === 'bank_transfer' ? 'bank_transfer' : 'promptpay';
-  if (!amount || amount < 20) {
-    req.flash('error', 'กรุณาระบุจำนวนเงินอย่างน้อย 20 บาท');
+  if (!amount || amount < 1) {
+    req.flash('error', 'กรุณาระบุจำนวนเงินอย่างน้อย 1 บาท');
     return res.redirect('/account/topup');
   }
   const request = {
