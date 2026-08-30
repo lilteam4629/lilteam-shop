@@ -7,7 +7,7 @@ const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
 const easyslip = require('../services/easyslip');
 const theme = require('../services/theme');
-const { MAIN_SITE_URL } = require('../middleware/tenant');
+const { MAIN_SITE_URL, MAIN_DOMAIN } = require('../middleware/tenant');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
@@ -930,10 +930,16 @@ router.get('/license-plans', (req, res) => {
     const verified = license.isEnabled() ? license.verifyKey(sale.key) : {};
     return { ...sale, exp: verified.exp || null };
   });
+  // Shops created via /start (the direct-purchase flow, tracked separately
+  // from the licenseSales/key system above) — each one's own expiresAt is
+  // the real source of truth for when that customer's rented site expires.
+  const rentedShops = [...store.data.shops].sort((a, b) => (a.expiresAt || 0) - (b.expiresAt || 0));
   res.render('admin/license-plans', {
     title: 'ขายคีย์เช่าเว็บ', active: 'license-plans',
     plans: store.data.licensePlans,
     sales,
+    rentedShops,
+    mainDomain: MAIN_DOMAIN,
     licenseEnabled: license.isEnabled(),
   });
 });
