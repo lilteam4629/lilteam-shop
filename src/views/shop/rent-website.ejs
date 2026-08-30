@@ -7,7 +7,7 @@
 
   <% if (promoPlans.length) { %>
     <div class="relative overflow-hidden rounded-2xl p-[1.5px] mb-6 promo-border">
-      <div class="relative overflow-hidden rounded-[15px] bg-gradient-to-br from-[#fff8e4] via-[#fbedbb] to-[#eed787] p-4">
+      <div class="relative overflow-hidden rounded-[15px] bg-gradient-to-br from-white via-[color-mix(in_srgb,var(--gold-light)_45%,white)] to-[color-mix(in_srgb,var(--gold-light)_70%,white)] p-4">
         <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/40 blur-2xl pointer-events-none"></div>
         <div class="absolute -bottom-12 -left-12 w-32 h-32 rounded-full bg-white/25 blur-2xl pointer-events-none"></div>
         <h2 class="relative flex items-center gap-1.5 font-bold text-[var(--gold-dark)] text-sm mb-3">
@@ -17,8 +17,8 @@
           <% promoPlans.forEach(plan => { %>
             <a href="/start?plan=<%= plan.id %>" class="flex items-center justify-between gap-2 bg-white/55 hover:bg-white/75 border border-[var(--gold-dark)]/30 hover:border-[var(--gold-dark)]/70 rounded-xl px-3.5 py-2.5 transition">
               <div>
-                <div class="text-sm font-semibold text-[#4a3d1c]"><%= plan.days %> วัน</div>
-                <div class="text-[10px] text-[#8a7c5c]">
+                <div class="text-sm font-semibold text-[#2a2a2a]"><%= plan.days %> วัน</div>
+                <div class="text-[10px] text-[#6b6b6b]">
                   <% if (plan.promoLimit) { %>เหลือ <%= Math.max(0, plan.promoLimit - (plan.promoUsedCount || 0)) %>/<%= plan.promoLimit %> สิทธิ์<% } %>
                   <% if (plan.promoLimit && plan.promoExpiresAt) { %> · <% } %>
                   <% if (plan.promoExpiresAt) { %>หมดเขต <%= new Date(plan.promoExpiresAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }) %><% } %>
@@ -38,7 +38,7 @@
   <div class="grid grid-cols-2 gap-4 mb-5" style="perspective: 900px;">
     <% plans.forEach(plan => { %>
       <a href="/start?plan=<%= plan.id %>" class="tilt3d-card group relative block w-full aspect-[3/4] rounded-2xl p-[2px] neon-border">
-        <div class="relative w-full h-full rounded-[14px] overflow-hidden bg-gradient-to-br from-[#fff8e4] via-[#fbedbb] to-[#eed787] flex flex-col">
+        <div class="relative w-full h-full rounded-[14px] overflow-hidden bg-gradient-to-br from-white via-[color-mix(in_srgb,var(--gold-light)_45%,white)] to-[color-mix(in_srgb,var(--gold-light)_70%,white)] flex flex-col">
           <% if (plan.id === bestValuePlanId) { %>
             <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-7 items-center bg-gradient-to-r from-[var(--gold-dark)] to-[var(--gold)] pl-3 pr-2 text-[9px] font-black tracking-wider text-white">⭐ คุ้มสุด</div>
           <% } %>
@@ -55,7 +55,7 @@
           </div>
 
           <div class="relative p-3 flex flex-col gap-0.5 bg-white/50 border-t border-white/60 backdrop-blur-sm">
-            <h3 class="font-semibold text-sm text-[#4a3d1c]">แพ็กเกจ <%= plan.days %> วัน</h3>
+            <h3 class="font-semibold text-sm text-[#2a2a2a]">แพ็กเกจ <%= plan.days %> วัน</h3>
             <span class="text-[15px] font-bold neon-price">฿<%= plan.price.toLocaleString() %></span>
           </div>
         </div>
@@ -73,7 +73,7 @@
   </a>
 
   <h2 class="text-lg font-semibold mb-3">ประวัติการซื้อของคุณ</h2>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[#241f13]">
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[var(--border)]">
     <% if (!mySales.length) { %>
       <div class="p-4 text-[var(--text-3)] text-sm">ยังไม่มีประวัติการซื้อ</div>
     <% } %>
