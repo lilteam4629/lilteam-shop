@@ -75,6 +75,7 @@
         <th class="p-3 whitespace-nowrap">ผู้เช่า</th>
         <th class="p-3 whitespace-nowrap">เหลือเวลา</th>
         <th class="p-3 whitespace-nowrap">เปิดร้านเมื่อ</th>
+        <th class="p-3"></th>
       </tr>
     </thead>
     <tbody class="divide-y divide-[var(--border)]">
@@ -96,12 +97,29 @@
             <% } %>
           </td>
           <td class="p-3 text-[var(--text-4)] text-xs whitespace-nowrap"><%= new Date(shop.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></td>
+          <td class="p-3 text-right whitespace-nowrap">
+            <form action="/admin/rented-shops/<%= shop.id %>/delete" method="post" class="delete-shop-form inline" data-shop-name="<%= shop.name %>">
+              <button type="button" class="delete-shop-btn text-rose-400 text-xs hover:underline">ลบร้าน</button>
+            </form>
+          </td>
         </tr>
       <% }) %>
-      <% if (!rentedShops.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="4">ยังไม่มีร้านที่เปิดผ่านหน้านี้</td></tr><% } %>
+      <% if (!rentedShops.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="5">ยังไม่มีร้านที่เปิดผ่านหน้านี้</td></tr><% } %>
     </tbody>
   </table>
 </div>
+
+<script>
+  document.querySelectorAll('.delete-shop-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const form = btn.closest('.delete-shop-form');
+      const name = form.dataset.shopName;
+      const typed = prompt('การลบร้าน "' + name + '" จะลบสินค้า/ออเดอร์/ผู้ใช้/ยอดเงินในร้านนั้นถาวร กู้คืนไม่ได้\n\nพิมพ์ชื่อร้าน "' + name + '" ให้ตรงเป๊ะเพื่อยืนยันการลบ:');
+      if (typed === name) form.submit();
+      else if (typed !== null) alert('ชื่อไม่ตรง ยกเลิกการลบ');
+    });
+  });
+</script>
 
 <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
   <div class="p-4 border-b border-[var(--border)]"><h3 class="font-semibold">📜 ประวัติการขายคีย์ / เว็บเช่าทั้งหมด</h3></div>

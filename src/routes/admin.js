@@ -944,6 +944,24 @@ router.get('/license-plans', (req, res) => {
   });
 });
 
+// Permanently deletes a rented shop: its entire tenant dataset (products,
+// orders, users, wallet, settings) plus its entry in this list. Irreversible
+// — the view requires typing the shop's name to confirm before submitting.
+// Uploaded media files (product images etc.) are not swept up here, since
+// they live in a shared media store with no reliable per-tenant index.
+router.post('/rented-shops/:id/delete', async (req, res) => {
+  const shop = store.data.shops.find(s => s.id === req.params.id);
+  if (!shop) {
+    req.flash('error', 'ไม่พบร้านนี้');
+    return res.redirect('/admin/license-plans');
+  }
+  await store.deleteTenantDb(shop.id);
+  store.data.shops = store.data.shops.filter(s => s.id !== shop.id);
+  store.save();
+  req.flash('success', `ลบร้าน "${shop.name}" แล้ว`);
+  res.redirect('/admin/license-plans');
+});
+
 function parsePromoFields(body) {
   const promo = body.promo === 'on';
   const promoLimit = promo && body.promoLimit ? Math.max(1, parseInt(body.promoLimit, 10) || 0) || null : null;

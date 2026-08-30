@@ -517,6 +517,21 @@ function saveTenantDb(shopId, tenantDb) {
 }
 
 /**
+ * Permanently deletes a tenant's entire dataset (products, orders, users,
+ * wallet, settings — everything). Irreversible; callers must confirm with
+ * the admin before calling this. Does not touch the main site's own db or
+ * any other tenant.
+ */
+async function deleteTenantDb(shopId) {
+  if (mongoCollection) {
+    await mongoCollection.deleteOne({ _id: `shop:${shopId}` });
+    return;
+  }
+  const file = tenantDbPath(shopId);
+  if (fs.existsSync(file)) fs.unlinkSync(file);
+}
+
+/**
  * Load an existing tenant's full dataset, or null if that shop has none yet.
  */
 async function loadTenantDb(shopId) {
@@ -639,6 +654,7 @@ module.exports = {
   genId: (len) => nanoid(len || 8),
   loadTenantDb,
   createTenantDb,
+  deleteTenantDb,
   runInTenant,
   // Wrap a callback with the CURRENT tenant context so it still resolves
   // the right shop's data even if invoked later through a non-Express
