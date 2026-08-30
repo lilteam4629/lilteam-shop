@@ -18,6 +18,7 @@ const rentWebsiteRoutes = require('./routes/rent-website');
 const tenantRoutes = require('./routes/tenant');
 const { tenantResolver } = require('./middleware/tenant');
 const license = require('./services/license');
+const discordBot = require('./services/discord-bot');
 const packageInfo = require('../package.json');
 
 const app = express();
@@ -125,6 +126,7 @@ store.init()
     app.listen(PORT, () => {
       console.log(`LilTeam Shop running at http://localhost:${PORT}`);
     });
+    discordBot.init().catch((err) => console.error('[discord-bot] init failed:', err));
   })
   .catch((err) => {
     console.error('Failed to initialize data store:', err);

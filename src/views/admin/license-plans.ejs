@@ -121,6 +121,55 @@
   });
 </script>
 
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-6">
+  <div class="flex items-center justify-between mb-1">
+    <h3 class="font-semibold">🤖 บอท Discord แจ้งเตือน + ระบบตั๋ว</h3>
+    <% if (!discordConfigured) { %>
+      <span class="text-xs text-amber-400">⚪ ยังไม่ได้ตั้งค่า DISCORD_BOT_TOKEN</span>
+    <% } else if (discordReady) { %>
+      <span class="text-xs text-emerald-400">🟢 บอทออนไลน์</span>
+    <% } else { %>
+      <span class="text-xs text-[var(--coral)]">🔴 บอทออฟไลน์ (เช็ค token)</span>
+    <% } %>
+  </div>
+  <p class="text-xs text-[var(--text-3)] mb-4">
+    ใช้สำหรับระบบเช่าเว็บเท่านั้น — แจ้งเตือนใน Discord ทุกครั้งที่มีคนเปิดร้านใหม่/ต่ออายุ (หน้า /start, /my-shops) และเปิดปุ่ม "เปิดตั๋ว" ให้ลูกค้าเข้ามาแชทสอบถามในห้องส่วนตัวได้
+    <% if (!discordConfigured) { %>
+      <br />ขั้นแรกไปสร้างบอทที่ <a href="https://discord.com/developers/applications" target="_blank" class="text-[var(--gold)] underline">Discord Developer Portal</a> เอา Bot Token มาใส่เป็นตัวแปร <code class="font-mono">DISCORD_BOT_TOKEN</code> บน Railway แล้ว invite บอทเข้าเซิร์ฟเวอร์ (ให้สิทธิ์ Manage Channels ด้วย สำหรับสร้างห้องตั๋ว) จากนั้นค่อยกรอกด้านล่าง
+    <% } %>
+  </p>
+  <form action="/admin/discord/settings" method="post" class="grid sm:grid-cols-2 gap-3 mb-3">
+    <label class="flex items-center gap-2 text-sm cursor-pointer sm:col-span-2">
+      <input type="checkbox" name="enabled" <%= discordSettings.enabled ? 'checked' : '' %> class="accent-[var(--gold)]" /> เปิดใช้งานแจ้งเตือน Discord
+    </label>
+    <div>
+      <label class="block text-xs text-[var(--text-3)] mb-1">Channel ID สำหรับแจ้งเตือนเช่าเว็บ/ต่ออายุ</label>
+      <input type="text" name="notifyChannelId" value="<%= discordSettings.notifyChannelId %>" placeholder="เช่น 123456789012345678" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
+    </div>
+    <div>
+      <label class="block text-xs text-[var(--text-3)] mb-1">Channel ID สำหรับปุ่ม "เปิดตั๋ว"</label>
+      <input type="text" name="ticketPanelChannelId" value="<%= discordSettings.ticketPanelChannelId %>" placeholder="เช่น 123456789012345678" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
+    </div>
+    <div>
+      <label class="block text-xs text-[var(--text-3)] mb-1">Category ID สำหรับสร้างห้องตั๋ว</label>
+      <input type="text" name="ticketCategoryId" value="<%= discordSettings.ticketCategoryId %>" placeholder="เช่น 123456789012345678" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
+    </div>
+    <div>
+      <label class="block text-xs text-[var(--text-3)] mb-1">Role ID ทีมงาน (มองเห็น/ตอบตั๋วได้ทุกห้อง)</label>
+      <input type="text" name="supportRoleId" value="<%= discordSettings.supportRoleId %>" placeholder="ไม่บังคับ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
+    </div>
+    <div>
+      <label class="block text-xs text-[var(--text-3)] mb-1">Channel ID บันทึกประวัติปิดตั๋ว</label>
+      <input type="text" name="ticketLogChannelId" value="<%= discordSettings.ticketLogChannelId %>" placeholder="ไม่บังคับ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
+    </div>
+    <button class="sm:col-span-2 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">บันทึกการตั้งค่า</button>
+  </form>
+  <form action="/admin/discord/post-ticket-panel" method="post">
+    <button class="text-xs bg-[var(--input)] hover:bg-[var(--border-light)] rounded-lg px-3 py-2">📩 โพสต์ปุ่ม "เปิดตั๋ว" เข้าห้องที่ตั้งไว้</button>
+  </form>
+  <p class="text-[10px] text-[var(--text-4)] mt-2">วิธีหา ID: เปิด Discord → ตั้งค่า → Advanced → เปิด Developer Mode แล้วคลิกขวาที่ห้อง/หมวดหมู่/บทบาท เลือก "Copy ID"</p>
+</div>
+
 <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
   <div class="p-4 border-b border-[var(--border)]"><h3 class="font-semibold">📜 ประวัติการขายคีย์ / เว็บเช่าทั้งหมด</h3></div>
   <table class="w-full text-sm min-w-[1000px]">

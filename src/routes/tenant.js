@@ -20,6 +20,7 @@ const store = require('../data/store');
 const { MAIN_DOMAIN } = require('../middleware/tenant');
 const { requireLogin, currentUser } = require('../middleware/auth');
 const recaptcha = require('../services/recaptcha');
+const discordBot = require('../services/discord-bot');
 
 // A promo plan disappears on its own once it expires or sells out — no
 // admin cleanup needed. Non-promo plans are unaffected.
@@ -121,6 +122,10 @@ router.post('/start', requireLogin, async (req, res) => {
     return res.redirect('/start');
   }
 
+  discordBot.notifyNewRental({
+    shopName, ownerUsername: user.username, days: plan.days, price: plan.price, expiresAt,
+  }).catch((err) => console.error('[discord-bot] notifyNewRental failed:', err));
+
   req.flash('success', `เปิดร้าน "${shopName}" สำเร็จ! เข้าสู่ระบบด้วยชื่อผู้ใช้ ${adminUsername}`);
   res.redirect(`https://${slug}.${MAIN_DOMAIN}/login`);
 });
@@ -156,6 +161,11 @@ router.post('/my-shops/:id/renew', requireLogin, (req, res) => {
   const base = shop.expiresAt && Date.now() < shop.expiresAt ? shop.expiresAt : Date.now();
   shop.expiresAt = base + plan.days * 24 * 60 * 60 * 1000;
   store.save();
+
+  discordBot.notifyRenewal({
+    shopName: shop.name, ownerUsername: user.username, days: plan.days, price: plan.price, expiresAt: shop.expiresAt,
+  }).catch((err) => console.error('[discord-bot] notifyRenewal failed:', err));
+
   req.flash('success', `ต่ออายุร้าน "${shop.name}" สำเร็จ!`);
   res.redirect('/my-shops');
 });

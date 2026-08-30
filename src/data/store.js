@@ -432,6 +432,19 @@ function migrateSchema(db) {
     db.settings.license = { key: null, label: null, expiresAt: null };
     changed = true;
   }
+  if (!db.settings.discord) {
+    // Bot token itself lives in the DISCORD_BOT_TOKEN env var (same pattern
+    // as RECAPTCHA_SECRET_KEY) — only non-secret IDs are admin-configurable.
+    db.settings.discord = {
+      enabled: false,
+      notifyChannelId: '',
+      ticketPanelChannelId: '',
+      ticketCategoryId: '',
+      ticketLogChannelId: '',
+      supportRoleId: '',
+    };
+    changed = true;
+  }
   if (!db.miniGamePrizes) { db.miniGamePrizes = []; changed = true; }
   if (!db.miniGamePlays) { db.miniGamePlays = []; changed = true; }
   if (!db.licensePlans) { db.licensePlans = []; changed = true; }

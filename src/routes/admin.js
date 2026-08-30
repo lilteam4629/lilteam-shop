@@ -7,6 +7,7 @@ const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
 const easyslip = require('../services/easyslip');
 const theme = require('../services/theme');
+const discordBot = require('../services/discord-bot');
 const { MAIN_SITE_URL, MAIN_DOMAIN } = require('../middleware/tenant');
 const { requireAdmin } = require('../middleware/auth');
 
@@ -941,7 +942,37 @@ router.get('/license-plans', (req, res) => {
     rentedShops,
     mainDomain: MAIN_DOMAIN,
     licenseEnabled: license.isEnabled(),
+    discordSettings: store.data.settings.discord,
+    discordConfigured: discordBot.isConfigured(),
+    discordReady: discordBot.isReady(),
   });
+});
+
+// ---------- Discord bot (rent-website notifications + ticket system) ----------
+// Bot token itself is DISCORD_BOT_TOKEN (env var, Railway) — only
+// non-secret channel/role IDs are editable from here.
+router.post('/discord/settings', (req, res) => {
+  store.data.settings.discord = {
+    enabled: req.body.enabled === 'on',
+    notifyChannelId: (req.body.notifyChannelId || '').trim(),
+    ticketPanelChannelId: (req.body.ticketPanelChannelId || '').trim(),
+    ticketCategoryId: (req.body.ticketCategoryId || '').trim(),
+    ticketLogChannelId: (req.body.ticketLogChannelId || '').trim(),
+    supportRoleId: (req.body.supportRoleId || '').trim(),
+  };
+  store.save();
+  req.flash('success', 'บันทึกการตั้งค่า Discord แล้ว');
+  res.redirect('/admin/license-plans');
+});
+
+router.post('/discord/post-ticket-panel', async (req, res) => {
+  try {
+    await discordBot.postTicketPanel();
+    req.flash('success', 'โพสต์ปุ่มเปิดตั๋วแล้ว');
+  } catch (err) {
+    req.flash('error', err.message || 'โพสต์ไม่สำเร็จ');
+  }
+  res.redirect('/admin/license-plans');
 });
 
 // Permanently deletes a rented shop: its entire tenant dataset (products,
