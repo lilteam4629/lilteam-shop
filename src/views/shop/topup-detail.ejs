@@ -60,7 +60,10 @@
           <div class="flex justify-between"><span class="text-[var(--text-3)]">ชื่อบัญชี</span><span><%= payment.bankAccountName %></span></div>
         </div>
       <% } %>
-      <p class="text-xs text-[var(--text-4)] mt-3">โอนแล้วกรุณาระบุจำนวนเงินให้ตรงเป๊ะ (฿<%= request.amount.toLocaleString() %>.00) เพื่อให้ระบบตรวจสอบอัตโนมัติผ่านและเติมเงินได้ทันที</p>
+      <div class="flex items-start gap-2.5 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl px-4 py-3 mt-4 text-sm">
+        <span class="shrink-0 text-lg">⚠️</span>
+        <span class="text-[var(--text)]">โอนแล้วกรุณาระบุจำนวนเงินให้ตรงเป๊ะ <b class="text-[var(--gold)]">(฿<%= request.amount.toLocaleString() %>.00)</b> เพื่อให้ระบบตรวจสอบอัตโนมัติผ่านและเติมเงินได้ทันที</span>
+      </div>
     </div>
   </div>
 
