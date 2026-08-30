@@ -22,7 +22,7 @@
 
     <form action="/admin/site-logo/upload" method="post" enctype="multipart/form-data" class="space-y-3">
       <label class="block text-sm text-[var(--text-3)]">เลือกรูปโลโก้ (แนะนำ PNG พื้นหลังโปร่งใส หรือรูปสี่เหลี่ยมจัตุรัส)</label>
-      <input type="file" name="logoImage" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
+      <input type="file" name="logoImage" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
       <button class="w-full sm:w-auto bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2.5 rounded-lg text-sm">อัปโหลดโลโก้</button>
     </form>
   </section>
@@ -44,8 +44,8 @@
 
     <form action="/admin/hero-banner/upload" method="post" enctype="multipart/form-data" class="space-y-3 mb-6">
       <label class="block text-sm text-[var(--text-3)]">เลือกรูปแบนเนอร์ (แนะนำอัตราส่วน 3:1)</label>
-      <input type="file" name="bannerImage" accept="image/*" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
-      <button class="w-full sm:w-auto bg-[#332b1a] hover:bg-[#4a3f26] border border-[var(--border-light)] text-[var(--gold)] px-6 py-2.5 rounded-lg text-sm">อัปโหลดแบนเนอร์</button>
+      <input type="file" name="bannerImage" accept="image/*" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
+      <button class="w-full sm:w-auto bg-[var(--input)] hover:bg-[var(--border-light)] border border-[var(--border-light)] text-[var(--gold)] px-6 py-2.5 rounded-lg text-sm">อัปโหลดแบนเนอร์</button>
     </form>
 
     <form action="/admin/hero-banner/mode" method="post" class="space-y-4">

@@ -21,7 +21,7 @@
     <form action="/search" method="get" class="hidden md:flex flex-1 max-w-xs">
       <input type="text" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="ค้นหาเกม..."
         class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-l-lg px-3 py-2 text-sm focus:outline-none focus:border-[var(--gold)]" />
-      <button class="bg-[#332b1a] hover:bg-[#4a3f26] border border-[var(--border-light)] border-l-0 rounded-r-lg px-3 text-sm text-[var(--gold)]">🔍</button>
+      <button class="bg-[var(--input)] hover:bg-[var(--border-light)] border border-[var(--border-light)] border-l-0 rounded-r-lg px-3 text-sm text-[var(--gold)]">🔍</button>
     </form>
 
     <div class="flex items-center gap-1.5 sm:gap-3 text-sm shrink-0">
@@ -76,7 +76,7 @@
       <% } else { %>
         <a href="/login" aria-label="เข้าสู่ระบบหรือสมัครสมาชิก" title="เข้าสู่ระบบ / สมัครสมาชิก"
           class="sm:hidden w-9 h-9 shrink-0 rounded-full bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 flex items-center justify-center transition">👤</a>
-        <a href="/login" class="hidden sm:inline-flex bg-[#332b1a] hover:bg-[#4a3f26] px-3 py-1.5 rounded-lg text-[var(--text-2)]">เข้าสู่ระบบ</a>
+        <a href="/login" class="hidden sm:inline-flex bg-[var(--input)] hover:bg-[var(--border-light)] px-3 py-1.5 rounded-lg text-[var(--text-2)]">เข้าสู่ระบบ</a>
         <a href="/register" class="hidden sm:inline-flex bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-3 py-1.5 rounded-lg">สมัครสมาชิก</a>
       <% } %>
     </div>

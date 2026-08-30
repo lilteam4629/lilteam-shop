@@ -82,7 +82,7 @@
         </div>
       <% } %>
       <form id="slipUploadForm" action="/account/topup/<%= request.id %>/slip" method="post" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-2">
-        <input type="file" name="slip" accept="image/*" required class="min-w-0 flex-1 text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[#332b1a] file:text-[var(--gold)] file:text-sm" />
+        <input type="file" name="slip" accept="image/*" required class="min-w-0 flex-1 text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
         <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 sm:py-0 rounded-lg text-sm whitespace-nowrap"><%= request.slipPath ? 'แนบใหม่' : 'แนบสลิป' %></button>
       </form>
       <p class="text-[10px] text-[var(--text-4)] mt-2">⚠️ สลิปต้องเป็นรายการโอนภายใน 5 นาทีล่าสุด และใช้ยืนยันได้ครั้งเดียวเท่านั้น (สลิปเก่าเกิน 5 นาที หรือสลิปที่เคยใช้แล้วจะไม่ผ่านการตรวจสอบ)</p>
