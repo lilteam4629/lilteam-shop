@@ -1028,7 +1028,14 @@ router.get('/settings', (req, res) => {
 });
 
 router.get('/appearance', (req, res) => {
-  res.render('admin/appearance', { title: 'รูปหน้าเว็บและโลโก้', active: 'appearance' });
+  res.render('admin/appearance', {
+    title: 'รูปหน้าเว็บและโลโก้', active: 'appearance',
+    currentTheme: store.data.settings.theme,
+    accentPresets: theme.getAccentPresets(),
+    bgPresets: theme.getBgPresets(),
+    styles: theme.getStyles(),
+    announcements: store.data.announcements,
+  });
 });
 
 // A link saved without "http(s)://" (e.g. just "m.me/page" or a bare page
