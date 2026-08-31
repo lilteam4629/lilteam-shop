@@ -105,10 +105,6 @@
         <img src="<%= popupAnnouncement.image %>" alt="<%= popupAnnouncement.title %>" class="w-full object-contain" />
       <% if (popupAnnouncement.link) { %></a><% } %>
     <% } %>
-    <div class="p-4">
-      <h3 class="font-bold text-[var(--gold)] mb-1">📢 <%= popupAnnouncement.title %></h3>
-      <p class="text-sm text-[var(--text-2)] whitespace-pre-line"><%= popupAnnouncement.body %></p>
-    </div>
     <div class="flex divide-x divide-[var(--border)] border-t border-[var(--border)]">
       <button type="button" id="announcement-popup-close" class="flex-1 py-3 text-sm font-medium text-[var(--text-2)] hover:bg-[var(--input)]">✕ เข้าสู่เว็บไซต์</button>
       <button type="button" id="announcement-popup-mute" class="flex-1 py-3 text-sm font-medium text-[var(--coral)] hover:bg-[var(--input)]">🕐 ไม่แสดงผลอีกครั้งใน 1 วัน</button>
