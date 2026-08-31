@@ -16,6 +16,9 @@
       <% if (currentUser) { %>
         <a href="/account/topup" class="hover:text-[var(--gold)]">เติมเงิน</a>
       <% } %>
+      <% if (rentWebsiteEnabled) { %>
+        <a href="/rent-website" class="hover:text-[var(--gold)]">🌐 เช่าเว็บ</a>
+      <% } %>
     </nav>
 
     <form action="/search" method="get" class="hidden md:flex flex-1 max-w-xs">
@@ -97,4 +100,17 @@
       <span class="relative min-w-0 text-left"><span class="mobile-quick-title block text-sm font-semibold text-[var(--text-2)] leading-tight">ติดต่อร้าน</span><span class="mobile-quick-subtitle block text-[10px] text-[var(--text-4)] mt-0.5">สอบถามและช่วยเหลือ</span></span>
     </a>
   </div>
+  <% if (rentWebsiteEnabled) { %>
+    <div class="sm:hidden px-3 pb-3">
+      <a href="/rent-website" class="group relative flex items-center gap-2.5 overflow-hidden rounded-2xl border border-[var(--gold)]/45 bg-gradient-to-br from-[var(--input)] to-[var(--card)] px-3.5 py-3 shadow-[0_7px_20px_rgba(0,0,0,.3)] active:scale-[.98] transition">
+        <span class="absolute -right-5 -top-7 w-20 h-20 rounded-full bg-[var(--gold)]/10 blur-xl"></span>
+        <span class="relative w-9 h-9 shrink-0 rounded-xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[var(--bg)] flex items-center justify-center shadow-[0_4px_14px_rgba(0,0,0,.25)] text-lg" aria-hidden="true">🌐</span>
+        <span class="relative min-w-0 text-left flex-1">
+          <span class="block text-sm font-semibold text-[var(--gold-hover)] leading-tight">เช่าเว็บของคุณเอง</span>
+          <span class="block text-[10px] text-[var(--text-4)] mt-0.5">เปิดร้านแบบนี้ได้ทันที — สินค้า/สต๊อก/กระเป๋าเงินครบ</span>
+        </span>
+        <span class="relative text-[var(--gold)] text-sm">→</span>
+      </a>
+    </div>
+  <% } %>
 </header>
