@@ -84,7 +84,6 @@
       <button data-tab="terms" class="tab-btn px-4 py-2 border-b-2 border-[var(--gold)] text-[var(--gold)] whitespace-nowrap">เงื่อนไข</button>
       <button data-tab="gallery" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">ภาพเกม</button>
       <button data-tab="about" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">รายละเอียด</button>
-      <button data-tab="reviews" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">รีวิว</button>
     </div>
 
     <div id="tab-terms" class="tab-panel py-6 text-sm text-[var(--text-2)] space-y-4">
@@ -121,21 +120,6 @@
     </div>
 
     <div id="tab-about" class="tab-panel py-6 hidden text-sm text-[var(--text-2)] leading-relaxed whitespace-pre-line"><%= product.aboutText %></div>
-
-    <div id="tab-reviews" class="tab-panel py-6 hidden text-sm text-[var(--text-3)]">
-      <% if (!reviews.length) { %>
-        ยังไม่มีรีวิวสำหรับเกมนี้ — เป็นคนแรกที่รีวิวหลังได้รับสินค้า
-      <% } else { %>
-        <div class="space-y-3">
-          <% reviews.forEach(r => { %>
-            <div class="bg-[var(--card)] border border-[var(--border)] rounded-lg p-3">
-              <div class="text-[var(--gold)] text-xs mb-1"><%= '★'.repeat(r.rating) %><%= '☆'.repeat(5-r.rating) %></div>
-              <p class="text-[var(--text-2)]"><%= r.body %></p>
-            </div>
-          <% }) %>
-        </div>
-      <% } %>
-    </div>
   </div>
 </section>
 
