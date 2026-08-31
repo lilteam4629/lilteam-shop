@@ -173,7 +173,10 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
     // verification failure, so fall back to manual admin review (checked:
     // false) instead of telling the customer their slip "failed", which a
     // slow third-party API response shouldn't imply.
-    if (!err.response) {
+    // A 5xx also means EasySlip's own service failed to process the
+    // request (not that it looked at the slip and rejected it) — same
+    // fallback as a timeout/no-response.
+    if (!err.response || err.response.status >= 500) {
       return {
         checked: false, verified: false,
         message: 'ระบบตรวจสอบสลิปอัตโนมัติไม่ตอบสนอง (อาจช้าชั่วคราว) — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้แทน',

@@ -93,7 +93,10 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
     // actually looked at the slip — not the same as a real verification
     // failure, so fall back to manual admin review (checked: false) instead
     // of telling the customer their slip "failed" over a slow API.
-    if (!err.response) {
+    // A 5xx also means SlipOK's own service failed to process the request
+    // (not that it looked at the slip and rejected it) — same fallback as
+    // a timeout/no-response.
+    if (!err.response || err.response.status >= 500) {
       return {
         checked: false, verified: false,
         message: 'ระบบตรวจสอบสลิปอัตโนมัติไม่ตอบสนอง (อาจช้าชั่วคราว) — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้แทน',
