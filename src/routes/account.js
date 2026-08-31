@@ -184,7 +184,7 @@ router.post('/topup/:id/slip', (req, res) => {
       if (result.checked) {
         req.flash('error', `ตรวจสอบสลิปอัตโนมัติไม่ผ่าน: ${request.slipCheck.message} — กรุณาตรวจสอบยอดเงิน/สลิปแล้วลองแนบใหม่อีกครั้ง`);
       } else {
-        req.flash('success', 'แนบสลิปแล้ว กำลังรอระบบตรวจสอบ');
+        req.flash('success', `${request.slipCheck.message || 'แนบสลิปแล้ว กำลังรอระบบตรวจสอบ'}`);
       }
     }
     res.redirect(`/account/topup/${request.id}`);

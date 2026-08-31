@@ -97,10 +97,52 @@
   <% if (q || status) { %><a href="/admin/topups" class="border border-[var(--border-light)] rounded-lg px-4 py-2 text-sm text-center hover:border-[var(--gold)]">ล้าง</a><% } %>
 </form>
 
-<div class="text-xs text-[var(--text-4)] mb-3">พบประวัติการเติมเงิน <%= requests.length %> รายการ</div>
+<%
+  const pendingRequests = requests.filter(r => r.status === 'pending');
+  const historyRequests = requests.filter(r => r.status !== 'pending');
+%>
 
+<h2 class="font-semibold mb-3">🕐 รอตรวจสอบ / มีปัญหา (<%= pendingRequests.length %>)</h2>
+<div class="space-y-3 mb-8">
+  <% pendingRequests.forEach(r => { %>
+    <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
+      <% if (r.slipPath) { %>
+        <a href="<%= r.slipPath %>" target="_blank" rel="noopener">
+          <img src="<%= r.slipPath %>" class="w-20 h-20 object-cover rounded-lg border border-[var(--border)]" alt="สลิป" />
+        </a>
+      <% } else { %>
+        <div class="w-20 h-20 shrink-0 rounded-lg border border-[var(--border)] bg-[var(--input)] flex items-center justify-center text-[10px] text-[var(--text-4)] text-center px-1">ยังไม่แนบสลิป</div>
+      <% } %>
+
+      <div class="flex-1 text-sm">
+        <div class="font-medium"><%= r.buyer ? r.buyer.username : 'ไม่พบผู้ใช้' %> <span class="text-[var(--text-4)] font-normal">(<%= r.buyer ? r.buyer.email : '-' %>)</span></div>
+        <div class="text-[var(--text-3)] font-mono text-xs">#<%= r.refCode %> &middot; <%= r.method === 'promptpay' ? 'พร้อมเพย์' : 'โอนธนาคาร' %></div>
+        <div class="text-[var(--text-4)] text-xs"><%= new Date(r.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></div>
+        <% if (r.slipCheck && r.slipCheck.message) { %>
+          <div class="text-[var(--text-4)] text-xs mt-1">📋 <%= r.slipCheck.message %></div>
+        <% } %>
+      </div>
+
+      <div class="text-xl font-bold text-[var(--gold)] sm:w-28 sm:text-right">฿<%= r.amount.toLocaleString() %>.00</div>
+
+      <div class="flex sm:flex-col gap-2 shrink-0">
+        <form action="/admin/topups/<%= r.id %>/approve" method="post" onsubmit="return confirm('ยืนยันว่าตรวจสลิปแล้ว ยอด ฿' + <%= r.amount %> + ' ถูกต้อง และต้องการเติมเงินให้เลยใช่ไหม?')">
+          <button class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg px-4 py-2 text-xs whitespace-nowrap">✓ ตรวจแล้ว เติมเงินให้เลย</button>
+        </form>
+        <form action="/admin/topups/<%= r.id %>/reject" method="post" onsubmit="return confirm('ยืนยันปฏิเสธคำขอนี้?')">
+          <button class="w-full border border-[var(--coral)]/50 text-[var(--coral)] hover:bg-[var(--coral)]/10 font-medium rounded-lg px-4 py-2 text-xs whitespace-nowrap">✕ ปฏิเสธ</button>
+        </form>
+      </div>
+    </div>
+  <% }) %>
+  <% if (!pendingRequests.length) { %>
+    <div class="bg-[var(--card)] border border-dashed border-[var(--border-light)] rounded-xl py-8 text-center text-sm text-[var(--text-4)]">ไม่มีรายการรอตรวจสอบ 🎉</div>
+  <% } %>
+</div>
+
+<h2 class="font-semibold mb-3">📜 ประวัติ (<%= historyRequests.length %>)</h2>
 <div class="space-y-3">
-  <% requests.forEach(r => { %>
+  <% historyRequests.forEach(r => { %>
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
       <% if (r.slipPath) { %>
         <a href="<%= r.slipPath %>" target="_blank" rel="noopener">
@@ -118,18 +160,14 @@
 
       <div class="text-xl font-bold text-[var(--gold)] sm:w-32 sm:text-right">฿<%= r.amount.toLocaleString() %>.00</div>
 
-      <% if (r.status === 'pending') { %>
-        <span class="shrink-0 text-xs bg-[var(--gold)]/15 text-[var(--gold-light)] px-3 py-1.5 rounded-full text-center">
-          <%= r.slipPath ? 'รอระบบตรวจสอบ' : 'รอลูกค้าแนบสลิป' %>
-        </span>
-      <% } else if (r.status === 'approved') { %>
+      <% if (r.status === 'approved') { %>
         <span class="shrink-0 text-xs bg-emerald-900/40 text-emerald-400 px-3 py-1.5 rounded-full text-center">อนุมัติแล้ว</span>
       <% } else { %>
         <span class="shrink-0 text-xs bg-[var(--coral)]/15 text-[var(--coral)] px-3 py-1.5 rounded-full text-center">ปฏิเสธ</span>
       <% } %>
     </div>
   <% }) %>
-  <% if (!requests.length) { %>
+  <% if (!historyRequests.length) { %>
     <div class="bg-[var(--card)] border border-dashed border-[var(--border-light)] rounded-xl py-12 text-center text-sm text-[var(--text-4)]">ไม่พบประวัติการเติมเงินที่ค้นหา</div>
   <% } %>
 </div>

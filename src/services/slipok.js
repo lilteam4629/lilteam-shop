@@ -99,7 +99,7 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
     if (!err.response || err.response.status >= 500) {
       return {
         checked: false, verified: false,
-        message: 'ระบบตรวจสอบสลิปอัตโนมัติไม่ตอบสนอง (อาจช้าชั่วคราว) — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้แทน',
+        message: 'ระบบเติมเงินมีปัญหาชั่วคราว — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้',
         raw: null,
       };
     }
