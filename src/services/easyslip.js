@@ -142,7 +142,7 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
 
     const res = await axios.post(`${BASE_URL}/verify/bank`, form, {
       headers: { ...form.getHeaders(), Authorization: `Bearer ${API_KEY}` },
-      timeout: 20000,
+      timeout: 40000,
     });
 
     const body = res.data;
