@@ -1057,13 +1057,25 @@ router.get('/announcements', (req, res) => {
 });
 
 router.post('/announcements', (req, res) => {
-  const { title, body } = req.body;
-  store.data.announcements.push({
-    id: store.genId(8), title, body, active: true, createdAt: new Date().toISOString(),
-  });
-  store.save();
-  req.flash('success', 'เพิ่มประกาศแล้ว');
-  res.redirect('/admin/announcements');
+  bannerUpload.single('image')(req, res, store.bindTenantContext(async (err) => {
+    if (err) {
+      req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 8MB)');
+      return res.redirect('/admin/announcements');
+    }
+    try {
+      const image = req.file ? await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype) : null;
+      store.data.announcements.push({
+        id: store.genId(8), title: req.body.title, body: req.body.body,
+        image, link: (req.body.link || '').trim(), popup: req.body.popup === 'on',
+        active: true, createdAt: new Date().toISOString(),
+      });
+      store.save();
+      req.flash('success', 'เพิ่มประกาศแล้ว');
+    } catch (saveError) {
+      req.flash('error', 'บันทึกประกาศไม่สำเร็จ กรุณาลองใหม่');
+    }
+    res.redirect('/admin/announcements');
+  }));
 });
 
 router.post('/announcements/:id/toggle', (req, res) => {

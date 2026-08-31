@@ -96,6 +96,48 @@
 </div>
 <% } %>
 
+<% const popupAnnouncement = [...announcements].filter(a => a.popup).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]; %>
+<% if (popupAnnouncement) { %>
+<div id="announcement-popup" class="hidden fixed inset-0 z-[9998] items-center justify-center bg-black/70 backdrop-blur-sm p-4" data-announcement-id="<%= popupAnnouncement.id %>">
+  <div class="relative w-full max-w-md bg-[var(--card)] border border-[var(--gold)]/40 rounded-2xl overflow-hidden shadow-2xl">
+    <% if (popupAnnouncement.image) { %>
+      <% if (popupAnnouncement.link) { %><a href="<%= popupAnnouncement.link %>" target="_blank" rel="noopener"><% } %>
+        <img src="<%= popupAnnouncement.image %>" alt="<%= popupAnnouncement.title %>" class="w-full object-contain" />
+      <% if (popupAnnouncement.link) { %></a><% } %>
+    <% } %>
+    <div class="p-4">
+      <h3 class="font-bold text-[var(--gold)] mb-1">📢 <%= popupAnnouncement.title %></h3>
+      <p class="text-sm text-[var(--text-2)] whitespace-pre-line"><%= popupAnnouncement.body %></p>
+    </div>
+    <div class="flex divide-x divide-[var(--border)] border-t border-[var(--border)]">
+      <button type="button" id="announcement-popup-close" class="flex-1 py-3 text-sm font-medium text-[var(--text-2)] hover:bg-[var(--input)]">✕ เข้าสู่เว็บไซต์</button>
+      <button type="button" id="announcement-popup-mute" class="flex-1 py-3 text-sm font-medium text-[var(--coral)] hover:bg-[var(--input)]">🕐 ไม่แสดงผลอีกครั้งใน 1 วัน</button>
+    </div>
+  </div>
+</div>
+<script>
+  (function () {
+    const modal = document.getElementById('announcement-popup');
+    if (!modal) return;
+    const storageKey = 'lilteam_announcement_mute_' + modal.dataset.announcementId;
+    try {
+      const mutedUntil = Number(localStorage.getItem(storageKey) || 0);
+      if (Date.now() < mutedUntil) return;
+    } catch (e) {}
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    const close = document.getElementById('announcement-popup-close');
+    const mute = document.getElementById('announcement-popup-mute');
+    if (close) close.addEventListener('click', function () { modal.remove(); });
+    if (mute) mute.addEventListener('click', function () {
+      try { localStorage.setItem(storageKey, String(Date.now() + 24 * 60 * 60 * 1000)); } catch (e) {}
+      modal.remove();
+    });
+    modal.addEventListener('click', function (e) { if (e.target === modal) modal.remove(); });
+  })();
+</script>
+<% } %>
+
 <% if (scheduledProducts && scheduledProducts.length) { %>
 <section class="event-update w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-5">
   <div class="mb-3">

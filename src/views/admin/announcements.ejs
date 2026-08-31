@@ -2,14 +2,21 @@
   <div class="lg:col-span-2 space-y-3">
     <% announcements.forEach(a => { %>
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-        <div class="flex justify-between items-start mb-1">
-          <span class="font-medium"><%= a.title %></span>
-          <span class="text-xs text-[var(--text-4)]"><%= a.active ? '🟢 แสดงอยู่' : '⚪ ซ่อน' %></span>
-        </div>
-        <p class="text-sm text-[var(--text-3)] mb-3"><%= a.body %></p>
-        <div class="space-x-2">
-          <form action="/admin/announcements/<%= a.id %>/toggle" method="post" class="inline"><button class="text-[var(--gold)] text-xs"><%= a.active ? 'ซ่อน' : 'แสดง' %></button></form>
-          <form action="/admin/announcements/<%= a.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบประกาศนี้?')"><button class="text-rose-400 text-xs">ลบ</button></form>
+        <div class="flex gap-3">
+          <% if (a.image) { %>
+            <img src="<%= a.image %>" alt="" class="w-16 h-16 rounded-lg object-cover shrink-0 border border-[var(--border-light)]" />
+          <% } %>
+          <div class="flex-1 min-w-0">
+            <div class="flex justify-between items-start gap-2 mb-1">
+              <span class="font-medium"><%= a.title %></span>
+              <span class="text-xs text-[var(--text-4)] shrink-0 whitespace-nowrap"><%= a.active ? '🟢 แสดงอยู่' : '⚪ ซ่อน' %><%= a.popup ? ' · 🪟 ป๊อปอัพ' : '' %></span>
+            </div>
+            <p class="text-sm text-[var(--text-3)] mb-3"><%= a.body %></p>
+            <div class="space-x-2">
+              <form action="/admin/announcements/<%= a.id %>/toggle" method="post" class="inline"><button class="text-[var(--gold)] text-xs"><%= a.active ? 'ซ่อน' : 'แสดง' %></button></form>
+              <form action="/admin/announcements/<%= a.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบประกาศนี้?')"><button class="text-rose-400 text-xs">ลบ</button></form>
+            </div>
+          </div>
         </div>
       </div>
     <% }) %>
@@ -17,10 +24,23 @@
   </div>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
     <h3 class="font-semibold mb-3">เพิ่มประกาศ</h3>
-    <form action="/admin/announcements" method="post" class="space-y-3">
+    <form action="/admin/announcements" method="post" enctype="multipart/form-data" class="space-y-3">
       <input name="title" required placeholder="หัวข้อ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
       <textarea name="body" required rows="3" placeholder="เนื้อหาประกาศ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"></textarea>
+      <div>
+        <label class="block text-xs text-[var(--text-3)] mb-1">รูปภาพ (ไม่บังคับ — ใช้กับแบบป๊อปอัพจะสวยกว่า)</label>
+        <input type="file" name="image" accept="image/png,image/jpeg,image/webp,image/gif" class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
+      </div>
+      <div>
+        <label class="block text-xs text-[var(--text-3)] mb-1">ลิงก์เมื่อกดที่รูป (ไม่บังคับ)</label>
+        <input name="link" placeholder="https://..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      </div>
+      <label class="flex items-center gap-2 text-sm cursor-pointer w-fit">
+        <input type="checkbox" name="popup" class="accent-[var(--gold)]" />
+        แสดงเป็นป๊อปอัพเต็มจอตอนเปิดหน้าแรก (ไม่ใช่แค่แถบข้อความ)
+      </label>
       <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มประกาศ</button>
     </form>
+    <p class="text-xs text-[var(--text-4)] mt-3">ถ้ามีประกาศแบบป๊อปอัพเปิดอยู่หลายอัน จะแสดงอันล่าสุดอันเดียว ลูกค้าที่กด "ไม่แสดงผลอีกครั้งใน 1 วัน" จะไม่เห็นซ้ำภายใน 24 ชม.</p>
   </div>
 </div>
