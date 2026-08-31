@@ -168,7 +168,19 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
     }
     return { checked: true, verified: true, message: 'ตรวจสอบสลิปสำเร็จผ่าน EasySlip', raw: data };
   } catch (err) {
-    const body = err.response && err.response.data;
+    // No response at all (timeout, DNS/network failure) means EasySlip
+    // never actually looked at the slip — that's not the same as a real
+    // verification failure, so fall back to manual admin review (checked:
+    // false) instead of telling the customer their slip "failed", which a
+    // slow third-party API response shouldn't imply.
+    if (!err.response) {
+      return {
+        checked: false, verified: false,
+        message: 'ระบบตรวจสอบสลิปอัตโนมัติไม่ตอบสนอง (อาจช้าชั่วคราว) — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้แทน',
+        raw: null,
+      };
+    }
+    const body = err.response.data;
     const error = body && body.error;
     return {
       checked: true,

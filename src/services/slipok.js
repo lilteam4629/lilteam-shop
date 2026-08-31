@@ -89,7 +89,18 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
       raw: body,
     };
   } catch (err) {
-    const body = err.response && err.response.data;
+    // No response at all (timeout, DNS/network failure) means SlipOK never
+    // actually looked at the slip — not the same as a real verification
+    // failure, so fall back to manual admin review (checked: false) instead
+    // of telling the customer their slip "failed" over a slow API.
+    if (!err.response) {
+      return {
+        checked: false, verified: false,
+        message: 'ระบบตรวจสอบสลิปอัตโนมัติไม่ตอบสนอง (อาจช้าชั่วคราว) — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้แทน',
+        raw: null,
+      };
+    }
+    const body = err.response.data;
     const code = body && (body.code || (body.data && body.data.code));
     return {
       checked: true,
