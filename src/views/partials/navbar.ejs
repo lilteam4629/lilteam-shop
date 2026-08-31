@@ -102,9 +102,22 @@
   </div>
   <% if (rentWebsiteEnabled) { %>
     <div class="sm:hidden flex justify-center pb-3">
-      <a href="/rent-website" class="inline-flex items-center gap-1.5 rounded-full border border-[var(--gold)]/40 bg-[var(--input)] px-3.5 py-1.5 text-[11px] text-[var(--gold-hover)] active:scale-[.97] transition">
-        <span aria-hidden="true">🌐</span> เช่าเว็บของคุณเอง
+      <a href="/rent-website" class="rent-website-pill group inline-flex items-center gap-1.5 rounded-full border border-[var(--gold)]/50 bg-gradient-to-r from-[var(--gold)]/15 via-[var(--gold)]/25 to-[var(--gold)]/15 px-4 py-1.5 text-[11px] font-medium text-[var(--gold-hover)] shadow-[0_0_14px_-4px_color-mix(in_srgb,var(--gold)_60%,transparent)] active:scale-[.96] transition">
+        <span aria-hidden="true" class="animate-bounce" style="animation-duration:1.8s;">🌐</span>
+        ใครที่อยากมีเว็บเป็นของตัวเอง กดเลย
+        <span aria-hidden="true" class="transition-transform group-hover:translate-x-0.5">→</span>
       </a>
     </div>
+    <style>
+      @keyframes rent-website-pill-glow {
+        0%, 100% { box-shadow: 0 0 14px -4px color-mix(in srgb, var(--gold) 60%, transparent); }
+        50% { box-shadow: 0 0 20px -2px color-mix(in srgb, var(--gold) 85%, transparent); }
+      }
+      .rent-website-pill { animation: rent-website-pill-glow 2.2s ease-in-out infinite; }
+      @media (prefers-reduced-motion: reduce) {
+        .rent-website-pill { animation: none; }
+        .rent-website-pill .animate-bounce { animation: none; }
+      }
+    </style>
   <% } %>
 </header>
