@@ -89,8 +89,8 @@
 <% if (announcements.length) { %>
 <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-2">
   <% announcements.forEach(a => { %>
-    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 text-[var(--gold-hover)] text-sm rounded-lg px-4 py-3 mb-2">
-      <b>📢 <%= a.title %></b> — <%= a.body %>
+    <div class="bg-[var(--card)] border border-[var(--gold)]/40 border-l-4 border-l-[var(--gold)] text-[var(--text)] text-sm rounded-lg px-4 py-3 mb-2">
+      <b class="text-[var(--gold)]">📢 <%= a.title %></b> — <%= a.body %>
     </div>
   <% }) %>
 </div>
