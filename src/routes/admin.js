@@ -13,7 +13,7 @@ const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 20 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
@@ -1059,7 +1059,7 @@ router.get('/announcements', (req, res) => {
 router.post('/announcements', (req, res) => {
   bannerUpload.single('image')(req, res, store.bindTenantContext(async (err) => {
     if (err) {
-      req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 20MB)');
+      req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 10MB)');
       return res.redirect('/admin/announcements');
     }
     try {
@@ -1221,7 +1221,7 @@ router.post('/site-logo/upload', (req, res) => {
 router.post('/hero-banner/upload', (req, res) => {
   bannerUpload.single('bannerImage')(req, res, store.bindTenantContext(async (err) => {
     if (err || !req.file) {
-      req.flash('error', 'อัปโหลดแบนเนอร์ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 20MB)');
+      req.flash('error', 'อัปโหลดแบนเนอร์ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 10MB)');
       return res.redirect('/admin/appearance');
     }
     try {
