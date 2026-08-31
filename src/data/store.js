@@ -393,6 +393,13 @@ function migrateSchema(db) {
     db.settings.payment.slipokApiKey = '';
     changed = true;
   }
+  if (db.settings.payment.topupWebhookUrl === undefined) {
+    // Each shop pastes its own Discord/Slack-compatible incoming webhook URL
+    // here — never shared or mixed across shops (it's a per-tenant db field
+    // like everything else in settings.payment).
+    db.settings.payment.topupWebhookUrl = '';
+    changed = true;
+  }
   if (db.settings.payment.easyslipAccounts === undefined) {
     // Migrate the old single-bank shape (easyslipBankCode/easyslipAccountId)
     // into the new multi-select map, if it was ever set.

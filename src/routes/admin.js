@@ -618,6 +618,7 @@ router.post('/topups/payment-settings', (req, res) => {
     Object.assign(payment, {
       promptpayId, promptpayName, bankAccountNumber, bankAccountName,
       bankName: primaryBank ? primaryBank.nameTh : payment.bankName,
+      topupWebhookUrl: (req.body.topupWebhookUrl || '').trim(),
     });
 
     // Registered as its own bank (matches a normal transfer) AND, if

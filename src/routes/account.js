@@ -6,6 +6,7 @@ const store = require('../data/store');
 const slipok = require('../services/slipok');
 const easyslip = require('../services/easyslip');
 const promptpay = require('../services/promptpay');
+const webhook = require('../services/webhook');
 const { requireLogin, currentUser } = require('../middleware/auth');
 
 router.use(requireLogin);
@@ -187,6 +188,17 @@ router.post('/topup/:id/slip', (req, res) => {
         req.flash('success', `${request.slipCheck.message || 'แนบสลิปแล้ว กำลังรอระบบตรวจสอบ'}`);
       }
     }
+
+    const origin = `${req.protocol}://${req.get('host')}`;
+    webhook.notifyTopup({
+      webhookUrl: payment.topupWebhookUrl,
+      username: user.username, email: user.email,
+      amount: request.amount, refCode: request.refCode, method: request.method,
+      slipUrl: request.slipPath ? origin + request.slipPath : null,
+      autoApproved: verified,
+      adminUrl: `${origin}/admin/topups`,
+    }).catch(() => {});
+
     res.redirect(`/account/topup/${request.id}`);
   }));
 });

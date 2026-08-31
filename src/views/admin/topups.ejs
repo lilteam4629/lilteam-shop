@@ -78,6 +78,13 @@
     <% if (payment.easyslipStatus) { %>
       <p class="text-xs <%= payment.easyslipStatus.includes('ไม่สำเร็จ') ? 'text-[var(--coral)]' : 'text-emerald-400' %>">สถานะเชื่อมต่อ EasySlip ล่าสุด: <%= payment.easyslipStatus %></p>
     <% } %>
+
+    <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4">
+      <label class="block font-medium mb-1">🔔 Webhook แจ้งเตือนเติมเงิน (ไม่บังคับ)</label>
+      <p class="text-xs text-[var(--text-4)] mb-3">วาง Discord Webhook URL ของร้านคุณเอง (ไม่แชร์กับร้านอื่น) — ทุกครั้งที่มีคนแนบสลิปเติมเงิน จะแจ้งเข้าห้อง Discord ทันที พร้อมชื่อผู้ใช้ ยอดเงิน และรูปสลิป<br />วิธีสร้าง: ตั้งค่าห้อง (⚙️) → Integrations → Webhooks → New Webhook → Copy Webhook URL</p>
+      <input type="url" name="topupWebhookUrl" value="<%= payment.topupWebhookUrl || '' %>" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
+    </div>
+
     <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกข้อมูลบัญชี</button>
   </form>
 </details>
