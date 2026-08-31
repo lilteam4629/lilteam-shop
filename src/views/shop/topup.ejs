@@ -22,9 +22,10 @@
       </div>
       <div class="relative">
         <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">฿</span>
-        <input type="number" name="amount" id="amountInput" min="1" step="1" required placeholder="หรือระบุจำนวนเงินเอง (ขั้นต่ำ 1 บาท)"
+        <input type="text" inputmode="numeric" pattern="[0-9]*" name="amount" id="amountInput" placeholder="หรือระบุจำนวนเงินเอง (ขั้นต่ำ 1 บาท)"
           class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-8 pr-3 py-3 text-sm focus:outline-none focus:border-[var(--gold)] transition-colors" />
       </div>
+      <p id="amountError" class="hidden text-xs text-[var(--coral)] mt-2">กรุณาระบุจำนวนเงินเป็นตัวเลข อย่างน้อย 1 บาท</p>
     </div>
 
     <div>
@@ -60,10 +61,33 @@
   document.querySelectorAll('.amount-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.getElementById('amountInput').value = btn.dataset.amount;
+      document.getElementById('amountError').classList.add('hidden');
       document.querySelectorAll('.amount-btn').forEach((b) => b.classList.remove('border-[var(--gold)]', 'bg-[var(--gold)]/10'));
       btn.classList.add('border-[var(--gold)]', 'bg-[var(--gold)]/10');
     });
   });
+  (function () {
+    const amountInput = document.getElementById('amountInput');
+    const amountError = document.getElementById('amountError');
+    // type="number" silently blocks submission (no visible error) in some
+    // in-app browsers (Instagram/Facebook/TikTok webviews) whenever the
+    // native constraint validation fails — e.g. a stray decimal point from
+    // a numeric keypad. Using a plain text input + our own validation here
+    // means typing an amount behaves the same as tapping a preset button.
+    amountInput.addEventListener('input', () => {
+      const digitsOnly = amountInput.value.replace(/[^0-9]/g, '');
+      if (digitsOnly !== amountInput.value) amountInput.value = digitsOnly;
+      amountError.classList.add('hidden');
+    });
+    amountInput.closest('form').addEventListener('submit', (event) => {
+      const amount = parseInt(amountInput.value, 10);
+      if (!amount || amount < 1) {
+        event.preventDefault();
+        amountError.classList.remove('hidden');
+        amountInput.focus();
+      }
+    });
+  })();
   document.querySelectorAll('input[name="method"]').forEach((radio) => {
     radio.addEventListener('change', syncMethodOptions);
   });
