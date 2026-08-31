@@ -99,7 +99,7 @@ router.post('/coupon/remove', (req, res) => {
   res.redirect('/cart');
 });
 
-router.post('/checkout', requireLogin, (req, res) => {
+router.post('/checkout', requireLogin, async (req, res) => {
   const user = currentUser(req);
   const { items, total } = buildCartView(req);
   if (!items.length) {
@@ -173,7 +173,11 @@ router.post('/checkout', requireLogin, (req, res) => {
   }
 
   store.data.orders.push(order);
-  store.save();
+  // Must finish persisting before redirecting — on a tenant shop, the very
+  // next request (GET /account/orders/:id) reloads this tenant's db fresh
+  // from MongoDB, so an unawaited save() here is a race: that request can
+  // land before the write is committed and find no such order.
+  await store.save();
 
   req.session.cart = [];
   req.session.coupon = null;

@@ -43,7 +43,7 @@ router.get('/topup', (req, res) => {
   res.render('shop/topup', { title: 'เติมเงิน', payment: store.data.settings.payment });
 });
 
-router.post('/topup', (req, res) => {
+router.post('/topup', async (req, res) => {
   const user = currentUser(req);
   const amount = parseInt(req.body.amount, 10);
   const method = req.body.method === 'bank_transfer' ? 'bank_transfer' : 'promptpay';
@@ -65,7 +65,12 @@ router.post('/topup', (req, res) => {
     reviewNote: '',
   };
   store.data.topupRequests.push(request);
-  store.save();
+  // Must finish persisting before redirecting — on a tenant shop, the very
+  // next request (GET /topup/:id) reloads this tenant's db fresh from
+  // MongoDB, so an unawaited save() here is a race: that next request can
+  // land before the write is committed and find the request missing,
+  // silently bouncing back to /account/topup with no error shown.
+  await store.save();
   res.redirect(`/account/topup/${request.id}`);
 });
 
@@ -172,10 +177,10 @@ router.post('/topup/:id/slip', (req, res) => {
       request.status = 'approved';
       request.reviewedAt = new Date().toISOString();
       request.reviewNote = 'ตรวจสอบและอนุมัติอัตโนมัติ';
-      store.save();
+      await store.save();
       req.flash('success', `ตรวจสอบสลิปสำเร็จ! เติมเงิน ${request.amount.toLocaleString()} บาทเข้ากระเป๋าเรียบร้อยแล้ว`);
     } else {
-      store.save();
+      await store.save();
       if (result.checked) {
         req.flash('error', `ตรวจสอบสลิปอัตโนมัติไม่ผ่าน: ${request.slipCheck.message} — กรุณาตรวจสอบยอดเงิน/สลิปแล้วลองแนบใหม่อีกครั้ง`);
       } else {
