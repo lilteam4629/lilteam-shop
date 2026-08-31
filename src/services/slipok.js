@@ -68,7 +68,7 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
     const res = await axios.post(
       `https://api.slipok.com/api/line/apikey/${BRANCH_ID}`,
       form,
-      { headers: { ...form.getHeaders(), 'x-authorization': API_KEY }, timeout: 40000 }
+      { headers: { ...form.getHeaders(), 'x-authorization': API_KEY }, timeout: 300000 }
     );
 
     const body = res.data;
