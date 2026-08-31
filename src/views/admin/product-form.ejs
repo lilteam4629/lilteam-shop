@@ -126,6 +126,37 @@
     </div>
   </div>
 
+  <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-4">
+    <div>
+      <h3 class="font-medium">ข้อความในหน้าสินค้า</h3>
+      <p class="text-xs text-[var(--text-4)] mt-1">แก้ไขหรือปิดการแสดงผลได้แยกทีละส่วน เฉพาะสินค้านี้ (ขึ้นบรรทัดใหม่ = แยกเป็นข้อๆ) เว้นว่างไว้เพื่อใช้ข้อความมาตรฐานของร้าน</p>
+    </div>
+
+    <div>
+      <label class="flex items-center gap-2 text-sm cursor-pointer w-fit mb-2">
+        <input type="checkbox" name="howToReceiveEnabled" <%= !product || product.howToReceiveEnabled !== false ? 'checked' : '' %> class="accent-[var(--gold)]" />
+        แสดงส่วน "วิธีรับสินค้า"
+      </label>
+      <textarea name="howToReceiveText" rows="3" placeholder="รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= product ? (product.howToReceiveText || '') : '' %></textarea>
+    </div>
+
+    <div>
+      <label class="flex items-center gap-2 text-sm cursor-pointer w-fit mb-2">
+        <input type="checkbox" name="termsBeforeOrderEnabled" <%= !product || product.termsBeforeOrderEnabled !== false ? 'checked' : '' %> class="accent-[var(--gold)]" />
+        แสดงส่วน "เงื่อนไขก่อนสั่งซื้อ"
+      </label>
+      <textarea name="termsBeforeOrderText" rows="4" placeholder="กรุณาตรวจสอบชื่อสินค้า รายละเอียด และราคาก่อนยืนยันคำสั่งซื้อ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= product ? (product.termsBeforeOrderText || '') : '' %></textarea>
+    </div>
+
+    <div>
+      <label class="flex items-center gap-2 text-sm cursor-pointer w-fit mb-2">
+        <input type="checkbox" name="warrantyEnabled" <%= !product || product.warrantyEnabled !== false ? 'checked' : '' %> class="accent-[var(--gold)]" />
+        แสดงส่วน "เงื่อนไขการรับประกันสินค้า"
+      </label>
+      <textarea name="warrantyText" rows="3" placeholder="รับประกันสินค้า 90 วันนับจากวันสั่งซื้อ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= product ? (product.warrantyText || '') : '' %></textarea>
+    </div>
+  </div>
+
   <% if (product) { %>
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">สถานะ</label>

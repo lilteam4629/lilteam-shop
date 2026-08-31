@@ -177,6 +177,12 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     eventBadge: (body.eventBadge || '').trim(),
     eventDescription: (body.eventDescription || '').trim(),
     images: images.length ? images : ['https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800'],
+    howToReceiveEnabled: body.howToReceiveEnabled === 'on',
+    howToReceiveText: (body.howToReceiveText || '').trim(),
+    termsBeforeOrderEnabled: body.termsBeforeOrderEnabled === 'on',
+    termsBeforeOrderText: (body.termsBeforeOrderText || '').trim(),
+    warrantyEnabled: body.warrantyEnabled === 'on',
+    warrantyText: (body.warrantyText || '').trim(),
   };
 }
 
@@ -439,12 +445,6 @@ router.post('/products/:id/stock/settings', (req, res) => {
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   product.fulfillmentMode = req.body.fulfillmentMode === 'contact' ? 'contact' : 'automatic';
   product.fulfillmentInstructions = (req.body.fulfillmentInstructions || '').trim();
-  product.howToReceiveEnabled = req.body.howToReceiveEnabled === 'on';
-  product.howToReceiveText = (req.body.howToReceiveText || '').trim();
-  product.termsBeforeOrderEnabled = req.body.termsBeforeOrderEnabled === 'on';
-  product.termsBeforeOrderText = (req.body.termsBeforeOrderText || '').trim();
-  product.warrantyEnabled = req.body.warrantyEnabled === 'on';
-  product.warrantyText = (req.body.warrantyText || '').trim();
   store.save();
   req.flash('success', 'บันทึกวิธีรับสินค้าแล้ว');
   res.redirect(`/admin/products/${product.id}/stock`);
