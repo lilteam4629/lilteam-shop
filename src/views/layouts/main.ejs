@@ -82,9 +82,58 @@
       .product-shimmer, .ready-glow { animation: none; }
       .premium-product-card:hover { transform: none; }
     }
+
+    /* Shown while a link/form navigation is in flight (see the SPA-style
+       navigation script below) so a tap always gets visible feedback
+       instead of looking like nothing happened. */
+    #page-loading-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: color-mix(in srgb, var(--bg) 75%, transparent);
+      backdrop-filter: blur(3px);
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity .15s ease;
+    }
+    html.lilteam-navigating #page-loading-overlay {
+      opacity: 1; visibility: visible; pointer-events: auto;
+      transition: opacity .15s ease .15s;
+    }
+    #page-loading-overlay .loading-ring {
+      position: relative; width: 68px; height: 68px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #page-loading-overlay .loading-ring::before {
+      content: ''; position: absolute; inset: 0;
+      border-radius: 9999px;
+      border: 3px solid color-mix(in srgb, var(--gold) 25%, transparent);
+      border-top-color: var(--gold);
+      animation: page-loading-spin .8s linear infinite;
+    }
+    #page-loading-overlay .loading-logo {
+      width: 44px; height: 44px; border-radius: 9999px; object-fit: cover;
+    }
+    #page-loading-overlay .loading-logo-fallback {
+      width: 44px; height: 44px; border-radius: 9999px;
+      background: var(--gold); color: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 18px;
+    }
+    @keyframes page-loading-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      #page-loading-overlay .loading-ring::before { animation-duration: 1.6s; }
+    }
   </style>
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col">
+  <div id="page-loading-overlay" aria-hidden="true">
+    <div class="loading-ring">
+      <% if (settings.branding && settings.branding.logoImage) { %>
+        <img src="<%= settings.branding.logoImage %>" alt="" class="loading-logo" />
+      <% } else { %>
+        <span class="loading-logo-fallback">L</span>
+      <% } %>
+    </div>
+  </div>
   <div id="site-page-shell" class="min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
 
