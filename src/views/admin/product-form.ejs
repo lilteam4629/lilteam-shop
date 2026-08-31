@@ -16,11 +16,10 @@
     </div>
   </div>
 
-  <div class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4 space-y-4">
-    <div>
-      <h3 class="font-medium text-[var(--gold)]">⚡ Flash Sale</h3>
-      <p class="text-xs text-[var(--text-4)] mt-1">ตั้งราคาพิเศษและเวลาไทยล่วงหน้า ระบบจะเริ่มลดราคาและคืนราคาขายเดิมให้อัตโนมัติเมื่อหมดเวลา เว้นว่างทั้งหมดหากไม่ใช้</p>
-    </div>
+  <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.flashSalePrice != null) ? 'open' : '' %>>
+    <summary class="font-medium text-[var(--gold)] cursor-pointer select-none">⚡ Flash Sale</summary>
+    <div class="space-y-4 mt-4">
+    <p class="text-xs text-[var(--text-4)]">ตั้งราคาพิเศษและเวลาไทยล่วงหน้า ระบบจะเริ่มลดราคาและคืนราคาขายเดิมให้อัตโนมัติเมื่อหมดเวลา เว้นว่างทั้งหมดหากไม่ใช้</p>
     <div class="grid sm:grid-cols-3 gap-3">
       <div>
         <label class="block text-sm mb-1 text-[var(--text-3)]">ราคา Flash Sale (บาท)</label>
@@ -36,7 +35,8 @@
       </div>
     </div>
     <p class="text-xs text-[var(--text-4)]">ราคาพิเศษต้องต่ำกว่าราคาขาย และเวลาสิ้นสุดต้องอยู่หลังเวลาเริ่ม</p>
-  </div>
+    </div>
+  </details>
 
   <div>
     <label class="block text-sm mb-1 text-[var(--text-3)]">ตัวกรองสินค้า (สินค้านี้มีสิ่งนี้)</label>
@@ -105,11 +105,10 @@
     </details>
   </div>
 
-  <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4 space-y-3">
-    <div>
-      <h3 class="font-medium">⏰ EVENT UPDATE / ตั้งเวลาเปิดขาย</h3>
-      <p class="text-xs text-[var(--text-4)] mt-1">เว้นวันเวลาไว้หากต้องการเปิดขายทันที หากตั้งเวลา สินค้าจะถูกซ่อนไว้และเปิดขายอัตโนมัติเมื่อถึงเวลาไทย</p>
-    </div>
+  <details class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4" <%= (product && (product.publishAt || product.eventBadge || product.eventDescription)) ? 'open' : '' %>>
+    <summary class="font-medium cursor-pointer select-none">⏰ EVENT UPDATE / ตั้งเวลาเปิดขาย</summary>
+    <div class="space-y-3 mt-3">
+    <p class="text-xs text-[var(--text-4)]">เว้นวันเวลาไว้หากต้องการเปิดขายทันที หากตั้งเวลา สินค้าจะถูกซ่อนไว้และเปิดขายอัตโนมัติเมื่อถึงเวลาไทย</p>
     <div class="grid sm:grid-cols-2 gap-3">
       <div>
         <label class="block text-sm mb-1 text-[var(--text-3)]">วันและเวลาเปิดขาย</label>
@@ -124,7 +123,8 @@
       <label class="block text-sm mb-1 text-[var(--text-3)]">คำอธิบายบนการ์ดกิจกรรม</label>
       <input name="eventDescription" value="<%= product ? (product.eventDescription || '') : '' %>" placeholder="เช่น เปิดขายจำนวนจำกัด เตรียมตัวให้พร้อม!" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
-  </div>
+    </div>
+  </details>
 
   <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-4">
     <div>
