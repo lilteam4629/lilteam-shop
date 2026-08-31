@@ -20,8 +20,8 @@ async function notifyTopup({ webhookUrl, username, email, amount, refCode, metho
       timestamp: new Date().toISOString(),
     };
     if (slipUrl) embed.image = { url: slipUrl };
-    if (adminUrl && !autoApproved) {
-      embed.fields.push({ name: 'กดตรวจสอบ/อนุมัติ', value: adminUrl, inline: false });
+    if (adminUrl) {
+      embed.fields.push({ name: 'กดตรวจสอบ/อนุมัติ (ต้องล็อกอินแอดมิน)', value: adminUrl, inline: false });
     }
     await axios.post(webhookUrl, { embeds: [embed] }, { timeout: 10000 });
   } catch (err) {

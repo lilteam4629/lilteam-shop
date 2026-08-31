@@ -109,4 +109,15 @@
       overlay.classList.remove('hidden');
     });
   })();
+  <% if (request.status === 'pending' && request.slipPath) { %>
+  // The automated slip check now finishes in the background after the
+  // upload response (see /account/topup/:id/slip) instead of making the
+  // customer wait on it live, so poll for the result instead of expecting
+  // it to already be there on this load.
+  (function () {
+    var checkedAt = <%= (request.slipCheck && request.slipCheck.checked !== undefined) ? 'true' : 'false' %>;
+    if (checkedAt) return;
+    setTimeout(function () { window.location.reload(); }, 6000);
+  })();
+  <% } %>
 </script>

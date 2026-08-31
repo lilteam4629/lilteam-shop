@@ -94,6 +94,97 @@ router.get('/topup/:id', async (req, res) => {
   res.render('shop/topup-detail', { title: 'สถานะการเติมเงิน', request, payment, qrDataUrl });
 });
 
+// The actual automated check against EasySlip/SlipOK can take anywhere up
+// to several minutes if the provider is slow (see their configured
+// timeouts) — the customer must never sit staring at a spinner waiting on
+// a third-party API for that long. This runs AFTER the response has
+// already been sent (see the route below), so it always needs its own
+// bound tenant context — nothing here can rely on the original request's
+// context still being current.
+async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptions, origin }) {
+  const request = store.data.topupRequests.find(t => t.id === requestId);
+  const user = store.data.users.find(u => u.id === userId);
+  if (!request || !user || request.status !== 'pending') return;
+
+  const payment = store.data.settings.payment;
+  let provider = null;
+  let result;
+  if (easyslip.isConfigured() && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
+    provider = 'easyslip';
+    const expectedNumbers = Object.values(payment.easyslipAccounts).map(a => a.bankNumber).filter(Boolean);
+    result = await easyslip.verifySlip(fileBuffer, request.amount, fileOptions, expectedNumbers);
+  } else {
+    provider = 'slipok';
+    result = await slipok.verifySlip(fileBuffer, request.amount, fileOptions, {
+      branchId: payment.slipokBranchId,
+      apiKey: payment.slipokApiKey,
+    });
+  }
+  request.slipCheck = { checked: result.checked, verified: result.verified, message: result.message, provider };
+
+  let verified = result.checked && result.verified;
+  const raw = result.raw;
+  // Normalize the transaction reference + timestamp across providers —
+  // EasySlip nests these under rawSlip (transRef, date ISO string);
+  // SlipOK returns transRef/transDate/transTime flat.
+  const transRef = raw && (raw.transRef || (raw.rawSlip && raw.rawSlip.transRef)) || null;
+  const transTime = raw && (
+    (raw.rawSlip && raw.rawSlip.date && new Date(raw.rawSlip.date))
+    || slipok.parseTransDateTime(raw.transDate, raw.transTime)
+  );
+
+  if (verified && raw) {
+    request.slipCheck.transRef = transRef;
+
+    // Reject slips for transfers made more than 5 minutes ago
+    if (transTime && !Number.isNaN(transTime.getTime()) && Date.now() - transTime.getTime() > 5 * 60 * 1000) {
+      verified = false;
+      request.slipCheck.verified = false;
+      request.slipCheck.message = 'สลิปนี้โอนเงินมานานเกิน 5 นาทีแล้ว ไม่สามารถใช้ยืนยันได้ กรุณาโอนใหม่แล้วแนบสลิปทันที';
+    }
+
+    // Reject slips already used to top up successfully before (duplicate) —
+    // extra safety on top of the provider's own duplicate check, scoped to
+    // this shop's own top-up history.
+    if (verified && transRef) {
+      const alreadyUsed = store.data.topupRequests.some(t =>
+        t.id !== request.id && t.status === 'approved' &&
+        t.slipCheck && t.slipCheck.transRef === transRef
+      );
+      if (alreadyUsed) {
+        verified = false;
+        request.slipCheck.verified = false;
+        request.slipCheck.message = 'สลิปนี้เคยถูกใช้เติมเงินไปแล้ว ไม่สามารถใช้ซ้ำได้';
+      }
+    }
+  }
+
+  if (verified) {
+    user.walletBalance += request.amount;
+    store.data.walletTransactions.push({
+      id: store.genId(10), userId: user.id, type: 'topup', amount: request.amount,
+      note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${request.refCode})`,
+      createdAt: new Date().toISOString(),
+    });
+    request.status = 'approved';
+    request.reviewedAt = new Date().toISOString();
+    request.reviewNote = 'ตรวจสอบและอนุมัติอัตโนมัติ';
+  }
+  await store.save();
+
+  // Links to the normal (login-required) admin approve page for now — a
+  // no-login-needed one-click link is a separate, deliberately-held-back
+  // change pending a decision on its security tradeoff.
+  webhook.notifyTopup({
+    webhookUrl: payment.topupWebhookUrl,
+    username: user.username, email: user.email,
+    amount: request.amount, refCode: request.refCode, method: request.method,
+    slipUrl: request.slipPath ? origin + request.slipPath : null,
+    autoApproved: verified,
+    adminUrl: verified ? null : `${origin}/admin/topups`,
+  }).catch(() => {});
+}
+
 router.post('/topup/:id/slip', (req, res) => {
   const user = currentUser(req);
   const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
@@ -109,97 +200,22 @@ router.post('/topup/:id/slip', (req, res) => {
     }
     try {
       request.slipPath = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      await store.save();
     } catch (saveError) {
       req.flash('error', 'บันทึกไฟล์สลิปไม่สำเร็จ กรุณาลองใหม่');
       return res.redirect(`/account/topup/${request.id}`);
     }
 
-    const payment = store.data.settings.payment;
-    const fileOptions = { filename: req.file.originalname, contentType: req.file.mimetype };
-    let provider = null;
-    let result;
-    if (easyslip.isConfigured() && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
-      provider = 'easyslip';
-      const expectedNumbers = Object.values(payment.easyslipAccounts).map(a => a.bankNumber).filter(Boolean);
-      result = await easyslip.verifySlip(req.file.buffer, request.amount, fileOptions, expectedNumbers);
-    } else {
-      provider = 'slipok';
-      result = await slipok.verifySlip(req.file.buffer, request.amount, fileOptions, {
-        branchId: payment.slipokBranchId,
-        apiKey: payment.slipokApiKey,
-      });
-    }
-    request.slipCheck = { checked: result.checked, verified: result.verified, message: result.message, provider };
-
-    let verified = result.checked && result.verified;
-    const raw = result.raw;
-    // Normalize the transaction reference + timestamp across providers —
-    // EasySlip nests these under rawSlip (transRef, date ISO string);
-    // SlipOK returns transRef/transDate/transTime flat.
-    const transRef = raw && (raw.transRef || (raw.rawSlip && raw.rawSlip.transRef)) || null;
-    const transTime = raw && (
-      (raw.rawSlip && raw.rawSlip.date && new Date(raw.rawSlip.date))
-      || slipok.parseTransDateTime(raw.transDate, raw.transTime)
-    );
-
-    if (verified && raw) {
-      request.slipCheck.transRef = transRef;
-
-      // Reject slips for transfers made more than 5 minutes ago
-      if (transTime && !Number.isNaN(transTime.getTime()) && Date.now() - transTime.getTime() > 5 * 60 * 1000) {
-        verified = false;
-        request.slipCheck.verified = false;
-        request.slipCheck.message = 'สลิปนี้โอนเงินมานานเกิน 5 นาทีแล้ว ไม่สามารถใช้ยืนยันได้ กรุณาโอนใหม่แล้วแนบสลิปทันที';
-      }
-
-      // Reject slips already used to top up successfully before (duplicate) —
-      // extra safety on top of the provider's own duplicate check, scoped to
-      // this shop's own top-up history.
-      if (verified && transRef) {
-        const alreadyUsed = store.data.topupRequests.some(t =>
-          t.id !== request.id && t.status === 'approved' &&
-          t.slipCheck && t.slipCheck.transRef === transRef
-        );
-        if (alreadyUsed) {
-          verified = false;
-          request.slipCheck.verified = false;
-          request.slipCheck.message = 'สลิปนี้เคยถูกใช้เติมเงินไปแล้ว ไม่สามารถใช้ซ้ำได้';
-        }
-      }
-    }
-
-    if (verified) {
-      user.walletBalance += request.amount;
-      store.data.walletTransactions.push({
-        id: store.genId(10), userId: user.id, type: 'topup', amount: request.amount,
-        note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${request.refCode})`,
-        createdAt: new Date().toISOString(),
-      });
-      request.status = 'approved';
-      request.reviewedAt = new Date().toISOString();
-      request.reviewNote = 'ตรวจสอบและอนุมัติอัตโนมัติ';
-      await store.save();
-      req.flash('success', `ตรวจสอบสลิปสำเร็จ! เติมเงิน ${request.amount.toLocaleString()} บาทเข้ากระเป๋าเรียบร้อยแล้ว`);
-    } else {
-      await store.save();
-      if (result.checked) {
-        req.flash('error', `ตรวจสอบสลิปอัตโนมัติไม่ผ่าน: ${request.slipCheck.message} — กรุณาตรวจสอบยอดเงิน/สลิปแล้วลองแนบใหม่อีกครั้ง`);
-      } else {
-        req.flash('success', `${request.slipCheck.message || 'แนบสลิปแล้ว กำลังรอระบบตรวจสอบ'}`);
-      }
-    }
-
-    const origin = `${req.protocol}://${req.get('host')}`;
-    webhook.notifyTopup({
-      webhookUrl: payment.topupWebhookUrl,
-      username: user.username, email: user.email,
-      amount: request.amount, refCode: request.refCode, method: request.method,
-      slipUrl: request.slipPath ? origin + request.slipPath : null,
-      autoApproved: verified,
-      adminUrl: `${origin}/admin/topups`,
-    }).catch(() => {});
-
+    req.flash('success', 'แนบสลิปแล้ว ระบบกำลังตรวจสอบอัตโนมัติเบื้องหลัง — รีเฟรชหน้านี้อีกครั้งในไม่กี่วินาทีเพื่อดูผล');
     res.redirect(`/account/topup/${request.id}`);
+
+    const backgroundVerify = store.bindTenantContext(verifySlipInBackground);
+    backgroundVerify({
+      requestId: request.id, userId: user.id,
+      fileBuffer: req.file.buffer,
+      fileOptions: { filename: req.file.originalname, contentType: req.file.mimetype },
+      origin: `${req.protocol}://${req.get('host')}`,
+    }).catch((bgErr) => console.error('[topup] background verify failed:', bgErr.message));
   }));
 });
 
