@@ -21,9 +21,43 @@
       animation: none !important;
     }
     body { font-family: 'Kanit', sans-serif; }
+
+    /* Shown right after clicking a link/button or submitting a form, so a
+       tap always gets visible feedback instead of looking like nothing
+       happened — admin pages are plain server-rendered navigation, so this
+       just needs to appear instantly and never needs to be hidden again
+       (the page unloads and replaces it). */
+    #page-loading-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      display: flex; align-items: center; justify-content: center;
+      background: color-mix(in srgb, var(--bg) 75%, transparent);
+      backdrop-filter: blur(3px);
+      opacity: 0; visibility: hidden; pointer-events: none;
+      transition: opacity .15s ease;
+    }
+    html.lilteam-navigating #page-loading-overlay {
+      opacity: 1; visibility: visible; pointer-events: auto;
+      transition: opacity .15s ease .15s;
+    }
+    #page-loading-overlay .loading-ring {
+      position: relative; width: 68px; height: 68px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #page-loading-overlay .loading-ring::before {
+      content: ''; position: absolute; inset: 0;
+      border-radius: 9999px;
+      border: 3px solid color-mix(in srgb, var(--gold) 25%, transparent);
+      border-top-color: var(--gold);
+      animation: page-loading-spin .8s linear infinite;
+    }
+    @keyframes page-loading-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) {
+      #page-loading-overlay .loading-ring::before { animation-duration: 1.6s; }
+    }
   </style>
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen md:flex">
+  <div id="page-loading-overlay" aria-hidden="true"><div class="loading-ring"></div></div>
   <div class="md:hidden sticky top-0 z-40 flex items-center justify-between bg-[var(--card)] border-b border-[var(--border)] px-4 py-3">
     <a href="/admin" class="flex items-center gap-2 font-bold text-base">
       <span class="bg-gradient-to-br from-[var(--gold)] to-[var(--gold-hover)] w-7 h-7 rounded-lg flex items-center justify-center text-sm">L</span>
@@ -133,6 +167,29 @@
           updateIcons();
           requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.remove('theme-switching'); }); });
         });
+      });
+    })();
+
+    (function () {
+      function markNavigating() {
+        document.documentElement.classList.add('lilteam-navigating');
+      }
+      document.addEventListener('click', function (event) {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        const link = event.target.closest('a[href]');
+        if (!link || (link.target && link.target !== '_self') || link.hasAttribute('download')) return;
+        const rawHref = link.getAttribute('href') || '';
+        if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) return;
+        markNavigating();
+      });
+      document.addEventListener('submit', function (event) {
+        if (event.defaultPrevented) return;
+        markNavigating();
+      });
+      // A bfcache restore (back/forward) can bring back the page with the
+      // class still set from just before it navigated away.
+      window.addEventListener('pageshow', function () {
+        document.documentElement.classList.remove('lilteam-navigating');
       });
     })();
   </script>
