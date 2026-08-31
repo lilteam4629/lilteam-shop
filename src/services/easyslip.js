@@ -168,28 +168,18 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
     }
     return { checked: true, verified: true, message: 'ตรวจสอบสลิปสำเร็จผ่าน EasySlip', raw: data };
   } catch (err) {
-    // No response at all (timeout, DNS/network failure) means EasySlip
-    // never actually looked at the slip — that's not the same as a real
-    // verification failure, so fall back to manual admin review (checked:
-    // false) instead of telling the customer their slip "failed", which a
-    // slow third-party API response shouldn't imply.
-    // A 5xx also means EasySlip's own service failed to process the
-    // request (not that it looked at the slip and rejected it) — same
-    // fallback as a timeout/no-response.
-    if (!err.response || err.response.status >= 500) {
-      return {
-        checked: false, verified: false,
-        message: 'ระบบเติมเงินมีปัญหาจาก ESL ชั่วคราว — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้',
-        raw: null,
-      };
-    }
-    const body = err.response.data;
-    const error = body && body.error;
+    // Landing here at all means the HTTP request/response cycle itself
+    // failed (timeout, DNS/network failure, a non-2xx status) — EasySlip
+    // never actually reached a real success/fail determination on the
+    // slip. A genuine "your slip is wrong" result comes back as a normal
+    // 200 response with success:false, handled above in the try block, not
+    // here. So every path through this catch is "couldn't check", not
+    // "checked and failed" — fall back to manual admin review instead of
+    // telling the customer their slip was rejected.
     return {
-      checked: true,
-      verified: false,
-      message: (error && error.message) || err.message || 'เชื่อมต่อ EasySlip ไม่สำเร็จ',
-      raw: body || null,
+      checked: false, verified: false,
+      message: 'ระบบเติมเงินมีปัญหาจาก ESL ชั่วคราว — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้',
+      raw: (err.response && err.response.data) || null,
     };
   }
 }
