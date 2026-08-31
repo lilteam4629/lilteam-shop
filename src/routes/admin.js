@@ -183,6 +183,8 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     termsBeforeOrderText: (body.termsBeforeOrderText || '').trim(),
     warrantyEnabled: body.warrantyEnabled === 'on',
     warrantyText: (body.warrantyText || '').trim(),
+    contactMessageIntro: (body.contactMessageIntro || '').trim(),
+    contactMessageOutro: (body.contactMessageOutro || '').trim(),
   };
 }
 

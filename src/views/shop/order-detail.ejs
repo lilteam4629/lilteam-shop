@@ -14,12 +14,12 @@
           <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm">
             <div class="font-semibold text-[var(--gold)] mb-1">กรุณาติดต่อร้านเพื่อรับสินค้า</div>
             <% if (i.fulfillmentInstructions) { %><div class="text-[var(--text-2)] whitespace-pre-line mb-3"><%= i.fulfillmentInstructions %></div><% } %>
-            <textarea class="contact-order-message hidden">สวัสดีครับ ต้องการติดต่อรับสินค้า
+            <textarea class="contact-order-message hidden"><%= i.contactMessageIntro || 'สวัสดีครับ ต้องการติดต่อรับสินค้า' %>
 หมายเลขคำสั่งซื้อ: #<%= order.id %>
 สินค้า: <%= i.title %>
 ชื่อลูกค้า: <%= currentUser.username %>
 <% if (i.fulfillmentInstructions) { %>ข้อมูลที่ร้านขอให้เตรียม: <%= i.fulfillmentInstructions %>
-<% } %>กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ</textarea>
+<% } %><%= i.contactMessageOutro || 'กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ' %></textarea>
             <button type="button" data-contact-url="<%= settings.contactMessenger || settings.contactFacebook %>" class="contact-order-btn inline-flex items-center justify-center w-full sm:w-auto px-5 py-2.5 rounded-lg bg-[var(--gold)] text-[var(--bg)] font-medium">💬 คัดลอกข้อความและเปิด Messenger</button>
             <div class="contact-order-status text-[10px] text-[var(--text-4)] mt-2"></div>
           </div>

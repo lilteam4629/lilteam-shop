@@ -136,6 +136,8 @@ router.post('/checkout', requireLogin, (req, res) => {
         stockItemId: stockItem.id,
         fulfillmentMode: item.product.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
         fulfillmentInstructions: item.product.fulfillmentInstructions || '',
+        contactMessageIntro: item.product.contactMessageIntro || '',
+        contactMessageOutro: item.product.contactMessageOutro || '',
       });
     }
   }

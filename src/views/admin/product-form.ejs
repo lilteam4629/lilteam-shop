@@ -157,6 +157,24 @@
     </div>
   </div>
 
+  <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-3">
+    <div>
+      <h3 class="font-medium">ข้อความ "คัดลอกและเปิด Messenger" (เฉพาะสินค้าที่ตั้งวิธีส่งมอบเป็น "ติดต่อร้านเพื่อรับสินค้า")</h3>
+      <p class="text-xs text-[var(--text-4)] mt-1">แก้ได้เฉพาะคำขึ้นต้น/ปิดท้าย — ส่วนหมายเลขคำสั่งซื้อ ชื่อสินค้า ชื่อลูกค้า และข้อมูลที่ต้องเตรียม ระบบล็อกไว้ให้อัตโนมัติ แก้ไม่ได้ กันพลาดข้อมูลหาย</p>
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-3)]">คำขึ้นต้น</label>
+      <input name="contactMessageIntro" value="<%= product ? (product.contactMessageIntro || '') : '' %>" placeholder="สวัสดีครับ ต้องการติดต่อรับสินค้า" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+    </div>
+    <div class="text-xs text-[var(--text-4)] font-mono bg-[var(--card)] border border-dashed border-[var(--border-light)] rounded-lg px-3 py-2">
+      🔒 หมายเลขคำสั่งซื้อ: #...<br />🔒 สินค้า: ...<br />🔒 ชื่อลูกค้า: ...<br />🔒 ข้อมูลที่ร้านขอให้เตรียม: ... (ถ้ามี)
+    </div>
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-3)]">คำปิดท้าย</label>
+      <input name="contactMessageOutro" value="<%= product ? (product.contactMessageOutro || '') : '' %>" placeholder="กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+    </div>
+  </div>
+
   <% if (product) { %>
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">สถานะ</label>
