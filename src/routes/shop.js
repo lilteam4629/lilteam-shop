@@ -107,6 +107,14 @@ router.get('/preview/locker-home', requireAdmin, (req, res) => {
   res.render('shop/home', { ...homeViewData(true), title: 'ทดลองหน้าแรกแบบห้องล็อกเกอร์' });
 });
 
+router.get('/preview/mobile-cinematic-7f4c2a', (req, res) => {
+  res.render('shop/home', {
+    ...homeViewData(true),
+    title: 'ทดลองหน้าแรกบนมือถือ',
+    publicPreview: true,
+  });
+});
+
 router.get('/products', (req, res) => {
   let products = store.data.products.filter(isProductVisible).map(withStock);
   const requestedIds = String(req.query.tags || req.query.tag || '').split(',').map(s => s.trim()).filter(Boolean);
