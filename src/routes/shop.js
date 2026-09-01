@@ -104,13 +104,13 @@ router.get('/', (req, res) => {
 });
 
 router.get('/preview/locker-home', requireAdmin, (req, res) => {
-  res.render('shop/home', { ...homeViewData(true), title: 'ทดลองหน้าแรกแบบห้องล็อกเกอร์' });
+  res.render('shop/home', { ...homeViewData(false), title: 'หน้าแรกแบบเดิม' });
 });
 
 router.get('/preview/mobile-cinematic-7f4c2a', (req, res) => {
   res.render('shop/home', {
-    ...homeViewData(true),
-    title: 'ทดลองหน้าแรกบนมือถือ',
+    ...homeViewData(false),
+    title: 'หน้าแรกแบบเดิม',
     publicPreview: true,
   });
 });
