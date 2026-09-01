@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
 const { withEffectivePrice } = require('../services/pricing');
+const { requireAdmin } = require('../middleware/auth');
 
 function publishTime(product) {
   if (!product.publishAt) return 0;
@@ -66,7 +67,7 @@ function latestOrderCards() {
     });
 }
 
-router.get('/', (req, res) => {
+function homeViewData(heroPreviewV2 = false) {
   const active = store.data.products.filter(isProductVisible).map(withStock);
   const scheduledProducts = store.data.products
     .filter(product => product.status === 'active' && product.publishAt && publishTime(product) > Date.now())
@@ -80,7 +81,7 @@ router.get('/', (req, res) => {
       : [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, section.limit || 5);
     return { id: section.id, title: section.title, products };
   }).filter(section => section.products.length);
-  res.render('shop/home', {
+  return {
     title: 'หน้าแรก',
     stats: shopStats(),
     newest,
@@ -94,7 +95,16 @@ router.get('/', (req, res) => {
     activeFilterTags: [],
     filterProductCount: active.length,
     miniGamePrizes: store.data.miniGamePrizes.filter(p => p.active),
-  });
+    heroPreviewV2,
+  };
+}
+
+router.get('/', (req, res) => {
+  res.render('shop/home', homeViewData(false));
+});
+
+router.get('/preview/locker-home', requireAdmin, (req, res) => {
+  res.render('shop/home', { ...homeViewData(true), title: 'ทดลองหน้าแรกแบบห้องล็อกเกอร์' });
 });
 
 router.get('/products', (req, res) => {

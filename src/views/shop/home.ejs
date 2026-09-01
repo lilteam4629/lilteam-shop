@@ -1,4 +1,6 @@
-<% if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
+<% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2) { %>
+  <%- include('../partials/locker-hero', { newest, stats, settings }) %>
+<% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
   <section class="border-b border-[var(--border)]">
     <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6">
       <% if (settings.hero.bannerLink) { %>
