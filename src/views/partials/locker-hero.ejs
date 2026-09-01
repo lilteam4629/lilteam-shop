@@ -1,63 +1,56 @@
-<section class="locker-hero border-b border-[var(--border)] bg-[var(--bg)]">
+<section class="game-lobby-preview border-b border-[var(--border)] bg-[var(--bg)]">
   <div class="mx-auto w-full max-w-[1800px] px-4 py-4 lg:w-[88%] lg:px-0 lg:py-7">
     <div class="mb-3 flex items-center justify-between gap-3 rounded-xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-3 py-2 text-xs text-[var(--gold-hover)]">
-      <span>👁️ โหมดทดลอง — หน้านี้เห็นได้เฉพาะแอดมิน ยังไม่กระทบหน้าร้านจริง</span>
+      <span>👁️ โหมดทดลอง — เห็นเฉพาะแอดมิน หน้าร้านจริงยังเป็นแบบเดิม</span>
       <a href="/admin/appearance" class="shrink-0 rounded-lg border border-[var(--gold)]/35 px-2.5 py-1 hover:bg-[var(--gold)]/10">กลับหลังบ้าน</a>
     </div>
-
-    <div class="locker-room overflow-hidden rounded-2xl border border-white/10">
-      <div class="locker-copy">
-        <div>
-          <span class="locker-kicker">LILTEAM SELECTION</span>
-          <h1>เลือกสินค้าเกม<br><em>ที่ใช่สำหรับคุณ</em></h1>
-          <p>รวมสินค้าเกมพร้อมส่ง คัดรายการเด่นและราคาพิเศษไว้ให้เลือกในที่เดียว</p>
-          <a href="/products" class="locker-cta">เลือกซื้อสินค้า <span>→</span></a>
+    <div class="lobby-shell overflow-hidden rounded-2xl border border-white/20">
+      <div class="lobby-sky">
+        <span class="lobby-cloud cloud-one">☁</span><span class="lobby-cloud cloud-two">☁</span><span class="lobby-cloud cloud-three">☁</span>
+        <div class="lobby-brand">🎮 LILTEAM GAME STORE</div>
+        <div class="lobby-hero-copy">
+          <span class="lobby-eyebrow">สินค้าเกมพร้อมส่ง • เลือกง่าย ได้ทันที</span>
+          <h1>ค้นหาเกมที่ใช่<br><em>แล้วเริ่มสนุกได้เลย</em></h1>
+          <p><%= settings.tagline %></p>
+          <a href="/products" class="lobby-main-cta">เริ่มเลือกสินค้า <span>›</span></a>
         </div>
-        <div class="locker-trust">
-          <div><b><%= stats.gameCount.toLocaleString() %></b><span>สินค้าพร้อมเลือก</span></div>
-          <div><b><%= stats.customerCount.toLocaleString() %></b><span>สมาชิกของร้าน</span></div>
-        </div>
+        <form action="/search" method="get" class="lobby-search">
+          <span>⌕</span><input name="q" aria-label="ค้นหาสินค้า" placeholder="ค้นหาชื่อสินค้า..." /><button aria-label="ค้นหา">ค้นหา</button>
+        </form>
+        <nav class="lobby-categories" aria-label="หมวดหมู่สินค้า">
+          <a href="/products" class="lobby-category active"><b>🎯</b><span>ทั้งหมด</span></a>
+          <% (filterTags || []).slice(0, 5).forEach(tag => { %>
+            <a href="/products?tags=<%= tag.id %>" class="lobby-category"><% if (tag.image) { %><img src="<%= tag.image %>" alt="" /><% } else { %><b>🎮</b><% } %><span><%= tag.name %></span></a>
+          <% }) %>
+          <a href="/products?sort=discount" class="lobby-category"><b>🔥</b><span>ราคาพิเศษ</span></a>
+        </nav>
       </div>
-
-      <div class="locker-showcase">
-        <% const lockerLabels = ['สินค้าใหม่', 'ยอดนิยม', 'แนะนำ', 'ราคาพิเศษ']; %>
-        <% newest.slice(0, 4).forEach((p, index) => { %>
-          <a href="/game/<%= p.slug %>" class="locker-bay group" aria-label="ดูสินค้า <%= p.title %>">
-            <span class="locker-label"><%= lockerLabels[index] %></span>
-            <span class="locker-light"></span>
-            <span class="locker-hanger"><i></i></span>
-            <span class="locker-product">
-              <img src="<%= p.images[0] %>" alt="<%= p.title %>" />
-            </span>
-            <span class="locker-product-info">
-              <strong><%= p.title %></strong>
-              <small>฿<%= p.price.toLocaleString() %>.00</small>
-            </span>
-            <span class="locker-bench"></span>
-          </a>
-        <% }) %>
+      <div class="lobby-products-zone">
+        <div class="lobby-products-head"><div><span>สินค้าแนะนำ</span><strong>เลือกเกมยอดนิยมสำหรับคุณ</strong></div><a href="/products">ดูทั้งหมด →</a></div>
+        <div class="lobby-products-grid">
+          <% newest.slice(0, 5).forEach((p, index) => { %>
+            <a href="/game/<%= p.slug %>" class="lobby-product group">
+              <span class="lobby-rank"><%= String(index + 1).padStart(2, '0') %></span>
+              <span class="lobby-product-cover"><img src="<%= p.images[0] %>" alt="<%= p.title %>" /></span>
+              <span class="lobby-product-copy"><strong><%= p.title %></strong><small>฿<%= p.price.toLocaleString() %>.00</small></span><span class="lobby-product-arrow">›</span>
+            </a>
+          <% }) %>
+        </div>
+        <div class="lobby-stats"><div><b><%= stats.gameCount.toLocaleString() %></b><span>สินค้าพร้อมเลือก</span></div><div><b><%= stats.customerCount.toLocaleString() %></b><span>สมาชิกของร้าน</span></div><div><b>24/7</b><span>ระบบสั่งซื้อออนไลน์</span></div></div>
       </div>
     </div>
   </div>
 </section>
-
 <style>
-  .locker-room{display:grid;grid-template-columns:minmax(17rem,30%) 1fr;min-height:33rem;background:var(--card);box-shadow:0 24px 70px -42px color-mix(in srgb,var(--gold) 38%,transparent)}
-  .locker-copy{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:space-between;padding:clamp(2rem,4vw,4.5rem) clamp(1.5rem,3vw,3.4rem);background:linear-gradient(115deg,var(--card) 68%,color-mix(in srgb,var(--card) 88%,transparent));border-right:1px solid var(--border)}
-  .locker-copy:before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(circle at 15% 15%,color-mix(in srgb,var(--gold) 12%,transparent),transparent 38%)}
-  .locker-copy>div{position:relative}.locker-kicker{display:inline-block;margin-bottom:1rem;color:var(--gold);font-size:.66rem;font-weight:800;letter-spacing:.2em}
-  .locker-copy h1{font-size:clamp(2rem,3.3vw,4rem);font-weight:800;line-height:1.08;letter-spacing:-.035em;color:var(--text)}.locker-copy h1 em{font-style:normal;color:var(--gold)}
-  .locker-copy p{max-width:28rem;margin-top:1.25rem;color:var(--text-3);font-size:.9rem;line-height:1.75}
-  .locker-cta{display:inline-flex;align-items:center;gap:1.2rem;margin-top:1.7rem;padding:.8rem 1.15rem;border-radius:.65rem;background:var(--gold);color:var(--bg);font-size:.78rem;font-weight:800;box-shadow:0 10px 25px -15px var(--gold);transition:background .2s,transform .2s}.locker-cta:hover{background:var(--gold-hover);transform:translateY(-1px)}.locker-cta span{font-size:1.05rem}
-  .locker-trust{display:flex;gap:1.6rem;margin-top:2rem}.locker-trust div{display:flex;flex-direction:column}.locker-trust b{font-size:1rem;color:var(--gold)}.locker-trust span{font-size:.58rem;color:var(--text-4)}
-  .locker-showcase{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:linear-gradient(180deg,var(--input),color-mix(in srgb,var(--bg) 72%,var(--card)))}
-  .locker-bay{position:relative;display:flex;min-width:0;flex-direction:column;align-items:center;overflow:hidden;border-right:1px solid color-mix(in srgb,var(--gold) 24%,var(--border));background:linear-gradient(90deg,color-mix(in srgb,var(--bg) 24%,transparent),transparent 18%,transparent 82%,color-mix(in srgb,var(--bg) 28%,transparent));transition:background .25s}.locker-bay:last-child{border-right:0}.locker-bay:hover{background-color:color-mix(in srgb,var(--gold) 7%,transparent)}
-  .locker-label{position:relative;z-index:4;height:3.1rem;padding-top:1.15rem;color:var(--text-2);font-size:.66rem;font-weight:600}
-  .locker-light{position:absolute;z-index:1;top:2.75rem;left:50%;width:72%;height:.22rem;transform:translateX(-50%);border-radius:99px;background:var(--gold);box-shadow:0 2px 10px color-mix(in srgb,var(--gold) 72%,transparent),0 18px 55px 14px color-mix(in srgb,var(--gold) 15%,transparent)}
-  .locker-hanger{position:relative;z-index:2;display:block;width:52%;height:2.3rem;margin-top:.75rem;border-bottom:2px solid color-mix(in srgb,var(--text-3) 65%,transparent)}.locker-hanger:before{content:'';position:absolute;left:50%;top:.25rem;width:.55rem;height:.55rem;border:2px solid color-mix(in srgb,var(--text-3) 65%,transparent);border-bottom:0;border-radius:99px 99px 0 0;transform:translateX(-50%)}.locker-hanger i{position:absolute;left:50%;bottom:-.2rem;width:70%;height:1.35rem;border-left:2px solid color-mix(in srgb,var(--text-3) 65%,transparent);border-right:2px solid color-mix(in srgb,var(--text-3) 65%,transparent);transform:translateX(-50%) skewX(-35deg)}
-  .locker-product{position:relative;z-index:3;display:block;width:min(76%,12rem);aspect-ratio:3/4;margin-top:-.2rem;filter:drop-shadow(0 14px 15px color-mix(in srgb,var(--bg) 72%,transparent));transition:transform .25s}.locker-product img{width:100%;height:100%;border:1px solid color-mix(in srgb,var(--gold) 25%,var(--border));border-radius:.55rem;object-fit:cover}.locker-bay:hover .locker-product{transform:translateY(-4px) scale(1.025)}
-  .locker-product-info{position:relative;z-index:4;display:block;width:82%;margin-top:.65rem;text-align:center}.locker-product-info strong{display:block;overflow:hidden;color:var(--text);font-size:.68rem;text-overflow:ellipsis;white-space:nowrap}.locker-product-info small{display:block;margin-top:.25rem;color:var(--gold);font-size:.72rem;font-weight:800}
-  .locker-bench{position:absolute;z-index:2;right:7%;bottom:1.4rem;left:7%;height:2.8rem;border-top:5px solid color-mix(in srgb,var(--gold) 42%,var(--border));background:linear-gradient(90deg,var(--bg),color-mix(in srgb,var(--gold) 12%,var(--input)) 50%,var(--bg));box-shadow:0 -8px 18px color-mix(in srgb,var(--gold) 7%,transparent),inset 0 1px color-mix(in srgb,var(--gold) 45%,transparent)}
-  @media(max-width:900px){.locker-room{grid-template-columns:1fr;min-height:0}.locker-copy{padding:2rem 1.5rem;border-right:0;border-bottom:1px solid rgba(255,255,255,.08)}.locker-copy h1{font-size:2.2rem}.locker-copy p{font-size:.8rem}.locker-showcase{min-height:27rem}.locker-bench{bottom:1rem}}
-  @media(max-width:560px){.locker-room{border-radius:1rem}.locker-copy{padding:1.5rem 1.15rem}.locker-copy h1{font-size:1.85rem}.locker-copy p{margin-top:.8rem;line-height:1.6}.locker-cta{width:100%;justify-content:center;margin-top:1.1rem}.locker-trust{margin-top:1.25rem}.locker-showcase{grid-template-columns:repeat(2,minmax(0,1fr));min-height:0}.locker-bay{min-height:20rem;border-bottom:1px solid rgba(207,167,61,.2)}.locker-bay:nth-child(2){border-right:0}.locker-label{height:2.7rem}.locker-light{top:2.35rem}.locker-product{width:min(68%,8rem)}.locker-product-info{margin-top:.4rem}.locker-bench{height:2.1rem;bottom:.7rem}}
+  .lobby-shell{background:var(--card);box-shadow:0 24px 70px -42px color-mix(in srgb,var(--gold) 42%,transparent)}
+  .lobby-sky{position:relative;min-height:28rem;padding:1.25rem clamp(1.2rem,4vw,4rem) 2rem;overflow:hidden;background:linear-gradient(180deg,#2188ee 0%,#38a7f3 55%,#81d3f5 100%)}
+  .lobby-sky:before{content:'';position:absolute;inset:auto -8% -5rem;width:116%;height:13rem;border-radius:50% 50% 0 0;background:linear-gradient(180deg,rgba(255,255,255,.15),rgba(34,139,77,.34));transform:rotate(-2deg)}.lobby-sky:after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 78% 22%,rgba(255,255,255,.3),transparent 25%);pointer-events:none}
+  .lobby-cloud{position:absolute;color:rgba(255,255,255,.9);font-size:2.4rem;filter:drop-shadow(0 5px 9px rgba(18,87,153,.2))}.cloud-one{left:7%;top:20%}.cloud-two{right:10%;top:10%;font-size:3.3rem}.cloud-three{right:28%;top:43%;font-size:1.8rem;opacity:.7}
+  .lobby-brand{position:relative;z-index:2;color:white;font-size:.7rem;font-weight:800;letter-spacing:.15em;text-shadow:0 2px 8px rgba(0,62,130,.3)}.lobby-hero-copy{position:relative;z-index:2;max-width:42rem;margin:2.2rem auto 0;text-align:center}.lobby-eyebrow{display:inline-flex;border-radius:99px;background:rgba(255,255,255,.16);padding:.35rem .75rem;color:white;font-size:.66rem;font-weight:600;backdrop-filter:blur(4px)}
+  .lobby-hero-copy h1{margin-top:.8rem;color:white;font-size:clamp(2.25rem,5vw,5rem);font-weight:900;line-height:1.02;letter-spacing:-.045em;text-shadow:0 6px 20px rgba(0,60,125,.24)}.lobby-hero-copy h1 em{font-style:normal;color:#fff2a8}.lobby-hero-copy p{margin-top:.8rem;color:rgba(255,255,255,.82);font-size:.85rem}.lobby-main-cta{display:inline-flex;align-items:center;gap:.8rem;margin-top:1.1rem;border:2px solid rgba(255,255,255,.7);border-radius:.7rem;background:var(--gold);padding:.7rem 1rem;color:var(--bg);font-size:.75rem;font-weight:800;box-shadow:0 10px 22px -12px rgba(5,55,105,.55)}
+  .lobby-search{position:relative;z-index:3;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.6rem;width:min(45rem,100%);margin:1.6rem auto 0;border:3px solid rgba(255,255,255,.75);border-radius:.8rem;background:white;padding:.25rem .3rem .25rem .8rem;box-shadow:0 12px 30px -15px rgba(0,55,120,.6)}.lobby-search>span{color:#4d6e8e;font-size:1.15rem}.lobby-search input{min-width:0;border:0;background:transparent;padding:.55rem 0;color:#203549;font-size:.8rem;outline:0}.lobby-search button{border-radius:.55rem;background:#1768ba;padding:.58rem .9rem;color:white;font-size:.7rem;font-weight:700}
+  .lobby-categories{position:relative;z-index:3;display:flex;justify-content:center;gap:clamp(.5rem,2vw,1.5rem);margin:1.25rem auto 0;overflow-x:auto;padding:.2rem .2rem .35rem;scrollbar-width:none}.lobby-categories::-webkit-scrollbar{display:none}.lobby-category{display:flex;min-width:3.8rem;flex-direction:column;align-items:center;gap:.3rem;color:white;font-size:.58rem;font-weight:600;text-shadow:0 2px 5px rgba(0,61,120,.35)}.lobby-category b,.lobby-category img{display:grid;width:2.4rem;height:2.4rem;place-items:center;border:2px solid rgba(255,255,255,.65);border-radius:.75rem;background:rgba(255,255,255,.16);object-fit:cover;font-size:1.05rem}.lobby-category.active b{border-color:#ffe478;background:#ffe478;color:#164c7e}
+  .lobby-products-zone{position:relative;z-index:4;padding:1.25rem clamp(1rem,3vw,2rem) 1.35rem;background:linear-gradient(180deg,var(--card),var(--input))}.lobby-products-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.85rem}.lobby-products-head div{display:flex;flex-direction:column}.lobby-products-head span{color:var(--gold);font-size:.62rem;font-weight:800}.lobby-products-head strong{margin-top:.1rem;color:var(--text);font-size:1rem}.lobby-products-head>a{color:var(--gold);font-size:.68rem}
+  .lobby-products-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.75rem}.lobby-product{position:relative;display:flex;min-width:0;align-items:center;gap:.65rem;border:1px solid var(--border);border-radius:.9rem;background:var(--bg);padding:.55rem;transition:border-color .2s,transform .2s}.lobby-product:hover{transform:translateY(-2px);border-color:var(--gold)}.lobby-rank{position:absolute;z-index:2;top:.25rem;left:.25rem;border-radius:.35rem;background:var(--gold);padding:.1rem .3rem;color:var(--bg);font-size:.52rem;font-weight:900}.lobby-product-cover{width:3.4rem;height:4.2rem;flex:0 0 auto;overflow:hidden;border-radius:.55rem;background:var(--input)}.lobby-product-cover img{width:100%;height:100%;object-fit:cover}.lobby-product-copy{min-width:0;flex:1}.lobby-product-copy strong{display:block;overflow:hidden;color:var(--text);font-size:.67rem;text-overflow:ellipsis;white-space:nowrap}.lobby-product-copy small{display:block;margin-top:.35rem;color:var(--gold);font-size:.72rem;font-weight:800}.lobby-product-arrow{color:var(--text-4);font-size:1rem}.lobby-stats{display:flex;justify-content:center;gap:clamp(1rem,4vw,3rem);margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--border)}.lobby-stats div{display:flex;align-items:baseline;gap:.35rem}.lobby-stats b{color:var(--gold);font-size:.8rem}.lobby-stats span{color:var(--text-4);font-size:.56rem}
+  @media(max-width:1050px){.lobby-products-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.lobby-product:nth-child(n+4){display:none}}@media(max-width:600px){.lobby-sky{min-height:27rem;padding:1rem 1rem 1.5rem}.lobby-brand{text-align:center}.lobby-hero-copy{margin-top:2.1rem}.lobby-hero-copy h1{font-size:2.25rem}.lobby-hero-copy p{font-size:.72rem}.lobby-main-cta{margin-top:.9rem}.lobby-search{margin-top:1.25rem;border-width:2px}.lobby-categories{justify-content:flex-start;margin-right:-1rem;margin-left:-1rem;padding-right:1rem;padding-left:1rem}.lobby-products-grid{grid-template-columns:1fr 1fr;gap:.55rem}.lobby-product:nth-child(3){display:none}.lobby-product{gap:.45rem;padding:.45rem}.lobby-product-cover{width:2.8rem;height:3.55rem}.lobby-product-copy strong{font-size:.6rem}.lobby-product-arrow{display:none}.lobby-products-head strong{font-size:.85rem}.lobby-stats{justify-content:space-between;gap:.5rem}.lobby-stats div{flex-direction:column;align-items:center;gap:.05rem;text-align:center}.cloud-one{left:2%;top:23%}.cloud-two{right:2%}}
 </style>
