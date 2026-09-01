@@ -18,8 +18,8 @@
     </div>
   </section>
 <% } else { %>
-<section class="border-b border-[var(--border)] overflow-hidden">
-  <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-10 pb-6 text-center">
+<section class="modern-fan-hero border-b border-[var(--border)] overflow-hidden">
+  <div class="modern-fan-heading w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-10 pb-6 text-center">
     <p class="text-[var(--gold)] text-xs sm:text-sm mb-2 px-2 flex flex-wrap items-center justify-center gap-1.5">
       <span>🎮</span><%= stats.gameCount %> สินค้า — พร้อมส่งทันทีหลังชำระเงิน
     </p>
@@ -31,7 +31,7 @@
 
   <% if (newest.length) { %>
   <!-- Compact 3-card fan for mobile -->
-  <div class="sm:hidden relative w-[92vw] max-w-[420px] mx-auto mb-6" style="height: clamp(210px, 62vw, 270px);">
+  <div class="modern-fan-stage modern-fan-mobile sm:hidden relative w-[92vw] max-w-[420px] mx-auto mb-6" style="height: clamp(230px, 68vw, 290px);">
     <%
       const mobileNewest = newest.slice(0,3);
       const mobileLayouts = {
@@ -49,15 +49,15 @@
       const mobileLayout = mobileLayouts[mobileNewest.length];
     %>
     <% mobileNewest.forEach((p, i) => { const layout = mobileLayout[i]; %>
-      <div class="absolute top-0 aspect-[3/4]"
-        style="left:<%= layout.left %>; width:<%= layout.width %>; transform:translateX(-50%) translateY(<%= layout.y %>) rotate(<%= layout.rotate %>deg); z-index:<%= 10 - Math.abs((mobileNewest.length - 1) / 2 - i) %>;">
+      <div class="modern-fan-card absolute top-0 aspect-[3/4]"
+        style="--fan-left:<%= layout.left %>; --fan-width:<%= layout.width %>; --fan-y:<%= layout.y %>; --fan-rotate:<%= layout.rotate %>deg; left:var(--fan-left); width:var(--fan-width); transform:translateX(-50%) translateY(var(--fan-y)) rotate(var(--fan-rotate)); z-index:<%= 10 - Math.abs((mobileNewest.length - 1) / 2 - i) %>;">
         <%- include('../partials/product-card', { p, compact: true }) %>
       </div>
     <% }) %>
   </div>
 
   <!-- Full 5-card fan for tablet/desktop -->
-  <div class="hidden sm:block relative max-w-6xl mx-auto mb-6" style="height: clamp(275px, 40vw, 385px);">
+  <div class="modern-fan-stage modern-fan-desktop hidden sm:block relative max-w-6xl mx-auto mb-6" style="height: clamp(295px, 42vw, 405px);">
     <%
       const rot = [-10, -5, 0, 5, 10];
       const tx = ['-40%', '-20%', '0%', '20%', '40%'];
@@ -65,8 +65,8 @@
       const widths = ['clamp(150px,18vw,200px)', 'clamp(172px,21vw,230px)', 'clamp(198px,24vw,265px)', 'clamp(172px,21vw,230px)', 'clamp(150px,18vw,200px)'];
     %>
     <% newest.slice(0,5).forEach((p, i) => { %>
-      <div class="absolute top-0 left-1/2 aspect-[3/4] hover:z-30"
-        style="width: <%= widths[i] %>; margin-left: calc(<%= tx[i] %> - <%= widths[i] %> / 2); transform: translateY(<%= ty[i] %>px) rotate(<%= rot[i] %>deg); z-index: <%= 10 - Math.abs(2-i) %>;">
+      <div class="modern-fan-card absolute top-0 left-1/2 aspect-[3/4] hover:z-30"
+        style="--fan-width:<%= widths[i] %>; --fan-x:<%= tx[i] %>; --fan-y:<%= ty[i] %>px; --fan-rotate:<%= rot[i] %>deg; width:var(--fan-width); margin-left:calc(var(--fan-x) - var(--fan-width) / 2); transform:translateY(var(--fan-y)) rotate(var(--fan-rotate)); z-index:<%= 10 - Math.abs(2-i) %>;">
         <%- include('../partials/product-card', { p, compact: true }) %>
       </div>
     <% }) %>
@@ -74,6 +74,10 @@
   <% } %>
 </section>
 <% } %>
+
+<style>
+.modern-fan-hero{position:relative;isolation:isolate;background:radial-gradient(ellipse at 50% 62%,color-mix(in srgb,var(--gold) 16%,transparent),transparent 38%),linear-gradient(180deg,color-mix(in srgb,var(--gold) 4%,var(--bg)),var(--bg))}.modern-fan-hero:before{content:'';position:absolute;z-index:-2;inset:0;background-image:linear-gradient(color-mix(in srgb,var(--gold) 5%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--gold) 5%,transparent) 1px,transparent 1px);background-size:4.5rem 4.5rem;mask-image:linear-gradient(transparent 2%,#000 34%,transparent 92%)}.modern-fan-hero:after{content:'';position:absolute;z-index:-1;bottom:-18rem;left:50%;width:min(76rem,96vw);height:29rem;border:1px solid color-mix(in srgb,var(--gold) 16%,transparent);border-radius:50%;background:radial-gradient(ellipse,color-mix(in srgb,var(--gold) 10%,transparent),transparent 66%);box-shadow:0 -20px 70px color-mix(in srgb,var(--gold) 8%,transparent);transform:translateX(-50%);pointer-events:none}.modern-fan-heading{position:relative;z-index:20}.modern-fan-heading>p:first-child{display:inline-flex;width:auto;align-items:center;padding:.38rem .72rem;border:1px solid color-mix(in srgb,var(--gold) 28%,var(--border));border-radius:999px;background:color-mix(in srgb,var(--gold) 6%,var(--card));box-shadow:inset 0 1px color-mix(in srgb,#fff 16%,transparent)}.modern-fan-heading h1{line-height:.95;letter-spacing:-.06em}.modern-fan-heading h1 span{filter:drop-shadow(0 8px 24px color-mix(in srgb,var(--gold) 12%,transparent))}.modern-fan-stage{perspective:1200px}.modern-fan-card{transform-origin:50% 82%;transition:transform .42s cubic-bezier(.2,.85,.2,1),filter .32s,opacity .32s}.modern-fan-card:before{content:'';position:absolute;z-index:-1;inset:-.42rem;border:1px solid color-mix(in srgb,var(--gold) 22%,var(--border));border-radius:1rem;background:linear-gradient(145deg,color-mix(in srgb,var(--gold) 7%,var(--card)),transparent 58%);box-shadow:0 25px 40px rgba(0,0,0,.18),0 0 30px color-mix(in srgb,var(--gold) 8%,transparent);opacity:.82;transition:border-color .3s,box-shadow .3s}.modern-fan-card:after{content:'';position:absolute;z-index:15;right:18%;bottom:-.65rem;left:18%;height:.22rem;border-radius:99px;background:linear-gradient(90deg,transparent,var(--gold),transparent);box-shadow:0 0 12px color-mix(in srgb,var(--gold) 55%,transparent);opacity:.55;transition:opacity .3s,transform .3s}.modern-fan-card:hover,.modern-fan-card:focus-within{transform:translateY(calc(var(--fan-y) - 18px)) rotate(0deg) scale(1.045)!important}.modern-fan-card:hover:before,.modern-fan-card:focus-within:before{border-color:color-mix(in srgb,var(--gold) 58%,var(--border));box-shadow:0 34px 52px rgba(0,0,0,.24),0 0 36px color-mix(in srgb,var(--gold) 20%,transparent)}.modern-fan-card:hover:after,.modern-fan-card:focus-within:after{opacity:1;transform:scaleX(1.2)}.modern-fan-desktop:has(.modern-fan-card:hover) .modern-fan-card:not(:hover){filter:brightness(.72) saturate(.82);opacity:.78}.modern-fan-card>a,.modern-fan-card>div{height:100%}.modern-fan-card img{backface-visibility:hidden}@media(max-width:640px){.modern-fan-hero:before{background-size:3.5rem 3.5rem}.modern-fan-hero:after{bottom:-13rem;height:21rem}.modern-fan-heading{padding-top:1.7rem!important;padding-bottom:1rem!important}.modern-fan-heading>p:first-child{font-size:.66rem}.modern-fan-heading h1{font-size:2.35rem}.modern-fan-mobile .modern-fan-card:hover,.modern-fan-mobile .modern-fan-card:focus-within{transform:translateX(-50%) translateY(calc(var(--fan-y) - 7px)) rotate(0deg) scale(1.025)!important}.modern-fan-card:before{inset:-.28rem;border-radius:.7rem}.modern-fan-card:after{bottom:-.45rem}}@media(hover:none){.modern-fan-desktop:has(.modern-fan-card:hover) .modern-fan-card:not(:hover){filter:none;opacity:1}}@media(prefers-reduced-motion:reduce){.modern-fan-card,.modern-fan-card:before,.modern-fan-card:after{transition:none!important}}
+</style>
 
 <section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6">
   <div class="flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
