@@ -1,56 +1,71 @@
-<section class="game-lobby-preview border-b border-[var(--border)] bg-[var(--bg)]">
-  <div class="mx-auto w-full max-w-[1800px] px-4 py-4 lg:w-[88%] lg:px-0 lg:py-7">
+<section class="scout-preview border-b border-[var(--border)] bg-[var(--bg)]">
+  <div class="mx-auto w-full max-w-[1800px] px-4 py-4 lg:w-[92%] lg:px-0 lg:py-7">
     <div class="mb-3 flex items-center justify-between gap-3 rounded-xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-3 py-2 text-xs text-[var(--gold-hover)]">
-      <span>👁️ โหมดทดลอง — เห็นเฉพาะแอดมิน หน้าร้านจริงยังเป็นแบบเดิม</span>
-      <a href="/admin/appearance" class="shrink-0 rounded-lg border border-[var(--gold)]/35 px-2.5 py-1 hover:bg-[var(--gold)]/10">กลับหลังบ้าน</a>
+      <span>👁️ โหมดทดลอง Scouting Command Center — เห็นเฉพาะแอดมิน</span>
+      <a href="/admin/appearance" class="shrink-0 rounded-lg border border-[var(--gold)]/35 px-2.5 py-1">กลับหลังบ้าน</a>
     </div>
-    <div class="lobby-shell overflow-hidden rounded-2xl border border-white/20">
-      <div class="lobby-sky">
-        <span class="lobby-cloud cloud-one">☁</span><span class="lobby-cloud cloud-two">☁</span><span class="lobby-cloud cloud-three">☁</span>
-        <div class="lobby-brand">🎮 LILTEAM GAME STORE</div>
-        <div class="lobby-hero-copy">
-          <span class="lobby-eyebrow">สินค้าเกมพร้อมส่ง • เลือกง่าย ได้ทันที</span>
-          <h1>ค้นหาเกมที่ใช่<br><em>แล้วเริ่มสนุกได้เลย</em></h1>
-          <p><%= settings.tagline %></p>
-          <a href="/products" class="lobby-main-cta">เริ่มเลือกสินค้า <span>›</span></a>
-        </div>
-        <form action="/search" method="get" class="lobby-search">
-          <span>⌕</span><input name="q" aria-label="ค้นหาสินค้า" placeholder="ค้นหาชื่อสินค้า..." /><button aria-label="ค้นหา">ค้นหา</button>
-        </form>
-        <nav class="lobby-categories" aria-label="หมวดหมู่สินค้า">
-          <a href="/products" class="lobby-category active"><b>🎯</b><span>ทั้งหมด</span></a>
-          <% (filterTags || []).slice(0, 5).forEach(tag => { %>
-            <a href="/products?tags=<%= tag.id %>" class="lobby-category"><% if (tag.image) { %><img src="<%= tag.image %>" alt="" /><% } else { %><b>🎮</b><% } %><span><%= tag.name %></span></a>
-          <% }) %>
-          <a href="/products?sort=discount" class="lobby-category"><b>🔥</b><span>ราคาพิเศษ</span></a>
-        </nav>
+
+    <% if (newest.length) { const featured = newest[0]; %>
+    <div id="scout-command" class="scout-command">
+      <div class="scout-grid-lines"></div>
+      <div class="scout-copy">
+        <span class="scout-kicker">◉ SCOUTING COMMAND CENTER</span>
+        <h1>ศูนย์รวมสินค้าเกมฟุตบอล<br><em>ค้นหาสินค้าที่ใช่สำหรับคุณ</em></h1>
+        <p>คัดเลือกสินค้าเด่น พร้อมข้อมูล ราคา และสต็อกให้ตรวจสอบก่อนสั่งซื้อได้ทันที</p>
+        <div class="scout-benefits"><span>◎ สินค้าคัดสรร</span><span>▣ ข้อมูลเรียลไทม์</span><span>◇ ระบบปลอดภัย</span></div>
+        <a id="scout-browse-link" href="/game/<%= featured.slug %>" class="scout-cta">เลือกซื้อสินค้า <b>→</b></a>
       </div>
-      <div class="lobby-products-zone">
-        <div class="lobby-products-head"><div><span>สินค้าแนะนำ</span><strong>เลือกเกมยอดนิยมสำหรับคุณ</strong></div><a href="/products">ดูทั้งหมด →</a></div>
-        <div class="lobby-products-grid">
+
+      <div class="scout-stage">
+        <div class="scout-radar"></div><span class="scout-scan-label">SCANNING PRODUCT</span>
+        <a id="scout-feature-link" href="/game/<%= featured.slug %>" class="scout-frame">
+          <img id="scout-feature-image" src="<%= featured.images[0] %>" alt="<%= featured.title %>" />
+          <span class="scout-corner c1"></span><span class="scout-corner c2"></span><span class="scout-corner c3"></span><span class="scout-corner c4"></span>
+        </a>
+        <div class="scout-stock-row"><span id="scout-stock-dot" class="<%= featured.stockCount > 0 ? 'available' : 'sold' %>"></span><strong id="scout-stock-text"><%= featured.stockCount > 0 ? 'พร้อมส่ง' : 'สินค้าหมด' %></strong><small>สต็อก: <b id="scout-stock-count"><%= featured.stockCount %></b></small></div>
+      </div>
+
+      <aside class="scout-data">
+        <div class="scout-data-title"><span>PRODUCT DATA</span><b>LIVE</b></div>
+        <div class="scout-rating"><span>RATING</span><strong id="scout-rating"><%= 98 - 0 %></strong><div class="scout-hex">◈</div></div>
+        <dl><div><dt>ชื่อสินค้า</dt><dd id="scout-title"><%= featured.title %></dd></div><div><dt>หมวดหมู่</dt><dd>สินค้าเกมฟุตบอล</dd></div><div><dt>การจัดส่ง</dt><dd class="delivery">⚡ พร้อมส่งผ่านระบบ</dd></div></dl>
+        <div class="scout-price"><span>ราคาสินค้า</span><strong id="scout-price">฿<%= featured.price.toLocaleString() %>.00</strong></div>
+        <a id="scout-buy-link" href="/game/<%= featured.slug %>" class="scout-buy">🛒 ดูสินค้าและสั่งซื้อ</a>
+      </aside>
+
+      <div class="scout-selector">
+        <button type="button" class="scout-nav" aria-label="เลื่อนซ้าย">‹</button>
+        <div class="scout-thumbs">
           <% newest.slice(0, 5).forEach((p, index) => { %>
-            <a href="/game/<%= p.slug %>" class="lobby-product group">
-              <span class="lobby-rank"><%= String(index + 1).padStart(2, '0') %></span>
-              <span class="lobby-product-cover"><img src="<%= p.images[0] %>" alt="<%= p.title %>" /></span>
-              <span class="lobby-product-copy"><strong><%= p.title %></strong><small>฿<%= p.price.toLocaleString() %>.00</small></span><span class="lobby-product-arrow">›</span>
-            </a>
+            <button type="button" class="scout-thumb <%= index === 0 ? 'active' : '' %>" data-image="<%= p.images[0] %>" data-title="<%= p.title %>" data-price="<%= p.price %>" data-stock="<%= p.stockCount %>" data-slug="<%= p.slug %>" data-rating="<%= Math.max(90, 98 - index) %>">
+              <span><%= Math.max(90, 98 - index) %></span><img src="<%= p.images[0] %>" alt="<%= p.title %>" /><small><%= p.title %></small>
+            </button>
           <% }) %>
         </div>
-        <div class="lobby-stats"><div><b><%= stats.gameCount.toLocaleString() %></b><span>สินค้าพร้อมเลือก</span></div><div><b><%= stats.customerCount.toLocaleString() %></b><span>สมาชิกของร้าน</span></div><div><b>24/7</b><span>ระบบสั่งซื้อออนไลน์</span></div></div>
+        <button type="button" class="scout-nav" aria-label="เลื่อนขวา">›</button>
       </div>
     </div>
+    <% } else { %><div class="rounded-2xl border border-dashed border-[var(--border)] p-12 text-center text-[var(--text-4)]">ยังไม่มีสินค้าสำหรับแสดงตัวอย่าง</div><% } %>
   </div>
 </section>
+
 <style>
-  .lobby-shell{background:var(--card);box-shadow:0 24px 70px -42px color-mix(in srgb,var(--gold) 42%,transparent)}
-  .lobby-sky{position:relative;min-height:28rem;padding:1.25rem clamp(1.2rem,4vw,4rem) 2rem;overflow:hidden;background:linear-gradient(180deg,#2188ee 0%,#38a7f3 55%,#81d3f5 100%)}
-  .lobby-sky:before{content:'';position:absolute;inset:auto -8% -5rem;width:116%;height:13rem;border-radius:50% 50% 0 0;background:linear-gradient(180deg,rgba(255,255,255,.15),rgba(34,139,77,.34));transform:rotate(-2deg)}.lobby-sky:after{content:'';position:absolute;inset:0;background:radial-gradient(circle at 78% 22%,rgba(255,255,255,.3),transparent 25%);pointer-events:none}
-  .lobby-cloud{position:absolute;color:rgba(255,255,255,.9);font-size:2.4rem;filter:drop-shadow(0 5px 9px rgba(18,87,153,.2))}.cloud-one{left:7%;top:20%}.cloud-two{right:10%;top:10%;font-size:3.3rem}.cloud-three{right:28%;top:43%;font-size:1.8rem;opacity:.7}
-  .lobby-brand{position:relative;z-index:2;color:white;font-size:.7rem;font-weight:800;letter-spacing:.15em;text-shadow:0 2px 8px rgba(0,62,130,.3)}.lobby-hero-copy{position:relative;z-index:2;max-width:42rem;margin:2.2rem auto 0;text-align:center}.lobby-eyebrow{display:inline-flex;border-radius:99px;background:rgba(255,255,255,.16);padding:.35rem .75rem;color:white;font-size:.66rem;font-weight:600;backdrop-filter:blur(4px)}
-  .lobby-hero-copy h1{margin-top:.8rem;color:white;font-size:clamp(2.25rem,5vw,5rem);font-weight:900;line-height:1.02;letter-spacing:-.045em;text-shadow:0 6px 20px rgba(0,60,125,.24)}.lobby-hero-copy h1 em{font-style:normal;color:#fff2a8}.lobby-hero-copy p{margin-top:.8rem;color:rgba(255,255,255,.82);font-size:.85rem}.lobby-main-cta{display:inline-flex;align-items:center;gap:.8rem;margin-top:1.1rem;border:2px solid rgba(255,255,255,.7);border-radius:.7rem;background:var(--gold);padding:.7rem 1rem;color:var(--bg);font-size:.75rem;font-weight:800;box-shadow:0 10px 22px -12px rgba(5,55,105,.55)}
-  .lobby-search{position:relative;z-index:3;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.6rem;width:min(45rem,100%);margin:1.6rem auto 0;border:3px solid rgba(255,255,255,.75);border-radius:.8rem;background:white;padding:.25rem .3rem .25rem .8rem;box-shadow:0 12px 30px -15px rgba(0,55,120,.6)}.lobby-search>span{color:#4d6e8e;font-size:1.15rem}.lobby-search input{min-width:0;border:0;background:transparent;padding:.55rem 0;color:#203549;font-size:.8rem;outline:0}.lobby-search button{border-radius:.55rem;background:#1768ba;padding:.58rem .9rem;color:white;font-size:.7rem;font-weight:700}
-  .lobby-categories{position:relative;z-index:3;display:flex;justify-content:center;gap:clamp(.5rem,2vw,1.5rem);margin:1.25rem auto 0;overflow-x:auto;padding:.2rem .2rem .35rem;scrollbar-width:none}.lobby-categories::-webkit-scrollbar{display:none}.lobby-category{display:flex;min-width:3.8rem;flex-direction:column;align-items:center;gap:.3rem;color:white;font-size:.58rem;font-weight:600;text-shadow:0 2px 5px rgba(0,61,120,.35)}.lobby-category b,.lobby-category img{display:grid;width:2.4rem;height:2.4rem;place-items:center;border:2px solid rgba(255,255,255,.65);border-radius:.75rem;background:rgba(255,255,255,.16);object-fit:cover;font-size:1.05rem}.lobby-category.active b{border-color:#ffe478;background:#ffe478;color:#164c7e}
-  .lobby-products-zone{position:relative;z-index:4;padding:1.25rem clamp(1rem,3vw,2rem) 1.35rem;background:linear-gradient(180deg,var(--card),var(--input))}.lobby-products-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.85rem}.lobby-products-head div{display:flex;flex-direction:column}.lobby-products-head span{color:var(--gold);font-size:.62rem;font-weight:800}.lobby-products-head strong{margin-top:.1rem;color:var(--text);font-size:1rem}.lobby-products-head>a{color:var(--gold);font-size:.68rem}
-  .lobby-products-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.75rem}.lobby-product{position:relative;display:flex;min-width:0;align-items:center;gap:.65rem;border:1px solid var(--border);border-radius:.9rem;background:var(--bg);padding:.55rem;transition:border-color .2s,transform .2s}.lobby-product:hover{transform:translateY(-2px);border-color:var(--gold)}.lobby-rank{position:absolute;z-index:2;top:.25rem;left:.25rem;border-radius:.35rem;background:var(--gold);padding:.1rem .3rem;color:var(--bg);font-size:.52rem;font-weight:900}.lobby-product-cover{width:3.4rem;height:4.2rem;flex:0 0 auto;overflow:hidden;border-radius:.55rem;background:var(--input)}.lobby-product-cover img{width:100%;height:100%;object-fit:cover}.lobby-product-copy{min-width:0;flex:1}.lobby-product-copy strong{display:block;overflow:hidden;color:var(--text);font-size:.67rem;text-overflow:ellipsis;white-space:nowrap}.lobby-product-copy small{display:block;margin-top:.35rem;color:var(--gold);font-size:.72rem;font-weight:800}.lobby-product-arrow{color:var(--text-4);font-size:1rem}.lobby-stats{display:flex;justify-content:center;gap:clamp(1rem,4vw,3rem);margin-top:1.1rem;padding-top:1rem;border-top:1px solid var(--border)}.lobby-stats div{display:flex;align-items:baseline;gap:.35rem}.lobby-stats b{color:var(--gold);font-size:.8rem}.lobby-stats span{color:var(--text-4);font-size:.56rem}
-  @media(max-width:1050px){.lobby-products-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.lobby-product:nth-child(n+4){display:none}}@media(max-width:600px){.lobby-sky{min-height:27rem;padding:1rem 1rem 1.5rem}.lobby-brand{text-align:center}.lobby-hero-copy{margin-top:2.1rem}.lobby-hero-copy h1{font-size:2.25rem}.lobby-hero-copy p{font-size:.72rem}.lobby-main-cta{margin-top:.9rem}.lobby-search{margin-top:1.25rem;border-width:2px}.lobby-categories{justify-content:flex-start;margin-right:-1rem;margin-left:-1rem;padding-right:1rem;padding-left:1rem}.lobby-products-grid{grid-template-columns:1fr 1fr;gap:.55rem}.lobby-product:nth-child(3){display:none}.lobby-product{gap:.45rem;padding:.45rem}.lobby-product-cover{width:2.8rem;height:3.55rem}.lobby-product-copy strong{font-size:.6rem}.lobby-product-arrow{display:none}.lobby-products-head strong{font-size:.85rem}.lobby-stats{justify-content:space-between;gap:.5rem}.lobby-stats div{flex-direction:column;align-items:center;gap:.05rem;text-align:center}.cloud-one{left:2%;top:23%}.cloud-two{right:2%}}
+  .scout-command{position:relative;display:grid;grid-template-columns:minmax(16rem,1.05fr) minmax(18rem,.8fr) minmax(15rem,.7fr);grid-template-rows:auto auto;gap:1rem;overflow:hidden;border:1px solid color-mix(in srgb,var(--gold) 30%,#242116);border-radius:1.1rem;background:radial-gradient(circle at 50% 30%,color-mix(in srgb,var(--gold) 9%,#080a09),#050706 58%);padding:clamp(1rem,2.3vw,2rem);color:#f5eedc;box-shadow:0 30px 80px -45px rgba(0,0,0,.95)}
+  .scout-grid-lines{position:absolute;inset:0;opacity:.16;background-image:linear-gradient(color-mix(in srgb,var(--gold) 24%,transparent) 1px,transparent 1px),linear-gradient(90deg,color-mix(in srgb,var(--gold) 24%,transparent) 1px,transparent 1px);background-size:46px 46px;mask-image:linear-gradient(to bottom,#000,transparent)}
+  .scout-copy,.scout-stage,.scout-data,.scout-selector{position:relative;z-index:2}.scout-copy{display:flex;flex-direction:column;justify-content:center;padding:1rem clamp(.2rem,2vw,1.5rem)}.scout-kicker{color:var(--gold);font-size:.63rem;font-weight:800;letter-spacing:.12em}.scout-copy h1{margin-top:1rem;font-size:clamp(1.8rem,3vw,3.5rem);font-weight:800;line-height:1.12;letter-spacing:-.04em}.scout-copy h1 em{font-style:normal;color:var(--gold)}.scout-copy p{max-width:31rem;margin-top:1rem;color:#989080;font-size:.78rem;line-height:1.7}.scout-benefits{display:flex;flex-wrap:wrap;gap:.65rem 1rem;margin-top:1.3rem;color:#c7bfae;font-size:.6rem}.scout-benefits span:first-child{color:var(--gold)}.scout-cta{display:flex;width:max-content;align-items:center;gap:2rem;margin-top:1.6rem;border:1px solid color-mix(in srgb,var(--gold) 75%,white);border-radius:.55rem;background:linear-gradient(135deg,var(--gold-hover),var(--gold));padding:.75rem 1rem;color:#121007;font-size:.72rem;font-weight:800}.scout-cta b{font-size:1rem}
+  .scout-stage{display:flex;min-height:31rem;flex-direction:column;align-items:center;justify-content:center;border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);background:linear-gradient(180deg,rgba(255,255,255,.02),transparent);padding:2.2rem 1rem 1rem}.scout-scan-label{position:absolute;top:.75rem;color:var(--gold);font-size:.55rem;letter-spacing:.2em}.scout-radar{position:absolute;width:90%;aspect-ratio:1;border:1px solid color-mix(in srgb,var(--gold) 18%,transparent);border-radius:50%;background:repeating-radial-gradient(circle,transparent 0 2.5rem,color-mix(in srgb,var(--gold) 10%,transparent) 2.55rem 2.6rem)}.scout-frame{position:relative;display:block;width:min(82%,17rem);aspect-ratio:3/4;padding:.38rem;border:1px solid var(--gold);background:#080a08;box-shadow:0 0 30px color-mix(in srgb,var(--gold) 14%,transparent)}.scout-frame img{width:100%;height:100%;object-fit:contain;background:#050505}.scout-corner{position:absolute;width:1.2rem;height:1.2rem;border-color:#ffe89a}.c1{top:-.35rem;left:-.35rem;border-top:2px solid;border-left:2px solid}.c2{top:-.35rem;right:-.35rem;border-top:2px solid;border-right:2px solid}.c3{bottom:-.35rem;left:-.35rem;border-bottom:2px solid;border-left:2px solid}.c4{right:-.35rem;bottom:-.35rem;border-right:2px solid;border-bottom:2px solid}.scout-stock-row{display:flex;width:min(82%,17rem);align-items:center;gap:.4rem;margin-top:.8rem;font-size:.65rem}.scout-stock-row small{margin-left:auto;color:#aaa190}.scout-stock-row>span{width:.55rem;height:.55rem;border-radius:50%}.scout-stock-row .available{background:#58d56b}.scout-stock-row .sold{background:#e66f63}.scout-stock-row strong{color:#64dc77}
+  .scout-data{align-self:center;border:1px solid color-mix(in srgb,var(--gold) 28%,transparent);background:rgba(5,7,6,.82);padding:1rem}.scout-data-title{display:flex;justify-content:space-between;color:var(--gold);font-size:.56rem;letter-spacing:.12em}.scout-data-title b{border:1px solid #4fbf64;border-radius:99px;padding:.12rem .35rem;color:#68d87b;font-size:.45rem}.scout-rating{position:relative;margin-top:1rem;padding-bottom:1rem;border-bottom:1px solid #29271f}.scout-rating>span{display:block;color:#8f887a;font-size:.5rem}.scout-rating>strong{font-size:2.2rem;color:var(--gold)}.scout-hex{position:absolute;right:.3rem;top:.1rem;color:color-mix(in srgb,var(--gold) 72%,transparent);font-size:3.2rem}.scout-data dl>div{padding:.65rem 0;border-bottom:1px solid #29271f}.scout-data dt{color:#817a6d;font-size:.5rem;text-transform:uppercase}.scout-data dd{margin-top:.2rem;overflow:hidden;color:#eee7d7;font-size:.67rem;text-overflow:ellipsis;white-space:nowrap}.scout-data .delivery{color:#61d777}.scout-price{display:flex;align-items:end;justify-content:space-between;margin-top:1rem}.scout-price span{color:#8b8375;font-size:.55rem}.scout-price strong{color:var(--gold);font-size:1.45rem}.scout-buy{display:block;margin-top:.85rem;border-radius:.5rem;background:var(--gold);padding:.7rem;text-align:center;color:#111006;font-size:.68rem;font-weight:800}
+  .scout-selector{grid-column:1/4;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.55rem}.scout-thumbs{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.55rem}.scout-thumb{position:relative;display:grid;grid-template-columns:2.7rem minmax(0,1fr);grid-template-rows:1fr auto;gap:0 .5rem;min-width:0;overflow:hidden;border:1px solid #383428;border-radius:.55rem;background:#0b0d0c;padding:.35rem;text-align:left}.scout-thumb.active{border-color:var(--gold);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent)}.scout-thumb>span{position:absolute;top:.25rem;left:.25rem;z-index:2;border-radius:.25rem;background:var(--gold);padding:.08rem .22rem;color:#111;font-size:.5rem;font-weight:900}.scout-thumb img{grid-row:1/3;width:2.7rem;height:3.4rem;border-radius:.25rem;object-fit:cover}.scout-thumb small{align-self:end;overflow:hidden;color:#ddd5c5;font-size:.54rem;text-overflow:ellipsis;white-space:nowrap}.scout-nav{color:var(--gold);font-size:1.5rem}
+  @media(max-width:1050px){.scout-command{grid-template-columns:1fr 1fr}.scout-copy{grid-column:1/3;text-align:center;align-items:center}.scout-stage{grid-column:1}.scout-data{grid-column:2}.scout-selector{grid-column:1/3}}
+  @media(max-width:640px){.scout-command{display:block;padding:.8rem}.scout-copy{padding:1.2rem .35rem 1.5rem}.scout-copy h1{font-size:1.85rem}.scout-copy p{font-size:.68rem}.scout-benefits{justify-content:center}.scout-stage{min-height:27rem;padding-top:2.1rem}.scout-frame{width:min(74%,14rem)}.scout-data{margin-top:.75rem}.scout-selector{display:block;margin-top:.75rem}.scout-nav{display:none}.scout-thumbs{display:flex;overflow-x:auto;padding-bottom:.25rem;scrollbar-width:none}.scout-thumb{min-width:8.5rem;flex:0 0 8.5rem}.scout-price strong{font-size:1.7rem}}
 </style>
+
+<script>
+  (function(){
+    const root=document.getElementById('scout-command');if(!root)return;
+    const thumbs=Array.from(root.querySelectorAll('.scout-thumb'));
+    const image=document.getElementById('scout-feature-image'),title=document.getElementById('scout-title'),price=document.getElementById('scout-price'),rating=document.getElementById('scout-rating'),stockCount=document.getElementById('scout-stock-count'),stockText=document.getElementById('scout-stock-text'),stockDot=document.getElementById('scout-stock-dot');
+    const links=[document.getElementById('scout-feature-link'),document.getElementById('scout-buy-link'),document.getElementById('scout-browse-link')];
+    thumbs.forEach(btn=>btn.addEventListener('click',()=>{thumbs.forEach(x=>x.classList.remove('active'));btn.classList.add('active');image.src=btn.dataset.image;image.alt=btn.dataset.title;title.textContent=btn.dataset.title;price.textContent='฿'+Number(btn.dataset.price).toLocaleString()+'.00';rating.textContent=btn.dataset.rating;stockCount.textContent=btn.dataset.stock;const available=Number(btn.dataset.stock)>0;stockText.textContent=available?'พร้อมส่ง':'สินค้าหมด';stockDot.className=available?'available':'sold';links.forEach(a=>a.href='/game/'+btn.dataset.slug);}));
+  })();
+</script>

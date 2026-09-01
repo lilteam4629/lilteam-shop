@@ -104,7 +104,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/preview/locker-home', requireAdmin, (req, res) => {
-  res.render('shop/home', { ...homeViewData(true), title: 'ทดลองหน้าแรกแบบ Game Lobby' });
+  res.render('shop/home', { ...homeViewData(true), title: 'ทดลอง Scouting Command Center' });
 });
 
 router.get('/products', (req, res) => {
