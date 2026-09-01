@@ -225,6 +225,7 @@ function defaultData() {
     reviews: [],
     walletTransactions: [],
     topupRequests: [],
+    purchaseApplications: [],
     miniGamePrizes: [
       { id: nanoid(8), name: 'ไอดีเกมมือสอง (สุ่ม 1 ไอดี)', percent: 10, stock: 5, isPrize: true, image: null, active: true, createdAt: now },
       { id: nanoid(8), name: 'ส่วนลด 20 บาท (แจ้งแอดมิน)', percent: 20, stock: 20, isPrize: true, image: null, active: true, createdAt: now },
@@ -413,6 +414,7 @@ function migrateSchema(db) {
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }
+  if (!db.purchaseApplications) { db.purchaseApplications = []; changed = true; }
   if (!db.settings.music) {
     db.settings.music = { enabled: false, youtubeUrl: '', defaultVolume: 50, startSeconds: 0, endSeconds: 0 };
     changed = true;
@@ -475,6 +477,12 @@ function migrateSchema(db) {
     changed = true;
   }
   db.products.forEach(product => {
+    if (product.purchaseApprovalEnabled === undefined) {
+      product.purchaseApprovalEnabled = false;
+      product.purchaseConfirmationText = '';
+      product.purchaseApplicationPrompt = '';
+      changed = true;
+    }
     if (!product.fulfillmentMode) {
       product.fulfillmentMode = 'automatic';
       changed = true;

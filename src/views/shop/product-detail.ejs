@@ -52,9 +52,44 @@
       </div>
 
       <% if (product.stockCount > 0) { %>
-        <form action="/cart/add/<%= product.id %>" method="post">
-          <button class="w-full sm:w-auto px-8 py-3 rounded-lg font-medium bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)]">เพิ่มลงตะกร้า</button>
-        </form>
+        <% if (!product.purchaseApprovalEnabled) { %>
+          <form action="/cart/add/<%= product.id %>" method="post">
+            <button class="w-full sm:w-auto px-8 py-3 rounded-lg font-medium bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)]">เพิ่มลงตะกร้า</button>
+          </form>
+        <% } else if (!currentUser) { %>
+          <div class="rounded-2xl border border-[var(--gold)]/35 bg-[var(--card)] p-5">
+            <div class="font-semibold text-[var(--gold)]">🔐 สินค้านี้ต้องยืนยันสิทธิ์ก่อนซื้อ</div>
+            <p class="text-sm text-[var(--text-3)] mt-1">เข้าสู่ระบบก่อน แล้วส่งข้อมูลให้แอดมินตรวจสอบ</p>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <a href="/login" class="px-6 py-2.5 rounded-lg font-medium bg-[var(--gold)] text-[var(--bg)]">เข้าสู่ระบบ</a>
+              <a href="/register" class="px-6 py-2.5 rounded-lg border border-[var(--border-light)] hover:border-[var(--gold)]">สมัครสมาชิก</a>
+            </div>
+          </div>
+        <% } else if (purchaseApplication && purchaseApplication.status === 'approved') { %>
+          <form action="/cart/add/<%= product.id %>" method="post" class="rounded-2xl border border-emerald-500/35 bg-emerald-500/5 p-5">
+            <div class="flex items-center gap-2 text-emerald-400 font-semibold mb-3"><span class="flex w-7 h-7 items-center justify-center rounded-full bg-emerald-500 text-white">✓</span> แอดมินอนุมัติแล้ว พร้อมซื้อได้เลย</div>
+            <label class="flex items-start gap-3 rounded-xl border border-[var(--border-light)] bg-[var(--input)] p-4 cursor-pointer">
+              <input type="checkbox" name="purchaseConfirmed" value="yes" required class="mt-1 h-5 w-5 shrink-0 accent-[var(--gold)]" />
+              <span class="text-sm leading-relaxed"><%= product.purchaseConfirmationText || 'ฉันตรวจสอบข้อมูลและยืนยันว่าพร้อมทำตามเงื่อนไขของสินค้านี้' %></span>
+            </label>
+            <button class="mt-4 w-full sm:w-auto px-8 py-3 rounded-lg font-medium bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)]">ยืนยันและเพิ่มลงตะกร้า</button>
+          </form>
+        <% } else if (purchaseApplication && purchaseApplication.status === 'pending') { %>
+          <div class="rounded-2xl border border-amber-400/35 bg-amber-400/5 p-5">
+            <div class="font-semibold text-amber-300">⏳ ส่งคำขอแล้ว กำลังรอแอดมินตรวจสอบ</div>
+            <p class="text-sm text-[var(--text-3)] mt-1">เมื่อได้รับอนุมัติ กลับมาหน้านี้แล้วคุณจะติ๊กยืนยันและซื้อได้ทันที</p>
+          </div>
+        <% } else { %>
+          <form action="/game/<%= product.slug %>/purchase-application" method="post" class="rounded-2xl border border-[var(--gold)]/35 bg-[var(--card)] p-5">
+            <% if (purchaseApplication && purchaseApplication.status === 'rejected') { %>
+              <div class="mb-4 rounded-lg bg-rose-500/10 border border-rose-500/30 p-3 text-sm text-rose-300">คำขอก่อนหน้าถูกปฏิเสธ<% if (purchaseApplication.adminNote) { %>: <%= purchaseApplication.adminNote %><% } %> — คุณสามารถแก้ข้อมูลแล้วส่งใหม่ได้</div>
+            <% } %>
+            <div class="font-semibold text-[var(--gold)]">ส่งข้อมูลเพื่อขอสิทธิ์ซื้อ</div>
+            <p class="text-sm text-[var(--text-2)] whitespace-pre-line mt-2"><%= product.purchaseApplicationPrompt || 'กรุณาแจ้งข้อมูลที่จำเป็นสำหรับให้ร้านตรวจสอบก่อนซื้อ' %></p>
+            <textarea name="answer" required maxlength="2000" rows="4" placeholder="พิมพ์ข้อมูลของคุณที่นี่..." class="mt-3 w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-4 py-3 text-sm outline-none focus:border-[var(--gold)]"></textarea>
+            <button class="mt-3 w-full sm:w-auto px-7 py-3 rounded-lg font-medium bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)]">ส่งคำขอให้แอดมิน</button>
+          </form>
+        <% } %>
       <% } else { %>
         <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมด กรุณาเลือกสินค้าอื่น</div>
       <% } %>
