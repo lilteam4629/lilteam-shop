@@ -104,7 +104,7 @@ router.get('/', (req, res) => {
 });
 
 router.get('/preview/locker-home', requireAdmin, (req, res) => {
-  res.render('shop/home', { ...homeViewData(true), title: 'ทดลอง NEO STREET DROP' });
+  res.render('shop/home', { ...homeViewData(true), title: 'ทดลอง CARD COLLECTION ALBUM' });
 });
 
 router.get('/products', (req, res) => {
