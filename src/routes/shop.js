@@ -86,7 +86,10 @@ function homeViewData(heroPreviewV2 = false) {
     stats: shopStats(),
     newest,
     homeSections,
-    products: active.slice(0, 24),
+    // Show every currently published product. This view-data builder is shared
+    // by the main shop and every tenant shop, so rented sites are not silently
+    // capped at 24 products either.
+    products: active,
     productTotal: active.length,
     announcements: store.data.announcements.filter(a => a.active),
     latestOrders: latestOrderCards(),
