@@ -109,17 +109,13 @@
     <div>
       <label class="flex items-center gap-2 font-medium cursor-pointer w-fit">
         <input type="checkbox" name="purchaseApprovalEnabled" <%= product && product.purchaseApprovalEnabled ? 'checked' : '' %> class="accent-[var(--gold)]" />
-        ต้องให้แอดมินอนุมัติก่อนซื้อสินค้านี้
+        ให้ลูกค้าติ๊กยืนยันก่อนเพิ่มลงตะกร้า
       </label>
-      <p class="text-xs text-[var(--text-4)] mt-1">ลูกค้าจะต้องส่งข้อมูล รออนุมัติ และติ๊กยืนยันก่อนเพิ่มลงตะกร้า</p>
+      <p class="text-xs text-[var(--text-4)] mt-1">เมื่อเปิด ลูกค้าติ๊กถูกหนึ่งครั้งแล้วซื้อได้ทันที ไม่ต้องรอแอดมิน</p>
     </div>
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">ข้อความให้ลูกค้าติ๊กยืนยัน</label>
       <textarea name="purchaseConfirmationText" rows="2" placeholder="เช่น ฉันมีบัญชีเกมที่พร้อมใช้งานและตรวจสอบข้อมูลเรียบร้อยแล้ว" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= product ? (product.purchaseConfirmationText || '') : '' %></textarea>
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">คำถาม/ข้อมูลที่ให้ลูกค้าส่งมาสมัคร</label>
-      <textarea name="purchaseApplicationPrompt" rows="3" placeholder="เช่น กรุณาส่งชื่อในเกม แพลตฟอร์ม และ UID เพื่อให้ร้านตรวจสอบ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= product ? (product.purchaseApplicationPrompt || '') : '' %></textarea>
     </div>
   </div>
 

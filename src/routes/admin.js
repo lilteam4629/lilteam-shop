@@ -45,7 +45,6 @@ router.use(requireAdmin);
 router.use((req, res, next) => {
   res.locals.layout = 'layouts/admin';
   res.locals.pendingTopupCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
-  res.locals.pendingPurchaseApplicationCount = store.data.purchaseApplications.filter(item => item.status === 'pending').length;
   res.locals.persistentStorageEnabled = store.isPersistent();
   next();
 });
@@ -188,7 +187,6 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     contactMessageOutro: (body.contactMessageOutro || '').trim(),
     purchaseApprovalEnabled: body.purchaseApprovalEnabled === 'on',
     purchaseConfirmationText: (body.purchaseConfirmationText || '').trim(),
-    purchaseApplicationPrompt: (body.purchaseApplicationPrompt || '').trim(),
   };
 }
 
@@ -266,38 +264,9 @@ router.post('/products/:id/edit', (req, res) => {
 router.post('/products/:id/delete', (req, res) => {
   store.data.products = store.data.products.filter(p => p.id !== req.params.id);
   store.data.stockItems = store.data.stockItems.filter(s => s.productId !== req.params.id);
-  store.data.purchaseApplications = store.data.purchaseApplications.filter(item => item.productId !== req.params.id);
   store.save();
   req.flash('success', 'ลบสินค้าแล้ว');
   res.redirect('/admin/products');
-});
-
-// ---------- Purchase applications ----------
-router.get('/purchase-applications', (req, res) => {
-  const applications = [...store.data.purchaseApplications]
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .map(item => ({
-      ...item,
-      user: store.data.users.find(user => user.id === item.userId),
-      product: store.data.products.find(product => product.id === item.productId),
-    }));
-  res.render('admin/purchase-applications', {
-    title: 'คำขอสิทธิ์ซื้อ', active: 'purchase-applications', applications,
-  });
-});
-
-router.post('/purchase-applications/:id/:action', (req, res) => {
-  const application = store.data.purchaseApplications.find(item => item.id === req.params.id);
-  if (!application || !['approve', 'reject'].includes(req.params.action)) {
-    req.flash('error', 'ไม่พบคำขอที่ต้องการ');
-    return res.redirect('/admin/purchase-applications');
-  }
-  application.status = req.params.action === 'approve' ? 'approved' : 'rejected';
-  application.adminNote = String(req.body.adminNote || '').trim().slice(0, 500);
-  application.reviewedAt = new Date().toISOString();
-  store.save();
-  req.flash('success', application.status === 'approved' ? 'อนุมัติสิทธิ์ซื้อแล้ว' : 'ปฏิเสธคำขอแล้ว');
-  res.redirect('/admin/purchase-applications');
 });
 
 router.post('/products/:id/copy', (req, res) => {

@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
 const { withEffectivePrice } = require('../services/pricing');
-const { requireAdmin, requireLogin, currentUser } = require('../middleware/auth');
+const { requireAdmin } = require('../middleware/auth');
 
 function publishTime(product) {
   if (!product.publishAt) return 0;
@@ -168,45 +168,12 @@ router.get('/game/:slug', (req, res) => {
   const product = store.data.products.find(p => p.slug === req.params.slug);
   if (!product || !isProductVisible(product)) return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });
   const reviews = store.data.reviews.filter(r => r.productId === product.id);
-  const user = currentUser(req);
-  const purchaseApplication = user
-    ? [...store.data.purchaseApplications].reverse().find(item => item.userId === user.id && item.productId === product.id)
-    : null;
   res.render('shop/product-detail', {
     title: product.title,
     product: withStock(product),
     genreNames: (product.genres || []).map(g => store.data.settings.genres[g] || g),
     reviews,
-    purchaseApplication,
   });
-});
-
-router.post('/game/:slug/purchase-application', requireLogin, (req, res) => {
-  const product = store.data.products.find(item => item.slug === req.params.slug);
-  if (!product || !isProductVisible(product) || !product.purchaseApprovalEnabled) {
-    req.flash('error', 'สินค้านี้ไม่เปิดรับคำขอสิทธิ์ซื้อ');
-    return res.redirect(`/game/${req.params.slug}`);
-  }
-  const user = currentUser(req);
-  const answer = String(req.body.answer || '').trim().slice(0, 2000);
-  if (!answer) {
-    req.flash('error', 'กรุณากรอกข้อมูลที่ร้านต้องการ');
-    return res.redirect(`/game/${product.slug}`);
-  }
-  const existing = [...store.data.purchaseApplications].reverse()
-    .find(item => item.userId === user.id && item.productId === product.id);
-  if (existing && ['pending', 'approved'].includes(existing.status)) {
-    req.flash('error', existing.status === 'approved' ? 'คุณได้รับอนุมัติแล้ว' : 'คำขอของคุณกำลังรอตรวจสอบ');
-    return res.redirect(`/game/${product.slug}`);
-  }
-  store.data.purchaseApplications.push({
-    id: store.genId(10), userId: user.id, productId: product.id,
-    answer, status: 'pending', adminNote: '',
-    createdAt: new Date().toISOString(), reviewedAt: null,
-  });
-  store.save();
-  req.flash('success', 'ส่งคำขอให้แอดมินแล้ว กรุณารอการอนุมัติ');
-  res.redirect(`/game/${product.slug}`);
 });
 
 module.exports = router;

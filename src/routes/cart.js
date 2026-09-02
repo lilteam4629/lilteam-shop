@@ -47,18 +47,6 @@ router.post('/add/:productId', (req, res) => {
     return res.redirect('back');
   }
   if (product.purchaseApprovalEnabled) {
-    const user = currentUser(req);
-    const latestApplication = user && [...store.data.purchaseApplications].reverse().find(item =>
-      item.userId === user.id && item.productId === product.id);
-    const approved = latestApplication && latestApplication.status === 'approved';
-    if (!user) {
-      req.flash('error', 'กรุณาเข้าสู่ระบบและส่งคำขอสิทธิ์ซื้อก่อน');
-      return res.redirect(`/game/${product.slug}`);
-    }
-    if (!approved) {
-      req.flash('error', 'สินค้านี้ต้องได้รับอนุมัติจากแอดมินก่อนซื้อ');
-      return res.redirect(`/game/${product.slug}`);
-    }
     if (req.body.purchaseConfirmed !== 'yes') {
       req.flash('error', 'กรุณาติ๊กยืนยันเงื่อนไขก่อนเพิ่มลงตะกร้า');
       return res.redirect(`/game/${product.slug}`);
@@ -124,17 +112,6 @@ router.post('/checkout', requireLogin, async (req, res) => {
     req.flash('error', 'ตะกร้าว่างเปล่า');
     return res.redirect('/cart');
   }
-  const blockedItem = items.find(({ product }) => {
-    if (!product.purchaseApprovalEnabled) return false;
-    const latest = [...store.data.purchaseApplications].reverse().find(item =>
-      item.userId === user.id && item.productId === product.id);
-    return !latest || latest.status !== 'approved';
-  });
-  if (blockedItem) {
-    req.flash('error', `สิทธิ์ซื้อ "${blockedItem.product.title}" ยังไม่ได้รับอนุมัติ`);
-    return res.redirect(`/game/${blockedItem.product.slug}`);
-  }
-
   let discount = 0;
   const coupon = req.session.coupon;
   if (coupon) {
