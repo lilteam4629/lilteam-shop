@@ -13,7 +13,7 @@ git fetch --quiet origin main
 
 CURRENT_COMMIT="$(git rev-parse HEAD)"
 TARGET_COMMIT="$(git rev-parse origin/main)"
-if [[ "$CURRENT_COMMIT" == "$TARGET_COMMIT" ]] && docker compose -f "$COMPOSE_FILE" ps --status running app | grep -q app; then
+if [[ "$CURRENT_COMMIT" == "$TARGET_COMMIT" ]] && docker compose --env-file /opt/lilteam/.env -f "$COMPOSE_FILE" ps --status running app | grep -q app; then
   exit 0
 fi
 
