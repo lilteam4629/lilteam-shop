@@ -481,8 +481,11 @@ router.post('/products/:id/stock/settings', (req, res) => {
   product.fulfillmentMode = req.body.fulfillmentMode === 'contact' ? 'contact' : 'automatic';
   product.fulfillmentInstructions = (req.body.fulfillmentInstructions || '').trim();
   store.save();
-  req.flash('success', 'บันทึกวิธีรับสินค้าแล้ว');
-  res.redirect(`/admin/products/${product.id}/stock`);
+  req.flash('success', 'บันทึกวิธีรับสินค้าแล้ว เพิ่มสต๊อกในขั้นตอนถัดไปได้เลย');
+  // Continue directly to the stock-entry section. Previously this returned
+  // to the top of the same page, which made a successful first click look as
+  // if nothing had happened and led users to press the button twice.
+  res.redirect(`/admin/products/${product.id}/stock#add-stock`);
 });
 
 router.post('/products/:id/stock/add', (req, res) => {
