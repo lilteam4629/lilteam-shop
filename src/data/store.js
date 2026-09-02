@@ -5,6 +5,7 @@ const { nanoid } = require('nanoid');
 const bcrypt = require('bcryptjs');
 const { MongoClient, GridFSBucket, ObjectId } = require('mongodb');
 const { AsyncLocalStorage } = require('async_hooks');
+const r2 = require('../services/r2');
 
 // Multi-tenant support: each rented "shop" (see src/routes/tenant.js) gets
 // its OWN full copy of this exact data shape (products, orders, users,
@@ -647,6 +648,16 @@ function reset() {
 }
 
 async function saveMedia(buffer, filename, contentType) {
+  if (r2.isEnabled()) {
+    try {
+      const uploaded = await r2.uploadMedia(buffer, filename, contentType);
+      if (uploaded) return uploaded.url;
+    } catch (err) {
+      // A temporary R2 outage must not make an admin lose an upload. Keep the
+      // existing GridFS/local path as a safe fallback and make the issue visible.
+      console.error('[media] R2 upload failed; falling back to existing storage:', err.message);
+    }
+  }
   if (mediaBucket) {
     const upload = mediaBucket.openUploadStream(filename, { metadata: { contentType } });
     await new Promise((resolve, reject) => {
@@ -679,6 +690,7 @@ function getSystemStatus() {
     persistentStorage: Boolean(mongoCollection),
     adminRecoveryConfigured: Boolean(process.env.ADMIN_PASSWORD),
     managedAdminReady: Boolean(managedAccount && managedAccount.role === 'admin' && managedAccount.status === 'active'),
+    r2Storage: r2.isEnabled(),
   };
 }
 
