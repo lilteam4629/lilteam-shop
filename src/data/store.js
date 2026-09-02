@@ -480,6 +480,11 @@ function migrateSchema(db) {
       product.purchaseConfirmationText = '';
       changed = true;
     }
+    if (product.purchaseActionUrl === undefined) {
+      product.purchaseActionLabel = '';
+      product.purchaseActionUrl = '';
+      changed = true;
+    }
     if (!product.fulfillmentMode) {
       product.fulfillmentMode = 'automatic';
       changed = true;

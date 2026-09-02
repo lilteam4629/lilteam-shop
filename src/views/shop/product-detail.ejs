@@ -52,15 +52,24 @@
       </div>
 
       <% if (product.stockCount > 0) { %>
-        <form action="/cart/add/<%= product.id %>" method="post" <%= product.purchaseApprovalEnabled ? 'class="rounded-2xl border border-[var(--gold)]/35 bg-[var(--card)] p-5"' : '' %>>
+        <form action="/cart/add/<%= product.id %>" method="post" <%= product.purchaseApprovalEnabled ? 'class="relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 bg-gradient-to-br from-[var(--card)] to-[var(--input)] p-5 shadow-lg"' : '' %>>
           <% if (product.purchaseApprovalEnabled) { %>
-            <div class="font-semibold text-[var(--gold)] mb-3">✓ ยืนยันก่อนเพิ่มลงตะกร้า</div>
-            <label class="flex items-start gap-3 rounded-xl border border-[var(--border-light)] bg-[var(--input)] p-4 cursor-pointer">
-              <input type="checkbox" name="purchaseConfirmed" value="yes" required class="mt-1 h-5 w-5 shrink-0 accent-[var(--gold)]" />
-              <span class="text-sm leading-relaxed"><%= product.purchaseConfirmationText || 'ฉันตรวจสอบข้อมูลและยืนยันว่าพร้อมทำตามเงื่อนไขของสินค้านี้' %></span>
+            <div class="relative flex items-center gap-3 mb-4">
+              <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--gold)] text-[var(--bg)] font-black">1</span>
+              <div><div class="font-semibold text-[var(--gold)]">เตรียมให้พร้อมก่อนซื้อ</div><div class="text-xs text-[var(--text-4)]">ทำตามขั้นตอน แล้วติ๊กเพื่อยืนยัน</div></div>
+            </div>
+            <label class="relative flex items-start gap-3 rounded-xl border border-[var(--border-light)] bg-[var(--bg)]/55 p-4 cursor-pointer transition hover:border-[var(--gold)]/60">
+              <input data-purchase-confirm type="checkbox" name="purchaseConfirmed" value="yes" required class="peer mt-0.5 h-6 w-6 shrink-0 accent-[var(--gold)]" />
+              <span class="text-sm font-medium leading-relaxed peer-checked:text-[var(--gold-light)]"><%= product.purchaseConfirmationText || 'ฉันตรวจสอบข้อมูลและยืนยันว่าพร้อมทำตามเงื่อนไขของสินค้านี้' %></span>
             </label>
+            <div class="relative mt-4 grid gap-2 sm:grid-cols-2">
+              <% if (product.purchaseActionUrl) { %>
+                <a href="<%= product.purchaseActionUrl %>" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)]/50 bg-[var(--input)] px-5 py-3 text-center text-sm font-semibold text-[var(--gold)] transition hover:-translate-y-0.5 hover:border-[var(--gold)] hover:bg-[var(--gold)]/10">↗ <%= product.purchaseActionLabel || 'ไปทำขั้นตอนนี้ก่อน' %></a>
+              <% } %>
+              <button data-purchase-submit disabled class="min-h-12 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[var(--bg)] opacity-50 transition enabled:hover:-translate-y-0.5 enabled:hover:bg-[var(--gold-hover)] disabled:cursor-not-allowed <%= product.purchaseActionUrl ? '' : 'sm:col-span-2' %>">✓ ยืนยันและเพิ่มลงตะกร้า</button>
+            </div>
           <% } %>
-          <button class="<%= product.purchaseApprovalEnabled ? 'mt-4 ' : '' %>w-full sm:w-auto px-8 py-3 rounded-lg font-medium bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)]"><%= product.purchaseApprovalEnabled ? 'ยืนยันและเพิ่มลงตะกร้า' : 'เพิ่มลงตะกร้า' %></button>
+          <% if (!product.purchaseApprovalEnabled) { %><button class="w-full sm:w-auto px-8 py-3 rounded-lg font-medium bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)]">เพิ่มลงตะกร้า</button><% } %>
         </form>
       <% } else { %>
         <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมด กรุณาเลือกสินค้าอื่น</div>
@@ -131,6 +140,19 @@
 </section>
 
 <script>
+  (function () {
+    const checkbox = document.querySelector('[data-purchase-confirm]');
+    const submit = document.querySelector('[data-purchase-submit]');
+    if (!checkbox || !submit) return;
+    function syncConfirmation() {
+      submit.disabled = !checkbox.checked;
+      submit.classList.toggle('opacity-50', !checkbox.checked);
+      submit.classList.toggle('shadow-lg', checkbox.checked);
+    }
+    checkbox.addEventListener('change', syncConfirmation);
+    syncConfirmation();
+  })();
+
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => {

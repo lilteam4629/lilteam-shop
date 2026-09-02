@@ -56,6 +56,11 @@ function slugify(str) {
     .replace(/-+/g, '-');
 }
 
+function safeExternalUrl(value) {
+  const url = String(value || '').trim();
+  return /^https?:\/\//i.test(url) ? url.slice(0, 1000) : '';
+}
+
 async function persistUploadedFiles(files) {
   return Promise.all((files || []).map(file => store.saveMedia(file.buffer, file.originalname, file.mimetype)));
 }
@@ -187,6 +192,8 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     contactMessageOutro: (body.contactMessageOutro || '').trim(),
     purchaseApprovalEnabled: body.purchaseApprovalEnabled === 'on',
     purchaseConfirmationText: (body.purchaseConfirmationText || '').trim(),
+    purchaseActionLabel: (body.purchaseActionLabel || '').trim().slice(0, 80),
+    purchaseActionUrl: safeExternalUrl(body.purchaseActionUrl),
   };
 }
 

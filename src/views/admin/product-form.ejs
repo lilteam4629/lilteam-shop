@@ -117,6 +117,17 @@
       <label class="block text-sm mb-1 text-[var(--text-3)]">ข้อความให้ลูกค้าติ๊กยืนยัน</label>
       <textarea name="purchaseConfirmationText" rows="2" placeholder="เช่น ฉันมีบัญชีเกมที่พร้อมใช้งานและตรวจสอบข้อมูลเรียบร้อยแล้ว" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= product ? (product.purchaseConfirmationText || '') : '' %></textarea>
     </div>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อปุ่มให้ลูกค้าไปทำก่อน</label>
+        <input name="purchaseActionLabel" value="<%= product ? (product.purchaseActionLabel || '') : '' %>" placeholder="เช่น สมัคร Konami ID ก่อน" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+      </div>
+      <div>
+        <label class="block text-sm mb-1 text-[var(--text-3)]">ลิงก์ของปุ่ม</label>
+        <input type="url" name="purchaseActionUrl" value="<%= product ? (product.purchaseActionUrl || '') : '' %>" placeholder="https://..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+      </div>
+    </div>
+    <p class="text-xs text-[var(--text-4)]">ถ้าใส่ลิงก์ ปุ่มจะเปิดหน้าใหม่ให้ลูกค้าไปทำรายการ แล้วกลับมาติ๊กยืนยันและซื้อได้</p>
   </div>
 
   <details class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4" <%= (product && (product.publishAt || product.eventBadge || product.eventDescription)) ? 'open' : '' %>>
