@@ -44,7 +44,11 @@ app.get('/media/:id/:filename?', async (req, res, next) => {
     if (!media) return res.sendStatus(404);
     res.setHeader('Content-Type', media.file.metadata?.contentType || 'application/octet-stream');
     res.setHeader('Content-Length', media.file.length);
+    // GridFS ids never change their underlying bytes. Let browsers and CDNs
+    // keep product images instead of downloading the same full-size files on
+    // every page visit, which is especially important for tenant storefronts.
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    if (media.file.uploadDate) res.setHeader('Last-Modified', new Date(media.file.uploadDate).toUTCString());
     media.stream.on('error', next).pipe(res);
   } catch (err) {
     next(err);

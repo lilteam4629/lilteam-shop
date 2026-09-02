@@ -18,7 +18,7 @@
          transition-all duration-300 hover:border-[var(--gold)]">
 
   <div class="relative w-full <%= isFan ? 'h-full' : '' %> overflow-hidden">
-    <img src="<%= p.images[0] %>" alt="<%= p.title %>" <%= isFan ? 'loading="eager" fetchpriority="high"' : 'loading="lazy" fetchpriority="low"' %> decoding="async"
+    <img src="<%= p.images[0] %>" alt="<%= p.title %>"
       class="<%= isFan ? 'absolute inset-0 w-full h-full object-cover' : 'block w-full h-auto' %> transition duration-500
              <%= soldOut
                ? 'grayscale-[70%] brightness-[0.35] contrast-[1.05] group-hover:brightness-[0.45]'
@@ -76,7 +76,7 @@
          transition-all duration-300 hover:border-[var(--gold)]">
 
   <div class="relative w-full overflow-hidden">
-    <img src="<%= p.images[0] %>" alt="<%= p.title %>" <%= isFan ? 'loading="eager" fetchpriority="high"' : 'loading="lazy" fetchpriority="low"' %> decoding="async"
+    <img src="<%= p.images[0] %>" alt="<%= p.title %>"
       class="block w-full h-auto transition duration-500
              <%= soldOut
                ? 'grayscale-[70%] brightness-[0.35] contrast-[1.05] group-hover:brightness-[0.45]'
