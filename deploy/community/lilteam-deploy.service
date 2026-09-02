@@ -1,0 +1,10 @@
+[Unit]
+Description=LilTeam Shop automatic deployment
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/opt/lilteam/app/deploy/community/auto-deploy.sh
+TimeoutStartSec=15min

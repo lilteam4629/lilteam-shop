@@ -1,6 +1,8 @@
 node_modules/
 src/data/db.json
 .env
+*.pem
+*.key
 public/uploads/slips/*
 !public/uploads/slips/.gitkeep
 public/uploads/banner/*
