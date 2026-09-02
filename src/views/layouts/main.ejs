@@ -246,7 +246,11 @@
         if (activeRequest) activeRequest.abort();
         const request = new AbortController();
         activeRequest = request;
-        document.documentElement.classList.add('lilteam-navigating');
+        // Avoid flashing a full-screen spinner for fast navigations. It only
+        // appears when a request genuinely takes longer than a brief moment.
+        const loadingTimer = window.setTimeout(function () {
+          if (activeRequest === request) document.documentElement.classList.add('lilteam-navigating');
+        }, 180);
 
         try {
           const response = await fetch(url.href, {
@@ -288,6 +292,7 @@
         } catch (error) {
           if (error.name !== 'AbortError') window.location.assign(url.href);
         } finally {
+          window.clearTimeout(loadingTimer);
           if (activeRequest === request) {
             document.documentElement.classList.remove('lilteam-navigating');
             activeRequest = null;

@@ -14,9 +14,19 @@ function isProductVisible(product) {
   return product.status === 'active' && (!product.publishAt || publishTime(product) <= Date.now());
 }
 
-function withStock(product) {
-  const stock = store.data.stockItems.filter(s => s.productId === product.id && s.status === 'available');
-  return { ...withEffectivePrice(product), stockCount: stock.length };
+function availableStockCounts() {
+  const counts = new Map();
+  store.data.stockItems.forEach(item => {
+    if (item.status === 'available') counts.set(item.productId, (counts.get(item.productId) || 0) + 1);
+  });
+  return counts;
+}
+
+function withStock(product, counts) {
+  const stockCount = counts
+    ? (counts.get(product.id) || 0)
+    : store.data.stockItems.filter(s => s.productId === product.id && s.status === 'available').length;
+  return { ...withEffectivePrice(product), stockCount };
 }
 
 function shopStats() {
@@ -68,7 +78,8 @@ function latestOrderCards() {
 }
 
 function homeViewData(heroPreviewV2 = false) {
-  const active = store.data.products.filter(isProductVisible).map(withStock);
+  const stockCounts = availableStockCounts();
+  const active = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
   const scheduledProducts = store.data.products
     .filter(product => product.status === 'active' && product.publishAt && publishTime(product) > Date.now())
     .sort((a, b) => publishTime(a) - publishTime(b))
@@ -119,7 +130,8 @@ router.get('/preview/mobile-cinematic-7f4c2a', (req, res) => {
 });
 
 router.get('/products', (req, res) => {
-  let products = store.data.products.filter(isProductVisible).map(withStock);
+  const stockCounts = availableStockCounts();
+  let products = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
   const requestedIds = String(req.query.tags || req.query.tag || '').split(',').map(s => s.trim()).filter(Boolean);
   const activeFilterTags = requestedIds
     .map(id => store.data.filterTags.find(tag => tag.id === id))
@@ -150,9 +162,10 @@ router.get('/rental', (req, res) => res.redirect('/products'));
 
 router.get('/search', (req, res) => {
   const q = (req.query.q || '').trim().toLowerCase();
+  const stockCounts = availableStockCounts();
   const products = store.data.products
     .filter(p => isProductVisible(p) && p.title.toLowerCase().includes(q))
-    .map(withStock);
+    .map(product => withStock(product, stockCounts));
   res.render('shop/listing', { title: `ผลการค้นหา: ${q}`, products, listType: null, sort: '', q, filterTags: null });
 });
 
