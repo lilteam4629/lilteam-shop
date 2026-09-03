@@ -49,29 +49,38 @@
           <span class="text-3xl font-bold text-[var(--gold)]">฿<span data-unit-price><%= product.price.toLocaleString() %></span></span>
           <span class="text-sm text-[var(--text-3)]">/ ชิ้น</span>
         </div>
-        <div class="mb-5 rounded-2xl border border-[var(--gold)]/25 overflow-hidden bg-gradient-to-br from-[var(--card)] to-[var(--input)] shadow-[0_10px_30px_-18px_rgba(0,0,0,.5)]">
-          <div class="px-4 pt-3 pb-2 text-xs font-semibold text-[var(--gold)] flex items-center gap-1.5">📦 ซื้อเยอะยิ่งถูก</div>
-          <div class="divide-y divide-[var(--border-light)]/70">
-            <div class="qty-tier-row flex items-center justify-between px-4 py-2.5" data-tier-min="1">
-              <span class="text-sm text-[var(--text-2)]">ซื้อ 1 ชิ้น</span>
-              <span class="font-semibold text-sm">฿<%= product.price.toLocaleString() %> <span class="text-[var(--text-4)] font-normal">/ชิ้น</span></span>
-            </div>
+        <div class="mb-5">
+          <div class="text-xs font-semibold text-[var(--gold)] flex items-center gap-1.5 mb-2">
+            <% if (settings.branding && settings.branding.logoImage) { %>
+              <img src="<%= settings.branding.logoImage %>" alt="" class="w-4 h-4 rounded object-contain" />
+            <% } else { %>📦<% } %>
+            ซื้อเยอะยิ่งถูก — กดเลือกจำนวนได้เลย
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            <button type="button" class="qty-tier-btn" data-tier-min="1">
+              <div class="qty-tier-btn-qty">1 ชิ้น</div>
+              <div class="qty-tier-btn-price">฿<%= product.price.toLocaleString() %></div>
+              <div class="qty-tier-btn-unit">/ชิ้น</div>
+            </button>
             <% qtyTiers.forEach((opt, i) => { %>
-              <div class="qty-tier-row flex items-center justify-between px-4 py-2.5 <%= i === qtyTiers.length - 1 ? 'bg-[var(--gold)]/8' : '' %>" data-tier-min="<%= opt.minQty %>">
-                <span class="flex items-center gap-1.5 text-sm text-[var(--text-2)]">
-                  ซื้อ <%= opt.minQty %> ชิ้นขึ้นไป
-                  <% if (i === qtyTiers.length - 1) { %><span class="text-[10px] font-bold bg-[var(--gold)] text-[var(--bg)] rounded-full px-1.5 py-0.5">คุ้มสุด</span><% } %>
-                </span>
-                <span class="text-right">
-                  <span class="font-bold text-[var(--gold)]">฿<%= (opt.minQty * opt.price).toLocaleString() %></span>
-                  <span class="text-xs text-[var(--text-4)]">(฿<%= opt.price.toLocaleString() %>/ชิ้น)</span>
-                </span>
-              </div>
+              <button type="button" class="qty-tier-btn <%= i === qtyTiers.length - 1 ? 'is-best' : '' %>" data-tier-min="<%= opt.minQty %>">
+                <% if (i === qtyTiers.length - 1) { %><span class="qty-tier-badge">คุ้มสุด</span><% } %>
+                <div class="qty-tier-btn-qty"><%= opt.minQty %> ชิ้น</div>
+                <div class="qty-tier-btn-price">฿<%= (opt.minQty * opt.price).toLocaleString() %></div>
+                <div class="qty-tier-btn-unit">฿<%= opt.price.toLocaleString() %>/ชิ้น</div>
+              </button>
             <% }) %>
           </div>
         </div>
         <style>
-          .qty-tier-row.is-active{background:color-mix(in srgb,var(--gold) 14%,transparent);box-shadow:inset 3px 0 0 var(--gold)}
+          .qty-tier-btn{position:relative;display:flex;flex-direction:column;align-items:center;gap:.15rem;padding:.75rem .5rem;border-radius:1rem;border:1px solid var(--border-light);background:linear-gradient(160deg,var(--card),var(--input));cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
+          .qty-tier-btn:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--gold) 60%,var(--border-light))}
+          .qty-tier-btn.is-active{border-color:var(--gold);background:linear-gradient(160deg,color-mix(in srgb,var(--gold) 18%,var(--card)),color-mix(in srgb,var(--gold) 10%,var(--input)));box-shadow:0 0 0 1px var(--gold),0 10px 24px -14px color-mix(in srgb,var(--gold) 70%,transparent)}
+          .qty-tier-btn-qty{font-size:.78rem;font-weight:700;color:var(--text-2)}
+          .qty-tier-btn.is-active .qty-tier-btn-qty{color:var(--gold)}
+          .qty-tier-btn-price{font-size:1.05rem;font-weight:900;color:var(--gold)}
+          .qty-tier-btn-unit{font-size:.65rem;color:var(--text-4)}
+          .qty-tier-badge{position:absolute;top:-.55rem;left:50%;transform:translateX(-50%);font-size:.6rem;font-weight:800;background:var(--gold);color:var(--bg);border-radius:999px;padding:.1rem .5rem;white-space:nowrap;box-shadow:0 4px 10px -4px rgba(0,0,0,.5)}
           .qty-stepper-btn{width:2.5rem;height:2.5rem;display:grid;place-items:center;font-weight:800;font-size:1.1rem;border:1px solid var(--border-light);background:var(--input);color:var(--text-2);transition:background .15s,color .15s}
           .qty-stepper-btn:hover{background:var(--gold);color:var(--bg);border-color:var(--gold)}
           .qty-stepper-btn:first-child{border-radius:.7rem 0 0 .7rem}
@@ -130,8 +139,8 @@
                   const subEl = wrap.querySelector('[data-subtotal]');
                   if (unitEl) unitEl.textContent = unit.toLocaleString();
                   if (subEl) subEl.textContent = '฿' + (unit * qty).toLocaleString();
-                  document.querySelectorAll('.qty-tier-row').forEach(function(row){
-                    row.classList.toggle('is-active', Number(row.dataset.tierMin) === activeMin);
+                  document.querySelectorAll('.qty-tier-btn').forEach(function(btn){
+                    btn.classList.toggle('is-active', Number(btn.dataset.tierMin) === activeMin);
                   });
                 }
                 input.addEventListener('input', update);
@@ -139,6 +148,12 @@
                   btn.addEventListener('click', function(){
                     const current = Math.max(1, parseInt(input.value, 10) || 1);
                     input.value = Math.max(1, current + Number(btn.dataset.qtyStep));
+                    update();
+                  });
+                });
+                document.querySelectorAll('.qty-tier-btn').forEach(function(btn){
+                  btn.addEventListener('click', function(){
+                    input.value = Number(btn.dataset.tierMin);
                     update();
                   });
                 });
