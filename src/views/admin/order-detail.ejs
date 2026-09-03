@@ -6,7 +6,7 @@
   <div class="lg:col-span-2 space-y-3">
     <% itemsWithCreds.forEach(i => { %>
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-        <div class="flex justify-between mb-2"><span class="font-medium"><%= i.title %></span><span class="text-[var(--gold)]"><%= i.price.toLocaleString() %> ฿</span></div>
+        <div class="flex justify-between mb-2"><span class="font-medium"><%= i.title %><% if (i.optionLabel) { %> <span class="text-xs font-normal text-[var(--text-4)]">(<%= i.optionLabel %>)</span><% } %></span><span class="text-[var(--gold)]"><%= i.price.toLocaleString() %> ฿</span></div>
         <% if (i.fulfillmentMode === 'contact') { %>
           <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-lg p-3 text-sm">
             <div class="font-medium text-[var(--gold)]">ลูกค้าต้องติดต่อร้านเพื่อรับสินค้า</div>

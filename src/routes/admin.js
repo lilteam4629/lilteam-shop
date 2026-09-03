@@ -166,6 +166,17 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
   const images = body.newImagesFirst === 'on' ? [...addedImages, ...keptImages] : [...keptImages, ...addedImages];
   const genres = Array.isArray(body.genres) ? body.genres : (body.genres ? [body.genres] : []);
   const filterTagIds = Array.isArray(body.filterTagIds) ? body.filterTagIds : (body.filterTagIds ? [body.filterTagIds] : []);
+  const toArr = v => Array.isArray(v) ? v : (v === undefined ? [] : [v]);
+  const optionIds = toArr(body.priceOptionId);
+  const optionLabels = toArr(body.priceOptionLabel);
+  const optionPrices = toArr(body.priceOptionPrice);
+  const priceOptions = optionLabels
+    .map((label, i) => ({
+      id: optionIds[i] || store.genId(8),
+      label: String(label || '').trim(),
+      price: Math.max(0, parseInt(optionPrices[i], 10) || 0),
+    }))
+    .filter(o => o.label && o.price > 0);
   return {
     title: body.title,
     type: 'game',
@@ -173,6 +184,7 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     filterTagIds,
     price: parseInt(body.price, 10) || 0,
     originalPrice: parseInt(body.originalPrice, 10) || 0,
+    priceOptions,
     flashSalePrice: body.flashSalePrice === '' ? null : Math.max(0, parseInt(body.flashSalePrice, 10) || 0),
     flashSaleStartAt: (body.flashSaleStartAt || '').trim(),
     flashSaleEndAt: (body.flashSaleEndAt || '').trim(),

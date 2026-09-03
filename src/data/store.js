@@ -538,6 +538,15 @@ function migrateSchema(db) {
       product.contactMessageOutro = 'กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ';
       changed = true;
     }
+    if (product.priceOptions === undefined) {
+      // Optional list of {id, label, price} tiers for a product sold at
+      // several price points (e.g. "6H ฿10" / "1DAY ฿35" / "7DAY ฿150") —
+      // all tiers share the same stock pool and deliver the same thing,
+      // they just cost different amounts. Empty array = old single-price
+      // behavior, unchanged.
+      product.priceOptions = [];
+      changed = true;
+    }
   });
   db.miniGamePrizes.forEach(prize => {
     if (!prize.gameType) {

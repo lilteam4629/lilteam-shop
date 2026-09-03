@@ -21,6 +21,18 @@ function isProductVisible(product) {
   return time <= Date.now();
 }
 
+// A product with priceOptions is sold at several price points that all
+// share the same stock pool and deliver the same thing — this just picks
+// the chosen tier's price (falling back to the base price if the cart's
+// optionId no longer matches one, e.g. the tier was deleted after adding).
+function resolveUnitPrice(product, optionId) {
+  if (optionId && product.priceOptions && product.priceOptions.length) {
+    const option = product.priceOptions.find(o => o.id === optionId);
+    if (option) return { unitPrice: option.price, optionLabel: option.label };
+  }
+  return { unitPrice: product.price, optionLabel: null };
+}
+
 function buildCartView(req) {
   const cart = getCart(req);
   const items = cart.map(ci => {
@@ -29,7 +41,8 @@ function buildCartView(req) {
     const product = withEffectivePrice(storedProduct);
     const stock = availableStock(product.id);
     const qty = Math.min(ci.qty, Math.max(stock, 0));
-    return { product, qty, stock, subtotal: product.price * qty };
+    const { unitPrice, optionLabel } = resolveUnitPrice(product, ci.optionId);
+    return { product, optionId: ci.optionId || null, optionLabel, qty, stock, unitPrice, subtotal: unitPrice * qty };
   }).filter(Boolean);
   const total = items.reduce((sum, i) => sum + i.subtotal, 0);
   return { items, total };
@@ -52,12 +65,22 @@ router.post('/add/:productId', (req, res) => {
       return res.redirect(`/game/${product.slug}`);
     }
   }
+  let optionId = (req.body.priceOptionId || '').trim() || null;
+  if (product.priceOptions && product.priceOptions.length) {
+    // Trust the submitted tier only if it still exists; otherwise fall back
+    // to the first tier rather than silently selling at the base price.
+    if (!optionId || !product.priceOptions.some(o => o.id === optionId)) {
+      optionId = product.priceOptions[0].id;
+    }
+  } else {
+    optionId = null;
+  }
   const cart = getCart(req);
-  const existing = cart.find(c => c.productId === product.id);
+  const existing = cart.find(c => c.productId === product.id && (c.optionId || null) === optionId);
   if (existing) {
     existing.qty = Math.min(existing.qty + 1, stock);
   } else {
-    cart.push({ productId: product.id, qty: 1 });
+    cart.push({ productId: product.id, optionId, qty: 1 });
   }
   req.flash('success', `เพิ่ม "${product.title}" ลงตะกร้าแล้ว`);
   res.redirect('/cart');
@@ -65,7 +88,8 @@ router.post('/add/:productId', (req, res) => {
 
 router.post('/update/:productId', (req, res) => {
   const cart = getCart(req);
-  const item = cart.find(c => c.productId === req.params.productId);
+  const optionId = (req.body.optionId || '').trim() || null;
+  const item = cart.find(c => c.productId === req.params.productId && (c.optionId || null) === optionId);
   const qty = parseInt(req.body.qty, 10);
   if (item && qty > 0) {
     const stock = availableStock(item.productId);
@@ -75,7 +99,8 @@ router.post('/update/:productId', (req, res) => {
 });
 
 router.post('/remove/:productId', (req, res) => {
-  req.session.cart = getCart(req).filter(c => c.productId !== req.params.productId);
+  const optionId = (req.body.optionId || '').trim() || null;
+  req.session.cart = getCart(req).filter(c => !(c.productId === req.params.productId && (c.optionId || null) === optionId));
   res.redirect('/cart');
 });
 
@@ -137,7 +162,8 @@ router.post('/checkout', requireLogin, async (req, res) => {
       orderItems.push({
         productId: item.product.id,
         title: item.product.title,
-        price: item.product.price,
+        price: item.unitPrice,
+        optionLabel: item.optionLabel || null,
         stockItemId: stockItem.id,
         fulfillmentMode: item.product.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
         fulfillmentInstructions: item.product.fulfillmentInstructions || '',
