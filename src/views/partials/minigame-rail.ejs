@@ -50,6 +50,8 @@
   .rail-button:disabled{opacity:.55;cursor:not-allowed;transform:none}
   .rail-result{margin-top:.85rem;min-height:1.5rem}
   .rail-claim{margin-top:.5rem;padding:.55rem;border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:.65rem;background:color-mix(in srgb,var(--gold) 12%,transparent);color:var(--gold);font-size:1.25rem;font-weight:800;letter-spacing:.1em}
+  .rail-contact-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;margin-top:.65rem;padding:.65rem .85rem;border-radius:.7rem;color:var(--text);background:var(--input);border:1px solid var(--border-light);font-size:.8rem;font-weight:700;transition:border-color .2s,color .2s,transform .15s}
+  .rail-contact-btn:hover{color:var(--gold);border-color:var(--gold);transform:translateY(-1px)}
 
   @media (max-width: 639px){
     .rail-window{height:140px}
@@ -109,6 +111,7 @@
         spinning=false;
         result.innerHTML='';const line=document.createElement('div');line.className=data.isWin?'text-emerald-400 font-medium':'text-[var(--text-3)]';line.textContent=data.isWin?'ยินดีด้วย! ได้รับ '+data.prizeName:'ผลลัพธ์: '+data.prizeName;result.appendChild(line);
         if(data.isWin&&data.claimCode){const claim=document.createElement('div');claim.className='rail-claim';claim.textContent=data.claimCode;result.appendChild(claim)}
+        if(data.isWin){const contactBtn=document.createElement('a');contactBtn.href='/contact';contactBtn.className='rail-contact-btn';contactBtn.textContent='💬 ติดต่อร้านเพื่อรับรางวัล';result.appendChild(contactBtn)}
         if(balance&&typeof data.walletBalance==='number')balance.textContent=data.walletBalance.toLocaleString();button.disabled=false;
       },4900);
     });
