@@ -15,22 +15,21 @@
           </a>
           <div class="flex-1 min-w-0 flex flex-col gap-2">
             <div>
-              <a href="/game/<%= i.product.slug %>" class="font-medium hover:text-[var(--gold)] line-clamp-2"><%= i.product.title %><% if (i.optionLabel) { %> <span class="text-xs font-normal text-[var(--text-3)]">(<%= i.optionLabel %>)</span><% } %></a>
+              <a href="/game/<%= i.product.slug %>" class="font-medium hover:text-[var(--gold)] line-clamp-2"><%= i.product.title %></a>
               <div class="text-sm text-[var(--text-3)] mt-0.5">
-                <% if (!i.optionLabel && i.product.flashSaleActive) { %><span class="font-bold text-[var(--gold)]">⚡ Flash Sale</span> · <% } %>
+                <% if (i.product.flashSaleActive) { %><span class="font-bold text-[var(--gold)]">⚡ Flash Sale</span> · <% } %>
                 ฿<%= i.unitPrice.toLocaleString() %>.00 / รายการ &middot; คงเหลือ <%= i.stock %>
+                <% if (i.product.priceOptions && i.product.priceOptions.length) { %><span class="text-[10px]">(ราคาลดตามจำนวน — อัปเดตจำนวนเพื่อดูราคาที่ถูกลง)</span><% } %>
               </div>
             </div>
             <div class="flex flex-wrap items-center justify-between gap-3 mt-auto">
               <form action="/cart/update/<%= i.product.id %>" method="post" class="flex items-center gap-2">
-                <input type="hidden" name="optionId" value="<%= i.optionId || '' %>" />
                 <input type="number" name="qty" value="<%= i.qty %>" min="1" max="<%= i.stock %>" class="w-16 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 text-sm" />
                 <button class="text-xs text-[var(--gold)] hover:text-[var(--gold-hover)]">อัปเดต</button>
               </form>
               <div class="flex items-center gap-4">
                 <span class="font-semibold text-[var(--gold)]">฿<%= i.subtotal.toLocaleString() %>.00</span>
                 <form action="/cart/remove/<%= i.product.id %>" method="post">
-                  <input type="hidden" name="optionId" value="<%= i.optionId || '' %>" />
                   <button class="text-[var(--coral)] text-sm hover:underline">ลบ</button>
                 </form>
               </div>

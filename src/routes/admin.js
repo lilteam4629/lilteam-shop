@@ -168,15 +168,16 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
   const filterTagIds = Array.isArray(body.filterTagIds) ? body.filterTagIds : (body.filterTagIds ? [body.filterTagIds] : []);
   const toArr = v => Array.isArray(v) ? v : (v === undefined ? [] : [v]);
   const optionIds = toArr(body.priceOptionId);
-  const optionLabels = toArr(body.priceOptionLabel);
+  const optionMinQtys = toArr(body.priceOptionMinQty);
   const optionPrices = toArr(body.priceOptionPrice);
-  const priceOptions = optionLabels
-    .map((label, i) => ({
+  const priceOptions = optionMinQtys
+    .map((minQty, i) => ({
       id: optionIds[i] || store.genId(8),
-      label: String(label || '').trim(),
+      minQty: Math.max(1, parseInt(minQty, 10) || 0),
       price: Math.max(0, parseInt(optionPrices[i], 10) || 0),
     }))
-    .filter(o => o.label && o.price > 0);
+    .filter(o => o.minQty > 1 && o.price > 0)
+    .sort((a, b) => a.minQty - b.minQty);
   return {
     title: body.title,
     type: 'game',

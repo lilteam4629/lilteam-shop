@@ -21,16 +21,16 @@ function isProductVisible(product) {
   return time <= Date.now();
 }
 
-// A product with priceOptions is sold at several price points that all
-// share the same stock pool and deliver the same thing — this just picks
-// the chosen tier's price (falling back to the base price if the cart's
-// optionId no longer matches one, e.g. the tier was deleted after adding).
-function resolveUnitPrice(product, optionId) {
-  if (optionId && product.priceOptions && product.priceOptions.length) {
-    const option = product.priceOptions.find(o => o.id === optionId);
-    if (option) return { unitPrice: option.price, optionLabel: option.label };
+// A product with priceOptions gets cheaper per unit past certain quantity
+// thresholds (e.g. 5+ units = ฿50/unit instead of ฿60/unit) — this picks the
+// highest threshold the given quantity qualifies for, or the base price if
+// none do. All tiers share the same stock pool and deliver the same thing.
+function resolveUnitPrice(product, qty) {
+  let price = product.price;
+  if (product.priceOptions && product.priceOptions.length) {
+    product.priceOptions.forEach(tier => { if (qty >= tier.minQty) price = tier.price; });
   }
-  return { unitPrice: product.price, optionLabel: null };
+  return price;
 }
 
 function buildCartView(req) {
@@ -41,8 +41,8 @@ function buildCartView(req) {
     const product = withEffectivePrice(storedProduct);
     const stock = availableStock(product.id);
     const qty = Math.min(ci.qty, Math.max(stock, 0));
-    const { unitPrice, optionLabel } = resolveUnitPrice(product, ci.optionId);
-    return { product, optionId: ci.optionId || null, optionLabel, qty, stock, unitPrice, subtotal: unitPrice * qty };
+    const unitPrice = resolveUnitPrice(product, qty);
+    return { product, qty, stock, unitPrice, subtotal: unitPrice * qty };
   }).filter(Boolean);
   const total = items.reduce((sum, i) => sum + i.subtotal, 0);
   return { items, total };
@@ -65,22 +65,13 @@ router.post('/add/:productId', (req, res) => {
       return res.redirect(`/game/${product.slug}`);
     }
   }
-  let optionId = (req.body.priceOptionId || '').trim() || null;
-  if (product.priceOptions && product.priceOptions.length) {
-    // Trust the submitted tier only if it still exists; otherwise fall back
-    // to the first tier rather than silently selling at the base price.
-    if (!optionId || !product.priceOptions.some(o => o.id === optionId)) {
-      optionId = product.priceOptions[0].id;
-    }
-  } else {
-    optionId = null;
-  }
+  const requestedQty = Math.max(1, parseInt(req.body.qty, 10) || 1);
   const cart = getCart(req);
-  const existing = cart.find(c => c.productId === product.id && (c.optionId || null) === optionId);
+  const existing = cart.find(c => c.productId === product.id);
   if (existing) {
-    existing.qty = Math.min(existing.qty + 1, stock);
+    existing.qty = Math.min(existing.qty + requestedQty, stock);
   } else {
-    cart.push({ productId: product.id, optionId, qty: 1 });
+    cart.push({ productId: product.id, qty: Math.min(requestedQty, stock) });
   }
   req.flash('success', `เพิ่ม "${product.title}" ลงตะกร้าแล้ว`);
   res.redirect('/cart');
@@ -88,8 +79,7 @@ router.post('/add/:productId', (req, res) => {
 
 router.post('/update/:productId', (req, res) => {
   const cart = getCart(req);
-  const optionId = (req.body.optionId || '').trim() || null;
-  const item = cart.find(c => c.productId === req.params.productId && (c.optionId || null) === optionId);
+  const item = cart.find(c => c.productId === req.params.productId);
   const qty = parseInt(req.body.qty, 10);
   if (item && qty > 0) {
     const stock = availableStock(item.productId);
@@ -99,8 +89,7 @@ router.post('/update/:productId', (req, res) => {
 });
 
 router.post('/remove/:productId', (req, res) => {
-  const optionId = (req.body.optionId || '').trim() || null;
-  req.session.cart = getCart(req).filter(c => !(c.productId === req.params.productId && (c.optionId || null) === optionId));
+  req.session.cart = getCart(req).filter(c => c.productId !== req.params.productId);
   res.redirect('/cart');
 });
 
@@ -163,7 +152,6 @@ router.post('/checkout', requireLogin, async (req, res) => {
         productId: item.product.id,
         title: item.product.title,
         price: item.unitPrice,
-        optionLabel: item.optionLabel || null,
         stockItemId: stockItem.id,
         fulfillmentMode: item.product.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
         fulfillmentInstructions: item.product.fulfillmentInstructions || '',

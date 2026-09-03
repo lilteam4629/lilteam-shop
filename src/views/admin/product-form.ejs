@@ -39,20 +39,22 @@
   </details>
 
   <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.priceOptions && product.priceOptions.length) ? 'open' : '' %>>
-    <summary class="font-medium text-[var(--gold)] cursor-pointer select-none">💰 หลายราคา (เช่น 6H / 12H / 1DAY)</summary>
+    <summary class="font-medium text-[var(--gold)] cursor-pointer select-none">💰 ราคาลดตามจำนวนซื้อ (ยิ่งซื้อเยอะยิ่งถูก)</summary>
     <div class="space-y-3 mt-4">
-      <p class="text-xs text-[var(--text-4)]">เพิ่มได้กี่รายการก็ได้ ทุกรายการใช้สต็อกและของที่ส่งมอบร่วมกัน ต่างกันแค่ชื่อกับราคา — ลูกค้าจะเห็นเป็นปุ่มให้เลือกในหน้าสินค้า เว้นว่างไว้ทั้งหมดถ้าไม่ต้องการใช้ (ใช้ราคาขายด้านบนตามปกติ)</p>
+      <p class="text-xs text-[var(--text-4)]">ตั้งราคาต่อชิ้นให้ถูกลงเมื่อซื้อครบจำนวนที่กำหนด เช่น ซื้อ 5 ชิ้นขึ้นไป เหลือชิ้นละ 50 บาท ระบบคิดราคาให้อัตโนมัติตามจำนวนที่ลูกค้าซื้อ เว้นว่างไว้ทั้งหมดถ้าไม่ต้องการใช้ (ใช้ราคาขายด้านบนตามปกติ)</p>
       <div id="price-options-list" class="space-y-2">
         <% (product && product.priceOptions ? product.priceOptions : []).forEach(opt => { %>
           <div class="price-option-row flex gap-2 items-center">
             <input type="hidden" name="priceOptionId" value="<%= opt.id %>" />
-            <input type="text" name="priceOptionLabel" value="<%= opt.label %>" placeholder="เช่น 6H" class="flex-1 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-            <input type="number" min="0" name="priceOptionPrice" value="<%= opt.price %>" placeholder="ราคา" class="w-28 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+            <span class="text-xs text-[var(--text-3)] whitespace-nowrap">ซื้อ</span>
+            <input type="number" min="2" name="priceOptionMinQty" value="<%= opt.minQty %>" placeholder="เช่น 5" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+            <span class="text-xs text-[var(--text-3)] whitespace-nowrap">ชิ้นขึ้นไป เหลือชิ้นละ</span>
+            <input type="number" min="0" name="priceOptionPrice" value="<%= opt.price %>" placeholder="ราคา" class="flex-1 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
             <button type="button" onclick="this.closest('.price-option-row').remove()" class="text-[var(--coral)] text-xs px-2">ลบ</button>
           </div>
         <% }) %>
       </div>
-      <button type="button" id="add-price-option" class="text-xs text-[var(--gold)] border border-[var(--gold)]/40 rounded-lg px-3 py-1.5">+ เพิ่มตัวเลือกราคา</button>
+      <button type="button" id="add-price-option" class="text-xs text-[var(--gold)] border border-[var(--gold)]/40 rounded-lg px-3 py-1.5">+ เพิ่มระดับราคา</button>
     </div>
   </details>
   <script>
@@ -61,8 +63,10 @@
       row.className = 'price-option-row flex gap-2 items-center';
       row.innerHTML =
         '<input type="hidden" name="priceOptionId" value="" />' +
-        '<input type="text" name="priceOptionLabel" placeholder="เช่น 6H" class="flex-1 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />' +
-        '<input type="number" min="0" name="priceOptionPrice" placeholder="ราคา" class="w-28 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />' +
+        '<span class="text-xs text-[var(--text-3)] whitespace-nowrap">ซื้อ</span>' +
+        '<input type="number" min="2" name="priceOptionMinQty" placeholder="เช่น 5" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />' +
+        '<span class="text-xs text-[var(--text-3)] whitespace-nowrap">ชิ้นขึ้นไป เหลือชิ้นละ</span>' +
+        '<input type="number" min="0" name="priceOptionPrice" placeholder="ราคา" class="flex-1 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />' +
         '<button type="button" onclick="this.closest(\'.price-option-row\').remove()" class="text-[var(--coral)] text-xs px-2">ลบ</button>';
       document.getElementById('price-options-list').appendChild(row);
     });

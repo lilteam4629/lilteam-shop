@@ -42,39 +42,23 @@
           <span class="text-xs bg-[var(--input)] border border-[var(--border-light)] text-[var(--text-2)] px-2 py-1 rounded-full"><%= g %></span>
         <% }) %>
       </div>
-      <% if (product.priceOptions && product.priceOptions.length) { %>
-        <div class="mb-1 text-xs text-[var(--text-3)]">เลือกแพ็กเกจ</div>
-        <div class="flex flex-wrap gap-2 mb-3" data-price-options>
-          <% product.priceOptions.forEach((opt, i) => { %>
-            <button type="button" data-option-id="<%= opt.id %>" data-option-price="<%= opt.price %>"
-              class="price-option-btn <%= i === 0 ? 'is-selected' : '' %> rounded-xl border px-4 py-2 text-sm font-semibold text-left transition"
-            ><%= opt.label %><div class="text-xs font-normal opacity-80">฿<%= opt.price.toLocaleString() %></div></button>
+      <% const qtyTiers = (product.priceOptions || []).slice().sort((a, b) => a.minQty - b.minQty); %>
+      <% if (qtyTiers.length) { %>
+        <div class="mb-1 text-xs text-[var(--text-3)]">ราคา (ยิ่งซื้อเยอะยิ่งถูก)</div>
+        <div class="flex items-baseline gap-2 mb-3">
+          <span class="text-3xl font-bold text-[var(--gold)]">฿<span data-unit-price><%= product.price.toLocaleString() %></span></span>
+          <span class="text-sm text-[var(--text-3)]">/ ชิ้น</span>
+        </div>
+        <div class="mb-5 rounded-xl border border-[var(--border-light)] overflow-hidden text-sm">
+          <div class="flex items-center justify-between px-4 py-2 bg-[var(--input)]">
+            <span class="text-[var(--text-2)]">ซื้อ 1 ชิ้น</span><span class="font-semibold">฿<%= product.price.toLocaleString() %> / ชิ้น</span>
+          </div>
+          <% qtyTiers.forEach(opt => { %>
+            <div class="flex items-center justify-between px-4 py-2 border-t border-[var(--border-light)]">
+              <span class="text-[var(--text-2)]">ซื้อ <%= opt.minQty %> ชิ้นขึ้นไป</span><span class="font-semibold text-[var(--gold)]">฿<%= opt.price.toLocaleString() %> / ชิ้น</span>
+            </div>
           <% }) %>
         </div>
-        <div class="flex items-baseline gap-2 mb-5">
-          <span class="text-3xl font-bold text-[var(--gold)]">฿<span data-selected-price><%= product.priceOptions[0].price.toLocaleString() %></span>.00</span>
-        </div>
-        <style>
-          .price-option-btn{background:var(--input);border-color:var(--border-light);color:var(--text-2)}
-          .price-option-btn.is-selected{background:color-mix(in srgb,var(--gold) 16%,var(--input));border-color:var(--gold);color:var(--gold)}
-        </style>
-        <script>
-          document.querySelectorAll('[data-price-options]').forEach(function(wrap){
-            wrap.querySelectorAll('.price-option-btn').forEach(function(btn){
-              btn.addEventListener('click', function(){
-                wrap.querySelectorAll('.price-option-btn').forEach(function(b){ b.classList.remove('is-selected'); });
-                btn.classList.add('is-selected');
-                // Looked up on click, not at page-load time — the <form> with
-                // this hidden input renders further down the page, after this
-                // script tag, so it doesn't exist yet when the script runs.
-                const priceEl = document.querySelector('[data-selected-price]');
-                const hiddenInput = document.querySelector('input[name="priceOptionId"]');
-                if (priceEl) priceEl.textContent = Number(btn.dataset.optionPrice).toLocaleString();
-                if (hiddenInput) hiddenInput.value = btn.dataset.optionId;
-              });
-            });
-          });
-        </script>
       <% } else { %>
         <div class="mb-1 text-xs text-[var(--text-3)]">ราคา</div>
         <div class="flex items-baseline gap-2 mb-5">
@@ -88,8 +72,34 @@
 
       <% if (product.stockCount > 0) { %>
         <form action="/cart/add/<%= product.id %>" method="post" <%= product.purchaseApprovalEnabled ? 'class="relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 bg-gradient-to-br from-[var(--card)] to-[var(--input)] p-5 shadow-lg"' : '' %>>
-          <% if (product.priceOptions && product.priceOptions.length) { %>
-            <input type="hidden" name="priceOptionId" value="<%= product.priceOptions[0].id %>" />
+          <% if (qtyTiers.length) { %>
+            <div class="flex items-center gap-3 mb-4" data-qty-wrap data-base-price="<%= product.price %>" data-tiers='<%- JSON.stringify(qtyTiers) %>'>
+              <label class="text-sm text-[var(--text-3)]" for="qty-input">จำนวน</label>
+              <input type="number" id="qty-input" name="qty" value="1" min="1" max="<%= product.stockCount %>" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" data-qty-input />
+              <span class="text-sm text-[var(--text-3)]">รวม <span class="font-bold text-[var(--gold)]" data-subtotal>฿<%= product.price.toLocaleString() %></span></span>
+            </div>
+            <script>
+              document.querySelectorAll('[data-qty-wrap]').forEach(function(wrap){
+                const basePrice = Number(wrap.dataset.basePrice);
+                const tiers = JSON.parse(wrap.dataset.tiers || '[]');
+                const input = wrap.querySelector('[data-qty-input]');
+                function resolvePrice(qty){
+                  let price = basePrice;
+                  tiers.forEach(function(t){ if (qty >= t.minQty) price = t.price; });
+                  return price;
+                }
+                function update(){
+                  const qty = Math.max(1, parseInt(input.value, 10) || 1);
+                  const unit = resolvePrice(qty);
+                  const unitEl = document.querySelector('[data-unit-price]');
+                  const subEl = wrap.querySelector('[data-subtotal]');
+                  if (unitEl) unitEl.textContent = unit.toLocaleString();
+                  if (subEl) subEl.textContent = '฿' + (unit * qty).toLocaleString();
+                }
+                input.addEventListener('input', update);
+                update();
+              });
+            </script>
           <% } %>
           <% if (product.purchaseApprovalEnabled) { %>
             <div class="relative flex items-center gap-3 mb-4">

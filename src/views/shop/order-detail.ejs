@@ -7,7 +7,7 @@
     <% itemsWithCreds.forEach(i => { %>
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
         <div class="flex items-center justify-between mb-2">
-          <span class="font-medium"><%= i.title %><% if (i.optionLabel) { %> <span class="text-xs font-normal text-[var(--text-4)]">(<%= i.optionLabel %>)</span><% } %></span>
+          <span class="font-medium"><%= i.title %></span>
           <span class="text-[var(--gold)]">฿<%= i.price.toLocaleString() %>.00</span>
         </div>
         <% if (i.fulfillmentMode === 'contact') { %>
