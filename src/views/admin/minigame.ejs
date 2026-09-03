@@ -143,7 +143,14 @@
 </div>
 
 <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
-  <div class="p-4 border-b border-[var(--border)]"><h3 class="font-semibold">📜 ประวัติการเล่นล่าสุด</h3></div>
+  <div class="p-4 border-b border-[var(--border)] flex flex-wrap items-center gap-3">
+    <h3 class="font-semibold shrink-0">📜 ประวัติการเล่นล่าสุด</h3>
+    <form method="get" action="/admin/minigame" class="flex gap-2 flex-1 min-w-[220px]">
+      <input type="text" name="q" value="<%= searchQuery %>" placeholder="ค้นหาชื่อผู้เล่นหรือโค้ดรับของ..." class="flex-1 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
+      <button class="px-4 py-1.5 rounded-lg bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] text-xs font-semibold whitespace-nowrap">ค้นหา</button>
+      <% if (searchQuery) { %><a href="/admin/minigame" class="px-3 py-1.5 rounded-lg bg-[var(--input)] border border-[var(--border-light)] text-xs text-[var(--text-3)] whitespace-nowrap">ล้าง</a><% } %>
+    </form>
+  </div>
   <table class="w-full text-sm">
     <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
       <tr><th class="p-3">ผู้เล่น</th><th class="p-3">ผลลัพธ์</th><th class="p-3">โค้ดรับของ</th><th class="p-3">สถานะ</th><th class="p-3">เวลา</th><th class="p-3"></th></tr>
@@ -173,7 +180,7 @@
           </td>
         </tr>
       <% }) %>
-      <% if (!recentPlays.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="6">ยังไม่มีคนเล่น</td></tr><% } %>
+      <% if (!recentPlays.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="6"><%= searchQuery ? 'ไม่พบผลลัพธ์ที่ตรงกับ "' + searchQuery + '"' : 'ยังไม่มีคนเล่น' %></td></tr><% } %>
     </tbody>
   </table>
 </div>

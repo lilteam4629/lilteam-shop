@@ -786,13 +786,23 @@ router.get('/minigame', (req, res) => {
   const totalPercent = type => store.data.miniGamePrizes
     .filter(p => p.active && (p.gameType || 'box') === type)
     .reduce((sum, p) => sum + Number(p.percent), 0);
+  const searchQuery = (req.query.q || '').trim();
+  let plays = store.data.miniGamePlays;
+  if (searchQuery) {
+    const needle = searchQuery.toLowerCase();
+    plays = plays.filter(p =>
+      (p.username || '').toLowerCase().includes(needle) ||
+      (p.claimCode || '').toLowerCase().includes(needle)
+    );
+  }
   res.render('admin/minigame', {
     title: 'มินิเกม', active: 'minigame',
     game: store.data.settings.miniGame,
     prizes: store.data.miniGamePrizes,
     totalPercent: totalPercent('box'),
     railTotalPercent: totalPercent('rail'),
-    recentPlays: store.data.miniGamePlays.slice(0, 30),
+    recentPlays: plays.slice(0, searchQuery ? 100 : 30),
+    searchQuery,
   });
 });
 
