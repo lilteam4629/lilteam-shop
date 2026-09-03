@@ -99,6 +99,7 @@
       <a href="/admin/coupons" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='coupons'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🏷️ คูปองส่วนลด</a>
       <a href="/admin/minigame" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='minigame'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🎰 มินิเกม</a>
       <% if (rentWebsiteEnabled) { %><a href="/admin/license-plans" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='license-plans'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🌐 ขายคีย์เช่าเว็บ</a><% } %>
+      <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><a href="/admin/easyslip-usage" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='easyslip-usage'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🧾 เช็คสลิป EasySlip</a><% } %>
       <a href="/admin/appearance" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= (active==='appearance'||active==='theme'||active==='announcements')?'bg-[var(--input)] text-[var(--gold)]':'' %>">🖼️ รูปหน้าเว็บและโลโก้</a>
       <a href="/admin/settings" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='settings'?'bg-[var(--input)] text-[var(--gold)]':'' %>">⚙️ ตั้งค่าร้าน</a>
       <div class="border-t border-[var(--border)] my-3"></div>

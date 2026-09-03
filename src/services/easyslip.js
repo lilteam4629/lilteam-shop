@@ -184,4 +184,37 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
   }
 }
 
-module.exports = { isConfigured, createBankAccount, updateBankAccount, verifySlip, getBanks };
+/**
+ * GET /v2/info — platform-wide account info for the one shared EASYSLIP_API_KEY
+ * (yours, not any individual tenant's). Does not deduct quota. Returns
+ * { ok: true, quota: {used, max, remaining}, credit, planName } or
+ * { ok: false, message }.
+ */
+async function getAccountInfo() {
+  if (!isConfigured()) {
+    return { ok: false, message: 'ยังไม่ได้ตั้งค่า EASYSLIP_API_KEY' };
+  }
+  try {
+    const res = await axios.get(`${BASE_URL}/info`, { headers: authHeaders(), timeout: 15000 });
+    const data = res.data && res.data.data;
+    if (!res.data || !res.data.success || !data) {
+      return { ok: false, message: 'ดึงข้อมูลบัญชี EasySlip ไม่สำเร็จ' };
+    }
+    return {
+      ok: true,
+      quota: {
+        used: data.application && data.application.quota ? data.application.quota.used : null,
+        max: data.application && data.application.quota ? data.application.quota.max : null,
+        remaining: data.application && data.application.quota ? data.application.quota.remaining : null,
+      },
+      credit: data.account ? data.account.credit : null,
+      planName: data.product ? data.product.name : null,
+    };
+  } catch (err) {
+    const body = err.response && err.response.data;
+    const error = body && body.error;
+    return { ok: false, message: (error && error.message) || err.message || 'เชื่อมต่อ EasySlip ไม่สำเร็จ' };
+  }
+}
+
+module.exports = { isConfigured, createBankAccount, updateBankAccount, verifySlip, getBanks, getAccountInfo };

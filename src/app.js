@@ -88,6 +88,11 @@ app.use((req, res, next) => {
   // multi-tenant shop's own subdomain (req.tenantShop) — otherwise a shop
   // you rented out could turn around and "open a new shop" itself.
   res.locals.rentWebsiteEnabled = !license.isGateOn() && !req.tenantShop;
+  // The EasySlip usage/quota page reads the ONE shared EASYSLIP_API_KEY
+  // (your own EasySlip account), not anything per-tenant — showing it on a
+  // rented shop's own subdomain would leak your account's credit balance
+  // to whoever you rented that shop to.
+  res.locals.isMainSite = !req.tenantShop;
   next();
 });
 

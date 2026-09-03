@@ -1,0 +1,38 @@
+<div class="max-w-2xl space-y-4">
+  <div>
+    <h2 class="text-lg font-semibold">🧾 เช็คสลิป EasySlip</h2>
+    <p class="text-xs text-[var(--text-4)] mt-1">โควตาการตรวจสลิปของบัญชี EasySlip กลาง (ใช้ร่วมกันทุกร้านบนแพลตฟอร์มนี้) — หน้านี้เห็นได้เฉพาะร้านหลักเท่านั้น</p>
+  </div>
+
+  <% if (!info.ok) { %>
+    <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-xl p-4">
+      ดึงข้อมูลไม่สำเร็จ: <%= info.message %>
+    </div>
+  <% } else { %>
+    <div class="grid sm:grid-cols-2 gap-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+        <div class="text-xs text-[var(--text-4)] mb-1">เหลือเช็คสลิปได้อีก</div>
+        <div class="text-3xl font-black text-[var(--gold)]">
+          <%= info.quota.remaining === null ? 'ไม่จำกัด' : Number(info.quota.remaining).toLocaleString() %>
+        </div>
+        <% if (info.quota.max !== null) { %>
+          <div class="text-xs text-[var(--text-4)] mt-1">ใช้ไปแล้ว <%= Number(info.quota.used || 0).toLocaleString() %> / <%= Number(info.quota.max).toLocaleString() %> รอบนี้</div>
+          <div class="w-full h-2 rounded-full bg-[var(--input)] mt-2 overflow-hidden">
+            <div class="h-full bg-[var(--gold)]" style="width: <%= Math.min(100, Math.round((info.quota.used || 0) / info.quota.max * 100)) %>%"></div>
+          </div>
+        <% } %>
+      </div>
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+        <div class="text-xs text-[var(--text-4)] mb-1">เครดิตคงเหลือในบัญชี</div>
+        <div class="text-3xl font-black text-[var(--gold)]">฿<%= info.credit === null ? '-' : Number(info.credit).toLocaleString() %></div>
+        <% if (info.planName) { %><div class="text-xs text-[var(--text-4)] mt-1">แพ็กเกจ: <%= info.planName %></div><% } %>
+      </div>
+    </div>
+
+    <a href="https://developer.easyslip.com" target="_blank" rel="noopener"
+      class="inline-flex items-center gap-2 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg px-5 py-2.5 text-sm">
+      ➕ เติมเครดิต / ซื้อโควตาเพิ่ม
+    </a>
+    <p class="text-xs text-[var(--text-4)]">EasySlip ไม่มี API สำหรับเติมเครดิตโดยตรง ปุ่มนี้จะพาไปหน้า dashboard ของ EasySlip เพื่อเติมเอง</p>
+  <% } %>
+</div>

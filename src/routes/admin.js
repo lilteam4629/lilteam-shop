@@ -619,6 +619,14 @@ router.get('/topups', async (req, res) => {
   res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment: store.data.settings.payment, banks, q, status });
 });
 
+// EasySlip usage/quota — reads the ONE shared platform EASYSLIP_API_KEY
+// (yours), not anything per-tenant, so it only exists on the main site.
+router.get('/easyslip-usage', async (req, res) => {
+  if (req.tenantShop) { req.flash('error', 'หน้านี้ใช้ได้เฉพาะร้านหลักเท่านั้น'); return res.redirect('/admin'); }
+  const info = await easyslip.getAccountInfo();
+  res.render('admin/easyslip-usage', { title: 'เช็คสลิป EasySlip', active: 'easyslip-usage', info });
+});
+
 router.post('/topups/payment-settings', (req, res) => {
   qrImageUpload.fields([
     { name: 'promptpayQrImage', maxCount: 1 },
