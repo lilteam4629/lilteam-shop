@@ -7,6 +7,27 @@
   <% if (settings.branding && settings.branding.logoImage) { %>
     <link rel="icon" href="<%= settings.branding.logoImage %>" />
   <% } %>
+  <%
+    // Open Graph tags — what Facebook/LINE/Discord show when someone shares
+    // a link to this page. A page can override any of these (e.g. a
+    // product page passes its own ogTitle/ogDescription/ogImage); anything
+    // not overridden falls back to the shop's own info so every page still
+    // gets a reasonable preview card even without per-page tags.
+    const ogTitleVal = typeof ogTitle !== 'undefined' ? ogTitle : (typeof title !== 'undefined' ? title + ' | ' + settings.shopName : settings.shopName);
+    const ogDescriptionVal = typeof ogDescription !== 'undefined' ? ogDescription : (settings.tagline || settings.shopName);
+    const ogImageVal = typeof ogImage !== 'undefined' ? ogImage : (settings.branding && settings.branding.logoImage ? settings.branding.logoImage : null);
+    const ogUrlVal = typeof ogUrl !== 'undefined' ? ogUrl : `${typeof currentRequestUrl !== 'undefined' ? currentRequestUrl : ''}`;
+  %>
+  <meta property="og:type" content="<%= typeof ogType !== 'undefined' ? ogType : 'website' %>" />
+  <meta property="og:site_name" content="<%= settings.shopName %>" />
+  <meta property="og:title" content="<%= ogTitleVal %>" />
+  <meta property="og:description" content="<%= ogDescriptionVal %>" />
+  <% if (ogUrlVal) { %><meta property="og:url" content="<%= ogUrlVal %>" /><% } %>
+  <% if (ogImageVal) { %><meta property="og:image" content="<%= ogImageVal %>" /><% } %>
+  <meta name="twitter:card" content="<%= ogImageVal ? 'summary_large_image' : 'summary' %>" />
+  <meta name="twitter:title" content="<%= ogTitleVal %>" />
+  <meta name="twitter:description" content="<%= ogDescriptionVal %>" />
+  <% if (ogImageVal) { %><meta name="twitter:image" content="<%= ogImageVal %>" /><% } %>
   <script>
     (function () {
       try {

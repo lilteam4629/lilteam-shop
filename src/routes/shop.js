@@ -186,6 +186,10 @@ router.get('/game/:slug', (req, res) => {
     product: withStock(product),
     genreNames: (product.genres || []).map(g => store.data.settings.genres[g] || g),
     reviews,
+    ogTitle: `${product.title} | ${store.data.settings.shopName}`,
+    ogDescription: `฿${product.price.toLocaleString()} — ${product.description || store.data.settings.tagline || ''}`.trim(),
+    ogImage: product.images && product.images[0] ? product.images[0] : undefined,
+    ogType: 'product',
   });
 });
 

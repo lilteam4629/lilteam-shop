@@ -93,6 +93,9 @@ app.use((req, res, next) => {
   // rented shop's own subdomain would leak your account's credit balance
   // to whoever you rented that shop to.
   res.locals.isMainSite = !req.tenantShop;
+  // Absolute URL of the current page, for the og:url share tag — falls back
+  // to this when a route doesn't pass its own ogUrl.
+  res.locals.currentRequestUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
   next();
 });
 
