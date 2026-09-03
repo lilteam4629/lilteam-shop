@@ -196,9 +196,14 @@ function defaultData() {
       },
       miniGame: {
         enabled: true,
+        boxEnabled: true,
+        railEnabled: false,
         title: 'กล่องสุ่มลุ้นโชค',
         description: 'เสี่ยงดวงลุ้นรับของรางวัลฟรี! เปิดเผยอัตราการออกรางวัลของทุกรายการอย่างโปร่งใส ถูกรางวัลแล้วทักแชทมารับได้เลย',
         costPerPlay: 20,
+        railTitle: 'รางเลื่อนลุ้นรางวัล',
+        railDescription: 'กดเริ่มแล้วลุ้นให้รางวัลเลื่อนมาหยุดตรงช่องกลาง',
+        railCostPerPlay: 20,
       },
       license: {
         key: null,
@@ -227,10 +232,10 @@ function defaultData() {
     walletTransactions: [],
     topupRequests: [],
     miniGamePrizes: [
-      { id: nanoid(8), name: 'ไอดีเกมมือสอง (สุ่ม 1 ไอดี)', percent: 10, stock: 5, isPrize: true, image: null, active: true, createdAt: now },
-      { id: nanoid(8), name: 'ส่วนลด 20 บาท (แจ้งแอดมิน)', percent: 20, stock: 20, isPrize: true, image: null, active: true, createdAt: now },
-      { id: nanoid(8), name: 'สติกเกอร์ที่ระลึก', percent: 30, stock: 50, isPrize: true, image: null, active: true, createdAt: now },
-      { id: nanoid(8), name: 'เสียใจด้วย ลองใหม่ครั้งหน้า', percent: 40, stock: null, isPrize: false, image: null, active: true, createdAt: now },
+      { id: nanoid(8), gameType: 'box', name: 'ไอดีเกมมือสอง (สุ่ม 1 ไอดี)', percent: 10, stock: 5, isPrize: true, image: null, active: true, createdAt: now },
+      { id: nanoid(8), gameType: 'box', name: 'ส่วนลด 20 บาท (แจ้งแอดมิน)', percent: 20, stock: 20, isPrize: true, image: null, active: true, createdAt: now },
+      { id: nanoid(8), gameType: 'box', name: 'สติกเกอร์ที่ระลึก', percent: 30, stock: 50, isPrize: true, image: null, active: true, createdAt: now },
+      { id: nanoid(8), gameType: 'box', name: 'เสียใจด้วย ลองใหม่ครั้งหน้า', percent: 40, stock: null, isPrize: false, image: null, active: true, createdAt: now },
     ],
     miniGamePlays: [],
     licensePlans: [
@@ -436,6 +441,20 @@ function migrateSchema(db) {
     };
     changed = true;
   }
+  if (db.settings.miniGame.boxEnabled === undefined) {
+    db.settings.miniGame.boxEnabled = Boolean(db.settings.miniGame.enabled);
+    changed = true;
+  }
+  if (db.settings.miniGame.railEnabled === undefined) {
+    db.settings.miniGame.railEnabled = false;
+    changed = true;
+  }
+  if (db.settings.miniGame.railTitle === undefined) {
+    db.settings.miniGame.railTitle = 'รางเลื่อนลุ้นรางวัล';
+    db.settings.miniGame.railDescription = 'กดเริ่มแล้วลุ้นให้รางวัลเลื่อนมาหยุดตรงช่องกลาง';
+    db.settings.miniGame.railCostPerPlay = Number(db.settings.miniGame.costPerPlay) || 0;
+    changed = true;
+  }
   if (!db.settings.license) {
     db.settings.license = { key: null, label: null, expiresAt: null };
     changed = true;
@@ -521,6 +540,10 @@ function migrateSchema(db) {
     }
   });
   db.miniGamePrizes.forEach(prize => {
+    if (!prize.gameType) {
+      prize.gameType = 'box';
+      changed = true;
+    }
     if (prize.isPrize === undefined) {
       prize.isPrize = (Number(prize.rewardAmount) || 0) > 0;
       changed = true;

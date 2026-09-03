@@ -783,24 +783,28 @@ router.post('/coupons/:id/delete', (req, res) => {
 
 // ---------- Mini game ----------
 router.get('/minigame', (req, res) => {
-  const totalPercent = store.data.miniGamePrizes
-    .filter(p => p.active)
+  const totalPercent = type => store.data.miniGamePrizes
+    .filter(p => p.active && (p.gameType || 'box') === type)
     .reduce((sum, p) => sum + Number(p.percent), 0);
   res.render('admin/minigame', {
     title: 'มินิเกม', active: 'minigame',
     game: store.data.settings.miniGame,
     prizes: store.data.miniGamePrizes,
-    totalPercent,
+    totalPercent: totalPercent('box'),
+    railTotalPercent: totalPercent('rail'),
     recentPlays: store.data.miniGamePlays.slice(0, 30),
   });
 });
 
 router.post('/minigame/settings', (req, res) => {
-  const { title, description, costPerPlay } = req.body;
+  const { title, description, costPerPlay, railTitle, railDescription, railCostPerPlay } = req.body;
   Object.assign(store.data.settings.miniGame, {
     title: title || store.data.settings.miniGame.title,
     description: description || '',
     costPerPlay: Math.max(0, parseInt(costPerPlay, 10) || 0),
+    railTitle: railTitle || store.data.settings.miniGame.railTitle,
+    railDescription: railDescription || '',
+    railCostPerPlay: Math.max(0, parseInt(railCostPerPlay, 10) || 0),
   });
   store.save();
   req.flash('success', 'บันทึกการตั้งค่ามินิเกมแล้ว');
@@ -808,9 +812,12 @@ router.post('/minigame/settings', (req, res) => {
 });
 
 router.post('/minigame/toggle', (req, res) => {
-  store.data.settings.miniGame.enabled = !store.data.settings.miniGame.enabled;
+  const field = req.body.gameType === 'rail' ? 'railEnabled' : 'boxEnabled';
+  store.data.settings.miniGame[field] = !store.data.settings.miniGame[field];
+  store.data.settings.miniGame.enabled = Boolean(store.data.settings.miniGame.boxEnabled || store.data.settings.miniGame.railEnabled);
   store.save();
-  req.flash('success', store.data.settings.miniGame.enabled ? 'เปิดใช้งานมินิเกมแล้ว' : 'ปิดใช้งานมินิเกมแล้ว');
+  const label = field === 'railEnabled' ? 'เกมรางเลื่อน' : 'เกมเปิดกล่อง';
+  req.flash('success', `${store.data.settings.miniGame[field] ? 'เปิด' : 'ปิด'}ใช้งาน${label}แล้ว`);
   res.redirect('/admin/minigame');
 });
 
@@ -821,6 +828,7 @@ router.post('/minigame/prizes', (req, res) => {
       return res.redirect('/admin/minigame');
     }
     const { name, percent, stock } = req.body;
+    const gameType = req.body.gameType === 'rail' ? 'rail' : 'box';
     if (!name || !name.trim()) {
       req.flash('error', 'กรุณากรอกชื่อรางวัล');
       return res.redirect('/admin/minigame');
@@ -835,7 +843,7 @@ router.post('/minigame/prizes', (req, res) => {
       }
     }
     store.data.miniGamePrizes.push({
-      id: store.genId(8), name: name.trim(),
+      id: store.genId(8), gameType, name: name.trim(),
       percent: Math.max(0, Math.min(100, Number(percent) || 0)),
       stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
       isPrize: req.body.isPrize === 'on',
@@ -872,7 +880,8 @@ router.post('/minigame/prizes/:id/image/remove', (req, res) => {
 });
 
 router.post('/minigame/preview', (req, res) => {
-  const prize = pickPrize(store.data.miniGamePrizes);
+  const gameType = req.query.mode === 'rail' ? 'rail' : 'box';
+  const prize = pickPrize(store.data.miniGamePrizes.filter(p => (p.gameType || 'box') === gameType));
   if (!prize) {
     return res.status(400).json({ error: 'ของรางวัลหมดชั่วคราวหรือยังไม่ได้ตั้งค่าอัตราออก' });
   }

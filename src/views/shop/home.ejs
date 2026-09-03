@@ -305,7 +305,11 @@
   <% } %>
 </section>
 
-<% if (settings.miniGame && settings.miniGame.enabled && miniGamePrizes.length) { %>
+<%
+  const boxGamePrizes = miniGamePrizes.filter(p => (p.gameType || 'box') === 'box');
+  const railGamePrizes = miniGamePrizes.filter(p => p.gameType === 'rail');
+%>
+<% if (settings.miniGame && settings.miniGame.boxEnabled && boxGamePrizes.length) { %>
 <section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-10">
   <div class="mg-panel relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 p-6 sm:p-10">
     <div class="mg-sparkle-field absolute inset-0 pointer-events-none overflow-hidden">
@@ -339,7 +343,7 @@
       <div>
         <h3 class="text-sm font-semibold text-[var(--text-2)] mb-3 flex items-center gap-1.5">📋 อัตราการออกรางวัลทั้งหมด (เปิดเผย 100% โปร่งใส)</h3>
         <div class="grid sm:grid-cols-2 gap-3">
-          <% miniGamePrizes.forEach(p => {
+          <% boxGamePrizes.forEach(p => {
                const tier = !p.isPrize ? 'none' : p.percent <= 5 ? 'legendary' : p.percent <= 15 ? 'rare' : 'common';
                const tierIcon = { legendary: '💎', rare: '🌟', common: '🎁', none: '💨' }[tier];
                const tierLabel = { legendary: 'ตำนาน', rare: 'หายาก', common: 'ทั่วไป', none: 'เสียใจด้วย' }[tier];
@@ -507,4 +511,43 @@
     .mg-sparkle { animation: none; }
   }
 </style>
+<% } %>
+
+<% if (settings.miniGame && settings.miniGame.railEnabled && railGamePrizes.length) { %>
+<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-10">
+  <div class="mg-panel relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 p-6 sm:p-10">
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
+      <div>
+        <p class="mg-kicker">🎰 มินิเกมรางเลื่อน</p>
+        <h2 class="mg-title"><%= settings.miniGame.railTitle || 'รางเลื่อนลุ้นรางวัล' %></h2>
+        <p class="mg-description"><%= settings.miniGame.railDescription || 'รางวัลจะเลื่อนและหยุดตรงช่องกลาง' %></p>
+      </div>
+      <div class="mg-price">
+        <div class="mg-price-label">เริ่มลุ้นเพียง</div>
+        <div class="mg-price-value">฿<%= Number(settings.miniGame.railCostPerPlay || 0).toLocaleString() %></div>
+        <div class="mg-price-suffix">ต่อครั้ง</div>
+      </div>
+    </div>
+    <div class="grid lg:grid-cols-[1fr_440px] gap-6 items-start">
+      <div>
+        <h3 class="text-sm font-semibold text-[var(--text-2)] mb-3">🎁 รางวัลที่มีโอกาสได้รับ</h3>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <% railGamePrizes.forEach(p => { %>
+            <div class="mg-prize-chip <%= p.stock !== null && p.stock <= 0 ? 'opacity-50' : '' %>">
+              <% if (p.image) { %><img src="<%= p.image %>" alt="<%= p.name %>" class="w-12 h-12 object-contain rounded" /><% } else { %><div class="text-2xl"><%= p.isPrize ? '🎁' : '💨' %></div><% } %>
+              <div class="flex-1 min-w-0"><div class="text-sm font-semibold truncate"><%= p.name %></div><div class="text-[10px] text-[var(--text-4)]">โอกาส <%= p.percent %>%</div></div>
+            </div>
+          <% }) %>
+        </div>
+      </div>
+      <%- include('../partials/minigame-rail', {
+        endpoint: '/minigame/play?mode=rail',
+        cost: settings.miniGame.railCostPerPlay,
+        prizes: railGamePrizes,
+        showLogin: !currentUser,
+        balance: currentUser ? currentUser.walletBalance : null,
+      }) %>
+    </div>
+  </div>
+</section>
 <% } %>
