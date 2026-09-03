@@ -75,25 +75,38 @@
       else{const icon=document.createElement('div');icon.className='rail-item-icon';icon.textContent=p.isPrize?'🎁':'💨';el.appendChild(icon)}
       const name=document.createElement('div');name.className='rail-item-name';name.textContent=p.name;el.appendChild(name);return el;
     }
-    function seed(){track.innerHTML='';for(let i=0;i<16;i++)track.appendChild(item(prizes[i%prizes.length]||{name:'รางวัล',isPrize:true}));track.style.transition='none';track.style.transform='translateX(0)'}
+    let spinning=false;
+    function centerIndexAt(index){
+      const el=track.children[index];
+      if(!el)return;
+      const itemWidth=el.getBoundingClientRect().width;
+      const gap=parseFloat(getComputedStyle(track).gap)||14;
+      const step=itemWidth+gap;
+      const windowCenter=game.querySelector('.rail-window').clientWidth/2;
+      return windowCenter-(index*step+itemWidth/2);
+    }
+    function seed(){
+      track.innerHTML='';
+      const count=16;
+      for(let i=0;i<count;i++)track.appendChild(item(prizes[i%prizes.length]||{name:'รางวัล',isPrize:true}));
+      track.style.transition='none';
+      track.style.transform='translateX('+(centerIndexAt(Math.floor(count/2))||0)+'px)';
+    }
     seed();
+    window.addEventListener('resize',function(){if(!spinning)seed()});
     if(!button)return;
     button.addEventListener('click',async function(){
-      button.disabled=true;result.textContent='กำลังสุ่ม...';seed();
+      spinning=true;button.disabled=true;result.textContent='กำลังสุ่ม...';seed();
       let response,data;try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin'});data=await response.json()}catch(e){data=null}
-      if(!response||!response.ok||!data){result.textContent=(data&&data.error)||'เกิดข้อผิดพลาด กรุณาลองใหม่';button.disabled=false;return}
+      if(!response||!response.ok||!data){result.textContent=(data&&data.error)||'เกิดข้อผิดพลาด กรุณาลองใหม่';button.disabled=false;spinning=false;return}
       const winner={name:data.prizeName,image:data.image||null,isPrize:data.isWin};
       const winnerIndex=34;const total=40;
       const sequence=[];for(let i=0;i<total;i++)sequence.push(i===winnerIndex?winner:(prizes[Math.floor(Math.random()*prizes.length)]||winner));
       track.innerHTML='';sequence.forEach(p=>track.appendChild(item(p)));
-      const firstItem=track.children[0];
-      const itemWidth=firstItem.getBoundingClientRect().width;
-      const gap=parseFloat(getComputedStyle(track).gap)||14;
-      const step=itemWidth+gap;
-      const windowCenter=game.querySelector('.rail-window').clientWidth/2;
-      const target=windowCenter-(winnerIndex*step+itemWidth/2);
+      const target=centerIndexAt(winnerIndex);
       track.style.transition='transform 4.8s cubic-bezier(.12,.72,.08,1)';track.style.transform='translateX('+target+'px)';
       setTimeout(function(){
+        spinning=false;
         result.innerHTML='';const line=document.createElement('div');line.className=data.isWin?'text-emerald-400 font-medium':'text-[var(--text-3)]';line.textContent=data.isWin?'ยินดีด้วย! ได้รับ '+data.prizeName:'ผลลัพธ์: '+data.prizeName;result.appendChild(line);
         if(data.isWin&&data.claimCode){const claim=document.createElement('div');claim.className='rail-claim';claim.textContent=data.claimCode;result.appendChild(claim)}
         if(balance&&typeof data.walletBalance==='number')balance.textContent=data.walletBalance.toLocaleString();button.disabled=false;

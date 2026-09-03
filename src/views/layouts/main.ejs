@@ -20,7 +20,7 @@
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
 
-    html.theme-switching, html.theme-switching * {
+    html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
       transition: none !important;
       animation: none !important;
     }
