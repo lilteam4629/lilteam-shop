@@ -18,4 +18,12 @@
     </div>
   </div>
   <div class="text-center text-xs text-[var(--text-4)] pb-6">&copy; <%= new Date().getFullYear() %> <%= settings.shopName %></div>
+  <!-- Platform-wide fraud-report notice. Intentionally hardcoded (not read
+       from a shop's own settings) so a scamming tenant can't edit or
+       remove it — every shop on this platform shows the platform owner's
+       own contact, not the tenant's. -->
+  <div class="border-t border-[var(--border)] py-3 text-center text-[11px] text-[var(--text-4)]">
+    ⚠️ พบร้านนี้มีพฤติกรรมโกง? แจ้งเราได้ที่
+    <a href="https://web.facebook.com/aurupong.sungthim.2024" target="_blank" rel="noopener" class="text-[var(--gold)] hover:underline">Facebook</a>
+  </div>
 </footer>
