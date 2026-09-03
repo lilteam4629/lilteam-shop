@@ -171,11 +171,14 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
   const optionMinQtys = toArr(body.priceOptionMinQty);
   const optionPrices = toArr(body.priceOptionPrice);
   const priceOptions = optionMinQtys
-    .map((minQty, i) => ({
-      id: optionIds[i] || store.genId(8),
-      minQty: Math.max(1, parseInt(minQty, 10) || 0),
-      price: Math.max(0, parseInt(optionPrices[i], 10) || 0),
-    }))
+    .map((minQty, i) => {
+      const qty = Math.max(1, parseInt(minQty, 10) || 0);
+      const totalPrice = Math.max(0, parseInt(optionPrices[i], 10) || 0);
+      // Admin types "buy N pieces, total price P" — store the per-unit
+      // price (P/N) since that's what actually gets applied per unit once
+      // a cart quantity crosses this threshold (see cart.js resolveUnitPrice).
+      return { id: optionIds[i] || store.genId(8), minQty: qty, price: Math.round(totalPrice / qty) };
+    })
     .filter(o => o.minQty > 1 && o.price > 0)
     .sort((a, b) => a.minQty - b.minQty);
   return {

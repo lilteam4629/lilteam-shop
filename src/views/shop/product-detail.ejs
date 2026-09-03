@@ -55,7 +55,8 @@
           </div>
           <% qtyTiers.forEach(opt => { %>
             <div class="flex items-center justify-between px-4 py-2 border-t border-[var(--border-light)]">
-              <span class="text-[var(--text-2)]">ซื้อ <%= opt.minQty %> ชิ้นขึ้นไป</span><span class="font-semibold text-[var(--gold)]">฿<%= opt.price.toLocaleString() %> / ชิ้น</span>
+              <span class="text-[var(--text-2)]">ซื้อ <%= opt.minQty %> ชิ้นขึ้นไป</span>
+              <span class="text-right"><span class="font-semibold text-[var(--gold)]">฿<%= (opt.minQty * opt.price).toLocaleString() %></span> <span class="text-xs text-[var(--text-3)]">(฿<%= opt.price.toLocaleString() %>/ชิ้น)</span></span>
             </div>
           <% }) %>
         </div>
