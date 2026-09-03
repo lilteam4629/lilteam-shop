@@ -379,7 +379,9 @@
     </div>
   </div>
 </section>
+<% } %>
 
+<% if ((settings.miniGame && settings.miniGame.boxEnabled && boxGamePrizes.length) || (settings.miniGame && settings.miniGame.railEnabled && railGamePrizes.length)) { %>
 <style>
   .mg-panel {
     background:
