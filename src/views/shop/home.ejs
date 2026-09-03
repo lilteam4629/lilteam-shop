@@ -528,25 +528,23 @@
         <div class="mg-price-suffix">ต่อครั้ง</div>
       </div>
     </div>
-    <div class="grid lg:grid-cols-[1fr_440px] gap-6 items-start">
-      <div>
-        <h3 class="text-sm font-semibold text-[var(--text-2)] mb-3">🎁 รางวัลที่มีโอกาสได้รับ</h3>
-        <div class="grid sm:grid-cols-2 gap-3">
-          <% railGamePrizes.forEach(p => { %>
-            <div class="mg-prize-chip <%= p.stock !== null && p.stock <= 0 ? 'opacity-50' : '' %>">
-              <% if (p.image) { %><img src="<%= p.image %>" alt="<%= p.name %>" class="w-12 h-12 object-contain rounded" /><% } else { %><div class="text-2xl"><%= p.isPrize ? '🎁' : '💨' %></div><% } %>
-              <div class="flex-1 min-w-0"><div class="text-sm font-semibold truncate"><%= p.name %></div><div class="text-[10px] text-[var(--text-4)]">โอกาส <%= p.percent %>%</div></div>
-            </div>
-          <% }) %>
-        </div>
+    <%- include('../partials/minigame-rail', {
+      endpoint: '/minigame/play?mode=rail',
+      cost: settings.miniGame.railCostPerPlay,
+      prizes: railGamePrizes,
+      showLogin: !currentUser,
+      balance: currentUser ? currentUser.walletBalance : null,
+    }) %>
+    <div class="mt-6">
+      <h3 class="text-sm font-semibold text-[var(--text-2)] mb-3">🎁 รางวัลที่มีโอกาสได้รับ</h3>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <% railGamePrizes.forEach(p => { %>
+          <div class="mg-prize-chip <%= p.stock !== null && p.stock <= 0 ? 'opacity-50' : '' %>">
+            <% if (p.image) { %><img src="<%= p.image %>" alt="<%= p.name %>" class="w-12 h-12 object-contain rounded" /><% } else { %><div class="text-2xl"><%= p.isPrize ? '🎁' : '💨' %></div><% } %>
+            <div class="flex-1 min-w-0"><div class="text-sm font-semibold truncate"><%= p.name %></div><div class="text-[10px] text-[var(--text-4)]">โอกาส <%= p.percent %>%</div></div>
+          </div>
+        <% }) %>
       </div>
-      <%- include('../partials/minigame-rail', {
-        endpoint: '/minigame/play?mode=rail',
-        cost: settings.miniGame.railCostPerPlay,
-        prizes: railGamePrizes,
-        showLogin: !currentUser,
-        balance: currentUser ? currentUser.walletBalance : null,
-      }) %>
     </div>
   </div>
 </section>
