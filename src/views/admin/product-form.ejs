@@ -1,9 +1,17 @@
-<form action="<%= product ? `/admin/products/${product.id}/edit` : '/admin/products/new' %>" method="post" enctype="multipart/form-data"
+<% const isBulkImport = typeof bulkMode !== 'undefined' && bulkMode; %>
+<form action="<%= isBulkImport ? '/admin/products/bulk-import' : (product ? `/admin/products/${product.id}/edit` : '/admin/products/new') %>" method="post" enctype="multipart/form-data"
   class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-3xl space-y-4">
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อเกม</label>
-    <input name="title" required value="<%= product ? product.title : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-  </div>
+  <% if (isBulkImport) { %>
+    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm text-[var(--text-2)]">
+      📁 เลือกโฟลเดอร์รูปด้านล่าง — ระบบจะสร้าง <b>1 สินค้าต่อ 1 รูป</b> โดยใช้ <b>ชื่อไฟล์เป็นชื่อสินค้า</b> อัตโนมัติ
+      ส่วนค่าอื่นๆ ทั้งหมดในฟอร์มนี้ (ราคา, หมวดหมู่, เงื่อนไข ฯลฯ) จะถูกใช้ร่วมกันกับทุกสินค้าที่สร้าง — แก้ไขแต่ละชิ้นแยกทีหลังได้ตามปกติ
+    </div>
+  <% } else { %>
+    <div>
+      <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อเกม</label>
+      <input name="title" required value="<%= product ? product.title : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+    </div>
+  <% } %>
 
   <div class="grid sm:grid-cols-2 gap-4">
     <div>
@@ -97,6 +105,40 @@
     <label class="block text-sm mb-1 text-[var(--text-3)]">รายละเอียดเกม (แท็บ "รายละเอียด")</label>
     <textarea name="aboutText" rows="4" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= product ? product.aboutText : '' %></textarea>
   </div>
+  <% if (isBulkImport) { %>
+  <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-3">
+    <div>
+      <h3 class="font-medium">เลือกโฟลเดอร์รูป</h3>
+      <p class="text-xs text-[var(--text-4)]">เลือกทั้งโฟลเดอร์ได้เลย ระบบจะดึงเฉพาะไฟล์รูปในนั้นมาสร้างสินค้าให้อัตโนมัติ (สูงสุด 60 รูปต่อครั้ง)</p>
+    </div>
+    <input id="bulkFolderInput" type="file" name="productImages" webkitdirectory directory multiple accept="image/*" class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
+    <div id="bulkFileList" class="hidden">
+      <p class="text-xs text-[var(--text-3)] mb-2">พบ <span id="bulkFileCount" class="font-bold text-[var(--gold)]">0</span> รูป — จะสร้างเป็นสินค้าตามรายการนี้:</p>
+      <ul id="bulkFileNames" class="text-xs text-[var(--text-2)] space-y-0.5 max-h-48 overflow-y-auto bg-[var(--card)] border border-[var(--border-light)] rounded-lg p-3"></ul>
+    </div>
+  </div>
+  <script>
+    (function () {
+      const input = document.getElementById('bulkFolderInput');
+      if (!input) return;
+      input.addEventListener('change', function () {
+        const files = Array.from(input.files).filter(function (f) { return /^image\//.test(f.type); });
+        const listEl = document.getElementById('bulkFileList');
+        const namesEl = document.getElementById('bulkFileNames');
+        const countEl = document.getElementById('bulkFileCount');
+        namesEl.innerHTML = '';
+        countEl.textContent = files.length;
+        listEl.classList.toggle('hidden', files.length === 0);
+        files.forEach(function (f) {
+          const title = f.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim();
+          const li = document.createElement('li');
+          li.textContent = '🖼️ ' + f.name + ' → ชื่อสินค้า: "' + title + '"';
+          namesEl.appendChild(li);
+        });
+      });
+    })();
+  </script>
+  <% } else { %>
   <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-4">
     <div>
       <h3 class="font-medium">รูปภาพสินค้า</h3>
@@ -138,6 +180,7 @@
       <textarea name="images" rows="3" placeholder="https://...&#10;https://..." class="mt-2 w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 font-mono text-sm"></textarea>
     </details>
   </div>
+  <% } %>
 
   <div class="bg-[var(--input)]/40 border border-[var(--gold)]/30 rounded-xl p-4 space-y-4">
     <div>
@@ -245,7 +288,7 @@
   <% } %>
 
   <div class="flex gap-3">
-    <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm"><%= product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า' %></button>
+    <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm"><%= isBulkImport ? '📁 นำเข้าและสร้างสินค้าทั้งหมด' : (product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า') %></button>
     <a href="/admin/products" class="px-6 py-2 rounded-lg text-sm border border-[var(--border-light)] hover:bg-[var(--input)]">ยกเลิก</a>
   </div>
 </form>

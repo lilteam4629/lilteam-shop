@@ -29,6 +29,15 @@ const productImageUpload = multer({
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
+// Folder-import: one product per image file, so the cap tracks how many
+// products a single import can create rather than how many photos one
+// product can have.
+const bulkProductImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024, files: 60 },
+  fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
+});
+
 const qrImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 4 * 1024 * 1024, files: 2 },
@@ -252,6 +261,52 @@ router.post('/products/new', (req, res) => {
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
       res.redirect('/admin/products/new');
+    }
+  }));
+});
+
+router.get('/products/bulk-import', (req, res) => {
+  res.render('admin/product-form', {
+    title: 'นำเข้าสินค้าจากโฟลเดอร์', active: 'products', product: null, bulkMode: true,
+    genres: store.data.settings.genres, filterTags: store.data.filterTags,
+  });
+});
+
+router.post('/products/bulk-import', (req, res) => {
+  bulkProductImageUpload.array('productImages', 60)(req, res, store.bindTenantContext(async (err) => {
+    if (err) {
+      req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (สูงสุด 60 รูปต่อครั้ง รูปละไม่เกิน 8MB)');
+      return res.redirect('/admin/products/bulk-import');
+    }
+    if (!req.files || !req.files.length) {
+      req.flash('error', 'ไม่พบรูปในโฟลเดอร์ที่เลือก กรุณาเลือกโฟลเดอร์ที่มีไฟล์รูปอยู่ข้างใน');
+      return res.redirect('/admin/products/bulk-import');
+    }
+    try {
+      // Shared field values (price, genres, description, fulfillment, etc.)
+      // apply to every product created from this batch — only title (from
+      // the filename) and the image itself differ per product.
+      const sharedFields = parseProductBody(req.body, [], []);
+      delete sharedFields.title;
+      delete sharedFields.images;
+
+      const uploadedImages = await persistUploadedFiles(req.files);
+      const now = new Date().toISOString();
+      const created = req.files.map((file, i) => {
+        const title = file.originalname.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'สินค้าใหม่';
+        return {
+          id: store.genId(8), slug: slugify(title) + '-' + store.genId(4),
+          ...sharedFields, title, images: [uploadedImages[i]],
+          status: 'active', createdAt: now,
+        };
+      });
+      store.data.products.push(...created);
+      store.save();
+      req.flash('success', `นำเข้าสินค้าแล้ว ${created.length} รายการ — แก้ไขแต่ละชิ้นแยกได้ตามปกติ`);
+      res.redirect('/admin/products');
+    } catch (saveError) {
+      req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
+      res.redirect('/admin/products/bulk-import');
     }
   }));
 });
