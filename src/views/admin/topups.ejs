@@ -53,7 +53,7 @@
     </button>
     <button type="button" onclick="switchTopupTab('autoverify')" id="topup-tab-btn-autoverify" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
       <span class="text-base">🤖</span>
-      <span>ตรวจสลิปอัตโนมัติ & แจ้งเตือน</span>
+      <span><%= isMainSite ? 'ตรวจสลิปอัตโนมัติ & แจ้งเตือน' : 'แจ้งเตือนการเติมเงิน' %></span>
     </button>
   </div>
 
@@ -441,11 +441,14 @@
       <input type="hidden" name="truemoneyPhone" value="<%= payment.truemoneyPhone || '' %>" />
       <input type="hidden" name="truemoneyEnabled" value="<%= payment.truemoneyEnabled !== false ? 'on' : 'off' %>" />
 
-      <!-- Active Provider Status & Direct Link Card -->
+      <% if (isMainSite) { %>
+      <!-- API provider configuration is platform-only. Tenant shops share
+           the platform EasySlip key and only enter their own receiving account. -->
       <div class="bg-gradient-to-r from-[var(--gold)]/10 via-[var(--card)] to-[var(--card)] border border-[var(--gold)]/30 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
-            <% if (payment.slipProvider === 'byshop') { %>🚀
+            <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>⚡
+            <% } else if (payment.slipProvider === 'byshop') { %>🚀
             <% } else if (payment.slipProvider === 'slipok') { %>🛡️
             <% } else if (payment.slipProvider === 'easyslip') { %>⚡
             <% } else if (payment.slipProvider === 'slip2go') { %>⚠️
@@ -455,7 +458,8 @@
             <div class="flex items-center gap-2">
               <span class="text-xs text-[var(--text-4)]">ค่ายตรวจสลิปที่ใช้อยู่:</span>
               <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--gold)] text-[var(--bg)]">
-                <% if (payment.slipProvider === 'byshop') { %>⭐ BYSHOP API (แนะนำ)
+                <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>EasySlip/SlipOK อัตโนมัติ
+                <% } else if (payment.slipProvider === 'byshop') { %>⭐ BYSHOP API (แนะนำ)
                 <% } else if (payment.slipProvider === 'slipok') { %>⭐ SlipOK API (แนะนำ)
                 <% } else if (payment.slipProvider === 'easyslip') { %>EasySlip API (มาตรฐาน)
                 <% } else if (payment.slipProvider === 'slip2go') { %>Slip2Go API
@@ -473,6 +477,7 @@
           <span>↗</span>
         </a>
       </div>
+      <% } %>
 
       <!-- Discord Webhook Box -->
       <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
