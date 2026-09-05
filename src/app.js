@@ -16,7 +16,7 @@ const adminRoutes = require('./routes/admin');
 const licenseRoutes = require('./routes/license');
 const rentWebsiteRoutes = require('./routes/rent-website');
 const tenantRoutes = require('./routes/tenant');
-const { tenantResolver } = require('./middleware/tenant');
+const { tenantResolver, MAIN_DOMAIN } = require('./middleware/tenant');
 const license = require('./services/license');
 const discordBot = require('./services/discord-bot');
 const packageInfo = require('../package.json');
@@ -156,6 +156,18 @@ app.use((req, res, next) => {
   // Absolute URL of the current page, for the og:url share tag — falls back
   // to this when a route doesn't pass its own ogUrl.
   res.locals.currentRequestUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+  next();
+});
+
+// rent.<MAIN_DOMAIN> is the dedicated landing site for the reseller/
+// rent-a-shop funnel — same app, same code, just its own subdomain so it
+// doesn't show your game-shop storefront. Only the home page needs
+// redirecting; /rent-website, /start, /my-shops, /login etc. already work
+// on any main-site host.
+app.use('/', (req, res, next) => {
+  if (req.path === '/' && req.hostname === `rent.${MAIN_DOMAIN}`) {
+    return res.redirect('/rent-website');
+  }
   next();
 });
 

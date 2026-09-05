@@ -39,6 +39,11 @@ function getShopUrl(slug, req) {
 const MAIN_DOMAIN = (process.env.MAIN_DOMAIN || '').trim().toLowerCase();
 const MAIN_SITE_URL = (process.env.MAIN_SITE_URL || '').trim().replace(/\/$/, '') || (MAIN_DOMAIN ? `https://${MAIN_DOMAIN}` : '');
 
+// Subdomains that belong to the platform itself, never to a rented shop —
+// "rent" is the dedicated landing site for the reseller/rent-a-shop funnel
+// (see app.js), so it must never be resolved as a shop slug lookup.
+const RESERVED_TENANT_SUBDOMAINS = new Set(['rent']);
+
 async function tenantResolver(req, res, next) {
   const host = (req.hostname || '').toLowerCase();
   let slug = null;
@@ -62,6 +67,10 @@ async function tenantResolver(req, res, next) {
       slug = host.slice(0, -'.lvh.me'.length);
     }
   }
+
+  // A reserved platform subdomain (e.g. rent.lilteam.site) is never a shop
+  // slug lookup, on any of the host patterns above.
+  if (slug && RESERVED_TENANT_SUBDOMAINS.has(slug.toLowerCase())) return next();
 
   // If no subdomain slug is matched, treat as main site
   if (!slug) return next();
