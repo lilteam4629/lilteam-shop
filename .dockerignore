@@ -5,4 +5,8 @@ node_modules
 npm-debug.log
 deploy
 src/data/db.json
+src/data/db*.json
+data
+*.zip
+.claude
 public/uploads

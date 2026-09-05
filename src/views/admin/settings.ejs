@@ -1,96 +1,177 @@
-<% if (licenseEnabled) { %>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-xl mb-6">
-    <h3 class="font-semibold mb-2">🔒 ใบอนุญาตใช้งาน</h3>
-    <% if (settings.license && settings.license.key && settings.license.expiresAt && Date.now() < settings.license.expiresAt) { %>
-      <p class="text-sm text-emerald-400">✓ ใช้งานอยู่<% if (settings.license.label) { %> — <%= settings.license.label %><% } %></p>
-      <p class="text-xs text-[var(--text-4)] mt-1">หมดอายุ: <%= new Date(settings.license.expiresAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></p>
-    <% } else { %>
-      <p class="text-sm text-[var(--coral)]">✕ ยังไม่ได้ปลดล็อก หรือหมดอายุแล้ว</p>
-    <% } %>
-    <a href="/license" class="inline-block text-xs text-[var(--gold)] underline mt-2">ไปหน้ากรอกคีย์ →</a>
-  </div>
-<% } %>
-
-<form action="/admin/settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-xl space-y-4">
+<!-- Settings Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
   <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อร้าน</label>
-    <input name="shopName" value="<%= settings.shopName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">ตั้งค่าร้านค้า</h1>
+    <p class="text-xs text-[var(--text-4)] mt-0.5">จัดการข้อมูลพื้นฐาน ช่องทางการติดต่อ เวลาเปิดร้าน เพลงพื้นหลัง และเอฟเฟกต์หน้าเว็บ</p>
   </div>
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">คำโปรย</label>
-    <input name="tagline" value="<%= settings.tagline %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-  </div>
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">Line ID</label>
-    <input name="contactLine" value="<%= settings.contactLine %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-  </div>
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">Facebook URL</label>
-    <input name="contactFacebook" value="<%= settings.contactFacebook %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-  </div>
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">Messenger URL</label>
-    <input name="contactMessenger" value="<%= settings.contactMessenger || '' %>" placeholder="https://m.me/ชื่อเพจ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-  </div>
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อที่แสดงบนการ์ด Facebook</label>
-    <input name="contactFacebookName" value="<%= settings.contactFacebookName || '' %>" placeholder="ชื่อเพจหรือ @username" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-  </div>
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">เวลาตอบกลับโดยประมาณ</label>
-    <input name="contactResponseTime" value="<%= settings.contactResponseTime || '' %>" placeholder="เช่น 5–15 นาที" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-  </div>
-  <div>
-    <label class="block text-sm mb-1 text-[var(--text-3)]">เวลาเปิดบริการ</label>
-    <input name="openHours" value="<%= settings.openHours %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-  </div>
-
-  <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกการตั้งค่า</button>
-</form>
-
-<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-xl mt-6">
-  <h3 class="font-semibold mb-1">เพลงหน้าเว็บ</h3>
-  <p class="text-xs text-[var(--text-4)] mb-4">ใส่ลิงก์วิดีโอ YouTube เพื่อเปิดเป็นเพลงพื้นหลังของหน้าเว็บ ลูกค้าจะเห็นเป็นปุ่มเล่นเพลงเล็กๆ มุมจอ กดเล่น/หยุด/ปรับเสียงเองได้ และย่อเก็บได้</p>
-
-  <form action="/admin/music-player" method="post" class="space-y-3">
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ลิงก์ YouTube</label>
-      <input name="youtubeUrl" value="<%= settings.music.youtubeUrl %>" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <p class="text-[11px] text-[var(--text-4)] mt-1">รองรับ YouTube, YouTube Music, youtu.be, Shorts และ Live — ต้องเป็นลิงก์วิดีโอ ไม่ใช่ลิงก์ Playlist อย่างเดียว</p>
-    </div>
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-sm mb-1 text-[var(--text-3)]">เริ่มเล่นที่ (นาที:วินาที)</label>
-        <input name="startTime" value="<%= Math.floor(settings.music.startSeconds/60) %>:<%= String(settings.music.startSeconds%60).padStart(2,'0') %>" placeholder="0:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      </div>
-      <div>
-        <label class="block text-sm mb-1 text-[var(--text-3)]">จบท่อนที่ (ไม่บังคับ)</label>
-        <input name="endTime" value="<%= settings.music.endSeconds ? Math.floor(settings.music.endSeconds/60) + ':' + String(settings.music.endSeconds%60).padStart(2,'0') : '' %>" placeholder="0:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      </div>
-    </div>
-    <p class="text-xs text-[var(--text-4)] -mt-1">ใส่ทั้งสองช่องเพื่อเลือกเล่นเฉพาะท่อนที่ต้องการ (จะวนซ้ำเฉพาะช่วงนั้น) หรือใส่แค่ "เริ่มเล่นที่" อย่างเดียวก็ได้</p>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ระดับเสียงเริ่มต้น (<%= settings.music.defaultVolume %>%)</label>
-      <input type="range" name="defaultVolume" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="w-full accent-[var(--gold)]" />
-    </div>
-    <label class="flex items-center justify-between gap-3 bg-[var(--input)] border-2 <%= settings.music.enabled ? 'border-emerald-500/70' : 'border-[var(--border-light)]' %> rounded-lg px-4 py-3 cursor-pointer text-sm">
-      <span>
-        <span class="block font-medium">เปิดใช้งานเพลงหน้าเว็บ</span>
-        <span class="block text-xs mt-0.5 <%= settings.music.enabled ? 'text-emerald-400' : 'text-[var(--text-4)]' %>"><%= settings.music.enabled ? 'เปิดอยู่ — กดเพื่อปิด' : 'ปิดอยู่ — กดเพื่อเปิด' %></span>
-      </span>
-      <input type="checkbox" name="enabled" <%= settings.music.enabled ? 'checked' : '' %> class="w-5 h-5 accent-emerald-500" onchange="this.form.requestSubmit()" />
-    </label>
-    <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกการตั้งค่าเพลง</button>
-  </form>
 </div>
 
-<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-xl mt-6">
-  <h3 class="font-semibold mb-1">❄️ หิมะตกหน้าเว็บ</h3>
-  <p class="text-xs text-[var(--text-4)] mb-4">เพิ่มเอฟเฟกต์หิมะตกตกแต่งบนหน้าเว็บ (ไม่บังการใช้งาน กดผ่านได้ปกติ)</p>
-  <form action="/admin/snow-toggle" method="post">
-    <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.snow.enabled ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-lg px-3 py-2 cursor-pointer text-sm w-fit">
-      <input type="checkbox" name="enabled" <%= settings.snow.enabled ? 'checked' : '' %> class="accent-[var(--gold)]" onchange="this.form.submit()" />
-      เปิดใช้งานหิมะตก
-    </label>
-  </form>
+<div class="space-y-6 max-w-4xl">
+
+  <!-- License Status Card (If enabled) -->
+  <% if (licenseEnabled) { %>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex items-center justify-between flex-wrap gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-10 h-10 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-lg">
+          🔒
+        </div>
+        <div>
+          <h3 class="font-bold text-sm text-[var(--text)]">ใบอนุญาตการใช้งานเว็บ (License)</h3>
+          <% if (settings.license && settings.license.key && settings.license.expiresAt && Date.now() < settings.license.expiresAt) { %>
+            <div class="text-xs text-emerald-400 font-semibold mt-0.5 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              <span>ใช้งานได้ปกติ<% if (settings.license.label) { %> (<%= settings.license.label %>)<% } %></span>
+            </div>
+            <div class="text-[11px] text-[var(--text-4)] mt-0.5">หมดอายุ: <%= new Date(settings.license.expiresAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></div>
+          <% } else { %>
+            <div class="text-xs text-rose-400 font-semibold mt-0.5 flex items-center gap-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+              <span>ยังไม่ได้ปลดล็อก หรือหมดอายุแล้ว</span>
+            </div>
+          <% } %>
+        </div>
+      </div>
+      <a href="/license" class="bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--gold)]/30 text-[var(--gold)] font-bold px-4 py-2 rounded-xl text-xs transition">
+        จัดการคีย์ลิขสิทธิ์ →
+      </a>
+    </div>
+  <% } %>
+
+  <!-- General Shop Settings Card -->
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+    <div class="flex items-center gap-2.5 mb-5 pb-4 border-b border-[var(--border)]">
+      <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
+        🏪
+      </div>
+      <div>
+        <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">ข้อมูลทั่วไปและช่องทางติดต่อ</h3>
+        <p class="text-[11px] text-[var(--text-4)]">ข้อมูลนี้จะแสดงบน Header, Footer และหน้าติดต่อเราของร้าน</p>
+      </div>
+    </div>
+
+    <form action="/admin/settings" method="post" class="space-y-4">
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อร้านค้า (Shop Name) *</label>
+          <input name="shopName" value="<%= settings.shopName %>" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition font-medium" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">คำโปรยร้าน (Tagline)</label>
+          <input name="tagline" value="<%= settings.tagline %>" placeholder="เช่น ร้านจำหน่ายเกมและไอดีแท้ 24 ชม." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">Line ID หรือ Line @</label>
+          <input name="contactLine" value="<%= settings.contactLine %>" placeholder="เช่น @myshop" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เวลาเปิดบริการ</label>
+          <input name="openHours" value="<%= settings.openHours %>" placeholder="เช่น เปิดบริการ 24 ชั่วโมง หรือ 10:00 - 22:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">Facebook Page URL</label>
+          <input name="contactFacebook" value="<%= settings.contactFacebook %>" placeholder="https://facebook.com/เพจของคุณ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">Messenger URL</label>
+          <input name="contactMessenger" value="<%= settings.contactMessenger || '' %>" placeholder="https://m.me/ชื่อเพจ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อที่แสดงบนการ์ด Facebook</label>
+          <input name="contactFacebookName" value="<%= settings.contactFacebookName || '' %>" placeholder="เช่น LilTeam Official" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เวลาตอบกลับโดยประมาณ</label>
+        <input name="contactResponseTime" value="<%= settings.contactResponseTime || '' %>" placeholder="เช่น ภายใน 5–15 นาที" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+          💾 บันทึกข้อมูลร้านค้า
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Background Music Player Card -->
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+    <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-[var(--border)]">
+      <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
+        🎵
+      </div>
+      <div>
+        <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เพลงพื้นหลังหน้าเว็บ (Background Music Player)</h3>
+        <p class="text-[11px] text-[var(--text-4)]">เล่นเพลงจาก YouTube พื้นหลัง ลูกค้าสามารถปรับระดับเสียงหรือย่อเก็บได้</p>
+      </div>
+    </div>
+
+    <form action="/admin/music-player" method="post" class="space-y-4">
+      <div>
+        <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ลิงก์วิดีโอ YouTube</label>
+        <input name="youtubeUrl" value="<%= settings.music.youtubeUrl %>" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+        <p class="text-[11px] text-[var(--text-4)] mt-1">รองรับ YouTube, YouTube Music, youtu.be, Shorts และ Live</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">เริ่มเล่นที่ (นาที:วินาที)</label>
+          <input name="startTime" value="<%= Math.floor(settings.music.startSeconds/60) %>:<%= String(settings.music.startSeconds%60).padStart(2,'0') %>" placeholder="0:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">จบท่อนที่ (ไม่บังคับ)</label>
+          <input name="endTime" value="<%= settings.music.endSeconds ? Math.floor(settings.music.endSeconds/60) + ':' + String(settings.music.endSeconds%60).padStart(2,'0') : '' %>" placeholder="0:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ระดับเสียงเริ่มต้น (<%= settings.music.defaultVolume %>%)</label>
+        <input type="range" name="defaultVolume" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="w-full accent-[var(--gold)] h-2 bg-[var(--input)] rounded-lg cursor-pointer" />
+      </div>
+
+      <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-3.5 flex items-center justify-between">
+        <div>
+          <div class="font-bold text-xs text-[var(--text)]">เปิดใช้งานเพลงพื้นหลัง</div>
+          <div class="text-[11px] text-[var(--text-4)]">เล่นเพลงอัตโนมัติเมื่อลูกค้าเข้าสู่หน้าเว็บ</div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" name="enabled" <%= settings.music.enabled ? 'checked' : '' %> class="sr-only peer" onchange="this.form.requestSubmit()" />
+          <div class="w-11 h-6 bg-[var(--input)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--gold)]"></div>
+        </label>
+      </div>
+
+      <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+        💾 บันทึกการตั้งค่าเพลง
+      </button>
+    </form>
+  </div>
+
+  <!-- Snow Particle Effect Card -->
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold text-sm">
+          ❄️
+        </div>
+        <div>
+          <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เอฟเฟกต์หิมะตกหน้าเว็บ (Snow Particles)</h3>
+          <p class="text-[11px] text-[var(--text-4)]">เพิ่มอนุภาคหิมะโปรยปรายตกแต่งบนหน้าเว็บ (ไม่บดบังหรือรบกวนการคลิกของลูกค้า)</p>
+        </div>
+      </div>
+
+      <form action="/admin/snow-toggle" method="post">
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" name="enabled" <%= settings.snow.enabled ? 'checked' : '' %> class="sr-only peer" onchange="this.form.submit()" />
+          <div class="w-11 h-6 bg-[var(--input)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
+        </label>
+      </form>
+    </div>
+  </div>
+
 </div>

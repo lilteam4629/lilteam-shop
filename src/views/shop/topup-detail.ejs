@@ -67,7 +67,7 @@
     </div>
   </div>
 
-  <% if (request.status === 'pending') { %>
+  <% if (request.status === 'pending' || request.status === 'verifying') { %>
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
       <h2 class="font-semibold mb-3">แนบสลิปการโอนเงิน</h2>
       <% if (request.slipPath) { %>
@@ -109,7 +109,7 @@
       overlay.classList.remove('hidden');
     });
   })();
-  <% if (request.status === 'pending' && request.slipPath) { %>
+  <% if ((request.status === 'pending' || request.status === 'verifying') && request.slipPath) { %>
   // The automated slip check now finishes in the background after the
   // upload response (see /account/topup/:id/slip) instead of making the
   // customer wait on it live, so poll for the result instead of expecting

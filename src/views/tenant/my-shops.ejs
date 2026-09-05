@@ -14,7 +14,7 @@
         <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
           <div>
             <div class="font-semibold"><%= shop.name %></div>
-            <a href="https://<%= shop.slug %>.<%= mainDomain %>" target="_blank" class="text-xs text-[var(--gold)] underline font-mono"><%= shop.slug %>.<%= mainDomain %> →</a>
+            <a href="<%= shop.url || ('https://' + shop.slug + '.' + mainDomain) %>" target="_blank" class="text-xs text-[var(--gold)] underline font-mono"><%= shop.url ? shop.url.replace(/^https?:\/\//, '') : (shop.slug + '.' + mainDomain) %> →</a>
           </div>
           <span class="countdown text-xs font-mono px-2 py-1 rounded-full border border-[var(--border-light)]" data-exp="<%= shop.expiresAt %>">…</span>
         </div>

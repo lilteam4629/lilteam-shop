@@ -23,6 +23,15 @@ const packageInfo = require('../package.json');
 
 const app = express();
 
+app.disable('x-powered-by');
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  next();
+});
+
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
@@ -62,6 +71,52 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // ahead of DNS being finished.
 app.use(tenantResolver);
 
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
+
+// Persistent session store for local development (prevents getting logged out on server reload)
+const fs = require('fs');
+const SESSION_DIR = path.join(__dirname, '..', 'data', 'sessions');
+if (!fs.existsSync(SESSION_DIR)) {
+  try { fs.mkdirSync(SESSION_DIR, { recursive: true }); } catch (e) {}
+}
+
+class LocalFileSessionStore extends session.Store {
+  constructor() {
+    super();
+  }
+  get(sid, cb) {
+    const file = path.join(SESSION_DIR, `${sid}.json`);
+    fs.readFile(file, 'utf8', (err, data) => {
+      if (err) return cb(null, null);
+      try {
+        const sess = JSON.parse(data);
+        if (sess.cookie && sess.cookie.expires && new Date(sess.cookie.expires) <= new Date()) {
+          this.destroy(sid, () => {});
+          return cb(null, null);
+        }
+        cb(null, sess);
+      } catch (e) {
+        cb(null, null);
+      }
+    });
+  }
+  set(sid, sess, cb) {
+    const file = path.join(SESSION_DIR, `${sid}.json`);
+    fs.writeFile(file, JSON.stringify(sess), 'utf8', cb || (() => {}));
+  }
+  destroy(sid, cb) {
+    const file = path.join(SESSION_DIR, `${sid}.json`);
+    fs.unlink(file, (err) => {
+      if (err && err.code !== 'ENOENT') {
+        if (cb) return cb(err);
+      }
+      if (cb) cb(null);
+    });
+  }
+}
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'lilteam-shop-demo-secret',
   resave: false,
@@ -72,8 +127,13 @@ app.use(session({
         dbName: process.env.MONGODB_DB_NAME || 'lilteam_shop',
         collectionName: 'sessions',
       })
-    : undefined,
-  cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 },
+    : new LocalFileSessionStore(),
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+  },
 }));
 app.use(flash());
 app.use(attachUser);
@@ -130,6 +190,12 @@ app.use('/admin', adminRoutes);
 
 app.use((req, res) => {
   res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบหน้านี้' });
+});
+
+app.use((err, req, res, next) => {
+  console.error('[Unhandled Server Error]', err);
+  if (res.headersSent) return next(err);
+  res.status(500).render('shop/404', { layout: 'layouts/main', title: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' });
 });
 
 const PORT = process.env.PORT || 3000;

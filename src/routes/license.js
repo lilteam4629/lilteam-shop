@@ -17,8 +17,12 @@ router.get('/license', (req, res) => {
   });
 });
 
-router.post('/license', (req, res) => {
-  const key = req.body.key.trim();
+router.post('/license', async (req, res) => {
+  const key = String(req.body?.key || '').trim();
+  if (!key) {
+    req.flash('error', 'กรุณากรอกคีย์ใบอนุญาต');
+    return res.redirect('/license');
+  }
   const result = license.verifyKey(key);
   if (!result.valid) {
     req.flash('error', result.error || 'คีย์ไม่ถูกต้อง');
@@ -36,7 +40,7 @@ router.post('/license', (req, res) => {
   const base = stillActive ? current.expiresAt : Date.now();
   const expiresAt = typeof result.days === 'number' ? base + Math.round(result.days * 24 * 60 * 60 * 1000) : result.exp;
   store.data.settings.license = { key, label: result.label || null, expiresAt };
-  store.save();
+  await store.save();
   req.flash('success', stillActive ? 'ต่ออายุสำเร็จ! เพิ่มเวลาให้แล้ว' : 'ปลดล็อกระบบสำเร็จ');
   res.redirect('/');
 });

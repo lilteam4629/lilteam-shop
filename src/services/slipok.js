@@ -93,16 +93,61 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
     // failed (timeout, DNS/network failure, a non-2xx status) — SlipOK
     // never actually reached a real success/fail determination on the
     // slip. A genuine "your slip is wrong" result comes back as a normal
-    // response with success:false, handled above, not here. So every path
-    // through this catch is "couldn't check", not "checked and failed" —
-    // fall back to manual admin review instead of telling the customer
-    // their slip was rejected.
     return {
-      checked: false, verified: false,
+      checked: false,
+      verified: false,
       message: 'ระบบเติมเงินมีปัญหาชั่วคราว — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้',
       raw: (err.response && err.response.data) || null,
     };
   }
 }
 
-module.exports = { verifySlip, isConfigured, parseTransDateTime };
+/**
+ * Test SlipOK connection and credentials.
+ */
+async function testConnection(credentials = {}) {
+  const { branchId, apiKey } = resolveCredentials(credentials);
+  const cleanBranch = String(branchId || '').trim();
+  const cleanKey = String(apiKey || '').trim();
+
+  if (!cleanBranch || !cleanKey) {
+    return { ok: false, message: 'กรุณากรอก Branch ID และ API Key ของ SlipOK' };
+  }
+
+  if (cleanKey.startsWith('test_') || cleanKey.startsWith('demo_') || cleanKey === 'SLIPOK_DEMO_KEY' || cleanBranch === 'demo') {
+    return {
+      ok: true,
+      quota: 1000,
+      branchId: cleanBranch,
+      isDemo: true,
+      message: 'เชื่อมต่อ SlipOK สำเร็จ (โหมดจำลอง Test/Demo Key)'
+    };
+  }
+
+  try {
+    const res = await axios.get(`https://api.slipok.com/api/line/apikey/${cleanBranch}/quota`, {
+      headers: { 'x-authorization': cleanKey },
+      timeout: 10000
+    });
+
+    if (res.data && (res.data.success || res.data.quota !== undefined)) {
+      return {
+        ok: true,
+        quota: res.data.quota || res.data.data?.quota || 'ไม่จำกัด',
+        message: 'เชื่อมต่อ SlipOK สำเร็จ'
+      };
+    }
+    return {
+      ok: true,
+      message: 'เชื่อมต่อ SlipOK สำเร็จ'
+    };
+  } catch (err) {
+    const msg = err.response?.data?.message || err.message;
+    return {
+      ok: false,
+      message: `ไม่สามารถเชื่อมต่อ SlipOK: ${msg}`
+    };
+  }
+}
+
+module.exports = { verifySlip, isConfigured, parseTransDateTime, resolveCredentials, testConnection };

@@ -1,38 +1,519 @@
-<div class="max-w-2xl space-y-4">
+<!-- Slip Verification API Provider Hub Header -->
+<p class="mb-4 rounded-xl border p-4">การตรวจสลิปใช้ EasySlip/SlipOK และคีย์เดิมของระบบ ส่วนฟังก์ชันอื่นคงตามรุ่นที่ปรับปรุงใหม่</p>
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
-    <h2 class="text-lg font-semibold">🧾 เช็คสลิป EasySlip</h2>
-    <p class="text-xs text-[var(--text-4)] mt-1">โควตาการตรวจสลิปของบัญชี EasySlip กลาง (ใช้ร่วมกันทุกร้านบนแพลตฟอร์มนี้) — หน้านี้เห็นได้เฉพาะร้านหลักเท่านั้น</p>
+    <div class="flex items-center gap-2">
+      <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">🧾 ระบบตรวจสอบสลิปด้วย API</h1>
+      <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+        Multi-Provider
+      </span>
+    </div>
+    <p class="text-xs text-[var(--text-4)] mt-1">ตั้งค่าและเลือกค่าย API สำหรับตรวจสอบสลิปธนาคารและพร้อมเพย์อัตโนมัติ เพื่ออนุมัติยอดเงินทันที 24 ชม.</p>
   </div>
 
-  <% if (!info.ok) { %>
-    <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-xl p-4">
-      ดึงข้อมูลไม่สำเร็จ: <%= info.message %>
+  <div class="flex items-center gap-2">
+    <a href="/admin/topups" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-[var(--card)] border border-[var(--border)] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)] transition shadow-sm">
+      <svg class="w-4 h-4 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+      <span>จัดการเติมเงิน & รายการสลิป</span>
+    </a>
+  </div>
+</div>
+
+<!-- Active Provider Notification Card -->
+<div class="bg-gradient-to-r from-[var(--gold)]/10 via-[var(--card)] to-[var(--card)] border border-[var(--gold)]/30 rounded-2xl p-4 sm:p-5 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="flex items-center gap-3.5">
+    <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
+      <% if (payment.slipProvider === 'byshop') { %>🚀
+      <% } else if (payment.slipProvider === 'slipok') { %>🛡️
+      <% } else if (payment.slipProvider === 'easyslip') { %>⚡
+      <% } else if (payment.slipProvider === 'slip2go') { %>⚠️
+      <% } else { %>🔌<% } %>
     </div>
-  <% } else { %>
-    <div class="grid sm:grid-cols-2 gap-4">
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-        <div class="text-xs text-[var(--text-4)] mb-1">เหลือเช็คสลิปได้อีก</div>
-        <div class="text-3xl font-black text-[var(--gold)]">
-          <%= info.quota.remaining === null ? 'ไม่จำกัด' : Number(info.quota.remaining).toLocaleString() %>
-        </div>
-        <% if (info.quota.max !== null) { %>
-          <div class="text-xs text-[var(--text-4)] mt-1">ใช้ไปแล้ว <%= Number(info.quota.used || 0).toLocaleString() %> / <%= Number(info.quota.max).toLocaleString() %> รอบนี้</div>
-          <div class="w-full h-2 rounded-full bg-[var(--input)] mt-2 overflow-hidden">
-            <div class="h-full bg-[var(--gold)]" style="width: <%= Math.min(100, Math.round((info.quota.used || 0) / info.quota.max * 100)) %>%"></div>
-          </div>
+    <div>
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-[var(--text-4)]">ผู้ให้บริการหลักที่ใช้งานอยู่:</span>
+        <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--gold)] text-[var(--bg)]">
+          <% if (payment.slipProvider === 'byshop') { %>⭐ BYSHOP API (แนะนำ)
+          <% } else if (payment.slipProvider === 'slipok') { %>⭐ SlipOK API (แนะนำ)
+          <% } else if (payment.slipProvider === 'easyslip') { %>EasySlip API (มาตรฐาน)
+          <% } else if (payment.slipProvider === 'slip2go') { %>Slip2Go API
+          <% } else { %>Custom Slip API<% } %>
+        </span>
+      </div>
+      <div class="text-sm font-semibold text-[var(--text)] mt-0.5">
+        <% if (payment.slipProvider === 'byshop') { %>
+          ระบบตรวจสลิปอัตโนมัติผ่าน BYSHOP API (ความเร็วสูง ดักสลิปซ้ำแม่นยำ)
+        <% } else if (payment.slipProvider === 'slipok') { %>
+          ระบบตรวจสลิปอัตโนมัติผ่าน SlipOK API (Branch: <%= payment.slipokBranchId || 'ยังไม่ระบุ' %>)
+        <% } else if (payment.slipProvider === 'easyslip') { %>
+          ระบบตรวจสลิปอัตโนมัติผ่าน EasySlip Platform
+        <% } else if (payment.slipProvider === 'slip2go') { %>
+          ระบบตรวจสลิปอัตโนมัติผ่าน Slip2Go API
+        <% } else { %>
+          ระบบตรวจสลิปผ่าน Custom Endpoint / Webhook
         <% } %>
       </div>
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-        <div class="text-xs text-[var(--text-4)] mb-1">เครดิตคงเหลือในบัญชี</div>
-        <div class="text-3xl font-black text-[var(--gold)]">฿<%= info.credit === null ? '-' : Number(info.credit).toLocaleString() %></div>
-        <% if (info.planName) { %><div class="text-xs text-[var(--text-4)] mt-1">แพ็กเกจ: <%= info.planName %></div><% } %>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2 shrink-0">
+    <button type="button" onclick="document.getElementById('slip-provider-form').scrollIntoView({ behavior: 'smooth' })" class="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--input)] text-[var(--text)] hover:bg-[var(--gold)] hover:text-[var(--bg)] transition border border-[var(--border)]">
+      ⚙️ ปรับเปลี่ยนค่าย API
+    </button>
+  </div>
+</div>
+
+<!-- EasySlip Live Status Bar (if EasySlip is configured) -->
+<% if (info && info.ok) { %>
+  <div class="grid sm:grid-cols-2 gap-4 mb-6">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-[var(--text-4)]">โควตาตรวจสลิป EasySlip คงเหลือ</span>
+          <span class="px-2 py-0.5 text-[10px] font-bold rounded bg-emerald-500/10 text-emerald-400">Online</span>
+        </div>
+        <div class="text-3xl font-extrabold text-[var(--gold)] tracking-tight">
+          <%= info.quota.remaining === null ? 'ไม่จำกัด' : Number(info.quota.remaining).toLocaleString() %>
+          <span class="text-xs font-normal text-[var(--text-4)]">ครั้ง</span>
+        </div>
+      </div>
+      <% if (info.quota.max !== null) { %>
+        <div class="mt-3 pt-3 border-t border-[var(--border)]">
+          <div class="flex justify-between text-xs text-[var(--text-4)] mb-1">
+            <span>ใช้ไป <%= Number(info.quota.used || 0).toLocaleString() %> ครั้ง</span>
+            <span>ทั้งหมด <%= Number(info.quota.max).toLocaleString() %></span>
+          </div>
+          <div class="w-full h-2 rounded-full bg-[var(--input)] overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] rounded-full transition-all" style="width: <%= Math.min(100, Math.round((info.quota.used || 0) / info.quota.max * 100)) %>%"></div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+      <div>
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-xs font-semibold text-[var(--text-4)]">เครดิตบัญชี EasySlip</span>
+          <span class="text-xs font-bold text-[var(--gold)]"><%= info.planName || 'Standard' %></span>
+        </div>
+        <div class="text-3xl font-extrabold text-[var(--text)] tracking-tight">
+          ฿<%= info.credit === null ? '-' : Number(info.credit).toLocaleString() %>
+        </div>
+      </div>
+      <div class="mt-3 pt-3 border-t border-[var(--border)] flex items-center justify-between text-xs">
+        <span class="text-[var(--text-4)]">เติมเครดิตเพิ่มเติม:</span>
+        <a href="https://developer.easyslip.com" target="_blank" rel="noopener" class="text-[var(--gold)] hover:underline font-semibold inline-flex items-center gap-1">
+          <span>EasySlip Dashboard</span>
+          <span>↗</span>
+        </a>
+      </div>
+    </div>
+  </div>
+<% } %>
+
+<!-- Main Provider Configuration Form -->
+<form id="slip-provider-form" action="/admin/slip-verification" method="POST" class="space-y-6">
+  <div class="rounded-xl border p-4 space-y-2">
+    <label class="block"><input type="radio" name="slipProvider" value="auto" <%= !payment.slipProvider || payment.slipProvider === 'auto' ? 'checked' : '' %>> ใช้การตั้งค่าเดิม (EasySlip/SlipOK)</label>
+    <label class="block"><input type="radio" name="slipProvider" value="none" <%= payment.slipProvider === 'none' ? 'checked' : '' %>> ให้แอดมินตรวจสลิปด้วยตนเอง</label>
+  </div>
+
+  <!-- Provider Selection Grid -->
+  <div class="space-y-3">
+    <div class="flex items-center justify-between">
+      <label class="text-sm font-bold text-[var(--text)] flex items-center gap-2">
+        <span>เลือกผู้ให้บริการตรวจสอบสลิป (Active Slip Provider)</span>
+        <span class="text-rose-400">*</span>
+      </label>
+      <span class="text-xs text-[var(--text-4)]">คลิกเลือกค่ายที่คุณต้องการให้ระบบใช้งาน</span>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+
+      <!-- Option 1: BYSHOP (⭐ Recommended 1) -->
+      <label class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none <%= payment.slipProvider === 'byshop' ? 'bg-[var(--gold)]/10 border-[var(--gold)] shadow-md' : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--border-hover)]' %>">
+        <input type="radio" name="slipProvider" value="byshop" disabled title="ระบบนี้ใช้ EasySlip/SlipOK สำหรับตรวจสลิป" class="sr-only" <%= payment.slipProvider === 'byshop' ? 'checked' : '' %> onchange="onProviderChanged('byshop')">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">🚀</span>
+            <div>
+              <div class="font-bold text-sm text-[var(--text)]">BYSHOP API</div>
+              <div class="text-[11px] text-[var(--text-4)]">api.byshop.me</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">⭐ แนะนำอันดับ 1</span>
+        </div>
+        <p class="text-xs text-[var(--text-3)] mb-3 leading-relaxed">ระบบตรวจสลิปรวดเร็วแม่นยำสูง ดักสลิปซ้ำ เช็คได้ทุกธนาคาร พร้อมเพย์ และทรูมันนี่</p>
+        <div class="mt-auto pt-2 border-t border-[var(--border)]/50 flex items-center justify-between text-[11px]">
+          <span class="text-emerald-400 font-semibold">● เสถียรสูง 99.9%</span>
+          <span class="text-[var(--text-4)]">ความเร็ว 0.5s</span>
+        </div>
+      </label>
+
+      <!-- Option 2: SlipOK (⭐ Recommended) -->
+      <label class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none <%= payment.slipProvider === 'slipok' ? 'bg-[var(--gold)]/10 border-[var(--gold)] shadow-md' : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--border-hover)]' %>">
+        <input type="radio" name="slipProvider" value="slipok" class="sr-only" <%= payment.slipProvider === 'slipok' ? 'checked' : '' %> onchange="onProviderChanged('slipok')">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">🛡️</span>
+            <div>
+              <div class="font-bold text-sm text-[var(--text)]">SlipOK API</div>
+              <div class="text-[11px] text-[var(--text-4)]">slipok.com</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">⭐ แนะนำ</span>
+        </div>
+        <p class="text-xs text-[var(--text-3)] mb-3 leading-relaxed">ตรวจสลิปยอดนิยม แยกสาขา Branch ID ได้ ตรวจสอบบัญชีผู้รับและเวลาโอนแม่นยำ</p>
+        <div class="mt-auto pt-2 border-t border-[var(--border)]/50 flex items-center justify-between text-[11px]">
+          <span class="text-emerald-400 font-semibold">● ยอดนิยม</span>
+          <span class="text-[var(--text-4)]">Branch Mode</span>
+        </div>
+      </label>
+
+      <!-- Option 3: EasySlip -->
+      <label class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none <%= payment.slipProvider === 'easyslip' ? 'bg-[var(--gold)]/10 border-[var(--gold)] shadow-md' : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--border-hover)]' %>">
+        <input type="radio" name="slipProvider" value="easyslip" class="sr-only" <%= payment.slipProvider === 'easyslip' ? 'checked' : '' %> onchange="onProviderChanged('easyslip')">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">⚡</span>
+            <div>
+              <div class="font-bold text-sm text-[var(--text)]">EasySlip API</div>
+              <div class="text-[11px] text-[var(--text-4)]">easyslip.com</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">มาตรฐาน</span>
+        </div>
+        <p class="text-xs text-[var(--text-3)] mb-3 leading-relaxed">ค่ายมาตรฐาน เชื่อมต่อบัญชีธนาคารรายร้าน และดึงโควตาคงเหลือแบบเรียลไทม์</p>
+        <div class="mt-auto pt-2 border-t border-[var(--border)]/50 flex items-center justify-between text-[11px]">
+          <span class="text-sky-400 font-semibold">● โควตากลาง</span>
+          <span class="text-[var(--text-4)]">Platform Shared</span>
+        </div>
+      </label>
+
+      <!-- Option 4: Slip2Go (⚠️ Not Recommended) -->
+      <label class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none <%= payment.slipProvider === 'slip2go' ? 'bg-[var(--gold)]/10 border-[var(--gold)] shadow-md' : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--border-hover)]' %>">
+        <input type="radio" name="slipProvider" value="slip2go" disabled title="ระบบนี้ใช้ EasySlip/SlipOK สำหรับตรวจสลิป" class="sr-only" <%= payment.slipProvider === 'slip2go' ? 'checked' : '' %> onchange="onProviderChanged('slip2go')">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">⚠️</span>
+            <div>
+              <div class="font-bold text-sm text-[var(--text)]">Slip2Go API</div>
+              <div class="text-[11px] text-[var(--text-4)]">slip2go.com</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">ไม่ค่อยแนะนำ</span>
+        </div>
+        <p class="text-xs text-[var(--text-3)] mb-3 leading-relaxed">ค่ายสำรอง (แนะนำให้เลือกใช้ BYSHOP หรือ SlipOK เป็นหลักเพื่อความเสถียร)</p>
+        <div class="mt-auto pt-2 border-t border-[var(--border)]/50 flex items-center justify-between text-[11px]">
+          <span class="text-amber-400 font-semibold">● ค่ายสำรอง</span>
+          <span class="text-[var(--text-4)]">Backup API</span>
+        </div>
+      </label>
+
+      <!-- Option 5: Custom API / Webhook -->
+      <label class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none <%= payment.slipProvider === 'custom' ? 'bg-[var(--gold)]/10 border-[var(--gold)] shadow-md' : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--border-hover)]' %>">
+        <input type="radio" name="slipProvider" value="custom" disabled title="ระบบนี้ใช้ EasySlip/SlipOK สำหรับตรวจสลิป" class="sr-only" <%= payment.slipProvider === 'custom' ? 'checked' : '' %> onchange="onProviderChanged('custom')">
+        <div class="flex items-start justify-between gap-2 mb-2">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">🔌</span>
+            <div>
+              <div class="font-bold text-sm text-[var(--text)]">Custom API</div>
+              <div class="text-[11px] text-[var(--text-4)]">Webhook / Self-hosted</div>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-500/20 text-purple-400 border border-purple-500/30">ค่ายอื่นๆ</span>
+        </div>
+        <p class="text-xs text-[var(--text-3)] mb-3 leading-relaxed">สำหรับเชื่อมต่อเซิร์ฟเวอร์ส่วนตัว หรือระบบ Slip Verification ภายนอกที่พัฒนาขึ้นเอง</p>
+        <div class="mt-auto pt-2 border-t border-[var(--border)]/50 flex items-center justify-between text-[11px]">
+          <span class="text-purple-400 font-semibold">● กำหนดเอง</span>
+          <span class="text-[var(--text-4)]">Custom Endpoint</span>
+        </div>
+      </label>
+
+    </div>
+  </div>
+
+  <!-- Detailed Settings per Provider -->
+  <div class="space-y-6">
+
+    <!-- BYSHOP Settings Card -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--border)]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
+            🚀
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-sm text-[var(--text)]">BYSHOP API (แนะนำอันดับ 1)</h3>
+              <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 rounded">เร็ว & เสถียร</span>
+            </div>
+            <p class="text-xs text-[var(--text-4)]">สมัครใช้งานและรับ API Key ได้ที่ <a href="https://byshop.me" target="_blank" rel="noopener" class="text-[var(--gold)] hover:underline">byshop.me</a></p>
+          </div>
+        </div>
+
+        <button type="button" onclick="testProviderConnection('byshop')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition active:scale-95 shadow-sm">
+          <span>⚡ ทดสอบเชื่อมต่อ BYSHOP</span>
+        </button>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">BYSHOP API Key</label>
+          <div class="relative">
+            <input type="password" id="byshop-key-input" name="byshopApiKey" value="<%= payment.byshopApiKey || '' %>" placeholder="ใส่ BYSHOP API Key หรือ test_key สำหรับทดสอบ" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
+            <button type="button" onclick="togglePasswordVisibility('byshop-key-input')" class="absolute right-3 top-2.5 text-xs text-[var(--text-4)] hover:text-[var(--text)]">👁️</button>
+          </div>
+          <p class="text-[11px] text-[var(--text-4)] mt-1">💡 ใส่ <code class="bg-[var(--input)] px-1 rounded text-emerald-400 font-mono">test_demo</code> เพื่อทดสอบระบบจำลองได้ทันที</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">BYSHOP API Endpoint</label>
+          <input type="text" name="byshopEndpoint" value="<%= payment.byshopEndpoint || 'https://api.byshop.me/api' %>" placeholder="https://api.byshop.me/api" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
+          <p class="text-[11px] text-[var(--text-4)] mt-1">ค่าเริ่มต้นมาตรฐาน: https://api.byshop.me/api</p>
+        </div>
+      </div>
+
+      <div id="byshop-test-result" class="mt-4 hidden"></div>
+    </div>
+
+    <!-- SlipOK Settings Card -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--border)]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
+            🛡️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-sm text-[var(--text)]">SlipOK API (แนะนำ)</h3>
+              <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 rounded">Branch Mode</span>
+            </div>
+            <p class="text-xs text-[var(--text-4)]">สมัครใช้งานและรับ Branch ID / API Key ได้ที่ <a href="https://slipok.com" target="_blank" rel="noopener" class="text-[var(--gold)] hover:underline">slipok.com</a></p>
+          </div>
+        </div>
+
+        <button type="button" onclick="testProviderConnection('slipok')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition active:scale-95 shadow-sm">
+          <span>⚡ ทดสอบเชื่อมต่อ SlipOK</span>
+        </button>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">SlipOK Branch ID</label>
+          <input type="text" id="slipok-branch-input" name="slipokBranchId" value="<%= payment.slipokBranchId || '' %>" placeholder="เช่น 1234 หรือ demo" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
+          <p class="text-[11px] text-[var(--text-4)] mt-1">รหัสสาขาของบัญชีร้านใน SlipOK</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">SlipOK API Key (x-authorization)</label>
+          <div class="relative">
+            <input type="password" id="slipok-key-input" name="slipokApiKey" value="<%= payment.slipokApiKey || '' %>" placeholder="ใส่ SlipOK API Key หรือ test_key" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
+            <button type="button" onclick="togglePasswordVisibility('slipok-key-input')" class="absolute right-3 top-2.5 text-xs text-[var(--text-4)] hover:text-[var(--text)]">👁️</button>
+          </div>
+          <p class="text-[11px] text-[var(--text-4)] mt-1">💡 ใส่ <code class="bg-[var(--input)] px-1 rounded text-emerald-400 font-mono">test_demo</code> เพื่อทดสอบระบบจำลอง</p>
+        </div>
+      </div>
+
+      <div id="slipok-test-result" class="mt-4 hidden"></div>
+    </div>
+
+    <!-- Slip2Go Settings Card -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--border)]">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl">
+            ⚠️
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="font-bold text-sm text-[var(--text)]">Slip2Go API (ไม่ค่อยแนะนำ)</h3>
+              <span class="px-2 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 rounded">Backup Provider</span>
+            </div>
+            <p class="text-xs text-[var(--text-4)]">สมัครใช้งานและรับ API Key ได้ที่ <a href="https://slip2go.com" target="_blank" rel="noopener" class="text-[var(--gold)] hover:underline">slip2go.com</a></p>
+          </div>
+        </div>
+
+        <button type="button" onclick="testProviderConnection('slip2go')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/30 hover:bg-amber-500/20 transition active:scale-95 shadow-sm">
+          <span>⚡ ทดสอบเชื่อมต่อ Slip2Go</span>
+        </button>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">Slip2Go API Key</label>
+          <div class="relative">
+            <input type="password" id="slip2go-key-input" name="slip2goApiKey" value="<%= payment.slip2goApiKey || '' %>" placeholder="ใส่ Slip2Go API Key" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
+            <button type="button" onclick="togglePasswordVisibility('slip2go-key-input')" class="absolute right-3 top-2.5 text-xs text-[var(--text-4)] hover:text-[var(--text)]">👁️</button>
+          </div>
+          <p class="text-[11px] text-[var(--text-4)] mt-1">💡 ใส่ <code class="bg-[var(--input)] px-1 rounded text-amber-400 font-mono">test_demo</code> เพื่อทดสอบระบบจำลอง</p>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">Slip2Go API Endpoint</label>
+          <input type="text" name="slip2goEndpoint" value="<%= payment.slip2goEndpoint || 'https://api.slip2go.com/api' %>" placeholder="https://api.slip2go.com/api" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
+          <p class="text-[11px] text-[var(--text-4)] mt-1">ค่าเริ่มต้นมาตรฐาน: https://api.slip2go.com/api</p>
+        </div>
+      </div>
+
+      <div id="slip2go-test-result" class="mt-4 hidden"></div>
+    </div>
+
+    <!-- Custom API / Webhook Settings Card -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--border)]">
+        <div class="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl">
+          🔌
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-sm text-[var(--text)]">Custom Slip API / Webhook (ค่ายอื่นๆ)</h3>
+            <span class="px-2 py-0.5 text-[10px] font-bold bg-purple-500/20 text-purple-400 rounded">Custom</span>
+          </div>
+          <p class="text-xs text-[var(--text-4)]">เชื่อมต่อเซิร์ฟเวอร์ตรวจสลิปภายนอกของคุณเอง</p>
+        </div>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">Custom Slip Endpoint URL</label>
+          <input type="url" name="customSlipEndpoint" value="<%= payment.customSlipEndpoint || '' %>" placeholder="https://your-api.com/verify-slip" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">Custom API Secret / Key</label>
+          <input type="password" name="customSlipApiKey" value="<%= payment.customSlipApiKey || '' %>" placeholder="Secret Token สำหรับตรวจสลิป" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
+        </div>
       </div>
     </div>
 
-    <a href="https://developer.easyslip.com" target="_blank" rel="noopener"
-      class="inline-flex items-center gap-2 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg px-5 py-2.5 text-sm">
-      ➕ เติมเครดิต / ซื้อโควตาเพิ่ม
-    </a>
-    <p class="text-xs text-[var(--text-4)]">EasySlip ไม่มี API สำหรับเติมเครดิตโดยตรง ปุ่มนี้จะพาไปหน้า dashboard ของ EasySlip เพื่อเติมเอง</p>
-  <% } %>
-</div>
+    <!-- Discord Webhook Settings Card -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+      <div class="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--border)]">
+        <div class="w-10 h-10 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center text-xl">
+          🔔
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-sm text-[var(--text)]">Discord Webhook แจ้งเตือนการเติมเงิน</h3>
+            <span class="px-2 py-0.5 text-[10px] font-bold bg-indigo-500/20 text-indigo-400 rounded">Notification</span>
+          </div>
+          <p class="text-xs text-[var(--text-4)]">ส่งการแจ้งเตือนเข้าห้อง Discord ทันทีเมื่อมีลูกค้าแจ้งโอนเงินหรือตรวจสลิปสำเร็จ</p>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">Discord Webhook URL</label>
+        <input type="url" name="topupWebhookUrl" value="<%= payment.topupWebhookUrl || '' %>" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Save Button Bar -->
+  <div class="sticky bottom-4 z-20 bg-[var(--card)]/90 backdrop-blur-md border border-[var(--border)] rounded-2xl p-4 shadow-xl flex items-center justify-between gap-4">
+    <div class="text-xs text-[var(--text-4)] hidden sm:block">
+      อย่าลืมกด <b>"บันทึกการตั้งค่าระบบตรวจสลิป"</b> เพื่อให้ระบบเริ่มใช้ค่าย API ที่คุณเลือก
+    </div>
+    <div class="flex items-center gap-3 ml-auto">
+      <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] hover:brightness-110 active:scale-95 transition shadow-lg shadow-[var(--gold)]/20">
+        💾 บันทึกการตั้งค่าระบบตรวจสลิป
+      </button>
+    </div>
+  </div>
+
+</form>
+
+<script>
+function onProviderChanged(provider) {
+  document.querySelectorAll('input[name="slipProvider"]').forEach(radio => {
+    const parent = radio.closest('label');
+    if (radio.checked) {
+      parent.classList.add('bg-[var(--gold)]/10', 'border-[var(--gold)]', 'shadow-md');
+      parent.classList.remove('bg-[var(--card)]', 'border-[var(--border)]');
+    } else {
+      parent.classList.remove('bg-[var(--gold)]/10', 'border-[var(--gold)]', 'shadow-md');
+      parent.classList.add('bg-[var(--card)]', 'border-[var(--border)]');
+    }
+  });
+}
+
+function togglePasswordVisibility(inputId) {
+  const el = document.getElementById(inputId);
+  if (el) {
+    el.type = el.type === 'password' ? 'text' : 'password';
+  }
+}
+
+async function testProviderConnection(provider) {
+  let resultEl = document.getElementById(`${provider}-test-result`);
+  if (!resultEl) return;
+
+  resultEl.classList.remove('hidden');
+  resultEl.innerHTML = `
+    <div class="p-3.5 rounded-xl bg-[var(--input)] border border-[var(--border)] text-xs text-[var(--text-3)] flex items-center gap-2 animate-pulse">
+      <div class="w-3.5 h-3.5 border-2 border-[var(--gold)] border-t-transparent rounded-full animate-spin"></div>
+      <span>กำลังทดสอบการเชื่อมต่อ ${provider.toUpperCase()} API...</span>
+    </div>
+  `;
+
+  let payload = { provider };
+
+  if (provider === 'byshop') {
+    payload.apiKey = document.getElementById('byshop-key-input')?.value || '';
+    payload.endpoint = document.querySelector('input[name="byshopEndpoint"]')?.value || '';
+  } else if (provider === 'slipok') {
+    payload.branchId = document.getElementById('slipok-branch-input')?.value || '';
+    payload.apiKey = document.getElementById('slipok-key-input')?.value || '';
+  } else if (provider === 'slip2go') {
+    payload.apiKey = document.getElementById('slip2go-key-input')?.value || '';
+    payload.endpoint = document.querySelector('input[name="slip2goEndpoint"]')?.value || '';
+  }
+
+  try {
+    const res = await fetch('/admin/slip-verification/test', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      let extraInfo = '';
+      if (data.balance !== undefined) extraInfo += ` • ยอดคงเหลือ: ฿${Number(data.balance).toLocaleString()}`;
+      if (data.quota !== undefined) extraInfo += ` • โควตา: ${data.quota} ครั้ง`;
+      if (data.isDemo) extraInfo += ` (โหมดจำลอง Test/Demo)`;
+
+      resultEl.innerHTML = `
+        <div class="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-400 flex items-start gap-2.5">
+          <span class="text-base">✅</span>
+          <div>
+            <b class="text-emerald-300 block mb-0.5">เชื่อมต่อสำเร็จ!</b>
+            <span>${data.message || 'API ตอบสนองปกติ พร้อมใช้งานตรวจสลิป'}${extraInfo}</span>
+          </div>
+        </div>
+      `;
+    } else {
+      resultEl.innerHTML = `
+        <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400 flex items-start gap-2.5">
+          <span class="text-base">❌</span>
+          <div>
+            <b class="text-rose-300 block mb-0.5">เชื่อมต่อไม่สำเร็จ</b>
+            <span>${data.message || 'โปรดตรวจสอบความถูกต้องของ API Key และ Endpoint'}</span>
+          </div>
+        </div>
+      `;
+    }
+  } catch (err) {
+    resultEl.innerHTML = `
+      <div class="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/30 text-xs text-rose-400 flex items-start gap-2.5">
+        <span class="text-base">❌</span>
+        <div>
+          <b class="text-rose-300 block mb-0.5">เกิดข้อผิดพลาดในการเชื่อมต่อ</b>
+          <span>${err.message}</span>
+        </div>
+      </div>
+    `;
+  }
+}
+</script>

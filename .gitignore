@@ -1,6 +1,12 @@
 node_modules/
 src/data/db.json
 .env
+.env.*
+!.env.example
+data/
+src/data/db*.json
+public/uploads/media/
+*.zip
 *.pem
 *.key
 public/uploads/slips/*

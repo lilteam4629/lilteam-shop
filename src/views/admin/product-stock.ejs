@@ -1,72 +1,152 @@
-<a href="/admin/products" class="text-sm text-[var(--gold)]">← กลับไปหน้าสินค้า</a>
-<h2 class="font-semibold text-lg mt-2 mb-4"><%= product.title %></h2>
-
-<form action="/admin/products/<%= product.id %>/stock/settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-6 space-y-4">
+<!-- Stock Management Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
-    <h3 class="font-semibold">วิธีส่งมอบสินค้า</h3>
-    <p class="text-xs text-[var(--text-4)] mt-1">เลือกวิธีที่ลูกค้าจะได้รับสินค้าหลังชำระเงิน</p>
-  </div>
-  <div class="grid sm:grid-cols-2 gap-3">
-    <label class="flex gap-3 p-4 rounded-xl border border-[var(--border-light)] bg-[var(--input)] cursor-pointer">
-      <input type="radio" name="fulfillmentMode" value="automatic" <%= product.fulfillmentMode !== 'contact' ? 'checked' : '' %> class="accent-[var(--gold)] mt-1" />
-      <span><b class="block">ส่งข้อมูลอัตโนมัติ</b><small class="text-[var(--text-4)]">ใส่สต๊อกแบบ ข้อมูลบน:ข้อมูลล่าง</small></span>
-    </label>
-    <label class="flex gap-3 p-4 rounded-xl border border-[var(--border-light)] bg-[var(--input)] cursor-pointer">
-      <input type="radio" name="fulfillmentMode" value="contact" <%= product.fulfillmentMode === 'contact' ? 'checked' : '' %> class="accent-[var(--gold)] mt-1" />
-      <span><b class="block">ติดต่อร้านเพื่อรับสินค้า</b><small class="text-[var(--text-4)]">แสดงรายละเอียดและปุ่มติดต่อให้ลูกค้า</small></span>
-    </label>
-  </div>
-  <div>
-    <label class="block text-sm text-[var(--text-3)] mb-1">รายละเอียดที่ให้ลูกค้าเตรียมก่อนติดต่อ</label>
-    <textarea name="fulfillmentInstructions" rows="3" placeholder="เช่น ส่งเลขคำสั่งซื้อ ชื่อในเกม และ UID ให้ทางร้าน" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= product.fulfillmentInstructions || '' %></textarea>
+    <div class="flex items-center gap-2 text-xs text-[var(--text-4)] mb-1">
+      <a href="/admin/products" class="text-[var(--gold)] hover:underline inline-flex items-center gap-1 font-semibold">
+        <span>← กลับไปหน้ารายการสินค้า</span>
+      </a>
+    </div>
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">จัดการสต็อก: <%= product.title %></h1>
+    <p class="text-xs text-[var(--text-4)] mt-0.5">กำหนดรูปแบบการส่งมอบและเพิ่มคีย์/ไอดีพร้อมขาย</p>
   </div>
 
-  <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg px-5 py-2 text-sm">บันทึกและไปเพิ่มสต๊อก →</button>
-</form>
-
-<div class="grid lg:grid-cols-3 gap-6">
-  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-        <tr><th class="p-3">ข้อมูลบน</th><th class="p-3">ข้อมูลล่าง</th><th class="p-3">สถานะ</th><th class="p-3"></th></tr>
-      </thead>
-      <tbody class="divide-y divide-[var(--border)]">
-        <% stockItems.forEach(s => { %>
-          <tr>
-            <td class="p-3 font-mono"><%= s.fulfillmentMode === 'contact' ? 'ติดต่อร้าน' : s.username %></td>
-            <td class="p-3 font-mono"><%= s.fulfillmentMode === 'contact' ? '—' : s.password %></td>
-            <td class="p-3"><%= s.status === 'available' ? '🟢 พร้อมขาย' : '🔴 ขายแล้ว' %></td>
-            <td class="p-3 text-right">
-              <% if (s.status === 'available') { %>
-                <form action="/admin/products/<%= product.id %>/stock/<%= s.id %>/delete" method="post" onsubmit="return confirm('ลบไอดีนี้?')">
-                  <button class="text-rose-400 text-xs">ลบ</button>
-                </form>
-              <% } %>
-            </td>
-          </tr>
-        <% }) %>
-        <% if (!stockItems.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="4">ยังไม่มีสต๊อกสินค้า</td></tr><% } %>
-      </tbody>
-    </table>
-  </div>
-  <div id="add-stock" class="scroll-mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-    <h3 class="font-semibold mb-2">เพิ่มจำนวนสินค้า</h3>
-    <form action="/admin/products/<%= product.id %>/stock/add" method="post" class="space-y-3">
-      <% if (product.fulfillmentMode === 'contact') { %>
-        <p class="text-xs text-[var(--text-4)]">ระบุจำนวนสิทธิ์ที่พร้อมขาย ลูกค้าจะติดต่อร้านหลังซื้อ</p>
-        <input type="number" name="quantity" min="1" max="1000" placeholder="เช่น 10" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <% } else { %>
-        <p class="text-xs text-[var(--text-4)]">1 บรรทัดต่อ 1 สินค้า: <code>ข้อมูลบน:ข้อมูลล่าง:หมายเหตุ</code></p>
-        <textarea name="bulk" rows="8" placeholder="ข้อมูลบน01:ข้อมูลล่าง01:หมายเหตุ&#10;ข้อมูลบน02:ข้อมูลล่าง02" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono"></textarea>
-      <% } %>
-      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มเข้าสต๊อก</button>
-    </form>
+  <div class="flex items-center gap-2.5">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3.5 py-1.5 text-xs text-[var(--text-3)] flex items-center gap-2 shadow-sm">
+      <span>พร้อมขาย:</span>
+      <b class="text-emerald-400 font-bold"><%= stockItems.filter(s => s.status === 'available').length %> รายการ</b>
+    </div>
   </div>
 </div>
 
-<style>
-  #add-stock:target {
-    border-color: var(--gold);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 12%, transparent), 0 14px 35px -24px var(--gold);
-  }
-</style>
+<!-- Fulfillment Mode Configuration Card -->
+<form action="/admin/products/<%= product.id %>/stock/settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 mb-6 space-y-4 shadow-sm">
+  <div class="flex items-center gap-2 pb-3 border-b border-[var(--border)]">
+    <span class="text-base">📦</span>
+    <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">วิธีการส่งมอบสินค้าให้ลูกค้า</h3>
+  </div>
+
+  <div class="grid sm:grid-cols-2 gap-3.5">
+    <label class="flex gap-3.5 p-4 rounded-2xl border border-[var(--border-light)] bg-[var(--input)]/40 hover:border-[var(--gold)]/50 cursor-pointer transition">
+      <input type="radio" name="fulfillmentMode" value="automatic" <%= product.fulfillmentMode !== 'contact' ? 'checked' : '' %> class="accent-[var(--gold)] mt-1 w-4 h-4" />
+      <div>
+        <b class="block text-xs sm:text-sm text-[var(--text)]">ส่งข้อมูลไอดี/คีย์อัตโนมัติ (Instant Delivery)</b>
+        <span class="text-[11px] text-[var(--text-4)] mt-0.5 block">ระบบจะตัดสต็อกและแสดงข้อมูลให้ลูกค้าเห็นทันทีหลังชำระเงิน</span>
+      </div>
+    </label>
+
+    <label class="flex gap-3.5 p-4 rounded-2xl border border-[var(--border-light)] bg-[var(--input)]/40 hover:border-[var(--gold)]/50 cursor-pointer transition">
+      <input type="radio" name="fulfillmentMode" value="contact" <%= product.fulfillmentMode === 'contact' ? 'checked' : '' %> class="accent-[var(--gold)] mt-1 w-4 h-4" />
+      <div>
+        <b class="block text-xs sm:text-sm text-[var(--text)]">ติดต่อร้านเพื่อรับสินค้า (Contact Fulfillment)</b>
+        <span class="text-[11px] text-[var(--text-4)] mt-0.5 block">แสดงคำแนะนำและปุ่มติดต่อแอดมินให้ลูกค้าติดต่อส่งมอบด้วยตนเอง</span>
+      </div>
+    </label>
+  </div>
+
+  <div>
+    <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">คำแนะนำ/รายละเอียดที่ให้ลูกค้าเตรียมก่อนติดต่อร้าน</label>
+    <textarea name="fulfillmentInstructions" rows="2" placeholder="เช่น ส่งเลขคำสั่งซื้อ ชื่อในเกม และ UID ให้ทางร้านผ่านทาง Line" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition"><%= product.fulfillmentInstructions || '' %></textarea>
+  </div>
+
+  <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl px-5 py-2 text-xs shadow-md transition active:scale-95">
+    💾 บันทึกรูปแบบการส่งมอบ
+  </button>
+</form>
+
+<!-- Stock Items Table & Add Stock Grid -->
+<div class="grid lg:grid-cols-3 gap-6">
+
+  <!-- Left Column: Existing Stock Items Table -->
+  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+    <div class="p-4 border-b border-[var(--border)] flex items-center justify-between">
+      <h3 class="font-bold text-sm text-[var(--text)]">รายการคีย์ / ไอดีในสต็อก (<%= stockItems.length %>)</h3>
+      <span class="text-xs text-[var(--text-4)]">พร้อมขาย: <b class="text-emerald-400"><%= stockItems.filter(s => s.status === 'available').length %></b> | ขายแล้ว: <b class="text-rose-400"><%= stockItems.filter(s => s.status !== 'available').length %></b></span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs sm:text-sm">
+        <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
+          <tr>
+            <th class="py-3 px-4 font-semibold">ข้อมูลบน / Username</th>
+            <th class="py-3 px-4 font-semibold">ข้อมูลล่าง / Password</th>
+            <th class="py-3 px-4 font-semibold">สถานะ</th>
+            <th class="py-3 px-4 font-semibold text-right">การจัดการ</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-[var(--border)]">
+          <% stockItems.forEach(s => { %>
+            <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+              <td class="py-3 px-4 font-mono text-xs">
+                <%= s.fulfillmentMode === 'contact' ? 'ติดต่อร้านค้า' : s.username %>
+              </td>
+              <td class="py-3 px-4 font-mono text-xs text-[var(--text-3)]">
+                <%= s.fulfillmentMode === 'contact' ? '—' : s.password %>
+              </td>
+              <td class="py-3 px-4 whitespace-nowrap">
+                <% if (s.status === 'available') { %>
+                  <span class="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> พร้อมขาย
+                  </span>
+                <% } else { %>
+                  <span class="inline-flex items-center gap-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span> ขายแล้ว
+                  </span>
+                <% } %>
+              </td>
+              <td class="py-3 px-4 text-right whitespace-nowrap">
+                <% if (s.status === 'available') { %>
+                  <form action="/admin/products/<%= product.id %>/stock/<%= s.id %>/delete" method="post" class="inline" data-confirm="ต้องการลบไอดี/คีย์รายการนี้ออกจากสต็อกใช่ไหม?">
+                    <button type="submit" class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition" title="ลบรายการนี้">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                  </form>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+
+          <% if (!stockItems.length) { %>
+            <tr>
+              <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="4">
+                <div class="text-2xl mb-1">📦</div>
+                ยังไม่มีข้อมูลสต็อกสินค้าในระบบ
+              </td>
+            </tr>
+          <% } %>
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right Column: Add Stock Form Card -->
+  <div id="add-stock" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm sticky top-20">
+    <div class="flex items-center gap-2.5 mb-3">
+      <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
+        ➕
+      </div>
+      <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เพิ่มจำนวนสต็อก</h3>
+    </div>
+
+    <form action="/admin/products/<%= product.id %>/stock/add" method="post" class="space-y-3.5">
+      <% if (product.fulfillmentMode === 'contact') { %>
+        <p class="text-[11px] text-[var(--text-4)]">ระบุจำนวนสิทธิ์ที่ต้องการเปิดขาย ลูกค้าจะติดต่อร้านเพื่อรับสินค้าหลังชำระเงิน</p>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">จำนวนสิทธิ์ที่ต้องการเพิ่ม (ชิ้น) *</label>
+          <input type="number" name="quantity" min="1" max="1000" placeholder="เช่น 10 หรือ 50" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+      <% } else { %>
+        <p class="text-[11px] text-[var(--text-4)] leading-relaxed">
+          เพิ่มแบบหลายรายการได้พร้อมกัน โดยใส่ <b>1 บรรทัดต่อ 1 สินค้า</b><br />
+          รูปแบบ: <code class="bg-[var(--input)] px-1.5 py-0.5 rounded font-mono text-[10px] text-[var(--gold)]">ข้อมูลบน:ข้อมูลล่าง:หมายเหตุ</code>
+        </p>
+        <textarea name="bulk" rows="8" placeholder="user01:pass01:หมายเหตุ&#10;user02:pass02:หมายเหตุ&#10;user03:pass03" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition"></textarea>
+      <% } %>
+
+      <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95">
+        + เพิ่มรายการเข้าสู่สต็อก
+      </button>
+    </form>
+  </div>
+
+</div>

@@ -97,6 +97,8 @@
     <% } %>
   </div>
 
+
+
   <div>
     <label class="block text-sm mb-1 text-[var(--text-3)]">รายละเอียดสั้น (แสดงในการ์ดสินค้า)</label>
     <textarea name="description" rows="2" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= product ? product.description : '' %></textarea>
@@ -295,6 +297,8 @@
 
 <script>
   (function () {
+
+
     const input = document.getElementById('productImagesInput');
     const preview = document.getElementById('newImagePreview');
     if (!input || !preview) return;

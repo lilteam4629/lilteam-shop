@@ -1,194 +1,383 @@
-<div class="mb-3 max-w-3xl">
-  <h3 class="font-semibold">⚙️ ตั้งค่ามินิเกม</h3>
-  <p class="text-xs text-[var(--text-4)] mt-1">เลือกเปิดเกมใดเกมหนึ่ง หรือเปิดทั้ง 2 เกมพร้อมกันได้</p>
-  <div class="flex flex-wrap gap-2 mt-3">
+<!-- Minigame Management Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">จัดการมินิเกม (สุ่มของรางวัล)</h1>
+    <p class="text-xs text-[var(--text-4)] mt-0.5">ตั้งค่าเกมเปิดกล่อง (Box) และเกมรางเลื่อน (Rail) กำหนดอัตราออก และตรวจสอบประวัติการเล่น</p>
+  </div>
+
+  <!-- Game Toggles -->
+  <div class="flex items-center gap-2 flex-wrap">
     <% [['box', '🎁 เกมเปิดกล่อง', game.boxEnabled], ['rail', '🎰 เกมรางเลื่อน', game.railEnabled]].forEach(item => { %>
       <form action="/admin/minigame/toggle" method="post" class="inline">
         <input type="hidden" name="gameType" value="<%= item[0] %>" />
-        <button class="text-xs px-3 py-2 rounded-full <%= item[2] ? 'bg-emerald-900/40 text-emerald-400' : 'bg-[var(--input)] text-[var(--text-4)]' %>">
-          <%= item[2] ? '🟢' : '⚪' %> <%= item[1] %> — <%= item[2] ? 'เปิดอยู่' : 'ปิดอยู่' %>
+        <button type="submit" class="inline-flex items-center gap-2 text-xs font-semibold px-3.5 py-2 rounded-xl border shadow-sm transition active:scale-95 <%= item[2] ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20' : 'bg-[var(--input)] border-[var(--border-light)] text-[var(--text-4)] hover:text-[var(--text)]' %>">
+          <span class="w-2 h-2 rounded-full <%= item[2] ? 'bg-emerald-400 animate-pulse' : 'bg-slate-500' %>"></span>
+          <span><%= item[1] %></span>
+          <span class="text-[10px] font-normal opacity-80">(<%= item[2] ? 'เปิดอยู่' : 'ปิดอยู่' %>)</span>
         </button>
       </form>
     <% }) %>
   </div>
 </div>
-<details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-6 max-w-3xl" open>
-  <summary class="font-semibold cursor-pointer">รายละเอียดและราคาของทั้ง 2 เกม</summary>
-  <form action="/admin/minigame/settings" method="post" class="space-y-4 mt-4">
-    <h4 class="text-sm font-semibold text-[var(--gold)]">🎁 เกมเปิดกล่อง</h4>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อเกม</label>
-      <input name="title" value="<%= game.title %>" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+
+<!-- Minigame Settings Accordion Card -->
+<details class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 mb-6 shadow-sm transition group">
+  <summary class="font-bold text-sm text-[var(--text)] cursor-pointer flex items-center justify-between list-none">
+    <div class="flex items-center gap-2.5">
+      <span class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center text-sm">⚙️</span>
+      <span>ตั้งค่าชื่อเกม คำอธิบาย และราคาต่อครั้ง (ทั้ง 2 เกม)</span>
     </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">คำอธิบาย</label>
-      <textarea name="description" rows="2" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= game.description %></textarea>
+    <span class="text-xs text-[var(--gold)] font-medium group-open:rotate-180 transition-transform duration-200">▼</span>
+  </summary>
+
+  <form action="/admin/minigame/settings" method="post" class="space-y-6 mt-6 pt-5 border-t border-[var(--border)]">
+
+    <!-- Box Game Settings -->
+    <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-base">🎁</span>
+        <h4 class="font-bold text-sm text-[var(--gold)]">ตั้งค่าเกมเปิดกล่อง (Box Game)</h4>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ชื่อเกมเปิดกล่อง *</label>
+          <input name="title" value="<%= game.title %>" required class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ราคาต่อการเล่น 1 ครั้ง (฿) *</label>
+          <input type="number" min="0" name="costPerPlay" value="<%= game.costPerPlay %>" required class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-bold text-[var(--gold)] outline-none focus:border-[var(--gold)] transition" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">คำอธิบายเกมเปิดกล่อง</label>
+          <textarea name="description" rows="2" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition"><%= game.description %></textarea>
+        </div>
+      </div>
     </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ราคาต่อการเล่น 1 ครั้ง (฿)</label>
-      <input type="number" min="0" name="costPerPlay" value="<%= game.costPerPlay %>" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
+
+    <!-- Rail Game Settings -->
+    <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-4">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="text-base">🎰</span>
+        <h4 class="font-bold text-sm text-[var(--gold)]">ตั้งค่าเกมรางเลื่อน (Rail Game)</h4>
+      </div>
+      <div class="grid sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ชื่อเกมรางเลื่อน *</label>
+          <input name="railTitle" value="<%= game.railTitle %>" required class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ราคาต่อการเล่น 1 ครั้ง (฿) *</label>
+          <input type="number" min="0" name="railCostPerPlay" value="<%= game.railCostPerPlay %>" required class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-bold text-[var(--gold)] outline-none focus:border-[var(--gold)] transition" />
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">คำอธิบายเกมรางเลื่อน</label>
+          <textarea name="railDescription" rows="2" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition"><%= game.railDescription %></textarea>
+        </div>
+      </div>
     </div>
-    <hr class="border-[var(--border)]" />
-    <h4 class="text-sm font-semibold text-[var(--gold)]">🎰 เกมรางเลื่อน</h4>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อเกมรางเลื่อน</label>
-      <input name="railTitle" value="<%= game.railTitle %>" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">คำอธิบายเกมรางเลื่อน</label>
-      <textarea name="railDescription" rows="2" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= game.railDescription %></textarea>
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ราคาเกมรางเลื่อนต่อครั้ง (฿)</label>
-      <input type="number" min="0" name="railCostPerPlay" value="<%= game.railCostPerPlay %>" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-    </div>
-    <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกการตั้งค่า</button>
+
+    <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+      💾 บันทึกการตั้งค่ามินิเกม
+    </button>
   </form>
 </details>
 
-<div class="grid md:grid-cols-2 gap-4 mb-6 max-w-3xl">
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-    <h3 class="font-semibold mb-3">🎁 ทดลองเกมเปิดกล่อง</h3>
+<!-- Live Preview Widgets Grid -->
+<div class="grid md:grid-cols-2 gap-6 mb-8">
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">🎁 ทดสอบเล่นเกมเปิดกล่อง</h3>
+      <span class="text-[11px] text-[var(--gold)] bg-[var(--gold)]/10 px-2.5 py-0.5 rounded-full font-semibold">โหมดทดสอบ</span>
+    </div>
     <%- include('../partials/minigame-widget', { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: '🎲 สุ่มทดสอบ', showLogin: false, balance: null }) %>
   </div>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-    <h3 class="font-semibold mb-3">🎰 ทดลองเกมรางเลื่อน</h3>
+
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">🎰 ทดสอบเล่นเกมรางเลื่อน</h3>
+      <span class="text-[11px] text-[var(--gold)] bg-[var(--gold)]/10 px-2.5 py-0.5 rounded-full font-semibold">โหมดทดสอบ</span>
+    </div>
     <%- include('../partials/minigame-rail', { endpoint: '/admin/minigame/preview?mode=rail', cost: 0, prizes: prizes.filter(p => p.active && (p.gameType || 'box') === 'rail'), showLogin: false, balance: null }) %>
   </div>
-  <p class="md:col-span-2 text-xs text-[var(--text-4)]">การทดลองไม่หักเครดิตและไม่ตัดสต็อกจริง แต่ใช้รายการรางวัลของแต่ละเกม</p>
 </div>
 
-<div class="grid lg:grid-cols-3 gap-6 mb-6">
-  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
-    <div class="p-4 border-b border-[var(--border)] flex items-center justify-between">
-      <h3 class="font-semibold">🎁 ของรางวัลและอัตราออก แยกตามเกม</h3>
-      <div class="text-right text-xs"><div class="<%= totalPercent === 100 ? 'text-emerald-400' : 'text-amber-400' %>">กล่อง: <%= totalPercent %>%</div><div class="<%= railTotalPercent === 100 ? 'text-emerald-400' : 'text-amber-400' %>">ราง: <%= railTotalPercent %>%</div></div>
+<!-- Prizes Management Grid -->
+<div class="grid lg:grid-cols-3 gap-6 mb-8">
+
+  <!-- Left Main Column: Prizes Table -->
+  <div class="lg:col-span-2 min-w-0 space-y-4">
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h3 class="font-bold text-sm text-[var(--text)]">🎁 รายการของรางวัล & อัตราออก</h3>
+        <p class="text-[11px] text-[var(--text-4)]">กำหนดเปอร์เซ็นต์โอกาสได้รับของรางวัลและจำนวนสต็อก</p>
+      </div>
+
+      <div class="flex items-center gap-3 text-xs">
+        <div class="bg-[var(--input)] px-2.5 py-1 rounded-lg border border-[var(--border-light)]">
+          <span>เกมกล่อง: </span>
+          <b class="<%= totalPercent === 100 ? 'text-emerald-400' : 'text-amber-400' %>"><%= totalPercent %>%</b>
+        </div>
+        <div class="bg-[var(--input)] px-2.5 py-1 rounded-lg border border-[var(--border-light)]">
+          <span>เกมราง: </span>
+          <b class="<%= railTotalPercent === 100 ? 'text-emerald-400' : 'text-amber-400' %>"><%= railTotalPercent %>%</b>
+        </div>
+      </div>
     </div>
-    <table class="w-full text-sm">
-      <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs sm:text-sm">
+          <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
+            <tr>
+              <th class="py-3.5 px-3 font-semibold">เกม</th>
+              <th class="py-3.5 px-3 font-semibold">รูปภาพ</th>
+              <th class="py-3.5 px-3 font-semibold">ชื่อรางวัล</th>
+              <th class="py-3.5 px-3 font-semibold">โอกาส (%)</th>
+              <th class="py-3.5 px-3 font-semibold">สต็อก</th>
+              <th class="py-3.5 px-3 font-semibold">รางวัลจริง</th>
+              <th class="py-3.5 px-3 font-semibold">สถานะ</th>
+              <th class="py-3.5 px-3 font-semibold text-right">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border)]">
+            <% prizes.forEach(p => { %>
+              <% const formId = 'prize-form-' + p.id; const imgFormId = 'prize-img-form-' + p.id; %>
+              <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+
+                <!-- Game Type -->
+                <td class="py-3 px-3 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1 font-semibold text-[11px] px-2 py-0.5 rounded-md bg-[var(--input)] border border-[var(--border-light)]">
+                    <%= (p.gameType || 'box') === 'rail' ? '🎰 รางเลื่อน' : '🎁 เปิดกล่อง' %>
+                  </span>
+                </td>
+
+                <!-- Image -->
+                <td class="py-3 px-3">
+                  <div class="flex items-center gap-2">
+                    <div class="w-10 h-10 rounded-lg overflow-hidden bg-[var(--input)] border border-[var(--border-light)] shrink-0 shadow-sm">
+                      <% if (p.image) { %>
+                        <img src="<%= p.image %>" alt="<%= p.name %>" class="w-full h-full object-cover" />
+                      <% } else { %>
+                        <div class="w-full h-full flex items-center justify-center text-xs">🎁</div>
+                      <% } %>
+                    </div>
+
+                    <div>
+                      <form id="<%= imgFormId %>" action="/admin/minigame/prizes/<%= p.id %>/image" method="post" enctype="multipart/form-data" class="hidden"></form>
+                      <input form="<%= imgFormId %>" type="file" name="image" accept="image/*" onchange="this.form.submit()" class="hidden" id="<%= imgFormId %>-input" />
+                      <label for="<%= imgFormId %>-input" class="text-[var(--gold)] text-[10px] cursor-pointer hover:underline block font-semibold">เปลี่ยนรูป</label>
+                      <% if (p.image) { %>
+                        <form action="/admin/minigame/prizes/<%= p.id %>/image/remove" method="post" class="inline">
+                          <button type="submit" class="text-rose-400 text-[10px] hover:underline">ลบรูป</button>
+                        </form>
+                      <% } %>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Name Input -->
+                <td class="py-3 px-3">
+                  <input form="<%= formId %>" name="name" value="<%= p.name %>" class="w-28 sm:w-32 bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-2.5 py-1 text-xs outline-none focus:border-[var(--gold)]" />
+                </td>
+
+                <!-- Percent Input -->
+                <td class="py-3 px-3">
+                  <input form="<%= formId %>" type="number" min="0" max="100" step="0.1" name="percent" value="<%= p.percent %>" class="w-16 bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-2 py-1 text-xs outline-none focus:border-[var(--gold)] font-bold text-[var(--gold)]" />
+                </td>
+
+                <!-- Stock Input -->
+                <td class="py-3 px-3">
+                  <input form="<%= formId %>" type="number" min="0" name="stock" value="<%= p.stock === null ? '' : p.stock %>" placeholder="∞ ไม่จำกัด" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-2 py-1 text-xs outline-none focus:border-[var(--gold)]" />
+                </td>
+
+                <!-- IsPrize Checkbox -->
+                <td class="py-3 px-3 text-center">
+                  <input form="<%= formId %>" type="checkbox" name="isPrize" value="on" <%= p.isPrize ? 'checked' : '' %> class="w-4 h-4 accent-[var(--gold)] rounded" />
+                </td>
+
+                <!-- Status -->
+                <td class="py-3 px-3 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full <%= p.active ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-[var(--input)] text-[var(--text-4)] border border-[var(--border-light)]' %>">
+                    <%= p.active ? '🟢 เปิด' : '⚪ ปิด' %>
+                  </span>
+                </td>
+
+                <!-- Actions -->
+                <td class="py-3 px-3 text-right whitespace-nowrap">
+                  <div class="inline-flex items-center gap-1.5">
+                    <form id="<%= formId %>" action="/admin/minigame/prizes/<%= p.id %>" method="post" class="inline"></form>
+                    <button form="<%= formId %>" type="submit" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-bold px-2.5 py-1 rounded-lg text-xs transition" title="บันทึกข้อมูล">
+                      บันทึก
+                    </button>
+
+                    <form action="/admin/minigame/prizes/<%= p.id %>/toggle" method="post" class="inline">
+                      <button type="submit" class="p-1 rounded-lg text-[var(--text-3)] hover:text-[var(--text)] border border-[var(--border-light)] text-xs transition">
+                        <%= p.active ? 'ปิด' : 'เปิด' %>
+                      </button>
+                    </form>
+
+                    <form action="/admin/minigame/prizes/<%= p.id %>/delete" method="post" class="inline" data-confirm="ต้องการลบของรางวัล '<%= p.name %>' ใช่หรือไม่?">
+                      <button type="submit" class="p-1 rounded-lg text-rose-400 hover:bg-rose-500/10 transition text-xs" title="ลบรางวัล">
+                        ✕
+                      </button>
+                    </form>
+                  </div>
+                </td>
+
+              </tr>
+            <% }) %>
+
+            <% if (!prizes.length) { %>
+              <tr>
+                <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="8">
+                  ยังไม่มีของรางวัลในระบบ
+                </td>
+              </tr>
+            <% } %>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right Column: Add New Prize Form Card -->
+  <div>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm sticky top-20">
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
+          ➕
+        </div>
+        <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เพิ่มของรางวัลใหม่</h3>
+      </div>
+
+      <form action="/admin/minigame/prizes" method="post" enctype="multipart/form-data" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">เลือกเกมที่ต้องการเพิ่ม *</label>
+          <select name="gameType" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition">
+            <option value="box">🎁 เกมเปิดกล่อง (Box)</option>
+            <option value="rail">🎰 เกมรางเลื่อน (Rail)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ชื่อของรางวัล *</label>
+          <input name="name" required placeholder="เช่น ไอดีเกม Valorant, เครดิต 500฿" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">อัตราโอกาสออก (%) *</label>
+          <input type="number" min="0" max="100" step="0.1" name="percent" required placeholder="เช่น 5, 20.5 หรือ 50" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition font-bold text-[var(--gold)]" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">จำนวนสต็อก</label>
+          <input type="number" min="0" name="stock" placeholder="เว้นว่าง = ไม่จำกัดสต็อก" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+
+        <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-3">
+          <label class="flex items-start gap-2.5 text-xs text-[var(--text)] cursor-pointer">
+            <input type="checkbox" name="isPrize" value="on" checked class="w-4 h-4 accent-[var(--gold)] rounded mt-0.5 shrink-0" />
+            <span>เป็นของรางวัลจริง (ลูกค้าได้รับโค้ดรับรางวัล) — หากไม่ติ๊ก จะถือเป็นรายการ "เกลือ / ไม่ได้รางวัล"</span>
+          </label>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">รูปภาพของรางวัล (ไม่บังคับ)</label>
+          <input type="file" name="image" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95 mt-2">
+          + เพิ่มของรางวัลลงระบบ
+        </button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<!-- Recent Play History Section -->
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+  <div class="p-5 border-b border-[var(--border)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div>
+      <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">📜 ประวัติการเล่นมินิเกมล่าสุด</h3>
+      <p class="text-xs text-[var(--text-4)] mt-0.5">ตรวจสอบผลการสุ่มและสถานะการส่งมอบของรางวัล</p>
+    </div>
+
+    <form method="get" action="/admin/minigame" class="flex gap-2 w-full sm:w-80">
+      <input type="text" name="q" value="<%= searchQuery %>" placeholder="ค้นหาชื่อผู้เล่น หรือโค้ดรับของ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-1.5 text-xs outline-none focus:border-[var(--gold)] transition" />
+      <button type="submit" class="bg-[var(--gold)] text-[var(--bg)] font-bold px-4 py-1.5 rounded-xl text-xs transition whitespace-nowrap active:scale-95">
+        ค้นหา
+      </button>
+      <% if (searchQuery) { %>
+        <a href="/admin/minigame" class="border border-[var(--border-light)] px-3 py-1.5 rounded-xl text-xs flex items-center justify-center hover:border-[var(--gold)]">ล้าง</a>
+      <% } %>
+    </form>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="w-full text-left text-xs sm:text-sm">
+      <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
         <tr>
-          <th class="p-3">เกม</th><th class="p-3">รูป</th>
-          <th class="p-3">ชื่อรางวัล</th>
-          <th class="p-3">อัตราออก (%)</th>
-          <th class="p-3">สต็อก</th>
-          <th class="p-3">รางวัลจริง?</th>
-          <th class="p-3">สถานะ</th>
-          <th class="p-3"></th>
+          <th class="py-3.5 px-4 font-semibold">ผู้เล่น</th>
+          <th class="py-3.5 px-4 font-semibold">ผลลัพธ์ที่ได้</th>
+          <th class="py-3.5 px-4 font-semibold">โค้ดรับของรางวัล</th>
+          <th class="py-3.5 px-4 font-semibold">สถานะการรับ</th>
+          <th class="py-3.5 px-4 font-semibold">เวลาที่เล่น</th>
+          <th class="py-3.5 px-4 font-semibold text-right">การจัดการ</th>
         </tr>
       </thead>
       <tbody class="divide-y divide-[var(--border)]">
-        <% prizes.forEach(p => { %>
-          <% const formId = 'prize-form-' + p.id; const imgFormId = 'prize-img-form-' + p.id; %>
-          <tr>
-            <td class="p-3 text-xs whitespace-nowrap"><%= (p.gameType || 'box') === 'rail' ? '🎰 รางเลื่อน' : '🎁 เปิดกล่อง' %></td>
-            <td class="p-3">
-              <% if (p.image) { %>
-                <img src="<%= p.image %>" alt="<%= p.name %>" class="w-14 h-14 rounded-lg object-cover border border-[var(--border-light)] mb-1" />
+        <% recentPlays.forEach(play => { %>
+          <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+            <td class="py-3 px-4 font-bold text-xs sm:text-sm text-[var(--text)]">
+              <%= play.username %>
+            </td>
+            <td class="py-3 px-4 font-semibold text-xs <%= play.isWin ? 'text-emerald-400' : 'text-[var(--text-4)]' %>">
+              <%= play.isWin ? '🏆 ' : '' %><%= play.prizeName %>
+            </td>
+            <td class="py-3 px-4 font-mono font-bold text-xs text-[var(--gold)]">
+              <%= play.claimCode || '-' %>
+            </td>
+            <td class="py-3 px-4">
+              <% if (!play.isWin) { %>
+                <span class="text-[var(--text-4)] text-xs">—</span>
+              <% } else if (play.status === 'delivered') { %>
+                <span class="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                  ✓ ส่งมอบแล้ว
+                </span>
               <% } else { %>
-                <div class="w-10 h-10 rounded-lg border border-dashed border-[var(--border-light)] mb-1"></div>
-              <% } %>
-              <form id="<%= imgFormId %>" action="/admin/minigame/prizes/<%= p.id %>/image" method="post" enctype="multipart/form-data" class="hidden"></form>
-              <input form="<%= imgFormId %>" type="file" name="image" accept="image/*" onchange="this.form.submit()" class="hidden" id="<%= imgFormId %>-input" />
-              <label for="<%= imgFormId %>-input" class="text-[var(--gold)] text-[10px] cursor-pointer underline">เปลี่ยนรูป</label>
-              <% if (p.image) { %>
-                <form action="/admin/minigame/prizes/<%= p.id %>/image/remove" method="post" class="inline"><button class="text-[var(--coral)] text-[10px] underline ml-1">ลบรูป</button></form>
+                <span class="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                  ⏳ รอมารับรางวัล
+                </span>
               <% } %>
             </td>
-            <td class="p-3"><input form="<%= formId %>" name="name" value="<%= p.name %>" class="w-32 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
-            <td class="p-3"><input form="<%= formId %>" type="number" min="0" max="100" step="0.1" name="percent" value="<%= p.percent %>" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
-            <td class="p-3"><input form="<%= formId %>" type="number" min="0" name="stock" value="<%= p.stock === null ? '' : p.stock %>" placeholder="ไม่จำกัด" class="w-24 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1" /></td>
-            <td class="p-3"><input form="<%= formId %>" type="checkbox" name="isPrize" value="on" <%= p.isPrize ? 'checked' : '' %> class="w-4 h-4 accent-[var(--gold)]" /></td>
-            <td class="p-3"><%= p.active ? '🟢 เปิด' : '⚪ ปิด' %></td>
-            <td class="p-3 text-right space-x-2 whitespace-nowrap">
-              <form id="<%= formId %>" action="/admin/minigame/prizes/<%= p.id %>" method="post" class="inline"></form>
-              <button form="<%= formId %>" class="text-[var(--gold)] text-xs">บันทึก</button>
-              <form action="/admin/minigame/prizes/<%= p.id %>/toggle" method="post" class="inline"><button class="text-[var(--text-3)] text-xs"><%= p.active ? 'ปิด' : 'เปิด' %></button></form>
-              <% if (p.stock !== null) { %>
-              <form action="/admin/minigame/prizes/<%= p.id %>/restock" method="post" class="inline-flex items-center gap-1" onsubmit="return confirmRestock(this)">
-                <input type="number" name="addStock" min="1" placeholder="+จำนวน" class="w-16 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-1.5 py-1 text-xs" />
-                <button class="text-emerald-400 text-xs">เติมสต็อก</button>
-              </form>
+            <td class="py-3 px-4 text-xs text-[var(--text-4)]">
+              <%= new Date(play.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
+            </td>
+            <td class="py-3 px-4 text-right whitespace-nowrap">
+              <% if (play.isWin) { %>
+                <form action="/admin/minigame/plays/<%= play.id %>/deliver" method="post" class="inline">
+                  <button type="submit" class="text-xs font-semibold px-3 py-1 rounded-xl border transition <%= play.status === 'delivered' ? 'border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--text)]' : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20' %>">
+                    <%= play.status === 'delivered' ? 'ยกเลิกการส่งมอบ' : '✓ มอบของรางวัลแล้ว' %>
+                  </button>
+                </form>
               <% } %>
-              <form action="/admin/minigame/prizes/<%= p.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบของรางวัลนี้?')"><button class="text-rose-400 text-xs">ลบ</button></form>
             </td>
           </tr>
         <% }) %>
-        <% if (!prizes.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="8">ยังไม่มีของรางวัล</td></tr><% } %>
+
+        <% if (!recentPlays.length) { %>
+          <tr>
+            <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="6">
+              <%= searchQuery ? 'ไม่พบประวัติการเล่นที่ตรงกับ "' + searchQuery + '"' : 'ยังไม่มีประวัติการเล่นมินิเกม' %>
+            </td>
+          </tr>
+        <% } %>
+
       </tbody>
     </table>
   </div>
-
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 h-fit">
-    <h3 class="font-semibold mb-3">➕ เพิ่มของรางวัล</h3>
-    <form action="/admin/minigame/prizes" method="post" enctype="multipart/form-data" class="space-y-3">
-      <select name="gameType" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
-        <option value="box">🎁 เกมเปิดกล่อง</option>
-        <option value="rail">🎰 เกมรางเลื่อน</option>
-      </select>
-      <input name="name" required placeholder="ชื่อรางวัล เช่น ไอดีเกม Valorant" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <input type="number" min="0" max="100" step="0.1" name="percent" required placeholder="อัตราออก (%)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <input type="number" min="0" name="stock" placeholder="สต็อก (เว้นว่าง = ไม่จำกัด)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <label class="flex items-center gap-2 text-sm text-[var(--text-3)]">
-        <input type="checkbox" name="isPrize" value="on" checked class="w-4 h-4 accent-[var(--gold)]" />
-        เป็นของรางวัลจริง (ลูกค้าต้องทักแชทมารับ) — ไม่ติ๊กถ้าเป็นรายการ "ไม่ได้รางวัล"
-      </label>
-      <div>
-        <label class="block text-xs mb-1 text-[var(--text-3)]">รูปของรางวัล (ไม่บังคับ ไม่ใส่จะใช้ไอคอนอัตโนมัติ)</label>
-        <input type="file" name="image" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-xs" />
-      </div>
-      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มของรางวัล</button>
-    </form>
-    <p class="text-xs text-[var(--text-4)] mt-3">💡 อัตราออกทั้งหมดควรรวมกันเป็น 100% ลูกค้าจะเห็นอัตรานี้ที่หน้าเว็บก่อนเล่นเสมอ</p>
-  </div>
 </div>
-
-<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
-  <div class="p-4 border-b border-[var(--border)] flex flex-wrap items-center gap-3">
-    <h3 class="font-semibold shrink-0">📜 ประวัติการเล่นล่าสุด</h3>
-    <form method="get" action="/admin/minigame" class="flex gap-2 flex-1 min-w-[220px]">
-      <input type="text" name="q" value="<%= searchQuery %>" placeholder="ค้นหาชื่อผู้เล่นหรือโค้ดรับของ..." class="flex-1 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-sm" />
-      <button class="px-4 py-1.5 rounded-lg bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] text-xs font-semibold whitespace-nowrap">ค้นหา</button>
-      <% if (searchQuery) { %><a href="/admin/minigame" class="px-3 py-1.5 rounded-lg bg-[var(--input)] border border-[var(--border-light)] text-xs text-[var(--text-3)] whitespace-nowrap">ล้าง</a><% } %>
-    </form>
-  </div>
-  <table class="w-full text-sm">
-    <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-      <tr><th class="p-3">ผู้เล่น</th><th class="p-3">ผลลัพธ์</th><th class="p-3">โค้ดรับของ</th><th class="p-3">สถานะ</th><th class="p-3">เวลา</th><th class="p-3"></th></tr>
-    </thead>
-    <tbody class="divide-y divide-[var(--border)]">
-      <% recentPlays.forEach(play => { %>
-        <tr>
-          <td class="p-3"><%= play.username %></td>
-          <td class="p-3 <%= play.isWin ? 'text-emerald-400' : 'text-[var(--text-4)]' %>"><%= play.prizeName %></td>
-          <td class="p-3 font-mono text-xs"><%= play.claimCode || '-' %></td>
-          <td class="p-3">
-            <% if (!play.isWin) { %>
-              <span class="text-[var(--text-4)] text-xs">—</span>
-            <% } else if (play.status === 'delivered') { %>
-              <span class="text-emerald-400 text-xs">✓ รับแล้ว</span>
-            <% } else { %>
-              <span class="text-amber-400 text-xs">⏳ รอมารับ</span>
-            <% } %>
-          </td>
-          <td class="p-3 text-[var(--text-4)] text-xs"><%= new Date(play.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></td>
-          <td class="p-3 text-right whitespace-nowrap">
-            <% if (play.isWin) { %>
-              <form action="/admin/minigame/plays/<%= play.id %>/deliver" method="post" class="inline">
-                <button class="text-[var(--gold)] text-xs"><%= play.status === 'delivered' ? 'ยกเลิกรับแล้ว' : 'ทำเครื่องหมายว่ารับแล้ว' %></button>
-              </form>
-            <% } %>
-          </td>
-        </tr>
-      <% }) %>
-      <% if (!recentPlays.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="6"><%= searchQuery ? 'ไม่พบผลลัพธ์ที่ตรงกับ "' + searchQuery + '"' : 'ยังไม่มีคนเล่น' %></td></tr><% } %>
-    </tbody>
-  </table>
-</div>
-
-<script>
-  function confirmRestock(form) {
-    const amount = form.querySelector('input[name="addStock"]').value;
-    if (!amount || Number(amount) <= 0) { alert('กรุณากรอกจำนวนที่จะเติม'); return false; }
-    return true;
-  }
-</script>

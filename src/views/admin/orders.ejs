@@ -1,20 +1,140 @@
-<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
-  <table class="w-full text-sm">
-    <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-      <tr><th class="p-3">รหัส</th><th class="p-3">ผู้ซื้อ</th><th class="p-3">วันที่</th><th class="p-3">ยอดรวม</th><th class="p-3">สถานะ</th><th class="p-3"></th></tr>
-    </thead>
-    <tbody class="divide-y divide-[var(--border)]">
-      <% orders.forEach(o => { %>
-        <tr class="hover:bg-[var(--input)]/50">
-          <td class="p-3">#<%= o.id %></td>
-          <td class="p-3"><%= o.buyer ? o.buyer.username : '-' %></td>
-          <td class="p-3 text-[var(--text-3)]"><%= new Date(o.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></td>
-          <td class="p-3"><%= o.total.toLocaleString() %> ฿</td>
-          <td class="p-3"><%= o.status %></td>
-          <td class="p-3 text-right"><a href="/admin/orders/<%= o.id %>" class="text-[var(--gold)]">ดูรายละเอียด</a></td>
+<!-- Orders Management Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">คำสั่งซื้อทั้งหมด</h1>
+    <p class="text-xs text-[var(--text-4)] mt-0.5">ประวัติและสถานะการสั่งซื้อสินค้าของลูกค้าทั้งหมดในร้าน (<%= orders.length %> รายการ)</p>
+  </div>
+
+  <div class="flex items-center gap-3">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3.5 py-1.5 text-xs text-[var(--text-3)] flex items-center gap-2 shadow-sm">
+      <span>ยอดขายสะสม:</span>
+      <b class="text-[var(--gold)] font-bold">฿<%= orders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + (o.total || 0), 0).toLocaleString() %></b>
+    </div>
+  </div>
+</div>
+
+<!-- Search & Status Summary Bar -->
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 mb-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+  <div class="relative w-full sm:w-80">
+    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">⌕</span>
+    <input type="text" data-table-search="#admin-orders-table" placeholder="ค้นหารหัสคำสั่งซื้อ หรือชื่อผู้ซื้อ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-9 pr-3 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+  </div>
+
+  <div class="flex items-center gap-3 text-xs text-[var(--text-4)] w-full sm:w-auto justify-between sm:justify-end">
+    <div class="flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+      <span>สำเร็จ (<%= orders.filter(o => o.status === 'completed').length %>)</span>
+    </div>
+    <div class="flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+      <span>รอดำเนินการ (<%= orders.filter(o => o.status === 'pending').length %>)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Orders Table Card -->
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+  <div class="overflow-x-auto">
+    <table id="admin-orders-table" class="w-full text-left text-xs sm:text-sm">
+      <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
+        <tr>
+          <th class="py-3.5 px-4 font-semibold">รหัสสั่งซื้อ</th>
+          <th class="py-3.5 px-4 font-semibold">ผู้ซื้อ / ลูกค้า</th>
+          <th class="py-3.5 px-4 font-semibold">วันที่สั่งซื้อ</th>
+          <th class="py-3.5 px-4 font-semibold">ยอดรวม</th>
+          <th class="py-3.5 px-4 font-semibold">สถานะ</th>
+          <th class="py-3.5 px-4 font-semibold text-right">การจัดการ</th>
         </tr>
-      <% }) %>
-      <% if (!orders.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="6">ยังไม่มีคำสั่งซื้อ</td></tr><% } %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody class="divide-y divide-[var(--border)]">
+        <% orders.forEach(o => { %>
+          <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+
+            <!-- Order ID -->
+            <td class="py-3 px-4 whitespace-nowrap">
+              <a href="/admin/orders/<%= o.id %>" class="font-mono font-bold text-sm text-[var(--gold)] hover:underline inline-flex items-center gap-1">
+                <span>#<%= o.id %></span>
+              </a>
+            </td>
+
+            <!-- Buyer -->
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-[var(--input)] border border-[var(--border-light)] flex items-center justify-center font-bold text-xs text-[var(--text-3)] shrink-0">
+                  <%= ((o.buyer && o.buyer.username) || 'U')[0].toUpperCase() %>
+                </div>
+                <div class="min-w-0">
+                  <div class="font-medium text-xs sm:text-sm text-[var(--text)] truncate">
+                    <%= o.buyer ? o.buyer.username : 'ผู้ใช้ทั่วไป' %>
+                  </div>
+                  <% if (o.buyer && o.buyer.email) { %>
+                    <div class="text-[11px] text-[var(--text-4)] truncate"><%= o.buyer.email %></div>
+                  <% } %>
+                </div>
+              </div>
+            </td>
+
+            <!-- Date -->
+            <td class="py-3 px-4 text-xs text-[var(--text-3)] whitespace-nowrap">
+              <%= new Date(o.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
+            </td>
+
+            <!-- Total Price -->
+            <td class="py-3 px-4 whitespace-nowrap">
+              <span class="font-bold text-sm text-[var(--text)]">฿<%= (o.total || 0).toLocaleString() %></span>
+              <% if (o.discount) { %>
+                <span class="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-1.5 py-0.2 rounded ml-1">ลด ฿<%= o.discount %></span>
+              <% } %>
+            </td>
+
+            <!-- Status -->
+            <td class="py-3 px-4 whitespace-nowrap">
+              <% if (o.status === 'completed') { %>
+                <span class="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span>สำเร็จ (ส่งคีย์แล้ว)</span>
+                </span>
+              <% } else if (o.status === 'pending') { %>
+                <span class="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-amber-300 animate-pulse"></span>
+                  <span>รอดำเนินการ (ติดต่อร้าน)</span>
+                </span>
+              <% } else { %>
+                <span class="inline-flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                  <span><%= o.status %></span>
+                </span>
+              <% } %>
+            </td>
+
+            <!-- Action -->
+            <td class="py-3 px-4 text-right whitespace-nowrap">
+              <a href="/admin/orders/<%= o.id %>" class="inline-flex items-center gap-1 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--gold)] text-xs font-semibold px-3 py-1.5 rounded-xl transition">
+                <span>รายละเอียด</span>
+                <span>→</span>
+              </a>
+            </td>
+
+          </tr>
+        <% }) %>
+
+        <% if (!orders.length) { %>
+          <tr>
+            <td class="py-12 text-center text-[var(--text-4)]" colspan="6">
+              <div class="text-3xl mb-2">🧾</div>
+              <div class="text-sm font-semibold text-[var(--text-3)]">ยังไม่มีรายการสั่งซื้อ</div>
+              <p class="text-xs text-[var(--text-4)] mt-1">เมื่อลูกค้าสั่งซื้อสินค้า รายการจะปรากฏที่นี่ทันที</p>
+            </td>
+          </tr>
+        <% } %>
+
+        <tr class="table-empty-search-row" style="display: none;">
+          <td class="py-12 text-center text-[var(--text-4)]" colspan="6">
+            <div class="text-2xl mb-1">🔍</div>
+            <div class="text-xs">ไม่พบคำสั่งซื้อที่ตรงกับคำค้นหา</div>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
 </div>

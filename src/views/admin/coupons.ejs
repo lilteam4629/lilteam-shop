@@ -1,37 +1,158 @@
+<!-- Coupons Management Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">คูปอง & โค้ดส่วนลด</h1>
+    <p class="text-xs text-[var(--text-4)] mt-0.5">สร้างโค้ดส่วนลดโปรโมชั่นสำหรับดึงดูดลูกค้าและจัดแคมเปญการขาย (<%= coupons.length %> คูปอง)</p>
+  </div>
+</div>
+
 <div class="grid lg:grid-cols-3 gap-6">
-  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
-    <table class="w-full text-sm">
-      <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-        <tr><th class="p-3">โค้ด</th><th class="p-3">ส่วนลด</th><th class="p-3">ใช้ไปแล้ว</th><th class="p-3">สถานะ</th><th class="p-3"></th></tr>
-      </thead>
-      <tbody class="divide-y divide-[var(--border)]">
-        <% coupons.forEach(c => { %>
-          <tr>
-            <td class="p-3 font-mono"><%= c.code %></td>
-            <td class="p-3"><%= c.value %><%= c.type === 'percent' ? '%' : ' ฿' %></td>
-            <td class="p-3"><%= c.usedCount %> / <%= c.usageLimit || '∞' %></td>
-            <td class="p-3"><%= c.active ? '🟢 เปิดใช้งาน' : '⚪ ปิด' %></td>
-            <td class="p-3 text-right space-x-2 whitespace-nowrap">
-              <form action="/admin/coupons/<%= c.id %>/toggle" method="post" class="inline"><button class="text-[var(--gold)] text-xs"><%= c.active ? 'ปิด' : 'เปิด' %></button></form>
-              <form action="/admin/coupons/<%= c.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบคูปองนี้?')"><button class="text-rose-400 text-xs">ลบ</button></form>
-            </td>
-          </tr>
-        <% }) %>
-        <% if (!coupons.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="5">ยังไม่มีคูปอง</td></tr><% } %>
-      </tbody>
-    </table>
+
+  <!-- Left Main Column: Coupons Table -->
+  <div class="lg:col-span-2 min-w-0 space-y-4">
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex items-center justify-between gap-3">
+      <div class="relative flex-1">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">⌕</span>
+        <input type="text" data-table-search="#admin-coupons-table" placeholder="ค้นหาโค้ดส่วนลด..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-9 pr-3 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+      </div>
+      <div class="text-xs text-[var(--text-4)]">
+        ใช้งานอยู่: <b class="text-emerald-400"><%= coupons.filter(c => c.active).length %></b> / ทั้งหมด: <%= coupons.length %>
+      </div>
+    </div>
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table id="admin-coupons-table" class="w-full text-left text-xs sm:text-sm">
+          <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
+            <tr>
+              <th class="py-3.5 px-4 font-semibold">รหัสโค้ด</th>
+              <th class="py-3.5 px-4 font-semibold">มูลค่าส่วนลด</th>
+              <th class="py-3.5 px-4 font-semibold">การใช้งาน (Used)</th>
+              <th class="py-3.5 px-4 font-semibold">สถานะ</th>
+              <th class="py-3.5 px-4 font-semibold text-right">การจัดการ</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border)]">
+            <% coupons.forEach(c => { %>
+              <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+
+                <!-- Code -->
+                <td class="py-3.5 px-4">
+                  <div class="font-mono font-bold text-sm text-[var(--gold)] bg-[var(--input)]/60 px-2.5 py-1 rounded-lg inline-block border border-[var(--border-light)]">
+                    <%= c.code %>
+                  </div>
+                </td>
+
+                <!-- Discount Value -->
+                <td class="py-3.5 px-4 font-bold text-[var(--text)]">
+                  <%= c.value %> <%= c.type === 'percent' ? '%' : '฿' %>
+                  <span class="text-[10px] text-[var(--text-4)] font-normal block">
+                    <%= c.type === 'percent' ? 'ลดตามสัดส่วน' : 'ลดทันที' %>
+                  </span>
+                </td>
+
+                <!-- Usage Limit -->
+                <td class="py-3.5 px-4 text-xs text-[var(--text-3)]">
+                  <span class="font-semibold text-[var(--text)]"><%= c.usedCount || 0 %></span>
+                  <span class="text-[var(--text-4)]">/ <%= c.usageLimit ? c.usageLimit : 'ไม่จำกัด' %> ครั้ง</span>
+                </td>
+
+                <!-- Status -->
+                <td class="py-3.5 px-4">
+                  <% if (c.active) { %>
+                    <span class="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> เปิดใช้งาน
+                    </span>
+                  <% } else { %>
+                    <span class="inline-flex items-center gap-1 bg-[var(--input)] border border-[var(--border-light)] text-[var(--text-4)] text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                      <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> ปิดอยู่
+                    </span>
+                  <% } %>
+                </td>
+
+                <!-- Actions -->
+                <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                  <div class="inline-flex items-center gap-2">
+                    <form action="/admin/coupons/<%= c.id %>/toggle" method="post" class="inline">
+                      <button type="submit" class="text-xs font-semibold px-2.5 py-1 rounded-lg border transition <%= c.active ? 'border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500/20' %>">
+                        <%= c.active ? 'ปิดใช้งาน' : 'เปิดใช้งาน' %>
+                      </button>
+                    </form>
+
+                    <form action="/admin/coupons/<%= c.id %>/delete" method="post" class="inline" data-confirm="ต้องการลบคูปองส่วนลด '<%= c.code %>' ใช่หรือไม่?">
+                      <button type="submit" class="p-1 rounded-lg text-rose-400 hover:bg-rose-500/10 transition" title="ลบคูปอง">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                      </button>
+                    </form>
+                  </div>
+                </td>
+
+              </tr>
+            <% }) %>
+
+            <% if (!coupons.length) { %>
+              <tr>
+                <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="5">
+                  <div class="text-3xl mb-2">🎫</div>
+                  <div class="text-sm font-semibold text-[var(--text-3)]">ยังไม่มีคูปองส่วนลด</div>
+                  <p class="text-xs text-[var(--text-4)] mt-1">สร้างคูปองใหม่จากแบบฟอร์มด้านขวา</p>
+                </td>
+              </tr>
+            <% } %>
+
+            <tr class="table-empty-search-row" style="display: none;">
+              <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="5">
+                ไม่พบคูปองที่ตรงกับคำค้นหา
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-    <h3 class="font-semibold mb-3">เพิ่มคูปอง</h3>
-    <form action="/admin/coupons" method="post" class="space-y-3">
-      <input name="code" required placeholder="โค้ด เช่น SALE20" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <select name="type" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
-        <option value="percent">เปอร์เซ็นต์ (%)</option>
-        <option value="fixed">จำนวนเงินคงที่ (฿)</option>
-      </select>
-      <input type="number" name="value" required placeholder="มูลค่าส่วนลด" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <input type="number" name="usageLimit" placeholder="จำนวนครั้งที่ใช้ได้ (0 = ไม่จำกัด)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">เพิ่มคูปอง</button>
-    </form>
+
+  <!-- Right Column: Create Coupon Form Card -->
+  <div>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm sticky top-20">
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
+          🎫
+        </div>
+        <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">สร้างคูปองส่วนลดใหม่</h3>
+      </div>
+
+      <form action="/admin/coupons" method="post" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">รหัสคูปอง (Coupon Code) *</label>
+          <input name="code" required placeholder="เช่น SALE50, NEWYEAR2026" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono uppercase outline-none focus:border-[var(--gold)] transition" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ประเภทส่วนลด</label>
+          <select name="type" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition">
+            <option value="percent">เปอร์เซ็นต์ (%) — ลดตามสัดส่วนราคารวม</option>
+            <option value="fixed">จำนวนเงินคงที่ (฿) — หักลดตามยอดเงิน</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">มูลค่าส่วนลด *</label>
+          <input type="number" name="value" required min="1" placeholder="เช่น 20 หรือ 100" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">จำกัดจำนวนครั้งการใช้งาน</label>
+          <input type="number" name="usageLimit" placeholder="เว้นว่าง หรือ 0 = ไม่จำกัดจำนวนครั้ง" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95 mt-2">
+          + บันทึกและเปิดใช้งานคูปอง
+        </button>
+      </form>
+    </div>
   </div>
+
 </div>

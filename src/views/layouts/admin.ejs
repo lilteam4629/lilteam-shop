@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title %> | Admin - <%= settings.shopName %></title>
+  <title><%= title %> | ระบบจัดการหลังบ้าน - <%= settings.shopName %></title>
   <% if (settings.branding && settings.branding.logoImage) { %>
     <link rel="icon" href="<%= settings.branding.logoImage %>" />
   <% } %>
@@ -11,12 +11,15 @@
     (function () {
       try {
         if (localStorage.getItem('lilteam_theme') === 'light') document.documentElement.classList.add('light');
+        if (localStorage.getItem('lilteam_admin_sidebar') === 'collapsed' && window.innerWidth >= 1024) {
+          document.documentElement.classList.add('sidebar-collapsed');
+        }
       } catch (e) {}
     })();
   </script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
     html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
@@ -24,17 +27,39 @@
       animation: none !important;
     }
     body { font-family: 'Kanit', sans-serif; }
+    code, kbd, samp, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
 
-    /* Shown right after clicking a link/button or submitting a form, so a
-       tap always gets visible feedback instead of looking like nothing
-       happened — admin pages are plain server-rendered navigation, so this
-       just needs to appear instantly and never needs to be hidden again
-       (the page unloads and replaces it). */
+    /* Custom scrollbar for sidebar and admin tables */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--border) 70%, transparent); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--gold); }
+
+    /* Collapsed Sidebar Transitions */
+    #admin-sidebar {
+      transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    html.sidebar-collapsed #admin-sidebar {
+      width: 5rem;
+    }
+    html.sidebar-collapsed .sidebar-text,
+    html.sidebar-collapsed .sidebar-badge,
+    html.sidebar-collapsed .sidebar-heading,
+    html.sidebar-collapsed .sidebar-user-details {
+      display: none !important;
+    }
+    html.sidebar-collapsed .sidebar-link {
+      justify-content: center !important;
+      padding-left: 0.5rem !important;
+      padding-right: 0.5rem !important;
+    }
+
+    /* Page Navigation Loading Overlay */
     #page-loading-overlay {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; align-items: center; justify-content: center;
-      background: color-mix(in srgb, var(--bg) 75%, transparent);
-      backdrop-filter: blur(3px);
+      background: color-mix(in srgb, var(--bg) 80%, transparent);
+      backdrop-filter: blur(4px);
       opacity: 0; visibility: hidden; pointer-events: none;
       transition: opacity .15s ease;
     }
@@ -43,106 +68,456 @@
       transition: opacity .15s ease .15s;
     }
     #page-loading-overlay .loading-ring {
-      position: relative; width: 68px; height: 68px;
+      position: relative; width: 64px; height: 64px;
       display: flex; align-items: center; justify-content: center;
     }
     #page-loading-overlay .loading-ring::before {
       content: ''; position: absolute; inset: 0;
       border-radius: 9999px;
-      border: 3px solid color-mix(in srgb, var(--gold) 25%, transparent);
+      border: 3px solid color-mix(in srgb, var(--gold) 20%, transparent);
       border-top-color: var(--gold);
-      animation: page-loading-spin .8s linear infinite;
+      animation: page-loading-spin .7s linear infinite;
     }
     @keyframes page-loading-spin { to { transform: rotate(360deg); } }
-    @media (prefers-reduced-motion: reduce) {
-      #page-loading-overlay .loading-ring::before { animation-duration: 1.6s; }
+
+    /* Custom Toast Animation */
+    @keyframes toast-slide-in {
+      from { transform: translateY(100%) scale(0.95); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .toast-item {
+      animation: toast-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen md:flex">
-  <div id="page-loading-overlay" aria-hidden="true"><div class="loading-ring"></div></div>
-  <div class="md:hidden sticky top-0 z-40 flex items-center justify-between bg-[var(--card)] border-b border-[var(--border)] px-4 py-3">
-    <a href="/admin" class="flex items-center gap-2 font-bold text-base">
-      <span class="bg-gradient-to-br from-[var(--gold)] to-[var(--gold-hover)] w-7 h-7 rounded-lg flex items-center justify-center text-sm">L</span>
-      Admin Panel
-    </a>
-    <div class="flex items-center gap-2">
-      <button id="theme-toggle-btn" type="button" title="สลับโหมดมืด/สว่าง" class="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--border)]"><span id="theme-toggle-icon">🌙</span></button>
-      <button id="admin-menu-btn" type="button" class="w-9 h-9 flex items-center justify-center rounded-lg border border-[var(--border)] text-lg">☰</button>
-    </div>
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--bg)]">
+
+  <!-- Navigation spinner overlay -->
+  <div id="page-loading-overlay" aria-hidden="true">
+    <div class="loading-ring"></div>
   </div>
 
-  <div id="admin-sidebar-backdrop" class="hidden fixed inset-0 bg-black/60 z-40 md:hidden"></div>
-
-  <aside id="admin-sidebar" class="w-64 shrink-0 bg-[var(--card)] border-r border-[var(--border)] min-h-screen p-4 fixed inset-y-0 left-0 z-50 -translate-x-full transition-transform duration-200 overflow-y-auto md:translate-x-0 md:static md:block">
-    <div class="flex items-center justify-between mb-8">
-      <a href="/admin" class="flex items-center gap-2 font-bold text-lg">
-        <span class="bg-gradient-to-br from-[var(--gold)] to-[var(--gold-hover)] w-8 h-8 rounded-lg flex items-center justify-center">L</span>
-        Admin Panel
-      </a>
-      <button id="admin-menu-close" type="button" class="md:hidden w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-3)]">✕</button>
-    </div>
-    <nav class="space-y-1 text-sm">
-      <a href="/admin" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='dashboard'?'bg-[var(--input)] text-[var(--gold)]':'' %>">📊 แดชบอร์ด</a>
-      <a href="/admin/products" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='products'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🎮 สินค้า</a>
-      <a href="/admin/scheduled-products" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='scheduled-products'?'bg-[var(--input)] text-[var(--gold)]':'' %>">⏰ ตั้งเวลาเปิดขาย</a>
-      <a href="/admin/filter-tags" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='filter-tags'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🏷️ ตัวกรองสินค้า</a>
-      <a href="/admin/home-sections" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='home-sections'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🗂️ หมวดหมู่หน้าแรก</a>
-      <a href="/admin/orders" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='orders'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🧾 คำสั่งซื้อ</a>
-      <a href="/admin/users" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='users'?'bg-[var(--input)] text-[var(--gold)]':'' %>">👥 สมาชิก</a>
-      <a href="/admin/topups" class="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='topups'?'bg-[var(--input)] text-[var(--gold)]':'' %>">
-        <span>💳 บัญชี</span>
-        <% if (typeof pendingTopupCount !== 'undefined' && pendingTopupCount > 0) { %>
-          <span class="bg-[var(--gold)] text-[var(--bg)] text-[10px] font-bold rounded-full min-w-[18px] px-1.5 py-0.5 text-center"><%= pendingTopupCount %></span>
+  <!-- Mobile Top Header Bar -->
+  <header class="lg:hidden sticky top-0 z-40 flex items-center justify-between bg-[var(--card)]/90 backdrop-blur-md border-b border-[var(--border)] px-4 py-3">
+    <a href="/admin" class="flex items-center gap-2 font-bold text-base tracking-wide">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-[var(--gold-dark)] to-[var(--gold)] flex items-center justify-center text-[var(--bg)] font-extrabold shadow-sm">
+        <% if (settings.branding && settings.branding.logoImage) { %>
+          <img src="<%= settings.branding.logoImage %>" class="w-full h-full object-cover rounded-lg" alt="Logo" />
+        <% } else { %>
+          L
         <% } %>
+      </div>
+      <div class="flex flex-col leading-tight">
+        <span class="text-sm font-semibold text-[var(--text)]"><%= settings.shopName %></span>
+        <span class="text-[10px] text-[var(--gold)] font-medium">ระบบแอดมิน</span>
+      </div>
+    </a>
+    <div class="flex items-center gap-2">
+      <button id="theme-toggle-btn" type="button" title="สลับโหมดมืด/สว่าง" class="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--input)]/80 border border-[var(--border-light)] text-sm active:scale-95 transition">
+        <span id="theme-toggle-icon">🌙</span>
+      </button>
+      <button id="admin-menu-btn" type="button" aria-label="เปิดเมนู" class="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--input)]/80 border border-[var(--border-light)] text-[var(--text)] active:scale-95 transition">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div id="admin-sidebar-backdrop" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-200"></div>
+
+  <!-- Main Sidebar -->
+  <aside id="admin-sidebar" class="w-72 shrink-0 bg-[var(--card)] border-r border-[var(--border)] min-h-screen fixed inset-y-0 left-0 z-50 -translate-x-full transition-all duration-200 overflow-y-auto lg:translate-x-0 lg:static flex flex-col justify-between shadow-2xl lg:shadow-none">
+
+    <!-- Top Branding & Collapse Button -->
+    <div>
+      <div class="p-4 sm:p-5 flex items-center justify-between border-b border-[var(--border)]">
+        <a href="/admin" class="flex items-center gap-3 font-bold text-base min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[var(--gold-dark)] to-[var(--gold)] shrink-0 flex items-center justify-center text-[var(--bg)] font-black text-lg shadow-[0_0_15px_color-mix(in_srgb,var(--gold)_25%,transparent)]">
+            <% if (settings.branding && settings.branding.logoImage) { %>
+              <img src="<%= settings.branding.logoImage %>" class="w-full h-full object-cover rounded-xl" alt="Logo" />
+            <% } else { %>
+              L
+            <% } %>
+          </div>
+          <div class="sidebar-text flex flex-col min-w-0">
+            <span class="font-bold text-sm text-[var(--text)] truncate"><%= settings.shopName %></span>
+            <span class="text-[11px] text-[var(--gold)] font-medium">ผู้ดูแลระบบ</span>
+          </div>
+        </a>
+        <div class="flex items-center gap-1">
+          <!-- Desktop Collapse Toggle -->
+          <button id="sidebar-collapse-btn" type="button" class="hidden lg:flex w-8 h-8 items-center justify-center rounded-lg text-[var(--text-4)] hover:text-[var(--text)] hover:bg-[var(--input)] transition" title="ย่อ/ขยายเมนู">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"></path></svg>
+          </button>
+          <!-- Mobile Close Button -->
+          <button id="admin-menu-close" type="button" class="lg:hidden w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border)] text-[var(--text-3)] hover:text-[var(--text)]">✕</button>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="p-3 space-y-6 text-sm">
+
+        <!-- SECTION 1: ภาพรวม -->
+        <div class="space-y-1">
+          <div class="sidebar-heading px-3 text-[11px] font-semibold tracking-wider text-[var(--text-4)] uppercase">ภาพรวม</div>
+          <a href="/admin" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='dashboard'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)]':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="แดชบอร์ด">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='dashboard'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            <span class="sidebar-text">แดชบอร์ด</span>
+          </a>
+        </div>
+
+        <!-- SECTION 2: จัดการสินค้า & แคตตาล็อก -->
+        <div class="space-y-1">
+          <div class="sidebar-heading px-3 text-[11px] font-semibold tracking-wider text-[var(--text-4)] uppercase">สินค้า & แคตตาล็อก</div>
+
+          <a href="/admin/products" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='products'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="รายการสินค้า">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='products'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+            <span class="sidebar-text">รายการสินค้า</span>
+          </a>
+
+          <a href="/admin/scheduled-products" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='scheduled-products'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="ตั้งเวลาเปิดขาย">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='scheduled-products'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="sidebar-text">ตั้งเวลาเปิดขาย</span>
+          </a>
+
+          <a href="/admin/filter-tags" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='filter-tags'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="แท็กตัวกรอง">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='filter-tags'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+            <span class="sidebar-text">แท็กตัวกรองสินค้า</span>
+          </a>
+
+          <a href="/admin/home-sections" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='home-sections'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="หมวดหมู่หน้าแรก">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='home-sections'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+            <span class="sidebar-text">หมวดหมู่หน้าแรก</span>
+          </a>
+        </div>
+
+        <!-- SECTION 3: คำสั่งซื้อ & การเงิน -->
+        <div class="space-y-1">
+          <div class="sidebar-heading px-3 text-[11px] font-semibold tracking-wider text-[var(--text-4)] uppercase">การสั่งซื้อ & การเงิน</div>
+
+          <a href="/admin/orders" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='orders'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="คำสั่งซื้อ">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='orders'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+            <span class="sidebar-text">คำสั่งซื้อ</span>
+          </a>
+
+          <a href="/admin/topups" class="sidebar-link flex items-center justify-between px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='topups'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="จัดการเติมเงิน">
+            <div class="flex items-center gap-3 min-w-0">
+              <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='topups'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+              <span class="sidebar-text">เติมเงิน & ตรวจสลิป</span>
+            </div>
+            <% if (typeof pendingTopupCount !== 'undefined' && pendingTopupCount > 0) { %>
+              <span class="sidebar-badge bg-[var(--gold)] text-[var(--bg)] text-[11px] font-bold rounded-full px-2 py-0.5 shadow-[0_0_10px_color-mix(in_srgb,var(--gold)_50%,transparent)] animate-pulse"><%= pendingTopupCount %></span>
+            <% } %>
+          </a>
+
+          <a href="/admin/coupons" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='coupons'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="คูปองส่วนลด">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='coupons'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"></path></svg>
+            <span class="sidebar-text">คูปองส่วนลด</span>
+          </a>
+        </div>
+
+        <!-- SECTION 4: สมาชิก -->
+        <div class="space-y-1">
+          <div class="sidebar-heading px-3 text-[11px] font-semibold tracking-wider text-[var(--text-4)] uppercase">ผู้ใช้งาน & ลูกค้า</div>
+
+          <a href="/admin/users" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='users'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="สมาชิกทั้งหมด">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='users'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+            <span class="sidebar-text">จัดการสมาชิก</span>
+          </a>
+        </div>
+
+        <!-- SECTION 5: ส่วนเสริม & ฟีเจอร์พิเศษ -->
+        <div class="space-y-1">
+          <div class="sidebar-heading px-3 text-[11px] font-semibold tracking-wider text-[var(--text-4)] uppercase">มินิเกม & ระบบเสริม</div>
+
+          <a href="/admin/minigame" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='minigame'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="มินิเกม">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='minigame'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="sidebar-text">มินิเกม (สุ่มของรางวัล)</span>
+          </a>
+
+          <% if (rentWebsiteEnabled) { %>
+            <a href="/admin/license-plans" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='license-plans'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="ขายคีย์เช่าเว็บ">
+              <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='license-plans'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+              <span class="sidebar-text">ขายคีย์เช่าเว็บ</span>
+            </a>
+          <% } %>
+
+          <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+            <a href="/admin/easyslip-usage" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= (active==='easyslip-usage'||active==='slip-verification'||active==='api-providers')?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="ระบบตรวจสอบสลิปด้วย API">
+              <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= (active==='easyslip-usage'||active==='slip-verification'||active==='api-providers')?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <div class="flex items-center justify-between flex-1 min-w-0">
+                <span class="sidebar-text">ตรวจสลิปด้วย API</span>
+                <span class="sidebar-badge text-[9px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded">BYSHOP / Multi-API</span>
+              </div>
+            </a>
+          <% } %>
+        </div>
+
+        <!-- SECTION 6: ตกแต่ง & การตั้งค่า -->
+        <div class="space-y-1">
+          <div class="sidebar-heading px-3 text-[11px] font-semibold tracking-wider text-[var(--text-4)] uppercase">ตกแต่ง & การตั้งค่า</div>
+
+          <a href="/admin/appearance" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= (active==='appearance'||active==='theme'||active==='announcements')?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="ตกแต่งหน้าเว็บ">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= (active==='appearance'||active==='theme'||active==='announcements')?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span class="sidebar-text">ธีม & ป้ายประกาศ</span>
+          </a>
+
+          <a href="/admin/settings" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='settings'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="ตั้งค่าร้านค้า">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='settings'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            <span class="sidebar-text">ตั้งค่าร้านค้า</span>
+          </a>
+        </div>
+
+      </nav>
+    </div>
+
+    <!-- Bottom Footer Profile & Store Links -->
+    <div class="p-3 border-t border-[var(--border)] bg-[var(--card)]/80 space-y-2">
+      <a href="/" target="_blank" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)] transition" title="เปิดหน้าร้านจริง">
+        <div class="flex items-center gap-2">
+          <svg class="w-4 h-4 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          <span class="sidebar-text">ดูหน้าร้าน (เปิดแท็บใหม่)</span>
+        </div>
+        <span class="sidebar-badge text-[10px] text-[var(--text-4)]">↗</span>
       </a>
-      <a href="/admin/coupons" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='coupons'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🏷️ คูปองส่วนลด</a>
-      <a href="/admin/minigame" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='minigame'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🎰 มินิเกม</a>
-      <% if (rentWebsiteEnabled) { %><a href="/admin/license-plans" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='license-plans'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🌐 ขายคีย์เช่าเว็บ</a><% } %>
-      <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><a href="/admin/easyslip-usage" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='easyslip-usage'?'bg-[var(--input)] text-[var(--gold)]':'' %>">🧾 เช็คสลิป EasySlip</a><% } %>
-      <a href="/admin/appearance" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= (active==='appearance'||active==='theme'||active==='announcements')?'bg-[var(--input)] text-[var(--gold)]':'' %>">🖼️ รูปหน้าเว็บและโลโก้</a>
-      <a href="/admin/settings" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] <%= active==='settings'?'bg-[var(--input)] text-[var(--gold)]':'' %>">⚙️ ตั้งค่าร้าน</a>
-      <div class="border-t border-[var(--border)] my-3"></div>
-      <a href="/" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)]">🏠 กลับหน้าร้าน</a>
-      <a href="/logout" class="block px-3 py-2 rounded-lg hover:bg-[var(--input)] text-rose-400">🚪 ออกจากระบบ</a>
-    </nav>
+
+      <div class="flex items-center justify-between px-2 pt-2 border-t border-[var(--border)]/60">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center text-[var(--bg)] font-bold text-xs shrink-0">
+            <%= (currentUser.username || 'A')[0].toUpperCase() %>
+          </div>
+          <div class="sidebar-user-details flex flex-col min-w-0">
+            <span class="text-xs font-medium text-[var(--text)] truncate"><%= currentUser.username %></span>
+            <span class="text-[10px] text-[var(--text-4)]">แอดมินสูงสุด</span>
+          </div>
+        </div>
+
+        <a href="/logout" class="p-1.5 rounded-lg text-rose-400/80 hover:text-rose-400 hover:bg-rose-500/10 transition" title="ออกจากระบบ">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+        </a>
+      </div>
+    </div>
+
   </aside>
 
-  <div class="flex-1 min-w-0">
-    <header class="hidden md:flex bg-[var(--card)]/60 border-b border-[var(--border)] px-6 py-3 items-center justify-between">
-      <h1 class="font-semibold"><%= title %></h1>
+  <!-- Main Content Wrapper -->
+  <div class="flex-1 min-w-0 flex flex-col min-h-screen">
+
+    <!-- Top Header (Desktop & Tablet) -->
+    <header class="hidden lg:flex bg-[var(--card)]/70 backdrop-blur-md border-b border-[var(--border)] px-6 py-3.5 items-center justify-between sticky top-0 z-30">
+
+      <!-- Breadcrumb / Page Title -->
       <div class="flex items-center gap-3">
-        <button id="theme-toggle-btn-desktop" type="button" title="สลับโหมดมืด/สว่าง" class="w-8 h-8 flex items-center justify-center rounded-lg border border-[var(--border-light)] hover:border-[var(--gold)]/60"><span id="theme-toggle-icon-desktop">🌙</span></button>
-        <span class="text-sm text-[var(--text-3)]">👤 <%= currentUser.username %></span>
+        <div class="flex items-center gap-2 text-xs text-[var(--text-4)]">
+          <a href="/admin" class="hover:text-[var(--gold)] transition">หลังบ้าน</a>
+          <span>/</span>
+          <span class="text-[var(--text)] font-semibold text-sm"><%= title %></span>
+        </div>
+      </div>
+
+      <!-- Header Right Utilities -->
+      <div class="flex items-center gap-3">
+
+        <!-- Live Store Status Badge -->
+        <% if (typeof persistentStorageEnabled !== 'undefined' && !persistentStorageEnabled) { %>
+          <div class="flex items-center gap-1.5 text-xs text-amber-300 bg-amber-950/60 border border-amber-500/40 px-3 py-1 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span>Local DB (ยังไม่ต่อ MongoDB)</span>
+          </div>
+        <% } else { %>
+          <div class="flex items-center gap-1.5 text-xs text-emerald-400 bg-emerald-950/40 border border-emerald-500/30 px-3 py-1 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span>Cloud Connected</span>
+          </div>
+        <% } %>
+
+        <!-- Theme Toggle Button -->
+        <button id="theme-toggle-btn-desktop" type="button" title="สลับโหมดมืด/สว่าง" class="w-8 h-8 flex items-center justify-center rounded-xl bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 text-xs transition">
+          <span id="theme-toggle-icon-desktop">🌙</span>
+        </button>
+
+        <!-- Quick View Storefront Button -->
+        <a href="/" target="_blank" class="flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] hover:text-[var(--gold)] px-3 py-1.5 rounded-xl text-xs font-medium transition">
+          <span>หน้าร้าน</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+        </a>
+
+        <!-- Admin Profile Pill -->
+        <div class="flex items-center gap-2 pl-2 border-l border-[var(--border)]">
+          <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center text-[var(--bg)] font-bold text-xs">
+            <%= (currentUser.username || 'A')[0].toUpperCase() %>
+          </div>
+          <span class="text-xs font-semibold text-[var(--text)]"><%= currentUser.username %></span>
+        </div>
+
       </div>
     </header>
-    <main class="p-4 md:p-6 overflow-x-hidden">
-      <h1 class="md:hidden font-semibold text-lg mb-4"><%= title %></h1>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
+
+      <!-- System Storage Alert Banner -->
       <% if (!persistentStorageEnabled) { %>
-        <div class="bg-amber-900/40 border border-amber-500/60 text-amber-200 px-4 py-3 rounded-xl mb-4 text-sm">
-          ⚠️ ยังไม่ได้เชื่อม MongoDB — ข้อมูลและรูปที่อัปโหลดอาจหายเมื่อ Deploy กรุณาตั้งค่า <code class="font-mono">MONGODB_URI</code> บนโฮสต์
+        <div class="bg-amber-900/30 border border-amber-500/50 text-amber-200 px-4 py-3 rounded-2xl mb-6 text-sm flex items-start gap-3 backdrop-blur-sm shadow-lg">
+          <span class="text-xl">⚠️</span>
+          <div>
+            <div class="font-semibold text-amber-100">โหมดจัดเก็บข้อมูล Local (ชั่วคราว)</div>
+            <div class="text-xs text-amber-200/90 mt-0.5">ยังไม่ได้เชื่อมต่อ MongoDB Atlas — หากต้องการให้ข้อมูลและรูปภาพคงอยู่อย่างถาวร แนะนำให้ตั้งค่า <code class="bg-amber-950/80 px-1.5 py-0.5 rounded font-mono text-[11px] text-amber-300">MONGODB_URI</code> ในตัวแปรระบบ</div>
+          </div>
         </div>
       <% } %>
+
+      <!-- Server Flash Notifications (Auto converted to toasts if JS active) -->
       <% if (messages.success && messages.success.length) { %>
         <% messages.success.forEach(m => { %>
-          <div class="bg-emerald-900/60 border border-emerald-600 text-emerald-200 px-4 py-2 rounded-lg mb-4 text-sm"><%= m %></div>
+          <div data-flash="success" class="hidden sm:flex items-center justify-between bg-emerald-950/60 border border-emerald-500/40 text-emerald-200 px-4 py-3 rounded-2xl mb-5 text-sm backdrop-blur-sm shadow-md">
+            <div class="flex items-center gap-2.5">
+              <span class="text-emerald-400 font-bold">✓</span>
+              <span><%= m %></span>
+            </div>
+          </div>
         <% }) %>
       <% } %>
       <% if (messages.error && messages.error.length) { %>
         <% messages.error.forEach(m => { %>
-          <div class="bg-rose-900/60 border border-rose-600 text-rose-200 px-4 py-2 rounded-lg mb-4 text-sm"><%= m %></div>
+          <div data-flash="error" class="hidden sm:flex items-center justify-between bg-rose-950/60 border border-rose-500/40 text-rose-200 px-4 py-3 rounded-2xl mb-5 text-sm backdrop-blur-sm shadow-md">
+            <div class="flex items-center gap-2.5">
+              <span class="text-rose-400 font-bold">✕</span>
+              <span><%= m %></span>
+            </div>
+          </div>
         <% }) %>
       <% } %>
+
+      <!-- Primary Page Body -->
       <%- body %>
+
     </main>
+
   </div>
 
+  <!-- Global Toast Notification Container -->
+  <div id="admin-toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- Global Glass Confirmation Modal -->
+  <div id="admin-confirm-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-opacity">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 max-w-md w-full shadow-2xl transform transition-transform scale-95 duration-150" id="admin-confirm-card">
+      <div class="flex items-center gap-3.5 mb-3">
+        <div id="admin-confirm-icon-wrap" class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center shrink-0 text-xl font-bold">
+          ⚠️
+        </div>
+        <h3 id="admin-confirm-title" class="font-bold text-base text-[var(--text)]">ยืนยันการดำเนินการ</h3>
+      </div>
+      <p id="admin-confirm-message" class="text-sm text-[var(--text-3)] mb-6 leading-relaxed">คุณแน่ใจหรือไม่ว่าต้องการดำเนินการนี้?</p>
+      <div class="flex items-center justify-end gap-2.5">
+        <button id="admin-confirm-cancel-btn" type="button" class="px-4 py-2 rounded-xl text-sm font-medium text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)] transition">ยกเลิก</button>
+        <button id="admin-confirm-action-btn" type="button" class="px-5 py-2 rounded-xl text-sm font-semibold bg-rose-600 hover:bg-rose-500 text-white shadow-lg transition">ยืนยัน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Interactive Scripts -->
   <script>
+    // Toast Notification System
+    window.showToast = function (message, type = 'success', duration = 4000) {
+      const container = document.getElementById('admin-toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      toast.className = `toast-item pointer-events-auto flex items-center justify-between gap-3 p-4 rounded-2xl border shadow-2xl backdrop-blur-md text-sm transition-all ${
+        type === 'success' ? 'bg-emerald-950/90 border-emerald-500/50 text-emerald-100' :
+        type === 'error' ? 'bg-rose-950/90 border-rose-500/50 text-rose-100' :
+        type === 'warning' ? 'bg-amber-950/90 border-amber-500/50 text-amber-100' :
+        'bg-[var(--card)]/90 border-[var(--border)] text-[var(--text)]'
+      }`;
+      const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : type === 'warning' ? '⚠️' : 'ℹ️';
+      toast.innerHTML = `
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="font-bold shrink-0">${icon}</span>
+          <span class="truncate">${message}</span>
+        </div>
+        <button type="button" class="text-xs opacity-60 hover:opacity-100 transition shrink-0">✕</button>
+      `;
+      toast.querySelector('button').addEventListener('click', () => {
+        toast.remove();
+      });
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px) scale(0.95)';
+        setTimeout(() => toast.remove(), 200);
+      }, duration);
+    };
+
+    // Modern Confirmation Modal Replacement
+    window.confirmModal = function ({ title, message, confirmText = 'ยืนยัน', confirmClass = 'bg-rose-600 hover:bg-rose-500 text-white', onConfirm }) {
+      const modal = document.getElementById('admin-confirm-modal');
+      const card = document.getElementById('admin-confirm-card');
+      const titleEl = document.getElementById('admin-confirm-title');
+      const msgEl = document.getElementById('admin-confirm-message');
+      const cancelBtn = document.getElementById('admin-confirm-cancel-btn');
+      const actionBtn = document.getElementById('admin-confirm-action-btn');
+
+      titleEl.textContent = title || 'ยืนยันการดำเนินการ';
+      msgEl.textContent = message || 'คุณแน่ใจหรือไม่ว่าต้องการดำเนินการนี้?';
+      actionBtn.textContent = confirmText;
+      actionBtn.className = `px-5 py-2 rounded-xl text-sm font-semibold shadow-lg transition ${confirmClass}`;
+
+      modal.classList.remove('hidden');
+      requestAnimationFrame(() => card.classList.remove('scale-95'));
+
+      function closeModal() {
+        card.classList.add('scale-95');
+        setTimeout(() => modal.classList.add('hidden'), 150);
+        cleanup();
+      }
+
+      function handleAction() {
+        closeModal();
+        if (typeof onConfirm === 'function') onConfirm();
+      }
+
+      function handleKey(e) {
+        if (e.key === 'Escape') closeModal();
+        if (e.key === 'Enter') handleAction();
+      }
+
+      function cleanup() {
+        cancelBtn.removeEventListener('click', closeModal);
+        actionBtn.removeEventListener('click', handleAction);
+        window.removeEventListener('keydown', handleKey);
+      }
+
+      cancelBtn.addEventListener('click', closeModal);
+      actionBtn.addEventListener('click', handleAction);
+      window.addEventListener('keydown', handleKey);
+    };
+
+    // Form confirmation hook: automatically intercepts forms with onsubmit="return confirm(...)"
+    document.addEventListener('submit', function (e) {
+      const form = e.target;
+      const confirmAttr = form.getAttribute('data-confirm');
+      if (confirmAttr) {
+        e.preventDefault();
+        window.confirmModal({
+          title: 'ยืนยันการทำรายการ',
+          message: confirmAttr,
+          confirmText: 'ยืนยัน',
+          onConfirm: () => {
+            form.removeAttribute('data-confirm');
+            form.submit();
+          }
+        });
+      }
+    });
+
+    // Mobile Sidebar Drawer
     (function () {
       const sidebar = document.getElementById('admin-sidebar');
       const backdrop = document.getElementById('admin-sidebar-backdrop');
       const openBtn = document.getElementById('admin-menu-btn');
       const closeBtn = document.getElementById('admin-menu-close');
+      const collapseBtn = document.getElementById('sidebar-collapse-btn');
+
       function openMenu() {
         sidebar.classList.remove('-translate-x-full');
         backdrop.classList.remove('hidden');
@@ -154,8 +529,18 @@
       if (openBtn) openBtn.addEventListener('click', openMenu);
       if (closeBtn) closeBtn.addEventListener('click', closeMenu);
       if (backdrop) backdrop.addEventListener('click', closeMenu);
+
+      // Desktop Collapse
+      if (collapseBtn) {
+        collapseBtn.addEventListener('click', function () {
+          document.documentElement.classList.toggle('sidebar-collapsed');
+          const isCollapsed = document.documentElement.classList.contains('sidebar-collapsed');
+          try { localStorage.setItem('lilteam_admin_sidebar', isCollapsed ? 'collapsed' : 'expanded'); } catch (e) {}
+        });
+      }
     })();
 
+    // Dark/Light Theme Switcher
     (function () {
       const icons = [document.getElementById('theme-toggle-icon'), document.getElementById('theme-toggle-icon-desktop')].filter(Boolean);
       const buttons = [document.getElementById('theme-toggle-btn'), document.getElementById('theme-toggle-btn-desktop')].filter(Boolean);
@@ -174,6 +559,7 @@
       });
     })();
 
+    // Page Navigation Spinner Handler
     (function () {
       function markNavigating() {
         document.documentElement.classList.add('lilteam-navigating');
@@ -188,14 +574,43 @@
       });
       document.addEventListener('submit', function (event) {
         if (event.defaultPrevented) return;
+        // Add loading state to the submit button
+        const submitBtn = event.target.querySelector('button[type="submit"], input[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        }
         markNavigating();
       });
-      // A bfcache restore (back/forward) can bring back the page with the
-      // class still set from just before it navigated away.
       window.addEventListener('pageshow', function () {
         document.documentElement.classList.remove('lilteam-navigating');
       });
     })();
+
+    // Instant Table Live Search Engine
+    document.addEventListener('DOMContentLoaded', function () {
+      const searchInputs = document.querySelectorAll('[data-table-search]');
+      searchInputs.forEach(input => {
+        const targetTableSelector = input.getAttribute('data-table-search');
+        const table = document.querySelector(targetTableSelector);
+        if (!table) return;
+        input.addEventListener('input', function () {
+          const term = this.value.toLowerCase().trim();
+          const rows = table.querySelectorAll('tbody tr');
+          let visibleCount = 0;
+          rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+            const match = text.includes(term);
+            row.style.display = match ? '' : 'none';
+            if (match) visibleCount++;
+          });
+          const emptyRow = table.querySelector('.table-empty-search-row');
+          if (emptyRow) {
+            emptyRow.style.display = (visibleCount === 0 && term !== '') ? '' : 'none';
+          }
+        });
+      });
+    });
   </script>
 </body>
 </html>

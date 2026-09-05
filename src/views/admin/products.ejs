@@ -1,48 +1,171 @@
-<div class="flex flex-wrap items-center justify-between gap-3 mb-4">
-  <form action="/admin/products/card-style" method="post" class="flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] rounded-lg p-1 text-sm">
-    <span class="text-[var(--text-4)] text-xs pl-2">🃏 รูปแบบการ์ด:</span>
-    <button name="productCardStyle" value="classic" class="px-3 py-1.5 rounded-md transition <%= productCardStyle === 'classic' ? 'bg-[var(--gold)] text-[var(--bg)] font-medium' : 'text-[var(--text-3)] hover:bg-[var(--input)]' %>">🎴 คลาสสิก</button>
-    <button name="productCardStyle" value="natural" class="px-3 py-1.5 rounded-md transition <%= productCardStyle === 'natural' ? 'bg-[var(--gold)] text-[var(--bg)] font-medium' : 'text-[var(--text-3)] hover:bg-[var(--input)]' %>">🖼️ เต็มรูป</button>
-  </form>
-  <div class="flex items-center gap-2">
-    <a href="/admin/products/bulk-import" class="bg-[var(--input)] border border-[var(--gold)]/40 text-[var(--gold)] hover:border-[var(--gold)] font-medium px-4 py-2 rounded-lg text-sm">📁 นำเข้าจากโฟลเดอร์</a>
-    <a href="/admin/products/new" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">+ เพิ่มสินค้า</a>
+<!-- Products Management Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">รายการสินค้าทั้งหมด</h1>
+    <p class="text-xs text-[var(--text-4)] mt-0.5">จัดการสต็อกสินค้า กำหนดราคา และตั้งค่าการขายของร้านคุณ (<%= products.length %> รายการ)</p>
+  </div>
+
+  <div class="flex items-center gap-2.5 flex-wrap">
+    <!-- Card Style Toggle -->
+    <form action="/admin/products/card-style" method="post" class="flex items-center gap-1 bg-[var(--card)] border border-[var(--border)] rounded-xl p-1 text-xs shadow-sm">
+      <span class="text-[var(--text-4)] text-[11px] px-2 font-medium">รูปแบบการ์ด:</span>
+      <button name="productCardStyle" value="classic" class="px-3 py-1.5 rounded-lg transition <%= productCardStyle === 'classic' ? 'bg-[var(--gold)] text-[var(--bg)] font-bold shadow-sm' : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>">🎴 คลาสสิก</button>
+      <button name="productCardStyle" value="natural" class="px-3 py-1.5 rounded-lg transition <%= productCardStyle === 'natural' ? 'bg-[var(--gold)] text-[var(--bg)] font-bold shadow-sm' : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>">🖼️ เต็มรูป</button>
+    </form>
+
+    <!-- Bulk Import Button -->
+    <a href="/admin/products/bulk-import" class="inline-flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] hover:text-[var(--gold)] font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+      <span>นำเข้าโฟลเดอร์</span>
+    </a>
+
+    <!-- Add Product Button -->
+    <a href="/admin/products/new" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-4 py-2 rounded-xl text-xs shadow-md hover:shadow-lg transition active:scale-95">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+      <span>เพิ่มสินค้าใหม่</span>
+    </a>
   </div>
 </div>
-<div class="bg-[var(--card)] border border-[var(--border)] rounded-xl overflow-x-auto">
-  <table class="w-full text-sm">
-    <thead class="text-[var(--text-4)] text-left border-b border-[var(--border)]">
-      <tr><th class="p-3">สินค้า</th><th class="p-3">ราคา</th><th class="p-3">สต๊อก</th><th class="p-3">สถานะ</th><th class="p-3"></th></tr>
-    </thead>
-    <tbody class="divide-y divide-[var(--border)]">
-      <% products.forEach(p => { %>
-        <tr class="hover:bg-[var(--input)]/50">
-          <td class="p-3 flex items-center gap-2">
-            <img src="<%= p.images[0] %>" class="w-10 h-8 object-cover rounded" />
-            <%= p.title %>
-          </td>
-          <td class="p-3">
-            ฿<%= p.price.toLocaleString() %>
-            <% if (p.originalPrice > p.price) { %>
-              <span class="text-rose-400 line-through text-xs">฿<%= p.originalPrice.toLocaleString() %></span>
-            <% } %>
-          </td>
-          <td class="p-3">
-            <a href="/admin/products/<%= p.id %>/stock" class="<%= p.stockCount < 1 ? 'text-rose-400' : 'text-emerald-400' %>"><%= p.stockCount %> รายการ</a>
-          </td>
-          <td class="p-3"><%= p.status === 'active' ? '🟢 เปิดขาย' : '⚪ ซ่อน' %></td>
-          <td class="p-3 text-right space-x-2 whitespace-nowrap">
-            <a href="/admin/products/<%= p.id %>/edit" class="text-[var(--gold)]">แก้ไข</a>
-            <form action="/admin/products/<%= p.id %>/copy" method="post" class="inline" onsubmit="return confirm('คัดลอกสินค้านี้? สต๊อกไอดีจะไม่ถูกคัดลอก')">
-              <button class="text-sky-400">คัดลอก</button>
-            </form>
-            <form action="/admin/products/<%= p.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบสินค้านี้?')">
-              <button class="text-rose-400">ลบ</button>
-            </form>
+
+<!-- Search & Filter Bar -->
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 mb-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+  <div class="relative w-full sm:w-80">
+    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">⌕</span>
+    <input type="text" data-table-search="#admin-products-table" placeholder="ค้นหาชื่อสินค้า หมวดหมู่ หรือราคา..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-9 pr-3 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+  </div>
+
+  <div class="flex items-center gap-3 text-xs text-[var(--text-4)] w-full sm:w-auto justify-between sm:justify-end">
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
+      <span>เปิดขาย (<%= products.filter(p => p.status === 'active').length %>)</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="inline-block w-2 h-2 rounded-full bg-slate-500"></span>
+      <span>ซ่อนอยู่ (<%= products.filter(p => p.status !== 'active').length %>)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Products Table Card -->
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
+  <div class="overflow-x-auto">
+    <table id="admin-products-table" class="w-full text-left text-xs sm:text-sm">
+      <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
+        <tr>
+          <th class="py-3.5 px-4 font-semibold">สินค้า</th>
+          <th class="py-3.5 px-4 font-semibold">ราคาขาย</th>
+          <th class="py-3.5 px-4 font-semibold">คงเหลือในสต๊อก</th>
+          <th class="py-3.5 px-4 font-semibold">สถานะ</th>
+          <th class="py-3.5 px-4 font-semibold text-right">การจัดการ</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-[var(--border)]">
+        <% products.forEach(p => { %>
+          <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+
+            <!-- Product Info -->
+            <td class="py-3 px-4">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-10 rounded-lg overflow-hidden bg-[var(--input)] border border-[var(--border)] shrink-0 shadow-sm">
+                  <% if (p.images && p.images[0]) { %>
+                    <img src="<%= p.images[0] %>" class="w-full h-full object-cover" alt="<%= p.title %>" />
+                  <% } else { %>
+                    <div class="w-full h-full flex items-center justify-center text-xs text-[var(--text-4)]">🎮</div>
+                  <% } %>
+                </div>
+                <div class="min-w-0">
+                  <div class="font-bold text-sm text-[var(--text)] hover:text-[var(--gold)] transition truncate">
+                    <a href="/admin/products/<%= p.id %>/edit"><%= p.title %></a>
+                  </div>
+                  <div class="text-[11px] text-[var(--text-4)] font-mono truncate">slug: <%= p.slug %></div>
+                </div>
+              </div>
+            </td>
+
+            <!-- Price -->
+            <td class="py-3 px-4 whitespace-nowrap">
+              <div class="font-bold text-sm text-[var(--gold)]">฿<%= p.price.toLocaleString() %></div>
+              <% if (p.originalPrice > p.price) { %>
+                <div class="text-[11px] text-[var(--coral)] line-through">฿<%= p.originalPrice.toLocaleString() %></div>
+              <% } %>
+            </td>
+
+            <!-- Stock -->
+            <td class="py-3 px-4 whitespace-nowrap">
+              <a href="/admin/products/<%= p.id %>/stock" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border font-semibold text-xs transition <%= p.stockCount < 1 ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' : (p.stockCount <= 3 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20') %>">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
+                <span><%= p.stockCount %> รายการ</span>
+              </a>
+            </td>
+
+            <!-- Status -->
+            <td class="py-3 px-4 whitespace-nowrap">
+              <% if (p.status === 'active') { %>
+                <span class="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                  <span>เปิดขาย</span>
+                </span>
+              <% } else { %>
+                <span class="inline-flex items-center gap-1.5 bg-[var(--input)] border border-[var(--border-light)] text-[var(--text-4)] text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span>
+                  <span>ซ่อนอยู่</span>
+                </span>
+              <% } %>
+            </td>
+
+            <!-- Actions -->
+            <td class="py-3 px-4 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-1">
+                <!-- Stock Button -->
+                <a href="/admin/products/<%= p.id %>/stock" class="p-1.5 rounded-lg text-[var(--text-3)] hover:text-[var(--gold)] hover:bg-[var(--input)] transition" title="จัดการสต็อกสินค้า">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                </a>
+
+                <!-- Edit Button -->
+                <a href="/admin/products/<%= p.id %>/edit" class="p-1.5 rounded-lg text-sky-400 hover:bg-sky-500/10 transition" title="แก้ไขข้อมูลสินค้า">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </a>
+
+                <!-- Copy Form -->
+                <form action="/admin/products/<%= p.id %>/copy" method="post" class="inline" data-confirm="ต้องการคัดลอกสินค้านี้ใช่ไหม? (ข้อมูลสต็อกไอดีจะไม่ถูกคัดลอก)">
+                  <button type="submit" class="p-1.5 rounded-lg text-purple-400 hover:bg-purple-500/10 transition" title="คัดลอกสินค้า">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                  </button>
+                </form>
+
+                <!-- Delete Form -->
+                <form action="/admin/products/<%= p.id %>/delete" method="post" class="inline" data-confirm="ต้องการลบสินค้า '<%= p.title %>' ใช่หรือไม่? การกระทำนี้ไม่สามารถย้อนกลับได้">
+                  <button type="submit" class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition" title="ลบสินค้า">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </form>
+              </div>
+            </td>
+
+          </tr>
+        <% }) %>
+
+        <% if (!products.length) { %>
+          <tr>
+            <td class="py-12 text-center text-[var(--text-4)]" colspan="5">
+              <div class="text-3xl mb-2">📦</div>
+              <div class="text-sm font-semibold text-[var(--text-3)]">ยังไม่มีสินค้าในร้าน</div>
+              <p class="text-xs text-[var(--text-4)] mt-1 mb-4">เริ่มต้นสร้างสินค้าชิ้นแรก เพื่อให้ลูกค้าสามารถสั่งซื้อได้</p>
+              <a href="/admin/products/new" class="inline-flex items-center gap-1.5 bg-[var(--gold)] text-[var(--bg)] font-bold px-4 py-2 rounded-xl text-xs shadow-md">
+                + เพิ่มสินค้าแรกเลย
+              </a>
+            </td>
+          </tr>
+        <% } %>
+
+        <tr class="table-empty-search-row" style="display: none;">
+          <td class="py-12 text-center text-[var(--text-4)]" colspan="5">
+            <div class="text-2xl mb-1">🔍</div>
+            <div class="text-xs">ไม่พบสินค้าที่ตรงกับคำค้นหา</div>
           </td>
         </tr>
-      <% }) %>
-      <% if (!products.length) { %><tr><td class="p-3 text-[var(--text-4)]" colspan="5">ยังไม่มีสินค้า</td></tr><% } %>
-    </tbody>
-  </table>
+
+      </tbody>
+    </table>
+  </div>
 </div>

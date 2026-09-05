@@ -29,6 +29,11 @@ const BG_PRESETS = {
     dark: { bg: '#14161c', card: '#1e2129', border: '#3a3f4d', borderLight: '#454b5b', input: '#252932', text: '#eef0f5', text2: '#cdd2de', text3: '#98a0b3', text4: '#666e82' },
     light: { bg: '#f2f4f8', card: '#ffffff', border: '#dde1ea', borderLight: '#ccd2df', input: '#e8ebf2', text: '#1c1f27', text2: '#3d4351', text3: '#616a7d', text4: '#858ea3' },
   },
+  roseDark: {
+    label: 'มืดชมพูเข้ม (LilTeam)',
+    dark: { bg: '#1e0b11', card: '#30121b', border: '#612436', borderLight: '#732b40', input: '#3c1621', text: '#f1eeef', text2: '#d6cdcf', text3: '#ac959c', text4: '#86656e' },
+    light: { bg: '#faf0f2', card: '#ffffff', border: '#e8cad1', borderLight: '#dcabb6', input: '#f5e4e8', text: '#291016', text2: '#471c26', text3: '#6a3240', text4: '#8c485a' },
+  },
 };
 
 const ACCENT_PRESETS = [

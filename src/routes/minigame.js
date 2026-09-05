@@ -4,6 +4,15 @@ const store = require('../data/store');
 const { currentUser } = require('../middleware/auth');
 const { pickPrize } = require('../services/minigame');
 
+let minigameQueue = Promise.resolve();
+function runWithMinigameQueue(fn) {
+  const next = minigameQueue.then(fn, fn);
+  minigameQueue = next.catch(() => {});
+  return next;
+}
+
+const minigameLocks = new Set();
+
 router.post('/play', (req, res) => {
   const game = store.data.settings.miniGame;
   const user = currentUser(req);
@@ -17,42 +26,56 @@ router.post('/play', (req, res) => {
     return res.status(400).json({ error: 'มินิเกมนี้ปิดใช้งานอยู่ในขณะนี้' });
   }
 
-  const cost = Number(gameMode === 'rail' ? game.railCostPerPlay : game.costPerPlay) || 0;
-  if (user.walletBalance < cost) {
-    return res.status(400).json({ error: 'ยอดเครดิตไม่พอ กรุณาเติมเงินก่อนเล่น' });
+  if (minigameLocks.has(user.id)) {
+    return res.status(429).json({ error: 'กำลังประมวลผลการเล่นรอบก่อนหน้า กรุณารอสักครู่' });
   }
 
-  const prize = pickPrize(store.data.miniGamePrizes.filter(p => (p.gameType || 'box') === gameMode));
-  if (!prize) {
-    return res.status(400).json({ error: 'ของรางวัลหมดชั่วคราว กรุณาลองใหม่ภายหลัง' });
-  }
+  minigameLocks.add(user.id);
+  return runWithMinigameQueue(async () => {
+    try {
+      const cost = Number(gameMode === 'rail' ? game.railCostPerPlay : game.costPerPlay) || 0;
+      if (user.walletBalance < cost) {
+        return res.status(400).json({ error: 'ยอดเครดิตไม่พอ กรุณาเติมเงินก่อนเล่น' });
+      }
 
-  user.walletBalance -= cost;
-  store.data.walletTransactions.push({
-    id: store.genId(10), userId: user.id, type: 'minigame_play', amount: -cost,
-    note: `เล่น ${gameMode === 'rail' ? game.railTitle : game.title}`, createdAt: new Date().toISOString(),
-  });
+      const prize = pickPrize(store.data.miniGamePrizes.filter(p => (p.gameType || 'box') === gameMode));
+      if (!prize) {
+        return res.status(400).json({ error: 'ของรางวัลหมดชั่วคราว กรุณาลองใหม่ภายหลัง' });
+      }
 
-  if (prize.stock !== null) prize.stock = Math.max(0, prize.stock - 1);
+      user.walletBalance = Math.round((user.walletBalance - cost) * 100) / 100;
+      store.data.walletTransactions.push({
+        id: store.genId(10), userId: user.id, type: 'minigame_play', amount: -cost,
+        note: `เล่น ${gameMode === 'rail' ? game.railTitle : game.title}`, createdAt: new Date().toISOString(),
+      });
 
-  const isWin = Boolean(prize.isPrize);
-  const claimCode = isWin ? store.genId(6).toUpperCase() : null;
+      if (prize.stock !== null) prize.stock = Math.max(0, prize.stock - 1);
 
-  store.data.miniGamePlays.unshift({
-    id: store.genId(10), userId: user.id, username: user.username,
-    prizeName: prize.name, isWin, claimCode,
-    status: isWin ? 'pending' : 'none', cost, gameMode, createdAt: new Date().toISOString(),
-  });
-  store.data.miniGamePlays = store.data.miniGamePlays.slice(0, 200);
+      const isWin = Boolean(prize.isPrize);
+      const claimCode = isWin ? store.genId(6).toUpperCase() : null;
 
-  store.save();
-  res.json({
-    ok: true,
-    prizeName: prize.name,
-    image: prize.image || null,
-    isWin,
-    claimCode,
-    walletBalance: user.walletBalance,
+      store.data.miniGamePlays.unshift({
+        id: store.genId(10), userId: user.id, username: user.username,
+        prizeName: prize.name, isWin, claimCode,
+        status: isWin ? 'pending' : 'none', cost, gameMode, createdAt: new Date().toISOString(),
+      });
+      store.data.miniGamePlays = store.data.miniGamePlays.slice(0, 200);
+
+      await store.save();
+      res.json({
+        ok: true,
+        prizeName: prize.name,
+        image: prize.image || null,
+        isWin,
+        claimCode,
+        walletBalance: user.walletBalance,
+      });
+    } catch (err) {
+      console.error('[minigame] play error:', err);
+      res.status(500).json({ error: 'เกิดข้อผิดพลาดในการเล่นเกม' });
+    } finally {
+      minigameLocks.delete(user.id);
+    }
   });
 });
 

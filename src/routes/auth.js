@@ -23,11 +23,47 @@ function normalizeEnvironmentValue(value) {
   return trimmed;
 }
 
+function regenerateSession(req) {
+  return new Promise((resolve, reject) => {
+    req.session.regenerate((err) => {
+      if (err) return reject(err);
+      resolve();
+    });
+  });
+}
+
+const loginAttempts = new Map();
+function isLoginAllowed(key) {
+  const now = Date.now();
+  const entry = loginAttempts.get(key);
+  if (!entry) return true;
+  if (now > entry.resetAt) {
+    loginAttempts.delete(key);
+    return true;
+  }
+  return entry.count < 8;
+}
+function recordFailedAttempt(key) {
+  const now = Date.now();
+  const entry = loginAttempts.get(key) || { count: 0, resetAt: now + 5 * 60 * 1000 };
+  entry.count += 1;
+  loginAttempts.set(key, entry);
+}
+function clearAttempts(key) {
+  loginAttempts.delete(key);
+}
+
 router.get('/login', (req, res) => {
   res.render('shop/login', { title: 'เข้าสู่ระบบ' });
 });
 
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
+  const ip = req.ip || req.connection.remoteAddress || 'unknown';
+  if (!isLoginAllowed(ip)) {
+    req.flash('error', 'คุณพยายามเข้าสู่ระบบผิดพลาดหลายครั้งเกินไป กรุณารอ 5 นาทีแล้วลองใหม่');
+    return res.redirect('/login');
+  }
+
   const password = req.body.password;
   const username = (req.body.username || '').trim();
   const usernameLower = username.toLowerCase();
@@ -41,13 +77,17 @@ router.post('/login', (req, res) => {
   if (managedPassword && usernameLower === managedUsername && safeTextEqual(password, managedPassword)) {
     const managedAdmin = store.data.users.find(u => (u.username || '').toLowerCase() === managedUsername && u.role === 'admin');
     if (managedAdmin) {
+      clearAttempts(ip);
+      await regenerateSession(req);
       req.session.userId = managedAdmin.id;
       req.flash('success', `ยินดีต้อนรับ ${managedAdmin.username}`);
       return res.redirect('/admin');
     }
   }
 
-  if (!user || !bcrypt.compareSync(password || '', user.passwordHash)) {
+  const isPasswordValid = user && (await bcrypt.compare(password || '', user.passwordHash));
+  if (!user || !isPasswordValid) {
+    recordFailedAttempt(ip);
     req.flash('error', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');
     return res.redirect('/login');
   }
@@ -55,6 +95,9 @@ router.post('/login', (req, res) => {
     req.flash('error', 'บัญชีนี้ถูกระงับการใช้งาน');
     return res.redirect('/login');
   }
+
+  clearAttempts(ip);
+  await regenerateSession(req);
   req.session.userId = user.id;
   req.flash('success', `ยินดีต้อนรับ ${user.username}`);
   res.redirect(user.role === 'admin' ? '/admin' : '/');
@@ -88,25 +131,31 @@ router.post('/register', async (req, res) => {
     req.flash('error', 'อีเมลนี้ถูกใช้งานแล้ว');
     return res.redirect('/register');
   }
+  const passwordHash = await bcrypt.hash(password, 10);
   const user = {
     id: store.genId(8),
     username,
     email,
-    passwordHash: bcrypt.hashSync(password, 10),
+    passwordHash,
     role: 'customer',
     walletBalance: 0,
     status: 'active',
     createdAt: new Date().toISOString(),
   };
   store.data.users.push(user);
-  store.save();
+  await store.save();
+
+  await regenerateSession(req);
   req.session.userId = user.id;
   req.flash('success', 'สมัครสมาชิกสำเร็จ! ยินดีต้อนรับสู่ ' + store.data.settings.shopName);
   res.redirect('/');
 });
 
 router.get('/logout', (req, res) => {
-  req.session.destroy(() => res.redirect('/'));
+  req.session.destroy(() => {
+    res.clearCookie('connect.sid');
+    res.redirect('/');
+  });
 });
 
 module.exports = router;

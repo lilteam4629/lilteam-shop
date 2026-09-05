@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
+const byshop = require('../services/byshop');
 const { requireLogin, currentUser } = require('../middleware/auth');
 const { withEffectivePrice } = require('../services/pricing');
 
@@ -10,7 +11,13 @@ function getCart(req) {
 }
 
 function availableStock(productId) {
-  return store.data.stockItems.filter(s => s.productId === productId && s.status === 'available').length;
+  const localStock = store.data.stockItems.filter(s => s.productId === productId && s.status === 'available').length;
+  if (localStock > 0) return localStock;
+  const product = store.data.products.find(p => p.id === productId);
+  if (product && product.apiProvider === 'byshop' && store.data.settings?.apiProviders?.byshop?.enabled) {
+    return 999;
+  }
+  return 0;
 }
 
 function isProductVisible(product) {
@@ -40,7 +47,9 @@ function buildCartView(req) {
     if (!isProductVisible(storedProduct)) return null;
     const product = withEffectivePrice(storedProduct);
     const stock = availableStock(product.id);
+    if (stock <= 0) return null;
     const qty = Math.min(ci.qty, Math.max(stock, 0));
+    if (qty <= 0) return null;
     const unitPrice = resolveUnitPrice(product, qty);
     return { product, qty, stock, unitPrice, subtotal: unitPrice * qty };
   }).filter(Boolean);
@@ -119,89 +128,181 @@ router.post('/coupon/remove', (req, res) => {
   res.redirect('/cart');
 });
 
-router.post('/checkout', requireLogin, async (req, res) => {
+let checkoutQueue = Promise.resolve();
+function runWithCheckoutQueue(fn) {
+  const result = checkoutQueue.then(fn, fn);
+  checkoutQueue = result.catch(() => {});
+  return result;
+}
+
+const checkoutLocks = new Set();
+
+router.post('/checkout', requireLogin, (req, res) => {
   const user = currentUser(req);
-  const { items, total } = buildCartView(req);
-  if (!items.length) {
-    req.flash('error', 'ตะกร้าว่างเปล่า');
-    return res.redirect('/cart');
+  if (!user) {
+    req.flash('error', 'กรุณาเข้าสู่ระบบก่อน');
+    return res.redirect('/login');
   }
-  let discount = 0;
-  const coupon = req.session.coupon;
-  if (coupon) {
-    discount = coupon.type === 'percent' ? Math.round(total * (coupon.value / 100)) : coupon.value;
-    discount = Math.min(discount, total);
-  }
-  const finalTotal = total - discount;
 
-  if (user.walletBalance < finalTotal) {
-    req.flash('error', 'ยอดเงินในกระเป๋าไม่เพียงพอ กรุณาเติมเงินก่อนทำการสั่งซื้อ');
+  if (checkoutLocks.has(user.id)) {
+    req.flash('error', 'ระบบกำลังดำเนินการสั่งซื้อก่อนหน้า กรุณารอสักครู่');
     return res.redirect('/cart');
   }
 
-  const orderItems = [];
-  for (const item of items) {
-    const stockPool = store.data.stockItems.filter(s => s.productId === item.product.id && s.status === 'available');
-    if (stockPool.length < item.qty) {
-      req.flash('error', `สินค้า "${item.product.title}" มีไม่พอในสต๊อก กรุณาลองใหม่`);
-      return res.redirect('/cart');
-    }
-    for (let i = 0; i < item.qty; i++) {
-      const stockItem = stockPool[i];
-      orderItems.push({
-        productId: item.product.id,
-        title: item.product.title,
-        price: item.unitPrice,
-        stockItemId: stockItem.id,
-        fulfillmentMode: item.product.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
-        fulfillmentInstructions: item.product.fulfillmentInstructions || '',
-        contactMessageIntro: item.product.contactMessageIntro || '',
-        contactMessageOutro: item.product.contactMessageOutro || '',
+  checkoutLocks.add(user.id);
+
+  return runWithCheckoutQueue(async () => {
+    const reservedStockItems = [];
+    try {
+      const { items, total } = buildCartView(req);
+      if (!items.length) {
+        req.flash('error', 'ตะกร้าว่างเปล่า');
+        return res.redirect('/cart');
+      }
+
+      let discount = 0;
+      let validCoupon = null;
+      const sessionCoupon = req.session.coupon;
+      if (sessionCoupon) {
+        const couponRecord = store.data.coupons.find(c => c.code === sessionCoupon.code && c.active);
+        if (couponRecord && (!couponRecord.usageLimit || couponRecord.usedCount < couponRecord.usageLimit)) {
+          validCoupon = couponRecord;
+          discount = couponRecord.type === 'percent' ? Math.round(total * (couponRecord.value / 100)) : couponRecord.value;
+          discount = Math.min(discount, total);
+        } else {
+          req.session.coupon = null;
+        }
+      }
+      const finalTotal = Math.round(Math.max(0, total - discount) * 100) / 100;
+
+      if (user.walletBalance < finalTotal) {
+        req.flash('error', 'ยอดเงินในกระเป๋าไม่เพียงพอ กรุณาเติมเงินก่อนทำการสั่งซื้อ');
+        return res.redirect('/cart');
+      }
+
+      const orderItems = [];
+      for (const item of items) {
+        const isByshop = item.product.apiProvider === 'byshop' && store.data.settings?.apiProviders?.byshop?.enabled;
+        let stockPool = store.data.stockItems.filter(s => s.productId === item.product.id && s.status === 'available');
+
+        // If BYSHOP auto-fulfillment is active and stock pool has fewer items than requested,
+        // create instant stock items for this order.
+        if (isByshop && stockPool.length < item.qty) {
+          const needed = item.qty - stockPool.length;
+          for (let k = 0; k < needed; k++) {
+            const newStock = {
+              id: store.genId(10),
+              productId: item.product.id,
+              username: '',
+              password: '',
+              extra: 'จัดส่งผ่านระบบ BYSHOP API',
+              status: 'available',
+              soldOrderId: null,
+              addedAt: new Date().toISOString()
+            };
+            store.data.stockItems.push(newStock);
+            stockPool.push(newStock);
+          }
+        }
+
+        if (stockPool.length < item.qty) {
+          req.flash('error', `สินค้า "${item.product.title}" มีไม่พอในสต๊อก กรุณาลองใหม่`);
+          return res.redirect('/cart');
+        }
+
+        for (let i = 0; i < item.qty; i++) {
+          const stockItem = stockPool[i];
+          stockItem.status = 'reserved';
+          reservedStockItems.push(stockItem);
+
+          // Trigger BYSHOP API auto-order if enabled
+          if (isByshop && store.data.settings?.apiProviders?.byshop?.autoFulfill) {
+            const byshopKey = store.data.settings.apiProviders.byshop.apiKey;
+            const byshopEndpoint = store.data.settings.apiProviders.byshop.endpoint;
+            const byshopProductId = item.product.apiProductId || item.product.id;
+
+            try {
+              const apiRes = await byshop.placeOrder({
+                apiKey: byshopKey,
+                byshopProductId: byshopProductId,
+                quantity: 1,
+                customerInput: user.username,
+                customEndpoint: byshopEndpoint
+              });
+              if (apiRes.ok && apiRes.deliveredCredentials) {
+                stockItem.username = apiRes.deliveredCredentials.username || stockItem.username;
+                stockItem.password = apiRes.deliveredCredentials.password || stockItem.password;
+                stockItem.extra = apiRes.deliveredCredentials.extra || stockItem.extra;
+              }
+            } catch (apiErr) {
+              console.error('[BYSHOP checkout fulfill error]:', apiErr.message);
+            }
+          }
+
+          orderItems.push({
+            productId: item.product.id,
+            title: item.product.title,
+            price: item.unitPrice,
+            stockItemId: stockItem.id,
+            fulfillmentMode: item.product.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
+            fulfillmentInstructions: item.product.fulfillmentInstructions || '',
+            contactMessageIntro: item.product.contactMessageIntro || '',
+            contactMessageOutro: item.product.contactMessageOutro || '',
+          });
+        }
+      }
+
+      if (!orderItems.length) {
+        req.flash('error', 'สินค้าในตะกร้าหมดสต๊อกแล้ว');
+        return res.redirect('/cart');
+      }
+
+      const order = {
+        id: store.genId(10),
+        userId: user.id,
+        items: orderItems,
+        subtotal: total,
+        discount,
+        total: finalTotal,
+        couponCode: validCoupon ? validCoupon.code : null,
+        status: orderItems.some(item => item.fulfillmentMode === 'contact') ? 'pending' : 'completed',
+        paymentMethod: 'wallet',
+        createdAt: new Date().toISOString(),
+      };
+
+      reservedStockItems.forEach(stockItem => {
+        stockItem.status = 'sold';
+        stockItem.soldOrderId = order.id;
       });
+
+      user.walletBalance = Math.round((user.walletBalance - finalTotal) * 100) / 100;
+      store.data.walletTransactions.push({
+        id: store.genId(10), userId: user.id, type: 'purchase', amount: -finalTotal,
+        note: `สั่งซื้อ #${order.id}`, createdAt: new Date().toISOString(),
+      });
+
+      if (validCoupon) {
+        validCoupon.usedCount = (validCoupon.usedCount || 0) + 1;
+      }
+
+      store.data.orders.push(order);
+      await store.save();
+
+      req.session.cart = [];
+      req.session.coupon = null;
+      req.flash('success', 'สั่งซื้อสำเร็จ! ตรวจสอบวิธีรับสินค้าได้ที่หน้าคำสั่งซื้อ');
+      res.redirect(`/account/orders/${order.id}`);
+    } catch (err) {
+      reservedStockItems.forEach(s => {
+        if (s.status === 'reserved') s.status = 'available';
+      });
+      console.error('[checkout] error:', err);
+      req.flash('error', 'เกิดข้อผิดพลาดในการสั่งซื้อ กรุณาลองใหม่อีกครั้ง');
+      res.redirect('/cart');
+    } finally {
+      checkoutLocks.delete(user.id);
     }
-  }
-
-  const order = {
-    id: store.genId(10),
-    userId: user.id,
-    items: orderItems,
-    subtotal: total,
-    discount,
-    total: finalTotal,
-    couponCode: coupon ? coupon.code : null,
-    status: orderItems.some(item => item.fulfillmentMode === 'contact') ? 'pending' : 'completed',
-    paymentMethod: 'wallet',
-    createdAt: new Date().toISOString(),
-  };
-
-  orderItems.forEach(oi => {
-    const stockItem = store.data.stockItems.find(s => s.id === oi.stockItemId);
-    stockItem.status = 'sold';
-    stockItem.soldOrderId = order.id;
   });
-
-  user.walletBalance -= finalTotal;
-  store.data.walletTransactions.push({
-    id: store.genId(10), userId: user.id, type: 'purchase', amount: -finalTotal,
-    note: `สั่งซื้อ #${order.id}`, createdAt: new Date().toISOString(),
-  });
-
-  if (coupon) {
-    const couponRecord = store.data.coupons.find(c => c.code === coupon.code);
-    if (couponRecord) couponRecord.usedCount += 1;
-  }
-
-  store.data.orders.push(order);
-  // Must finish persisting before redirecting — on a tenant shop, the very
-  // next request (GET /account/orders/:id) reloads this tenant's db fresh
-  // from MongoDB, so an unawaited save() here is a race: that request can
-  // land before the write is committed and find no such order.
-  await store.save();
-
-  req.session.cart = [];
-  req.session.coupon = null;
-  req.flash('success', 'สั่งซื้อสำเร็จ! ตรวจสอบวิธีรับสินค้าได้ที่หน้าคำสั่งซื้อ');
-  res.redirect(`/account/orders/${order.id}`);
 });
 
 module.exports = router;

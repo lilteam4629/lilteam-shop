@@ -9,55 +9,124 @@
     </div>
   </div>
 
-  <form action="/account/topup" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-6 shadow-[0_18px_40px_-24px_rgba(0,0,0,.5)]">
-    <div>
-      <label class="block text-sm font-medium mb-3">เลือกจำนวนเงิน</label>
-      <div class="grid grid-cols-3 gap-2.5 mb-3" id="amountPresets">
-        <% [100, 300, 500, 1000, 2000, 5000].forEach(v => { %>
-          <button type="button" data-amount="<%= v %>"
-            class="amount-btn relative bg-[var(--input)] border-2 border-[var(--border-light)] hover:border-[var(--gold)]/60 hover:-translate-y-0.5 rounded-xl py-3 text-sm font-semibold transition-all">
-            ฿<%= v.toLocaleString() %>
-          </button>
-        <% }) %>
-      </div>
-      <div class="relative">
-        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">฿</span>
-        <input type="text" inputmode="numeric" pattern="[0-9]*" name="amount" id="amountInput" placeholder="หรือระบุจำนวนเงินเอง (ขั้นต่ำ 1 บาท)"
-          class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-8 pr-3 py-3 text-sm focus:outline-none focus:border-[var(--gold)] transition-colors" />
-      </div>
-      <p id="amountError" class="hidden text-xs text-[var(--coral)] mt-2">กรุณาระบุจำนวนเงินเป็นตัวเลข อย่างน้อย 1 บาท</p>
-    </div>
-
-    <div>
-      <label class="block text-sm font-medium mb-3">ช่องทางชำระเงิน</label>
-      <div class="grid grid-cols-2 gap-2.5">
-        <label class="method-option relative flex flex-col items-center gap-1.5 bg-[var(--input)] border-2 border-[var(--gold)] rounded-xl px-3 py-4 cursor-pointer text-center transition-colors">
-          <input type="radio" name="method" value="promptpay" checked class="peer sr-only" />
-          <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[10px] items-center justify-center">✓</span>
-          <span class="text-2xl">📱</span>
-          <span class="text-sm font-medium leading-tight">พร้อมเพย์<br />(PromptPay)</span>
-        </label>
-        <label class="method-option relative flex flex-col items-center gap-1.5 bg-[var(--input)] border-2 border-[var(--border-light)] rounded-xl px-3 py-4 cursor-pointer text-center transition-colors">
-          <input type="radio" name="method" value="bank_transfer" class="peer sr-only" />
-          <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[10px] items-center justify-center">✓</span>
-          <span class="text-2xl">🏦</span>
-          <span class="text-sm font-medium leading-tight">โอนผ่าน<br />ธนาคาร</span>
-        </label>
-      </div>
-    </div>
-
-    <button class="group relative w-full overflow-hidden bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-xl py-3.5 text-sm transition-colors">
-      <span class="relative">ดำเนินการต่อ →</span>
+  <!-- Channel Select Tabs -->
+  <div class="grid grid-cols-2 gap-2 mb-4">
+    <button type="button" id="tabTruemoney" onclick="switchTab('truemoney')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]">
+      <span>🧧</span> <span>ซองของขวัญ TrueMoney</span>
     </button>
-  </form>
+    <button type="button" id="tabBank" onclick="switchTab('bank')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--border-light)] bg-[var(--card)] text-[var(--text-3)] hover:border-[var(--gold)]/50">
+      <span>📱</span> <span>พร้อมเพย์ / ธนาคาร</span>
+    </button>
+  </div>
 
-  <div class="flex items-start gap-2.5 bg-[var(--gold)]/10 border border-[var(--gold)]/25 rounded-xl px-4 py-3 mt-4 text-xs text-[var(--text-2)]">
-    <span class="shrink-0">💡</span>
-    <span>หลังโอนเงินแล้วให้แนบสลิปในหน้าถัดไป ทีมงานจะตรวจสอบและเติมเงินให้ภายในไม่กี่นาที</span>
+  <!-- Form 1: TrueMoney Angpao (Instant & Automatic) -->
+  <div id="sectionTruemoney" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-5 shadow-[0_18px_40px_-24px_rgba(0,0,0,.5)]">
+    <div class="flex items-center gap-2 text-sm font-semibold text-[var(--gold)]">
+      <span>🧧</span> <span>เติมเงินด้วยซองของขวัญ TrueMoney (เข้าทันที)</span>
+    </div>
+
+    <% if (payment.truemoneyEnabled === false || !payment.truemoneyPhone) { %>
+      <div class="bg-amber-900/30 border border-amber-600/50 text-amber-300 rounded-xl p-4 text-xs text-center">
+        ⚠️ ระบบเติมเงินผ่านซองของขวัญ TrueMoney ยังไม่พร้อมใช้งานในขณะนี้ กรุณาใช้ช่องทางพร้อมเพย์หรือโอนผ่านธนาคาร
+      </div>
+    <% } else { %>
+      <form action="/account/topup/truemoney" method="post" class="space-y-4">
+        <div>
+          <label class="block text-xs font-medium text-[var(--text-3)] mb-1.5">วางลิงก์ซองของขวัญ TrueMoney ที่นี่</label>
+          <input type="text" name="voucherLink" required placeholder="https://gift.truemoney.com/campaign/?v=..."
+            class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-3 text-sm focus:outline-none focus:border-[var(--gold)] transition-colors font-mono" />
+          <p class="text-[11px] text-[var(--text-4)] mt-1.5 leading-relaxed">
+            สร้างซองของขวัญจากแอป TrueMoney ➜ เลือก <strong>"แบ่งจำนวนเงินเท่ากัน"</strong> ➜ จำนวนคนรับซอง <strong>1 คน</strong> ➜ คัดลอกลิงก์มาวางได้เลย
+          </p>
+        </div>
+
+        <button class="group relative w-full overflow-hidden bg-gradient-to-r from-amber-500 via-[var(--gold)] to-amber-600 hover:brightness-110 text-[var(--bg)] font-semibold rounded-xl py-3.5 text-sm transition-all shadow-[0_6px_20px_-6px_rgba(200,166,63,.4)]">
+          <span>🧧 ยืนยันรับเงินจากซองของขวัญ</span>
+        </button>
+      </form>
+
+      <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-3.5 text-xs text-[var(--text-3)] space-y-1">
+        <div class="font-medium text-[var(--text)] flex items-center gap-1.5 mb-1">
+          <span>ℹ️</span> <span>วิธีสร้างซองของขวัญ TrueMoney:</span>
+        </div>
+        <p>1. เปิดแอป <strong>TrueMoney</strong> ➜ กดเมนู <strong>"ส่งซองของขวัญ"</strong></p>
+        <p>2. ใส่ยอดเงินที่ต้องการเติม ➜ เลือกประเภท <strong>"แบ่งจำนวนเงินเท่ากัน"</strong></p>
+        <p>3. ใส่จำนวนคนรับซองเป็น <strong>1 คน</strong> ➜ กดยืนยันสร้างซอง</p>
+        <p>4. คัดลอกลิงก์ซองของขวัญมาวางในช่องด้านบน แล้วกดยืนยัน เงินจะเข้ากระเป๋าทันที ⚡</p>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Form 2: PromptPay & Bank Transfer (Slip Upload) -->
+  <div id="sectionBank" class="hidden">
+    <form action="/account/topup" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-6 shadow-[0_18px_40px_-24px_rgba(0,0,0,.5)]">
+      <div>
+        <label class="block text-sm font-medium mb-3">เลือกจำนวนเงิน</label>
+        <div class="grid grid-cols-3 gap-2.5 mb-3" id="amountPresets">
+          <% [100, 300, 500, 1000, 2000, 5000].forEach(v => { %>
+            <button type="button" data-amount="<%= v %>"
+              class="amount-btn relative bg-[var(--input)] border-2 border-[var(--border-light)] hover:border-[var(--gold)]/60 hover:-translate-y-0.5 rounded-xl py-3 text-sm font-semibold transition-all">
+              ฿<%= v.toLocaleString() %>
+            </button>
+          <% }) %>
+        </div>
+        <div class="relative">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">฿</span>
+          <input type="text" inputmode="numeric" pattern="[0-9]*" name="amount" id="amountInput" placeholder="หรือระบุจำนวนเงินเอง (ขั้นต่ำ 1 บาท)"
+            class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-8 pr-3 py-3 text-sm focus:outline-none focus:border-[var(--gold)] transition-colors" />
+        </div>
+        <p id="amountError" class="hidden text-xs text-[var(--coral)] mt-2">กรุณาระบุจำนวนเงินเป็นตัวเลข อย่างน้อย 1 บาท</p>
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium mb-3">ช่องทางชำระเงิน</label>
+        <div class="grid grid-cols-2 gap-2.5">
+          <label class="method-option relative flex flex-col items-center gap-1.5 bg-[var(--input)] border-2 border-[var(--gold)] rounded-xl px-3 py-4 cursor-pointer text-center transition-colors">
+            <input type="radio" name="method" value="promptpay" checked class="peer sr-only" />
+            <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[10px] items-center justify-center">✓</span>
+            <span class="text-2xl">📱</span>
+            <span class="text-sm font-medium leading-tight">พร้อมเพย์<br />(PromptPay)</span>
+          </label>
+          <label class="method-option relative flex flex-col items-center gap-1.5 bg-[var(--input)] border-2 border-[var(--border-light)] rounded-xl px-3 py-4 cursor-pointer text-center transition-colors">
+            <input type="radio" name="method" value="bank_transfer" class="peer sr-only" />
+            <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[10px] items-center justify-center">✓</span>
+            <span class="text-2xl">🏦</span>
+            <span class="text-sm font-medium leading-tight">โอนผ่าน<br />ธนาคาร</span>
+          </label>
+        </div>
+      </div>
+
+      <button class="group relative w-full overflow-hidden bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-xl py-3.5 text-sm transition-colors">
+        <span class="relative">ดำเนินการต่อ →</span>
+      </button>
+    </form>
+
+    <div class="flex items-start gap-2.5 bg-[var(--gold)]/10 border border-[var(--gold)]/25 rounded-xl px-4 py-3 mt-4 text-xs text-[var(--text-2)]">
+      <span class="shrink-0">💡</span>
+      <span>หลังโอนเงินแล้วให้แนบสลิปในหน้าถัดไป ทีมงานจะตรวจสอบและเติมเงินให้ภายในไม่กี่นาที</span>
+    </div>
   </div>
 </section>
 
 <script>
+  function switchTab(tab) {
+    const tabTm = document.getElementById('tabTruemoney');
+    const tabBk = document.getElementById('tabBank');
+    const secTm = document.getElementById('sectionTruemoney');
+    const secBk = document.getElementById('sectionBank');
+
+    if (tab === 'truemoney') {
+      tabTm.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]';
+      tabBk.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--border-light)] bg-[var(--card)] text-[var(--text-3)] hover:border-[var(--gold)]/50';
+      secTm.classList.remove('hidden');
+      secBk.classList.add('hidden');
+    } else {
+      tabBk.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]';
+      tabTm.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--border-light)] bg-[var(--card)] text-[var(--text-3)] hover:border-[var(--gold)]/50';
+      secBk.classList.remove('hidden');
+      secTm.classList.add('hidden');
+    }
+  }
   document.querySelectorAll('.amount-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.getElementById('amountInput').value = btn.dataset.amount;

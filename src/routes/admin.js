@@ -6,6 +6,9 @@ const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
 const easyslip = require('../services/easyslip');
+const byshop = require('../services/byshop');
+const slipok = require('../services/slipok');
+const slip2go = require('../services/slip2go');
 const theme = require('../services/theme');
 const discordBot = require('../services/discord-bot');
 const { MAIN_SITE_URL, MAIN_DOMAIN } = require('../middleware/tenant');
@@ -53,13 +56,13 @@ const prizeImageUpload = multer({
 router.use(requireAdmin);
 router.use((req, res, next) => {
   res.locals.layout = 'layouts/admin';
-  res.locals.pendingTopupCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
+  res.locals.pendingTopupCount = store.data.topupRequests.filter(t => t.status === 'pending' || t.status === 'verifying').length;
   res.locals.persistentStorageEnabled = store.isPersistent();
   next();
 });
 
 function slugify(str) {
-  return str.toString().toLowerCase().trim()
+  return String(str || '').toLowerCase().trim()
     .replace(/[^a-z0-9ก-๙\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
@@ -150,7 +153,7 @@ router.get('/', (req, res) => {
 // Lets the owner of a rented site rename the label shown on their own
 // /license page (independent of whatever name was baked into the key they
 // redeemed) — purely cosmetic, no effect on the key's actual validity.
-router.post('/license-label', (req, res) => {
+router.post('/license-label', async (req, res) => {
   if (!license.isGateOn() || !store.data.settings.license.key) {
     req.flash('error', 'เว็บนี้ยังไม่ได้ปลดล็อกด้วยคีย์');
     return res.redirect('/admin');
@@ -161,7 +164,7 @@ router.post('/license-label', (req, res) => {
     return res.redirect('/admin');
   }
   store.data.settings.license.label = label;
-  store.save();
+  await store.save();
   req.flash('success', 'แก้ไขชื่อแล้ว');
   res.redirect('/admin');
 });
@@ -219,6 +222,8 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     purchaseConfirmationText: (body.purchaseConfirmationText || '').trim(),
     purchaseActionLabel: (body.purchaseActionLabel || '').trim().slice(0, 80),
     purchaseActionUrl: safeExternalUrl(body.purchaseActionUrl),
+    apiProvider: body.apiProvider === 'byshop' ? 'byshop' : (body.apiProvider === 'custom' ? 'custom' : 'none'),
+    apiProductId: (body.apiProductId || '').trim(),
   };
 }
 
@@ -230,9 +235,9 @@ router.get('/products', (req, res) => {
   res.render('admin/products', { title: 'สินค้า', active: 'products', products, productCardStyle: store.data.settings.productCardStyle || 'natural' });
 });
 
-router.post('/products/card-style', (req, res) => {
+router.post('/products/card-style', async (req, res) => {
   store.data.settings.productCardStyle = req.body.productCardStyle === 'natural' ? 'natural' : 'classic';
-  store.save();
+  await store.save();
   req.flash('success', 'เปลี่ยนรูปแบบการ์ดสินค้าแล้ว');
   res.redirect('/admin/products');
 });
@@ -255,7 +260,7 @@ router.post('/products/new', (req, res) => {
         ...fields, status: 'active', createdAt: new Date().toISOString(),
       };
       store.data.products.push(product);
-      store.save();
+      await store.save();
       req.flash('success', 'เพิ่มสินค้าแล้ว');
       res.redirect('/admin/products');
     } catch (saveError) {
@@ -301,7 +306,7 @@ router.post('/products/bulk-import', (req, res) => {
         };
       });
       store.data.products.push(...created);
-      store.save();
+      await store.save();
       req.flash('success', `นำเข้าสินค้าแล้ว ${created.length} รายการ — แก้ไขแต่ละชิ้นแยกได้ตามปกติ`);
       res.redirect('/admin/products');
     } catch (saveError) {
@@ -329,7 +334,7 @@ router.post('/products/:id/edit', (req, res) => {
       const uploadedImages = await persistUploadedFiles(req.files);
       const fields = parseProductBody(req.body, uploadedImages, product.images || []);
       Object.assign(product, fields, { status: req.body.status || 'active' });
-      store.save();
+      await store.save();
       req.flash('success', 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
       res.redirect('/admin/products');
     } catch (saveError) {
@@ -339,15 +344,15 @@ router.post('/products/:id/edit', (req, res) => {
   }));
 });
 
-router.post('/products/:id/delete', (req, res) => {
+router.post('/products/:id/delete', async (req, res) => {
   store.data.products = store.data.products.filter(p => p.id !== req.params.id);
   store.data.stockItems = store.data.stockItems.filter(s => s.productId !== req.params.id);
-  store.save();
+  await store.save();
   req.flash('success', 'ลบสินค้าแล้ว');
   res.redirect('/admin/products');
 });
 
-router.post('/products/:id/copy', (req, res) => {
+router.post('/products/:id/copy', async (req, res) => {
   const source = store.data.products.find(p => p.id === req.params.id);
   if (!source) {
     req.flash('error', 'ไม่พบสินค้าที่ต้องการคัดลอก');
@@ -369,7 +374,7 @@ router.post('/products/:id/copy', (req, res) => {
     createdAt: new Date().toISOString(),
   };
   store.data.products.push(product);
-  store.save();
+  await store.save();
   req.flash('success', 'คัดลอกสินค้าแล้ว กรุณาตรวจสอบข้อมูลก่อนเปิดขาย');
   res.redirect(`/admin/products/${product.id}/edit`);
 });
@@ -396,7 +401,7 @@ router.post('/filter-tags', (req, res) => {
     try {
       const image = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
       store.data.filterTags.push({ id: store.genId(8), name, image, createdAt: new Date().toISOString() });
-      store.save();
+      await store.save();
       req.flash('success', 'เพิ่มตัวกรองและอัปโหลดรูปแล้ว');
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปตัวกรองไม่สำเร็จ กรุณาลองใหม่');
@@ -405,12 +410,12 @@ router.post('/filter-tags', (req, res) => {
   }));
 });
 
-router.post('/filter-tags/:id/delete', (req, res) => {
+router.post('/filter-tags/:id/delete', async (req, res) => {
   store.data.filterTags = store.data.filterTags.filter(t => t.id !== req.params.id);
   store.data.products.forEach(p => {
     if (p.filterTagIds) p.filterTagIds = p.filterTagIds.filter(id => id !== req.params.id);
   });
-  store.save();
+  await store.save();
   req.flash('success', 'ลบตัวกรองสินค้าแล้ว');
   res.redirect('/admin/filter-tags');
 });
@@ -427,7 +432,7 @@ router.get('/home-sections', (req, res) => {
   });
 });
 
-router.post('/home-sections', (req, res) => {
+router.post('/home-sections', async (req, res) => {
   const title = (req.body.title || '').trim();
   const mode = req.body.mode === 'manual' ? 'manual' : 'newest';
   if (!title) {
@@ -437,12 +442,12 @@ router.post('/home-sections', (req, res) => {
   const limit = Math.min(30, Math.max(1, parseInt(req.body.limit, 10) || 5));
   const productIds = mode === 'manual' ? [].concat(req.body.productIds || []).filter(Boolean) : [];
   store.data.homeSections.push({ id: store.genId(8), title, mode, limit, productIds });
-  store.save();
+  await store.save();
   req.flash('success', 'เพิ่มหมวดหมู่แล้ว');
   res.redirect('/admin/home-sections');
 });
 
-router.post('/home-sections/:id/edit', (req, res) => {
+router.post('/home-sections/:id/edit', async (req, res) => {
   const section = store.data.homeSections.find(s => s.id === req.params.id);
   if (!section) { req.flash('error', 'ไม่พบหมวดหมู่นี้'); return res.redirect('/admin/home-sections'); }
   const title = (req.body.title || '').trim();
@@ -454,19 +459,19 @@ router.post('/home-sections/:id/edit', (req, res) => {
   section.mode = req.body.mode === 'manual' ? 'manual' : 'newest';
   section.limit = Math.min(30, Math.max(1, parseInt(req.body.limit, 10) || 5));
   section.productIds = section.mode === 'manual' ? [].concat(req.body.productIds || []).filter(Boolean) : [];
-  store.save();
+  await store.save();
   req.flash('success', 'บันทึกหมวดหมู่แล้ว');
   res.redirect('/admin/home-sections');
 });
 
-router.post('/home-sections/:id/delete', (req, res) => {
+router.post('/home-sections/:id/delete', async (req, res) => {
   store.data.homeSections = store.data.homeSections.filter(s => s.id !== req.params.id);
-  store.save();
+  await store.save();
   req.flash('success', 'ลบหมวดหมู่แล้ว');
   res.redirect('/admin/home-sections');
 });
 
-router.post('/home-sections/:id/move', (req, res) => {
+router.post('/home-sections/:id/move', async (req, res) => {
   const list = store.data.homeSections;
   const index = list.findIndex(s => s.id === req.params.id);
   if (index === -1) return res.redirect('/admin/home-sections');
@@ -474,7 +479,7 @@ router.post('/home-sections/:id/move', (req, res) => {
   const target = index + direction;
   if (target < 0 || target >= list.length) return res.redirect('/admin/home-sections');
   [list[index], list[target]] = [list[target], list[index]];
-  store.save();
+  await store.save();
   res.redirect('/admin/home-sections');
 });
 
@@ -489,7 +494,7 @@ router.get('/theme', (req, res) => {
   });
 });
 
-router.post('/theme', (req, res) => {
+router.post('/theme', async (req, res) => {
   const accent = /^#[0-9a-fA-F]{6}$/.test(req.body.accent || '') ? req.body.accent : store.data.settings.theme.accent;
   const bgMode = req.body.bgMode === 'custom' ? 'custom' : 'preset';
   let bgPreset = store.data.settings.theme.bgPreset;
@@ -501,7 +506,7 @@ router.post('/theme', (req, res) => {
   }
   const style = theme.getStyles().some(s => s.key === req.body.style) ? req.body.style : 'normal';
   store.data.settings.theme = { accent, bgPreset, bgColor, style };
-  store.save();
+  await store.save();
   req.flash('success', 'บันทึกธีมสีแล้ว');
   res.redirect('/admin/theme');
 });
@@ -522,12 +527,12 @@ router.get('/scheduled-products', (req, res) => {
   res.render('admin/scheduled-products', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products });
 });
 
-router.post('/products/:id/stock/settings', (req, res) => {
+router.post('/products/:id/stock/settings', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   product.fulfillmentMode = req.body.fulfillmentMode === 'contact' ? 'contact' : 'automatic';
   product.fulfillmentInstructions = (req.body.fulfillmentInstructions || '').trim();
-  store.save();
+  await store.save();
   req.flash('success', 'บันทึกวิธีรับสินค้าแล้ว เพิ่มสต๊อกในขั้นตอนถัดไปได้เลย');
   // Continue directly to the stock-entry section. Previously this returned
   // to the top of the same page, which made a successful first click look as
@@ -535,7 +540,7 @@ router.post('/products/:id/stock/settings', (req, res) => {
   res.redirect(`/admin/products/${product.id}/stock#add-stock`);
 });
 
-router.post('/products/:id/stock/add', (req, res) => {
+router.post('/products/:id/stock/add', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   if (product.fulfillmentMode === 'contact') {
@@ -546,7 +551,7 @@ router.post('/products/:id/stock/add', (req, res) => {
         fulfillmentMode: 'contact', status: 'available', soldOrderId: null, addedAt: new Date().toISOString(),
       });
     }
-    store.save();
+    await store.save();
     req.flash(quantity ? 'success' : 'error', quantity ? `เพิ่มจำนวนพร้อมขายแล้ว ${quantity} รายการ` : 'กรุณาระบุจำนวนที่ต้องการเพิ่ม');
     return res.redirect(`/admin/products/${product.id}/stock`);
   }
@@ -562,14 +567,14 @@ router.post('/products/:id/stock/add', (req, res) => {
     });
     added++;
   });
-  store.save();
+  await store.save();
   req.flash('success', `เพิ่มสต๊อกสินค้าแล้ว ${added} รายการ`);
   res.redirect(`/admin/products/${product.id}/stock`);
 });
 
-router.post('/products/:id/stock/:stockId/delete', (req, res) => {
+router.post('/products/:id/stock/:stockId/delete', async (req, res) => {
   store.data.stockItems = store.data.stockItems.filter(s => s.id !== req.params.stockId);
-  store.save();
+  await store.save();
   req.flash('success', 'ลบไอดีออกจากสต๊อกแล้ว');
   res.redirect(`/admin/products/${req.params.id}/stock`);
 });
@@ -592,11 +597,11 @@ router.get('/orders/:id', (req, res) => {
   res.render('admin/order-detail', { title: `คำสั่งซื้อ #${order.id}`, active: 'orders', order, buyer, itemsWithCreds });
 });
 
-router.post('/orders/:id/status', (req, res) => {
+router.post('/orders/:id/status', async (req, res) => {
   const order = store.data.orders.find(o => o.id === req.params.id);
   if (order) {
     order.status = req.body.status;
-    store.save();
+    await store.save();
     req.flash('success', 'อัปเดตสถานะคำสั่งซื้อแล้ว');
   }
   res.redirect(`/admin/orders/${req.params.id}`);
@@ -614,42 +619,58 @@ router.get('/users', (req, res) => {
   res.render('admin/users', { title: 'สมาชิก', active: 'users', users, q, totalUsers: store.data.users.length });
 });
 
-router.post('/users/:id/wallet', (req, res) => {
+router.post('/users/:id/wallet', async (req, res) => {
   const user = store.data.users.find(u => u.id === req.params.id);
   const amount = parseInt(req.body.amount, 10);
-  if (user && amount) {
-    user.walletBalance += amount;
-    store.data.walletTransactions.push({
-      id: store.genId(10), userId: user.id, type: 'adjust', amount,
-      note: `ผู้ดูแลระบบปรับยอด (${req.body.note || 'ไม่มีหมายเหตุ'})`, createdAt: new Date().toISOString(),
-    });
-    store.save();
-    req.flash('success', 'ปรับยอดเงินสำเร็จ');
+  if (!user) {
+    req.flash('error', 'ไม่พบสมาชิก');
+    return res.redirect('/admin/users');
   }
+  if (!Number.isFinite(amount) || amount === 0) {
+    req.flash('error', 'กรุณาระบุจำนวนเงินที่ถูกต้อง');
+    return res.redirect('/admin/users');
+  }
+  user.walletBalance = Math.max(0, user.walletBalance + amount);
+  store.data.walletTransactions.push({
+    id: store.genId(10), userId: user.id, type: 'adjust', amount,
+    note: `ผู้ดูแลระบบปรับยอด (${req.body.note || 'ไม่มีหมายเหตุ'})`, createdAt: new Date().toISOString(),
+  });
+  await store.save();
+  req.flash('success', 'ปรับยอดเงินสำเร็จ');
   res.redirect('/admin/users');
 });
 
-router.post('/users/:id/toggle-ban', (req, res) => {
+router.post('/users/:id/toggle-ban', async (req, res) => {
   const user = store.data.users.find(u => u.id === req.params.id);
   if (user && user.role !== 'admin') {
     user.status = user.status === 'banned' ? 'active' : 'banned';
-    store.save();
+    await store.save();
     req.flash('success', user.status === 'banned' ? 'ระงับบัญชีแล้ว' : 'ปลดระงับบัญชีแล้ว');
   }
   res.redirect('/admin/users');
 });
 
-router.post('/users/new', (req, res) => {
-  const { username, email, password, role } = req.body;
-  if (store.data.users.some(u => u.username === username)) {
+router.post('/users/new', async (req, res) => {
+  const username = String(req.body.username || '').trim();
+  const email = String(req.body.email || '').trim();
+  const password = String(req.body.password || '123456');
+  const role = req.body.role;
+
+  if (!username) {
+    req.flash('error', 'กรุณาระบุชื่อผู้ใช้');
+    return res.redirect('/admin/users');
+  }
+
+  if (store.data.users.some(u => (u.username || '').toLowerCase() === username.toLowerCase())) {
     req.flash('error', 'ชื่อผู้ใช้นี้ถูกใช้งานแล้ว');
     return res.redirect('/admin/users');
   }
+  const passwordHash = await bcrypt.hash(password, 10);
   store.data.users.push({
-    id: store.genId(8), username, email, passwordHash: bcrypt.hashSync(password || '123456', 10),
+    id: store.genId(8), username, email, passwordHash,
     role: role === 'admin' ? 'admin' : 'customer', walletBalance: 0, status: 'active', createdAt: new Date().toISOString(),
   });
-  store.save();
+  await store.save();
   req.flash('success', 'เพิ่มสมาชิกแล้ว');
   res.redirect('/admin/users');
 });
@@ -678,12 +699,136 @@ router.get('/topups', async (req, res) => {
   res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment: store.data.settings.payment, banks, q, status });
 });
 
-// EasySlip usage/quota — reads the ONE shared platform EASYSLIP_API_KEY
-// (yours), not anything per-tenant, so it only exists on the main site.
-router.get('/easyslip-usage', async (req, res) => {
+// Slip Verification Hub & Provider Management (/admin/easyslip-usage & /admin/slip-verification)
+async function renderSlipVerificationHub(req, res) {
   if (req.tenantShop) { req.flash('error', 'หน้านี้ใช้ได้เฉพาะร้านหลักเท่านั้น'); return res.redirect('/admin'); }
-  const info = await easyslip.getAccountInfo();
-  res.render('admin/easyslip-usage', { title: 'เช็คสลิป EasySlip', active: 'easyslip-usage', info });
+  const payment = store.data.settings.payment || {};
+
+  let easyslipInfo = { ok: false, message: 'ไม่ได้ตั้งค่า' };
+  try {
+    if (!req.tenantShop) easyslipInfo = await easyslip.getAccountInfo();
+  } catch (e) {
+    easyslipInfo = { ok: false, message: e.message };
+  }
+
+  let byshopInfo = null;
+  if (payment.byshopApiKey) {
+    try {
+      byshopInfo = await byshop.checkBalance(payment.byshopApiKey, payment.byshopEndpoint);
+    } catch (e) {
+      byshopInfo = { ok: false, message: e.message };
+    }
+  }
+
+  let slipokInfo = null;
+  if (payment.slipokBranchId && payment.slipokApiKey) {
+    try {
+      slipokInfo = await slipok.testConnection({ branchId: payment.slipokBranchId, apiKey: payment.slipokApiKey });
+    } catch (e) {
+      slipokInfo = { ok: false, message: e.message };
+    }
+  }
+
+  let slip2goInfo = null;
+  if (payment.slip2goApiKey) {
+    try {
+      slip2goInfo = await slip2go.checkBalance(payment.slip2goApiKey, payment.slip2goEndpoint);
+    } catch (e) {
+      slip2goInfo = { ok: false, message: e.message };
+    }
+  }
+
+  const banks = await easyslip.getBanks().catch(() => []);
+
+  res.render('admin/easyslip-usage', {
+    title: 'ระบบตรวจสอบสลิปด้วย API (Slip Provider Hub)',
+    active: 'easyslip-usage',
+    info: easyslipInfo,
+    payment,
+    byshopInfo,
+    slipokInfo,
+    slip2goInfo,
+    banks
+  });
+}
+
+router.get('/easyslip-usage', renderSlipVerificationHub);
+router.get('/slip-verification', renderSlipVerificationHub);
+
+router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
+  const payment = store.data.settings.payment;
+  const slipProvider = req.body.slipProvider || payment.slipProvider || 'auto';
+  if (!['auto', 'none', 'slipok', 'easyslip'].includes(slipProvider)) {
+    req.flash('error', 'ผู้ให้บริการนี้ยังไม่เปิดใช้งานจริง กรุณาเลือก EasySlip, SlipOK หรือการตรวจด้วยแอดมิน');
+    return res.redirect('/admin/easyslip-usage');
+  }
+  const byshopApiKey = (req.body.byshopApiKey !== undefined ? req.body.byshopApiKey : (payment.byshopApiKey || '')).trim();
+  const byshopEndpoint = (req.body.byshopEndpoint !== undefined ? req.body.byshopEndpoint : (payment.byshopEndpoint || 'https://api.byshop.me/api')).trim();
+  const slipokBranchId = (req.body.slipokBranchId !== undefined ? req.body.slipokBranchId : (payment.slipokBranchId || '')).trim();
+  const slipokApiKey = (req.body.slipokApiKey !== undefined ? req.body.slipokApiKey : (payment.slipokApiKey || '')).trim();
+  const slip2goApiKey = (req.body.slip2goApiKey !== undefined ? req.body.slip2goApiKey : (payment.slip2goApiKey || '')).trim();
+  const slip2goEndpoint = (req.body.slip2goEndpoint !== undefined ? req.body.slip2goEndpoint : (payment.slip2goEndpoint || 'https://api.slip2go.com/api')).trim();
+  const customSlipEndpoint = (req.body.customSlipEndpoint !== undefined ? req.body.customSlipEndpoint : (payment.customSlipEndpoint || '')).trim();
+  const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
+
+  Object.assign(payment, {
+    slipProvider,
+    byshopApiKey,
+    byshopEndpoint,
+    slipokBranchId,
+    slipokApiKey,
+    slip2goApiKey,
+    slip2goEndpoint,
+    customSlipEndpoint,
+    customSlipApiKey,
+    topupWebhookUrl: (req.body.topupWebhookUrl !== undefined ? req.body.topupWebhookUrl : (payment.topupWebhookUrl || '')).trim()
+  });
+
+  await store.save();
+  req.flash('success', 'บันทึกการตั้งค่าระบบตรวจสอบสลิปด้วย API เรียบร้อยแล้ว');
+  res.redirect('/admin/easyslip-usage');
+});
+
+router.post(['/slip-verification/test', '/easyslip-usage/test', '/api-providers/byshop/test'], async (req, res) => {
+  const provider = (req.body.provider || 'byshop').toLowerCase();
+  const apiKey = (req.body.apiKey || '').trim();
+  const endpoint = (req.body.endpoint || '').trim();
+  const branchId = (req.body.branchId || '').trim();
+
+  try {
+    if (provider === 'byshop') {
+      if (!apiKey) return res.json({ ok: false, message: 'กรุณากรอก BYSHOP API Key ก่อนทดสอบ' });
+      const result = await byshop.checkBalance(apiKey, endpoint || 'https://api.byshop.me/api');
+      return res.json(result);
+    }
+
+    if (provider === 'slipok') {
+      if (!branchId || !apiKey) return res.json({ ok: false, message: 'กรุณากรอก Branch ID และ API Key ก่อนทดสอบ' });
+      const result = await slipok.testConnection({ branchId, apiKey });
+      return res.json(result);
+    }
+
+    if (provider === 'easyslip') {
+      if (req.tenantShop) return res.status(403).json({ ok: false, message: 'ข้อมูลบัญชีกลางดูได้เฉพาะผู้ดูแลเว็บหลัก' });
+      const result = await easyslip.getAccountInfo();
+      return res.json(result);
+    }
+
+    if (provider === 'slip2go') {
+      if (!apiKey) return res.json({ ok: false, message: 'กรุณากรอก Slip2Go API Key ก่อนทดสอบ' });
+      const result = await slip2go.checkBalance(apiKey, endpoint || 'https://api.slip2go.com/api');
+      return res.json(result);
+    }
+
+    if (provider === 'custom') {
+      if (!endpoint) return res.json({ ok: false, message: 'กรุณาระบุ Webhook/Endpoint URL ก่อนทดสอบ' });
+      return res.json({ ok: false, message: 'Custom Slip Webhook ยังไม่เปิดใช้งานจริง' });
+    }
+
+    res.json({ ok: false, message: 'ไม่พบผู้ให้บริการที่ระบุ' });
+  } catch (err) {
+    res.json({ ok: false, message: err.message || 'เกิดข้อผิดพลาดในการทดสอบเชื่อมต่อ' });
+  }
 });
 
 router.post('/topups/payment-settings', (req, res) => {
@@ -705,10 +850,28 @@ router.post('/topups/payment-settings', (req, res) => {
     const payment = store.data.settings.payment;
     const banks = await easyslip.getBanks();
     const primaryBank = banks.find(b => b.code === bankCode);
-    const promptpayBank = banks.find(b => /พร้อมเพย์|promptpay/i.test(`${b.nameTh} ${b.nameEn}`));
+    const truemoneyPhone = (req.body.truemoneyPhone || '').trim().replace(/[^0-9]/g, '');
+    const truemoneyEnabled = req.body.truemoneyEnabled === 'on';
+    const slipProvider = req.body.slipProvider || payment.slipProvider || 'auto';
+    if (!['auto', 'none', 'slipok', 'easyslip'].includes(slipProvider)) {
+      req.flash('error', 'ผู้ให้บริการตรวจสลิปนี้ยังไม่พร้อมใช้งาน');
+      return res.redirect('/admin/topups');
+    }
+    const byshopApiKey = (req.body.byshopApiKey !== undefined ? req.body.byshopApiKey : (payment.byshopApiKey || '')).trim();
+    const byshopEndpoint = (req.body.byshopEndpoint !== undefined ? req.body.byshopEndpoint : (payment.byshopEndpoint || 'https://api.byshop.me/api')).trim();
+    const slipokBranchId = (req.body.slipokBranchId !== undefined ? req.body.slipokBranchId : (payment.slipokBranchId || '')).trim();
+    const slipokApiKey = (req.body.slipokApiKey !== undefined ? req.body.slipokApiKey : (payment.slipokApiKey || '')).trim();
+    const slip2goApiKey = (req.body.slip2goApiKey !== undefined ? req.body.slip2goApiKey : (payment.slip2goApiKey || '')).trim();
+    const slip2goEndpoint = (req.body.slip2goEndpoint !== undefined ? req.body.slip2goEndpoint : (payment.slip2goEndpoint || 'https://api.slip2go.com/api')).trim();
+    const customSlipEndpoint = (req.body.customSlipEndpoint !== undefined ? req.body.customSlipEndpoint : (payment.customSlipEndpoint || '')).trim();
+    const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
+
     Object.assign(payment, {
       promptpayId, promptpayName, bankAccountNumber, bankAccountName,
       bankName: primaryBank ? primaryBank.nameTh : payment.bankName,
+      truemoneyPhone, truemoneyEnabled,
+      slipProvider, byshopApiKey, byshopEndpoint, slipokBranchId, slipokApiKey,
+      slip2goApiKey, slip2goEndpoint, customSlipEndpoint, customSlipApiKey,
       topupWebhookUrl: (req.body.topupWebhookUrl || '').trim(),
     });
 
@@ -793,39 +956,39 @@ router.post('/topups/payment-settings', (req, res) => {
       return res.redirect('/admin/topups');
     }
 
-    store.save();
+    await store.save();
     req.flash('success', 'บันทึกข้อมูลบัญชีรับเงินแล้ว');
     res.redirect('/admin/topups');
   }));
 });
 
-router.post('/topups/:id/approve', (req, res) => {
+router.post('/topups/:id/approve', async (req, res) => {
   const request = store.data.topupRequests.find(t => t.id === req.params.id);
   if (!request) { req.flash('error', 'ไม่พบคำขอ'); return res.redirect('/admin/topups'); }
-  if (request.status !== 'pending') { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
+  if (request.status === 'approved' || request.status === 'rejected') { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
   const user = store.data.users.find(u => u.id === request.userId);
   if (!user) { req.flash('error', 'ไม่พบผู้ใช้'); return res.redirect('/admin/topups'); }
 
-  user.walletBalance += request.amount;
+  user.walletBalance = Math.round(((Number(user.walletBalance) || 0) + request.amount) * 100) / 100;
   store.data.walletTransactions.push({
     id: store.genId(10), userId: user.id, type: 'topup', amount: request.amount,
     note: `เติมเงินสำเร็จ (อ้างอิง ${request.refCode})`, createdAt: new Date().toISOString(),
   });
   request.status = 'approved';
   request.reviewedAt = new Date().toISOString();
-  store.save();
+  await store.save();
   req.flash('success', `อนุมัติคำขอเติมเงิน ${request.amount.toLocaleString()} บาท ให้ ${user.username} แล้ว`);
   res.redirect('/admin/topups');
 });
 
-router.post('/topups/:id/reject', (req, res) => {
+router.post('/topups/:id/reject', async (req, res) => {
   const request = store.data.topupRequests.find(t => t.id === req.params.id);
   if (!request) { req.flash('error', 'ไม่พบคำขอ'); return res.redirect('/admin/topups'); }
-  if (request.status !== 'pending') { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
+  if (request.status === 'approved' || request.status === 'rejected') { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
   request.status = 'rejected';
   request.reviewedAt = new Date().toISOString();
   request.reviewNote = req.body.reviewNote || '';
-  store.save();
+  await store.save();
   req.flash('success', 'ปฏิเสธคำขอเติมเงินแล้ว');
   res.redirect('/admin/topups');
 });
@@ -835,27 +998,27 @@ router.get('/coupons', (req, res) => {
   res.render('admin/coupons', { title: 'คูปองส่วนลด', active: 'coupons', coupons: store.data.coupons });
 });
 
-router.post('/coupons', (req, res) => {
+router.post('/coupons', async (req, res) => {
   const { code, type, value, usageLimit } = req.body;
   store.data.coupons.push({
     id: store.genId(8), code: code.toUpperCase(), type: type === 'fixed' ? 'fixed' : 'percent',
     value: parseInt(value, 10) || 0, active: true, usageLimit: parseInt(usageLimit, 10) || 0,
     usedCount: 0, expiresAt: null, createdAt: new Date().toISOString(),
   });
-  store.save();
+  await store.save();
   req.flash('success', 'เพิ่มคูปองแล้ว');
   res.redirect('/admin/coupons');
 });
 
-router.post('/coupons/:id/toggle', (req, res) => {
+router.post('/coupons/:id/toggle', async (req, res) => {
   const coupon = store.data.coupons.find(c => c.id === req.params.id);
-  if (coupon) { coupon.active = !coupon.active; store.save(); }
+  if (coupon) { coupon.active = !coupon.active; await store.save(); }
   res.redirect('/admin/coupons');
 });
 
-router.post('/coupons/:id/delete', (req, res) => {
+router.post('/coupons/:id/delete', async (req, res) => {
   store.data.coupons = store.data.coupons.filter(c => c.id !== req.params.id);
-  store.save();
+  await store.save();
   req.flash('success', 'ลบคูปองแล้ว');
   res.redirect('/admin/coupons');
 });
@@ -885,7 +1048,7 @@ router.get('/minigame', (req, res) => {
   });
 });
 
-router.post('/minigame/settings', (req, res) => {
+router.post('/minigame/settings', async (req, res) => {
   const { title, description, costPerPlay, railTitle, railDescription, railCostPerPlay } = req.body;
   Object.assign(store.data.settings.miniGame, {
     title: title || store.data.settings.miniGame.title,
@@ -895,16 +1058,16 @@ router.post('/minigame/settings', (req, res) => {
     railDescription: railDescription || '',
     railCostPerPlay: Math.max(0, parseInt(railCostPerPlay, 10) || 0),
   });
-  store.save();
+  await store.save();
   req.flash('success', 'บันทึกการตั้งค่ามินิเกมแล้ว');
   res.redirect('/admin/minigame');
 });
 
-router.post('/minigame/toggle', (req, res) => {
+router.post('/minigame/toggle', async (req, res) => {
   const field = req.body.gameType === 'rail' ? 'railEnabled' : 'boxEnabled';
   store.data.settings.miniGame[field] = !store.data.settings.miniGame[field];
   store.data.settings.miniGame.enabled = Boolean(store.data.settings.miniGame.boxEnabled || store.data.settings.miniGame.railEnabled);
-  store.save();
+  await store.save();
   const label = field === 'railEnabled' ? 'เกมรางเลื่อน' : 'เกมเปิดกล่อง';
   req.flash('success', `${store.data.settings.miniGame[field] ? 'เปิด' : 'ปิด'}ใช้งาน${label}แล้ว`);
   res.redirect('/admin/minigame');
@@ -938,7 +1101,7 @@ router.post('/minigame/prizes', (req, res) => {
       isPrize: req.body.isPrize === 'on',
       image, active: true, createdAt: new Date().toISOString(),
     });
-    store.save();
+    await store.save();
     req.flash('success', 'เพิ่มของรางวัลแล้ว');
     res.redirect('/admin/minigame');
   }));
@@ -953,7 +1116,7 @@ router.post('/minigame/prizes/:id/image', (req, res) => {
     }
     try {
       prize.image = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
-      store.save();
+      await store.save();
       req.flash('success', `เปลี่ยนรูป "${prize.name}" แล้ว`);
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปไม่สำเร็จ กรุณาลองใหม่');
@@ -962,9 +1125,9 @@ router.post('/minigame/prizes/:id/image', (req, res) => {
   }));
 });
 
-router.post('/minigame/prizes/:id/image/remove', (req, res) => {
+router.post('/minigame/prizes/:id/image/remove', async (req, res) => {
   const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
-  if (prize) { prize.image = null; store.save(); }
+  if (prize) { prize.image = null; await store.save(); }
   res.redirect('/admin/minigame');
 });
 
@@ -983,7 +1146,7 @@ router.post('/minigame/preview', (req, res) => {
   });
 });
 
-router.post('/minigame/prizes/:id', (req, res) => {
+router.post('/minigame/prizes/:id', async (req, res) => {
   const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
   if (!prize) { req.flash('error', 'ไม่พบของรางวัลนี้'); return res.redirect('/admin/minigame'); }
   const { name, percent, stock } = req.body;
@@ -993,40 +1156,40 @@ router.post('/minigame/prizes/:id', (req, res) => {
     stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
     isPrize: req.body.isPrize === 'on',
   });
-  store.save();
+  await store.save();
   req.flash('success', 'บันทึกของรางวัลแล้ว');
   res.redirect('/admin/minigame');
 });
 
-router.post('/minigame/prizes/:id/restock', (req, res) => {
+router.post('/minigame/prizes/:id/restock', async (req, res) => {
   const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
   const addAmount = Math.max(0, parseInt(req.body.addStock, 10) || 0);
   if (prize && prize.stock !== null) {
     prize.stock += addAmount;
-    store.save();
+    await store.save();
     req.flash('success', `เติมสต็อก "${prize.name}" อีก ${addAmount} ชิ้นแล้ว`);
   }
   res.redirect('/admin/minigame');
 });
 
-router.post('/minigame/prizes/:id/toggle', (req, res) => {
+router.post('/minigame/prizes/:id/toggle', async (req, res) => {
   const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
-  if (prize) { prize.active = !prize.active; store.save(); }
+  if (prize) { prize.active = !prize.active; await store.save(); }
   res.redirect('/admin/minigame');
 });
 
-router.post('/minigame/prizes/:id/delete', (req, res) => {
+router.post('/minigame/prizes/:id/delete', async (req, res) => {
   store.data.miniGamePrizes = store.data.miniGamePrizes.filter(p => p.id !== req.params.id);
-  store.save();
+  await store.save();
   req.flash('success', 'ลบของรางวัลแล้ว');
   res.redirect('/admin/minigame');
 });
 
-router.post('/minigame/plays/:id/deliver', (req, res) => {
+router.post('/minigame/plays/:id/deliver', async (req, res) => {
   const play = store.data.miniGamePlays.find(pl => pl.id === req.params.id);
   if (play && play.isWin) {
     play.status = play.status === 'delivered' ? 'pending' : 'delivered';
-    store.save();
+    await store.save();
   }
   res.redirect('/admin/minigame');
 });
@@ -1064,7 +1227,7 @@ router.get('/license-plans', (req, res) => {
 // ---------- Discord bot (rent-website notifications + ticket system) ----------
 // Bot token itself is DISCORD_BOT_TOKEN (env var, Railway) — only
 // non-secret channel/role IDs are editable from here.
-router.post('/discord/settings', (req, res) => {
+router.post('/discord/settings', async (req, res) => {
   store.data.settings.discord = {
     enabled: req.body.enabled === 'on',
     notifyChannelId: (req.body.notifyChannelId || '').trim(),
@@ -1073,7 +1236,7 @@ router.post('/discord/settings', (req, res) => {
     ticketLogChannelId: (req.body.ticketLogChannelId || '').trim(),
     supportRoleId: (req.body.supportRoleId || '').trim(),
   };
-  store.save();
+  await store.save();
   req.flash('success', 'บันทึกการตั้งค่า Discord แล้ว');
   res.redirect('/admin/license-plans');
 });
@@ -1101,7 +1264,7 @@ router.post('/rented-shops/:id/delete', async (req, res) => {
   }
   await store.deleteTenantDb(shop.id);
   store.data.shops = store.data.shops.filter(s => s.id !== shop.id);
-  store.save();
+  await store.save();
   req.flash('success', `ลบร้าน "${shop.name}" แล้ว`);
   res.redirect('/admin/license-plans');
 });
@@ -1113,7 +1276,7 @@ function parsePromoFields(body) {
   return { promo, promoLimit, promoExpiresAt };
 }
 
-router.post('/license-plans', (req, res) => {
+router.post('/license-plans', async (req, res) => {
   const days = Math.max(1, parseInt(req.body.days, 10) || 0);
   const price = Math.max(0, Number(req.body.price) || 0);
   if (!days || !price) {
@@ -1124,12 +1287,12 @@ router.post('/license-plans', (req, res) => {
     id: store.genId(8), days, price, active: true, createdAt: new Date().toISOString(),
     promoUsedCount: 0, ...parsePromoFields(req.body),
   });
-  store.save();
+  await store.save();
   req.flash('success', 'เพิ่มแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');
 });
 
-router.post('/license-plans/:id/edit', (req, res) => {
+router.post('/license-plans/:id/edit', async (req, res) => {
   const plan = store.data.licensePlans.find(p => p.id === req.params.id);
   if (!plan) {
     req.flash('error', 'ไม่พบแพ็กเกจนี้');
@@ -1144,20 +1307,20 @@ router.post('/license-plans/:id/edit', (req, res) => {
   plan.days = days;
   plan.price = price;
   Object.assign(plan, parsePromoFields(req.body));
-  store.save();
+  await store.save();
   req.flash('success', 'แก้ไขแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');
 });
 
-router.post('/license-plans/:id/toggle', (req, res) => {
+router.post('/license-plans/:id/toggle', async (req, res) => {
   const plan = store.data.licensePlans.find(p => p.id === req.params.id);
-  if (plan) { plan.active = !plan.active; store.save(); }
+  if (plan) { plan.active = !plan.active; await store.save(); }
   res.redirect('/admin/license-plans');
 });
 
-router.post('/license-plans/:id/delete', (req, res) => {
+router.post('/license-plans/:id/delete', async (req, res) => {
   store.data.licensePlans = store.data.licensePlans.filter(p => p.id !== req.params.id);
-  store.save();
+  await store.save();
   req.flash('success', 'ลบแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');
 });
@@ -1180,7 +1343,7 @@ router.post('/announcements', (req, res) => {
         image, link: (req.body.link || '').trim(), popup: req.body.popup === 'on',
         active: true, createdAt: new Date().toISOString(),
       });
-      store.save();
+      await store.save();
       req.flash('success', 'เพิ่มประกาศแล้ว');
     } catch (saveError) {
       req.flash('error', 'บันทึกประกาศไม่สำเร็จ กรุณาลองใหม่');
@@ -1189,15 +1352,15 @@ router.post('/announcements', (req, res) => {
   }));
 });
 
-router.post('/announcements/:id/toggle', (req, res) => {
+router.post('/announcements/:id/toggle', async (req, res) => {
   const a = store.data.announcements.find(x => x.id === req.params.id);
-  if (a) { a.active = !a.active; store.save(); }
+  if (a) { a.active = !a.active; await store.save(); }
   res.redirect('/admin/announcements');
 });
 
-router.post('/announcements/:id/delete', (req, res) => {
+router.post('/announcements/:id/delete', async (req, res) => {
   store.data.announcements = store.data.announcements.filter(x => x.id !== req.params.id);
-  store.save();
+  await store.save();
   req.flash('success', 'ลบประกาศแล้ว');
   res.redirect('/admin/announcements');
 });
@@ -1228,7 +1391,7 @@ function normalizeExternalLink(value) {
   return /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
 }
 
-router.post('/settings', (req, res) => {
+router.post('/settings', async (req, res) => {
   const { shopName, tagline, contactLine, contactFacebook, contactMessenger, contactFacebookName, contactResponseTime, openHours } = req.body;
   Object.assign(store.data.settings, {
     shopName, tagline, contactLine,
@@ -1236,7 +1399,7 @@ router.post('/settings', (req, res) => {
     contactMessenger: normalizeExternalLink(contactMessenger),
     contactFacebookName, contactResponseTime, openHours,
   });
-  store.save();
+  await store.save();
   req.flash('success', 'บันทึกการตั้งค่าแล้ว');
   res.redirect('/admin/settings');
 });
@@ -1274,7 +1437,7 @@ function extractYouTubeVideoId(input) {
   return null;
 }
 
-router.post('/music-player', (req, res) => {
+router.post('/music-player', async (req, res) => {
   const enabled = req.body.enabled === 'on';
   const youtubeUrl = (req.body.youtubeUrl || '').trim();
   let defaultVolume = parseInt(req.body.defaultVolume, 10);
@@ -1298,15 +1461,15 @@ router.post('/music-player', (req, res) => {
   }
 
   store.data.settings.music = { enabled, youtubeUrl, defaultVolume, startSeconds, endSeconds };
-  store.save();
+  await store.save();
   req.flash('success', 'บันทึกการตั้งค่าเพลงหน้าเว็บแล้ว');
   res.redirect('/admin/settings');
 });
 
 // ---------- Snow effect ----------
-router.post('/snow-toggle', (req, res) => {
+router.post('/snow-toggle', async (req, res) => {
   store.data.settings.snow = { enabled: req.body.enabled === 'on' };
-  store.save();
+  await store.save();
   req.flash('success', store.data.settings.snow.enabled ? 'เปิดใช้งานหิมะตกแล้ว' : 'ปิดใช้งานหิมะตกแล้ว');
   res.redirect('/admin/settings');
 });
@@ -1320,7 +1483,7 @@ router.post('/site-logo/upload', (req, res) => {
     }
     try {
       store.data.settings.branding.logoImage = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
-      store.save();
+      await store.save();
       req.flash('success', 'อัปโหลดโลโก้เว็บไซต์แล้ว และจะไม่หายเมื่อ Deploy');
     } catch (saveError) {
       req.flash('error', 'บันทึกโลโก้ไม่สำเร็จ กรุณาลองใหม่');
@@ -1337,7 +1500,7 @@ router.post('/hero-banner/upload', (req, res) => {
     }
     try {
       store.data.settings.hero.bannerImage = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
-      store.save();
+      await store.save();
       req.flash('success', 'อัปโหลดแบนเนอร์แล้ว และจะไม่หายเมื่อ Deploy');
     } catch (saveError) {
       req.flash('error', 'บันทึกแบนเนอร์ไม่สำเร็จ กรุณาลองใหม่');
@@ -1346,7 +1509,7 @@ router.post('/hero-banner/upload', (req, res) => {
   }));
 });
 
-router.post('/hero-banner/mode', (req, res) => {
+router.post('/hero-banner/mode', async (req, res) => {
   const mode = req.body.mode === 'banner' ? 'banner' : 'default';
   if (mode === 'banner' && !store.data.settings.hero.bannerImage) {
     req.flash('error', 'กรุณาอัปโหลดรูปแบนเนอร์ก่อนเปิดใช้งานโหมดแบนเนอร์');
@@ -1354,9 +1517,14 @@ router.post('/hero-banner/mode', (req, res) => {
   }
   store.data.settings.hero.mode = mode;
   store.data.settings.hero.bannerLink = req.body.bannerLink || '';
-  store.save();
+  await store.save();
   req.flash('success', mode === 'banner' ? 'เปิดใช้งานแบนเนอร์หน้าหลักแล้ว' : 'กลับไปใช้หน้าหลักแบบเดิมแล้ว');
   res.redirect('/admin/appearance');
 });
+
+// ---------- API Providers (Redirected to Unified Slip Verification Hub) ----------
+router.get('/api-providers', (req, res) => res.redirect('/admin/easyslip-usage'));
+router.post('/api-providers/byshop', (req, res) => res.redirect('/admin/easyslip-usage'));
+router.post('/api-providers/custom', (req, res) => res.redirect('/admin/easyslip-usage'));
 
 module.exports = router;

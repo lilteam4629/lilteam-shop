@@ -1,39 +1,146 @@
-<a href="/admin/orders" class="text-sm text-[var(--gold)]">← กลับไปหน้าคำสั่งซื้อ</a>
-<h2 class="font-semibold text-lg mt-2 mb-1">คำสั่งซื้อ #<%= order.id %></h2>
-<p class="text-[var(--text-4)] text-sm mb-6">ผู้ซื้อ: <%= buyer ? buyer.username : '-' %> &middot; <%= new Date(order.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></p>
+<!-- Order Detail Header -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+  <div>
+    <div class="flex items-center gap-2 text-xs text-[var(--text-4)] mb-1">
+      <a href="/admin/orders" class="text-[var(--gold)] hover:underline inline-flex items-center gap-1 font-semibold">
+        <span>← กลับไปหน้ารวมคำสั่งซื้อ</span>
+      </a>
+    </div>
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">คำสั่งซื้อ #<%= order.id %></h1>
+    <p class="text-xs text-[var(--text-4)] mt-0.5">
+      สั่งซื้อเมื่อ: <%= new Date(order.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
+    </p>
+  </div>
+
+  <div>
+    <% if (order.status === 'completed') { %>
+      <span class="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+        <span>สำเร็จ (ส่งคีย์แล้ว)</span>
+      </span>
+    <% } else if (order.status === 'pending') { %>
+      <span class="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-amber-300 animate-pulse"></span>
+        <span>รอดำเนินการ (ติดต่อร้าน)</span>
+      </span>
+    <% } else { %>
+      <span class="inline-flex items-center gap-1.5 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm">
+        <span class="w-2 h-2 rounded-full bg-rose-400"></span>
+        <span><%= order.status %></span>
+      </span>
+    <% } %>
+  </div>
+</div>
 
 <div class="grid lg:grid-cols-3 gap-6">
-  <div class="lg:col-span-2 space-y-3">
-    <% itemsWithCreds.forEach(i => { %>
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-        <div class="flex justify-between mb-2"><span class="font-medium"><%= i.title %></span><span class="text-[var(--gold)]"><%= i.price.toLocaleString() %> ฿</span></div>
-        <% if (i.fulfillmentMode === 'contact') { %>
-          <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-lg p-3 text-sm">
-            <div class="font-medium text-[var(--gold)]">ลูกค้าต้องติดต่อร้านเพื่อรับสินค้า</div>
-            <% if (i.fulfillmentInstructions) { %><div class="text-[var(--text-3)] whitespace-pre-line mt-1"><%= i.fulfillmentInstructions %></div><% } %>
+
+  <!-- Left Main Column: Purchased Items & Delivered Keys -->
+  <div class="lg:col-span-2 space-y-4">
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
+      <h3 class="font-bold text-sm sm:text-base text-[var(--text)] mb-4 flex items-center gap-2">
+        <span>🎮</span>
+        <span>รายการสินค้าที่จัดส่ง (<%= itemsWithCreds.length %> รายการ)</span>
+      </h3>
+
+      <div class="space-y-3">
+        <% itemsWithCreds.forEach((i, idx) => { %>
+          <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-4 transition hover:border-[var(--gold)]/40">
+            <div class="flex items-center justify-between gap-3 mb-2">
+              <div class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
+                <span class="w-6 h-6 rounded-lg bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center text-xs font-bold"><%= idx + 1 %></span>
+                <span><%= i.title %></span>
+              </div>
+              <span class="font-bold text-sm text-[var(--gold)]">฿<%= i.price.toLocaleString() %></span>
+            </div>
+
+            <% if (i.fulfillmentMode === 'contact') { %>
+              <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-3 text-xs text-[var(--text-2)] mt-2">
+                <div class="font-bold text-[var(--gold)] flex items-center gap-1.5">
+                  <span>💬</span>
+                  <span>ลูกค้ารายนี้ต้องติดต่อร้านเพื่อรับมอบสินค้า</span>
+                </div>
+                <% if (i.fulfillmentInstructions) { %>
+                  <div class="text-[var(--text-3)] whitespace-pre-line mt-1.5 text-[11px]"><%= i.fulfillmentInstructions %></div>
+                <% } %>
+              </div>
+            <% } else if (i.credentials) { %>
+              <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 mt-2 flex items-center justify-between gap-3">
+                <div class="font-mono text-xs text-[var(--text)] min-w-0 truncate">
+                  <span class="text-[var(--text-4)] text-[10px] block">ข้อมูลเข้าสู่ระบบ / คีย์:</span>
+                  <span class="font-bold text-[var(--gold)]"><%= i.credentials.username %></span>
+                  <% if (i.credentials.password) { %>
+                    <span class="text-[var(--text-3)]"> / <%= i.credentials.password %></span>
+                  <% } %>
+                </div>
+                <button type="button" onclick="navigator.clipboard.writeText('<%= i.credentials.username %><%= i.credentials.password ? ` / ${i.credentials.password}` : '' %>'); window.showToast('คัดลอกข้อมูลสินค้าแล้ว!', 'success');" class="bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-xs font-semibold px-2.5 py-1.5 rounded-lg text-[var(--text-2)] hover:text-[var(--gold)] transition shrink-0">
+                  📋 คัดลอก
+                </button>
+              </div>
+            <% } else { %>
+              <div class="text-xs text-[var(--text-4)] mt-2 bg-[var(--input)] p-2.5 rounded-xl border border-[var(--border-light)]">
+                ไม่มีบันทึกข้อมูลคีย์ (อาจเป็นสินค้าประเภทบริการหรือติดต่อร้าน)
+              </div>
+            <% } %>
+
           </div>
-        <% } else if (i.credentials) { %>
-          <div class="bg-[var(--bg)] border border-[var(--border)] rounded-lg p-3 text-sm font-mono">
-            <%= i.credentials.username %> / <%= i.credentials.password %>
-          </div>
-        <% } %>
-      </div>
-    <% }) %>
-  </div>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-3 h-fit">
-    <div class="flex justify-between text-sm"><span class="text-[var(--text-4)]">ยอดรวมสินค้า</span><span><%= order.subtotal.toLocaleString() %> ฿</span></div>
-    <% if (order.discount > 0) { %>
-      <div class="flex justify-between text-sm text-emerald-400"><span>ส่วนลด</span><span>-<%= order.discount.toLocaleString() %> ฿</span></div>
-    <% } %>
-    <div class="flex justify-between font-bold pt-2 border-t border-[var(--border)]"><span>ยอดชำระ</span><span class="text-[var(--gold)]"><%= order.total.toLocaleString() %> ฿</span></div>
-    <form action="/admin/orders/<%= order.id %>/status" method="post" class="pt-3 border-t border-[var(--border)] space-y-2">
-      <label class="block text-xs text-[var(--text-4)]">อัปเดตสถานะ</label>
-      <select name="status" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
-        <% ['completed','pending','cancelled'].forEach(s => { %>
-          <option value="<%= s %>" <%= order.status===s?'selected':'' %>><%= s %></option>
         <% }) %>
-      </select>
-      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium rounded-lg py-2 text-sm">บันทึก</button>
-    </form>
+      </div>
+    </div>
   </div>
+
+  <!-- Right Column: Buyer Info & Summary & Status Change -->
+  <div class="space-y-4">
+
+    <!-- Buyer Profile Card -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
+      <h3 class="font-bold text-xs text-[var(--text-4)] uppercase tracking-wider mb-3">ข้อมูลผู้ซื้อ</h3>
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-[var(--input)] border border-[var(--border-light)] flex items-center justify-center font-black text-sm text-[var(--gold)]">
+          <%= ((buyer && buyer.username) || 'U')[0].toUpperCase() %>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="font-bold text-sm text-[var(--text)] truncate"><%= buyer ? buyer.username : 'ไม่พบข้อมูล' %></div>
+          <div class="text-xs text-[var(--text-4)] truncate"><%= buyer ? buyer.email : '-' %></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Receipt Summary Card -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm space-y-3">
+      <h3 class="font-bold text-xs text-[var(--text-4)] uppercase tracking-wider mb-2">สรุปยอดชำระเงิน</h3>
+
+      <div class="flex justify-between text-xs text-[var(--text-3)]">
+        <span>ยอดรวมสินค้า</span>
+        <span>฿<%= (order.subtotal || order.total).toLocaleString() %></span>
+      </div>
+
+      <% if (order.discount > 0) { %>
+        <div class="flex justify-between text-xs text-emerald-400 font-semibold">
+          <span>ส่วนลดคูปอง</span>
+          <span>-฿<%= order.discount.toLocaleString() %></span>
+        </div>
+      <% } %>
+
+      <div class="flex justify-between items-center text-sm font-bold pt-3 border-t border-[var(--border)]">
+        <span>ยอดชำระสุทธิ</span>
+        <span class="text-base text-[var(--gold)]">฿<%= order.total.toLocaleString() %></span>
+      </div>
+
+      <!-- Update Status Form -->
+      <form action="/admin/orders/<%= order.id %>/status" method="post" class="pt-4 border-t border-[var(--border)] space-y-3">
+        <label class="block text-xs font-semibold text-[var(--text-3)]">เปลี่ยนสถานะคำสั่งซื้อ</label>
+        <select name="status" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition">
+          <option value="completed" <%= order.status === 'completed' ? 'selected' : '' %>>🟢 สำเร็จ (Completed)</option>
+          <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>🟡 รอดำเนินการ (Pending)</option>
+          <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>🔴 ยกเลิกคำสั่งซื้อ (Cancelled)</option>
+        </select>
+        <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl py-2 text-xs shadow-md transition active:scale-95">
+          💾 บันทึกสถานะ
+        </button>
+      </form>
+
+    </div>
+
+  </div>
+
 </div>

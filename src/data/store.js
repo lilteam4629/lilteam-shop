@@ -174,6 +174,14 @@ function defaultData() {
         bankAccountName: 'LilTeam Shop (Demo)',
         promptpayQrImage: null,
         bankQrImage: null,
+        truemoneyPhone: '',
+        truemoneyEnabled: true,
+        // Slip Verification Provider: 'byshop' (recommended) | 'slipok' | 'easyslip' | 'none'
+        slipProvider: 'auto',
+        byshopApiKey: '',
+        byshopEndpoint: 'https://api.byshop.me/api',
+        slip2goApiKey: '',
+        slip2goEndpoint: 'https://api.slip2go.com/api',
         // Optional per-shop SlipOK credentials (see /admin/topups). When set,
         // this shop's own slip checks use these instead of the global
         // SLIPOK_BRANCH_ID/SLIPOK_API_KEY env vars — lets each tenant shop
@@ -209,6 +217,20 @@ function defaultData() {
         key: null,
         label: null,
         expiresAt: null,
+      },
+      apiProviders: {
+        byshop: {
+          enabled: false,
+          apiKey: '',
+          endpoint: 'https://api.byshop.me/api',
+          autoFulfill: true,
+        },
+        custom: {
+          enabled: false,
+          endpoint: '',
+          apiKey: '',
+          webhookSecret: '',
+        },
       },
     },
     users: [
@@ -399,6 +421,12 @@ function migrateSchema(db) {
     db.settings.payment.slipokApiKey = '';
     changed = true;
   }
+  if (db.settings.payment.slipProvider === undefined) {
+    db.settings.payment.slipProvider = 'auto';
+    db.settings.payment.byshopApiKey ??= '';
+    db.settings.payment.byshopEndpoint ??= 'https://api.byshop.me/api';
+    changed = true;
+  }
   if (db.settings.payment.topupWebhookUrl === undefined) {
     // Each shop pastes its own Discord/Slack-compatible incoming webhook URL
     // here — never shared or mixed across shops (it's a per-tenant db field
@@ -416,6 +444,8 @@ function migrateSchema(db) {
     delete db.settings.payment.easyslipAccountId;
     delete db.settings.payment.easyslipAccountType;
     if (db.settings.payment.easyslipStatus === undefined) db.settings.payment.easyslipStatus = '';
+    if (db.settings.payment.truemoneyPhone === undefined) db.settings.payment.truemoneyPhone = '';
+    if (db.settings.payment.truemoneyEnabled === undefined) db.settings.payment.truemoneyEnabled = true;
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }
@@ -469,6 +499,41 @@ function migrateSchema(db) {
       ticketCategoryId: '',
       ticketLogChannelId: '',
       supportRoleId: '',
+    };
+    changed = true;
+  }
+  if (!db.settings.apiProviders) {
+    db.settings.apiProviders = {
+      byshop: {
+        enabled: false,
+        apiKey: '',
+        endpoint: 'https://api.byshop.me/api',
+        autoFulfill: true,
+      },
+      custom: {
+        enabled: false,
+        endpoint: '',
+        apiKey: '',
+        webhookSecret: '',
+      },
+    };
+    changed = true;
+  }
+  if (!db.settings.apiProviders.byshop) {
+    db.settings.apiProviders.byshop = {
+      enabled: false,
+      apiKey: '',
+      endpoint: 'https://api.byshop.me/api',
+      autoFulfill: true,
+    };
+    changed = true;
+  }
+  if (!db.settings.apiProviders.custom) {
+    db.settings.apiProviders.custom = {
+      enabled: false,
+      endpoint: '',
+      apiKey: '',
+      webhookSecret: '',
     };
     changed = true;
   }
@@ -539,12 +604,12 @@ function migrateSchema(db) {
       changed = true;
     }
     if (product.priceOptions === undefined) {
-      // Optional list of {id, label, price} tiers for a product sold at
-      // several price points (e.g. "6H ฿10" / "1DAY ฿35" / "7DAY ฿150") —
-      // all tiers share the same stock pool and deliver the same thing,
-      // they just cost different amounts. Empty array = old single-price
-      // behavior, unchanged.
       product.priceOptions = [];
+      changed = true;
+    }
+    if (product.apiProvider === undefined) {
+      product.apiProvider = 'none';
+      product.apiProductId = '';
       changed = true;
     }
   });
@@ -569,10 +634,11 @@ function save() {
   const ctx = tenantContext.getStore();
   if (ctx) return saveTenantDb(ctx.shopId, ctx.db);
   if (mongoCollection) {
-    mongoCollection.replaceOne({ _id: 'main' }, { _id: 'main', ...db }, { upsert: true })
+    return mongoCollection.replaceOne({ _id: 'main' }, { _id: 'main', ...db }, { upsert: true })
       .catch((err) => console.error('[store] MongoDB save failed:', err.message));
   } else {
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    return Promise.resolve();
   }
 }
 
@@ -679,7 +745,46 @@ function reset() {
   return db;
 }
 
+const ALLOWED_IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+
 async function saveMedia(buffer, filename, contentType) {
+  const ext = path.extname(filename || '').toLowerCase();
+  if (!ALLOWED_IMAGE_EXTS.has(ext)) {
+    throw new Error('ประเภทไฟล์ไม่ได้รับอนุญาต (รองรับเฉพาะไฟล์รูปภาพ .jpg, .png, .webp, .gif)');
+  }
+  if (contentType === 'image/svg+xml' || ext === '.svg') {
+    throw new Error('ไม่อนุญาตให้อัปโหลดไฟล์ SVG เนื่องจากความปลอดภัย');
+  }
+
+  if (buffer && buffer.length >= 4) {
+    const hex = buffer.toString('hex', 0, 4);
+    const isJpg = hex.startsWith('ffd8');
+    const isPng = hex.startsWith('89504e47');
+    const isGif = hex.startsWith('47494638');
+    const isWebp = buffer.length >= 12 && buffer.toString('utf8', 8, 12) === 'WEBP';
+
+    if ((ext === '.jpg' || ext === '.jpeg') && !isJpg) {
+      throw new Error('ข้อมูลไฟล์ไม่ใช่ไฟล์ JPEG ที่ถูกต้อง');
+    }
+    if (ext === '.png' && !isPng) {
+      throw new Error('ข้อมูลไฟล์ไม่ใช่ไฟล์ PNG ที่ถูกต้อง');
+    }
+    if (ext === '.gif' && !isGif) {
+      throw new Error('ข้อมูลไฟล์ไม่ใช่ไฟล์ GIF ที่ถูกต้อง');
+    }
+    if (ext === '.webp' && !isWebp) {
+      throw new Error('ข้อมูลไฟล์ไม่ใช่ไฟล์ WebP ที่ถูกต้อง');
+    }
+    if (!isJpg && !isPng && !isGif && !isWebp) {
+      throw new Error('ข้อมูลไฟล์ไม่ใช่ไฟล์รูปภาพที่ถูกต้อง');
+    }
+
+    const bufferStr = buffer.toString('binary');
+    if (bufferStr.includes('<?php') || bufferStr.includes('<?=') || /<script[\s>]/i.test(bufferStr)) {
+      throw new Error('ตรวจพบโค้ดอันตรายในไฟล์รูปภาพ ไม่อนุญาตให้อัปโหลด');
+    }
+  }
+
   if (r2.isEnabled()) {
     try {
       const uploaded = await r2.uploadMedia(buffer, filename, contentType);

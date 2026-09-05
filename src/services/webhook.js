@@ -5,8 +5,25 @@
 // webhook must never affect the customer's topup flow.
 const axios = require('axios');
 
+function isSafeWebhookUrl(urlStr) {
+  try {
+    const url = new URL(urlStr);
+    if (url.protocol !== 'https:') return false;
+    const hostname = url.hostname.toLowerCase();
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname.endsWith('.local')) {
+      return false;
+    }
+    if (/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|169\.254\.)/.test(hostname)) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
 async function notifyTopup({ webhookUrl, username, email, amount, refCode, method, slipUrl, autoApproved, adminUrl }) {
-  if (!webhookUrl) return;
+  if (!webhookUrl || !isSafeWebhookUrl(webhookUrl)) return;
   try {
     const embed = {
       title: autoApproved ? '✅ เติมเงินสำเร็จอัตโนมัติ' : '🕐 มีคำขอเติมเงินใหม่ — รอตรวจสอบ',
@@ -29,4 +46,4 @@ async function notifyTopup({ webhookUrl, username, email, amount, refCode, metho
   }
 }
 
-module.exports = { notifyTopup };
+module.exports = { notifyTopup, isSafeWebhookUrl };

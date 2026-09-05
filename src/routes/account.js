@@ -7,17 +7,29 @@ const slipok = require('../services/slipok');
 const easyslip = require('../services/easyslip');
 const promptpay = require('../services/promptpay');
 const webhook = require('../services/webhook');
+const truemoney = require('../services/truemoney');
+const { resolveSlipProvider } = require('../services/slip-provider');
+const discordBot = require('../services/discord-bot');
 const { requireLogin, currentUser } = require('../middleware/auth');
 
 router.use(requireLogin);
+
+const path = require('path');
 
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    cb(null, /^image\//.test(file.mimetype));
+    const ext = path.extname(file.originalname || '').toLowerCase();
+    const allowed = ['.jpg', '.jpeg', '.png', '.webp'];
+    if (!allowed.includes(ext) || file.mimetype === 'image/svg+xml' || !/^image\//.test(file.mimetype)) {
+      return cb(null, false);
+    }
+    cb(null, true);
   },
 });
+
+const truemoneyRedemptionLocks = new Set();
 
 router.get('/', (req, res) => {
   const user = currentUser(req);
@@ -44,11 +56,118 @@ router.get('/topup', (req, res) => {
   res.render('shop/topup', { title: 'เติมเงิน', payment: store.data.settings.payment });
 });
 
+router.post('/topup/truemoney', async (req, res) => {
+  const user = currentUser(req);
+  const voucherInput = String(req.body.voucherLink || req.body.voucherCode || '').trim();
+  const payment = store.data.settings.payment;
+
+  if (!payment.truemoneyEnabled) {
+    req.flash('error', 'ระบบเติมเงินผ่านซองของขวัญ TrueMoney ปิดให้บริการชั่วคราว');
+    return res.redirect('/account/topup');
+  }
+
+  const receiverPhone = payment.truemoneyPhone ? payment.truemoneyPhone.trim() : '';
+  if (!receiverPhone || receiverPhone.length !== 10) {
+    req.flash('error', 'ทางร้านยังไม่ได้ตั้งค่าเบอร์รับเงิน TrueMoney กรุณาติดต่อผู้ดูแลร้าน');
+    return res.redirect('/account/topup');
+  }
+
+  const voucherCode = truemoney.extractVoucherCode(voucherInput);
+  if (!voucherCode) {
+    req.flash('error', 'กรุณากรอกลิงก์ซองของขวัญ TrueMoney ให้ถูกต้อง');
+    return res.redirect('/account/topup');
+  }
+
+  if (truemoneyRedemptionLocks.has(voucherCode)) {
+    req.flash('error', 'ซองของขวัญนี้กำลังอยู่ระหว่างการตรวจสอบ กรุณารอสักครู่');
+    return res.redirect('/account/topup');
+  }
+
+  const alreadyUsed = store.data.walletTransactions.some(t => t.voucherCode === voucherCode);
+  if (alreadyUsed) {
+    req.flash('error', 'ซองของขวัญนี้ถูกใช้งานในระบบแล้ว');
+    return res.redirect('/account/topup');
+  }
+
+  truemoneyRedemptionLocks.add(voucherCode);
+
+  try {
+    const result = await truemoney.redeemAngpao(voucherInput, receiverPhone);
+
+    if (!result.success || !result.amount || result.amount <= 0) {
+      req.flash('error', result.message || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้');
+      return res.redirect('/account/topup');
+    }
+
+    const amount = result.amount;
+    const refCode = 'TM' + store.genId(6).toUpperCase();
+    const now = new Date().toISOString();
+
+    user.walletBalance = Math.round(((Number(user.walletBalance) || 0) + amount) * 100) / 100;
+
+    store.data.walletTransactions.push({
+      id: store.genId(10),
+      userId: user.id,
+      type: 'topup',
+      amount,
+      voucherCode,
+      note: `เติมเงินผ่านซอง TrueMoney (ผู้ส่ง: ${result.senderName || 'ไม่ระบุ'}, อ้างอิง ${refCode})`,
+      createdAt: now,
+    });
+
+    store.data.topupRequests.push({
+      id: store.genId(10),
+      userId: user.id,
+      amount,
+      method: 'truemoney_angpao',
+      refCode,
+      slipPath: null,
+      slipCheck: { checked: true, verified: true, message: `ซองของขวัญสำเร็จ (ผู้ส่ง: ${result.senderName || '-'})`, provider: 'truemoney_angpao' },
+      status: 'approved',
+      createdAt: now,
+      reviewedAt: now,
+      reviewNote: `ซอง TrueMoney ตรวจสอบและอนุมัติอัตโนมัติ (ผู้ส่ง: ${result.senderName || '-'})`,
+    });
+
+    await store.save();
+
+    const origin = `${req.protocol}://${req.get('host')}`;
+    webhook.notifyTopup({
+      webhookUrl: payment.topupWebhookUrl,
+      username: user.username,
+      email: user.email,
+      amount,
+      refCode,
+      method: 'truemoney_angpao',
+      slipUrl: null,
+      autoApproved: true,
+      adminUrl: null,
+    }).catch(() => {});
+
+    discordBot.notifyNewTopup({
+      username: user.username,
+      amount,
+      refCode,
+      method: 'ซองของขวัญ TrueMoney',
+    }).catch(() => {});
+
+    req.flash('success', `🧧 เติมเงินสำเร็จ! ได้รับ ฿${amount.toLocaleString()} เข้ากระเป๋าเรียบร้อยแล้ว`);
+    res.redirect('/account');
+  } catch (err) {
+    console.error('[TrueMoney Redeem Error]', err);
+    req.flash('error', 'เกิดข้อผิดพลาดในการตรวจสอบซองของขวัญ กรุณาลองใหม่อีกครั้ง');
+    res.redirect('/account/topup');
+  } finally {
+    truemoneyRedemptionLocks.delete(voucherCode);
+  }
+});
+
 router.post('/topup', async (req, res) => {
   const user = currentUser(req);
-  const amount = parseInt(req.body.amount, 10);
+  const rawAmount = parseFloat(req.body.amount);
+  const amount = Math.round((Number(rawAmount) || 0) * 100) / 100;
   const method = req.body.method === 'bank_transfer' ? 'bank_transfer' : 'promptpay';
-  if (!amount || amount < 1) {
+  if (!Number.isFinite(amount) || amount < 1) {
     req.flash('error', 'กรุณาระบุจำนวนเงินอย่างน้อย 1 บาท');
     return res.redirect('/account/topup');
   }
@@ -101,107 +220,145 @@ router.get('/topup/:id', async (req, res) => {
 // already been sent (see the route below), so it always needs its own
 // bound tenant context — nothing here can rely on the original request's
 // context still being current.
+const activeVerifications = new Set();
+
 async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptions, origin }) {
-  const request = store.data.topupRequests.find(t => t.id === requestId);
-  const user = store.data.users.find(u => u.id === userId);
-  if (!request || !user || request.status !== 'pending') return;
+  if (activeVerifications.has(requestId)) return;
+  activeVerifications.add(requestId);
 
-  const payment = store.data.settings.payment;
-  let provider = null;
-  let result;
-  if (easyslip.isConfigured() && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
-    provider = 'easyslip';
-    const expectedNumbers = Object.values(payment.easyslipAccounts).map(a => a.bankNumber).filter(Boolean);
-    result = await easyslip.verifySlip(fileBuffer, request.amount, fileOptions, expectedNumbers);
-  } else {
-    provider = 'slipok';
-    result = await slipok.verifySlip(fileBuffer, request.amount, fileOptions, {
-      branchId: payment.slipokBranchId,
-      apiKey: payment.slipokApiKey,
-    });
-  }
-  request.slipCheck = { checked: result.checked, verified: result.verified, message: result.message, provider };
+  try {
+    const request = store.data.topupRequests.find(t => t.id === requestId);
+    const user = store.data.users.find(u => u.id === userId);
+    if (!request || !user || request.status === 'approved' || request.status === 'rejected') return;
 
-  let verified = result.checked && result.verified;
-  const raw = result.raw;
-  // Normalize the transaction reference + timestamp across providers —
-  // EasySlip nests these under rawSlip (transRef, date ISO string);
-  // SlipOK returns transRef/transDate/transTime flat.
-  const transRef = raw && (raw.transRef || (raw.rawSlip && raw.rawSlip.transRef)) || null;
-  const transTime = raw && (
-    (raw.rawSlip && raw.rawSlip.date && new Date(raw.rawSlip.date))
-    || slipok.parseTransDateTime(raw.transDate, raw.transTime)
-  );
+    const payment = store.data.settings.payment;
+    let provider = null;
+    let result;
 
-  if (verified && raw) {
-    request.slipCheck.transRef = transRef;
+    const selectedProvider = resolveSlipProvider(payment, easyslip.isConfigured());
 
-    // Reject slips for transfers made more than 5 minutes ago
-    if (transTime && !Number.isNaN(transTime.getTime()) && Date.now() - transTime.getTime() > 5 * 60 * 1000) {
-      verified = false;
-      request.slipCheck.verified = false;
-      request.slipCheck.message = 'สลิปนี้โอนเงินมานานเกิน 5 นาทีแล้ว ไม่สามารถใช้ยืนยันได้ กรุณาโอนใหม่แล้วแนบสลิปทันที';
+    if (selectedProvider === 'easyslip' && easyslip.isConfigured() && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
+      provider = 'easyslip';
+      const expectedNumbers = Object.values(payment.easyslipAccounts).map(a => a.bankNumber).filter(Boolean);
+      result = await easyslip.verifySlip(fileBuffer, request.amount, fileOptions, expectedNumbers);
+    } else if (selectedProvider === 'slipok') {
+      provider = 'slipok';
+      result = await slipok.verifySlip(fileBuffer, request.amount, fileOptions, {
+        branchId: payment.slipokBranchId,
+        apiKey: payment.slipokApiKey,
+      });
+    } else {
+      provider = selectedProvider;
+      result = { checked: false, verified: false, message: 'รอแอดมินตรวจสอบสลิป', raw: null };
     }
+    // An admin may approve/reject while the provider request is in flight.
+    if (request.status === 'approved' || request.status === 'rejected') return;
+    request.slipCheck = { checked: result.checked, verified: result.verified, message: result.message, provider };
 
-    // Reject slips already used to top up successfully before (duplicate) —
-    // extra safety on top of the provider's own duplicate check, scoped to
-    // this shop's own top-up history.
-    if (verified && transRef) {
-      const alreadyUsed = store.data.topupRequests.some(t =>
-        t.id !== request.id && t.status === 'approved' &&
-        t.slipCheck && t.slipCheck.transRef === transRef
-      );
-      if (alreadyUsed) {
+    let verified = result.checked && result.verified;
+    const raw = result.raw;
+    // Normalize the transaction reference + timestamp across providers —
+    // EasySlip nests these under rawSlip (transRef, date ISO string);
+    // SlipOK returns transRef/transDate/transTime flat.
+    const transRef = raw && (raw.transRef || (raw.rawSlip && raw.rawSlip.transRef)) || null;
+    const transTime = raw && (
+      (raw.rawSlip && raw.rawSlip.date && new Date(raw.rawSlip.date))
+      || slipok.parseTransDateTime(raw.transDate, raw.transTime)
+    );
+
+    if (verified && raw) {
+      request.slipCheck.transRef = transRef;
+
+      // Reject slips for transfers made more than 5 minutes ago
+      if (transTime && !Number.isNaN(transTime.getTime()) && Date.now() - transTime.getTime() > 5 * 60 * 1000) {
         verified = false;
         request.slipCheck.verified = false;
-        request.slipCheck.message = 'สลิปนี้เคยถูกใช้เติมเงินไปแล้ว ไม่สามารถใช้ซ้ำได้';
+        request.slipCheck.message = 'สลิปนี้โอนเงินมานานเกิน 5 นาทีแล้ว ไม่สามารถใช้ยืนยันได้ กรุณาโอนใหม่แล้วแนบสลิปทันที';
+      }
+
+      // Reject slips already used to top up successfully before (duplicate) —
+      // extra safety on top of the provider's own duplicate check, scoped to
+      // this shop's own top-up history.
+      if (verified && transRef) {
+        const alreadyUsed = store.data.topupRequests.some(t =>
+          t.id !== request.id && t.status === 'approved' &&
+          t.slipCheck && t.slipCheck.transRef === transRef
+        );
+        if (alreadyUsed) {
+          verified = false;
+          request.slipCheck.verified = false;
+          request.slipCheck.message = 'สลิปนี้เคยถูกใช้เติมเงินไปแล้ว ไม่สามารถใช้ซ้ำได้';
+        }
       }
     }
-  }
 
-  if (verified) {
-    user.walletBalance += request.amount;
-    store.data.walletTransactions.push({
-      id: store.genId(10), userId: user.id, type: 'topup', amount: request.amount,
-      note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${request.refCode})`,
-      createdAt: new Date().toISOString(),
-    });
-    request.status = 'approved';
-    request.reviewedAt = new Date().toISOString();
-    request.reviewNote = 'ตรวจสอบและอนุมัติอัตโนมัติ';
-  }
-  await store.save();
+    if (verified) {
+      user.walletBalance = Math.round(((Number(user.walletBalance) || 0) + request.amount) * 100) / 100;
+      store.data.walletTransactions.push({
+        id: store.genId(10), userId: user.id, type: 'topup', amount: request.amount,
+        note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${request.refCode})`,
+        createdAt: new Date().toISOString(),
+      });
+      request.status = 'approved';
+      request.reviewedAt = new Date().toISOString();
+      request.reviewNote = 'ตรวจสอบและอนุมัติอัตโนมัติ';
+    } else {
+      request.status = 'pending';
+    }
+    await store.save();
 
-  // Links to the normal (login-required) admin approve page for now — a
-  // no-login-needed one-click link is a separate, deliberately-held-back
-  // change pending a decision on its security tradeoff.
-  webhook.notifyTopup({
-    webhookUrl: payment.topupWebhookUrl,
-    username: user.username, email: user.email,
-    amount: request.amount, refCode: request.refCode, method: request.method,
-    slipUrl: request.slipPath ? origin + request.slipPath : null,
-    autoApproved: verified,
-    adminUrl: verified ? null : `${origin}/admin/topups`,
-  }).catch(() => {});
+    // Links to the normal (login-required) admin approve page for now — a
+    // no-login-needed one-click link is a separate, deliberately-held-back
+    // change pending a decision on its security tradeoff.
+    webhook.notifyTopup({
+      webhookUrl: payment.topupWebhookUrl,
+      username: user.username, email: user.email,
+      amount: request.amount, refCode: request.refCode, method: request.method,
+      slipUrl: request.slipPath ? origin + request.slipPath : null,
+      autoApproved: verified,
+      adminUrl: verified ? null : `${origin}/admin/topups`,
+    }).catch(() => {});
+  } catch (err) {
+    console.error('[topup] background verify failed:', err.message);
+    const request = store.data.topupRequests.find(t => t.id === requestId);
+    if (request && request.status === 'verifying') {
+      request.status = 'pending';
+      request.slipCheck = { checked: false, verified: false, message: 'ระบบตรวจสลิปขัดข้องชั่วคราว อยู่ระหว่างรอแอดมินตรวจสอบ' };
+      await store.save();
+    }
+  } finally {
+    const request = store.data.topupRequests.find(t => t.id === requestId);
+    if (request && request.status === 'verifying') {
+      request.status = 'pending';
+      await store.save();
+    }
+    activeVerifications.delete(requestId);
+  }
 }
 
 router.post('/topup/:id/slip', (req, res) => {
   const user = currentUser(req);
   const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
   if (!request) return res.redirect('/account/topup');
-  if (request.status !== 'pending') {
-    req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว ไม่สามารถแนบสลิปใหม่ได้');
+  if (request.status === 'approved' || request.status === 'rejected') {
+    req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว');
+    return res.redirect(`/account/topup/${request.id}`);
+  }
+  if (activeVerifications.has(request.id)) {
+    req.flash('error', 'คำขอนี้กำลังอยู่ระหว่างการตรวจสอบ กรุณารอสักครู่');
     return res.redirect(`/account/topup/${request.id}`);
   }
   upload.single('slip')(req, res, store.bindTenantContext(async (err) => {
     if (err || !req.file) {
-      req.flash('error', 'อัปโหลดสลิปไม่สำเร็จ กรุณาลองใหม่ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 5MB)');
+      req.flash('error', 'อัปโหลดสลิปไม่สำเร็จ (รองรับไฟล์รูปภาพ JPG, PNG, WEBP ขนาดไม่เกิน 5MB)');
       return res.redirect(`/account/topup/${request.id}`);
     }
     try {
       request.slipPath = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      request.status = 'verifying';
       await store.save();
     } catch (saveError) {
+      request.status = 'pending';
       req.flash('error', 'บันทึกไฟล์สลิปไม่สำเร็จ กรุณาลองใหม่');
       return res.redirect(`/account/topup/${request.id}`);
     }

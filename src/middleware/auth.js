@@ -3,7 +3,12 @@ const theme = require('../services/theme');
 
 function currentUser(req) {
   if (!req.session.userId) return null;
-  return store.data.users.find(u => u.id === req.session.userId) || null;
+  const user = store.data.users.find(u => u.id === req.session.userId) || null;
+  if (user && user.status === 'banned') {
+    delete req.session.userId;
+    return null;
+  }
+  return user;
 }
 
 // A contact link saved without "http(s)://" (e.g. just "m.me/page") resolves
@@ -30,6 +35,15 @@ function attachUser(req, res, next) {
 }
 
 function requireLogin(req, res, next) {
+  if (req.session.userId) {
+    const rawUser = store.data.users.find(u => u.id === req.session.userId);
+    if (rawUser && rawUser.status === 'banned') {
+      return req.session.destroy(() => {
+        res.clearCookie('connect.sid');
+        res.redirect('/login');
+      });
+    }
+  }
   const user = currentUser(req);
   if (!user) {
     req.flash('error', 'กรุณาเข้าสู่ระบบก่อน');

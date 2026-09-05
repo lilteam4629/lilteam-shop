@@ -1,180 +1,579 @@
-<details class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 mb-6 max-w-xl" open>
-  <summary class="font-semibold cursor-pointer">ข้อมูลบัญชีรับเงิน</summary>
-  <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="space-y-4 mt-4">
-    <div class="grid sm:grid-cols-2 gap-4">
-      <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4">
-        <label class="block font-medium mb-1">QR พร้อมเพย์</label>
-        <p class="text-xs text-[var(--text-4)] mb-3">ถ้าไม่แนบ ระบบจะสร้าง QR จากหมายเลขพร้อมเพย์ให้อัตโนมัติ</p>
-      <% if (payment.promptpayQrImage) { %>
-        <div class="flex items-center gap-3 mb-2">
-          <img src="<%= payment.promptpayQrImage %>" class="w-28 h-28 object-contain rounded-lg bg-white" alt="QR พร้อมเพย์ปัจจุบัน" />
-          <label class="flex items-center gap-2 text-sm text-[var(--text-3)]">
-            <input type="checkbox" name="removePromptpayQrImage" class="accent-[var(--gold)]" /> ลบรูปนี้
-          </label>
-        </div>
-      <% } %>
-        <input type="file" name="promptpayQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-xs" />
+<!-- Topup & Payment Management -->
+<div class="space-y-6">
+
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <div class="flex items-center gap-2 text-xs text-[var(--text-4)] mb-1">
+        <a href="/admin" class="text-[var(--gold)] hover:underline font-semibold">แอดมิน</a>
+        <span>/</span>
+        <span>การเงิน</span>
       </div>
-      <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4">
-        <label class="block font-medium mb-1">QR โอนธนาคาร</label>
-        <p class="text-xs text-[var(--text-4)] mb-3">ใช้เฉพาะเมื่อลูกค้าเลือกช่องทางโอนผ่านธนาคาร</p>
-      <% if (payment.bankQrImage) { %>
-        <div class="flex items-center gap-3 mb-2">
-          <img src="<%= payment.bankQrImage %>" class="w-28 h-28 object-contain rounded-lg bg-white" alt="QR ธนาคารปัจจุบัน" />
-          <label class="flex items-center gap-2 text-sm text-[var(--text-3)]">
-            <input type="checkbox" name="removeBankQrImage" class="accent-[var(--gold)]" /> ลบรูปนี้
-          </label>
+      <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] flex items-center gap-2">
+        <span>💰 จัดการเติมเงิน, บัญชีรับเงิน & ตรวจสลิป</span>
+      </h1>
+      <p class="text-xs text-[var(--text-4)] mt-0.5">รวมศูนย์ระบบการเงิน: รายการตรวจสอบสลิป, บัญชีธนาคาร/พร้อมเพย์, ซองของขวัญ TrueMoney และระบบตรวจสลิปอัตโนมัติ</p>
+    </div>
+
+    <div class="flex items-center gap-2.5">
+      <% const pendingCount = requests.filter(r => r.status === 'pending').length; %>
+      <% if (pendingCount > 0) { %>
+        <div class="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 animate-pulse">
+          <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+          <span>รอตรวจสอบ <%= pendingCount %> รายการ</span>
         </div>
-      <% } %>
-        <input type="file" name="bankQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-xs" />
-      </div>
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">เบอร์/เลขพร้อมเพย์</label>
-      <input name="promptpayId" value="<%= payment.promptpayId %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์</label>
-      <input name="promptpayName" value="<%= payment.promptpayName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-    </div>
-    <%
-      const promptpayBank = banks.find(b => /พร้อมเพย์|promptpay/i.test(`${b.nameTh} ${b.nameEn}`));
-      const otherBanks = banks.filter(b => !promptpayBank || b.code !== promptpayBank.code);
-      const primaryBank = banks.find(b => b.nameTh === payment.bankName);
-      const promptpayConnected = payment.easyslipAccounts && promptpayBank && payment.easyslipAccounts[promptpayBank.code];
-    %>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ธนาคาร</label>
-      <% if (otherBanks.length) { %>
-        <select name="easyslipBankCode" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
-          <option value="">-- เลือกธนาคาร --</option>
-          <% otherBanks.forEach(bank => { %>
-            <option value="<%= bank.code %>" <%= primaryBank && primaryBank.code === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
-          <% }) %>
-        </select>
       <% } else { %>
-        <p class="text-[10px] text-[var(--text-4)]">ยังโหลดรายชื่อธนาคารไม่ได้ กรุณาลองใหม่ภายหลัง</p>
+        <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+          <span>ไม่มีรายการค้างตรวจ</span>
+        </div>
       <% } %>
     </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">เลขบัญชีธนาคาร</label>
-      <input name="bankAccountNumber" value="<%= payment.bankAccountNumber %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อบัญชีธนาคาร</label>
-      <input name="bankAccountName" value="<%= payment.bankAccountName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
-    </div>
-    <% if (promptpayBank) { %>
-      <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-3">
-        <label class="flex items-center gap-2 text-sm cursor-pointer">
-          <input type="checkbox" name="registerPromptpay" id="registerPromptpay" <%= promptpayConnected ? 'checked' : '' %> onchange="document.getElementById('promptpayNumberField').classList.toggle('hidden', !this.checked)" class="accent-[var(--gold)]" />
-          เชื่อมต่อพร้อมเพย์ด้วย <span class="text-[var(--text-4)]">(กันสลิปโอนข้ามธนาคารผ่านพร้อมเพย์ตรวจไม่ผ่าน)</span>
-        </label>
-        <div id="promptpayNumberField" class="mt-2 <%= promptpayConnected ? '' : 'hidden' %>">
-          <input name="promptpayEasyslipNumber" value="<%= promptpayConnected ? payment.easyslipAccounts[promptpayBank.code].bankNumber : payment.promptpayId %>" placeholder="เลขพร้อมเพย์ เช่น 0812345678" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-        </div>
-      </div>
-    <% } %>
-    <% if (payment.easyslipStatus) { %>
-      <p class="text-xs <%= payment.easyslipStatus.includes('ไม่สำเร็จ') ? 'text-[var(--coral)]' : 'text-emerald-400' %>">สถานะเชื่อมต่อ EasySlip ล่าสุด: <%= payment.easyslipStatus %></p>
-    <% } %>
-
-    <div class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4">
-      <label class="block font-medium mb-1">🔔 Webhook แจ้งเตือนเติมเงิน (ไม่บังคับ)</label>
-      <p class="text-xs text-[var(--text-4)] mb-3">วาง Discord Webhook URL ของร้านคุณเอง (ไม่แชร์กับร้านอื่น) — ทุกครั้งที่มีคนแนบสลิปเติมเงิน จะแจ้งเข้าห้อง Discord ทันที พร้อมชื่อผู้ใช้ ยอดเงิน และรูปสลิป<br />วิธีสร้าง: ตั้งค่าห้อง (⚙️) → Integrations → Webhooks → New Webhook → Copy Webhook URL</p>
-      <input type="url" name="topupWebhookUrl" value="<%= payment.topupWebhookUrl || '' %>" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm font-mono" />
-    </div>
-
-    <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm">บันทึกข้อมูลบัญชี</button>
-  </form>
-</details>
-
-<form method="get" action="/admin/topups" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 mb-4 flex flex-col sm:flex-row gap-2">
-  <div class="relative flex-1">
-    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-4)]">⌕</span>
-    <input name="q" value="<%= q %>" autocomplete="off" placeholder="ค้นหาชื่อผู้ใช้ อีเมล หรือเลขอ้างอิง" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg pl-9 pr-3 py-2 text-sm focus:border-[var(--gold)] outline-none" />
   </div>
-  <select name="status" class="bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
-    <option value="">ทุกสถานะ</option>
-    <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>รอตรวจสอบ</option>
-    <option value="approved" <%= status === 'approved' ? 'selected' : '' %>>อนุมัติแล้ว</option>
-    <option value="rejected" <%= status === 'rejected' ? 'selected' : '' %>>ปฏิเสธ</option>
-  </select>
-  <button class="bg-[var(--gold)] text-[var(--bg)] font-medium rounded-lg px-5 py-2 text-sm">ค้นหาประวัติ</button>
-  <% if (q || status) { %><a href="/admin/topups" class="border border-[var(--border-light)] rounded-lg px-4 py-2 text-sm text-center hover:border-[var(--gold)]">ล้าง</a><% } %>
-</form>
 
-<%
-  const pendingRequests = requests.filter(r => r.status === 'pending');
-  const historyRequests = requests.filter(r => r.status !== 'pending');
-%>
-
-<h2 class="font-semibold mb-3">🕐 รอตรวจสอบ / มีปัญหา (<%= pendingRequests.length %>)</h2>
-<div class="space-y-3 mb-8">
-  <% pendingRequests.forEach(r => { %>
-    <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-      <% if (r.slipPath) { %>
-        <a href="<%= r.slipPath %>" target="_blank" rel="noopener">
-          <img src="<%= r.slipPath %>" class="w-20 h-20 object-cover rounded-lg border border-[var(--border)]" alt="สลิป" />
-        </a>
-      <% } else { %>
-        <div class="w-20 h-20 shrink-0 rounded-lg border border-[var(--border)] bg-[var(--input)] flex items-center justify-center text-[10px] text-[var(--text-4)] text-center px-1">ยังไม่แนบสลิป</div>
+  <!-- Subsystem Navigation Tabs -->
+  <div class="flex border-b border-[var(--border)] gap-2 overflow-x-auto pb-px">
+    <button type="button" onclick="switchTopupTab('requests')" id="topup-tab-btn-requests" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-sm transition border-[var(--gold)] text-[var(--gold)] bg-[var(--gold)]/5 rounded-t-xl">
+      <span class="text-base">📋</span>
+      <span>รายการเติมเงิน & สลิป</span>
+      <% if (pendingCount > 0) { %>
+        <span class="text-[10px] bg-[var(--gold)] text-[var(--bg)] font-bold px-1.5 py-0.2 rounded-full"><%= pendingCount %></span>
       <% } %>
+    </button>
+    <button type="button" onclick="switchTopupTab('bank')" id="topup-tab-btn-bank" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
+      <span class="text-base">💳</span>
+      <span>พร้อมเพย์ & บัญชีธนาคาร</span>
+    </button>
+    <button type="button" onclick="switchTopupTab('truemoney')" id="topup-tab-btn-truemoney" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
+      <span class="text-base">🧧</span>
+      <span>ซองของขวัญ TrueMoney</span>
+      <% if (payment.truemoneyEnabled !== false && payment.truemoneyPhone) { %>
+        <span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded">เปิด</span>
+      <% } %>
+    </button>
+    <button type="button" onclick="switchTopupTab('autoverify')" id="topup-tab-btn-autoverify" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
+      <span class="text-base">🤖</span>
+      <span>ตรวจสลิปอัตโนมัติ & แจ้งเตือน</span>
+    </button>
+  </div>
 
-      <div class="flex-1 text-sm">
-        <div class="font-medium"><%= r.buyer ? r.buyer.username : 'ไม่พบผู้ใช้' %> <span class="text-[var(--text-4)] font-normal">(<%= r.buyer ? r.buyer.email : '-' %>)</span></div>
-        <div class="text-[var(--text-3)] font-mono text-xs">#<%= r.refCode %> &middot; <%= r.method === 'promptpay' ? 'พร้อมเพย์' : 'โอนธนาคาร' %></div>
-        <div class="text-[var(--text-4)] text-xs"><%= new Date(r.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></div>
-        <% if (r.slipCheck && r.slipCheck.message) { %>
-          <div class="text-[var(--text-4)] text-xs mt-1">📋 <%= r.slipCheck.message %></div>
-        <% } %>
+  <!-- ========================================== -->
+  <!-- TAB 1: รายการเติมเงิน & ตรวจสลิป (Requests) -->
+  <!-- ========================================== -->
+  <div id="topup-tab-content-requests" class="topup-tab-content space-y-6">
+
+    <!-- Search & Filter Bar -->
+    <form method="get" action="/admin/topups" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3">
+      <div class="relative flex-1">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">⌕</span>
+        <input name="q" value="<%= q %>" autocomplete="off" placeholder="ค้นหาชื่อผู้ใช้ อีเมล หรือรหัสอ้างอิง..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-9 pr-3 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
       </div>
 
-      <div class="text-xl font-bold text-[var(--gold)] sm:w-28 sm:text-right">฿<%= r.amount.toLocaleString() %>.00</div>
+      <select name="status" class="bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition">
+        <option value="">ทุกสถานะ</option>
+        <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>🕐 รอตรวจสอบ</option>
+        <option value="approved" <%= status === 'approved' ? 'selected' : '' %>>✓ อนุมัติแล้ว</option>
+        <option value="rejected" <%= status === 'rejected' ? 'selected' : '' %>>✕ ปฏิเสธ</option>
+      </select>
 
-      <div class="flex sm:flex-col gap-2 shrink-0">
-        <form action="/admin/topups/<%= r.id %>/approve" method="post" onsubmit="return confirm('ยืนยันว่าตรวจสลิปแล้ว ยอด ฿' + <%= r.amount %> + ' ถูกต้อง และต้องการเติมเงินให้เลยใช่ไหม?')">
-          <button class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-lg px-4 py-2 text-xs whitespace-nowrap">✓ ตรวจแล้ว เติมเงินให้เลย</button>
-        </form>
-        <form action="/admin/topups/<%= r.id %>/reject" method="post" onsubmit="return confirm('ยืนยันปฏิเสธคำขอนี้?')">
-          <button class="w-full border border-[var(--coral)]/50 text-[var(--coral)] hover:bg-[var(--coral)]/10 font-medium rounded-lg px-4 py-2 text-xs whitespace-nowrap">✕ ปฏิเสธ</button>
-        </form>
+      <button type="submit" class="bg-[var(--gold)] text-[var(--bg)] font-bold rounded-xl px-5 py-2 text-xs shadow-md transition active:scale-95">
+        ค้นหา
+      </button>
+
+      <% if (q || status) { %>
+        <a href="/admin/topups" class="border border-[var(--border-light)] rounded-xl px-4 py-2 text-xs text-center hover:border-[var(--gold)] transition flex items-center justify-center">
+          ล้างตัวกรอง
+        </a>
+      <% } %>
+    </form>
+
+    <%
+      const pendingRequests = requests.filter(r => r.status === 'pending' || r.status === 'verifying');
+      const historyRequests = requests.filter(r => r.status !== 'pending' && r.status !== 'verifying');
+    %>
+
+    <!-- Pending Approvals Section -->
+    <div class="space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <h2 class="font-bold text-sm sm:text-base text-[var(--text)]">🕐 รายการรอตรวจสอบ / รอดำเนินการ</h2>
+          <span class="bg-[var(--gold)] text-[var(--bg)] text-[11px] font-bold rounded-full px-2 py-0.5"><%= pendingRequests.length %></span>
+        </div>
       </div>
+
+      <% if (pendingRequests.length) { %>
+        <div class="space-y-3">
+          <% pendingRequests.forEach(r => { %>
+            <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+
+              <!-- Slip Preview & Info -->
+              <div class="flex items-start gap-4">
+                <% if (r.slipPath) { %>
+                  <a href="<%= r.slipPath %>" target="_blank" rel="noopener" class="group relative shrink-0">
+                    <img src="<%= r.slipPath %>" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-[var(--border)] shadow-sm group-hover:brightness-110 transition" alt="สลิปโอนเงิน" />
+                    <span class="absolute bottom-1 right-1 bg-black/70 text-[9px] text-white px-1 rounded backdrop-blur-xs">🔍 ขยาย</span>
+                  </a>
+                <% } else { %>
+                  <div class="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-xl border border-[var(--border)] bg-[var(--input)] flex flex-col items-center justify-center text-[10px] text-[var(--text-4)] text-center p-2">
+                    <span class="text-base mb-1">📄</span>
+                    <span>ยังไม่แนบสลิป</span>
+                  </div>
+                <% } %>
+
+                <div class="text-xs space-y-1">
+                  <div class="font-bold text-sm text-[var(--text)]">
+                    <%= r.buyer ? r.buyer.username : 'ไม่พบชื่อผู้ใช้' %>
+                    <span class="text-[11px] font-normal text-[var(--text-4)]">(<%= r.buyer ? r.buyer.email : '-' %>)</span>
+                  </div>
+                  <div class="text-[var(--text-3)] font-mono text-[11px]">
+                    รหัส: <b>#<%= r.refCode %></b> &middot; ช่องทาง:
+                    <% if (r.method === 'truemoney_angpao') { %>
+                      <span class="text-amber-400 font-semibold">🧧 ซอง TrueMoney</span>
+                    <% } else if (r.method === 'promptpay') { %>
+                      <span class="text-blue-400 font-semibold">💳 พร้อมเพย์</span>
+                    <% } else { %>
+                      <span class="text-emerald-400 font-semibold">🏦 โอนธนาคาร</span>
+                    <% } %>
+                  </div>
+                  <div class="text-[var(--text-4)] text-[11px]">
+                    เวลาแจ้ง: <%= new Date(r.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
+                  </div>
+                  <% if (r.slipCheck && r.slipCheck.message) { %>
+                    <div class="inline-block bg-[var(--input)] border border-[var(--border-light)] text-[11px] text-[var(--text-3)] px-2.5 py-1 rounded-lg mt-1">
+                      🤖 ผลตรวจอัตโนมัติ: <%= r.slipCheck.message %>
+                    </div>
+                  <% } %>
+                </div>
+              </div>
+
+              <!-- Amount & Action Buttons -->
+              <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-[var(--border)]">
+                <div class="text-2xl font-black text-[var(--gold)] tracking-tight">
+                  ฿<%= Number(r.amount || 0).toLocaleString() %>.00
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <!-- Approve Form -->
+                  <form action="/admin/topups/<%= r.id %>/approve" method="post" data-confirm="ยืนยันว่าตรวจสอบสลิปแล้ว ยอดเงิน ฿<%= r.amount %> ถูกต้อง และต้องการเติมเงินเข้ากระเป๋าผู้ใช้ทันทีใช่ไหม?">
+                    <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl px-4 py-2 text-xs shadow-md transition active:scale-95 whitespace-nowrap">
+                      ✓ อนุมัติและเติมเงิน
+                    </button>
+                  </form>
+
+                  <!-- Reject Form -->
+                  <form action="/admin/topups/<%= r.id %>/reject" method="post" data-confirm="ยืนยันปฏิเสธคำขอเติมเงินนี้?">
+                    <button type="submit" class="border border-rose-500/40 text-rose-400 hover:bg-rose-500/10 font-semibold rounded-xl px-3 py-2 text-xs transition active:scale-95 whitespace-nowrap">
+                      ✕ ปฏิเสธ
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="bg-[var(--card)] border border-dashed border-[var(--border-light)] rounded-2xl py-8 text-center text-xs text-[var(--text-4)]">
+          <div class="text-2xl mb-1">🎉</div>
+          ไม่มีรายการเติมเงินที่รอตรวจสอบในขณะนี้
+        </div>
+      <% } %>
     </div>
-  <% }) %>
-  <% if (!pendingRequests.length) { %>
-    <div class="bg-[var(--card)] border border-dashed border-[var(--border-light)] rounded-xl py-8 text-center text-sm text-[var(--text-4)]">ไม่มีรายการรอตรวจสอบ 🎉</div>
-  <% } %>
+
+    <!-- History Section -->
+    <div class="space-y-3 pt-4 border-t border-[var(--border)]">
+      <h2 class="font-bold text-sm sm:text-base text-[var(--text)]">📜 ประวัติการเติมเงิน (<%= historyRequests.length %>)</h2>
+
+      <% if (historyRequests.length) { %>
+        <div class="space-y-2.5">
+          <% historyRequests.forEach(r => { %>
+            <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:border-[var(--border-light)] transition">
+
+              <div class="flex items-center gap-3.5">
+                <% if (r.slipPath) { %>
+                  <a href="<%= r.slipPath %>" target="_blank" rel="noopener">
+                    <img src="<%= r.slipPath %>" class="w-12 h-12 object-cover rounded-xl border border-[var(--border)]" alt="สลิป" />
+                  </a>
+                <% } else { %>
+                  <div class="w-12 h-12 shrink-0 rounded-xl border border-[var(--border)] bg-[var(--input)] flex items-center justify-center text-xs text-[var(--text-4)]">
+                    📄
+                  </div>
+                <% } %>
+
+                <div class="text-xs">
+                  <div class="font-semibold text-sm text-[var(--text)]">
+                    <%= r.buyer ? r.buyer.username : 'ไม่พบผู้ใช้' %>
+                  </div>
+                  <div class="text-[var(--text-3)] font-mono text-[11px]">
+                    #<%= r.refCode %> &middot; <%= r.method === 'truemoney_angpao' ? 'ซอง TrueMoney' : (r.method === 'promptpay' ? 'พร้อมเพย์' : 'โอนธนาคาร') %>
+                  </div>
+                  <div class="text-[var(--text-4)] text-[10px]">
+                    <%= new Date(r.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-[var(--border)]">
+                <div class="text-lg font-bold text-[var(--gold)]">
+                  ฿<%= Number(r.amount || 0).toLocaleString() %>.00
+                </div>
+
+                <% if (r.status === 'approved') { %>
+                  <span class="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-3 py-1 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span>อนุมัติแล้ว</span>
+                  </span>
+                <% } else { %>
+                  <span class="inline-flex items-center gap-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-semibold px-3 py-1 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
+                    <span>ปฏิเสธ</span>
+                  </span>
+                <% } %>
+              </div>
+
+            </div>
+          <% }) %>
+        </div>
+      <% } else { %>
+        <div class="bg-[var(--card)] border border-dashed border-[var(--border-light)] rounded-2xl py-10 text-center text-xs text-[var(--text-4)]">
+          ไม่พบประวัติการเติมเงินที่ตรงกับคำค้นหา
+        </div>
+      <% } %>
+    </div>
+
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 2: พร้อมเพย์ & บัญชีธนาคาร (Bank & QR)  -->
+  <!-- ========================================== -->
+  <div id="topup-tab-content-bank" class="topup-tab-content hidden space-y-6">
+    <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+
+      <!-- Preserve Other Tab Settings as Hidden Inputs -->
+      <input type="hidden" name="truemoneyPhone" value="<%= payment.truemoneyPhone || '' %>" />
+      <input type="hidden" name="truemoneyEnabled" value="<%= payment.truemoneyEnabled !== false ? 'on' : 'off' %>" />
+      <input type="hidden" name="topupWebhookUrl" value="<%= payment.topupWebhookUrl || '' %>" />
+
+      <div class="flex items-center gap-3 pb-4 border-b border-[var(--border)]">
+        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-lg">
+          💳
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-[var(--text)]">ตั้งค่าบัญชีพร้อมเพย์ (PromptPay) & บัญชีธนาคาร</h2>
+          <p class="text-xs text-[var(--text-4)]">ข้อมูลและ QR Code นี้จะแสดงให้ลูกค้าสแกน/โอนเงินในหน้าเติมเงินของเว็บไซต์</p>
+        </div>
+      </div>
+
+      <!-- Section 1: PromptPay -->
+      <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
+        <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
+          <span>🔵 ช่องทาง พร้อมเพย์ (PromptPay)</span>
+        </h3>
+
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เบอร์โทรศัพท์ หรือ เลขประจำตัวประชาชนพร้อมเพย์</label>
+            <input name="promptpayId" value="<%= payment.promptpayId %>" placeholder="เช่น 0812345678 หรือ 1234567890123" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์</label>
+            <input name="promptpayName" value="<%= payment.promptpayName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code พร้อมเพย์ (ทางเลือก)</label>
+          <p class="text-[11px] text-[var(--text-4)] mb-2">หากไม่แนบรูป ระบบจะคำนวณและสร้าง QR Code พร้อมเพย์จากเบอร์ให้อัตโนมัติ</p>
+
+          <% if (payment.promptpayQrImage) { %>
+            <div class="flex items-center gap-3 mb-3 bg-[var(--card)] p-2.5 rounded-xl border border-[var(--border)] max-w-sm">
+              <img src="<%= payment.promptpayQrImage %>" class="w-20 h-20 object-contain rounded-lg bg-white p-1" alt="QR พร้อมเพย์" />
+              <label class="flex items-center gap-2 text-xs text-rose-400 cursor-pointer">
+                <input type="checkbox" name="removePromptpayQrImage" class="accent-rose-500" /> ลบรูปปัจจุบัน
+              </label>
+            </div>
+          <% } %>
+          <input type="file" name="promptpayQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--card)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
+        </div>
+      </div>
+
+      <!-- Section 2: Bank Transfer -->
+      <%
+        const promptpayBank = banks.find(b => /พร้อมเพย์|promptpay/i.test(`${b.nameTh} ${b.nameEn}`));
+        const otherBanks = banks.filter(b => !promptpayBank || b.code !== promptpayBank.code);
+        const primaryBank = banks.find(b => b.nameTh === payment.bankName);
+      %>
+      <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
+        <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
+          <span>🏦 ช่องทาง โอนผ่านบัญชีธนาคาร</span>
+        </h3>
+
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลือกธนาคารรับเงิน</label>
+            <% if (otherBanks.length) { %>
+              <select name="easyslipBankCode" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
+                <option value="">-- เลือกธนาคาร --</option>
+                <% otherBanks.forEach(bank => { %>
+                  <option value="<%= bank.code %>" <%= primaryBank && primaryBank.code === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
+                <% }) %>
+              </select>
+            <% } else { %>
+              <p class="text-[11px] text-[var(--text-4)]">ยังโหลดรายชื่อธนาคารไม่ได้</p>
+            <% } %>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลขที่บัญชีธนาคาร</label>
+            <input name="bankAccountNumber" value="<%= payment.bankAccountNumber %>" placeholder="เช่น 123-4-56789-0" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีธนาคาร</label>
+            <input name="bankAccountName" value="<%= payment.bankAccountName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code บัญชีธนาคาร (ทางเลือก)</label>
+          <p class="text-[11px] text-[var(--text-4)] mb-2">ใช้แสดงเมื่อลูกค้าเลือกชำระผ่านช่องทางบัญชีธนาคาร</p>
+
+          <% if (payment.bankQrImage) { %>
+            <div class="flex items-center gap-3 mb-3 bg-[var(--card)] p-2.5 rounded-xl border border-[var(--border)] max-w-sm">
+              <img src="<%= payment.bankQrImage %>" class="w-20 h-20 object-contain rounded-lg bg-white p-1" alt="QR ธนาคาร" />
+              <label class="flex items-center gap-2 text-xs text-rose-400 cursor-pointer">
+                <input type="checkbox" name="removeBankQrImage" class="accent-rose-500" /> ลบรูปปัจจุบัน
+              </label>
+            </div>
+          <% } %>
+          <input type="file" name="bankQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--card)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+          💾 บันทึกการตั้งค่าพร้อมเพย์ & บัญชีธนาคาร
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 3: ซองของขวัญ TrueMoney Wallet (Angpao) -->
+  <!-- ========================================== -->
+  <div id="topup-tab-content-truemoney" class="topup-tab-content hidden space-y-6">
+    <form action="/admin/topups/payment-settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+
+      <!-- Preserve Other Tab Settings as Hidden Inputs -->
+      <input type="hidden" name="promptpayId" value="<%= payment.promptpayId || '' %>" />
+      <input type="hidden" name="promptpayName" value="<%= payment.promptpayName || '' %>" />
+      <input type="hidden" name="bankAccountNumber" value="<%= payment.bankAccountNumber || '' %>" />
+      <input type="hidden" name="bankAccountName" value="<%= payment.bankAccountName || '' %>" />
+      <input type="hidden" name="topupWebhookUrl" value="<%= payment.topupWebhookUrl || '' %>" />
+
+      <div class="flex items-center gap-3 pb-4 border-b border-[var(--border)]">
+        <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-lg">
+          🧧
+        </div>
+        <div>
+          <h2 class="text-base font-bold text-[var(--text)]">ตั้งค่าระบบซองของขวัญ TrueMoney Wallet</h2>
+          <p class="text-xs text-[var(--text-4)]">รับเงินเข้า TrueMoney อัตโนมัติทันทีเมื่อลูกค้ากรอกลิงก์ซองของขวัญ โดยไม่ต้องตรวจสลิป</p>
+        </div>
+      </div>
+
+      <!-- TrueMoney Card -->
+      <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-5">
+
+        <!-- Toggle Switch -->
+        <div class="flex items-center justify-between p-4 rounded-xl bg-[var(--card)] border border-[var(--border-light)]">
+          <div class="space-y-0.5">
+            <label for="tm_enabled" class="font-bold text-sm text-[var(--text)] cursor-pointer">เปิดรับการเติมเงินผ่านซองของขวัญ TrueMoney</label>
+            <p class="text-xs text-[var(--text-4)]">เมื่อเปิด ลูกค้าจะสามารถเติมเงินด้วยการสร้างซองของขวัญและนำลิงก์มากรอก</p>
+          </div>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="tm_enabled" name="truemoneyEnabled" class="sr-only peer" <%= payment.truemoneyEnabled !== false ? 'checked' : '' %>>
+            <div class="w-11 h-6 bg-[var(--input)] peer-focus:outline-none rounded-full peer border border-[var(--border-light)] peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--gold)]"></div>
+          </label>
+        </div>
+
+        <!-- Phone Input -->
+        <div class="space-y-1.5 max-w-md">
+          <label class="block text-xs font-bold text-[var(--text-3)] uppercase tracking-wider">
+            เบอร์โทรศัพท์ TrueMoney Wallet สำหรับรับเงิน (10 หลัก) <span class="text-rose-400">*</span>
+          </label>
+          <input name="truemoneyPhone" value="<%= payment.truemoneyPhone || '' %>" placeholder="เช่น 0801234567" pattern="[0-9]{10}" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-4 py-3 text-sm font-mono outline-none focus:border-[var(--gold)] transition" />
+          <p class="text-[11px] text-[var(--text-4)]">
+            💡 เงินจากซองของขวัญของลูกค้าจะถูกโอนเข้าสู่เบอร์นี้ทันทีอัตโนมัติ และระบบจะเพิ่มยอดเงินเข้ากระเป๋าของลูกค้าในเว็บทันที
+          </p>
+        </div>
+
+        <!-- Instructions Box -->
+        <div class="bg-[var(--card)] border border-dashed border-[var(--border-light)] rounded-xl p-4 text-xs text-[var(--text-3)] space-y-1.5">
+          <div class="font-bold text-[var(--text)]">📌 ข้อแนะนำการใช้งาน:</div>
+          <div>1. เบอร์โทรศัพท์ต้องลงทะเบียน TrueMoney Wallet เรียบร้อยแล้ว</div>
+          <div>2. ลูกค้าสามารถสร้างซองของขวัญแบบ "แบ่งจำนวนเงินเท่ากัน" หรือสุ่มได้ตามต้องการ</div>
+          <div>3. ป้องกันการใช้ซองซ้ำและตรวจสอบความถูกต้องอัตโนมัติแบบเรียลไทม์</div>
+        </div>
+
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+          💾 บันทึกการตั้งค่า TrueMoney Wallet
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TAB 4: ตรวจสลิปอัตโนมัติ & Discord Webhook -->
+  <!-- ========================================== -->
+  <div id="topup-tab-content-autoverify" class="topup-tab-content hidden space-y-6">
+    <form action="/admin/topups/payment-settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+
+      <!-- Preserve Other Tab Settings as Hidden Inputs -->
+      <input type="hidden" name="promptpayId" value="<%= payment.promptpayId || '' %>" />
+      <input type="hidden" name="promptpayName" value="<%= payment.promptpayName || '' %>" />
+      <input type="hidden" name="bankAccountNumber" value="<%= payment.bankAccountNumber || '' %>" />
+      <input type="hidden" name="bankAccountName" value="<%= payment.bankAccountName || '' %>" />
+      <input type="hidden" name="truemoneyPhone" value="<%= payment.truemoneyPhone || '' %>" />
+      <input type="hidden" name="truemoneyEnabled" value="<%= payment.truemoneyEnabled !== false ? 'on' : 'off' %>" />
+
+      <!-- Active Provider Status & Direct Link Card -->
+      <div class="bg-gradient-to-r from-[var(--gold)]/10 via-[var(--card)] to-[var(--card)] border border-[var(--gold)]/30 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
+            <% if (payment.slipProvider === 'byshop') { %>🚀
+            <% } else if (payment.slipProvider === 'slipok') { %>🛡️
+            <% } else if (payment.slipProvider === 'easyslip') { %>⚡
+            <% } else if (payment.slipProvider === 'slip2go') { %>⚠️
+            <% } else { %>🔌<% } %>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-[var(--text-4)]">ค่ายตรวจสลิปที่ใช้อยู่:</span>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--gold)] text-[var(--bg)]">
+                <% if (payment.slipProvider === 'byshop') { %>⭐ BYSHOP API (แนะนำ)
+                <% } else if (payment.slipProvider === 'slipok') { %>⭐ SlipOK API (แนะนำ)
+                <% } else if (payment.slipProvider === 'easyslip') { %>EasySlip API (มาตรฐาน)
+                <% } else if (payment.slipProvider === 'slip2go') { %>Slip2Go API
+                <% } else { %>Custom Slip API<% } %>
+              </span>
+            </div>
+            <div class="text-sm font-semibold text-[var(--text)] mt-1">
+              ระบบตรวจสอบสลิปอัตโนมัติ 24 ชม. กำหนดค่าแบบศูนย์รวมไว้ที่หน้า "ตรวจสลิปด้วย API"
+            </div>
+          </div>
+        </div>
+
+        <a href="/admin/easyslip-usage" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] hover:brightness-110 active:scale-95 transition shadow-md shadow-[var(--gold)]/20 shrink-0">
+          <span>⚙️ ไปที่หน้าตั้งค่าตรวจสลิปด้วย API</span>
+          <span>↗</span>
+        </a>
+      </div>
+
+      <!-- Discord Webhook Box -->
+      <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
+        <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
+          <span>🔔 Discord Webhook แจ้งเตือนการเติมเงิน</span>
+        </h3>
+        <p class="text-xs text-[var(--text-4)]">
+          วาง Webhook URL ของห้อง Discord ที่ต้องการรับการแจ้งเตือนเมื่อมีลูกค้าแจ้งโอนเงินหรือเติมเงินสำเร็จ
+        </p>
+
+        <div class="space-y-1.5">
+          <label class="block text-xs font-semibold text-[var(--text-3)]">Discord Webhook URL</label>
+          <input type="url" name="topupWebhookUrl" value="<%= payment.topupWebhookUrl || '' %>" placeholder="https://discord.com/api/webhooks/..." class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-4 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+          💾 บันทึกการตั้งค่าการแจ้งเตือน
+        </button>
+      </div>
+
+    </form>
+  </div>
+
 </div>
 
-<h2 class="font-semibold mb-3">📜 ประวัติ (<%= historyRequests.length %>)</h2>
-<div class="space-y-3">
-  <% historyRequests.forEach(r => { %>
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-      <% if (r.slipPath) { %>
-        <a href="<%= r.slipPath %>" target="_blank" rel="noopener">
-          <img src="<%= r.slipPath %>" class="w-20 h-20 object-cover rounded-lg border border-[var(--border)]" alt="สลิป" />
-        </a>
-      <% } else { %>
-        <div class="w-20 h-20 shrink-0 rounded-lg border border-[var(--border)] bg-[var(--input)] flex items-center justify-center text-[10px] text-[var(--text-4)] text-center px-1">ยังไม่แนบสลิป</div>
-      <% } %>
+<script>
+  function switchTopupTab(tabId) {
+    document.querySelectorAll('.topup-tab-btn').forEach(btn => {
+      btn.classList.remove('border-[var(--gold)]', 'text-[var(--gold)]', 'bg-[var(--gold)]/5', 'font-bold');
+      btn.classList.add('border-transparent', 'text-[var(--text-3)]', 'font-semibold');
+    });
+    document.querySelectorAll('.topup-tab-content').forEach(content => {
+      content.classList.add('hidden');
+    });
 
-      <div class="flex-1 text-sm">
-        <div class="font-medium"><%= r.buyer ? r.buyer.username : 'ไม่พบผู้ใช้' %> <span class="text-[var(--text-4)] font-normal">(<%= r.buyer ? r.buyer.email : '-' %>)</span></div>
-        <div class="text-[var(--text-3)] font-mono text-xs">#<%= r.refCode %> &middot; <%= r.method === 'promptpay' ? 'พร้อมเพย์' : 'โอนธนาคาร' %></div>
-        <div class="text-[var(--text-4)] text-xs"><%= new Date(r.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></div>
-      </div>
+    const activeBtn = document.getElementById('topup-tab-btn-' + tabId);
+    const activeContent = document.getElementById('topup-tab-content-' + tabId);
 
-      <div class="text-xl font-bold text-[var(--gold)] sm:w-32 sm:text-right">฿<%= r.amount.toLocaleString() %>.00</div>
+    if (activeBtn) {
+      activeBtn.classList.remove('border-transparent', 'text-[var(--text-3)]', 'font-semibold');
+      activeBtn.classList.add('border-[var(--gold)]', 'text-[var(--gold)]', 'bg-[var(--gold)]/5', 'font-bold');
+    }
+    if (activeContent) {
+      activeContent.classList.remove('hidden');
+    }
 
-      <% if (r.status === 'approved') { %>
-        <span class="shrink-0 text-xs bg-emerald-900/40 text-emerald-400 px-3 py-1.5 rounded-full text-center">อนุมัติแล้ว</span>
-      <% } else { %>
-        <span class="shrink-0 text-xs bg-[var(--coral)]/15 text-[var(--coral)] px-3 py-1.5 rounded-full text-center">ปฏิเสธ</span>
-      <% } %>
-    </div>
-  <% }) %>
-  <% if (!historyRequests.length) { %>
-    <div class="bg-[var(--card)] border border-dashed border-[var(--border-light)] rounded-xl py-12 text-center text-sm text-[var(--text-4)]">ไม่พบประวัติการเติมเงินที่ค้นหา</div>
-  <% } %>
-</div>
+    if (window.location.hash !== '#' + tabId) {
+      history.replaceState(null, '', '#' + tabId);
+    }
+  }
+
+  function switchSlipProviderUI(providerKey) {
+    document.querySelectorAll('.provider-config-box').forEach(box => box.classList.add('hidden'));
+    const targetBox = document.getElementById('provider-box-' + providerKey);
+    if (targetBox) targetBox.classList.remove('hidden');
+  }
+
+  async function testByshopSlipConnection() {
+    const keyInput = document.getElementById('byshop_slip_api_key');
+    const statusMsg = document.getElementById('byshop-slip-status-msg');
+    const spinner = document.getElementById('test-slip-spinner');
+    const btn = document.getElementById('btn-test-slip');
+    const apiKey = keyInput ? keyInput.value.trim() : '';
+
+    if (!apiKey) {
+      alert('กรุณากรอก BYSHOP API Key ก่อนทำการทดสอบ');
+      if (keyInput) keyInput.focus();
+      return;
+    }
+
+    spinner.classList.remove('hidden');
+    btn.disabled = true;
+    statusMsg.innerHTML = '<span class="text-xs text-[var(--gold)] font-medium">กำลังทดสอบเชื่อมต่อ BYSHOP API...</span>';
+
+    try {
+      const res = await fetch('/admin/slip-verification/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider: 'byshop', apiKey: apiKey })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        statusMsg.innerHTML = `<span class="text-xs text-emerald-400 font-bold">✓ ${data.message || 'เชื่อมต่อสำเร็จ'} (ยอดคงเหลือ ฿${Number(data.balance || 0).toLocaleString()})</span>`;
+      } else {
+        statusMsg.innerHTML = `<span class="text-xs text-rose-400 font-bold">✗ ${data.message || 'เชื่อมต่อล้มเหลว'}</span>`;
+      }
+    } catch (e) {
+      statusMsg.innerHTML = '<span class="text-xs text-rose-400 font-bold">✗ เกิดข้อผิดพลาดในการเชื่อมต่อ</span>';
+    } finally {
+      spinner.classList.add('hidden');
+      btn.disabled = false;
+    }
+  }
+
+  // Restore active tab from URL hash if present
+  (function () {
+    const hash = (window.location.hash || '').replace('#', '');
+    if (hash && document.getElementById('topup-tab-content-' + hash)) {
+      switchTopupTab(hash);
+    }
+  })();
+</script>
