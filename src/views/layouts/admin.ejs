@@ -126,10 +126,10 @@
   <div id="admin-sidebar-backdrop" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-200"></div>
 
   <!-- Main Sidebar -->
-  <aside id="admin-sidebar" class="w-72 shrink-0 bg-[var(--card)] border-r border-[var(--border)] min-h-screen fixed inset-y-0 left-0 z-50 -translate-x-full transition-all duration-200 overflow-y-auto lg:translate-x-0 lg:static flex flex-col justify-between shadow-2xl lg:shadow-none">
+  <aside id="admin-sidebar" class="w-72 h-screen shrink-0 bg-[var(--card)] border-r border-[var(--border)] fixed inset-y-0 left-0 z-50 -translate-x-full transition-all duration-200 overflow-hidden lg:translate-x-0 lg:sticky lg:top-0 flex flex-col shadow-2xl lg:shadow-none">
 
     <!-- Top Branding & Collapse Button -->
-    <div>
+    <div class="flex-1 min-h-0 overflow-y-auto">
       <div class="p-4 sm:p-5 flex items-center justify-between border-b border-[var(--border)]">
         <a href="/admin" class="flex items-center gap-3 font-bold text-base min-w-0">
           <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[var(--gold-dark)] to-[var(--gold)] shrink-0 flex items-center justify-center text-[var(--bg)] font-black text-lg shadow-[0_0_15px_color-mix(in_srgb,var(--gold)_25%,transparent)]">
@@ -272,13 +272,13 @@
     </div>
 
     <!-- Bottom Footer Profile & Store Links -->
-    <div class="p-3 border-t border-[var(--border)] bg-[var(--card)]/80 space-y-2">
-      <a href="/" target="_blank" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)] transition" title="เปิดหน้าร้านจริง">
+    <div class="shrink-0 p-3 border-t border-[var(--border)] bg-[var(--card)] space-y-2 shadow-[0_-8px_20px_rgba(0,0,0,0.08)]">
+      <a href="/" class="sidebar-link flex items-center justify-between px-3 py-2 rounded-xl text-xs text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)] transition" title="ไปหน้าร้าน">
         <div class="flex items-center gap-2">
-          <svg class="w-4 h-4 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-          <span class="sidebar-text">ดูหน้าร้าน (เปิดแท็บใหม่)</span>
+          <svg class="w-4 h-4 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10h14V10M9 20v-6h6v6"></path></svg>
+          <span class="sidebar-text">ดูหน้าร้าน</span>
         </div>
-        <span class="sidebar-badge text-[10px] text-[var(--text-4)]">↗</span>
+        <span class="sidebar-badge text-[10px] text-[var(--text-4)]">→</span>
       </a>
 
       <div class="flex items-center justify-between px-2 pt-2 border-t border-[var(--border)]/60">
@@ -337,9 +337,9 @@
         </button>
 
         <!-- Quick View Storefront Button -->
-        <a href="/" target="_blank" class="flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] hover:text-[var(--gold)] px-3 py-1.5 rounded-xl text-xs font-medium transition">
+        <a href="/" class="flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] hover:text-[var(--gold)] px-3 py-1.5 rounded-xl text-xs font-medium transition">
           <span>หน้าร้าน</span>
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l9-9 9 9M5 10v10h14V10M9 20v-6h6v6"></path></svg>
         </a>
 
         <!-- Admin Profile Pill -->
