@@ -20,7 +20,7 @@
     </div>
   <% } else if (request.slipPath && automaticSlipCheck) { %>
     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
-      ⏳ ระบบกำลังตรวจสอบสลิปโดยอัตโนมัติ — เติมเงินให้ทันทีถ้ายอดถูกต้อง
+      ⏳ ระบบกำลังตรวจสอบสลิปโดยอัตโนมัติ — หน้านี้จะแสดงผลสำเร็จให้ทันที ไม่ต้องรีเฟรช
     </div>
   <% } else if (!request.slipPath && automaticSlipCheck) { %>
     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
@@ -113,15 +113,42 @@
       overlay.classList.remove('hidden');
     });
   })();
-  <% if (automaticSlipCheck && (request.status === 'pending' || request.status === 'verifying') && request.slipPath) { %>
-  // The automated slip check now finishes in the background after the
-  // upload response (see /account/topup/:id/slip) instead of making the
-  // customer wait on it live, so poll for the result instead of expecting
-  // it to already be there on this load.
+  <% if (automaticSlipCheck && request.status === 'verifying' && request.slipPath) { %>
   (function () {
-    var checkedAt = <%= (request.slipCheck && request.slipCheck.checked !== undefined) ? 'true' : 'false' %>;
-    if (checkedAt) return;
-    setTimeout(function () { window.location.reload(); }, 6000);
+    var overlay = document.getElementById('slipUploadOverlay');
+    var statusUrl = '/account/topup/<%= request.id %>/status';
+    var detailUrl = '/account/topup/<%= request.id %>';
+    var attempts = 0;
+
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      var title = overlay.querySelector('.text-lg');
+      var message = overlay.querySelector('p');
+      if (title) title.textContent = 'กำลังตรวจสอบสลิปอัตโนมัติ...';
+      if (message) message.textContent = 'ตรวจเสร็จแล้วระบบจะพาไปหน้าผลสำเร็จให้ทันที ไม่ต้องรีเฟรช';
+    }
+
+    function checkStatus() {
+      fetch(statusUrl, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+        .then(function (response) {
+          if (!response.ok) throw new Error('status request failed');
+          return response.json();
+        })
+        .then(function (result) {
+          if (result.finished) {
+            window.location.replace(detailUrl);
+            return;
+          }
+          attempts += 1;
+          setTimeout(checkStatus, attempts < 10 ? 1200 : 2000);
+        })
+        .catch(function () {
+          attempts += 1;
+          setTimeout(checkStatus, attempts < 10 ? 1500 : 3000);
+        });
+    }
+
+    checkStatus();
   })();
   <% } %>
 </script>

@@ -209,6 +209,21 @@ router.get('/topup/:id', async (req, res) => {
   });
 });
 
+router.get('/topup/:id/status', (req, res) => {
+  const user = currentUser(req);
+  const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
+  if (!request) return res.status(404).json({ ok: false, error: 'ไม่พบคำขอนี้' });
+
+  res.setHeader('Cache-Control', 'private, no-store');
+  res.json({
+    ok: true,
+    status: request.status,
+    finished: request.status !== 'verifying',
+    approved: request.status === 'approved',
+    message: request.slipCheck?.message || '',
+  });
+});
+
 router.get('/topup/:id/slip-file', async (req, res, next) => {
   try {
     const user = currentUser(req);
@@ -453,7 +468,7 @@ router.post('/topup/:id/slip', (req, res) => {
     }
 
     req.flash('success', attached.automatic
-      ? 'แนบสลิปแล้ว ระบบกำลังตรวจสอบอัตโนมัติเบื้องหลัง — รีเฟรชหน้านี้อีกครั้งในไม่กี่วินาทีเพื่อดูผล'
+      ? 'แนบสลิปแล้ว ระบบกำลังตรวจสอบอัตโนมัติและจะแสดงผลให้ทันที ไม่ต้องรีเฟรชหน้า'
       : 'แนบสลิปแล้ว อยู่ระหว่างรอแอดมินตรวจสอบ');
     res.redirect(`/account/topup/${request.id}`);
 
