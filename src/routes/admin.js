@@ -847,16 +847,22 @@ router.post('/topups/payment-settings', (req, res) => {
       promptpayId, promptpayName, bankAccountNumber, bankAccountName,
     } = req.body;
     const bankCode = (req.body.easyslipBankCode || '').trim();
+    const promptpayBankCode = (req.body.promptpayBankCode || '').trim();
     const promptpayEasyslipNumber = (req.body.promptpayEasyslipNumber || promptpayId || '').trim();
 
     const payment = store.data.settings.payment;
     const banks = await easyslip.getBanks();
     const primaryBank = banks.find(b => b.code === bankCode);
+    const promptpayPrimaryBank = banks.find(b => b.code === promptpayBankCode);
     const truemoneyPhone = (req.body.truemoneyPhone || '').trim().replace(/[^0-9]/g, '');
     const truemoneyEnabled = req.body.truemoneyEnabled === 'on';
     const slipProvider = req.body.slipProvider || payment.slipProvider || 'auto';
-    if ((promptpayId || bankAccountNumber) && !primaryBank) {
-      req.flash('error', 'กรุณาเลือกธนาคารที่บัญชีหรือพร้อมเพย์ผูกอยู่ เพื่อเชื่อม EasySlip');
+    if (promptpayId && !promptpayPrimaryBank) {
+      req.flash('error', 'กรุณาเลือกธนาคารที่พร้อมเพย์ผูกอยู่ เพื่อเชื่อม EasySlip');
+      return res.redirect('/admin/topups?tab=bank');
+    }
+    if (bankAccountNumber && !primaryBank) {
+      req.flash('error', 'กรุณาเลือกธนาคารของเลขบัญชี เพื่อเชื่อม EasySlip');
       return res.redirect('/admin/topups?tab=bank');
     }
     if (!['auto', 'none', 'slipok', 'easyslip'].includes(slipProvider)) {
@@ -873,7 +879,7 @@ router.post('/topups/payment-settings', (req, res) => {
     const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
 
     Object.assign(payment, {
-      promptpayId, promptpayName, bankAccountNumber, bankAccountName,
+      promptpayId, promptpayName, promptpayBankCode, bankAccountNumber, bankAccountName,
       bankName: primaryBank ? primaryBank.nameTh : payment.bankName,
       truemoneyPhone, truemoneyEnabled,
       slipProvider, byshopApiKey, byshopEndpoint, slipokBranchId, slipokApiKey,
@@ -888,19 +894,18 @@ router.post('/topups/payment-settings', (req, res) => {
     // PromptPay's own identifier (phone/ID) isn't the bank account
     // number, so it needs its own separate registration.
     const channels = [];
-    const selectedBank = banks.find(b => b.code === bankCode);
     if (bankCode && bankAccountNumber && bankAccountName) {
       channels.push({ key: `${bankCode}:account`, code: bankCode, number: bankAccountNumber, name: bankAccountName });
     }
-    if (bankCode && promptpayEasyslipNumber && (promptpayName || bankAccountName)) {
+    if (promptpayBankCode && promptpayEasyslipNumber && promptpayName) {
       const digits = promptpayEasyslipNumber.replace(/\D/g, '');
       const wantedVerify = digits.length === 10 ? 'MSISDN' : (digits.length === 13 ? 'NATID' : null);
-      const supported = Array.isArray(selectedBank && selectedBank.extraVerify)
-        && selectedBank.extraVerify.some(option => option.value === wantedVerify);
+      const supported = Array.isArray(promptpayPrimaryBank && promptpayPrimaryBank.extraVerify)
+        && promptpayPrimaryBank.extraVerify.some(option => option.value === wantedVerify);
       const duplicateNumber = channels.some(channel => channel.number.replace(/\D/g, '') === digits);
       if (!duplicateNumber) channels.push({
-        key: `${bankCode}:promptpay`, code: bankCode, number: promptpayEasyslipNumber,
-        name: promptpayName || bankAccountName, extraVerify: supported ? wantedVerify : undefined,
+        key: `${promptpayBankCode}:promptpay`, code: promptpayBankCode, number: promptpayEasyslipNumber,
+        name: promptpayName, extraVerify: supported ? wantedVerify : undefined,
       });
     }
 

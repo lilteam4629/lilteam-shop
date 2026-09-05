@@ -169,6 +169,7 @@ function defaultData() {
       payment: {
         promptpayId: '',
         promptpayName: '',
+        promptpayBankCode: '',
         bankName: '',
         bankAccountNumber: '',
         bankAccountName: '',
@@ -339,7 +340,7 @@ async function init() {
     await mongoCollection.updateMany(
       { 'settings.payment.receivingAccountResetVersion': { $ne: 1 } },
       { $set: {
-        'settings.payment.promptpayId': '', 'settings.payment.promptpayName': '',
+        'settings.payment.promptpayId': '', 'settings.payment.promptpayName': '', 'settings.payment.promptpayBankCode': '',
         'settings.payment.bankName': '', 'settings.payment.bankAccountNumber': '',
         'settings.payment.bankAccountName': '', 'settings.payment.easyslipAccounts': {},
         'settings.payment.easyslipStatus': '', 'settings.payment.receivingAccountResetVersion': 1,
@@ -471,6 +472,10 @@ function migrateSchema(db) {
     db.settings.payment.promptpayQrImage = db.settings.payment.qrImage || null;
     changed = true;
   }
+  if (db.settings.payment.promptpayBankCode === undefined) {
+    db.settings.payment.promptpayBankCode = '';
+    changed = true;
+  }
   if (db.settings.payment.bankQrImage === undefined) {
     db.settings.payment.bankQrImage = db.settings.payment.qrImage || null;
     changed = true;
@@ -512,7 +517,7 @@ function migrateSchema(db) {
   // then the marker prevents later restarts from clearing newly entered data.
   if ((Number(db.settings.payment.receivingAccountResetVersion) || 0) < 1) {
     Object.assign(db.settings.payment, {
-      promptpayId: '', promptpayName: '', bankName: '', bankAccountNumber: '', bankAccountName: '',
+      promptpayId: '', promptpayName: '', promptpayBankCode: '', bankName: '', bankAccountNumber: '', bankAccountName: '',
       easyslipAccounts: {}, easyslipStatus: '', receivingAccountResetVersion: 1,
     });
     changed = true;

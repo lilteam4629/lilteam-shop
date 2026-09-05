@@ -270,10 +270,19 @@
           <span>🔵 ช่องทาง พร้อมเพย์ (PromptPay)</span>
         </h3>
 
-        <div class="grid sm:grid-cols-2 gap-4">
+        <div class="grid sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เบอร์โทรศัพท์ หรือ เลขประจำตัวประชาชนพร้อมเพย์</label>
             <input name="promptpayId" value="<%= payment.promptpayId %>" placeholder="เช่น 0812345678 หรือ 1234567890123" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคารที่พร้อมเพย์ผูกอยู่ *</label>
+            <select name="promptpayBankCode" <%= payment.promptpayId ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
+              <option value="">-- เลือกธนาคารพร้อมเพย์ --</option>
+              <% banks.forEach(bank => { %>
+                <option value="<%= bank.code %>" <%= payment.promptpayBankCode === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
+              <% }) %>
+            </select>
           </div>
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์</label>
@@ -367,6 +376,8 @@
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
       <input type="hidden" name="promptpayId" value="<%= payment.promptpayId || '' %>" />
       <input type="hidden" name="promptpayName" value="<%= payment.promptpayName || '' %>" />
+      <input type="hidden" name="promptpayBankCode" value="<%= payment.promptpayBankCode || '' %>" />
+      <input type="hidden" name="easyslipBankCode" value="<%= (banks.find(b => b.nameTh === payment.bankName) || {}).code || '' %>" />
       <input type="hidden" name="bankAccountNumber" value="<%= payment.bankAccountNumber || '' %>" />
       <input type="hidden" name="bankAccountName" value="<%= payment.bankAccountName || '' %>" />
       <input type="hidden" name="topupWebhookUrl" value="<%= payment.topupWebhookUrl || '' %>" />
@@ -435,6 +446,8 @@
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
       <input type="hidden" name="promptpayId" value="<%= payment.promptpayId || '' %>" />
       <input type="hidden" name="promptpayName" value="<%= payment.promptpayName || '' %>" />
+      <input type="hidden" name="promptpayBankCode" value="<%= payment.promptpayBankCode || '' %>" />
+      <input type="hidden" name="easyslipBankCode" value="<%= (banks.find(b => b.nameTh === payment.bankName) || {}).code || '' %>" />
       <input type="hidden" name="bankAccountNumber" value="<%= payment.bankAccountNumber || '' %>" />
       <input type="hidden" name="bankAccountName" value="<%= payment.bankAccountName || '' %>" />
       <input type="hidden" name="truemoneyPhone" value="<%= payment.truemoneyPhone || '' %>" />
