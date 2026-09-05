@@ -276,7 +276,7 @@
             <input name="promptpayId" value="<%= payment.promptpayId %>" placeholder="เช่น 0812345678 หรือ 1234567890123" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
           </div>
           <div>
-            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคารที่พร้อมเพย์ผูกอยู่ *</label>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลือกพร้อมเพย์ *</label>
             <select name="promptpayBankCode" <%= payment.promptpayId ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
               <option value="">-- เลือกธนาคารพร้อมเพย์ --</option>
               <% banks.forEach(bank => { %>
