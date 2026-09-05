@@ -94,7 +94,7 @@ async function redeemAngpao(voucherInput, receiverPhone) {
 
     if (data && data.success && data.data && data.data.amount) {
       const amount = parseFloat(data.data.amount);
-      if (isNaN(amount) || amount <= 0) {
+      if (!Number.isFinite(amount) || amount <= 0) {
         return { success: false, amount: 0, message: 'จำนวนเงินในซองไม่ถูกต้อง' };
       }
       return {

@@ -41,7 +41,8 @@ async function main() {
   const als = new AsyncLocalStorage();
   let sequence = 0;
   const store = { get data() { return als.getStore(); }, genId: () => 'fixture-' + (++sequence),
-    save: async () => {}, isPersistent: () => false, bindTenantContext: fn => AsyncLocalStorage.bind(fn) };
+    save: async () => {}, transact: async fn => fn(als.getStore()),
+    isPersistent: () => false, bindTenantContext: fn => AsyncLocalStorage.bind(fn) };
   const auth = { currentUser: req => store.data.users.find(u => u.id === req.session.userId), requireLogin: (req, res, next) => next() };
   const cart = load('src/routes/cart.js', { '../data/store': store, '../middleware/auth': auth });
   const checkout = cart.stack.find(l => l.route?.path === '/checkout').route.stack.at(-1).handle;

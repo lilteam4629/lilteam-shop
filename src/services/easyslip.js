@@ -161,8 +161,10 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
       return { checked: true, verified: false, message: 'ไม่พบบัญชีผู้รับที่ตรงกับบัญชีที่ลงทะเบียนไว้', raw: data };
     }
     const normalizedExpected = expectedNumbers.map(normalizeAccountNumber).filter(Boolean);
-    const accountMatches = !normalizedExpected.length
-      || normalizedExpected.includes(normalizeAccountNumber(matched.bankNumber));
+    if (!normalizedExpected.length) {
+      return { checked: false, verified: false, message: 'ร้านยังไม่ได้ตั้งค่าบัญชีรับเงินสำหรับตรวจอัตโนมัติ — รอแอดมินตรวจสอบ', raw: data };
+    }
+    const accountMatches = normalizedExpected.includes(normalizeAccountNumber(matched.bankNumber));
     if (!accountMatches) {
       return { checked: true, verified: false, message: 'บัญชีผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: data };
     }

@@ -92,9 +92,27 @@ router.post('/topup/truemoney', async (req, res) => {
   truemoneyRedemptionLocks.add(voucherCode);
 
   try {
+    const reserved = await store.transact((data) => {
+      data.truemoneyRedemptions ||= [];
+      if (data.walletTransactions.some(t => t.voucherCode === voucherCode)
+        || data.truemoneyRedemptions.some(item => item.voucherCode === voucherCode && item.status !== 'failed')) return false;
+      data.truemoneyRedemptions.push({
+        voucherCode, userId: user.id, status: 'processing', createdAt: new Date().toISOString(),
+      });
+      return true;
+    });
+    if (!reserved) {
+      req.flash('error', 'ซองของขวัญนี้ถูกใช้แล้วหรือกำลังอยู่ระหว่างการตรวจสอบ');
+      return res.redirect('/account/topup');
+    }
+
     const result = await truemoney.redeemAngpao(voucherInput, receiverPhone);
 
-    if (!result.success || !result.amount || result.amount <= 0) {
+    if (!result.success || !Number.isFinite(result.amount) || result.amount <= 0) {
+      await store.transact((data) => {
+        const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.status === 'processing');
+        if (claim) { claim.status = 'failed'; claim.message = result.message || ''; claim.finishedAt = new Date().toISOString(); }
+      });
       req.flash('error', result.message || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้');
       return res.redirect('/account/topup');
     }
@@ -103,33 +121,30 @@ router.post('/topup/truemoney', async (req, res) => {
     const refCode = 'TM' + store.genId(6).toUpperCase();
     const now = new Date().toISOString();
 
-    user.walletBalance = Math.round(((Number(user.walletBalance) || 0) + amount) * 100) / 100;
-
-    store.data.walletTransactions.push({
-      id: store.genId(10),
-      userId: user.id,
-      type: 'topup',
-      amount,
-      voucherCode,
-      note: `เติมเงินผ่านซอง TrueMoney (ผู้ส่ง: ${result.senderName || 'ไม่ระบุ'}, อ้างอิง ${refCode})`,
-      createdAt: now,
+    await store.transact((data) => {
+      if (data.walletTransactions.some(t => t.voucherCode === voucherCode)) {
+        throw new Error('ซองของขวัญนี้ถูกบันทึกเข้าระบบแล้ว');
+      }
+      const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.status === 'processing');
+      if (!claim || claim.userId !== user.id) throw new Error('ไม่พบรายการรับซองที่กำลังดำเนินการ');
+      const freshUser = data.users.find(u => u.id === user.id);
+      if (!freshUser) throw new Error('ไม่พบบัญชีผู้ใช้');
+      freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + amount) * 100) / 100;
+      data.walletTransactions.push({
+        id: store.genId(10), userId: freshUser.id, type: 'topup', amount, voucherCode,
+        note: `เติมเงินผ่านซอง TrueMoney (ผู้ส่ง: ${result.senderName || 'ไม่ระบุ'}, อ้างอิง ${refCode})`, createdAt: now,
+      });
+      data.topupRequests.push({
+        id: store.genId(10), userId: freshUser.id, amount, method: 'truemoney_angpao', refCode,
+        slipPath: null,
+        slipCheck: { checked: true, verified: true, message: `ซองของขวัญสำเร็จ (ผู้ส่ง: ${result.senderName || '-'})`, provider: 'truemoney_angpao' },
+        status: 'approved', createdAt: now, reviewedAt: now,
+        reviewNote: `ซอง TrueMoney ตรวจสอบและอนุมัติอัตโนมัติ (ผู้ส่ง: ${result.senderName || '-'})`,
+      });
+      claim.status = 'approved';
+      claim.amount = amount;
+      claim.finishedAt = now;
     });
-
-    store.data.topupRequests.push({
-      id: store.genId(10),
-      userId: user.id,
-      amount,
-      method: 'truemoney_angpao',
-      refCode,
-      slipPath: null,
-      slipCheck: { checked: true, verified: true, message: `ซองของขวัญสำเร็จ (ผู้ส่ง: ${result.senderName || '-'})`, provider: 'truemoney_angpao' },
-      status: 'approved',
-      createdAt: now,
-      reviewedAt: now,
-      reviewNote: `ซอง TrueMoney ตรวจสอบและอนุมัติอัตโนมัติ (ผู้ส่ง: ${result.senderName || '-'})`,
-    });
-
-    await store.save();
 
     const origin = `${req.protocol}://${req.get('host')}`;
     webhook.notifyTopup({
@@ -164,34 +179,12 @@ router.post('/topup/truemoney', async (req, res) => {
 
 router.post('/topup', async (req, res) => {
   const user = currentUser(req);
-  const rawAmount = parseFloat(req.body.amount);
-  const amount = Math.round((Number(rawAmount) || 0) * 100) / 100;
-  const method = req.body.method === 'bank_transfer' ? 'bank_transfer' : 'promptpay';
-  if (!Number.isFinite(amount) || amount < 1) {
+  const created = await createTopupRequest({ user, amount: req.body.amount, method: req.body.method });
+  if (!created.ok) {
     req.flash('error', 'กรุณาระบุจำนวนเงินอย่างน้อย 1 บาท');
     return res.redirect('/account/topup');
   }
-  const request = {
-    id: store.genId(10),
-    userId: user.id,
-    amount,
-    method,
-    refCode: 'TU' + store.genId(6).toUpperCase(),
-    slipPath: null,
-    slipCheck: null,
-    status: 'pending',
-    createdAt: new Date().toISOString(),
-    reviewedAt: null,
-    reviewNote: '',
-  };
-  store.data.topupRequests.push(request);
-  // Must finish persisting before redirecting — on a tenant shop, the very
-  // next request (GET /topup/:id) reloads this tenant's db fresh from
-  // MongoDB, so an unawaited save() here is a race: that next request can
-  // land before the write is committed and find the request missing,
-  // silently bouncing back to /account/topup with no error shown.
-  await store.save();
-  res.redirect(`/account/topup/${request.id}`);
+  res.redirect(`/account/topup/${created.request.id}`);
 });
 
 router.get('/topup/:id', async (req, res) => {
@@ -211,6 +204,25 @@ router.get('/topup/:id', async (req, res) => {
   }
 
   res.render('shop/topup-detail', { title: 'สถานะการเติมเงิน', request, payment, qrDataUrl });
+});
+
+router.get('/topup/:id/slip-file', async (req, res, next) => {
+  try {
+    const user = currentUser(req);
+    const request = store.data.topupRequests.find(t => t.id === req.params.id);
+    if (!request || (user.role !== 'admin' && request.userId !== user.id) || !request.slipStorageId) {
+      return res.sendStatus(404);
+    }
+    const media = await store.getPrivateMedia(request.slipStorageId);
+    if (!media) return res.sendStatus(404);
+    res.setHeader('Content-Type', media.file.metadata?.contentType || 'application/octet-stream');
+    res.setHeader('Content-Length', media.file.length);
+    res.setHeader('Cache-Control', 'private, no-store');
+    res.setHeader('Content-Disposition', 'inline');
+    media.stream.on('error', next).pipe(res);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // The actual automated check against EasySlip/SlipOK can take anywhere up
@@ -251,10 +263,6 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       provider = selectedProvider;
       result = { checked: false, verified: false, message: 'รอแอดมินตรวจสอบสลิป', raw: null };
     }
-    // An admin may approve/reject while the provider request is in flight.
-    if (request.status === 'approved' || request.status === 'rejected') return;
-    request.slipCheck = { checked: result.checked, verified: result.verified, message: result.message, provider };
-
     let verified = result.checked && result.verified;
     const raw = result.raw;
     // Normalize the transaction reference + timestamp across providers —
@@ -266,46 +274,49 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       || slipok.parseTransDateTime(raw.transDate, raw.transTime)
     );
 
-    if (verified && raw) {
-      request.slipCheck.transRef = transRef;
-
-      // Reject slips for transfers made more than 5 minutes ago
-      if (transTime && !Number.isNaN(transTime.getTime()) && Date.now() - transTime.getTime() > 5 * 60 * 1000) {
-        verified = false;
-        request.slipCheck.verified = false;
-        request.slipCheck.message = 'สลิปนี้โอนเงินมานานเกิน 5 นาทีแล้ว ไม่สามารถใช้ยืนยันได้ กรุณาโอนใหม่แล้วแนบสลิปทันที';
-      }
-
-      // Reject slips already used to top up successfully before (duplicate) —
-      // extra safety on top of the provider's own duplicate check, scoped to
-      // this shop's own top-up history.
-      if (verified && transRef) {
-        const alreadyUsed = store.data.topupRequests.some(t =>
-          t.id !== request.id && t.status === 'approved' &&
-          t.slipCheck && t.slipCheck.transRef === transRef
-        );
-        if (alreadyUsed) {
+    let finalRequest;
+    const applied = await store.transact((data) => {
+      const freshRequest = data.topupRequests.find(t => t.id === requestId);
+      const freshUser = data.users.find(u => u.id === userId);
+      if (!freshRequest || !freshUser || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
+      freshRequest.slipCheck = { checked: result.checked, verified: result.verified, message: result.message, provider, transRef };
+      if (verified) {
+        const slipAge = transTime && !Number.isNaN(transTime.getTime()) ? Date.now() - transTime.getTime() : null;
+        if (slipAge === null || slipAge > 5 * 60 * 1000 || slipAge < -2 * 60 * 1000) {
           verified = false;
-          request.slipCheck.verified = false;
-          request.slipCheck.message = 'สลิปนี้เคยถูกใช้เติมเงินไปแล้ว ไม่สามารถใช้ซ้ำได้';
+          freshRequest.slipCheck.verified = false;
+          freshRequest.slipCheck.message = 'เวลาในสลิปไม่อยู่ในช่วงที่ยอมรับได้ กรุณาแนบสลิปล่าสุด';
+        }
+        if (!transRef) {
+          verified = false;
+          freshRequest.slipCheck.verified = false;
+          freshRequest.slipCheck.message = 'ไม่พบเลขอ้างอิงธุรกรรม — รอแอดมินตรวจสอบ';
+        }
+        const duplicate = transRef && data.topupRequests.some(t =>
+          t.id !== freshRequest.id && t.status === 'approved' && t.slipCheck?.transRef === transRef
+        );
+        if (duplicate) {
+          verified = false;
+          freshRequest.slipCheck.verified = false;
+          freshRequest.slipCheck.message = 'สลิปนี้เคยถูกใช้เติมเงินไปแล้ว ไม่สามารถใช้ซ้ำได้';
         }
       }
-    }
-
-    if (verified) {
-      user.walletBalance = Math.round(((Number(user.walletBalance) || 0) + request.amount) * 100) / 100;
-      store.data.walletTransactions.push({
-        id: store.genId(10), userId: user.id, type: 'topup', amount: request.amount,
-        note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${request.refCode})`,
-        createdAt: new Date().toISOString(),
-      });
-      request.status = 'approved';
-      request.reviewedAt = new Date().toISOString();
-      request.reviewNote = 'ตรวจสอบและอนุมัติอัตโนมัติ';
-    } else {
-      request.status = 'pending';
-    }
-    await store.save();
+      if (verified) {
+        freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + freshRequest.amount) * 100) / 100;
+        data.walletTransactions.push({
+          id: store.genId(10), userId: freshUser.id, type: 'topup', amount: freshRequest.amount,
+          note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${freshRequest.refCode})`, createdAt: new Date().toISOString(),
+        });
+        freshRequest.status = 'approved';
+        freshRequest.reviewedAt = new Date().toISOString();
+        freshRequest.reviewNote = 'ตรวจสอบและอนุมัติอัตโนมัติ';
+      } else {
+        freshRequest.status = 'pending';
+      }
+      finalRequest = freshRequest;
+      return true;
+    });
+    if (!applied) return;
 
     // Links to the normal (login-required) admin approve page for now — a
     // no-login-needed one-click link is a separate, deliberately-held-back
@@ -313,27 +324,78 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     webhook.notifyTopup({
       webhookUrl: payment.topupWebhookUrl,
       username: user.username, email: user.email,
-      amount: request.amount, refCode: request.refCode, method: request.method,
-      slipUrl: request.slipPath ? origin + request.slipPath : null,
+      amount: finalRequest.amount, refCode: finalRequest.refCode, method: finalRequest.method,
+      slipUrl: null,
       autoApproved: verified,
       adminUrl: verified ? null : `${origin}/admin/topups`,
     }).catch(() => {});
   } catch (err) {
     console.error('[topup] background verify failed:', err.message);
-    const request = store.data.topupRequests.find(t => t.id === requestId);
-    if (request && request.status === 'verifying') {
-      request.status = 'pending';
-      request.slipCheck = { checked: false, verified: false, message: 'ระบบตรวจสลิปขัดข้องชั่วคราว อยู่ระหว่างรอแอดมินตรวจสอบ' };
-      await store.save();
-    }
+    await store.transact((data) => {
+      const request = data.topupRequests.find(t => t.id === requestId);
+      if (request && request.status === 'verifying') {
+        request.status = 'pending';
+        request.slipCheck = { checked: false, verified: false, message: 'ระบบตรวจสลิปขัดข้องชั่วคราว อยู่ระหว่างรอแอดมินตรวจสอบ' };
+      }
+    }).catch(saveErr => console.error('[topup] could not persist verification failure:', saveErr.message));
   } finally {
-    const request = store.data.topupRequests.find(t => t.id === requestId);
-    if (request && request.status === 'verifying') {
-      request.status = 'pending';
-      await store.save();
-    }
+    await store.transact((data) => {
+      const request = data.topupRequests.find(t => t.id === requestId);
+      if (request && request.status === 'verifying') request.status = 'pending';
+    }).catch(saveErr => console.error('[topup] could not finalize verification:', saveErr.message));
     activeVerifications.delete(requestId);
   }
+}
+
+// Shared with src/routes/internal-api.js (the separate rent-app calls
+// these two instead of re-implementing topup + slip verification itself)
+// so there is exactly one place that creates a topup request and exactly
+// one place that kicks off slip verification.
+async function createTopupRequest({ user, amount, method }) {
+  const amt = Math.round((Number(amount) || 0) * 100) / 100;
+  const mth = method === 'bank_transfer' ? 'bank_transfer' : 'promptpay';
+  if (!Number.isFinite(amt) || amt < 1) {
+    return { ok: false, error: 'กรุณาระบุจำนวนเงินอย่างน้อย 1 บาท' };
+  }
+  const request = {
+    id: store.genId(10), userId: user.id, amount: amt, method: mth,
+    refCode: 'TU' + store.genId(6).toUpperCase(),
+    slipPath: null, slipCheck: null, status: 'pending',
+    createdAt: new Date().toISOString(), reviewedAt: null, reviewNote: '',
+  };
+  await store.transact((data) => data.topupRequests.push(request));
+  return { ok: true, request };
+}
+
+async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptions, origin }) {
+  const request = store.data.topupRequests.find(t => t.id === requestId && t.userId === user.id);
+  if (!request) return { ok: false, error: 'ไม่พบคำขอนี้' };
+  if (request.status === 'approved' || request.status === 'rejected') {
+    return { ok: false, error: 'คำขอนี้ถูกตรวจสอบไปแล้ว' };
+  }
+  if (activeVerifications.has(request.id)) {
+    return { ok: false, error: 'คำขอนี้กำลังอยู่ระหว่างการตรวจสอบ กรุณารอสักครู่' };
+  }
+  try {
+    const storageId = await store.savePrivateMedia(fileBuffer, fileOptions.filename, fileOptions.contentType);
+    await store.transact((data) => {
+      const fresh = data.topupRequests.find(t => t.id === requestId && t.userId === user.id);
+      if (!fresh || fresh.status === 'approved' || fresh.status === 'rejected') throw new Error('คำขอนี้ถูกตรวจสอบแล้ว');
+      fresh.slipStorageId = storageId;
+      fresh.slipPath = `/account/topup/${fresh.id}/slip-file`;
+      fresh.status = 'verifying';
+    });
+    request.slipStorageId = storageId;
+    request.slipPath = `/account/topup/${request.id}/slip-file`;
+    request.status = 'verifying';
+  } catch (saveError) {
+    request.status = 'pending';
+    return { ok: false, error: 'บันทึกไฟล์สลิปไม่สำเร็จ กรุณาลองใหม่' };
+  }
+  const backgroundVerify = store.bindTenantContext(verifySlipInBackground);
+  backgroundVerify({ requestId: request.id, userId: user.id, fileBuffer, fileOptions, origin })
+    .catch((bgErr) => console.error('[topup] background verify failed:', bgErr.message));
+  return { ok: true, request };
 }
 
 router.post('/topup/:id/slip', (req, res) => {
@@ -353,26 +415,20 @@ router.post('/topup/:id/slip', (req, res) => {
       req.flash('error', 'อัปโหลดสลิปไม่สำเร็จ (รองรับไฟล์รูปภาพ JPG, PNG, WEBP ขนาดไม่เกิน 5MB)');
       return res.redirect(`/account/topup/${request.id}`);
     }
-    try {
-      request.slipPath = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
-      request.status = 'verifying';
-      await store.save();
-    } catch (saveError) {
-      request.status = 'pending';
-      req.flash('error', 'บันทึกไฟล์สลิปไม่สำเร็จ กรุณาลองใหม่');
+    const attached = await attachSlipToTopupRequest({
+      requestId: request.id, user,
+      fileBuffer: req.file.buffer,
+      fileOptions: { filename: req.file.originalname, contentType: req.file.mimetype },
+      origin: `${req.protocol}://${req.get('host')}`,
+    });
+    if (!attached.ok) {
+      req.flash('error', attached.error);
       return res.redirect(`/account/topup/${request.id}`);
     }
 
     req.flash('success', 'แนบสลิปแล้ว ระบบกำลังตรวจสอบอัตโนมัติเบื้องหลัง — รีเฟรชหน้านี้อีกครั้งในไม่กี่วินาทีเพื่อดูผล');
     res.redirect(`/account/topup/${request.id}`);
 
-    const backgroundVerify = store.bindTenantContext(verifySlipInBackground);
-    backgroundVerify({
-      requestId: request.id, userId: user.id,
-      fileBuffer: req.file.buffer,
-      fileOptions: { filename: req.file.originalname, contentType: req.file.mimetype },
-      origin: `${req.protocol}://${req.get('host')}`,
-    }).catch((bgErr) => console.error('[topup] background verify failed:', bgErr.message));
   }));
 });
 
@@ -396,3 +452,7 @@ router.get('/orders/:id', (req, res) => {
 });
 
 module.exports = router;
+// Attached to the router function object (functions are objects in JS) so
+// the internal API can reuse this exact logic without a second import path.
+router.createTopupRequest = createTopupRequest;
+router.attachSlipToTopupRequest = attachSlipToTopupRequest;

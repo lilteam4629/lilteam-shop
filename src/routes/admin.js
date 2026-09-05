@@ -620,8 +620,8 @@ router.get('/users', (req, res) => {
 });
 
 router.post('/users/:id/wallet', async (req, res) => {
-  const user = store.data.users.find(u => u.id === req.params.id);
   const amount = parseInt(req.body.amount, 10);
+  const user = store.data.users.find(u => u.id === req.params.id);
   if (!user) {
     req.flash('error', 'ไม่พบสมาชิก');
     return res.redirect('/admin/users');
@@ -630,12 +630,15 @@ router.post('/users/:id/wallet', async (req, res) => {
     req.flash('error', 'กรุณาระบุจำนวนเงินที่ถูกต้อง');
     return res.redirect('/admin/users');
   }
-  user.walletBalance = Math.max(0, user.walletBalance + amount);
-  store.data.walletTransactions.push({
-    id: store.genId(10), userId: user.id, type: 'adjust', amount,
-    note: `ผู้ดูแลระบบปรับยอด (${req.body.note || 'ไม่มีหมายเหตุ'})`, createdAt: new Date().toISOString(),
+  await store.transact((data) => {
+    const freshUser = data.users.find(u => u.id === req.params.id);
+    if (!freshUser) throw new Error('ไม่พบสมาชิก');
+    freshUser.walletBalance = Math.max(0, (Number(freshUser.walletBalance) || 0) + amount);
+    data.walletTransactions.push({
+      id: store.genId(10), userId: freshUser.id, type: 'adjust', amount,
+      note: `ผู้ดูแลระบบปรับยอด (${req.body.note || 'ไม่มีหมายเหตุ'})`, createdAt: new Date().toISOString(),
+    });
   });
-  await store.save();
   req.flash('success', 'ปรับยอดเงินสำเร็จ');
   res.redirect('/admin/users');
 });
@@ -969,14 +972,21 @@ router.post('/topups/:id/approve', async (req, res) => {
   const user = store.data.users.find(u => u.id === request.userId);
   if (!user) { req.flash('error', 'ไม่พบผู้ใช้'); return res.redirect('/admin/topups'); }
 
-  user.walletBalance = Math.round(((Number(user.walletBalance) || 0) + request.amount) * 100) / 100;
-  store.data.walletTransactions.push({
-    id: store.genId(10), userId: user.id, type: 'topup', amount: request.amount,
-    note: `เติมเงินสำเร็จ (อ้างอิง ${request.refCode})`, createdAt: new Date().toISOString(),
+  const approved = await store.transact((data) => {
+    const freshRequest = data.topupRequests.find(t => t.id === req.params.id);
+    if (!freshRequest || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
+    const freshUser = data.users.find(u => u.id === freshRequest.userId);
+    if (!freshUser) return false;
+    freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + Number(freshRequest.amount)) * 100) / 100;
+    data.walletTransactions.push({
+      id: store.genId(10), userId: freshUser.id, type: 'topup', amount: freshRequest.amount,
+      note: `เติมเงินสำเร็จ (อ้างอิง ${freshRequest.refCode})`, createdAt: new Date().toISOString(),
+    });
+    freshRequest.status = 'approved';
+    freshRequest.reviewedAt = new Date().toISOString();
+    return true;
   });
-  request.status = 'approved';
-  request.reviewedAt = new Date().toISOString();
-  await store.save();
+  if (!approved) { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
   req.flash('success', `อนุมัติคำขอเติมเงิน ${request.amount.toLocaleString()} บาท ให้ ${user.username} แล้ว`);
   res.redirect('/admin/topups');
 });
@@ -985,10 +995,15 @@ router.post('/topups/:id/reject', async (req, res) => {
   const request = store.data.topupRequests.find(t => t.id === req.params.id);
   if (!request) { req.flash('error', 'ไม่พบคำขอ'); return res.redirect('/admin/topups'); }
   if (request.status === 'approved' || request.status === 'rejected') { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
-  request.status = 'rejected';
-  request.reviewedAt = new Date().toISOString();
-  request.reviewNote = req.body.reviewNote || '';
-  await store.save();
+  const rejected = await store.transact((data) => {
+    const freshRequest = data.topupRequests.find(t => t.id === req.params.id);
+    if (!freshRequest || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
+    freshRequest.status = 'rejected';
+    freshRequest.reviewedAt = new Date().toISOString();
+    freshRequest.reviewNote = req.body.reviewNote || '';
+    return true;
+  });
+  if (!rejected) { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
   req.flash('success', 'ปฏิเสธคำขอเติมเงินแล้ว');
   res.redirect('/admin/topups');
 });

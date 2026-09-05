@@ -253,6 +253,7 @@ function defaultData() {
     reviews: [],
     walletTransactions: [],
     topupRequests: [],
+    truemoneyRedemptions: [],
     miniGamePrizes: [
       { id: nanoid(8), gameType: 'box', name: 'ไอดีเกมมือสอง (สุ่ม 1 ไอดี)', percent: 10, stock: 5, isPrize: true, image: null, active: true, createdAt: now },
       { id: nanoid(8), gameType: 'box', name: 'ส่วนลด 20 บาท (แจ้งแอดมิน)', percent: 20, stock: 20, isPrize: true, image: null, active: true, createdAt: now },
@@ -278,6 +279,53 @@ let db = null;
 let mongoCollection = null;
 let mongoClient = null;
 let mediaBucket = null;
+const documentQueues = new Map();
+
+function replaceObject(target, source) {
+  Object.keys(target).forEach(key => delete target[key]);
+  Object.assign(target, source);
+}
+
+function enqueueDocument(documentId, work) {
+  const previous = documentQueues.get(documentId) || Promise.resolve();
+  const current = previous.then(work, work);
+  const queued = current.catch(() => {});
+  documentQueues.set(documentId, queued);
+  return current.finally(() => {
+    if (documentQueues.get(documentId) === queued) documentQueues.delete(documentId);
+  });
+}
+
+async function transact(mutator) {
+  const ctx = tenantContext.getStore();
+  const documentId = ctx ? `shop:${ctx.shopId}` : 'main';
+  const target = ctx ? ctx.db : db;
+  return enqueueDocument(documentId, async () => {
+    if (!mongoCollection) {
+      const result = await mutator(target);
+      await (ctx ? saveTenantDb(ctx.shopId, target) : save());
+      return result;
+    }
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      const stored = await mongoCollection.findOne({ _id: documentId });
+      if (!stored) throw new Error(`ไม่พบข้อมูลร้าน ${documentId}`);
+      const revision = Number(stored._revision) || 0;
+      delete stored._id;
+      delete stored._revision;
+      migrateSchema(stored);
+      const result = await mutator(stored);
+      const filter = revision
+        ? { _id: documentId, _revision: revision }
+        : { _id: documentId, $or: [{ _revision: { $exists: false } }, { _revision: 0 }] };
+      const written = await mongoCollection.replaceOne(filter, { _id: documentId, _revision: revision + 1, ...stored });
+      if (written.modifiedCount === 1) {
+        replaceObject(target, stored);
+        return result;
+      }
+    }
+    throw new Error('ข้อมูลมีการเปลี่ยนแปลงพร้อมกัน กรุณาลองใหม่');
+  });
+}
 
 async function init() {
   if (MONGODB_URI) {
@@ -449,6 +497,7 @@ function migrateSchema(db) {
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }
+  if (!db.truemoneyRedemptions) { db.truemoneyRedemptions = []; changed = true; }
   if (!db.settings.music) {
     db.settings.music = { enabled: false, youtubeUrl: '', defaultVolume: 50, startSeconds: 0, endSeconds: 0 };
     changed = true;
@@ -634,8 +683,7 @@ function save() {
   const ctx = tenantContext.getStore();
   if (ctx) return saveTenantDb(ctx.shopId, ctx.db);
   if (mongoCollection) {
-    return mongoCollection.replaceOne({ _id: 'main' }, { _id: 'main', ...db }, { upsert: true })
-      .catch((err) => console.error('[store] MongoDB save failed:', err.message));
+    return mongoCollection.replaceOne({ _id: 'main' }, { _id: 'main', ...db }, { upsert: true });
   } else {
     fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
     return Promise.resolve();
@@ -648,8 +696,7 @@ function saveTenantDb(shopId, tenantDb) {
     // shop created and then immediately redirected to must already be
     // readable by loadTenantDb on the very next request, or that request
     // sees no data yet and shows "ร้านนี้ยังไม่พร้อมใช้งาน".
-    return mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...tenantDb }, { upsert: true })
-      .catch((err) => console.error(`[store] MongoDB save failed for shop ${shopId}:`, err.message));
+    return mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...tenantDb }, { upsert: true });
   }
   fs.writeFileSync(tenantDbPath(shopId), JSON.stringify(tenantDb, null, 2));
   return Promise.resolve();
@@ -747,7 +794,7 @@ function reset() {
 
 const ALLOWED_IMAGE_EXTS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
 
-async function saveMedia(buffer, filename, contentType) {
+function validateImage(buffer, filename, contentType) {
   const ext = path.extname(filename || '').toLowerCase();
   if (!ALLOWED_IMAGE_EXTS.has(ext)) {
     throw new Error('ประเภทไฟล์ไม่ได้รับอนุญาต (รองรับเฉพาะไฟล์รูปภาพ .jpg, .png, .webp, .gif)');
@@ -785,6 +832,10 @@ async function saveMedia(buffer, filename, contentType) {
     }
   }
 
+}
+
+async function saveMedia(buffer, filename, contentType) {
+  validateImage(buffer, filename, contentType);
   if (r2.isEnabled()) {
     try {
       const uploaded = await r2.uploadMedia(buffer, filename, contentType);
@@ -812,6 +863,47 @@ async function saveMedia(buffer, filename, contentType) {
   return `/uploads/media/${safeName}`;
 }
 
+async function savePrivateMedia(buffer, filename, contentType) {
+  validateImage(buffer, filename, contentType);
+  if (mediaBucket) {
+    const upload = mediaBucket.openUploadStream(filename, {
+      metadata: { contentType, private: true },
+    });
+    await new Promise((resolve, reject) => {
+      upload.on('finish', resolve);
+      upload.on('error', reject);
+      upload.end(buffer);
+    });
+    return upload.id.toString();
+  }
+  const privateDir = path.join(__dirname, '..', '..', 'data', 'private');
+  fs.mkdirSync(privateDir, { recursive: true });
+  const id = `${Date.now()}-${nanoid(16)}`;
+  fs.writeFileSync(path.join(privateDir, id), buffer);
+  fs.writeFileSync(path.join(privateDir, `${id}.json`), JSON.stringify({ filename, contentType }));
+  return id;
+}
+
+async function getPrivateMedia(id) {
+  if (mediaBucket) {
+    if (!ObjectId.isValid(id)) return null;
+    const objectId = new ObjectId(id);
+    const file = await mediaBucket.find({ _id: objectId, 'metadata.private': true }).next();
+    if (!file) return null;
+    return { file, stream: mediaBucket.openDownloadStream(objectId) };
+  }
+  if (!/^[a-zA-Z0-9_-]+$/.test(String(id || ''))) return null;
+  const privateDir = path.join(__dirname, '..', '..', 'data', 'private');
+  const filePath = path.join(privateDir, id);
+  const metaPath = path.join(privateDir, `${id}.json`);
+  if (!fs.existsSync(filePath) || !fs.existsSync(metaPath)) return null;
+  const metadata = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+  return {
+    file: { metadata, length: fs.statSync(filePath).size },
+    stream: fs.createReadStream(filePath),
+  };
+}
+
 async function getMedia(id) {
   if (!mediaBucket || !ObjectId.isValid(id)) return null;
   const objectId = new ObjectId(id);
@@ -837,6 +929,8 @@ module.exports = {
   save,
   reset,
   saveMedia,
+  savePrivateMedia,
+  getPrivateMedia,
   getMedia,
   isPersistent: () => Boolean(mongoCollection),
   getSystemStatus,
@@ -845,6 +939,7 @@ module.exports = {
   createTenantDb,
   deleteTenantDb,
   runInTenant,
+  transact,
   // Wrap a callback with the CURRENT tenant context so it still resolves
   // the right shop's data even if invoked later through a non-Express
   // callback API (e.g. multer's manual upload.single(...)(req, res, cb)

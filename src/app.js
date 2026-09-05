@@ -16,6 +16,7 @@ const adminRoutes = require('./routes/admin');
 const licenseRoutes = require('./routes/license');
 const rentWebsiteRoutes = require('./routes/rent-website');
 const tenantRoutes = require('./routes/tenant');
+const internalApiRoutes = require('./routes/internal-api');
 const { tenantResolver, MAIN_DOMAIN } = require('./middleware/tenant');
 const license = require('./services/license');
 const discordBot = require('./services/discord-bot');
@@ -159,31 +160,14 @@ app.use((req, res, next) => {
   next();
 });
 
-// rent.<MAIN_DOMAIN> is the dedicated public marketing/pricing landing
-// page for the reseller/rent-a-shop funnel — same app, same code, just its
-// own subdomain so it doesn't show your game-shop storefront. Unlike
-// /rent-website (which requires login), this page must be visible to a
-// visitor who hasn't signed up yet, so it renders its own standalone view
-// rather than redirecting into a login-gated route.
-app.use('/', (req, res, next) => {
-  if (req.path !== '/' || req.hostname !== `rent.${MAIN_DOMAIN}`) return next();
-  const isPlanAvailable = (plan) => {
-    if (!plan.active) return false;
-    if (!plan.promo) return true;
-    if (plan.promoExpiresAt && Date.now() > plan.promoExpiresAt) return false;
-    if (plan.promoLimit && (plan.promoUsedCount || 0) >= plan.promoLimit) return false;
-    return true;
-  };
-  const plans = store.data.licensePlans.filter(isPlanAvailable).sort((a, b) => a.days - b.days);
-  res.render('tenant/rent-landing', {
-    title: `เช่าเว็บร้านค้าออนไลน์ | ${store.data.settings.shopName} Cloud`,
-    layout: false,
-    plans,
-    mainDomain: MAIN_DOMAIN,
-    shopName: store.data.settings.shopName,
-    logoImage: store.data.settings.branding && store.data.settings.branding.logoImage,
-  });
-});
+// rent.<MAIN_DOMAIN> now points (at the reverse-proxy level, outside this
+// app) to a fully separate rent-app deployment — see IMPORT-REVIEW/plan
+// notes. This app no longer renders anything for that host itself; it
+// only exposes /internal/api for the rent-app to call. 'rent' stays
+// reserved (RESERVED_TENANT_SUBDOMAINS in middleware/tenant.js,
+// RESERVED_SLUGS in services/shop-provisioning.js) so no tenant shop can
+// ever claim that slug even though routing happens at nginx now.
+app.use('/internal/api', internalApiRoutes);
 
 // /start and /my-shops (opening/renewing a multi-tenant shop) only make
 // sense on the MAIN site — a rented shop's own subdomain shouldn't be able
