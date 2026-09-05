@@ -183,6 +183,13 @@ function defaultData() {
         byshopEndpoint: 'https://api.byshop.me/api',
         slip2goApiKey: '',
         slip2goEndpoint: 'https://api.slip2go.com/api',
+        easyslipApiKey: '',
+        slipcheckApiKey: '',
+        slipcheckEndpoint: 'https://mxrslip.lovable.app/api/public/v1',
+        rdcwClientId: '',
+        rdcwClientSecret: '',
+        rdcwEndpoint: 'https://suba.rdcw.co.th/v2/inquiry',
+        tenantOwnedSlipApi: false,
         // Optional per-shop SlipOK credentials (see /admin/topups). When set,
         // this shop's own slip checks use these instead of the global
         // SLIPOK_BRANCH_ID/SLIPOK_API_KEY env vars — lets each tenant shop

@@ -4,6 +4,9 @@ const multer = require('multer');
 const QRCode = require('qrcode');
 const store = require('../data/store');
 const slipok = require('../services/slipok');
+const slipcheck = require('../services/slipcheck');
+const rdcwSlip = require('../services/rdcw-slip');
+const slip2go = require('../services/slip2go');
 const easyslip = require('../services/easyslip');
 const promptpay = require('../services/promptpay');
 const webhook = require('../services/webhook');
@@ -254,11 +257,15 @@ router.get('/topup/:id/slip-file', async (req, res, next) => {
 const activeVerifications = new Set();
 
 function canCheckSlipAutomatically(payment = {}) {
-  const selected = resolveSlipProvider(payment, easyslip.isConfigured());
+  const easyKey = payment.tenantOwnedSlipApi ? (payment.easyslipApiKey || null) : (payment.easyslipApiKey || undefined);
+  const selected = resolveSlipProvider(payment, easyslip.isConfigured(easyKey));
   if (selected === 'easyslip') {
-    return easyslip.isConfigured() && payment.easyslipAccounts && Object.values(payment.easyslipAccounts).some(a => a && a.bankNumber);
+    return easyslip.isConfigured(easyKey) && payment.easyslipAccounts && Object.values(payment.easyslipAccounts).some(a => a && a.bankNumber);
   }
   if (selected === 'slipok') return Boolean(payment.slipokBranchId && payment.slipokApiKey);
+  if (selected === 'slipcheck') return Boolean(payment.slipcheckApiKey);
+  if (selected === 'rdcw') return Boolean(payment.rdcwClientId && payment.rdcwClientSecret);
+  if (selected === 'slip2go') return Boolean(payment.slip2goApiKey);
   return false;
 }
 
@@ -275,9 +282,10 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     let provider = null;
     let result;
 
-    const selectedProvider = resolveSlipProvider(payment, easyslip.isConfigured());
+    const easyKey = payment.tenantOwnedSlipApi ? (payment.easyslipApiKey || null) : (payment.easyslipApiKey || undefined);
+    const selectedProvider = resolveSlipProvider(payment, easyslip.isConfigured(easyKey));
 
-    if (selectedProvider === 'easyslip' && easyslip.isConfigured() && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
+    if (selectedProvider === 'easyslip' && easyslip.isConfigured(easyKey) && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
       provider = 'easyslip';
       const accountEntries = Object.entries(payment.easyslipAccounts);
       const wantedKind = request.method === 'promptpay' ? ':promptpay' : ':account';
@@ -290,12 +298,33 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       if (!expectedNumbers.length && request.method === 'promptpay' && payment.promptpayId) {
         expectedNumbers = [payment.promptpayId];
       }
-      result = await easyslip.verifySlip(fileBuffer, request.amount, fileOptions, expectedNumbers);
+      result = await easyslip.verifySlip(fileBuffer, request.amount, fileOptions, expectedNumbers, easyKey);
     } else if (selectedProvider === 'slipok') {
       provider = 'slipok';
       result = await slipok.verifySlip(fileBuffer, request.amount, fileOptions, {
         branchId: payment.slipokBranchId,
         apiKey: payment.slipokApiKey,
+      });
+    } else if (selectedProvider === 'slipcheck') {
+      provider = 'slipcheck';
+      result = await slipcheck.verifySlip(fileBuffer, request.amount, fileOptions, {
+        apiKey: payment.slipcheckApiKey,
+        endpoint: payment.slipcheckEndpoint,
+        expectedReceiverNames: [request.method === 'promptpay' ? payment.promptpayName : payment.bankAccountName],
+      });
+    } else if (selectedProvider === 'rdcw') {
+      provider = 'rdcw';
+      result = await rdcwSlip.verifySlip(fileBuffer, request.amount, fileOptions, {
+        clientId: payment.rdcwClientId,
+        clientSecret: payment.rdcwClientSecret,
+        endpoint: payment.rdcwEndpoint,
+        expectedReceiverNames: [request.method === 'promptpay' ? payment.promptpayName : payment.bankAccountName],
+      });
+    } else if (selectedProvider === 'slip2go') {
+      provider = 'slip2go';
+      result = await slip2go.verifySlip(fileBuffer, request.amount, fileOptions, {
+        apiKey: payment.slip2goApiKey,
+        endpoint: payment.slip2goEndpoint,
       });
     } else {
       provider = selectedProvider;
@@ -309,6 +338,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     const transRef = raw && (raw.transRef || (raw.rawSlip && raw.rawSlip.transRef)) || null;
     const transTime = raw && (
       (raw.rawSlip && raw.rawSlip.date && new Date(raw.rawSlip.date))
+      || (raw.date && new Date(String(raw.date).replace(' ', 'T') + (String(raw.date).includes('T') ? '' : ':00+07:00')))
       || slipok.parseTransDateTime(raw.transDate, raw.transTime)
     );
 

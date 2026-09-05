@@ -1,5 +1,5 @@
 <!-- Slip Verification API Provider Hub Header -->
-<p class="mb-4 rounded-xl border p-4">การตรวจสลิปใช้ EasySlip/SlipOK และคีย์เดิมของระบบ ส่วนฟังก์ชันอื่นคงตามรุ่นที่ปรับปรุงใหม่</p>
+<p class="mb-4 rounded-xl border p-4"><%= isMainSite ? 'เว็บหลักใช้ API ของคุณเอง' : 'ร้านนี้ใช้ API และโควตาของเจ้าของร้านเองโดยเฉพาะ ไม่ใช้บัญชีของเว็บหลัก' %></p>
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
     <div class="flex items-center gap-2">
@@ -27,6 +27,8 @@
       <% } else if (payment.slipProvider === 'byshop') { %>🚀
       <% } else if (payment.slipProvider === 'slipok') { %>🛡️
       <% } else if (payment.slipProvider === 'easyslip') { %>⚡
+      <% } else if (payment.slipProvider === 'slipcheck') { %>✅
+      <% } else if (payment.slipProvider === 'rdcw') { %>🛡️
       <% } else if (payment.slipProvider === 'slip2go') { %>⚠️
       <% } else { %>🔌<% } %>
     </div>
@@ -38,6 +40,8 @@
           <% } else if (payment.slipProvider === 'byshop') { %>⭐ BYSHOP API (แนะนำ)
           <% } else if (payment.slipProvider === 'slipok') { %>⭐ SlipOK API (แนะนำ)
           <% } else if (payment.slipProvider === 'easyslip') { %>EasySlip API (มาตรฐาน)
+          <% } else if (payment.slipProvider === 'slipcheck') { %>SlipCheck API
+          <% } else if (payment.slipProvider === 'rdcw') { %>SlipRDCW API
           <% } else if (payment.slipProvider === 'slip2go') { %>Slip2Go API
           <% } else { %>Custom Slip API<% } %>
         </span>
@@ -51,6 +55,10 @@
           ระบบตรวจสลิปอัตโนมัติผ่าน SlipOK API (Branch: <%= payment.slipokBranchId || 'ยังไม่ระบุ' %>)
         <% } else if (payment.slipProvider === 'easyslip') { %>
           ระบบตรวจสลิปอัตโนมัติผ่าน EasySlip Platform
+        <% } else if (payment.slipProvider === 'slipcheck') { %>
+          ระบบตรวจสลิปอัตโนมัติผ่าน SlipCheck โดยใช้ API Key ของร้านนี้
+        <% } else if (payment.slipProvider === 'rdcw') { %>
+          ระบบตรวจสลิปอัตโนมัติผ่าน SlipRDCW โดยใช้ Client ID และ Secret ของร้านนี้
         <% } else if (payment.slipProvider === 'slip2go') { %>
           ระบบตรวจสลิปอัตโนมัติผ่าน Slip2Go API
         <% } else { %>
@@ -61,7 +69,7 @@
   </div>
 
   <div class="flex items-center gap-2 shrink-0">
-    <button type="button" onclick="document.getElementById('slip-provider-form').scrollIntoView({ behavior: 'smooth' })" class="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--input)] text-[var(--text)] hover:bg-[var(--gold)] hover:text-[var(--bg)] transition border border-[var(--border)]">
+    <button type="button" onclick="document.getElementById('own-slip-provider-form').scrollIntoView({ behavior: 'smooth' })" class="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--input)] text-[var(--text)] hover:bg-[var(--gold)] hover:text-[var(--bg)] transition border border-[var(--border)]">
       ⚙️ ปรับเปลี่ยนค่าย API
     </button>
   </div>
@@ -116,6 +124,7 @@
 <% } %>
 
 <!-- Main-site monthly operating costs (not tenant/rented shop expenses) -->
+<% if (isMainSite) { %>
 <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm mb-6">
   <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
     <div>
@@ -191,9 +200,119 @@
     </form>
   </details>
 </div>
+<% } %>
 
 <!-- Main Provider Configuration Form -->
-<form id="slip-provider-form" action="/admin/slip-verification" method="POST" class="space-y-6">
+<form id="own-slip-provider-form" action="/admin/slip-verification" method="POST" class="space-y-5 mb-6">
+  <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 sm:p-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      <div>
+        <h2 class="text-lg font-bold">ตั้งค่าตรวจสลิปอัตโนมัติ</h2>
+        <p class="text-xs text-[var(--text-4)] mt-1"><%= isMainSite ? 'เว็บหลักใช้บัญชี API ของคุณเอง' : 'ตอนนี้ EasySlip ใช้คีย์กลางของระบบ ส่วนค่ายอื่นร้านต้องกรอก API ของตัวเอง' %></p>
+      </div>
+      <label class="inline-flex items-center gap-2 text-sm"><input type="radio" name="slipProvider" value="none" <%= payment.slipProvider === 'none' ? 'checked' : '' %>> ปิดตรวจอัตโนมัติ</label>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+      <% const ownProviders = [
+        ['easyslip', '⚡', 'EasySlip', 'Bearer API Key'],
+        ['slipcheck', '✅', 'SlipCheck', 'ฟรี 500 ครั้ง/เดือน'],
+        ['rdcw', '🛡️', 'SlipRDCW', 'Client ID + Secret'],
+        ['slip2go', '🔎', 'Slip2Go', 'API Key']
+      ]; %>
+      <% ownProviders.forEach(provider => { %>
+        <label class="cursor-pointer rounded-xl border-2 p-4 transition <%= payment.slipProvider === provider[0] ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--input)]/30' %>">
+          <input type="radio" name="slipProvider" value="<%= provider[0] %>" class="sr-only" <%= payment.slipProvider === provider[0] ? 'checked' : '' %>>
+          <div class="text-2xl"><%= provider[1] %></div>
+          <div class="font-bold text-sm mt-2"><%= provider[2] %></div>
+          <div class="text-[10px] text-[var(--text-4)] mt-1"><%= provider[3] %></div>
+        </label>
+      <% }) %>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-2 gap-4">
+    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+      <div class="flex items-center justify-between"><h3 class="font-bold">⚡ EasySlip</h3><a href="https://developer.easyslip.com" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัคร/เติมแพ็กเกจ ↗</a></div>
+      <% if (isMainSite) { %>
+        <label class="block text-xs text-[var(--text-3)]">API Key
+          <input id="own-easyslip-key" type="password" name="easyslipApiKey" value="<%= payment.easyslipApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" />
+        </label>
+      <% } else { %>
+        <input id="own-easyslip-key" type="hidden" name="easyslipApiKey" value="" />
+        <div class="rounded-xl bg-emerald-500/10 border border-emerald-500/30 px-3 py-2.5 text-xs text-emerald-700">ใช้ EasySlip คีย์กลางของระบบแล้ว ร้านไม่ต้องกรอก API Key</div>
+      <% } %>
+      <button type="button" onclick="testOwnProvider('easyslip')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ทดสอบ EasySlip</button>
+      <div id="own-easyslip-result" class="text-xs text-[var(--text-4)]"></div>
+    </div>
+
+    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+      <div class="flex items-center justify-between"><h3 class="font-bold">✅ SlipCheck</h3><a href="https://mxrslip.lovable.app/auth" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัครฟรี ↗</a></div>
+      <label class="block text-xs text-[var(--text-3)]">API Key
+        <input id="own-slipcheck-key" type="password" name="slipcheckApiKey" value="<%= payment.slipcheckApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" />
+      </label>
+      <input id="own-slipcheck-endpoint" type="hidden" name="slipcheckEndpoint" value="<%= payment.slipcheckEndpoint || 'https://mxrslip.lovable.app/api/public/v1' %>" />
+      <button type="button" onclick="testOwnProvider('slipcheck')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ทดสอบ SlipCheck</button>
+      <div id="own-slipcheck-result" class="text-xs text-[var(--text-4)]"><%= slipcheckInfo && slipcheckInfo.ok ? 'เชื่อมต่อแล้ว' : '' %></div>
+    </div>
+
+    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+      <div class="flex items-center justify-between"><h3 class="font-bold">🛡️ SlipRDCW</h3><a href="https://slip.rdcw.co.th" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัคร/จัดการแพ็กเกจ ↗</a></div>
+      <div class="grid sm:grid-cols-2 gap-2">
+        <label class="block text-xs text-[var(--text-3)]">Client ID<input id="own-rdcw-id" type="text" name="rdcwClientId" value="<%= payment.rdcwClientId || '' %>" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
+        <label class="block text-xs text-[var(--text-3)]">Client Secret<input id="own-rdcw-secret" type="password" name="rdcwClientSecret" value="<%= payment.rdcwClientSecret || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
+      </div>
+      <input id="own-rdcw-endpoint" type="hidden" name="rdcwEndpoint" value="<%= payment.rdcwEndpoint || 'https://suba.rdcw.co.th/v2/inquiry' %>" />
+      <button type="button" onclick="testOwnProvider('rdcw')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ตรวจความครบถ้วน</button>
+      <div id="own-rdcw-result" class="text-xs text-[var(--text-4)]"></div>
+    </div>
+
+    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+      <div class="flex items-center justify-between"><h3 class="font-bold">🔎 Slip2Go</h3><a href="https://slip2go.com" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัคร/เติมแพ็กเกจ ↗</a></div>
+      <label class="block text-xs text-[var(--text-3)]">API Key<input id="own-slip2go-key" type="password" name="slip2goApiKey" value="<%= payment.slip2goApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
+      <input id="own-slip2go-endpoint" type="hidden" name="slip2goEndpoint" value="<%= payment.slip2goEndpoint || 'https://api.slip2go.com/api' %>" />
+      <button type="button" onclick="testOwnProvider('slip2go')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ทดสอบ Slip2Go</button>
+      <div id="own-slip2go-result" class="text-xs text-[var(--text-4)]"></div>
+    </div>
+  </div>
+
+  <div class="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
+    <h3 class="font-bold text-sm mb-3">🖼️ คู่มือแบบรูปภาพ</h3>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <% [['easyslip-api.svg','คู่มือ EasySlip'],['slipcheck-api.svg','คู่มือ SlipCheck'],['rdcw-api.svg','คู่มือ SlipRDCW'],['slip2go-api.svg','คู่มือ Slip2Go']].forEach(guide => { %>
+        <a href="/images/guides/<%= guide[0] %>" target="_blank" class="block rounded-xl overflow-hidden border border-[var(--border)] hover:border-[var(--gold)] transition" title="เปิด<%= guide[1] %>">
+          <img src="/images/guides/<%= guide[0] %>" alt="<%= guide[1] %>" class="w-full h-auto" loading="lazy" />
+        </a>
+      <% }) %>
+    </div>
+  </div>
+
+  <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-[var(--gold)] text-[var(--bg)] font-bold text-sm">บันทึกการตั้งค่าตรวจสลิป</button>
+</form>
+
+<script>
+async function testOwnProvider(provider) {
+  const result = document.getElementById(`own-${provider}-result`);
+  if (!result) return;
+  result.textContent = 'กำลังตรวจสอบ...';
+  const payload = { provider };
+  if (provider === 'easyslip') payload.apiKey = document.getElementById('own-easyslip-key').value;
+  if (provider === 'slipcheck') { payload.apiKey = document.getElementById('own-slipcheck-key').value; payload.endpoint = document.getElementById('own-slipcheck-endpoint').value; }
+  if (provider === 'rdcw') { payload.clientId = document.getElementById('own-rdcw-id').value; payload.clientSecret = document.getElementById('own-rdcw-secret').value; }
+  if (provider === 'slip2go') { payload.apiKey = document.getElementById('own-slip2go-key').value; payload.endpoint = document.getElementById('own-slip2go-endpoint').value; }
+  try {
+    const response = await fetch('/admin/slip-verification/test', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const data = await response.json();
+    result.className = `text-xs ${data.ok ? 'text-emerald-400' : 'text-rose-400'}`;
+    result.textContent = `${data.ok ? '✓' : '✕'} ${data.message || (data.ok ? 'เชื่อมต่อสำเร็จ' : 'เชื่อมต่อไม่สำเร็จ')}`;
+  } catch (error) {
+    result.className = 'text-xs text-rose-400';
+    result.textContent = '✕ ติดต่อผู้ให้บริการไม่ได้';
+  }
+}
+</script>
+
+<form id="slip-provider-form" action="/admin/slip-verification" method="POST" class="hidden">
   <div class="rounded-xl border p-4 space-y-2">
     <label class="block"><input type="radio" name="slipProvider" value="auto" <%= !payment.slipProvider || payment.slipProvider === 'auto' ? 'checked' : '' %>> ใช้การตั้งค่าเดิม (EasySlip/SlipOK)</label>
     <label class="block"><input type="radio" name="slipProvider" value="none" <%= payment.slipProvider === 'none' ? 'checked' : '' %>> ให้แอดมินตรวจสลิปด้วยตนเอง</label>

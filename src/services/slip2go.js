@@ -114,14 +114,22 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
     const data = res.data;
     if (data && (data.success || data.ok || data.status === 'success')) {
       const result = data.data || data;
+      const amount = Number(result.amount);
+      const transRef = result.transRef || result.trans_ref || result.ref;
+      if (!Number.isFinite(amount) || Math.abs(amount - Number(expectedAmount)) > 0.009) {
+        return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: data };
+      }
+      if (!transRef) {
+        return { checked: false, verified: false, message: 'Slip2Go ไม่ได้ส่งเลขอ้างอิงธุรกรรมกลับมา รอแอดมินตรวจสอบ', raw: data };
+      }
       return {
         checked: true,
         verified: true,
         message: 'ตรวจสอบสลิปสำเร็จผ่าน Slip2Go API',
         raw: {
-          transRef: result.transRef || result.trans_ref || result.ref || String(Date.now()),
-          amount: Number(result.amount || expectedAmount),
-          date: result.date || result.trans_date || new Date().toISOString()
+          transRef,
+          amount,
+          date: result.date || result.trans_date || null
         }
       };
     }

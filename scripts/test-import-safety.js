@@ -46,7 +46,7 @@ async function main() {
   check('Legacy EasySlip takes precedence', () => assert.equal(resolveSlipProvider({ easyslipAccounts: { bank: { bankNumber: 'fixture' } } }, true), 'easyslip'));
   check('Explicit manual mode is respected', () => assert.equal(resolveSlipProvider({ slipProvider: 'none', slipokApiKey: 'fixture' }, true), 'none'));
   check('Byshop slip setting falls back to the existing provider', () => assert.equal(resolveSlipProvider({ slipProvider: 'byshop' }, false), 'slipok'));
-  check('Slip2Go cannot replace configured EasySlip', () => assert.equal(resolveSlipProvider({ slipProvider: 'slip2go', easyslipAccounts: { bank: { bankNumber: 'fixture' } } }, true), 'easyslip'));
+  check('Explicit tenant-owned Slip2Go is respected', () => assert.equal(resolveSlipProvider({ slipProvider: 'slip2go', easyslipAccounts: { bank: { bankNumber: 'fixture' } } }, true), 'slip2go'));
 
   const als = new AsyncLocalStorage();
   let sequence = 0;
@@ -97,9 +97,9 @@ async function main() {
     '../services/license': { isGateOn: () => false }, '../middleware/tenant': { MAIN_DOMAIN: 'fixture.test', MAIN_SITE_URL: 'https://fixture.test' },
   });
   const hubTest = admin.stack.find(l => Array.isArray(l.route?.path) && l.route.path.includes('/easyslip-usage/test')).route.stack[0].handle;
-  let status;
-  await hubTest({ body: { provider: 'easyslip' }, tenantShop: { id: 'fixture' } }, { status(code) { status = code; return this; }, json() {} });
-  check('Tenant cannot retrieve central provider account', () => { assert.equal(status, 403); assert.equal(quotaCalls, 0); });
+  let testedProvider;
+  await hubTest({ body: { provider: 'easyslip' }, tenantShop: { id: 'fixture' } }, { status() { return this; }, json(result) { testedProvider = result; } });
+  check('Tenant EasySlip test uses the central provider without exposing its key', () => { assert.deepEqual(testedProvider, { ok: false }); assert.equal(quotaCalls, 1); });
   const viewData = model.fixture(); model.migrateFixture(viewData);
   const ejs = require('ejs');
   let pages = 0;
@@ -120,7 +120,7 @@ async function main() {
     await als.run(viewData, () => handler(req, res));
   }
   check('Updated admin pages render with migrated fixtures', () => assert.equal(pages, 14));
-  check('Only the main provider page calls central quota API', () => assert.equal(quotaCalls, 1));
+  check('Main provider page and tenant EasySlip test use central quota API', () => assert.equal(quotaCalls, 2));
   let js = 0, templates = 0;
   function scan(dir) { for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const filename = path.join(dir, entry.name);

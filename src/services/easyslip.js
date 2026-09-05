@@ -19,10 +19,11 @@ const BASE_URL = 'https://api.easyslip.com/v2';
 // separators.
 const normalizeAccountNumber = (value) => String(value || '').replace(/[\s-]/g, '');
 
-const isConfigured = () => Boolean(API_KEY);
+const resolveApiKey = apiKey => String(apiKey === undefined ? (API_KEY || '') : (apiKey || '')).trim();
+const isConfigured = apiKey => Boolean(resolveApiKey(apiKey));
 
-function authHeaders() {
-  return { Authorization: `Bearer ${API_KEY}`, 'Content-Type': 'application/json' };
+function authHeaders(apiKey) {
+  return { Authorization: `Bearer ${resolveApiKey(apiKey)}`, 'Content-Type': 'application/json' };
 }
 
 let banksCache = null;
@@ -75,15 +76,15 @@ async function getBanks() {
  * cannot and does not need to be passed).
  * Returns { ok: true, account } or { ok: false, code, message }.
  */
-async function createBankAccount({ bankCode, bankNumber, nameTh, nameEn, type, extraVerify }) {
-  if (!isConfigured()) {
+async function createBankAccount({ bankCode, bankNumber, nameTh, nameEn, type, extraVerify, apiKey }) {
+  if (!isConfigured(apiKey)) {
     return { ok: false, code: 'NOT_CONFIGURED', message: 'ยังไม่ได้ตั้งค่า EASYSLIP_API_KEY' };
   }
   try {
     const res = await axios.post(
       `${BASE_URL}/bank-accounts`,
       { bankCode, bankNumber, nameTh, nameEn, type, ...(extraVerify ? { extraVerify } : {}) },
-      { headers: authHeaders(), timeout: 15000 }
+      { headers: authHeaders(apiKey), timeout: 15000 }
     );
     if (res.data && res.data.success) {
       return { ok: true, account: res.data.data };
@@ -110,15 +111,15 @@ async function createBankAccount({ bankCode, bankNumber, nameTh, nameEn, type, e
  * to clear it) when that's what they mean to change.
  * Returns { ok: true, account } or { ok: false, code, message }.
  */
-async function updateBankAccount(accountId, { extraVerify }) {
-  if (!isConfigured()) {
+async function updateBankAccount(accountId, { extraVerify, apiKey }) {
+  if (!isConfigured(apiKey)) {
     return { ok: false, code: 'NOT_CONFIGURED', message: 'ยังไม่ได้ตั้งค่า EASYSLIP_API_KEY' };
   }
   try {
     const res = await axios.patch(
       `${BASE_URL}/bank-accounts/${accountId}`,
       { extraVerify },
-      { headers: authHeaders(), timeout: 15000 }
+      { headers: authHeaders(apiKey), timeout: 15000 }
     );
     if (res.data && res.data.success) {
       return { ok: true, account: res.data.data };
@@ -148,8 +149,8 @@ async function updateBankAccount(accountId, { extraVerify }) {
  * Returns { checked, verified, message, raw } — checked is false when
  * EasySlip isn't configured (caller should fall back to manual review).
  */
-async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedNumbers = []) {
-  if (!isConfigured()) {
+async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedNumbers = [], apiKey) {
+  if (!isConfigured(apiKey)) {
     return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า EasySlip — ใช้การตรวจสอบด้วยแอดมินแทน', raw: null };
   }
   try {
@@ -163,7 +164,7 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
     form.append('checkDuplicate', 'true');
 
     const res = await axios.post(`${BASE_URL}/verify/bank`, form, {
-      headers: { ...form.getHeaders(), Authorization: `Bearer ${API_KEY}` },
+      headers: { ...form.getHeaders(), Authorization: `Bearer ${resolveApiKey(apiKey)}` },
       timeout: 300000,
     });
 
@@ -219,12 +220,12 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
  * { ok: true, quota: {used, max, remaining}, credit, planName } or
  * { ok: false, message }.
  */
-async function getAccountInfo() {
-  if (!isConfigured()) {
+async function getAccountInfo(apiKey) {
+  if (!isConfigured(apiKey)) {
     return { ok: false, message: 'ยังไม่ได้ตั้งค่า EASYSLIP_API_KEY' };
   }
   try {
-    const res = await axios.get(`${BASE_URL}/info`, { headers: authHeaders(), timeout: 15000 });
+    const res = await axios.get(`${BASE_URL}/info`, { headers: authHeaders(apiKey), timeout: 15000 });
     const data = res.data && res.data.data;
     if (!res.data || !res.data.success || !data) {
       return { ok: false, message: 'ดึงข้อมูลบัญชี EasySlip ไม่สำเร็จ' };
