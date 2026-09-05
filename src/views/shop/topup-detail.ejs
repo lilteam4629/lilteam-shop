@@ -18,13 +18,17 @@
       <div class="text-[var(--coral)] font-semibold mb-1">คำขอนี้ถูกปฏิเสธ</div>
       <% if (request.reviewNote) { %><p class="text-sm text-[var(--text-3)]"><%= request.reviewNote %></p><% } %>
     </div>
-  <% } else if (request.slipPath) { %>
+  <% } else if (request.slipPath && automaticSlipCheck) { %>
     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
       ⏳ ระบบกำลังตรวจสอบสลิปโดยอัตโนมัติ — เติมเงินให้ทันทีถ้ายอดถูกต้อง
     </div>
-  <% } else { %>
+  <% } else if (!request.slipPath && automaticSlipCheck) { %>
     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
       ⏳ โอนเงินแล้วแนบสลิปด้านล่าง ระบบจะตรวจสอบและเติมเงินให้อัตโนมัติทันที
+    </div>
+  <% } else { %>
+    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
+      ⏳ แนบสลิปแล้วรอแอดมินร้านตรวจสอบและอนุมัติยอดเงิน
     </div>
   <% } %>
 
@@ -62,7 +66,7 @@
       <% } %>
       <div class="flex items-start gap-2.5 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl px-4 py-3 mt-4 text-sm">
         <span class="shrink-0 text-lg">⚠️</span>
-        <span class="text-[var(--text)]">โอนแล้วกรุณาระบุจำนวนเงินให้ตรงเป๊ะ <b class="text-[var(--gold)]">(฿<%= request.amount.toLocaleString() %>.00)</b> เพื่อให้ระบบตรวจสอบอัตโนมัติผ่านและเติมเงินได้ทันที</span>
+        <span class="text-[var(--text)]">โอนแล้วกรุณาระบุจำนวนเงินให้ตรงเป๊ะ <b class="text-[var(--gold)]">(฿<%= request.amount.toLocaleString() %>.00)</b><%= automaticSlipCheck ? ' เพื่อให้ระบบตรวจสอบอัตโนมัติผ่านและเติมเงินได้ทันที' : ' จากนั้นแอดมินร้านจะตรวจสอบและอนุมัติให้' %></span>
       </div>
     </div>
   </div>
@@ -97,8 +101,8 @@
     <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[#171208] flex items-center justify-center text-3xl font-bold mb-5 shadow-[0_10px_30px_color-mix(in_srgb,var(--gold)_25%,transparent)]"><%= (settings.shopName || 'S').charAt(0).toUpperCase() %></div>
   <% } %>
   <div class="w-10 h-10 border-[3px] border-[var(--gold)]/25 border-t-[var(--gold)] rounded-full animate-spin mb-5"></div>
-  <div class="text-lg font-semibold mb-1">กำลังตรวจสอบสลิป...</div>
-  <p class="text-sm text-[var(--text-3)]">กรุณารอสักครู่ ระบบกำลังตรวจสอบอัตโนมัติ</p>
+  <div class="text-lg font-semibold mb-1"><%= automaticSlipCheck ? 'กำลังส่งสลิปเพื่อตรวจสอบ...' : 'กำลังบันทึกสลิป...' %></div>
+  <p class="text-sm text-[var(--text-3)]"><%= automaticSlipCheck ? 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอัตโนมัติ' : 'กรุณารอสักครู่ จากนั้นคำขอจะรอแอดมินร้านตรวจสอบ' %></p>
 </div>
 <script>
   (function () {
@@ -109,7 +113,7 @@
       overlay.classList.remove('hidden');
     });
   })();
-  <% if ((request.status === 'pending' || request.status === 'verifying') && request.slipPath) { %>
+  <% if (automaticSlipCheck && (request.status === 'pending' || request.status === 'verifying') && request.slipPath) { %>
   // The automated slip check now finishes in the background after the
   // upload response (see /account/topup/:id/slip) instead of making the
   // customer wait on it live, so poll for the result instead of expecting

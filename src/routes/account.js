@@ -203,7 +203,10 @@ router.get('/topup/:id', async (req, res) => {
     }
   }
 
-  res.render('shop/topup-detail', { title: 'สถานะการเติมเงิน', request, payment, qrDataUrl });
+  res.render('shop/topup-detail', {
+    title: 'สถานะการเติมเงิน', request, payment, qrDataUrl,
+    automaticSlipCheck: canCheckSlipAutomatically(payment),
+  });
 });
 
 router.get('/topup/:id/slip-file', async (req, res, next) => {
@@ -233,6 +236,15 @@ router.get('/topup/:id/slip-file', async (req, res, next) => {
 // bound tenant context — nothing here can rely on the original request's
 // context still being current.
 const activeVerifications = new Set();
+
+function canCheckSlipAutomatically(payment = {}) {
+  const selected = resolveSlipProvider(payment, easyslip.isConfigured());
+  if (selected === 'easyslip') {
+    return easyslip.isConfigured() && payment.easyslipAccounts && Object.values(payment.easyslipAccounts).some(a => a && a.bankNumber);
+  }
+  if (selected === 'slipok') return Boolean(payment.slipokBranchId && payment.slipokApiKey);
+  return false;
+}
 
 async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptions, origin }) {
   if (activeVerifications.has(requestId)) return;
@@ -378,16 +390,20 @@ async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptio
   }
   try {
     const storageId = await store.savePrivateMedia(fileBuffer, fileOptions.filename, fileOptions.contentType);
+    const automatic = canCheckSlipAutomatically(store.data.settings.payment);
     await store.transact((data) => {
       const fresh = data.topupRequests.find(t => t.id === requestId && t.userId === user.id);
       if (!fresh || fresh.status === 'approved' || fresh.status === 'rejected') throw new Error('คำขอนี้ถูกตรวจสอบแล้ว');
       fresh.slipStorageId = storageId;
       fresh.slipPath = `/account/topup/${fresh.id}/slip-file`;
-      fresh.status = 'verifying';
+      fresh.status = automatic ? 'verifying' : 'pending';
+      if (!automatic) fresh.slipCheck = { checked: false, verified: false, message: 'รอแอดมินตรวจสอบสลิป', provider: 'manual' };
     });
     request.slipStorageId = storageId;
     request.slipPath = `/account/topup/${request.id}/slip-file`;
-    request.status = 'verifying';
+    request.status = automatic ? 'verifying' : 'pending';
+    if (!automatic) request.slipCheck = { checked: false, verified: false, message: 'รอแอดมินตรวจสอบสลิป', provider: 'manual' };
+    if (!automatic) return { ok: true, request, automatic: false };
   } catch (saveError) {
     request.status = 'pending';
     return { ok: false, error: 'บันทึกไฟล์สลิปไม่สำเร็จ กรุณาลองใหม่' };
@@ -395,7 +411,7 @@ async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptio
   const backgroundVerify = store.bindTenantContext(verifySlipInBackground);
   backgroundVerify({ requestId: request.id, userId: user.id, fileBuffer, fileOptions, origin })
     .catch((bgErr) => console.error('[topup] background verify failed:', bgErr.message));
-  return { ok: true, request };
+  return { ok: true, request, automatic: true };
 }
 
 router.post('/topup/:id/slip', (req, res) => {
@@ -426,7 +442,9 @@ router.post('/topup/:id/slip', (req, res) => {
       return res.redirect(`/account/topup/${request.id}`);
     }
 
-    req.flash('success', 'แนบสลิปแล้ว ระบบกำลังตรวจสอบอัตโนมัติเบื้องหลัง — รีเฟรชหน้านี้อีกครั้งในไม่กี่วินาทีเพื่อดูผล');
+    req.flash('success', attached.automatic
+      ? 'แนบสลิปแล้ว ระบบกำลังตรวจสอบอัตโนมัติเบื้องหลัง — รีเฟรชหน้านี้อีกครั้งในไม่กี่วินาทีเพื่อดูผล'
+      : 'แนบสลิปแล้ว อยู่ระหว่างรอแอดมินตรวจสอบ');
     res.redirect(`/account/topup/${request.id}`);
 
   }));
