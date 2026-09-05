@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <meta name="description" content="เช่าเว็บร้านค้าออนไลน์พร้อมระบบขาย จัดการสต็อก กระเป๋าเงิน มินิเกม และตรวจสลิปอัตโนมัติ ติดตั้งพร้อมใช้งานทันที" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <% if (logoImage) { %><link rel="icon" href="<%= logoImage %>" /><% } %>
+  <style>
+    :root{
+      --bg:#100e08; --card:#1a160d; --border:#3a3220; --border-light:#443a22; --input:#211c11;
+      --text:#f3ecd8; --text-2:#d6c9a0; --text-3:#a89a6c; --text-4:#7a6f47;
+      --gold:#c8a63f; --gold-hover:#dbb94d; --gold-light:#e8d48a; --gold-dark:#8a6f28;
+    }
+    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);}
+    .grad-text{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .hero-glow{background:radial-gradient(ellipse 60% 50% at 50% 0%,color-mix(in srgb,var(--gold) 18%,transparent),transparent)}
+    .badge{display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--text-3)}
+    .feature-card{background:linear-gradient(160deg,var(--card),var(--input));border:1px solid var(--border-light);border-radius:1rem;padding:1.5rem}
+    .plan-card{position:relative;background:linear-gradient(160deg,var(--card),var(--input));border:1px solid var(--border-light);border-radius:1.25rem;padding:1.75rem;transition:transform .2s,border-color .2s}
+    .plan-card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--gold) 55%,var(--border-light))}
+    .plan-card.is-popular{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 20px 40px -20px color-mix(in srgb,var(--gold) 60%,transparent)}
+    .popular-badge{position:absolute;top:-.7rem;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--bg);font-size:.65rem;font-weight:800;padding:.25rem .8rem;border-radius:999px;white-space:nowrap}
+  </style>
+</head>
+<body class="min-h-screen">
+
+  <header class="border-b border-[var(--border)] sticky top-0 z-30 bg-[var(--bg)]/90 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 font-bold text-lg">
+        <% if (logoImage) { %>
+          <img src="<%= logoImage %>" alt="โลโก้" class="w-9 h-9 rounded-xl object-contain p-1 bg-gradient-to-br from-[var(--gold-light)] via-[var(--gold)] to-[var(--gold-dark)] border border-[var(--gold)]/50" />
+        <% } else { %>
+          <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[var(--bg)] flex items-center justify-center">🏪</span>
+        <% } %>
+        <span><%= shopName %> <span class="text-[var(--gold)]">Cloud</span></span>
+      </a>
+      <nav class="hidden sm:flex items-center gap-6 text-sm text-[var(--text-3)]">
+        <a href="#features" class="hover:text-[var(--gold)] transition-colors">ฟีเจอร์</a>
+        <a href="#packages" class="hover:text-[var(--gold)] transition-colors">แพ็กเกจ</a>
+      </nav>
+      <% if (currentUser) { %>
+        <a href="/my-shops" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">จัดการร้านของฉัน</a>
+      <% } else { %>
+        <a href="/login" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">เข้าสู่ระบบ</a>
+      <% } %>
+    </div>
+  </header>
+
+  <section class="hero-glow relative overflow-hidden">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-16 pb-14 text-center">
+      <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight mb-5">
+        เปิดร้านค้า<span class="grad-text">ออนไลน์</span>ของคุณ<br class="hidden sm:block" />
+        ใน <span class="grad-text">1 นาที</span>
+      </h1>
+      <p class="text-[var(--text-3)] text-base sm:text-lg max-w-2xl mx-auto mb-8">
+        เช่าเว็บร้านค้าพร้อมระบบขายอัตโนมัติ จัดการสต็อก กระเป๋าเงิน มินิเกมลุ้นรางวัล และตรวจสลิปอัตโนมัติ 24 ชั่วโมง — ติดตั้งพร้อมใช้งานทันทีหลังชำระเงิน ไม่ต้องเขียนโค้ดสักบรรทัด
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
+        <a href="#packages" class="w-full sm:w-auto text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold px-7 py-3 rounded-xl transition-transform hover:-translate-y-0.5">ดูแพ็กเกจทั้งหมด</a>
+        <a href="<%= currentUser ? '/my-shops' : '/login' %>" class="w-full sm:w-auto text-center bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)] font-medium px-7 py-3 rounded-xl transition-colors"><%= currentUser ? 'ไปหน้าร้านของฉัน' : 'เข้าสู่ระบบเพื่อเริ่มต้น' %></a>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+        <span class="badge">⚡ ติดตั้งอัตโนมัติทันที</span>
+        <span class="badge">🔒 SSL ฟรีทุกแพ็กเกจ</span>
+        <span class="badge">🌐 โดเมนย่อย .<%= mainDomain %> ฟรี</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+    <div class="text-center mb-10">
+      <p class="text-[var(--gold)] text-xs font-bold tracking-wide mb-2">ฟีเจอร์</p>
+      <h2 class="text-2xl sm:text-3xl font-bold">ร้านคุณได้ระบบเดียวกับ<%= shopName %>ทุกอย่าง</h2>
+      <p class="text-[var(--text-3)] mt-2">เพราะเป็นแอปเดียวกัน แค่คนละร้าน ฟีเจอร์ใหม่ที่เพิ่มให้ระบบหลัก ร้านคุณได้ใช้ด้วยทันทีโดยไม่ต้องรออัปเดตเอง</p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="feature-card"><div class="text-3xl mb-3">🛒</div><h3 class="font-semibold mb-1">ระบบขายอัตโนมัติ</h3><p class="text-sm text-[var(--text-3)]">ลูกค้าจ่ายเงินปุ๊บ รับสินค้าปั๊บ ไม่ต้องมานั่งส่งเอง</p></div>
+      <div class="feature-card"><div class="text-3xl mb-3">🧾</div><h3 class="font-semibold mb-1">ตรวจสลิปอัตโนมัติ</h3><p class="text-sm text-[var(--text-3)]">เชื่อมต่อระบบตรวจสลิป อนุมัติเงินเข้าได้ตลอด 24 ชม.</p></div>
+      <div class="feature-card"><div class="text-3xl mb-3">🎰</div><h3 class="font-semibold mb-1">มินิเกมลุ้นรางวัล</h3><p class="text-sm text-[var(--text-3)]">เปิดกล่องสุ่มหรือรางเลื่อน ดึงลูกค้ากลับมาเล่นซ้ำ</p></div>
+      <div class="feature-card"><div class="text-3xl mb-3">📦</div><h3 class="font-semibold mb-1">จัดการสต็อกเรียลไทม์</h3><p class="text-sm text-[var(--text-3)]">เพิ่ม/ตัดสต็อกอัตโนมัติ รู้ทันทีว่าเหลือเท่าไหร่</p></div>
+    </div>
+  </section>
+
+  <section id="packages" class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+    <div class="text-center mb-10">
+      <p class="text-[var(--gold)] text-xs font-bold tracking-wide mb-2">แพ็กเกจ</p>
+      <h2 class="text-2xl sm:text-3xl font-bold">เลือกระยะเวลาเช่าร้านของคุณ</h2>
+      <p class="text-[var(--text-3)] mt-2">จ่ายเป็นรอบ ไม่มีสัญญาผูกมัดระยะยาว ต่ออายุเมื่อไหร่ก็ได้</p>
+    </div>
+
+    <% if (!plans.length) { %>
+      <div class="text-center text-[var(--text-3)] bg-[var(--card)] border border-[var(--border)] rounded-2xl p-10 max-w-md mx-auto">
+        ยังไม่มีแพ็กเกจเปิดขายตอนนี้ กลับมาดูใหม่อีกครั้งเร็วๆ นี้
+      </div>
+    <% } else { %>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
+        <% plans.forEach((plan, i) => { %>
+          <% const isPopular = i === Math.min(1, plans.length - 1); %>
+          <div class="plan-card <%= isPopular ? 'is-popular' : '' %>">
+            <% if (isPopular) { %><span class="popular-badge">ยอดนิยม</span><% } %>
+            <% if (plan.promo) { %><div class="text-xs font-bold text-[var(--gold)] mb-2">🔥 โปรโมชั่น</div><% } %>
+            <div class="text-sm text-[var(--text-3)] mb-1">แพ็กเกจ <%= plan.days %> วัน</div>
+            <div class="flex items-baseline gap-1 mb-4">
+              <span class="text-4xl font-black text-[var(--gold)]">฿<%= plan.price.toLocaleString() %></span>
+              <span class="text-sm text-[var(--text-4)]">/ <%= plan.days %> วัน</span>
+            </div>
+            <ul class="space-y-2 text-sm text-[var(--text-2)] mb-6">
+              <li class="flex items-center gap-2">✅ โดเมนย่อย .<%= mainDomain %> ฟรี</li>
+              <li class="flex items-center gap-2">✅ SSL ฟรี</li>
+              <li class="flex items-center gap-2">✅ ระบบครบ: สต็อก, กระเป๋าเงิน, มินิเกม, ตรวจสลิปอัตโนมัติ</li>
+              <li class="flex items-center gap-2">✅ ติดตั้งพร้อมใช้งานทันที</li>
+            </ul>
+            <% if (plan.promo && (plan.promoLimit || plan.promoExpiresAt)) { %>
+              <div class="text-[11px] text-[var(--text-4)] mb-3">
+                <% if (plan.promoLimit) { %>เหลือ <%= Math.max(0, plan.promoLimit - (plan.promoUsedCount || 0)) %>/<%= plan.promoLimit %> สิทธิ์<% } %>
+                <% if (plan.promoLimit && plan.promoExpiresAt) { %> · <% } %>
+                <% if (plan.promoExpiresAt) { %>หมดเขต <%= new Date(plan.promoExpiresAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'short', timeStyle: 'short' }) %><% } %>
+              </div>
+            <% } %>
+            <a href="/start?plan=<%= plan.id %>" class="block text-center font-semibold px-5 py-3 rounded-xl transition-colors <%= isPopular ? 'bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)]' : 'bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)]' %>">เริ่มต้นใช้งาน</a>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <p class="text-center text-sm text-[var(--text-3)] mt-8">
+      <%= currentUser ? 'กดเลือกแพ็กเกจเพื่อเปิดร้านได้เลย' : 'ต้อง' %>
+      <% if (!currentUser) { %><a href="/login" class="text-[var(--gold)] hover:underline">เข้าสู่ระบบ</a>ก่อนเริ่มเปิดร้าน<% } %>
+    </p>
+  </section>
+
+  <footer class="border-t border-[var(--border)] py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[var(--text-4)]">
+      <span>&copy; <%= new Date().getFullYear() %> <%= shopName %> Cloud</span>
+      <a href="/login" class="hover:text-[var(--gold)] transition-colors">เข้าสู่ระบบ →</a>
+    </div>
+  </footer>
+
+</body>
+</html>
