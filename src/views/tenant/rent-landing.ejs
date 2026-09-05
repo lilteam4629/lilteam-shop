@@ -39,14 +39,19 @@
         <span><%= shopName %> <span class="text-[var(--gold)]">Cloud</span></span>
       </a>
       <nav class="hidden sm:flex items-center gap-6 text-sm text-[var(--text-3)]">
+        <a href="#example" class="hover:text-[var(--gold)] transition-colors">ตัวอย่างร้าน</a>
         <a href="#features" class="hover:text-[var(--gold)] transition-colors">ฟีเจอร์</a>
         <a href="#packages" class="hover:text-[var(--gold)] transition-colors">แพ็กเกจ</a>
       </nav>
-      <% if (currentUser) { %>
-        <a href="/my-shops" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">จัดการร้านของฉัน</a>
-      <% } else { %>
-        <a href="/login" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">เข้าสู่ระบบ</a>
-      <% } %>
+      <div class="flex items-center gap-2">
+        <% if (currentUser) { %>
+          <a href="/account/topup" class="hidden sm:inline-block border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)] font-medium px-4 py-2 rounded-lg text-sm transition-colors">เติมเงิน</a>
+          <a href="/my-shops" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">จัดการร้านของฉัน</a>
+        <% } else { %>
+          <a href="/register" class="hidden sm:inline-block border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)] font-medium px-4 py-2 rounded-lg text-sm transition-colors">สมัครสมาชิก</a>
+          <a href="/login" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">เข้าสู่ระบบ</a>
+        <% } %>
+      </div>
     </div>
   </header>
 
@@ -59,9 +64,15 @@
       <p class="text-[var(--text-3)] text-base sm:text-lg max-w-2xl mx-auto mb-8">
         เช่าเว็บร้านค้าพร้อมระบบขายอัตโนมัติ จัดการสต็อก กระเป๋าเงิน มินิเกมลุ้นรางวัล และตรวจสลิปอัตโนมัติ 24 ชั่วโมง — ติดตั้งพร้อมใช้งานทันทีหลังชำระเงิน ไม่ต้องเขียนโค้ดสักบรรทัด
       </p>
-      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-10">
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
         <a href="#packages" class="w-full sm:w-auto text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold px-7 py-3 rounded-xl transition-transform hover:-translate-y-0.5">ดูแพ็กเกจทั้งหมด</a>
         <a href="<%= currentUser ? '/my-shops' : '/login' %>" class="w-full sm:w-auto text-center bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)] font-medium px-7 py-3 rounded-xl transition-colors"><%= currentUser ? 'ไปหน้าร้านของฉัน' : 'เข้าสู่ระบบเพื่อเริ่มต้น' %></a>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mb-10 text-sm">
+        <% if (!currentUser) { %>
+          <a href="/register" class="text-[var(--text-3)] hover:text-[var(--gold)] transition-colors">ยังไม่มีบัญชี? <span class="underline">สมัครสมาชิก</span></a>
+        <% } %>
+        <a href="/account/topup" class="text-[var(--text-3)] hover:text-[var(--gold)] transition-colors">💰 <span class="underline">เติมเงินเข้ากระเป๋า</span></a>
       </div>
       <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
         <span class="badge">⚡ ติดตั้งอัตโนมัติทันที</span>
@@ -69,6 +80,33 @@
         <span class="badge">🌐 โดเมนย่อย .<%= mainDomain %> ฟรี</span>
       </div>
     </div>
+  </section>
+
+  <section id="example" class="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-16">
+    <div class="text-center mb-8">
+      <p class="text-[var(--gold)] text-xs font-bold tracking-wide mb-2">ตัวอย่างร้านค้าจริง</p>
+      <h2 class="text-2xl sm:text-3xl font-bold">ไม่ใช่แค่โมเดล — นี่คือร้านค้าจริงที่ใช้ระบบนี้อยู่</h2>
+      <p class="text-[var(--text-3)] mt-2"><%= shopName %> คือร้านของเราเองที่เปิดขายจริงบนระบบเดียวกันนี้ทุกวัน ลองเข้าไปดูของจริงได้เลย ไม่ใช่ภาพตัวอย่างปลอม</p>
+    </div>
+    <a href="https://<%= mainDomain %>" target="_blank" rel="noopener" class="block group max-w-2xl mx-auto">
+      <div class="rounded-2xl border border-[var(--border-light)] overflow-hidden shadow-2xl transition-transform group-hover:-translate-y-1">
+        <div class="flex items-center gap-2 bg-[var(--input)] px-4 py-2.5 border-b border-[var(--border-light)]">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-400/70"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-yellow-400/70"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-green-400/70"></span>
+          <span class="ml-3 text-xs text-[var(--text-4)] bg-[var(--bg)] rounded-full px-3 py-1 truncate">🔒 <%= mainDomain %></span>
+        </div>
+        <div class="bg-[var(--card)] p-10 sm:p-14 flex flex-col items-center justify-center gap-3 text-center">
+          <% if (logoImage) { %>
+            <img src="<%= logoImage %>" alt="" class="w-16 h-16 rounded-2xl object-contain p-1 bg-gradient-to-br from-[var(--gold-light)] via-[var(--gold)] to-[var(--gold-dark)] border border-[var(--gold)]/50" />
+          <% } else { %>
+            <span class="text-4xl">🏪</span>
+          <% } %>
+          <div class="text-xl font-bold"><%= shopName %></div>
+          <div class="text-sm text-[var(--gold)] group-hover:underline">คลิกเพื่อเปิดดูร้านค้าจริง ↗</div>
+        </div>
+      </div>
+    </a>
   </section>
 
   <section id="features" class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
