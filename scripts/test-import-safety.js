@@ -31,6 +31,16 @@ async function main() {
   model.migrateFixture(legacy);
   check('Migration preserves users, balances and orders', () => assert.equal(JSON.stringify({ users: legacy.users, orders: legacy.orders }), preserved));
   check('Migration preserves legacy provider selection', () => assert.equal(legacy.settings.payment.slipProvider, 'auto'));
+  const resetFixture = model.fixture();
+  resetFixture.settings.payment.receivingAccountResetVersion = 0;
+  resetFixture.settings.payment.promptpayId = 'fixture-sensitive';
+  resetFixture.settings.payment.bankAccountNumber = 'fixture-sensitive';
+  model.migrateFixture(resetFixture);
+  check('One-time receiving account reset clears payment identifiers', () => {
+    assert.equal(resetFixture.settings.payment.promptpayId, '');
+    assert.equal(resetFixture.settings.payment.bankAccountNumber, '');
+    assert.equal(resetFixture.settings.payment.receivingAccountResetVersion, 1);
+  });
   const { resolveSlipProvider } = require('../src/services/slip-provider');
   check('Legacy SlipOK fallback', () => assert.equal(resolveSlipProvider(legacy.settings.payment, false), 'slipok'));
   check('Legacy EasySlip takes precedence', () => assert.equal(resolveSlipProvider({ easyslipAccounts: { bank: { bankNumber: 'fixture' } } }, true), 'easyslip'));

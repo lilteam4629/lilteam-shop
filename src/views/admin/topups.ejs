@@ -299,8 +299,7 @@
 
       <!-- Section 2: Bank Transfer -->
       <%
-        const promptpayBank = banks.find(b => /พร้อมเพย์|promptpay/i.test(`${b.nameTh} ${b.nameEn}`));
-        const otherBanks = banks.filter(b => !promptpayBank || b.code !== promptpayBank.code);
+        const otherBanks = banks;
         const primaryBank = banks.find(b => b.nameTh === payment.bankName);
       %>
       <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
@@ -310,9 +309,9 @@
 
         <div class="grid sm:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลือกธนาคารรับเงิน</label>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคารที่บัญชี/พร้อมเพย์ผูกอยู่ *</label>
             <% if (otherBanks.length) { %>
-              <select name="easyslipBankCode" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
+              <select name="easyslipBankCode" required class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
                 <option value="">-- เลือกธนาคาร --</option>
                 <% otherBanks.forEach(bank => { %>
                   <option value="<%= bank.code %>" <%= primaryBank && primaryBank.code === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>

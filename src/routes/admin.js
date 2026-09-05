@@ -847,7 +847,6 @@ router.post('/topups/payment-settings', (req, res) => {
       promptpayId, promptpayName, bankAccountNumber, bankAccountName,
     } = req.body;
     const bankCode = (req.body.easyslipBankCode || '').trim();
-    const registerPromptpay = req.body.registerPromptpay === 'on';
     const promptpayEasyslipNumber = (req.body.promptpayEasyslipNumber || promptpayId || '').trim();
 
     const payment = store.data.settings.payment;
@@ -856,6 +855,10 @@ router.post('/topups/payment-settings', (req, res) => {
     const truemoneyPhone = (req.body.truemoneyPhone || '').trim().replace(/[^0-9]/g, '');
     const truemoneyEnabled = req.body.truemoneyEnabled === 'on';
     const slipProvider = req.body.slipProvider || payment.slipProvider || 'auto';
+    if ((promptpayId || bankAccountNumber) && !primaryBank) {
+      req.flash('error', 'กรุณาเลือกธนาคารที่บัญชีหรือพร้อมเพย์ผูกอยู่ เพื่อเชื่อม EasySlip');
+      return res.redirect('/admin/topups?tab=bank');
+    }
     if (!['auto', 'none', 'slipok', 'easyslip'].includes(slipProvider)) {
       req.flash('error', 'ผู้ให้บริการตรวจสลิปนี้ยังไม่พร้อมใช้งาน');
       return res.redirect('/admin/topups');
@@ -885,20 +888,26 @@ router.post('/topups/payment-settings', (req, res) => {
     // PromptPay's own identifier (phone/ID) isn't the bank account
     // number, so it needs its own separate registration.
     const channels = [];
-    if (bankCode && bankAccountNumber && bankAccountName) channels.push({ code: bankCode, number: bankAccountNumber, name: bankAccountName });
-    if (registerPromptpay && promptpayBank && promptpayEasyslipNumber) {
-      // A mobile-number PromptPay account needs extraVerify explicitly set to
-      // MSISDN (EasySlip's own field name for phone numbers, per their QR
-      // generation API's PromptPayRequest.msisdn) or the account is created
-      // with no verification method at all, which silently breaks slip
-      // matching for every PromptPay transfer registered this way.
-      channels.push({ code: promptpayBank.code, number: promptpayEasyslipNumber, name: promptpayName || bankAccountName, extraVerify: 'MSISDN' });
+    const selectedBank = banks.find(b => b.code === bankCode);
+    if (bankCode && bankAccountNumber && bankAccountName) {
+      channels.push({ key: `${bankCode}:account`, code: bankCode, number: bankAccountNumber, name: bankAccountName });
+    }
+    if (bankCode && promptpayEasyslipNumber && (promptpayName || bankAccountName)) {
+      const digits = promptpayEasyslipNumber.replace(/\D/g, '');
+      const wantedVerify = digits.length === 10 ? 'MSISDN' : (digits.length === 13 ? 'NATID' : null);
+      const supported = Array.isArray(selectedBank && selectedBank.extraVerify)
+        && selectedBank.extraVerify.some(option => option.value === wantedVerify);
+      const duplicateNumber = channels.some(channel => channel.number.replace(/\D/g, '') === digits);
+      if (!duplicateNumber) channels.push({
+        key: `${bankCode}:promptpay`, code: bankCode, number: promptpayEasyslipNumber,
+        name: promptpayName || bankAccountName, extraVerify: supported ? wantedVerify : undefined,
+      });
     }
 
     if (easyslip.isConfigured() && channels.length) {
       const statuses = [];
       for (const channel of channels) {
-        const already = payment.easyslipAccounts[channel.code];
+        const already = payment.easyslipAccounts[channel.key] || payment.easyslipAccounts[channel.code];
         const targetExtraVerify = channel.extraVerify || null;
         if (already && already.accountId && already.bankNumber === channel.number && already.extraVerify === targetExtraVerify) continue;
         const bankLabel = (banks.find(b => b.code === channel.code) || {}).nameTh || channel.code;
@@ -909,7 +918,7 @@ router.post('/topups/payment-settings', (req, res) => {
         if (already && already.accountId && already.bankNumber === channel.number) {
           const updateResult = await easyslip.updateBankAccount(already.accountId, { extraVerify: targetExtraVerify });
           if (updateResult.ok) {
-            payment.easyslipAccounts[channel.code] = { accountId: already.accountId, status: 'ok', bankNumber: channel.number, extraVerify: targetExtraVerify };
+            payment.easyslipAccounts[channel.key] = { accountId: already.accountId, status: 'ok', bankCode: channel.code, bankNumber: channel.number, extraVerify: targetExtraVerify };
             statuses.push(`${bankLabel}: แก้ไขวิธีตรวจสอบสำเร็จ`);
           } else {
             statuses.push(`${bankLabel}: แก้ไขวิธีตรวจสอบไม่สำเร็จ (${updateResult.message})`);
@@ -922,21 +931,21 @@ router.post('/topups/payment-settings', (req, res) => {
           nameEn: channel.name, type: 'NATURAL', extraVerify: channel.extraVerify,
         });
         if (result.ok) {
-          payment.easyslipAccounts[channel.code] = { accountId: result.account.id, status: 'ok', bankNumber: channel.number, extraVerify: targetExtraVerify };
+          payment.easyslipAccounts[channel.key] = { accountId: result.account.id, status: 'ok', bankCode: channel.code, bankNumber: channel.number, extraVerify: targetExtraVerify };
           statuses.push(`${bankLabel}: เชื่อมต่อสำเร็จ`);
         } else if (result.code === 'BANK_ACCOUNT_DUPLICATE') {
           // Registered before (not by us, or accountId wasn't saved) — we
           // have no id to patch it with, so this still needs a manual fix
           // in the EasySlip dashboard (ดู/แก้ไขบัญชี → เลือกประเภทพร้อมเพย์).
-          payment.easyslipAccounts[channel.code] = { accountId: (already && already.accountId) || null, status: 'ok', bankNumber: channel.number, extraVerify: (already && already.extraVerify) || null };
+          payment.easyslipAccounts[channel.key] = { accountId: (already && already.accountId) || null, status: 'ok', bankCode: channel.code, bankNumber: channel.number, extraVerify: targetExtraVerify };
           statuses.push(`${bankLabel}: เชื่อมต่อไว้แล้วแต่แก้วิธีตรวจสอบให้อัตโนมัติไม่ได้ (ไม่มี id บันทึกไว้) — ต้องแก้เองที่แดชบอร์ด EasySlip`);
         } else {
           statuses.push(`${bankLabel}: ไม่สำเร็จ (${result.message})`);
         }
       }
-      const activeCodes = channels.map(c => c.code);
-      Object.keys(payment.easyslipAccounts).forEach((code) => {
-        if (!activeCodes.includes(code)) delete payment.easyslipAccounts[code];
+      const activeKeys = channels.map(c => c.key);
+      Object.keys(payment.easyslipAccounts).forEach((key) => {
+        if (!activeKeys.includes(key)) delete payment.easyslipAccounts[key];
       });
       if (statuses.length) payment.easyslipStatus = statuses.join(' · ');
     } else {

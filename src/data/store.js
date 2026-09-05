@@ -167,11 +167,11 @@ function defaultData() {
         enabled: false,
       },
       payment: {
-        promptpayId: '081-234-5678',
-        promptpayName: 'LilTeam Shop (Demo)',
-        bankName: 'ธนาคารกสิกรไทย',
-        bankAccountNumber: '123-4-56789-0',
-        bankAccountName: 'LilTeam Shop (Demo)',
+        promptpayId: '',
+        promptpayName: '',
+        bankName: '',
+        bankAccountNumber: '',
+        bankAccountName: '',
         promptpayQrImage: null,
         bankQrImage: null,
         truemoneyPhone: '',
@@ -201,6 +201,7 @@ function defaultData() {
         // phone/ID number, not the underlying bank account number.
         easyslipAccounts: {},
         easyslipStatus: '',
+        receivingAccountResetVersion: 1,
       },
       miniGame: {
         enabled: true,
@@ -334,6 +335,16 @@ async function init() {
     const mongoDb = mongoClient.db(MONGODB_DB_NAME);
     mongoCollection = mongoDb.collection('app_data');
     mediaBucket = new GridFSBucket(mongoDb, { bucketName: 'media' });
+
+    await mongoCollection.updateMany(
+      { 'settings.payment.receivingAccountResetVersion': { $ne: 1 } },
+      { $set: {
+        'settings.payment.promptpayId': '', 'settings.payment.promptpayName': '',
+        'settings.payment.bankName': '', 'settings.payment.bankAccountNumber': '',
+        'settings.payment.bankAccountName': '', 'settings.payment.easyslipAccounts': {},
+        'settings.payment.easyslipStatus': '', 'settings.payment.receivingAccountResetVersion': 1,
+      } }
+    );
 
     const existing = await mongoCollection.findOne({ _id: 'main' });
     if (existing) {
@@ -494,6 +505,16 @@ function migrateSchema(db) {
     if (db.settings.payment.easyslipStatus === undefined) db.settings.payment.easyslipStatus = '';
     if (db.settings.payment.truemoneyPhone === undefined) db.settings.payment.truemoneyPhone = '';
     if (db.settings.payment.truemoneyEnabled === undefined) db.settings.payment.truemoneyEnabled = true;
+    changed = true;
+  }
+  // One-time platform-wide reset requested by the owner. It runs for the
+  // main document at startup and for every tenant document on first load,
+  // then the marker prevents later restarts from clearing newly entered data.
+  if ((Number(db.settings.payment.receivingAccountResetVersion) || 0) < 1) {
+    Object.assign(db.settings.payment, {
+      promptpayId: '', promptpayName: '', bankName: '', bankAccountNumber: '', bankAccountName: '',
+      easyslipAccounts: {}, easyslipStatus: '', receivingAccountResetVersion: 1,
+    });
     changed = true;
   }
   if (!db.topupRequests) { db.topupRequests = []; changed = true; }
