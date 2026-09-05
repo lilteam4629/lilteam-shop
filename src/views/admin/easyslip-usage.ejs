@@ -115,6 +115,83 @@
   </div>
 <% } %>
 
+<!-- Main-site monthly operating costs (not tenant/rented shop expenses) -->
+<div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm mb-6">
+  <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
+    <div>
+      <h2 class="text-lg font-bold text-[var(--text)]">💳 ค่าใช้จ่ายเว็บไซต์ของฉัน</h2>
+      <p class="text-xs text-[var(--text-4)] mt-1">รวมเฉพาะเว็บหลัก: VPS และระบบตรวจสลิป EasySlip ไม่รวมค่าใช้จ่ายของร้านเช่า</p>
+    </div>
+    <div class="sm:text-right">
+      <div class="text-xs text-[var(--text-4)]">ควรเตรียมต่อเดือน</div>
+      <div class="text-3xl font-extrabold text-[var(--gold)]">฿<%= Number(ownerCostSummary.totalMonthly).toLocaleString('th-TH') %></div>
+    </div>
+  </div>
+
+  <div class="grid md:grid-cols-2 gap-3 mb-5">
+    <div class="rounded-xl border border-[var(--border)] bg-[var(--input)]/40 p-4">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <div class="font-semibold text-sm">🖥️ VPS ReadyIDC</div>
+          <div class="text-xs text-[var(--text-4)] mt-1">รอบชำระรายเดือน</div>
+        </div>
+        <div class="text-right">
+          <div class="font-bold text-lg">฿<%= Number(ownerCostSummary.vpsAmount).toLocaleString('th-TH') %></div>
+          <div class="text-xs text-[var(--gold)]">จ่ายวันที่ <%= ownerCostSummary.vpsBillingDay %></div>
+        </div>
+      </div>
+      <div class="mt-3 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-3)]">
+        รอบถัดไป: <b class="text-[var(--text)]"><%= ownerCostSummary.vpsNextDue.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }) %></b>
+      </div>
+    </div>
+
+    <div class="rounded-xl border border-[var(--border)] bg-[var(--input)]/40 p-4">
+      <div class="flex items-center justify-between gap-3">
+        <div>
+          <div class="font-semibold text-sm">⚡ EasySlip <%= info && info.planName ? info.planName : 'Start' %></div>
+          <div class="text-xs text-[var(--text-4)] mt-1"><%= info && info.quota && info.quota.max !== null ? Number(info.quota.max).toLocaleString('th-TH') + ' ครั้ง / 30 วัน' : 'ระบบตรวจสลิปอัตโนมัติ' %></div>
+        </div>
+        <div class="text-right">
+          <div class="font-bold text-lg">฿<%= Number(ownerCostSummary.easyslipAmount).toLocaleString('th-TH') %></div>
+          <div class="text-xs text-[var(--gold)]">จ่ายวันที่ <%= ownerCostSummary.easyslipBillingDay %></div>
+        </div>
+      </div>
+      <div class="mt-3 pt-3 border-t border-[var(--border)] text-xs text-[var(--text-3)]">
+        รอบถัดไป: <b class="text-[var(--text)]"><%= ownerCostSummary.easyslipNextDue.toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Bangkok' }) %></b>
+      </div>
+    </div>
+  </div>
+
+  <details class="group rounded-xl border border-[var(--border)] bg-[var(--input)]/20">
+    <summary class="cursor-pointer list-none px-4 py-3 flex items-center justify-between text-sm font-semibold">
+      <span>แก้ไขค่าใช้จ่ายหรือวันจ่าย</span>
+      <span class="text-[var(--text-4)] group-open:rotate-180 transition">⌄</span>
+    </summary>
+    <form action="/admin/easyslip-usage/billing" method="POST" class="grid sm:grid-cols-2 gap-4 p-4 pt-1 border-t border-[var(--border)]">
+      <div class="grid grid-cols-2 gap-2">
+        <label class="text-xs text-[var(--text-3)]">ค่า VPS/เดือน
+          <input type="number" name="vpsAmount" min="0" step="0.01" value="<%= ownerCostSummary.vpsAmount %>" class="mt-1 w-full bg-[var(--card)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+        </label>
+        <label class="text-xs text-[var(--text-3)]">วันที่จ่าย VPS
+          <input type="number" name="vpsBillingDay" min="1" max="28" value="<%= ownerCostSummary.vpsBillingDay %>" class="mt-1 w-full bg-[var(--card)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+        </label>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <label class="text-xs text-[var(--text-3)]">ค่า EasySlip/เดือน
+          <input type="number" name="easyslipAmount" min="0" step="0.01" value="<%= ownerCostSummary.easyslipAmount %>" class="mt-1 w-full bg-[var(--card)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+        </label>
+        <label class="text-xs text-[var(--text-3)]">วันที่จ่าย EasySlip
+          <input type="number" name="easyslipBillingDay" min="1" max="28" value="<%= ownerCostSummary.easyslipBillingDay %>" class="mt-1 w-full bg-[var(--card)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+        </label>
+      </div>
+      <div class="sm:col-span-2 flex items-center justify-between gap-3">
+        <p class="text-[10px] text-[var(--text-4)]">วันจ่ายจำกัดวันที่ 1–28 เพื่อให้มีวันดังกล่าวทุกเดือน</p>
+        <button class="px-4 py-2 rounded-xl bg-[var(--gold)] text-[var(--bg)] text-xs font-bold">บันทึก</button>
+      </div>
+    </form>
+  </details>
+</div>
+
 <!-- Main Provider Configuration Form -->
 <form id="slip-provider-form" action="/admin/slip-verification" method="POST" class="space-y-6">
   <div class="rounded-xl border p-4 space-y-2">

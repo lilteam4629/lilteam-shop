@@ -742,6 +742,30 @@ async function renderSlipVerificationHub(req, res) {
   }
 
   const banks = await easyslip.getBanks().catch(() => []);
+  const savedOwnerCosts = store.data.settings.ownerOperatingCosts || {};
+  const ownerCosts = {
+    vpsAmount: Number.isFinite(Number(savedOwnerCosts.vpsAmount)) ? Number(savedOwnerCosts.vpsAmount) : 250,
+    vpsBillingDay: Math.min(28, Math.max(1, Number(savedOwnerCosts.vpsBillingDay) || 3)),
+    easyslipAmount: Number.isFinite(Number(savedOwnerCosts.easyslipAmount)) ? Number(savedOwnerCosts.easyslipAmount) : 99,
+    easyslipBillingDay: Math.min(28, Math.max(1, Number(savedOwnerCosts.easyslipBillingDay) || 6)),
+  };
+
+  function nextMonthlyDue(day) {
+    const bangkokNow = new Date(Date.now() + (7 * 60 * 60 * 1000));
+    const year = bangkokNow.getUTCFullYear();
+    const month = bangkokNow.getUTCMonth();
+    const dueMonth = bangkokNow.getUTCDate() > day ? month + 1 : month;
+    // 05:00 UTC is noon in Bangkok and keeps the displayed calendar date
+    // stable regardless of the VPS process timezone.
+    return new Date(Date.UTC(year, dueMonth, day, 5, 0, 0));
+  }
+
+  const ownerCostSummary = {
+    ...ownerCosts,
+    totalMonthly: ownerCosts.vpsAmount + ownerCosts.easyslipAmount,
+    vpsNextDue: nextMonthlyDue(ownerCosts.vpsBillingDay),
+    easyslipNextDue: nextMonthlyDue(ownerCosts.easyslipBillingDay),
+  };
 
   res.render('admin/easyslip-usage', {
     title: 'ระบบตรวจสอบสลิปด้วย API (Slip Provider Hub)',
@@ -751,12 +775,32 @@ async function renderSlipVerificationHub(req, res) {
     byshopInfo,
     slipokInfo,
     slip2goInfo,
-    banks
+    banks,
+    ownerCostSummary,
   });
 }
 
 router.get('/easyslip-usage', renderSlipVerificationHub);
 router.get('/slip-verification', renderSlipVerificationHub);
+
+router.post('/easyslip-usage/billing', async (req, res) => {
+  if (req.tenantShop) {
+    req.flash('error', 'ตั้งค่าค่าใช้จ่ายได้เฉพาะเว็บหลักเท่านั้น');
+    return res.redirect('/admin');
+  }
+
+  const amount = value => Math.max(0, Math.round((Number(value) || 0) * 100) / 100);
+  const billingDay = value => Math.min(28, Math.max(1, Math.trunc(Number(value) || 1)));
+  store.data.settings.ownerOperatingCosts = {
+    vpsAmount: amount(req.body.vpsAmount),
+    vpsBillingDay: billingDay(req.body.vpsBillingDay),
+    easyslipAmount: amount(req.body.easyslipAmount),
+    easyslipBillingDay: billingDay(req.body.easyslipBillingDay),
+  };
+  await store.save();
+  req.flash('success', 'บันทึกค่าใช้จ่ายและวันจ่ายของเว็บไซต์แล้ว');
+  res.redirect('/admin/easyslip-usage');
+});
 
 router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const payment = store.data.settings.payment;
