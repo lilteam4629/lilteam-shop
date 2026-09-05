@@ -23,7 +23,8 @@
 <div class="bg-gradient-to-r from-[var(--gold)]/10 via-[var(--card)] to-[var(--card)] border border-[var(--gold)]/30 rounded-2xl p-4 sm:p-5 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
   <div class="flex items-center gap-3.5">
     <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
-      <% if (payment.slipProvider === 'byshop') { %>🚀
+      <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>⚡
+      <% } else if (payment.slipProvider === 'byshop') { %>🚀
       <% } else if (payment.slipProvider === 'slipok') { %>🛡️
       <% } else if (payment.slipProvider === 'easyslip') { %>⚡
       <% } else if (payment.slipProvider === 'slip2go') { %>⚠️
@@ -33,7 +34,8 @@
       <div class="flex items-center gap-2">
         <span class="text-xs text-[var(--text-4)]">ผู้ให้บริการหลักที่ใช้งานอยู่:</span>
         <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--gold)] text-[var(--bg)]">
-          <% if (payment.slipProvider === 'byshop') { %>⭐ BYSHOP API (แนะนำ)
+          <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>EasySlip/SlipOK อัตโนมัติ
+          <% } else if (payment.slipProvider === 'byshop') { %>⭐ BYSHOP API (แนะนำ)
           <% } else if (payment.slipProvider === 'slipok') { %>⭐ SlipOK API (แนะนำ)
           <% } else if (payment.slipProvider === 'easyslip') { %>EasySlip API (มาตรฐาน)
           <% } else if (payment.slipProvider === 'slip2go') { %>Slip2Go API
@@ -41,7 +43,9 @@
         </span>
       </div>
       <div class="text-sm font-semibold text-[var(--text)] mt-0.5">
-        <% if (payment.slipProvider === 'byshop') { %>
+        <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>
+          ระบบเลือก EasySlip หรือ SlipOK จากการตั้งค่าที่เชื่อมต่อไว้โดยอัตโนมัติ
+        <% } else if (payment.slipProvider === 'byshop') { %>
           ระบบตรวจสลิปอัตโนมัติผ่าน BYSHOP API (ความเร็วสูง ดักสลิปซ้ำแม่นยำ)
         <% } else if (payment.slipProvider === 'slipok') { %>
           ระบบตรวจสลิปอัตโนมัติผ่าน SlipOK API (Branch: <%= payment.slipokBranchId || 'ยังไม่ระบุ' %>)

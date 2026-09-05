@@ -26,6 +26,27 @@ function authHeaders() {
 }
 
 let banksCache = null;
+const FALLBACK_BANKS = [
+  ['002', 'BBL', 'ธนาคารกรุงเทพ', 'Bangkok Bank'],
+  ['004', 'KBANK', 'ธนาคารกสิกรไทย', 'Kasikornbank'],
+  ['006', 'KTB', 'ธนาคารกรุงไทย', 'Krungthai Bank'],
+  ['011', 'TTB', 'ธนาคารทหารไทยธนชาต', 'TMBThanachart Bank'],
+  ['014', 'SCB', 'ธนาคารไทยพาณิชย์', 'Siam Commercial Bank'],
+  ['022', 'CIMBT', 'ธนาคารซีไอเอ็มบีไทย', 'CIMB Thai Bank'],
+  ['024', 'UOBT', 'ธนาคารยูโอบี', 'United Overseas Bank (Thai)'],
+  ['025', 'BAY', 'ธนาคารกรุงศรีอยุธยา', 'Bank of Ayudhya'],
+  ['030', 'GSB', 'ธนาคารออมสิน', 'Government Savings Bank'],
+  ['033', 'GHB', 'ธนาคารอาคารสงเคราะห์', 'Government Housing Bank'],
+  ['034', 'BAAC', 'ธนาคารเพื่อการเกษตรและสหกรณ์การเกษตร', 'Bank for Agriculture and Agricultural Cooperatives'],
+  ['035', 'EXIM', 'ธนาคารเพื่อการส่งออกและนำเข้าแห่งประเทศไทย', 'Export-Import Bank of Thailand'],
+  ['067', 'TISCO', 'ธนาคารทิสโก้', 'TISCO Bank'],
+  ['069', 'KKP', 'ธนาคารเกียรตินาคินภัทร', 'Kiatnakin Phatra Bank'],
+  ['070', 'ICBCT', 'ธนาคารไอซีบีซี (ไทย)', 'ICBC (Thai)'],
+  ['071', 'TCD', 'ธนาคารไทยเครดิต', 'Thai Credit Bank'],
+  ['073', 'LHFG', 'ธนาคารแลนด์ แอนด์ เฮ้าส์', 'Land and Houses Bank'],
+  ['088', 'CLICX', 'ธนาคารคลิกซ์', 'Clicx Bank'],
+  ['098', 'SME', 'ธนาคารพัฒนาวิสาหกิจขนาดกลางและขนาดย่อมแห่งประเทศไทย', 'SME Development Bank of Thailand'],
+].map(([code, shortCode, nameTh, nameEn]) => ({ code, shortCode, nameTh, nameEn, extraVerify: null }));
 
 /**
  * Fixed list of the 17 banks EasySlip supports (GET /v2/banks) — cached in
@@ -34,16 +55,17 @@ let banksCache = null;
  */
 async function getBanks() {
   if (banksCache) return banksCache;
-  if (!isConfigured()) return [];
+  if (!isConfigured()) return FALLBACK_BANKS;
   try {
     const res = await axios.get(`${BASE_URL}/banks`, { headers: authHeaders(), timeout: 15000 });
     if (res.data && res.data.success && Array.isArray(res.data.data)) {
       banksCache = res.data.data;
       return banksCache;
     }
-    return [];
+    return FALLBACK_BANKS;
   } catch (err) {
-    return [];
+    console.error('[easyslip] bank list unavailable; using documented fallback:', err.message);
+    return FALLBACK_BANKS;
   }
 }
 
