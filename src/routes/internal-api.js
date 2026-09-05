@@ -105,6 +105,12 @@ router.get('/me', (req, res) => {
   res.json({ ok: true, user: publicUser(user), recaptchaSiteKey: recaptcha.siteKey() });
 });
 
+// Public (no userId needed) — e.g. the rent-app's own /register page needs
+// the recaptcha site key before anyone has logged in.
+router.get('/config', (req, res) => {
+  res.json({ ok: true, recaptchaSiteKey: recaptcha.siteKey() });
+});
+
 // ---------- Plans ----------
 router.get('/plans', (req, res) => {
   const plans = store.data.licensePlans.filter(provisioning.isPlanAvailable).sort((a, b) => a.days - b.days);
