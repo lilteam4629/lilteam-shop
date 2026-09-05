@@ -119,6 +119,7 @@ router.post('/topup/truemoney', async (req, res) => {
 
     const amount = result.amount;
     const refCode = 'TM' + store.genId(6).toUpperCase();
+    const topupRequestId = store.genId(10);
     const now = new Date().toISOString();
 
     await store.transact((data) => {
@@ -135,7 +136,7 @@ router.post('/topup/truemoney', async (req, res) => {
         note: `เติมเงินผ่านซอง TrueMoney (ผู้ส่ง: ${result.senderName || 'ไม่ระบุ'}, อ้างอิง ${refCode})`, createdAt: now,
       });
       data.topupRequests.push({
-        id: store.genId(10), userId: freshUser.id, amount, method: 'truemoney_angpao', refCode,
+        id: topupRequestId, userId: freshUser.id, amount, method: 'truemoney_angpao', refCode,
         slipPath: null,
         slipCheck: { checked: true, verified: true, message: `ซองของขวัญสำเร็จ (ผู้ส่ง: ${result.senderName || '-'})`, provider: 'truemoney_angpao' },
         status: 'approved', createdAt: now, reviewedAt: now,
@@ -167,7 +168,7 @@ router.post('/topup/truemoney', async (req, res) => {
     }).catch(() => {});
 
     req.flash('success', `🧧 เติมเงินสำเร็จ! ได้รับ ฿${amount.toLocaleString()} เข้ากระเป๋าเรียบร้อยแล้ว`);
-    res.redirect('/account');
+    res.redirect(`/account/topup/${topupRequestId}`);
   } catch (err) {
     console.error('[TrueMoney Redeem Error]', err);
     req.flash('error', 'เกิดข้อผิดพลาดในการตรวจสอบซองของขวัญ กรุณาลองใหม่อีกครั้ง');

@@ -34,10 +34,16 @@
 
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 space-y-4 mb-6">
     <div class="flex justify-between text-sm"><span class="text-[var(--text-3)]">จำนวนเงิน</span><span class="text-[var(--gold)] font-bold text-lg">฿<%= request.amount.toLocaleString() %>.00</span></div>
-    <div class="flex justify-between text-sm"><span class="text-[var(--text-3)]">ช่องทาง</span><span><%= request.method === 'promptpay' ? 'พร้อมเพย์ (PromptPay)' : 'โอนผ่านธนาคาร' %></span></div>
+    <div class="flex justify-between text-sm"><span class="text-[var(--text-3)]">ช่องทาง</span><span><%= request.method === 'truemoney_angpao' ? 'ซองของขวัญ TrueMoney' : (request.method === 'promptpay' ? 'พร้อมเพย์ (PromptPay)' : 'โอนผ่านธนาคาร') %></span></div>
 
     <div class="border-t border-[var(--border)] pt-4">
-      <% if (request.method === 'promptpay' && (payment.promptpayQrImage || qrDataUrl)) { %>
+      <% if (request.method === 'truemoney_angpao') { %>
+        <div class="bg-emerald-900/20 border border-emerald-700/50 rounded-xl px-4 py-4 text-center">
+          <div class="text-2xl mb-2">🧧</div>
+          <div class="font-semibold text-emerald-300">รับเงินจากซองของขวัญเรียบร้อยแล้ว</div>
+          <p class="text-xs text-[var(--text-3)] mt-1">ยอดเงินถูกเพิ่มเข้ากระเป๋าในเว็บไซต์อัตโนมัติ</p>
+        </div>
+      <% } else if (request.method === 'promptpay' && (payment.promptpayQrImage || qrDataUrl)) { %>
         <div class="bg-white rounded-lg p-4 flex flex-col items-center mb-3">
           <img src="<%= payment.promptpayQrImage || qrDataUrl %>" class="w-56 h-56 object-contain" alt="พร้อมเพย์ QR" />
           <p class="text-[var(--bg)] text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
@@ -64,10 +70,12 @@
           <div class="flex justify-between"><span class="text-[var(--text-3)]">ชื่อบัญชี</span><span><%= payment.bankAccountName %></span></div>
         </div>
       <% } %>
-      <div class="flex items-start gap-2.5 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl px-4 py-3 mt-4 text-sm">
-        <span class="shrink-0 text-lg">⚠️</span>
-        <span class="text-[var(--text)]">โอนแล้วกรุณาระบุจำนวนเงินให้ตรงเป๊ะ <b class="text-[var(--gold)]">(฿<%= request.amount.toLocaleString() %>.00)</b><%= automaticSlipCheck ? ' เพื่อให้ระบบตรวจสอบอัตโนมัติผ่านและเติมเงินได้ทันที' : ' จากนั้นแอดมินร้านจะตรวจสอบและอนุมัติให้' %></span>
-      </div>
+      <% if (request.method !== 'truemoney_angpao') { %>
+        <div class="flex items-start gap-2.5 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl px-4 py-3 mt-4 text-sm">
+          <span class="shrink-0 text-lg">⚠️</span>
+          <span class="text-[var(--text)]">โอนแล้วกรุณาระบุจำนวนเงินให้ตรงเป๊ะ <b class="text-[var(--gold)]">(฿<%= request.amount.toLocaleString() %>.00)</b><%= automaticSlipCheck ? ' เพื่อให้ระบบตรวจสอบอัตโนมัติผ่านและเติมเงินได้ทันที' : ' จากนั้นแอดมินร้านจะตรวจสอบและอนุมัติให้' %></span>
+        </div>
+      <% } %>
     </div>
   </div>
 
