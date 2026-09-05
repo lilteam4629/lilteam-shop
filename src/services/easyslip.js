@@ -186,7 +186,12 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
     if (!normalizedExpected.length) {
       return { checked: false, verified: false, message: 'ร้านยังไม่ได้ตั้งค่าบัญชีรับเงินสำหรับตรวจอัตโนมัติ — รอแอดมินตรวจสอบ', raw: data };
     }
-    const accountMatches = normalizedExpected.includes(normalizeAccountNumber(matched.bankNumber));
+    const matchedNumber = normalizeAccountNumber(matched.bankNumber);
+    const proxyNumber = normalizeAccountNumber(data.rawSlip && data.rawSlip.receiver
+      && data.rawSlip.receiver.account && data.rawSlip.receiver.account.proxy
+      && data.rawSlip.receiver.account.proxy.account);
+    const accountMatches = normalizedExpected.includes(matchedNumber)
+      || (proxyNumber && normalizedExpected.includes(proxyNumber));
     if (!accountMatches) {
       return { checked: true, verified: false, message: 'บัญชีผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: data };
     }

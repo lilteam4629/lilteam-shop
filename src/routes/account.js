@@ -263,7 +263,17 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
 
     if (selectedProvider === 'easyslip' && easyslip.isConfigured() && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
       provider = 'easyslip';
-      const expectedNumbers = Object.values(payment.easyslipAccounts).map(a => a.bankNumber).filter(Boolean);
+      const accountEntries = Object.entries(payment.easyslipAccounts);
+      const wantedKind = request.method === 'promptpay' ? ':promptpay' : ':account';
+      let expectedNumbers = accountEntries
+        .filter(([key]) => key.includes(':') ? key.endsWith(wantedKind) : request.method !== 'promptpay')
+        .map(([, account]) => account && account.bankNumber)
+        .filter(Boolean);
+      // Legacy shops may not have the new kind suffix yet. PromptPay must
+      // still compare against its own saved phone/ID, never the bank account.
+      if (!expectedNumbers.length && request.method === 'promptpay' && payment.promptpayId) {
+        expectedNumbers = [payment.promptpayId];
+      }
       result = await easyslip.verifySlip(fileBuffer, request.amount, fileOptions, expectedNumbers);
     } else if (selectedProvider === 'slipok') {
       provider = 'slipok';
