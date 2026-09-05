@@ -11,6 +11,7 @@ const slipok = require('../services/slipok');
 const slip2go = require('../services/slip2go');
 const slipcheck = require('../services/slipcheck');
 const rdcwSlip = require('../services/rdcw-slip');
+const { effectiveSlipConfig } = require('../services/slip-config');
 const theme = require('../services/theme');
 const discordBot = require('../services/discord-bot');
 const { MAIN_SITE_URL, MAIN_DOMAIN } = require('../middleware/tenant');
@@ -707,7 +708,8 @@ router.get('/topups', async (req, res) => {
 // Slip Verification Hub & Provider Management (/admin/easyslip-usage & /admin/slip-verification)
 async function renderSlipVerificationHub(req, res) {
   const payment = store.data.settings.payment || {};
-  const easyKey = payment.easyslipApiKey || undefined;
+  const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, Boolean(req.tenantShop));
+  const easyKey = effective.tenantOwnedSlipApi ? (effective.easyslipApiKey || null) : (effective.easyslipApiKey || undefined);
 
   let easyslipInfo = { ok: false, message: 'ไม่ได้ตั้งค่า' };
   try {
@@ -735,22 +737,26 @@ async function renderSlipVerificationHub(req, res) {
   }
 
   let slip2goInfo = null;
-  if (payment.slip2goApiKey) {
+  if (effective.slip2goApiKey) {
     try {
-      slip2goInfo = await slip2go.checkBalance(payment.slip2goApiKey, payment.slip2goEndpoint);
+      slip2goInfo = await slip2go.checkBalance(effective.slip2goApiKey, effective.slip2goEndpoint);
     } catch (e) {
       slip2goInfo = { ok: false, message: e.message };
     }
   }
 
   let slipcheckInfo = null;
-  if (payment.slipcheckApiKey) {
+  if (effective.slipcheckApiKey) {
     try {
-      slipcheckInfo = await slipcheck.getAccountInfo(payment.slipcheckApiKey, payment.slipcheckEndpoint);
+      slipcheckInfo = await slipcheck.getAccountInfo(effective.slipcheckApiKey, effective.slipcheckEndpoint);
     } catch (e) {
       slipcheckInfo = { ok: false, message: e.message };
     }
   }
+
+  const rdcwInfo = effective.rdcwClientId && effective.rdcwClientSecret
+    ? { ...rdcwSlip.validateCredentials(effective.rdcwClientId, effective.rdcwClientSecret), quotaUnavailable: true }
+    : null;
 
   const banks = await easyslip.getBanks().catch(() => []);
   const savedOwnerCosts = store.data.settings.ownerOperatingCosts || {};
@@ -787,6 +793,8 @@ async function renderSlipVerificationHub(req, res) {
     slipokInfo,
     slip2goInfo,
     slipcheckInfo,
+    rdcwInfo,
+    effectiveProvider: effective.slipProvider,
     banks,
     ownerCostSummary,
   });
@@ -816,6 +824,7 @@ router.post('/easyslip-usage/billing', async (req, res) => {
 
 router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const payment = store.data.settings.payment;
+  const slipApiMode = req.tenantShop && req.body.slipApiMode === 'own' ? 'own' : (req.tenantShop ? 'shared' : 'own');
   const slipProvider = req.body.slipProvider || payment.slipProvider || 'auto';
   if (!['none', 'easyslip', 'slipcheck', 'rdcw', 'slip2go'].includes(slipProvider)) {
     req.flash('error', 'กรุณาเลือกผู้ให้บริการตรวจสลิปที่รองรับ');
@@ -836,10 +845,10 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const customSlipEndpoint = (req.body.customSlipEndpoint !== undefined ? req.body.customSlipEndpoint : (payment.customSlipEndpoint || '')).trim();
   const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
 
-  const missingCredentials = (slipProvider === 'easyslip' && !easyslipApiKey && !easyslip.isConfigured())
+  const missingCredentials = slipApiMode === 'own' && ((slipProvider === 'easyslip' && !easyslipApiKey)
     || (slipProvider === 'slipcheck' && !slipcheckApiKey)
     || (slipProvider === 'rdcw' && (!rdcwClientId || !rdcwClientSecret))
-    || (slipProvider === 'slip2go' && !slip2goApiKey);
+    || (slipProvider === 'slip2go' && !slip2goApiKey));
   if (missingCredentials) {
     req.flash('error', 'กรุณากรอกข้อมูล API ของผู้ให้บริการที่เลือกให้ครบก่อนบันทึก');
     return res.redirect('/admin/easyslip-usage');
@@ -847,6 +856,7 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
 
   Object.assign(payment, {
     slipProvider,
+    slipApiMode,
     byshopApiKey,
     byshopEndpoint,
     slipokBranchId,
@@ -859,7 +869,7 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
     rdcwClientId,
     rdcwClientSecret,
     rdcwEndpoint,
-    tenantOwnedSlipApi: false,
+    tenantOwnedSlipApi: slipApiMode === 'own' && Boolean(req.tenantShop),
     customSlipEndpoint,
     customSlipApiKey,
     topupWebhookUrl: (req.body.topupWebhookUrl !== undefined ? req.body.topupWebhookUrl : (payment.topupWebhookUrl || '')).trim()
@@ -892,6 +902,7 @@ router.post(['/slip-verification/test', '/easyslip-usage/test', '/api-providers/
     }
 
     if (provider === 'easyslip') {
+      if (req.tenantShop && !apiKey) return res.json({ ok: false, message: 'กรุณากรอก EasySlip API Key ของร้านก่อนทดสอบ' });
       const result = await easyslip.getAccountInfo(apiKey || undefined);
       return res.json(result);
     }
@@ -943,12 +954,13 @@ router.post('/topups/payment-settings', (req, res) => {
     const promptpayPrimaryBank = banks.find(b => b.code === promptpayBankCode);
     const truemoneyPhone = (req.body.truemoneyPhone || '').trim().replace(/[^0-9]/g, '');
     const truemoneyEnabled = req.body.truemoneyEnabled === 'on';
-    const slipProvider = req.body.slipProvider || payment.slipProvider || 'auto';
-    if (promptpayId && !promptpayPrimaryBank) {
+    const effectiveBeforeSave = effectiveSlipConfig(payment, store.platformData.settings.payment, Boolean(req.tenantShop));
+    const slipProvider = effectiveBeforeSave.slipProvider || 'auto';
+    if (slipProvider === 'easyslip' && promptpayId && !promptpayPrimaryBank) {
       req.flash('error', 'กรุณาเลือกธนาคารที่พร้อมเพย์ผูกอยู่ เพื่อเชื่อม EasySlip');
       return res.redirect('/admin/topups?tab=bank');
     }
-    if (bankAccountNumber && !primaryBank) {
+    if (slipProvider === 'easyslip' && bankAccountNumber && !primaryBank) {
       req.flash('error', 'กรุณาเลือกธนาคารของเลขบัญชี เพื่อเชื่อม EasySlip');
       return res.redirect('/admin/topups?tab=bank');
     }
@@ -979,7 +991,7 @@ router.post('/topups/payment-settings', (req, res) => {
       slip2goApiKey, slip2goEndpoint, customSlipEndpoint, customSlipApiKey,
       easyslipApiKey, slipcheckApiKey, slipcheckEndpoint,
       rdcwClientId, rdcwClientSecret, rdcwEndpoint,
-      tenantOwnedSlipApi: false,
+      tenantOwnedSlipApi: payment.slipApiMode === 'own' && Boolean(req.tenantShop),
       topupWebhookUrl: (req.body.topupWebhookUrl || '').trim(),
     });
 
@@ -1005,7 +1017,8 @@ router.post('/topups/payment-settings', (req, res) => {
       });
     }
 
-    const easyKey = payment.easyslipApiKey || undefined;
+    const effectiveAfterSave = effectiveSlipConfig(payment, store.platformData.settings.payment, Boolean(req.tenantShop));
+    const easyKey = effectiveAfterSave.tenantOwnedSlipApi ? (effectiveAfterSave.easyslipApiKey || null) : (effectiveAfterSave.easyslipApiKey || undefined);
     if (slipProvider === 'easyslip' && easyslip.isConfigured(easyKey) && channels.length) {
       const statuses = [];
       for (const channel of channels) {

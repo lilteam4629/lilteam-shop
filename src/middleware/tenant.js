@@ -97,10 +97,11 @@ async function tenantResolver(req, res, next) {
       return res.status(404).send('ร้านนี้ยังไม่พร้อมใช้งาน');
     }
     req.tenantShop = shop;
-    // For now rented shops share the platform EasySlip account. Other
-    // providers still require credentials saved inside the tenant database.
+    // Existing shops default to the shared platform provider, while still
+    // being able to opt into their own provider account from the admin UI.
     if (tenantDb.settings && tenantDb.settings.payment) {
-      tenantDb.settings.payment.tenantOwnedSlipApi = false;
+      tenantDb.settings.payment.slipApiMode ||= 'shared';
+      tenantDb.settings.payment.tenantOwnedSlipApi = tenantDb.settings.payment.slipApiMode === 'own';
     }
     store.runInTenant(shop.id, tenantDb, next);
   } catch (err) {

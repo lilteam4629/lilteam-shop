@@ -47,10 +47,38 @@ async function main() {
   check('Explicit manual mode is respected', () => assert.equal(resolveSlipProvider({ slipProvider: 'none', slipokApiKey: 'fixture' }, true), 'none'));
   check('Byshop slip setting falls back to the existing provider', () => assert.equal(resolveSlipProvider({ slipProvider: 'byshop' }, false), 'slipok'));
   check('Explicit tenant-owned Slip2Go is respected', () => assert.equal(resolveSlipProvider({ slipProvider: 'slip2go', easyslipAccounts: { bank: { bankNumber: 'fixture' } } }, true), 'slip2go'));
+  const { effectiveSlipConfig } = require('../src/services/slip-config');
+  const tenantPayment = { slipApiMode: 'shared', slipProvider: 'slipcheck', slipcheckApiKey: 'tenant-key', promptpayId: 'tenant-receiver' };
+  const platformPayment = { slipProvider: 'easyslip', easyslipApiKey: 'platform-key' };
+  check('Shared mode uses platform provider but keeps tenant receiving account', () => {
+    const effective = effectiveSlipConfig(tenantPayment, platformPayment, true);
+    assert.equal(effective.slipProvider, 'easyslip');
+    assert.equal(effective.easyslipApiKey, 'platform-key');
+    assert.equal(effective.promptpayId, 'tenant-receiver');
+  });
+  check('Own mode never falls back to platform credentials', () => {
+    const effective = effectiveSlipConfig({ ...tenantPayment, slipApiMode: 'own' }, platformPayment, true);
+    assert.equal(effective.slipProvider, 'slipcheck');
+    assert.equal(effective.slipcheckApiKey, 'tenant-key');
+    assert.equal(effective.easyslipApiKey, undefined);
+  });
+  let slip2goCalls = 0;
+  class FakeFormData { append() {} getHeaders() { return {}; } }
+  const slip2goService = load('src/services/slip2go.js', {
+    axios: { post: async () => { slip2goCalls++; return { data: { success: true, data: { amount: 10, transRef: 'fixture-ref', receiverName: 'คนละร้าน' } } }; } },
+    'form-data': FakeFormData,
+  });
+  const demoResult = await slip2goService.verifySlip(Buffer.from('fixture'), 10, {}, { apiKey: 'demo_fixture', expectedReceiverNames: ['ร้านทดสอบ'] });
+  check('Slip2Go demo-looking keys still call the real API and validate receiver', () => {
+    assert.equal(slip2goCalls, 1);
+    assert.equal(demoResult.verified, false);
+  });
 
   const als = new AsyncLocalStorage();
   let sequence = 0;
-  const store = { get data() { return als.getStore(); }, genId: () => 'fixture-' + (++sequence),
+  const platformFixture = model.fixture();
+  const store = { get data() { return als.getStore(); }, get platformData() { return platformFixture; },
+    isTenantContext: () => Boolean(als.getStore()), genId: () => 'fixture-' + (++sequence),
     save: async () => {}, transact: async fn => fn(als.getStore()),
     isPersistent: () => false, bindTenantContext: fn => AsyncLocalStorage.bind(fn) };
   const auth = { currentUser: req => store.data.users.find(u => u.id === req.session.userId), requireLogin: (req, res, next) => next() };
@@ -99,7 +127,7 @@ async function main() {
   const hubTest = admin.stack.find(l => Array.isArray(l.route?.path) && l.route.path.includes('/easyslip-usage/test')).route.stack[0].handle;
   let testedProvider;
   await hubTest({ body: { provider: 'easyslip' }, tenantShop: { id: 'fixture' } }, { status() { return this; }, json(result) { testedProvider = result; } });
-  check('Tenant EasySlip test uses the central provider without exposing its key', () => { assert.deepEqual(testedProvider, { ok: false }); assert.equal(quotaCalls, 1); });
+  check('Tenant own EasySlip test requires its own key without exposing central credentials', () => { assert.equal(testedProvider.ok, false); assert.match(testedProvider.message, /API Key/); assert.equal(quotaCalls, 0); });
   const viewData = model.fixture(); model.migrateFixture(viewData);
   const ejs = require('ejs');
   let pages = 0;
@@ -120,7 +148,7 @@ async function main() {
     await als.run(viewData, () => handler(req, res));
   }
   check('Updated admin pages render with migrated fixtures', () => assert.equal(pages, 14));
-  check('Main provider page and tenant EasySlip test use central quota API', () => assert.equal(quotaCalls, 2));
+  check('Only the main provider page reads central quota during this fixture', () => assert.equal(quotaCalls, 1));
   let js = 0, templates = 0;
   function scan(dir) { for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const filename = path.join(dir, entry.name);

@@ -189,6 +189,7 @@ function defaultData() {
         rdcwClientId: '',
         rdcwClientSecret: '',
         rdcwEndpoint: 'https://suba.rdcw.co.th/v2/inquiry',
+        slipApiMode: 'own',
         tenantOwnedSlipApi: false,
         // Optional per-shop SlipOK credentials (see /admin/topups). When set,
         // this shop's own slip checks use these instead of the global
@@ -790,6 +791,7 @@ async function loadTenantDb(shopId) {
 async function createTenantDb(shopId, { shopName, adminUsername, adminEmail, adminPasswordHash }) {
   const tenantDb = defaultData();
   tenantDb.settings.shopName = shopName;
+  tenantDb.settings.payment.slipApiMode = 'shared';
   tenantDb.users = [
     {
       id: nanoid(8), username: adminUsername, email: adminEmail, passwordHash: adminPasswordHash,
@@ -958,6 +960,8 @@ function getSystemStatus() {
 
 module.exports = {
   get data() { return tenantContext.getStore()?.db || db; },
+  get platformData() { return db; },
+  isTenantContext: () => Boolean(tenantContext.getStore()),
   init,
   save,
   reset,

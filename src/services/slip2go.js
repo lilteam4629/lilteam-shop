@@ -20,17 +20,6 @@ async function checkBalance(apiKey, customEndpoint = null) {
     return { ok: false, message: 'กรุณาระบุ Slip2Go API Key' };
   }
 
-  // Demo / Simulation mode
-  if (cleanKey.startsWith('test_') || cleanKey.startsWith('demo_') || cleanKey === 'SLIP2GO_DEMO_KEY') {
-    return {
-      ok: true,
-      quota: 500,
-      used: 42,
-      isDemo: true,
-      message: 'เชื่อมต่อ Slip2Go สำเร็จ (โหมดจำลอง Test/Demo Key)'
-    };
-  }
-
   try {
     const res = await axios.get(`${endpoint}/user/quota`, {
       headers: {
@@ -74,21 +63,6 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
     return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า Slip2Go API Key สำหรับตรวจสลิป', raw: null };
   }
 
-  // Demo mode
-  if (apiKey.startsWith('test_') || apiKey.startsWith('demo_') || apiKey === 'SLIP2GO_DEMO_KEY') {
-    const mockRef = 'S2G' + Date.now().toString().slice(-10);
-    return {
-      checked: true,
-      verified: true,
-      message: 'ตรวจสอบสลิปสำเร็จผ่าน Slip2Go API (โหมดจำลอง Test/Demo)',
-      raw: {
-        transRef: mockRef,
-        amount: Number(expectedAmount),
-        date: new Date().toISOString()
-      }
-    };
-  }
-
   try {
     const form = new FormData();
     if (Buffer.isBuffer(fileInput)) {
@@ -116,11 +90,22 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
       const result = data.data || data;
       const amount = Number(result.amount);
       const transRef = result.transRef || result.trans_ref || result.ref;
+      const receiverName = result.receiverName || result.receiver_name
+        || (result.receiver && (result.receiver.name || result.receiver.displayName))
+        || (result.receiver && result.receiver.account && result.receiver.account.name);
+      const expectedNames = (credentials.expectedReceiverNames || []).map(name => String(name || '').replace(/\s+/g, '').toLowerCase()).filter(Boolean);
       if (!Number.isFinite(amount) || Math.abs(amount - Number(expectedAmount)) > 0.009) {
         return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: data };
       }
       if (!transRef) {
         return { checked: false, verified: false, message: 'Slip2Go ไม่ได้ส่งเลขอ้างอิงธุรกรรมกลับมา รอแอดมินตรวจสอบ', raw: data };
+      }
+      if (expectedNames.length) {
+        if (!receiverName) return { checked: false, verified: false, message: 'Slip2Go ไม่ได้ส่งชื่อผู้รับกลับมา จึงยังไม่เติมเงินอัตโนมัติ', raw: data };
+        const normalizedReceiver = String(receiverName).replace(/\s+/g, '').toLowerCase();
+        if (!expectedNames.some(name => normalizedReceiver.includes(name) || name.includes(normalizedReceiver))) {
+          return { checked: true, verified: false, message: 'ชื่อผู้รับในสลิปไม่ตรงกับบัญชีของร้าน', raw: data };
+        }
       }
       return {
         checked: true,
@@ -129,7 +114,8 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
         raw: {
           transRef,
           amount,
-          date: result.date || result.trans_date || null
+          date: result.date || result.trans_date || null,
+          receiverName,
         }
       };
     }
