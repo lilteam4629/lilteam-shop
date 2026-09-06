@@ -185,6 +185,18 @@ async function main() {
   r.body.amount = 'Infinity';
   await als.run(f, () => topup(r, response()));
   check('Non-finite topup amounts are rejected', () => assert.equal(f.topupRequests.length, 1));
+  for (const provider of ['slipcheck', 'rdcw', 'slip2go']) {
+    const bankOnly = fixture();
+    bankOnly.settings.payment.slipProvider = provider;
+    bankOnly.settings.payment.slipApiMode = 'own';
+    const rejectedPromptPay = await als.run(bankOnly, () => account.createTopupRequest({ user: bankOnly.users[0], amount: 10, method: 'promptpay' }));
+    const acceptedBank = await als.run(bankOnly, () => account.createTopupRequest({ user: bankOnly.users[0], amount: 10, method: 'bank_transfer' }));
+    check(`${provider} accepts bank transfer but rejects PromptPay requests`, () => {
+      assert.equal(rejectedPromptPay.ok, false);
+      assert.match(rejectedPromptPay.error, /บัญชีธนาคาร/);
+      assert.equal(acceptedBank.ok, true);
+    });
+  }
   let quotaCalls = 0;
   const easy = { isConfigured: () => false, getBanks: async () => [], getAccountInfo: async () => { quotaCalls++; return { ok: false }; } };
   const admin = load('src/routes/admin.js', { '../data/store': store,

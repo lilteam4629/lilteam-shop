@@ -300,7 +300,8 @@
         <% } %>
       </div>
 
-      <!-- Section 1: PromptPay -->
+      <% if (receiverProvider === 'easyslip') { %>
+      <!-- Section 1: PromptPay (EasySlip only) -->
       <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
         <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
           <span>🔵 ช่องทาง พร้อมเพย์ (PromptPay)</span>
@@ -345,6 +346,7 @@
           <input type="file" name="promptpayQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--card)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
         </div>
       </div>
+      <% } %>
 
       <!-- Section 2: Bank Transfer -->
       <%

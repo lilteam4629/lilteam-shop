@@ -36,6 +36,17 @@ const upload = multer({
 });
 
 const truemoneyRedemptionLocks = new Set();
+const BANK_ONLY_SLIP_PROVIDERS = new Set(['slipcheck', 'rdcw', 'slip2go']);
+
+function activeSlipProvider(payment = {}) {
+  const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
+  const easyKey = effective.tenantOwnedSlipApi ? (effective.easyslipApiKey || null) : (effective.easyslipApiKey || undefined);
+  return resolveSlipProvider(effective, easyslip.isConfigured(easyKey));
+}
+
+function supportsPromptPay(payment = {}) {
+  return !BANK_ONLY_SLIP_PROVIDERS.has(activeSlipProvider(payment));
+}
 
 router.get('/', (req, res) => {
   const user = currentUser(req);
@@ -59,7 +70,8 @@ router.get('/', (req, res) => {
 });
 
 router.get('/topup', (req, res) => {
-  res.render('shop/topup', { title: 'เติมเงิน', payment: store.data.settings.payment });
+  const payment = store.data.settings.payment;
+  res.render('shop/topup', { title: 'เติมเงิน', payment, promptpayEnabled: supportsPromptPay(payment) });
 });
 
 router.post('/topup/truemoney', async (req, res) => {
@@ -454,6 +466,9 @@ async function createTopupRequest({ user, amount, method }) {
   const mth = method === 'bank_transfer' ? 'bank_transfer' : 'promptpay';
   if (!Number.isFinite(amt) || amt < 1) {
     return { ok: false, error: 'กรุณาระบุจำนวนเงินอย่างน้อย 1 บาท' };
+  }
+  if (mth === 'promptpay' && !supportsPromptPay(store.data.settings.payment)) {
+    return { ok: false, error: 'ค่ายตรวจสลิปที่ร้านเลือกใช้งานรองรับเฉพาะการโอนผ่านบัญชีธนาคาร' };
   }
   const request = {
     id: store.genId(10), userId: user.id, amount: amt, method: mth,
