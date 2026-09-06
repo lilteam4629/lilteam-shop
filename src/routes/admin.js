@@ -708,14 +708,17 @@ router.get('/topups', async (req, res) => {
 // Slip Verification Hub & Provider Management (/admin/easyslip-usage & /admin/slip-verification)
 async function renderSlipVerificationHub(req, res) {
   const payment = store.data.settings.payment || {};
+  const usesSharedProvider = Boolean(req.tenantShop && (payment.slipApiMode || 'shared') === 'shared');
   const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, Boolean(req.tenantShop));
   const easyKey = effective.tenantOwnedSlipApi ? (effective.easyslipApiKey || null) : (effective.easyslipApiKey || undefined);
 
   let easyslipInfo = { ok: false, message: 'ไม่ได้ตั้งค่า' };
-  try {
-    easyslipInfo = await easyslip.getAccountInfo(easyKey);
-  } catch (e) {
-    easyslipInfo = { ok: false, message: e.message };
+  if (!usesSharedProvider) {
+    try {
+      easyslipInfo = await easyslip.getAccountInfo(easyKey);
+    } catch (e) {
+      easyslipInfo = { ok: false, message: e.message };
+    }
   }
 
   let byshopInfo = null;
@@ -737,7 +740,7 @@ async function renderSlipVerificationHub(req, res) {
   }
 
   let slip2goInfo = null;
-  if (effective.slip2goApiKey) {
+  if (!usesSharedProvider && effective.slip2goApiKey) {
     try {
       slip2goInfo = await slip2go.checkBalance(effective.slip2goApiKey, effective.slip2goEndpoint);
     } catch (e) {
@@ -746,7 +749,7 @@ async function renderSlipVerificationHub(req, res) {
   }
 
   let slipcheckInfo = null;
-  if (effective.slipcheckApiKey) {
+  if (!usesSharedProvider && effective.slipcheckApiKey) {
     try {
       slipcheckInfo = await slipcheck.getAccountInfo(effective.slipcheckApiKey, effective.slipcheckEndpoint);
     } catch (e) {
@@ -754,7 +757,7 @@ async function renderSlipVerificationHub(req, res) {
     }
   }
 
-  const rdcwInfo = effective.rdcwClientId && effective.rdcwClientSecret
+  const rdcwInfo = !usesSharedProvider && effective.rdcwClientId && effective.rdcwClientSecret
     ? { ...rdcwSlip.validateCredentials(effective.rdcwClientId, effective.rdcwClientSecret), quotaUnavailable: true }
     : null;
 
@@ -795,6 +798,7 @@ async function renderSlipVerificationHub(req, res) {
     slipcheckInfo,
     rdcwInfo,
     effectiveProvider: effective.slipProvider,
+    usesSharedProvider,
     banks,
     ownerCostSummary,
   });

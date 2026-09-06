@@ -77,13 +77,14 @@
 </div>
 
 <!-- Provider connection and quota status -->
+<% if (!usesSharedProvider) { %>
 <% const providerStatuses = [
   { id: 'easyslip', name: 'EasySlip', info, used: info?.quota?.used, max: info?.quota?.max, remaining: info?.quota?.remaining, note: info?.ok ? ('แพ็กเกจ ' + (info.planName || '-')) : (info?.message || 'ยังไม่เชื่อมต่อ') },
   { id: 'slipcheck', name: 'SlipCheck', info: slipcheckInfo, used: slipcheckInfo?.quota?.used, max: slipcheckInfo?.quota?.max, remaining: slipcheckInfo?.quota?.max == null ? null : Math.max(0, Number(slipcheckInfo.quota.max) - Number(slipcheckInfo.quota.used || 0)), note: slipcheckInfo?.message || 'ยังไม่ได้กรอก API Key' },
   { id: 'rdcw', name: 'SlipRDCW', info: rdcwInfo, used: null, max: null, remaining: null, note: rdcwInfo?.ok ? 'เชื่อมข้อมูลแล้ว • ค่ายนี้ไม่มี API สำหรับอ่านโควตา' : (rdcwInfo?.message || 'ยังไม่ได้กรอก Client ID / Secret') },
   { id: 'slip2go', name: 'Slip2Go', info: slip2goInfo, used: slip2goInfo?.used, max: slip2goInfo?.quota, remaining: slip2goInfo?.quota == null ? null : Math.max(0, Number(slip2goInfo.quota) - Number(slip2goInfo.used || 0)), note: slip2goInfo?.message || 'ยังไม่ได้กรอก API Key' },
 ]; %>
-<div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+<div data-provider-quota-details class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
   <% providerStatuses.forEach(status => { const connected = status.info && status.info.ok; const hasQuota = connected && status.remaining !== null && status.remaining !== undefined && Number.isFinite(Number(status.remaining)); %>
     <div class="bg-[var(--card)] border <%= activeProvider === status.id ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> rounded-2xl p-5 shadow-sm">
       <div class="flex items-center justify-between mb-3">
@@ -100,6 +101,12 @@
     </div>
   <% }) %>
 </div>
+<% } else { %>
+  <div class="mb-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
+    <div class="font-bold text-sm text-emerald-600">✓ ระบบตรวจสลิปกลางพร้อมใช้งาน</div>
+    <p class="mt-1 text-xs text-[var(--text-4)]">ร้านนี้ไม่ต้องตั้งค่า API เพิ่มเติม</p>
+  </div>
+<% } %>
 
 <!-- Main-site monthly operating costs (not tenant/rented shop expenses) -->
 <% if (isMainSite) { %>

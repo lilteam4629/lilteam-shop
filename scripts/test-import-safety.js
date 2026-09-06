@@ -148,6 +148,22 @@ async function main() {
     await als.run(viewData, () => handler(req, res));
   }
   check('Updated admin pages render with migrated fixtures', () => assert.equal(pages, 14));
+  const tenantViewData = model.fixture();
+  tenantViewData.settings.payment.slipApiMode = 'shared';
+  const tenantHub = admin.stack.find(l => l.route?.path === '/easyslip-usage' && l.route.methods.get).route.stack.at(-1).handle;
+  await als.run(tenantViewData, () => tenantHub(
+    { tenantShop: { id: 'tenant-fixture' } },
+    { render(view, values) {
+      const filename = path.join(root, 'src/views', view + '.ejs');
+      const html = ejs.render(fs.readFileSync(filename, 'utf8'), {
+        settings: tenantViewData.settings, currentUser: tenantViewData.users[0], messages: { success: [], error: [] },
+        isMainSite: false, pendingTopupCount: 0, ...values,
+      }, { filename });
+      assert.doesNotMatch(html, /data-provider-quota-details/);
+      assert.match(html, /ระบบตรวจสลิปกลางพร้อมใช้งาน/);
+    } },
+  ));
+  check('Shared tenants cannot see or query central quota details', () => assert.equal(quotaCalls, 1));
   check('Only the main provider page reads central quota during this fixture', () => assert.equal(quotaCalls, 1));
   let js = 0, templates = 0;
   function scan(dir) { for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
