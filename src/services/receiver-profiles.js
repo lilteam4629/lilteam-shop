@@ -1,14 +1,16 @@
 const PROVIDERS = ['easyslip', 'slipcheck', 'rdcw', 'slip2go'];
 const FIELDS = [
   'promptpayId', 'promptpayName', 'promptpayBankCode', 'promptpayQrImage',
-  'bankName', 'bankAccountNumber', 'bankAccountName', 'bankQrImage',
+  'promptpayNameEn', 'bankName', 'bankAccountNumber', 'bankAccountName', 'bankAccountNameEn',
+  'bankAccountType', 'bankExtraVerify', 'bankQrImage',
   'easyslipAccounts', 'easyslipStatus',
 ];
 
 function blankProfile() {
   return {
-    promptpayId: '', promptpayName: '', promptpayBankCode: '', promptpayQrImage: null,
-    bankName: '', bankAccountNumber: '', bankAccountName: '', bankQrImage: null,
+    promptpayId: '', promptpayName: '', promptpayNameEn: '', promptpayBankCode: '', promptpayQrImage: null,
+    bankName: '', bankAccountNumber: '', bankAccountName: '', bankAccountNameEn: '',
+    bankAccountType: 'NATURAL', bankExtraVerify: '', bankQrImage: null,
     easyslipAccounts: {}, easyslipStatus: '',
   };
 }

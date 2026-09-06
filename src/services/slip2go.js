@@ -9,13 +9,13 @@ const { numberValue, officialEndpoint } = require('./slip-fields');
  * Provides methods for verifying bank & PromptPay slips via Slip2Go API.
  */
 
-const DEFAULT_ENDPOINT = 'https://api.slip2go.com/api';
+const DEFAULT_ENDPOINT = 'https://connect.slip2go.com/api';
 
 /**
  * Test Slip2Go connection and check balance / status.
  */
 async function checkBalance(apiKey, customEndpoint = null) {
-  const endpoint = officialEndpoint(customEndpoint, DEFAULT_ENDPOINT, 'api.slip2go.com');
+  const endpoint = officialEndpoint(customEndpoint, DEFAULT_ENDPOINT, 'connect.slip2go.com');
   const cleanKey = String(apiKey || '').trim();
 
   if (!cleanKey) {
@@ -23,20 +23,20 @@ async function checkBalance(apiKey, customEndpoint = null) {
   }
 
   try {
-    const res = await axios.get(`${endpoint}/user/quota`, {
+    const res = await axios.get(`${endpoint}/account/info`, {
       headers: {
-        'Authorization': `Bearer ${cleanKey}`,
-        'x-api-key': cleanKey,
+        'Authorization': cleanKey,
         'Accept': 'application/json'
       },
       timeout: 10000
     });
 
-    if (res.data && (res.data.success || res.data.ok || res.data.status === 'success')) {
+    if (res.data && (res.data.code === '200001' || res.data.success || res.data.ok)) {
+      const info = res.data.data || res.data;
       return {
         ok: true,
-        quota: Number(res.data.quota || res.data.data?.quota || 0),
-        used: Number(res.data.used || res.data.data?.used || 0),
+        quota: Number(info.estimatedQuotaSlip ?? info.tokenLimit ?? 0),
+        used: Math.max(0, Number(info.tokenLimit || 0) - Number(info.tokenRemaining || 0)),
         message: 'เชื่อมต่อ Slip2Go API สำเร็จ'
       };
     }
@@ -59,7 +59,7 @@ async function checkBalance(apiKey, customEndpoint = null) {
  */
 async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentials = {}) {
   const apiKey = String(credentials.apiKey || credentials || '').trim();
-  const endpoint = officialEndpoint(credentials.endpoint, DEFAULT_ENDPOINT, 'api.slip2go.com');
+  const endpoint = officialEndpoint(credentials.endpoint, DEFAULT_ENDPOINT, 'connect.slip2go.com');
 
   if (!apiKey) {
     return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า Slip2Go API Key สำหรับตรวจสลิป', raw: null };
@@ -68,27 +68,26 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
   try {
     const form = new FormData();
     if (Buffer.isBuffer(fileInput)) {
-      form.append('slip', fileInput, {
+      form.append('file', fileInput, {
         filename: fileOptions.filename || 'slip.jpg',
         contentType: fileOptions.contentType || 'image/jpeg',
       });
     } else {
-      form.append('slip', fs.createReadStream(fileInput));
+      form.append('file', fs.createReadStream(fileInput));
     }
-    form.append('amount', String(expectedAmount));
+    form.append('payload', JSON.stringify({ checkDuplicate: true, checkAmount: { type: 'eq', amount: String(expectedAmount) } }));
 
-    const res = await axios.post(`${endpoint}/verify`, form, {
+    const res = await axios.post(`${endpoint}/verify-slip/qr-image/info`, form, {
       headers: {
         ...form.getHeaders(),
-        'Authorization': `Bearer ${apiKey}`,
-        'x-api-key': apiKey,
+        'Authorization': apiKey,
         'Accept': 'application/json'
       },
       timeout: 30000
     });
 
     const data = res.data;
-    if (data && (data.success || data.ok || data.status === 'success')) {
+    if (data && (data.code === '200000' || data.success || data.ok || data.status === 'success')) {
       const result = data.data || data;
       const amount = numberValue(result.amount ?? result.transferAmount ?? result.transAmount);
       const transRef = result.transRef || result.trans_ref || result.ref || result.reference;
@@ -139,7 +138,4 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
   }
 }
 
-module.exports = {
-  checkBalance,
-  verifySlip
-};
+module.exports = { DEFAULT_ENDPOINT, checkBalance, verifySlip };

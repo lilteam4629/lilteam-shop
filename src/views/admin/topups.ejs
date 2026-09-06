@@ -9,6 +9,7 @@
         <span>/</span>
         <span>การเงิน</span>
       </div>
+
       <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] flex items-center gap-2">
         <span>💰 จัดการเติมเงิน, บัญชีรับเงิน & ตรวจสลิป</span>
       </h1>
@@ -284,6 +285,14 @@
         </div>
       </div>
 
+      <div class="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-[var(--text-3)]">
+        <% if (receiverProvider === 'easyslip') { %>EasySlip ลงทะเบียนบัญชีผ่าน API จึงต้องกรอกธนาคาร เลขบัญชี ชื่อไทย/อังกฤษ ประเภทบัญชี และวิธีตรวจที่ธนาคารรองรับให้ครบ
+        <% } else if (receiverProvider === 'slipcheck') { %>SlipCheck ส่งชื่อผู้รับและธนาคารกลับมา ระบบจะตรวจจากชื่อผู้รับ ส่วนเบอร์/เลขบัญชีและ QR ใช้แสดงให้ลูกค้าโอน
+        <% } else if (receiverProvider === 'rdcw') { %>SlipRDCW ไม่มีหน้าลงทะเบียนบัญชีผ่าน API ระบบจะใช้ชื่อและเลขผู้รับที่กรอกหน้านี้เทียบกับผลตรวจ
+        <% } else { %>Slip2Go รองรับชื่อ เลขผู้รับ และประเภทบัญชี ระบบจะใช้ข้อมูลหน้านี้สร้างเงื่อนไขตรวจของค่ายนี้
+        <% } %>
+      </div>
+
       <!-- Section 1: PromptPay -->
       <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
         <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
@@ -297,18 +306,22 @@
           </div>
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลือกพร้อมเพย์ *</label>
-            <select name="promptpayBankCode" <%= receiverPayment.promptpayId ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
+            <% if (receiverProvider === 'easyslip') { %><select name="promptpayBankCode" <%= receiverPayment.promptpayId ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
               <option value="">-- เลือกธนาคารพร้อมเพย์ --</option>
               <% banks.forEach(bank => { %>
                 <option value="<%= bank.code %>" <%= receiverPayment.promptpayBankCode === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
               <% }) %>
-            </select>
+            </select><% } else { %><input type="hidden" name="promptpayBankCode" value="" /><div class="px-3.5 py-2.5 rounded-xl border border-[var(--border-light)] text-xs text-[var(--text-4)]">ค่ายนี้ไม่ต้องลงทะเบียนธนาคารพร้อมเพย์</div><% } %>
           </div>
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์</label>
             <input name="promptpayName" value="<%= receiverPayment.promptpayName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
           </div>
         </div>
+
+        <% if (receiverProvider === 'easyslip') { %>
+          <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์ภาษาอังกฤษ *</label><input name="promptpayNameEn" value="<%= receiverPayment.promptpayNameEn || '' %>" placeholder="เช่น AURAPONG SONGTIM" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs" /></div>
+        <% } %>
 
         <div>
           <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code พร้อมเพย์ (ทางเลือก)</label>
@@ -340,7 +353,7 @@
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคารที่บัญชี/พร้อมเพย์ผูกอยู่ *</label>
             <% if (otherBanks.length) { %>
-              <select name="easyslipBankCode" required class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
+              <select name="easyslipBankCode" <%= receiverPayment.bankAccountNumber ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
                 <option value="">-- เลือกธนาคาร --</option>
                 <% otherBanks.forEach(bank => { %>
                   <option value="<%= bank.code %>" <%= primaryBank && primaryBank.code === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
@@ -361,6 +374,14 @@
             <input name="bankAccountName" value="<%= receiverPayment.bankAccountName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
           </div>
         </div>
+
+        <% if (receiverProvider === 'easyslip') { const bankVerifyOptions = (primaryBank && primaryBank.extraVerify) || []; %>
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีภาษาอังกฤษ *</label><input name="bankAccountNameEn" value="<%= receiverPayment.bankAccountNameEn || '' %>" placeholder="เช่น AURAPONG SONGTIM" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs" /></div>
+            <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ประเภทบัญชี *</label><select name="bankAccountType" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs"><option value="NATURAL" <%= receiverPayment.bankAccountType !== 'JURISTIC' ? 'selected' : '' %>>บุคคลธรรมดา</option><option value="JURISTIC" <%= receiverPayment.bankAccountType === 'JURISTIC' ? 'selected' : '' %>>นิติบุคคล</option></select></div>
+            <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">วิธีตรวจสอบที่ธนาคารรองรับ</label><select name="bankExtraVerify" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs"><option value="">ค่าเริ่มต้นของ EasySlip</option><% bankVerifyOptions.forEach(option => { %><option value="<%= option.value %>" <%= receiverPayment.bankExtraVerify === option.value ? 'selected' : '' %>><%= option.label %></option><% }) %></select></div>
+          </div>
+        <% } %>
 
         <div>
           <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code บัญชีธนาคาร (ทางเลือก)</label>

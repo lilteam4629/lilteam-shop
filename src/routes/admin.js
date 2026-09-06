@@ -852,7 +852,7 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const slipokBranchId = (req.body.slipokBranchId !== undefined ? req.body.slipokBranchId : (payment.slipokBranchId || '')).trim();
   const slipokApiKey = (req.body.slipokApiKey !== undefined ? req.body.slipokApiKey : (payment.slipokApiKey || '')).trim();
   const slip2goApiKey = (req.body.slip2goApiKey !== undefined ? req.body.slip2goApiKey : (payment.slip2goApiKey || '')).trim();
-  const slip2goEndpoint = (req.body.slip2goEndpoint !== undefined ? req.body.slip2goEndpoint : (payment.slip2goEndpoint || 'https://api.slip2go.com/api')).trim();
+  const slip2goEndpoint = (req.body.slip2goEndpoint !== undefined ? req.body.slip2goEndpoint : (payment.slip2goEndpoint || slip2go.DEFAULT_ENDPOINT)).trim();
   const easyslipApiKey = (req.body.easyslipApiKey !== undefined ? req.body.easyslipApiKey : (payment.easyslipApiKey || '')).trim();
   const slipcheckApiKey = (req.body.slipcheckApiKey !== undefined ? req.body.slipcheckApiKey : (payment.slipcheckApiKey || '')).trim();
   const slipcheckEndpoint = (req.body.slipcheckEndpoint !== undefined ? req.body.slipcheckEndpoint : (payment.slipcheckEndpoint || slipcheck.DEFAULT_ENDPOINT)).trim();
@@ -944,7 +944,7 @@ router.post(['/slip-verification/test', '/easyslip-usage/test', '/api-providers/
 
     if (provider === 'slip2go') {
       if (!apiKey) return res.json({ ok: false, message: 'กรุณากรอก Slip2Go API Key ก่อนทดสอบ' });
-      const result = await slip2go.checkBalance(apiKey, endpoint || 'https://api.slip2go.com/api');
+      const result = await slip2go.checkBalance(apiKey, endpoint || slip2go.DEFAULT_ENDPOINT);
       return res.json(result);
     }
 
@@ -973,6 +973,10 @@ router.post('/topups/payment-settings', (req, res) => {
     } = req.body;
     const bankCode = (req.body.easyslipBankCode || '').trim();
     const promptpayBankCode = (req.body.promptpayBankCode || '').trim();
+    const promptpayNameEn = (req.body.promptpayNameEn || '').trim();
+    const bankAccountNameEn = (req.body.bankAccountNameEn || '').trim();
+    const bankAccountType = req.body.bankAccountType === 'JURISTIC' ? 'JURISTIC' : 'NATURAL';
+    const bankExtraVerify = (req.body.bankExtraVerify || '').trim();
     const promptpayEasyslipNumber = (req.body.promptpayEasyslipNumber || promptpayId || '').trim();
 
     const payment = store.data.settings.payment;
@@ -1006,6 +1010,10 @@ router.post('/topups/payment-settings', (req, res) => {
       req.flash('error', 'กรุณาเลือกธนาคารของเลขบัญชี เพื่อเชื่อม EasySlip');
       return res.redirect('/admin/topups?tab=bank');
     }
+    if (slipProvider === 'easyslip' && ((promptpayId && !promptpayNameEn) || (bankAccountNumber && !bankAccountNameEn))) {
+      req.flash('error', 'EasySlip ต้องกรอกชื่อเจ้าของบัญชีภาษาอังกฤษให้ครบตามเอกสาร API');
+      return res.redirect('/admin/topups?tab=bank&receiverProvider=easyslip');
+    }
     if (!['none', 'slipok', 'easyslip', 'slipcheck', 'rdcw', 'slip2go'].includes(slipProvider)) {
       req.flash('error', 'ผู้ให้บริการตรวจสลิปนี้ยังไม่พร้อมใช้งาน');
       return res.redirect('/admin/topups');
@@ -1015,7 +1023,7 @@ router.post('/topups/payment-settings', (req, res) => {
     const slipokBranchId = (req.body.slipokBranchId !== undefined ? req.body.slipokBranchId : (payment.slipokBranchId || '')).trim();
     const slipokApiKey = (req.body.slipokApiKey !== undefined ? req.body.slipokApiKey : (payment.slipokApiKey || '')).trim();
     const slip2goApiKey = (req.body.slip2goApiKey !== undefined ? req.body.slip2goApiKey : (payment.slip2goApiKey || '')).trim();
-    const slip2goEndpoint = (req.body.slip2goEndpoint !== undefined ? req.body.slip2goEndpoint : (payment.slip2goEndpoint || 'https://api.slip2go.com/api')).trim();
+    const slip2goEndpoint = (req.body.slip2goEndpoint !== undefined ? req.body.slip2goEndpoint : (payment.slip2goEndpoint || slip2go.DEFAULT_ENDPOINT)).trim();
     const easyslipApiKey = (req.body.easyslipApiKey !== undefined ? req.body.easyslipApiKey : (payment.easyslipApiKey || '')).trim();
     const slipcheckApiKey = (req.body.slipcheckApiKey !== undefined ? req.body.slipcheckApiKey : (payment.slipcheckApiKey || '')).trim();
     const slipcheckEndpoint = (req.body.slipcheckEndpoint !== undefined ? req.body.slipcheckEndpoint : (payment.slipcheckEndpoint || slipcheck.DEFAULT_ENDPOINT)).trim();
@@ -1026,7 +1034,8 @@ router.post('/topups/payment-settings', (req, res) => {
     const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
 
     Object.assign(payment, {
-      promptpayId, promptpayName, promptpayBankCode, bankAccountNumber, bankAccountName,
+      promptpayId, promptpayName, promptpayNameEn, promptpayBankCode, bankAccountNumber, bankAccountName, bankAccountNameEn,
+      bankAccountType, bankExtraVerify,
       bankName: primaryBank ? primaryBank.nameTh : payment.bankName,
       truemoneyPhone, truemoneyEnabled,
       slipProvider, byshopApiKey, byshopEndpoint, slipokBranchId, slipokApiKey,
@@ -1046,7 +1055,10 @@ router.post('/topups/payment-settings', (req, res) => {
     // number, so it needs its own separate registration.
     const channels = [];
     if (bankCode && bankAccountNumber && bankAccountName) {
-      channels.push({ key: `${bankCode}:account`, code: bankCode, number: bankAccountNumber, name: bankAccountName });
+      const supportedBankVerify = Array.isArray(primaryBank && primaryBank.extraVerify)
+        && primaryBank.extraVerify.some(option => option.value === bankExtraVerify);
+      channels.push({ key: `${bankCode}:account`, code: bankCode, number: bankAccountNumber, name: bankAccountName,
+        nameEn: bankAccountNameEn || bankAccountName, type: bankAccountType, extraVerify: supportedBankVerify ? bankExtraVerify : undefined });
     }
     if (promptpayBankCode && promptpayEasyslipNumber && promptpayName) {
       const digits = promptpayEasyslipNumber.replace(/\D/g, '');
@@ -1056,7 +1068,8 @@ router.post('/topups/payment-settings', (req, res) => {
       const duplicateNumber = channels.some(channel => channel.number.replace(/\D/g, '') === digits);
       if (!duplicateNumber) channels.push({
         key: `${promptpayBankCode}:promptpay`, code: promptpayBankCode, number: promptpayEasyslipNumber,
-        name: promptpayName, extraVerify: supported ? wantedVerify : undefined,
+        name: promptpayName, nameEn: promptpayNameEn || promptpayName, type: bankAccountType,
+        extraVerify: supported ? wantedVerify : undefined,
       });
     }
 
@@ -1074,7 +1087,9 @@ router.post('/topups/payment-settings', (req, res) => {
         // verification method in place rather than trying to create it
         // again (a duplicate bankNumber is rejected outright, not merged).
         if (already && already.accountId && already.bankNumber === channel.number) {
-          const updateResult = await easyslip.updateBankAccount(already.accountId, { extraVerify: targetExtraVerify, apiKey: easyKey });
+          const updateResult = await easyslip.updateBankAccount(already.accountId, { extraVerify: targetExtraVerify,
+            bankCode: channel.code, bankNumber: channel.number, nameTh: channel.name, nameEn: channel.nameEn,
+            type: channel.type, apiKey: easyKey });
           if (updateResult.ok) {
             payment.easyslipAccounts[channel.key] = { accountId: already.accountId, status: 'ok', bankCode: channel.code, bankNumber: channel.number, extraVerify: targetExtraVerify };
             statuses.push(`${bankLabel}: แก้ไขวิธีตรวจสอบสำเร็จ`);
@@ -1086,7 +1101,7 @@ router.post('/topups/payment-settings', (req, res) => {
 
         const result = await easyslip.createBankAccount({
           bankCode: channel.code, bankNumber: channel.number, nameTh: channel.name,
-          nameEn: channel.name, type: 'NATURAL', extraVerify: channel.extraVerify, apiKey: easyKey,
+          nameEn: channel.nameEn, type: channel.type, extraVerify: channel.extraVerify, apiKey: easyKey,
         });
         if (result.ok) {
           payment.easyslipAccounts[channel.key] = { accountId: result.account.id, status: 'ok', bankCode: channel.code, bankNumber: channel.number, extraVerify: targetExtraVerify };

@@ -111,14 +111,14 @@ async function createBankAccount({ bankCode, bankNumber, nameTh, nameEn, type, e
  * to clear it) when that's what they mean to change.
  * Returns { ok: true, account } or { ok: false, code, message }.
  */
-async function updateBankAccount(accountId, { extraVerify, apiKey }) {
+async function updateBankAccount(accountId, { extraVerify, apiKey, ...fields }) {
   if (!isConfigured(apiKey)) {
     return { ok: false, code: 'NOT_CONFIGURED', message: 'ยังไม่ได้ตั้งค่า EASYSLIP_API_KEY' };
   }
   try {
     const res = await axios.patch(
       `${BASE_URL}/bank-accounts/${accountId}`,
-      { extraVerify },
+      { ...fields, extraVerify },
       { headers: authHeaders(apiKey), timeout: 15000 }
     );
     if (res.data && res.data.success) {

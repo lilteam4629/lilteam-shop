@@ -72,15 +72,20 @@ async function main() {
     assert.equal(receiverProfiles.view(payment, 'slipcheck').easyslipAccounts.easy, undefined);
   });
   let slip2goCalls = 0;
+  let slip2goRequest = null;
   class FakeFormData { append() {} getHeaders() { return {}; } }
   const slip2goService = load('src/services/slip2go.js', {
-    axios: { post: async () => { slip2goCalls++; return { data: { success: true, data: { amount: 10, transRef: 'fixture-ref', receiverName: 'คนละร้าน' } } }; } },
+    axios: { post: async (url, form, options) => { slip2goCalls++; slip2goRequest = { url, authorization: options.headers.Authorization }; return { data: { success: true, data: { amount: 10, transRef: 'fixture-ref', receiverName: 'คนละร้าน' } } }; } },
     'form-data': FakeFormData,
   });
   const demoResult = await slip2goService.verifySlip(Buffer.from('fixture'), 10, {}, { apiKey: 'demo_fixture', expectedReceiverNames: ['ร้านทดสอบ'] });
   check('Slip2Go demo-looking keys still call the real API and validate receiver', () => {
     assert.equal(slip2goCalls, 1);
     assert.equal(demoResult.verified, false);
+  });
+  check('Slip2Go uses the documented Connect endpoint and raw Secret header', () => {
+    assert.equal(slip2goRequest.url, 'https://connect.slip2go.com/api/verify-slip/qr-image/info');
+    assert.equal(slip2goRequest.authorization, 'demo_fixture');
   });
   const { receiverMatches } = require('../src/services/receiver-match');
   check('Receiver matching accepts Thai titles but rejects unsafe four-digit-only account matches', () => {
