@@ -799,6 +799,7 @@ async function renderSlipVerificationHub(req, res) {
     rdcwInfo,
     effectiveProvider: effective.slipProvider,
     usesSharedProvider,
+    easyslipVisibleKey: req.tenantShop ? (payment.easyslipApiKey || '') : (payment.easyslipApiKey || process.env.EASYSLIP_API_KEY || ''),
     banks,
     ownerCostSummary,
   });

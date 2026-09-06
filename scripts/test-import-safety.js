@@ -165,6 +165,7 @@ async function main() {
   check('Updated admin pages render with migrated fixtures', () => assert.equal(pages, 14));
   const tenantViewData = model.fixture();
   tenantViewData.settings.payment.slipApiMode = 'shared';
+  platformFixture.settings.payment.easyslipApiKey = 'central-key-must-stay-private';
   const tenantHub = admin.stack.find(l => l.route?.path === '/easyslip-usage' && l.route.methods.get).route.stack.at(-1).handle;
   await als.run(tenantViewData, () => tenantHub(
     { tenantShop: { id: 'tenant-fixture' } },
@@ -175,6 +176,8 @@ async function main() {
         isMainSite: false, pendingTopupCount: 0, ...values,
       }, { filename });
       assert.doesNotMatch(html, /data-provider-quota-details/);
+      assert.doesNotMatch(html, /central-key-must-stay-private/);
+      assert.doesNotMatch(html, />ดูคีย์</);
       assert.match(html, /ระบบตรวจสลิปกลางพร้อมใช้งาน/);
     } },
   ));
