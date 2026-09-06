@@ -302,9 +302,9 @@ function toggleEasySlipKey(button) {
   button.textContent = showing ? 'ดูคีย์' : 'ซ่อนคีย์';
 }
 
-function selectOwnProvider(input) {
+function selectOwnProvider(input, switchToOwnMode = true) {
   const ownMode = document.querySelector('input[name="slipApiMode"][value="own"]');
-  if (ownMode && ownMode.type === 'radio') ownMode.checked = true;
+  if (switchToOwnMode && ownMode && ownMode.type === 'radio') ownMode.checked = true;
   document.querySelectorAll('[data-provider-card]').forEach(card => {
     const selected = card.dataset.providerCard === input.value;
     card.classList.toggle('border-[var(--gold)]', selected);
@@ -326,7 +326,7 @@ function updateSlipMode() {
   if (choice) choice.classList.toggle('opacity-50', !own);
 }
 updateSlipMode();
-selectOwnProvider(document.querySelector('input[name="slipProvider"]:checked') || { value: '<%= selectedOwnProvider %>' });
+selectOwnProvider(document.querySelector('input[name="slipProvider"]:checked') || { value: '<%= selectedOwnProvider %>' }, false);
 
 async function testOwnProvider(provider) {
   const result = document.getElementById(`own-${provider}-result`);

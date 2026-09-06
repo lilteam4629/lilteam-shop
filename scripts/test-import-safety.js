@@ -247,6 +247,34 @@ async function main() {
   ));
   check('Shared tenants cannot see or query central quota details', () => assert.equal(quotaCalls, 1));
   check('Only the main provider page reads central quota during this fixture', () => assert.equal(quotaCalls, 1));
+  const tenantTopups = admin.stack.find(l => l.route?.path === '/topups' && l.route.methods.get).route.stack.at(-1).handle;
+  platformFixture.settings.payment.slipProvider = 'slipcheck';
+  let sharedTopupView;
+  await als.run(tenantViewData, () => tenantTopups(
+    { query: { receiverProvider: 'easyslip' }, tenantShop: { id: 'tenant-fixture' } },
+    { render(view, values) { sharedTopupView = values; } },
+  ));
+  check('Shared tenant can edit only the provider selected by the platform', () => {
+    assert.equal(JSON.stringify(sharedTopupView.availableReceiverProviders), JSON.stringify(['slipcheck']));
+    assert.equal(sharedTopupView.activeReceiverProvider, 'slipcheck');
+    assert.equal(sharedTopupView.receiverProvider, null);
+  });
+  const ownTenantViewData = model.fixture();
+  ownTenantViewData.settings.payment.slipApiMode = 'own';
+  ownTenantViewData.settings.payment.slipProvider = 'rdcw';
+  let ownTopupView;
+  await als.run(ownTenantViewData, () => tenantTopups(
+    { query: { receiverProvider: 'slip2go' }, tenantShop: { id: 'tenant-own-fixture' } },
+    { render(view, values) { ownTopupView = values; } },
+  ));
+  check('Own-API tenant can keep separate receiver settings for every provider', () => {
+    assert.equal(JSON.stringify(ownTopupView.availableReceiverProviders), JSON.stringify(['easyslip', 'slipcheck', 'rdcw', 'slip2go']));
+    assert.equal(ownTopupView.receiverProvider, 'slip2go');
+  });
+  check('Provider page initialization does not switch a shared tenant to own API mode', () => {
+    const providerPage = fs.readFileSync(path.join(root, 'src/views/admin/easyslip-usage.ejs'), 'utf8');
+    assert.match(providerPage, /selectOwnProvider\([^\n]+, false\);/);
+  });
   let js = 0, templates = 0;
   function scan(dir) { for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const filename = path.join(dir, entry.name);

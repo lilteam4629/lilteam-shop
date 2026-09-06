@@ -274,12 +274,12 @@
           </div>
           <a href="/admin/easyslip-usage" class="text-xs font-bold text-[var(--gold)]">กรอก API ของค่าย →</a>
         </div>
-        <% const receiverProviders = [['easyslip','⚡','EasySlip'],['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go']]; %>
+        <% const receiverProviders = [['easyslip','⚡','EasySlip'],['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go']].filter(item => availableReceiverProviders.includes(item[0])); %>
         <div class="flex flex-col gap-2">
-          <% receiverProviders.forEach(item => { const activeReceiverProvider = payment.slipProvider === item[0]; const editingProvider = receiverProvider === item[0]; %>
+          <% receiverProviders.forEach(item => { const isActiveReceiverProvider = activeReceiverProvider === item[0]; const editingProvider = receiverProvider === item[0]; %>
             <a href="/admin/topups?tab=bank&receiverProvider=<%= item[0] %>" class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition hover:border-[var(--gold)] <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
               <div class="w-10 h-10 shrink-0 rounded-xl bg-[var(--input)] flex items-center justify-center text-xl"><%= item[1] %></div>
-              <div class="min-w-0 flex-1"><div class="text-sm font-bold"><%= item[2] %></div><div class="text-[10px] <%= activeReceiverProvider ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= activeReceiverProvider ? 'กำลังใช้งาน • กดเข้าไปแก้ไข' : 'กดเข้าไปกรอกข้อมูลของค่ายนี้' %></div></div>
+              <div class="min-w-0 flex-1"><div class="text-sm font-bold"><%= item[2] %></div><div class="text-[10px] <%= isActiveReceiverProvider ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= isActiveReceiverProvider ? 'กำลังใช้งาน • กดเข้าไปแก้ไข' : 'กดเข้าไปกรอกข้อมูลของค่ายนี้' %></div></div>
               <div class="text-[var(--text-4)] text-lg">›</div>
             </a>
           <% }) %>

@@ -704,11 +704,21 @@ router.get('/topups', async (req, res) => {
     });
   const pendingCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
   const payment = store.data.settings.payment;
+  const isTenant = Boolean(req.tenantShop);
+  const sharedTenant = Boolean(isTenant && (payment.slipApiMode || 'shared') === 'shared');
+  const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, isTenant);
+  const availableReceiverProviders = sharedTenant
+    ? receiverProfiles.PROVIDERS.filter(provider => provider === effective.slipProvider)
+    : [...receiverProfiles.PROVIDERS];
   const requestedReceiverProvider = String(req.query.receiverProvider || '').toLowerCase();
-  const receiverProvider = receiverProfiles.PROVIDERS.includes(requestedReceiverProvider) ? requestedReceiverProvider : null;
+  const receiverProvider = availableReceiverProviders.includes(requestedReceiverProvider) ? requestedReceiverProvider : null;
   const receiverPayment = receiverProfiles.view(payment, receiverProvider
+    || availableReceiverProviders[0]
     || (receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip'));
-  res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment, receiverPayment, receiverProvider, banks, q, status });
+  res.render('admin/topups', {
+    title: 'บัญชี', active: 'topups', requests, pendingCount, payment, receiverPayment,
+    receiverProvider, availableReceiverProviders, activeReceiverProvider: effective.slipProvider, banks, q, status,
+  });
 });
 
 // Slip Verification Hub & Provider Management (/admin/easyslip-usage & /admin/slip-verification)
@@ -988,6 +998,10 @@ router.post('/topups/payment-settings', (req, res) => {
     const currentlySelectedProvider = receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip';
     const submittedReceiverProvider = String(req.body.receiverProvider || '').toLowerCase();
     const sharedTenant = Boolean(req.tenantShop && (payment.slipApiMode || 'shared') === 'shared');
+    if (sharedTenant && submittedReceiverProvider && submittedReceiverProvider !== effectiveBeforeSave.slipProvider) {
+      req.flash('error', 'ร้านนี้ใช้ระบบกลาง กรุณาตั้งค่าบัญชีรับเงินให้ตรงกับค่ายกลางที่เว็บหลักเลือก');
+      return res.redirect(`/admin/topups?tab=bank&receiverProvider=${effectiveBeforeSave.slipProvider}`);
+    }
     const slipProvider = sharedTenant
       ? effectiveBeforeSave.slipProvider
       : (receiverProfiles.PROVIDERS.includes(submittedReceiverProvider) ? submittedReceiverProvider : currentlySelectedProvider);
