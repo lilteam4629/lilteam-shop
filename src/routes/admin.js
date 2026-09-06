@@ -829,8 +829,11 @@ router.post('/easyslip-usage/billing', async (req, res) => {
 router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const payment = store.data.settings.payment;
   const slipApiMode = req.tenantShop && req.body.slipApiMode === 'own' ? 'own' : (req.tenantShop ? 'shared' : 'own');
-  const slipProvider = req.body.slipProvider || payment.slipProvider || 'auto';
-  if (!['none', 'easyslip', 'slipcheck', 'rdcw', 'slip2go'].includes(slipProvider)) {
+  const allowedProviders = ['none', 'easyslip', 'slipcheck', 'rdcw', 'slip2go'];
+  const submittedProvider = Array.isArray(req.body.slipProvider) ? req.body.slipProvider.at(-1) : req.body.slipProvider;
+  const previousProvider = allowedProviders.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip';
+  const slipProvider = submittedProvider || previousProvider;
+  if (!allowedProviders.includes(slipProvider)) {
     req.flash('error', 'กรุณาเลือกผู้ให้บริการตรวจสลิปที่รองรับ');
     return res.redirect('/admin/easyslip-usage');
   }

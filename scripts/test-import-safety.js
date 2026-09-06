@@ -125,6 +125,21 @@ async function main() {
     '../services/license': { isGateOn: () => false }, '../middleware/tenant': { MAIN_DOMAIN: 'fixture.test', MAIN_SITE_URL: 'https://fixture.test' },
   });
   const hubTest = admin.stack.find(l => Array.isArray(l.route?.path) && l.route.path.includes('/easyslip-usage/test')).route.stack[0].handle;
+  const saveProvider = admin.stack.find(l => Array.isArray(l.route?.path) && l.route.path.includes('/slip-verification') && l.route.methods.post && !l.route.path.includes('/slip-verification/test')).route.stack[0].handle;
+  const legacyProviderData = model.fixture();
+  legacyProviderData.settings.payment.slipProvider = 'auto';
+  await als.run(legacyProviderData, () => saveProvider({
+    body: { slipApiMode: 'own', easyslipApiKey: 'easy-saved', slipcheckApiKey: 'check-saved', rdcwClientId: 'rdcw-id', rdcwClientSecret: 'rdcw-secret', slip2goApiKey: 's2g-saved' },
+    tenantShop: null, flash() {},
+  }, { redirect() {} }));
+  check('Legacy auto selection saves as EasySlip and preserves every provider key', () => {
+    const saved = legacyProviderData.settings.payment;
+    assert.equal(saved.slipProvider, 'easyslip');
+    assert.equal(saved.easyslipApiKey, 'easy-saved');
+    assert.equal(saved.slipcheckApiKey, 'check-saved');
+    assert.equal(saved.rdcwClientSecret, 'rdcw-secret');
+    assert.equal(saved.slip2goApiKey, 's2g-saved');
+  });
   let testedProvider;
   await hubTest({ body: { provider: 'easyslip' }, tenantShop: { id: 'fixture' } }, { status() { return this; }, json(result) { testedProvider = result; } });
   check('Tenant own EasySlip test requires its own key without exposing central credentials', () => { assert.equal(testedProvider.ok, false); assert.match(testedProvider.message, /API Key/); assert.equal(quotaCalls, 0); });

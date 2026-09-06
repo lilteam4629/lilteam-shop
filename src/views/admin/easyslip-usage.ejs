@@ -215,6 +215,7 @@
       <input type="hidden" name="slipApiMode" value="own">
     <% } %>
 
+    <% const selectableProviders = ['easyslip', 'slipcheck', 'rdcw', 'slip2go']; const selectedOwnProvider = selectableProviders.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip'; %>
     <div id="own-provider-choice" class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
       <% const ownProviders = [
         ['easyslip', '⚡', 'EasySlip', 'Bearer API Key'],
@@ -223,8 +224,8 @@
         ['slip2go', '🔎', 'Slip2Go', 'API Key']
       ]; %>
       <% ownProviders.forEach(provider => { %>
-        <label class="cursor-pointer rounded-xl border-2 p-4 transition <%= payment.slipProvider === provider[0] ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--input)]/30' %>">
-          <input type="radio" name="slipProvider" value="<%= provider[0] %>" class="sr-only" <%= payment.slipProvider === provider[0] ? 'checked' : '' %>>
+        <label class="cursor-pointer rounded-xl border-2 p-4 transition <%= selectedOwnProvider === provider[0] ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--input)]/30' %>">
+          <input type="radio" name="slipProvider" value="<%= provider[0] %>" class="sr-only" <%= selectedOwnProvider === provider[0] ? 'checked' : '' %>>
           <div class="text-2xl"><%= provider[1] %></div>
           <div class="font-bold text-sm mt-2"><%= provider[2] %></div>
           <div class="text-[10px] text-[var(--text-4)] mt-1"><%= provider[3] %></div>
@@ -236,7 +237,7 @@
   <div class="grid lg:grid-cols-2 gap-4">
     <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
       <div class="flex items-center justify-between"><h3 class="font-bold">⚡ EasySlip</h3><a href="https://developer.easyslip.com" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัคร/เติมแพ็กเกจ ↗</a></div>
-      <label class="block text-xs text-[var(--text-3)]">API Key <%= isMainSite ? '' : '(เมื่อเลือกใช้ API ของร้านเอง)' %>
+      <label class="block text-xs text-[var(--text-3)]">API Key <%= isMainSite ? '' : '(เมื่อเลือกใช้ API ของร้านเอง)' %> <% if (payment.easyslipApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %>
         <input id="own-easyslip-key" type="password" name="easyslipApiKey" value="<%= payment.easyslipApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" />
       </label>
       <button type="button" onclick="testOwnProvider('easyslip')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ทดสอบ EasySlip</button>
@@ -245,7 +246,7 @@
 
     <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
       <div class="flex items-center justify-between"><h3 class="font-bold">✅ SlipCheck</h3><a href="https://mxrslip.lovable.app/auth" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัครฟรี ↗</a></div>
-      <label class="block text-xs text-[var(--text-3)]">API Key
+      <label class="block text-xs text-[var(--text-3)]">API Key <% if (payment.slipcheckApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %>
         <input id="own-slipcheck-key" type="password" name="slipcheckApiKey" value="<%= payment.slipcheckApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" />
       </label>
       <input id="own-slipcheck-endpoint" type="hidden" name="slipcheckEndpoint" value="<%= payment.slipcheckEndpoint || 'https://mxrslip.lovable.app/api/public/v1' %>" />
@@ -256,8 +257,8 @@
     <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
       <div class="flex items-center justify-between"><h3 class="font-bold">🛡️ SlipRDCW</h3><a href="https://slip.rdcw.co.th" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัคร/จัดการแพ็กเกจ ↗</a></div>
       <div class="grid sm:grid-cols-2 gap-2">
-        <label class="block text-xs text-[var(--text-3)]">Client ID<input id="own-rdcw-id" type="text" name="rdcwClientId" value="<%= payment.rdcwClientId || '' %>" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
-        <label class="block text-xs text-[var(--text-3)]">Client Secret<input id="own-rdcw-secret" type="password" name="rdcwClientSecret" value="<%= payment.rdcwClientSecret || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
+        <label class="block text-xs text-[var(--text-3)]">Client ID <% if (payment.rdcwClientId) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %><input id="own-rdcw-id" type="text" name="rdcwClientId" value="<%= payment.rdcwClientId || '' %>" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
+        <label class="block text-xs text-[var(--text-3)]">Client Secret <% if (payment.rdcwClientSecret) { %><span class="text-emerald-500">✓ บัทึกแล้ว</span><% } %><input id="own-rdcw-secret" type="password" name="rdcwClientSecret" value="<%= payment.rdcwClientSecret || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
       </div>
       <input id="own-rdcw-endpoint" type="hidden" name="rdcwEndpoint" value="<%= payment.rdcwEndpoint || 'https://suba.rdcw.co.th/v2/inquiry' %>" />
       <button type="button" onclick="testOwnProvider('rdcw')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ตรวจความครบถ้วน</button>
@@ -266,7 +267,7 @@
 
     <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
       <div class="flex items-center justify-between"><h3 class="font-bold">🔎 Slip2Go</h3><a href="https://slip2go.com" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัคร/เติมแพ็กเกจ ↗</a></div>
-      <label class="block text-xs text-[var(--text-3)]">API Key<input id="own-slip2go-key" type="password" name="slip2goApiKey" value="<%= payment.slip2goApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
+      <label class="block text-xs text-[var(--text-3)]">API Key <% if (payment.slip2goApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %><input id="own-slip2go-key" type="password" name="slip2goApiKey" value="<%= payment.slip2goApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
       <input id="own-slip2go-endpoint" type="hidden" name="slip2goEndpoint" value="<%= payment.slip2goEndpoint || 'https://api.slip2go.com/api' %>" />
       <button type="button" onclick="testOwnProvider('slip2go')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ทดสอบ Slip2Go</button>
       <div id="own-slip2go-result" class="text-xs text-[var(--text-4)]"></div>
