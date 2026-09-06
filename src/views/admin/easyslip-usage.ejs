@@ -224,14 +224,16 @@
         ['slip2go', '🔎', 'Slip2Go', 'API Key']
       ]; %>
       <% ownProviders.forEach(provider => { %>
-        <label class="cursor-pointer rounded-xl border-2 p-4 transition <%= selectedOwnProvider === provider[0] ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--input)]/30' %>">
-          <input type="radio" name="slipProvider" value="<%= provider[0] %>" class="sr-only" <%= selectedOwnProvider === provider[0] ? 'checked' : '' %>>
+        <label data-provider-card="<%= provider[0] %>" class="relative cursor-pointer rounded-xl border-2 p-4 transition <%= selectedOwnProvider === provider[0] ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--input)]/30' %>">
+          <input type="radio" name="slipProvider" value="<%= provider[0] %>" class="sr-only" <%= selectedOwnProvider === provider[0] ? 'checked' : '' %> onchange="selectOwnProvider(this)">
+          <span data-provider-check class="absolute right-3 top-3 w-5 h-5 rounded-full items-center justify-center text-[11px] font-bold bg-[var(--gold)] text-[var(--bg)] <%= selectedOwnProvider === provider[0] ? 'flex' : 'hidden' %>">✓</span>
           <div class="text-2xl"><%= provider[1] %></div>
           <div class="font-bold text-sm mt-2"><%= provider[2] %></div>
           <div class="text-[10px] text-[var(--text-4)] mt-1"><%= provider[3] %></div>
         </label>
       <% }) %>
     </div>
+    <button type="submit" class="mt-4 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[var(--gold)] text-[var(--bg)] font-bold text-sm">บันทึกค่ายที่เลือก</button>
   </div>
 
   <div class="grid lg:grid-cols-2 gap-4">
@@ -298,6 +300,21 @@ function toggleEasySlipKey(button) {
   const showing = input.type === 'text';
   input.type = showing ? 'password' : 'text';
   button.textContent = showing ? 'ดูคีย์' : 'ซ่อนคีย์';
+}
+
+function selectOwnProvider(input) {
+  const ownMode = document.querySelector('input[name="slipApiMode"][value="own"]');
+  if (ownMode && ownMode.type === 'radio') ownMode.checked = true;
+  document.querySelectorAll('[data-provider-card]').forEach(card => {
+    const selected = card.dataset.providerCard === input.value;
+    card.classList.toggle('border-[var(--gold)]', selected);
+    card.classList.toggle('bg-[var(--gold)]/10', selected);
+    card.classList.toggle('border-[var(--border)]', !selected);
+    card.classList.toggle('bg-[var(--input)]/30', !selected);
+    const check = card.querySelector('[data-provider-check]');
+    if (check) { check.classList.toggle('flex', selected); check.classList.toggle('hidden', !selected); }
+  });
+  updateSlipMode();
 }
 
 function updateSlipMode() {
