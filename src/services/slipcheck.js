@@ -1,6 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
-const { receiverMatches, textValues } = require('./receiver-match');
+const { receiverMatches, textValues, extractReceiverEvidence } = require('./receiver-match');
 const { numberValue, officialEndpoint } = require('./slip-fields');
 
 const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
@@ -48,14 +48,15 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     }
     const receiver = data.receiver || data.receiving || data.payee || {};
     const receiverAccount = receiver.account || data.receiver_account || {};
+    const discovered = extractReceiverEvidence(data);
     const receiverCheck = receiverMatches({
-      actualNames: textValues(data.receiver_name, data.receiverName, receiver.name, receiver.displayName, receiverAccount.name, receiverAccount.displayName),
-      actualNumbers: textValues(data.receiver_account_number, data.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber),
+      actualNames: textValues(data.receiver_name, data.receiverName, receiver.name, receiver.displayName, receiverAccount.name, receiverAccount.displayName, discovered.names),
+      actualNumbers: textValues(data.receiver_account_number, data.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, discovered.numbers),
       expectedNames: credentials.expectedReceiverNames,
       expectedNumbers: credentials.expectedReceiverNumbers,
     });
     if (!receiverCheck.matched) {
-      return { checked: true, verified: false, message: 'ผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: normalizedRaw };
+      return { checked: true, verified: false, message: 'SlipCheck: ผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: normalizedRaw };
     }
     return {
       checked: true, verified: true, message: 'ตรวจสอบสลิปสำเร็จผ่าน SlipCheck',

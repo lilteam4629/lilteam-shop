@@ -292,9 +292,15 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     if (selectedProvider === 'easyslip' && easyslip.isConfigured(easyKey) && payment.easyslipAccounts && Object.keys(payment.easyslipAccounts).length) {
       provider = 'easyslip';
       const accountEntries = Object.entries(payment.easyslipAccounts);
-      const wantedKind = request.method === 'promptpay' ? ':promptpay' : ':account';
+      // PromptPay slips do not have one consistent receiver identifier:
+      // some banks return the phone/National ID proxy, while others return
+      // the underlying destination bank account. Both entries below belong
+      // to this tenant only, so accepting either still cannot credit a slip
+      // paid to a different rented shop.
       let expectedNumbers = accountEntries
-        .filter(([key]) => key.includes(':') ? key.endsWith(wantedKind) : request.method !== 'promptpay')
+        .filter(([key]) => request.method === 'promptpay'
+          ? (key.endsWith(':promptpay') || key.endsWith(':account') || !key.includes(':'))
+          : (key.endsWith(':account') || !key.includes(':')))
         .map(([, account]) => account && account.bankNumber)
         .filter(Boolean);
       // Legacy shops may not have the new kind suffix yet. PromptPay must

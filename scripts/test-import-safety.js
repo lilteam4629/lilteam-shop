@@ -78,6 +78,17 @@ async function main() {
     assert.equal(receiverMatches({ actualNames: ['นาย อุรพงค์ สงทิม'], expectedNames: ['อุรพงค์ สงทิม'] }).matched, true);
     assert.equal(receiverMatches({ actualNumbers: ['XXX-X-XX804-4'], expectedNumbers: ['147-3-36804-4'] }).matched, false);
   });
+  check('Masked receiver is accepted only when both name and last four digits match', () => {
+    assert.equal(receiverMatches({ actualNames: ['อุรพงค์ ส.'], actualNumbers: ['XXX-X-XX804-4'], expectedNames: ['อุรพงค์ สงทิม'], expectedNumbers: ['147-3-36804-4'] }).matched, true);
+    assert.equal(receiverMatches({ actualNames: ['คนละชื่อ'], actualNumbers: ['XXX-X-XX804-4'], expectedNames: ['อุรพงค์ สงทิม'], expectedNumbers: ['147-3-36804-4'] }).matched, false);
+  });
+  const { extractReceiverEvidence } = require('../src/services/receiver-match');
+  check('Nested provider receiver fields are discovered without reading sender fields', () => {
+    const found = extractReceiverEvidence({ sender: { name: 'คนโอน', account: '1111' }, result: { destination: { holder: { displayName: 'นาย อุรพงค์ สงทิม' }, accountNo: 'XXX-X-XX804-4' } } });
+    assert.equal(found.names.includes('นาย อุรพงค์ สงทิม'), true);
+    assert.equal(found.numbers.includes('XXX-X-XX804-4'), true);
+    assert.equal(found.names.includes('คนโอน'), false);
+  });
   const slipcheckService = load('src/services/slipcheck.js', {
     axios: { post: async () => ({ data: { success: true, data: { amount: 1, ref_no: 'nested-ref', transferred_at: new Date().toISOString(), receiver: { account: { name: { th: 'นาย อุรพงค์ สงทิม' }, number: 'XXX-X-XX804-4' } } } } }) },
     'form-data': FakeFormData,

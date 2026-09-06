@@ -237,7 +237,7 @@
   </div>
 
   <div class="grid lg:grid-cols-2 gap-4">
-    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+    <div id="provider-settings-easyslip" data-provider-settings="easyslip" class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
       <div class="flex items-center justify-between"><h3 class="font-bold">⚡ EasySlip</h3><a href="https://developer.easyslip.com" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัคร/เติมแพ็กเกจ ↗</a></div>
       <label class="block text-xs text-[var(--text-3)]">API Key <%= isMainSite ? '' : '(เมื่อเลือกใช้ API ของร้านเอง)' %> <% if (payment.easyslipApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %>
         <div class="relative mt-1">
@@ -249,7 +249,7 @@
       <div id="own-easyslip-result" class="text-xs text-[var(--text-4)]"></div>
     </div>
 
-    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+    <div id="provider-settings-slipcheck" data-provider-settings="slipcheck" class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
       <div class="flex items-center justify-between"><h3 class="font-bold">✅ SlipCheck</h3><a href="https://mxrslip.lovable.app/auth" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัครฟรี ↗</a></div>
       <label class="block text-xs text-[var(--text-3)]">API Key <% if (payment.slipcheckApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %>
         <input id="own-slipcheck-key" type="password" name="slipcheckApiKey" value="<%= payment.slipcheckApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" />
@@ -259,7 +259,7 @@
       <div id="own-slipcheck-result" class="text-xs text-[var(--text-4)]"><%= slipcheckInfo && slipcheckInfo.ok ? 'เชื่อมต่อแล้ว' : '' %></div>
     </div>
 
-    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+    <div id="provider-settings-rdcw" data-provider-settings="rdcw" class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
       <div class="flex items-center justify-between"><h3 class="font-bold">🛡️ SlipRDCW</h3><a href="https://slip.rdcw.co.th" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัคร/จัดการแพ็กเกจ ↗</a></div>
       <div class="grid sm:grid-cols-2 gap-2">
         <label class="block text-xs text-[var(--text-3)]">Client ID <% if (payment.rdcwClientId) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %><input id="own-rdcw-id" type="text" name="rdcwClientId" value="<%= payment.rdcwClientId || '' %>" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
@@ -270,7 +270,7 @@
       <div id="own-rdcw-result" class="text-xs text-[var(--text-4)]"></div>
     </div>
 
-    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+    <div id="provider-settings-slip2go" data-provider-settings="slip2go" class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
       <div class="flex items-center justify-between"><h3 class="font-bold">🔎 Slip2Go</h3><a href="https://slip2go.com" target="_blank" rel="noopener" class="text-xs text-[var(--gold)]">สมัคร/เติมแพ็กเกจ ↗</a></div>
       <label class="block text-xs text-[var(--text-3)]">API Key <% if (payment.slip2goApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %><input id="own-slip2go-key" type="password" name="slip2goApiKey" value="<%= payment.slip2goApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
       <input id="own-slip2go-endpoint" type="hidden" name="slip2goEndpoint" value="<%= payment.slip2goEndpoint || 'https://api.slip2go.com/api' %>" />
@@ -314,6 +314,9 @@ function selectOwnProvider(input) {
     const check = card.querySelector('[data-provider-check]');
     if (check) { check.classList.toggle('flex', selected); check.classList.toggle('hidden', !selected); }
   });
+  document.querySelectorAll('[data-provider-settings]').forEach(section => {
+    section.classList.toggle('hidden', section.dataset.providerSettings !== input.value);
+  });
   updateSlipMode();
 }
 
@@ -323,6 +326,7 @@ function updateSlipMode() {
   if (choice) choice.classList.toggle('opacity-50', !own);
 }
 updateSlipMode();
+selectOwnProvider(document.querySelector('input[name="slipProvider"]:checked') || { value: '<%= selectedOwnProvider %>' });
 
 async function testOwnProvider(provider) {
   const result = document.getElementById(`own-${provider}-result`);

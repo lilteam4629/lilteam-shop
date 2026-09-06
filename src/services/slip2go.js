@@ -1,7 +1,7 @@
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
-const { receiverMatches, textValues } = require('./receiver-match');
+const { receiverMatches, textValues, extractReceiverEvidence } = require('./receiver-match');
 const { numberValue, officialEndpoint } = require('./slip-fields');
 
 /**
@@ -104,14 +104,15 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
         return { checked: false, verified: false, message: 'Slip2Go ไม่ได้ส่งเลขอ้างอิงธุรกรรมกลับมา รอแอดมินตรวจสอบ', raw: normalizedRaw };
       }
       if ((credentials.expectedReceiverNames || []).length || (credentials.expectedReceiverNumbers || []).length) {
+        const discovered = extractReceiverEvidence(result);
         const receiverCheck = receiverMatches({
-          actualNames: textValues(receiverName, receiverAccount.displayName),
-          actualNumbers: textValues(result.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber),
+          actualNames: textValues(receiverName, receiverAccount.displayName, discovered.names),
+          actualNumbers: textValues(result.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, discovered.numbers),
           expectedNames: credentials.expectedReceiverNames,
           expectedNumbers: credentials.expectedReceiverNumbers,
         });
         if (!receiverCheck.hasEvidence) return { checked: false, verified: false, message: 'Slip2Go ไม่ได้ส่งข้อมูลผู้รับกลับมา จึงยังไม่เติมเงินอัตโนมัติ', raw: normalizedRaw };
-        if (!receiverCheck.matched) return { checked: true, verified: false, message: 'ผู้รับในสลิปไม่ตรงกับบัญชีของร้าน', raw: normalizedRaw };
+        if (!receiverCheck.matched) return { checked: true, verified: false, message: 'Slip2Go: ผู้รับในสลิปไม่ตรงกับบัญชีของร้าน', raw: normalizedRaw };
       }
       return {
         checked: true,

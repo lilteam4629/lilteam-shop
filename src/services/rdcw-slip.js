@@ -1,6 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
-const { receiverMatches, textValues } = require('./receiver-match');
+const { receiverMatches, textValues, extractReceiverEvidence } = require('./receiver-match');
 const { numberValue, officialEndpoint } = require('./slip-fields');
 
 const DEFAULT_ENDPOINT = 'https://suba.rdcw.co.th/v2/inquiry';
@@ -42,14 +42,15 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     }
     const receiver = data.receiver || data.receiving || data.receiverAccount || {};
     const receiverAccount = receiver.account || {};
+    const discovered = extractReceiverEvidence(data);
     const receiverCheck = receiverMatches({
-      actualNames: textValues(receiver.name, receiver.displayName, receiverAccount.name, data.receiverName),
-      actualNumbers: textValues(receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, data.receiverAccountNumber),
+      actualNames: textValues(receiver.name, receiver.displayName, receiverAccount.name, data.receiverName, discovered.names),
+      actualNumbers: textValues(receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, data.receiverAccountNumber, discovered.numbers),
       expectedNames: credentials.expectedReceiverNames,
       expectedNumbers: credentials.expectedReceiverNumbers,
     });
     if (!receiverCheck.matched) {
-      return { checked: true, verified: false, message: 'ผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: normalizedRaw };
+      return { checked: true, verified: false, message: 'SlipRDCW: ผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: normalizedRaw };
     }
     return {
       checked: true, verified: true, message: 'ตรวจสอบสลิปสำเร็จผ่าน SlipRDCW',

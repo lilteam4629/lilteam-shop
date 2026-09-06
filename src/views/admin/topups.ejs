@@ -264,6 +264,25 @@
         </div>
       </div>
 
+      <div class="rounded-2xl border border-[var(--border)] bg-[var(--input)]/30 p-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+          <div>
+            <h3 class="font-bold text-sm">ค่ายที่ใช้ตรวจสลิป</h3>
+            <p class="text-[11px] text-[var(--text-4)]">บัญชีรับเงินด้านล่างเป็นของร้านนี้ ใช้กับค่ายที่เลือกได้โดยไม่ปนกับร้านอื่น</p>
+          </div>
+          <a href="/admin/easyslip-usage" class="text-xs font-bold text-[var(--gold)]">เลือกค่าย / กรอก API →</a>
+        </div>
+        <% const receiverProviders = [['easyslip','⚡','EasySlip'],['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go']]; %>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+          <% receiverProviders.forEach(item => { const activeReceiverProvider = payment.slipProvider === item[0]; %>
+            <a href="/admin/easyslip-usage#provider-settings-<%= item[0] %>" class="rounded-xl border-2 p-3 transition <%= activeReceiverProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
+              <div class="text-lg"><%= item[1] %></div><div class="text-xs font-bold"><%= item[2] %></div>
+              <div class="text-[10px] mt-1 <%= activeReceiverProvider ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= activeReceiverProvider ? 'กำลังใช้งาน' : 'กดเพื่อตั้งค่า' %></div>
+            </a>
+          <% }) %>
+        </div>
+      </div>
+
       <!-- Section 1: PromptPay -->
       <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
         <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
