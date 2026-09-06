@@ -96,6 +96,10 @@ async function main() {
     assert.equal(receiverMatches({ actualNames: ['อุรพงค์ ส.'], actualNumbers: ['XXX-X-XX804-4'], expectedNames: ['อุรพงค์ สงทิม'], expectedNumbers: ['147-3-36804-4'] }).matched, true);
     assert.equal(receiverMatches({ actualNames: ['คนละชื่อ'], actualNumbers: ['XXX-X-XX804-4'], expectedNames: ['อุรพงค์ สงทิม'], expectedNumbers: ['147-3-36804-4'] }).matched, false);
   });
+  check('SlipCheck OCR may differ by one character only when the masked receiver suffix also matches', () => {
+    assert.equal(receiverMatches({ actualNames: ['นาย อุรพงค์ สงทิม'], actualNumbers: ['XXX-X-XX804-4'], expectedNames: ['จุรพงค์ ลงทิม'], expectedNumbers: ['147-3-36804-4'] }).matched, true);
+    assert.equal(receiverMatches({ actualNames: ['นาย อุรพงค์ สงทิม'], actualNumbers: ['XXX-X-XX999-9'], expectedNames: ['จุรพงค์ ลงทิม'], expectedNumbers: ['147-3-36804-4'] }).matched, false);
+  });
   const { extractReceiverEvidence } = require('../src/services/receiver-match');
   check('Nested provider receiver fields are discovered without reading sender fields', () => {
     const found = extractReceiverEvidence({ sender: { name: 'คนโอน', account: '1111' }, result: { destination: { holder: { displayName: 'นาย อุรพงค์ สงทิม' }, accountNo: 'XXX-X-XX804-4' } } });

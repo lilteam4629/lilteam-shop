@@ -4,6 +4,20 @@ const digits = value => String(value || '').replace(/\D/g, '');
 const nameTokens = value => String(value || '').toLocaleLowerCase('th-TH')
   .replace(/(นาย|นางสาว|นาง|คุณ)/g, ' ').replace(/[^a-z0-9ก-๙]+/g, ' ').trim().split(/\s+/).filter(Boolean);
 
+function oneEditApart(left, right) {
+  if (left === right) return true;
+  if (!left || !right || Math.abs(left.length - right.length) > 1) return false;
+  let i = 0, j = 0, edits = 0;
+  while (i < left.length && j < right.length) {
+    if (left[i] === right[j]) { i++; j++; continue; }
+    if (++edits > 1) return false;
+    if (left.length > right.length) i++;
+    else if (right.length > left.length) j++;
+    else { i++; j++; }
+  }
+  return edits + (i < left.length || j < right.length ? 1 : 0) <= 1;
+}
+
 function textValues(...values) {
   return values.flat(Infinity).map(value => {
     if (value && typeof value === 'object') return value.th || value.en || value.full || value.display || '';
@@ -31,8 +45,18 @@ function receiverMatches({ actualNames = [], actualNumbers = [], expectedNames =
     if (!left[1] || !right[1]) return true;
     return left[1] === right[1] || left[1][0] === right[1][0];
   }));
+  // OCR commonly confuses one Thai character in a first or last name.
+  // This deliberately cannot pass on a name alone: it is only combined
+  // with a matching masked account/PromptPay suffix below.
+  const nearNameMatched = actualNameValues.some(actual => expectedNameValues.some(expected => {
+    const left = nameTokens(actual), right = nameTokens(expected);
+    if (!left[0] || !right[0] || left[0].length < 3 || right[0].length < 3) return false;
+    if (!oneEditApart(left[0], right[0])) return false;
+    if (!left[1] || !right[1]) return true;
+    return oneEditApart(left[1], right[1]);
+  }));
   const lastFourMatched = allNumbers.some(actual => allWantedNumbers.some(expected => actual.slice(-4) === expected.slice(-4)));
-  const combinedMaskedMatch = partialNameMatched && lastFourMatched;
+  const combinedMaskedMatch = (partialNameMatched || nearNameMatched) && lastFourMatched;
   return { matched: nameMatched || numberMatched || combinedMaskedMatch, hasEvidence: Boolean(names.length || allNumbers.length), nameMatched, numberMatched, combinedMaskedMatch };
 }
 
