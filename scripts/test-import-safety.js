@@ -95,6 +95,12 @@ async function main() {
   });
   const nestedReceiverResult = await slipcheckService.verifySlip(Buffer.from('fixture'), 1, {}, { apiKey: 'fixture', expectedReceiverNames: ['อุรพงค์ สงทิม'], expectedReceiverNumbers: ['147-3-36804-4'] });
   check('SlipCheck accepts nested receiver data returned by the provider', () => assert.equal(nestedReceiverResult.verified, true));
+  const flatSlipcheckService = load('src/services/slipcheck.js', {
+    axios: { post: async () => ({ data: { success: true, duplicate: false, data: { amount: 1, ref_no: 'flat-ref', transferred_at: new Date().toISOString(), receiver_name: 'นาย อุรพงค์ สงทิม', receiver_bank: 'พร้อมเพย์' } } }) },
+    'form-data': FakeFormData,
+  });
+  const flatReceiverResult = await flatSlipcheckService.verifySlip(Buffer.from('fixture'), 1, {}, { apiKey: 'fixture', expectedReceiverNames: ['อุรพงค์ สงทิม'] });
+  check('SlipCheck can verify safely from receiver name when its API omits receiver number', () => assert.equal(flatReceiverResult.verified, true));
   const { numberValue, parseSlipDate, officialEndpoint } = require('../src/services/slip-fields');
   check('Provider field normalization handles formatted amounts and Bangkok timestamps', () => {
     assert.equal(numberValue({ value: '1,234.50' }), 1234.5);

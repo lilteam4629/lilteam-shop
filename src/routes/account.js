@@ -258,17 +258,33 @@ router.get('/topup/:id/slip-file', async (req, res, next) => {
 // context still being current.
 const activeVerifications = new Set();
 
+function receiverCredentials(payment = {}, method = 'promptpay') {
+  const names = [
+    method === 'promptpay' ? payment.promptpayName : payment.bankAccountName,
+    method === 'promptpay' ? payment.bankAccountName : payment.promptpayName,
+  ].map(value => String(value || '').trim()).filter(Boolean);
+  const numbers = method === 'promptpay'
+    ? [payment.promptpayId, payment.bankAccountNumber]
+    : [payment.bankAccountNumber];
+  return {
+    expectedReceiverNames: [...new Set(names)],
+    expectedReceiverNumbers: [...new Set(numbers.map(value => String(value || '').trim()).filter(Boolean))],
+  };
+}
+
 function canCheckSlipAutomatically(payment = {}) {
   const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
+  const receiver = receiverCredentials(payment, 'promptpay');
+  const hasReceiver = Boolean(receiver.expectedReceiverNames.length || receiver.expectedReceiverNumbers.length);
   const easyKey = effective.tenantOwnedSlipApi ? (effective.easyslipApiKey || null) : (effective.easyslipApiKey || undefined);
   const selected = resolveSlipProvider(effective, easyslip.isConfigured(easyKey));
   if (selected === 'easyslip') {
     return easyslip.isConfigured(easyKey) && payment.easyslipAccounts && Object.values(payment.easyslipAccounts).some(a => a && a.bankNumber);
   }
   if (selected === 'slipok') return Boolean(effective.slipokBranchId && effective.slipokApiKey);
-  if (selected === 'slipcheck') return Boolean(effective.slipcheckApiKey);
-  if (selected === 'rdcw') return Boolean(effective.rdcwClientId && effective.rdcwClientSecret);
-  if (selected === 'slip2go') return Boolean(effective.slip2goApiKey);
+  if (selected === 'slipcheck') return Boolean(effective.slipcheckApiKey && hasReceiver);
+  if (selected === 'rdcw') return Boolean(effective.rdcwClientId && effective.rdcwClientSecret && hasReceiver);
+  if (selected === 'slip2go') return Boolean(effective.slip2goApiKey && hasReceiver);
   return false;
 }
 
@@ -320,8 +336,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       result = await slipcheck.verifySlip(fileBuffer, request.amount, fileOptions, {
         apiKey: effective.slipcheckApiKey,
         endpoint: effective.slipcheckEndpoint,
-        expectedReceiverNames: [request.method === 'promptpay' ? payment.promptpayName : payment.bankAccountName],
-        expectedReceiverNumbers: [request.method === 'promptpay' ? payment.promptpayId : payment.bankAccountNumber],
+        ...receiverCredentials(payment, request.method),
       });
     } else if (selectedProvider === 'rdcw') {
       provider = 'rdcw';
@@ -329,16 +344,14 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         clientId: effective.rdcwClientId,
         clientSecret: effective.rdcwClientSecret,
         endpoint: effective.rdcwEndpoint,
-        expectedReceiverNames: [request.method === 'promptpay' ? payment.promptpayName : payment.bankAccountName],
-        expectedReceiverNumbers: [request.method === 'promptpay' ? payment.promptpayId : payment.bankAccountNumber],
+        ...receiverCredentials(payment, request.method),
       });
     } else if (selectedProvider === 'slip2go') {
       provider = 'slip2go';
       result = await slip2go.verifySlip(fileBuffer, request.amount, fileOptions, {
         apiKey: effective.slip2goApiKey,
         endpoint: effective.slip2goEndpoint,
-        expectedReceiverNames: [request.method === 'promptpay' ? payment.promptpayName : payment.bankAccountName],
-        expectedReceiverNumbers: [request.method === 'promptpay' ? payment.promptpayId : payment.bankAccountNumber],
+        ...receiverCredentials(payment, request.method),
       });
     } else {
       provider = selectedProvider;
