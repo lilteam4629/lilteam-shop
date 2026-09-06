@@ -82,6 +82,13 @@
   <% if (request.status === 'pending' || request.status === 'verifying') { %>
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
       <h2 class="font-semibold mb-3">แนบสลิปการโอนเงิน</h2>
+      <% if (automaticSlipCheck) { %>
+        <div id="slipDeadline" data-deadline="<%= new Date(request.createdAt).getTime() + (5 * 60 * 1000) %>" class="mb-4 rounded-xl border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-center">
+          <p class="text-xs text-[var(--text-3)]">กรุณาโอนและแนบสลิปภายใน</p>
+          <p id="slipCountdown" class="mt-1 font-mono text-3xl font-bold tabular-nums text-amber-400">05:00</p>
+          <p id="slipDeadlineHint" class="mt-1 text-[11px] text-[var(--text-4)]">ระบบนับถอยหลังให้ทุกวินาที</p>
+        </div>
+      <% } %>
       <% if (request.slipPath) { %>
         <div class="mb-3">
           <img src="<%= request.slipPath %>" class="max-w-full rounded-lg border border-[var(--border)]" alt="สลิปที่แนบ" />
@@ -113,6 +120,32 @@
   <p class="text-sm text-[var(--text-3)]"><%= automaticSlipCheck ? 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอัตโนมัติ' : 'กรุณารอสักครู่ จากนั้นคำขอจะรอแอดมินร้านตรวจสอบ' %></p>
 </div>
 <script>
+  (function () {
+    var box = document.getElementById('slipDeadline');
+    var countdown = document.getElementById('slipCountdown');
+    var hint = document.getElementById('slipDeadlineHint');
+    if (!box || !countdown) return;
+    var deadline = Number(box.dataset.deadline);
+    function updateCountdown() {
+      var remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      var minutes = Math.floor(remaining / 60);
+      var seconds = remaining % 60;
+      countdown.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+      if (remaining <= 0) {
+        box.classList.remove('border-amber-500/50', 'bg-amber-500/10');
+        box.classList.add('border-[var(--coral)]/50', 'bg-[var(--coral)]/10');
+        countdown.classList.remove('text-amber-400');
+        countdown.classList.add('text-[var(--coral)]');
+        if (hint) hint.textContent = 'หมดเวลาแล้ว กรุณากลับไปสร้างคำขอเติมเงินใหม่และใช้สลิปใหม่';
+        return false;
+      }
+      if (hint) hint.textContent = 'เหลือ ' + remaining + ' วินาทีสำหรับโอนและแนบสลิป';
+      return true;
+    }
+    if (updateCountdown()) {
+      var timer = setInterval(function () { if (!updateCountdown()) clearInterval(timer); }, 1000);
+    }
+  })();
   (function () {
     var form = document.getElementById('slipUploadForm');
     var overlay = document.getElementById('slipUploadOverlay');
