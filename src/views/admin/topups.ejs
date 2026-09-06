@@ -249,7 +249,7 @@
   <!-- ========================================== -->
   <div id="topup-tab-content-bank" class="topup-tab-content hidden space-y-6">
     <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
-      <input type="hidden" name="receiverProvider" value="<%= receiverProvider %>" />
+      <% if (receiverProvider) { %><input type="hidden" name="receiverProvider" value="<%= receiverProvider %>" /><% } %>
 
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
       <input type="hidden" name="truemoneyPhone" value="<%= payment.truemoneyPhone || '' %>" />
@@ -275,14 +275,21 @@
           <a href="/admin/easyslip-usage" class="text-xs font-bold text-[var(--gold)]">กรอก API ของค่าย →</a>
         </div>
         <% const receiverProviders = [['easyslip','⚡','EasySlip'],['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go']]; %>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div class="flex flex-col gap-2">
           <% receiverProviders.forEach(item => { const activeReceiverProvider = payment.slipProvider === item[0]; const editingProvider = receiverProvider === item[0]; %>
-            <a href="/admin/topups?tab=bank&receiverProvider=<%= item[0] %>" class="rounded-xl border-2 p-3 transition <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
-              <div class="text-lg"><%= item[1] %></div><div class="text-xs font-bold"><%= item[2] %></div>
-              <div class="text-[10px] mt-1 <%= activeReceiverProvider ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= activeReceiverProvider ? 'กำลังใช้งาน' : (editingProvider ? 'กำลังกรอกข้อมูล' : 'กดเพื่อตั้งค่า') %></div>
+            <a href="/admin/topups?tab=bank&receiverProvider=<%= item[0] %>" class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition hover:border-[var(--gold)] <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
+              <div class="w-10 h-10 shrink-0 rounded-xl bg-[var(--input)] flex items-center justify-center text-xl"><%= item[1] %></div>
+              <div class="min-w-0 flex-1"><div class="text-sm font-bold"><%= item[2] %></div><div class="text-[10px] <%= activeReceiverProvider ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= activeReceiverProvider ? 'กำลังใช้งาน • กดเข้าไปแก้ไข' : 'กดเข้าไปกรอกข้อมูลของค่ายนี้' %></div></div>
+              <div class="text-[var(--text-4)] text-lg">›</div>
             </a>
           <% }) %>
         </div>
+      </div>
+
+      <% if (receiverProvider) { %>
+      <div class="flex items-center justify-between gap-3">
+        <a href="/admin/topups?tab=bank" class="text-xs font-bold text-[var(--gold)]">← กลับไปเลือกค่าย</a>
+        <span class="text-xs text-[var(--text-4)]">กำลังกรอกข้อมูลสำหรับ <b class="text-[var(--text)]"><%= ({easyslip:'EasySlip',slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go'})[receiverProvider] %></b></span>
       </div>
 
       <div class="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-[var(--text-3)]">
@@ -404,6 +411,7 @@
           💾 บันทึกและใช้ข้อมูลของ <%= ({easyslip:'EasySlip',slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go'})[receiverProvider] %>
         </button>
       </div>
+      <% } %>
 
     </form>
   </div>

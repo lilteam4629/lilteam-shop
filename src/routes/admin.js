@@ -705,10 +705,9 @@ router.get('/topups', async (req, res) => {
   const pendingCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
   const payment = store.data.settings.payment;
   const requestedReceiverProvider = String(req.query.receiverProvider || '').toLowerCase();
-  const receiverProvider = receiverProfiles.PROVIDERS.includes(requestedReceiverProvider)
-    ? requestedReceiverProvider
-    : (receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip');
-  const receiverPayment = receiverProfiles.view(payment, receiverProvider);
+  const receiverProvider = receiverProfiles.PROVIDERS.includes(requestedReceiverProvider) ? requestedReceiverProvider : null;
+  const receiverPayment = receiverProfiles.view(payment, receiverProvider
+    || (receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip'));
   res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment, receiverPayment, receiverProvider, banks, q, status });
 });
 
