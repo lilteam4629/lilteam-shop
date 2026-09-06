@@ -21,6 +21,8 @@ const store = require('../data/store');
 const recaptcha = require('../services/recaptcha');
 const provisioning = require('../services/shop-provisioning');
 const accountRoutes = require('./account');
+const topupsService = require('../services/topups');
+const licensePlansService = require('../services/license-plans');
 const { getShopUrl, MAIN_SITE_URL } = require('../middleware/tenant');
 
 const upload = multer({
@@ -192,6 +194,112 @@ router.post('/wallet/topup', (req, res) => {
     if (!attached.ok) return res.status(400).json({ error: attached.error, request: created.request });
     res.json({ ok: true, request: attached.request });
   });
+});
+
+// ---------- Admin (rent-app's own /admin panel drives these) ----------
+// These are more powerful than everything above — full plan CRUD, topup
+// approve/reject, and a user directory — because rent-app's /admin is
+// meant to become a full back-office for the shop-rental business. There
+// is no separate admin-vs-customer distinction at this layer: whoever
+// holds INTERNAL_API_SECRET is trusted completely, exactly like every
+// other route in this file. rent-app's own ADMIN_USERNAME/ADMIN_PASSWORD
+// login is what actually gates who can reach these — never expose them
+// through anything the browser can call directly.
+router.get('/admin/license-plans', (req, res) => {
+  const plans = licensePlansService.listPlans().map(p => ({ ...p, available: provisioning.isPlanAvailable(p) }));
+  res.json({ ok: true, plans });
+});
+
+router.post('/admin/license-plans', async (req, res) => {
+  const result = await licensePlansService.createPlan(req.body || {});
+  if (!result.ok) return res.status(400).json({ error: result.error });
+  res.json({ ok: true, plan: result.plan });
+});
+
+router.post('/admin/license-plans/:id', async (req, res) => {
+  const result = await licensePlansService.editPlan(req.params.id, req.body || {});
+  if (!result.ok) return res.status(400).json({ error: result.error });
+  res.json({ ok: true, plan: result.plan });
+});
+
+router.post('/admin/license-plans/:id/toggle', async (req, res) => {
+  const result = await licensePlansService.togglePlan(req.params.id);
+  if (!result.ok) return res.status(400).json({ error: result.error });
+  res.json({ ok: true, plan: result.plan });
+});
+
+router.post('/admin/license-plans/:id/delete', async (req, res) => {
+  const result = await licensePlansService.deletePlan(req.params.id);
+  if (!result.ok) return res.status(400).json({ error: result.error });
+  res.json({ ok: true });
+});
+
+router.get('/admin/topups', (req, res) => {
+  const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : '';
+  const q = String(req.query.q || '').trim().toLocaleLowerCase('th-TH');
+  const requests = [...store.data.topupRequests]
+    .map(t => {
+      const buyer = store.data.users.find(u => u.id === t.userId);
+      return { ...t, buyerUsername: buyer ? buyer.username : null, buyerEmail: buyer ? buyer.email : null };
+    })
+    .filter(t => {
+      if (status && t.status !== status) return false;
+      if (!q) return true;
+      return String(t.refCode || '').toLocaleLowerCase('th-TH').includes(q)
+        || String(t.buyerUsername || '').toLocaleLowerCase('th-TH').includes(q)
+        || String(t.buyerEmail || '').toLocaleLowerCase('th-TH').includes(q);
+    })
+    .sort((a, b) => {
+      if (a.status === 'pending' && b.status !== 'pending') return -1;
+      if (a.status !== 'pending' && b.status === 'pending') return 1;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    })
+    .slice(0, 100);
+  res.json({ ok: true, requests });
+});
+
+router.get('/admin/topups/:id/slip', async (req, res, next) => {
+  try {
+    const request = store.data.topupRequests.find(t => t.id === req.params.id);
+    if (!request || !request.slipStorageId) return res.sendStatus(404);
+    const media = await store.getPrivateMedia(request.slipStorageId);
+    if (!media) return res.sendStatus(404);
+    res.setHeader('Content-Type', media.file.metadata?.contentType || 'application/octet-stream');
+    res.setHeader('Content-Length', media.file.length);
+    res.setHeader('Cache-Control', 'private, no-store');
+    media.stream.on('error', next).pipe(res);
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/admin/topups/:id/approve', async (req, res) => {
+  const result = await topupsService.approveTopup(req.params.id);
+  if (!result.ok) return res.status(400).json({ error: result.error });
+  res.json({ ok: true, request: result.request, user: publicUser(result.user) });
+});
+
+router.post('/admin/topups/:id/reject', async (req, res) => {
+  const result = await topupsService.rejectTopup(req.params.id, req.body && req.body.reviewNote);
+  if (!result.ok) return res.status(400).json({ error: result.error });
+  res.json({ ok: true });
+});
+
+router.get('/admin/users', (req, res) => {
+  const q = String(req.query.q || '').trim().toLocaleLowerCase('th-TH');
+  const users = store.data.users
+    .filter(u => {
+      if (!q) return true;
+      return String(u.username || '').toLocaleLowerCase('th-TH').includes(q)
+        || String(u.email || '').toLocaleLowerCase('th-TH').includes(q);
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .slice(0, 100)
+    .map(u => ({
+      id: u.id, username: u.username, email: u.email, walletBalance: u.walletBalance,
+      status: u.status, role: u.role, createdAt: u.createdAt,
+    }));
+  res.json({ ok: true, users });
 });
 
 module.exports = router;

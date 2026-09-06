@@ -15,6 +15,8 @@ const { effectiveSlipConfig } = require('../services/slip-config');
 const receiverProfiles = require('../services/receiver-profiles');
 const theme = require('../services/theme');
 const discordBot = require('../services/discord-bot');
+const topupsService = require('../services/topups');
+const licensePlansService = require('../services/license-plans');
 const { MAIN_SITE_URL, MAIN_DOMAIN } = require('../middleware/tenant');
 const { requireAdmin } = require('../middleware/auth');
 
@@ -1164,44 +1166,15 @@ router.post('/topups/payment-settings', (req, res) => {
 });
 
 router.post('/topups/:id/approve', async (req, res) => {
-  const request = store.data.topupRequests.find(t => t.id === req.params.id);
-  if (!request) { req.flash('error', 'ไม่พบคำขอ'); return res.redirect('/admin/topups'); }
-  if (request.status === 'approved' || request.status === 'rejected') { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
-  const user = store.data.users.find(u => u.id === request.userId);
-  if (!user) { req.flash('error', 'ไม่พบผู้ใช้'); return res.redirect('/admin/topups'); }
-
-  const approved = await store.transact((data) => {
-    const freshRequest = data.topupRequests.find(t => t.id === req.params.id);
-    if (!freshRequest || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
-    const freshUser = data.users.find(u => u.id === freshRequest.userId);
-    if (!freshUser) return false;
-    freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + Number(freshRequest.amount)) * 100) / 100;
-    data.walletTransactions.push({
-      id: store.genId(10), userId: freshUser.id, type: 'topup', amount: freshRequest.amount,
-      note: `เติมเงินสำเร็จ (อ้างอิง ${freshRequest.refCode})`, createdAt: new Date().toISOString(),
-    });
-    freshRequest.status = 'approved';
-    freshRequest.reviewedAt = new Date().toISOString();
-    return true;
-  });
-  if (!approved) { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
-  req.flash('success', `อนุมัติคำขอเติมเงิน ${request.amount.toLocaleString()} บาท ให้ ${user.username} แล้ว`);
+  const result = await topupsService.approveTopup(req.params.id);
+  if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/topups'); }
+  req.flash('success', `อนุมัติคำขอเติมเงิน ${result.request.amount.toLocaleString()} บาท ให้ ${result.user.username} แล้ว`);
   res.redirect('/admin/topups');
 });
 
 router.post('/topups/:id/reject', async (req, res) => {
-  const request = store.data.topupRequests.find(t => t.id === req.params.id);
-  if (!request) { req.flash('error', 'ไม่พบคำขอ'); return res.redirect('/admin/topups'); }
-  if (request.status === 'approved' || request.status === 'rejected') { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
-  const rejected = await store.transact((data) => {
-    const freshRequest = data.topupRequests.find(t => t.id === req.params.id);
-    if (!freshRequest || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
-    freshRequest.status = 'rejected';
-    freshRequest.reviewedAt = new Date().toISOString();
-    freshRequest.reviewNote = req.body.reviewNote || '';
-    return true;
-  });
-  if (!rejected) { req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว'); return res.redirect('/admin/topups'); }
+  const result = await topupsService.rejectTopup(req.params.id, req.body.reviewNote);
+  if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/topups'); }
   req.flash('success', 'ปฏิเสธคำขอเติมเงินแล้ว');
   res.redirect('/admin/topups');
 });
@@ -1482,58 +1455,28 @@ router.post('/rented-shops/:id/delete', async (req, res) => {
   res.redirect('/admin/license-plans');
 });
 
-function parsePromoFields(body) {
-  const promo = body.promo === 'on';
-  const promoLimit = promo && body.promoLimit ? Math.max(1, parseInt(body.promoLimit, 10) || 0) || null : null;
-  const promoExpiresAt = promo && body.promoExpiresAt ? new Date(body.promoExpiresAt).getTime() || null : null;
-  return { promo, promoLimit, promoExpiresAt };
-}
-
 router.post('/license-plans', async (req, res) => {
-  const days = Math.max(1, parseInt(req.body.days, 10) || 0);
-  const price = Math.max(0, Number(req.body.price) || 0);
-  if (!days || !price) {
-    req.flash('error', 'กรุณากรอกจำนวนวันและราคาให้ถูกต้อง');
-    return res.redirect('/admin/license-plans');
-  }
-  store.data.licensePlans.push({
-    id: store.genId(8), days, price, active: true, createdAt: new Date().toISOString(),
-    promoUsedCount: 0, ...parsePromoFields(req.body),
-  });
-  await store.save();
+  const result = await licensePlansService.createPlan(req.body);
+  if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/license-plans'); }
   req.flash('success', 'เพิ่มแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');
 });
 
 router.post('/license-plans/:id/edit', async (req, res) => {
-  const plan = store.data.licensePlans.find(p => p.id === req.params.id);
-  if (!plan) {
-    req.flash('error', 'ไม่พบแพ็กเกจนี้');
-    return res.redirect('/admin/license-plans');
-  }
-  const days = Math.max(1, parseInt(req.body.days, 10) || 0);
-  const price = Math.max(0, Number(req.body.price) || 0);
-  if (!days || !price) {
-    req.flash('error', 'กรุณากรอกจำนวนวันและราคาให้ถูกต้อง');
-    return res.redirect('/admin/license-plans');
-  }
-  plan.days = days;
-  plan.price = price;
-  Object.assign(plan, parsePromoFields(req.body));
-  await store.save();
+  const result = await licensePlansService.editPlan(req.params.id, req.body);
+  if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/license-plans'); }
   req.flash('success', 'แก้ไขแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');
 });
 
 router.post('/license-plans/:id/toggle', async (req, res) => {
-  const plan = store.data.licensePlans.find(p => p.id === req.params.id);
-  if (plan) { plan.active = !plan.active; await store.save(); }
+  await licensePlansService.togglePlan(req.params.id);
   res.redirect('/admin/license-plans');
 });
 
 router.post('/license-plans/:id/delete', async (req, res) => {
-  store.data.licensePlans = store.data.licensePlans.filter(p => p.id !== req.params.id);
-  await store.save();
+  const result = await licensePlansService.deletePlan(req.params.id);
+  if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/license-plans'); }
   req.flash('success', 'ลบแพ็กเกจแล้ว');
   res.redirect('/admin/license-plans');
 });
