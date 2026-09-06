@@ -1,13 +1,13 @@
 const axios = require('axios');
 const FormData = require('form-data');
+const { receiverMatches, textValues } = require('./receiver-match');
+const { numberValue, officialEndpoint } = require('./slip-fields');
 
 const DEFAULT_ENDPOINT = 'https://suba.rdcw.co.th/v2/inquiry';
-const normalize = value => String(value || '').toLocaleLowerCase('th-TH').replace(/(นาย|นางสาว|นาง|คุณ)/g, '').replace(/[^a-z0-9ก-๙]/g, '');
-
 async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credentials = {}) {
   const clientId = String(credentials.clientId || '').trim();
   const clientSecret = String(credentials.clientSecret || '').trim();
-  const endpoint = String(credentials.endpoint || DEFAULT_ENDPOINT).trim();
+  const endpoint = officialEndpoint(credentials.endpoint, DEFAULT_ENDPOINT, 'suba.rdcw.co.th');
   if (!clientId || !clientSecret) {
     return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipRDCW Client ID และ Client Secret', raw: null };
   }
@@ -23,23 +23,37 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     });
     const body = response.data || {};
     const data = body.data?.data || body.data || body;
-    const amountRaw = data.amount ?? data.transferAmount ?? data.transAmount;
-    // RDCW responses commonly use satang; accept baht when already equal.
-    const parsed = Number(amountRaw);
-    const amount = Math.abs(parsed - Number(expectedAmount)) < 0.009 ? parsed : parsed / 100;
-    if (!Number.isFinite(amount) || Math.abs(amount - Number(expectedAmount)) > 0.009) {
-      return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: body };
-    }
-    const receiver = data.receiver || data.receiving || data.receiverAccount || {};
-    const receiverName = normalize(receiver.name || receiver.displayName || data.receiverName);
-    const expectedNames = (credentials.expectedReceiverNames || []).map(normalize).filter(Boolean);
-    if (!receiverName || !expectedNames.some(name => receiverName === name || receiverName.includes(name) || name.includes(receiverName))) {
-      return { checked: true, verified: false, message: 'ชื่อผู้รับในสลิปไม่ตรงกับชื่อบัญชีร้านค้า', raw: body };
+    const responseCode = Number(body.code ?? body.statusCode);
+    if (body.success === false || (Number.isFinite(responseCode) && responseCode >= 1000)) {
+      const messages = { 1003: 'IP ของเซิร์ฟเวอร์ยังไม่ได้รับอนุญาตใน SlipRDCW', 1007: 'โควตา SlipRDCW หมดแล้ว', 1008: 'แพ็กเกจ SlipRDCW หมดอายุแล้ว' };
+      return { checked: [1004, 1005, 1006, 1007, 1008].includes(responseCode), verified: false, message: messages[responseCode] || body.message || 'ตรวจสลิปผ่าน SlipRDCW ไม่สำเร็จ', raw: body };
     }
     const transRef = data.transRef || data.trans_ref || data.ref || data.reference || null;
+    const normalizedRaw = { ...data, transRef, transDate: data.transDate, transTime: data.transTime, providerResponse: body };
+    const amountRaw = data.amount ?? data.transferAmount ?? data.transAmount;
+    // RDCW responses commonly use satang; accept baht when already equal.
+    const parsed = numberValue(amountRaw);
+    const amount = Math.abs(parsed - Number(expectedAmount)) < 0.009 ? parsed : parsed / 100;
+    if (!Number.isFinite(amount) || Math.abs(amount - Number(expectedAmount)) > 0.009) {
+      return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: normalizedRaw };
+    }
+    if (data.duplicate || data.isDuplicate || data.is_duplicate) {
+      return { checked: true, verified: false, message: 'สลิปนี้เคยถูกใช้แล้ว (สลิปซ้ำ)', raw: normalizedRaw };
+    }
+    const receiver = data.receiver || data.receiving || data.receiverAccount || {};
+    const receiverAccount = receiver.account || {};
+    const receiverCheck = receiverMatches({
+      actualNames: textValues(receiver.name, receiver.displayName, receiverAccount.name, data.receiverName),
+      actualNumbers: textValues(receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, data.receiverAccountNumber),
+      expectedNames: credentials.expectedReceiverNames,
+      expectedNumbers: credentials.expectedReceiverNumbers,
+    });
+    if (!receiverCheck.matched) {
+      return { checked: true, verified: false, message: 'ผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: normalizedRaw };
+    }
     return {
       checked: true, verified: true, message: 'ตรวจสอบสลิปสำเร็จผ่าน SlipRDCW',
-      raw: { ...data, transRef, transDate: data.transDate, transTime: data.transTime, providerResponse: body },
+      raw: normalizedRaw,
     };
   } catch (error) {
     const body = error.response?.data;

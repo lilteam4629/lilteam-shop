@@ -1,11 +1,11 @@
 const axios = require('axios');
 const FormData = require('form-data');
+const { receiverMatches, textValues } = require('./receiver-match');
+const { numberValue, officialEndpoint } = require('./slip-fields');
 
 const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 
-const cleanEndpoint = value => String(value || DEFAULT_ENDPOINT).trim().replace(/\/$/, '');
-const normalizeName = value => String(value || '').toLocaleLowerCase('th-TH').replace(/(นาย|นางสาว|นาง|คุณ)/g, '').replace(/[^a-z0-9ก-๙]/g, '');
-
+const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
 async function getAccountInfo(apiKey, endpoint = DEFAULT_ENDPOINT) {
   const key = String(apiKey || '').trim();
   if (!key) return { ok: false, message: 'กรุณากรอก SlipCheck API Key' };
@@ -40,19 +40,26 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     const body = response.data || {};
     const data = body.data || {};
     if (!body.success) return { checked: true, verified: false, message: body.message || 'SlipCheck ไม่สามารถยืนยันสลิปนี้ได้', raw: body };
-    if (body.duplicate) return { checked: true, verified: false, message: 'สลิปนี้เคยถูกใช้แล้ว (สลิปซ้ำ)', raw: body };
-    const amount = Number(data.amount);
+    const normalizedRaw = { ...data, transRef: data.ref_no || data.transRef || data.trans_ref || data.reference, date: data.transferred_at || data.date || data.transDateTime, providerResponse: body };
+    if (body.duplicate || data.duplicate || data.isDuplicate || data.is_duplicate) return { checked: true, verified: false, message: 'สลิปนี้เคยถูกใช้แล้ว (สลิปซ้ำ)', raw: normalizedRaw };
+    const amount = numberValue(data.amount ?? data.transferAmount ?? data.transAmount);
     if (!Number.isFinite(amount) || Math.abs(amount - Number(expectedAmount)) > 0.009) {
-      return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: body };
+      return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: normalizedRaw };
     }
-    const receiver = normalizeName(data.receiver_name);
-    const expectedNames = (credentials.expectedReceiverNames || []).map(normalizeName).filter(Boolean);
-    if (!receiver || !expectedNames.some(name => receiver === name || receiver.includes(name) || name.includes(receiver))) {
-      return { checked: true, verified: false, message: 'ชื่อผู้รับในสลิปไม่ตรงกับชื่อบัญชีร้านค้า', raw: body };
+    const receiver = data.receiver || data.receiving || data.payee || {};
+    const receiverAccount = receiver.account || data.receiver_account || {};
+    const receiverCheck = receiverMatches({
+      actualNames: textValues(data.receiver_name, data.receiverName, receiver.name, receiver.displayName, receiverAccount.name, receiverAccount.displayName),
+      actualNumbers: textValues(data.receiver_account_number, data.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber),
+      expectedNames: credentials.expectedReceiverNames,
+      expectedNumbers: credentials.expectedReceiverNumbers,
+    });
+    if (!receiverCheck.matched) {
+      return { checked: true, verified: false, message: 'ผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: normalizedRaw };
     }
     return {
       checked: true, verified: true, message: 'ตรวจสอบสลิปสำเร็จผ่าน SlipCheck',
-      raw: { ...data, transRef: data.ref_no, date: data.transferred_at, providerResponse: body },
+      raw: normalizedRaw,
     };
   } catch (error) {
     const body = error.response?.data;

@@ -10,6 +10,7 @@ const slip2go = require('../services/slip2go');
 const easyslip = require('../services/easyslip');
 const promptpay = require('../services/promptpay');
 const { effectiveSlipConfig } = require('../services/slip-config');
+const { parseSlipDate } = require('../services/slip-fields');
 const webhook = require('../services/webhook');
 const truemoney = require('../services/truemoney');
 const { resolveSlipProvider } = require('../services/slip-provider');
@@ -314,6 +315,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         apiKey: effective.slipcheckApiKey,
         endpoint: effective.slipcheckEndpoint,
         expectedReceiverNames: [request.method === 'promptpay' ? payment.promptpayName : payment.bankAccountName],
+        expectedReceiverNumbers: [request.method === 'promptpay' ? payment.promptpayId : payment.bankAccountNumber],
       });
     } else if (selectedProvider === 'rdcw') {
       provider = 'rdcw';
@@ -322,6 +324,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         clientSecret: effective.rdcwClientSecret,
         endpoint: effective.rdcwEndpoint,
         expectedReceiverNames: [request.method === 'promptpay' ? payment.promptpayName : payment.bankAccountName],
+        expectedReceiverNumbers: [request.method === 'promptpay' ? payment.promptpayId : payment.bankAccountNumber],
       });
     } else if (selectedProvider === 'slip2go') {
       provider = 'slip2go';
@@ -329,6 +332,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         apiKey: effective.slip2goApiKey,
         endpoint: effective.slip2goEndpoint,
         expectedReceiverNames: [request.method === 'promptpay' ? payment.promptpayName : payment.bankAccountName],
+        expectedReceiverNumbers: [request.method === 'promptpay' ? payment.promptpayId : payment.bankAccountNumber],
       });
     } else {
       provider = selectedProvider;
@@ -341,8 +345,8 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     // SlipOK returns transRef/transDate/transTime flat.
     const transRef = raw && (raw.transRef || (raw.rawSlip && raw.rawSlip.transRef)) || null;
     const transTime = raw && (
-      (raw.rawSlip && raw.rawSlip.date && new Date(raw.rawSlip.date))
-      || (raw.date && new Date(String(raw.date).replace(' ', 'T') + (String(raw.date).includes('T') ? '' : ':00+07:00')))
+      parseSlipDate(raw.rawSlip && raw.rawSlip.date)
+      || parseSlipDate(raw.date)
       || slipok.parseTransDateTime(raw.transDate, raw.transTime)
     );
 

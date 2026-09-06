@@ -1,6 +1,8 @@
 const axios = require('axios');
 const FormData = require('form-data');
 const fs = require('fs');
+const { receiverMatches, textValues } = require('./receiver-match');
+const { numberValue, officialEndpoint } = require('./slip-fields');
 
 /**
  * Slip2Go API Integration Service (slip2go.com)
@@ -13,7 +15,7 @@ const DEFAULT_ENDPOINT = 'https://api.slip2go.com/api';
  * Test Slip2Go connection and check balance / status.
  */
 async function checkBalance(apiKey, customEndpoint = null) {
-  const endpoint = customEndpoint || DEFAULT_ENDPOINT;
+  const endpoint = officialEndpoint(customEndpoint, DEFAULT_ENDPOINT, 'api.slip2go.com');
   const cleanKey = String(apiKey || '').trim();
 
   if (!cleanKey) {
@@ -57,7 +59,7 @@ async function checkBalance(apiKey, customEndpoint = null) {
  */
 async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentials = {}) {
   const apiKey = String(credentials.apiKey || credentials || '').trim();
-  const endpoint = credentials.endpoint || DEFAULT_ENDPOINT;
+  const endpoint = officialEndpoint(credentials.endpoint, DEFAULT_ENDPOINT, 'api.slip2go.com');
 
   if (!apiKey) {
     return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า Slip2Go API Key สำหรับตรวจสลิป', raw: null };
@@ -88,35 +90,34 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
     const data = res.data;
     if (data && (data.success || data.ok || data.status === 'success')) {
       const result = data.data || data;
-      const amount = Number(result.amount);
-      const transRef = result.transRef || result.trans_ref || result.ref;
-      const receiverName = result.receiverName || result.receiver_name
-        || (result.receiver && (result.receiver.name || result.receiver.displayName))
-        || (result.receiver && result.receiver.account && result.receiver.account.name);
-      const expectedNames = (credentials.expectedReceiverNames || []).map(name => String(name || '').replace(/\s+/g, '').toLowerCase()).filter(Boolean);
+      const amount = numberValue(result.amount ?? result.transferAmount ?? result.transAmount);
+      const transRef = result.transRef || result.trans_ref || result.ref || result.reference;
+      const normalizedRaw = { ...result, transRef, amount, date: result.date || result.trans_date || result.transferred_at || null, providerResponse: data };
+      const receiver = result.receiver || result.receiving || result.payee || {};
+      const receiverAccount = receiver.account || {};
+      const receiverName = result.receiverName || result.receiver_name || receiver.name || receiver.displayName || receiverAccount.name;
       if (!Number.isFinite(amount) || Math.abs(amount - Number(expectedAmount)) > 0.009) {
-        return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: data };
+        return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: normalizedRaw };
       }
+      if (data.duplicate || result.duplicate || result.isDuplicate || result.is_duplicate) return { checked: true, verified: false, message: 'สลิปนี้เคยถูกใช้แล้ว (สลิปซ้ำ)', raw: normalizedRaw };
       if (!transRef) {
-        return { checked: false, verified: false, message: 'Slip2Go ไม่ได้ส่งเลขอ้างอิงธุรกรรมกลับมา รอแอดมินตรวจสอบ', raw: data };
+        return { checked: false, verified: false, message: 'Slip2Go ไม่ได้ส่งเลขอ้างอิงธุรกรรมกลับมา รอแอดมินตรวจสอบ', raw: normalizedRaw };
       }
-      if (expectedNames.length) {
-        if (!receiverName) return { checked: false, verified: false, message: 'Slip2Go ไม่ได้ส่งชื่อผู้รับกลับมา จึงยังไม่เติมเงินอัตโนมัติ', raw: data };
-        const normalizedReceiver = String(receiverName).replace(/\s+/g, '').toLowerCase();
-        if (!expectedNames.some(name => normalizedReceiver.includes(name) || name.includes(normalizedReceiver))) {
-          return { checked: true, verified: false, message: 'ชื่อผู้รับในสลิปไม่ตรงกับบัญชีของร้าน', raw: data };
-        }
+      if ((credentials.expectedReceiverNames || []).length || (credentials.expectedReceiverNumbers || []).length) {
+        const receiverCheck = receiverMatches({
+          actualNames: textValues(receiverName, receiverAccount.displayName),
+          actualNumbers: textValues(result.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber),
+          expectedNames: credentials.expectedReceiverNames,
+          expectedNumbers: credentials.expectedReceiverNumbers,
+        });
+        if (!receiverCheck.hasEvidence) return { checked: false, verified: false, message: 'Slip2Go ไม่ได้ส่งข้อมูลผู้รับกลับมา จึงยังไม่เติมเงินอัตโนมัติ', raw: normalizedRaw };
+        if (!receiverCheck.matched) return { checked: true, verified: false, message: 'ผู้รับในสลิปไม่ตรงกับบัญชีของร้าน', raw: normalizedRaw };
       }
       return {
         checked: true,
         verified: true,
         message: 'ตรวจสอบสลิปสำเร็จผ่าน Slip2Go API',
-        raw: {
-          transRef,
-          amount,
-          date: result.date || result.trans_date || null,
-          receiverName,
-        }
+        raw: { ...normalizedRaw, receiverName }
       };
     }
 

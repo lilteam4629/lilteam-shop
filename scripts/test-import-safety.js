@@ -73,6 +73,39 @@ async function main() {
     assert.equal(slip2goCalls, 1);
     assert.equal(demoResult.verified, false);
   });
+  const { receiverMatches } = require('../src/services/receiver-match');
+  check('Receiver matching accepts Thai titles but rejects unsafe four-digit-only account matches', () => {
+    assert.equal(receiverMatches({ actualNames: ['นาย อุรพงค์ สงทิม'], expectedNames: ['อุรพงค์ สงทิม'] }).matched, true);
+    assert.equal(receiverMatches({ actualNumbers: ['XXX-X-XX804-4'], expectedNumbers: ['147-3-36804-4'] }).matched, false);
+  });
+  const slipcheckService = load('src/services/slipcheck.js', {
+    axios: { post: async () => ({ data: { success: true, data: { amount: 1, ref_no: 'nested-ref', transferred_at: new Date().toISOString(), receiver: { account: { name: { th: 'นาย อุรพงค์ สงทิม' }, number: 'XXX-X-XX804-4' } } } } }) },
+    'form-data': FakeFormData,
+  });
+  const nestedReceiverResult = await slipcheckService.verifySlip(Buffer.from('fixture'), 1, {}, { apiKey: 'fixture', expectedReceiverNames: ['อุรพงค์ สงทิม'], expectedReceiverNumbers: ['147-3-36804-4'] });
+  check('SlipCheck accepts nested receiver data returned by the provider', () => assert.equal(nestedReceiverResult.verified, true));
+  const { numberValue, parseSlipDate, officialEndpoint } = require('../src/services/slip-fields');
+  check('Provider field normalization handles formatted amounts and Bangkok timestamps', () => {
+    assert.equal(numberValue({ value: '1,234.50' }), 1234.5);
+    assert.equal(parseSlipDate('2026-09-06 07:28:15').toISOString(), '2026-09-06T00:28:15.000Z');
+  });
+  check('Provider endpoints reject non-official hosts', () => {
+    assert.equal(officialEndpoint('http://127.0.0.1/private', 'https://safe.example/api', 'safe.example'), 'https://safe.example/api');
+  });
+  const rdcwErrorService = load('src/services/rdcw-slip.js', {
+    axios: { post: async () => ({ data: { success: false, code: 1008, data: { amount: 100, receiverName: 'ร้านทดสอบ' } } }) },
+    'form-data': FakeFormData,
+  });
+  const rdcwExpired = await rdcwErrorService.verifySlip(Buffer.from('fixture'), 1, {}, { clientId: 'id', clientSecret: 'secret', expectedReceiverNames: ['ร้านทดสอบ'] });
+  check('SlipRDCW HTTP-200 error payload can never auto-credit', () => { assert.equal(rdcwExpired.verified, false); assert.match(rdcwExpired.message, /หมดอายุ/); });
+  const easyService = load('src/services/easyslip.js', {
+    dotenv: { config() {} },
+    axios: { post: async () => ({ data: { success: true, data: { isDuplicate: false, isAmountMatched: true, matchedAccount: { bankNumber: '147-3-36804-4' }, rawSlip: { transRef: 'easy-ref', date: new Date().toISOString() } } } }) },
+    'form-data': FakeFormData,
+  });
+  const easyMatch = await easyService.verifySlip(Buffer.from('fixture'), 1, {}, ['1473368044'], 'easy-key');
+  const easyWrongShop = await easyService.verifySlip(Buffer.from('fixture'), 1, {}, ['9999999999'], 'easy-key');
+  check('EasySlip shared account match credits only the intended shop', () => { assert.equal(easyMatch.verified, true); assert.equal(easyWrongShop.verified, false); });
 
   const als = new AsyncLocalStorage();
   let sequence = 0;
