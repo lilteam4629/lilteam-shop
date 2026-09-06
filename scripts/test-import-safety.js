@@ -62,6 +62,15 @@ async function main() {
     assert.equal(effective.slipcheckApiKey, 'tenant-key');
     assert.equal(effective.easyslipApiKey, undefined);
   });
+  const receiverProfiles = require('../src/services/receiver-profiles');
+  check('Each slip provider keeps an isolated receiving profile', () => {
+    const payment = { slipProvider: 'easyslip', promptpayId: 'easy-phone', promptpayName: 'Easy Owner', easyslipAccounts: { easy: { bankNumber: '111111' } } };
+    receiverProfiles.save(payment, 'easyslip', receiverProfiles.snapshot(payment));
+    receiverProfiles.saveAndActivate(payment, 'slipcheck', { promptpayId: 'check-phone', promptpayName: 'Check Owner', easyslipAccounts: {} });
+    assert.equal(receiverProfiles.view(payment, 'easyslip').promptpayId, 'easy-phone');
+    assert.equal(receiverProfiles.view(payment, 'slipcheck').promptpayId, 'check-phone');
+    assert.equal(receiverProfiles.view(payment, 'slipcheck').easyslipAccounts.easy, undefined);
+  });
   let slip2goCalls = 0;
   class FakeFormData { append() {} getHeaders() { return {}; } }
   const slip2goService = load('src/services/slip2go.js', {

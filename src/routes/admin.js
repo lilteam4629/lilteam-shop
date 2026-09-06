@@ -12,6 +12,7 @@ const slip2go = require('../services/slip2go');
 const slipcheck = require('../services/slipcheck');
 const rdcwSlip = require('../services/rdcw-slip');
 const { effectiveSlipConfig } = require('../services/slip-config');
+const receiverProfiles = require('../services/receiver-profiles');
 const theme = require('../services/theme');
 const discordBot = require('../services/discord-bot');
 const { MAIN_SITE_URL, MAIN_DOMAIN } = require('../middleware/tenant');
@@ -702,7 +703,13 @@ router.get('/topups', async (req, res) => {
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
   const pendingCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
-  res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment: store.data.settings.payment, banks, q, status });
+  const payment = store.data.settings.payment;
+  const requestedReceiverProvider = String(req.query.receiverProvider || '').toLowerCase();
+  const receiverProvider = receiverProfiles.PROVIDERS.includes(requestedReceiverProvider)
+    ? requestedReceiverProvider
+    : (receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip');
+  const receiverPayment = receiverProfiles.view(payment, receiverProvider);
+  res.render('admin/topups', { title: 'บัญชี', active: 'topups', requests, pendingCount, payment, receiverPayment, receiverProvider, banks, q, status });
 });
 
 // Slip Verification Hub & Provider Management (/admin/easyslip-usage & /admin/slip-verification)
@@ -829,6 +836,8 @@ router.post('/easyslip-usage/billing', async (req, res) => {
 
 router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const payment = store.data.settings.payment;
+  const previousReceiverProvider = receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip';
+  receiverProfiles.save(payment, previousReceiverProvider, receiverProfiles.snapshot(payment));
   const slipApiMode = req.tenantShop && req.body.slipApiMode === 'own' ? 'own' : (req.tenantShop ? 'shared' : 'own');
   const allowedProviders = ['none', 'easyslip', 'slipcheck', 'rdcw', 'slip2go'];
   const submittedProvider = Array.isArray(req.body.slipProvider) ? req.body.slipProvider.at(-1) : req.body.slipProvider;
@@ -882,6 +891,16 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
     customSlipApiKey,
     topupWebhookUrl: (req.body.topupWebhookUrl !== undefined ? req.body.topupWebhookUrl : (payment.topupWebhookUrl || '')).trim()
   });
+
+  const effectiveAfterProviderSave = effectiveSlipConfig(payment, store.platformData.settings.payment, Boolean(req.tenantShop));
+  const receiverProviderToActivate = req.tenantShop && slipApiMode === 'shared'
+    ? effectiveAfterProviderSave.slipProvider
+    : slipProvider;
+  const savedReceiverProfile = payment.receiverProfiles && payment.receiverProfiles[receiverProviderToActivate];
+  if (savedReceiverProfile) {
+    receiverProfiles.saveAndActivate(payment, receiverProviderToActivate, savedReceiverProfile);
+    payment.slipProvider = slipProvider;
+  }
 
   await store.save();
   req.flash('success', 'บันทึกการตั้งค่าระบบตรวจสอบสลิปด้วย API เรียบร้อยแล้ว');
@@ -963,7 +982,22 @@ router.post('/topups/payment-settings', (req, res) => {
     const truemoneyPhone = (req.body.truemoneyPhone || '').trim().replace(/[^0-9]/g, '');
     const truemoneyEnabled = req.body.truemoneyEnabled === 'on';
     const effectiveBeforeSave = effectiveSlipConfig(payment, store.platformData.settings.payment, Boolean(req.tenantShop));
-    const slipProvider = effectiveBeforeSave.slipProvider || 'auto';
+    const currentlySelectedProvider = receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip';
+    const submittedReceiverProvider = String(req.body.receiverProvider || '').toLowerCase();
+    const sharedTenant = Boolean(req.tenantShop && (payment.slipApiMode || 'shared') === 'shared');
+    const slipProvider = sharedTenant
+      ? effectiveBeforeSave.slipProvider
+      : (receiverProfiles.PROVIDERS.includes(submittedReceiverProvider) ? submittedReceiverProvider : currentlySelectedProvider);
+    if (!receiverProfiles.PROVIDERS.includes(slipProvider)) {
+      req.flash('error', 'กรุณาเลือกค่ายตรวจสลิปที่รองรับ');
+      return res.redirect('/admin/topups?tab=bank');
+    }
+    receiverProfiles.save(payment, currentlySelectedProvider, receiverProfiles.snapshot(payment));
+    const selectedProfile = receiverProfiles.view(payment, slipProvider);
+    payment.promptpayQrImage = selectedProfile.promptpayQrImage;
+    payment.bankQrImage = selectedProfile.bankQrImage;
+    payment.easyslipAccounts = selectedProfile.easyslipAccounts || {};
+    payment.easyslipStatus = selectedProfile.easyslipStatus || '';
     if (slipProvider === 'easyslip' && promptpayId && !promptpayPrimaryBank) {
       req.flash('error', 'กรุณาเลือกธนาคารที่พร้อมเพย์ผูกอยู่ เพื่อเชื่อม EasySlip');
       return res.redirect('/admin/topups?tab=bank');
@@ -1002,6 +1036,7 @@ router.post('/topups/payment-settings', (req, res) => {
       tenantOwnedSlipApi: payment.slipApiMode === 'own' && Boolean(req.tenantShop),
       topupWebhookUrl: (req.body.topupWebhookUrl || '').trim(),
     });
+    if (!sharedTenant) payment.slipProvider = slipProvider;
 
     // Registered as its own bank (matches a normal transfer) AND, if
     // opted in, again under the PromptPay channel — an interbank
@@ -1091,9 +1126,12 @@ router.post('/topups/payment-settings', (req, res) => {
       return res.redirect('/admin/topups');
     }
 
+    receiverProfiles.saveAndActivate(payment, slipProvider, receiverProfiles.snapshot(payment));
+    if (sharedTenant) payment.slipProvider = currentlySelectedProvider;
+
     await store.save();
-    req.flash('success', 'บันทึกข้อมูลบัญชีรับเงินแล้ว');
-    res.redirect('/admin/topups');
+    req.flash('success', `บันทึกข้อมูลบัญชีรับเงินสำหรับ ${slipProvider === 'easyslip' ? 'EasySlip' : slipProvider === 'slipcheck' ? 'SlipCheck' : slipProvider === 'rdcw' ? 'SlipRDCW' : 'Slip2Go'} แล้ว`);
+    res.redirect(`/admin/topups?tab=bank&receiverProvider=${slipProvider}`);
   }));
 });
 

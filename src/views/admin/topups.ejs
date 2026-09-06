@@ -248,6 +248,7 @@
   <!-- ========================================== -->
   <div id="topup-tab-content-bank" class="topup-tab-content hidden space-y-6">
     <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+      <input type="hidden" name="receiverProvider" value="<%= receiverProvider %>" />
 
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
       <input type="hidden" name="truemoneyPhone" value="<%= payment.truemoneyPhone || '' %>" />
@@ -270,14 +271,14 @@
             <h3 class="font-bold text-sm">ค่ายที่ใช้ตรวจสลิป</h3>
             <p class="text-[11px] text-[var(--text-4)]">บัญชีรับเงินด้านล่างเป็นของร้านนี้ ใช้กับค่ายที่เลือกได้โดยไม่ปนกับร้านอื่น</p>
           </div>
-          <a href="/admin/easyslip-usage" class="text-xs font-bold text-[var(--gold)]">เลือกค่าย / กรอก API →</a>
+          <a href="/admin/easyslip-usage" class="text-xs font-bold text-[var(--gold)]">กรอก API ของค่าย →</a>
         </div>
         <% const receiverProviders = [['easyslip','⚡','EasySlip'],['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go']]; %>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
-          <% receiverProviders.forEach(item => { const activeReceiverProvider = payment.slipProvider === item[0]; %>
-            <a href="/admin/easyslip-usage#provider-settings-<%= item[0] %>" class="rounded-xl border-2 p-3 transition <%= activeReceiverProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
+          <% receiverProviders.forEach(item => { const activeReceiverProvider = payment.slipProvider === item[0]; const editingProvider = receiverProvider === item[0]; %>
+            <a href="/admin/topups?tab=bank&receiverProvider=<%= item[0] %>" class="rounded-xl border-2 p-3 transition <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
               <div class="text-lg"><%= item[1] %></div><div class="text-xs font-bold"><%= item[2] %></div>
-              <div class="text-[10px] mt-1 <%= activeReceiverProvider ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= activeReceiverProvider ? 'กำลังใช้งาน' : 'กดเพื่อตั้งค่า' %></div>
+              <div class="text-[10px] mt-1 <%= activeReceiverProvider ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= activeReceiverProvider ? 'กำลังใช้งาน' : (editingProvider ? 'กำลังกรอกข้อมูล' : 'กดเพื่อตั้งค่า') %></div>
             </a>
           <% }) %>
         </div>
@@ -292,20 +293,20 @@
         <div class="grid sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เบอร์โทรศัพท์ หรือ เลขประจำตัวประชาชนพร้อมเพย์</label>
-            <input name="promptpayId" value="<%= payment.promptpayId %>" placeholder="เช่น 0812345678 หรือ 1234567890123" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+            <input name="promptpayId" value="<%= receiverPayment.promptpayId %>" placeholder="เช่น 0812345678 หรือ 1234567890123" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
           </div>
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลือกพร้อมเพย์ *</label>
-            <select name="promptpayBankCode" <%= payment.promptpayId ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
+            <select name="promptpayBankCode" <%= receiverPayment.promptpayId ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
               <option value="">-- เลือกธนาคารพร้อมเพย์ --</option>
               <% banks.forEach(bank => { %>
-                <option value="<%= bank.code %>" <%= payment.promptpayBankCode === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
+                <option value="<%= bank.code %>" <%= receiverPayment.promptpayBankCode === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
               <% }) %>
             </select>
           </div>
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์</label>
-            <input name="promptpayName" value="<%= payment.promptpayName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
+            <input name="promptpayName" value="<%= receiverPayment.promptpayName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
           </div>
         </div>
 
@@ -313,9 +314,9 @@
           <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code พร้อมเพย์ (ทางเลือก)</label>
           <p class="text-[11px] text-[var(--text-4)] mb-2">หากไม่แนบรูป ระบบจะคำนวณและสร้าง QR Code พร้อมเพย์จากเบอร์ให้อัตโนมัติ</p>
 
-          <% if (payment.promptpayQrImage) { %>
+          <% if (receiverPayment.promptpayQrImage) { %>
             <div class="flex items-center gap-3 mb-3 bg-[var(--card)] p-2.5 rounded-xl border border-[var(--border)] max-w-sm">
-              <img src="<%= payment.promptpayQrImage %>" class="w-20 h-20 object-contain rounded-lg bg-white p-1" alt="QR พร้อมเพย์" />
+              <img src="<%= receiverPayment.promptpayQrImage %>" class="w-20 h-20 object-contain rounded-lg bg-white p-1" alt="QR พร้อมเพย์" />
               <label class="flex items-center gap-2 text-xs text-rose-400 cursor-pointer">
                 <input type="checkbox" name="removePromptpayQrImage" class="accent-rose-500" /> ลบรูปปัจจุบัน
               </label>
@@ -328,7 +329,7 @@
       <!-- Section 2: Bank Transfer -->
       <%
         const otherBanks = banks;
-        const primaryBank = banks.find(b => b.nameTh === payment.bankName);
+        const primaryBank = banks.find(b => b.nameTh === receiverPayment.bankName);
       %>
       <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
         <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
@@ -352,12 +353,12 @@
 
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลขที่บัญชีธนาคาร</label>
-            <input name="bankAccountNumber" value="<%= payment.bankAccountNumber %>" placeholder="เช่น 123-4-56789-0" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+            <input name="bankAccountNumber" value="<%= receiverPayment.bankAccountNumber %>" placeholder="เช่น 123-4-56789-0" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
           </div>
 
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีธนาคาร</label>
-            <input name="bankAccountName" value="<%= payment.bankAccountName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
+            <input name="bankAccountName" value="<%= receiverPayment.bankAccountName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
           </div>
         </div>
 
@@ -365,9 +366,9 @@
           <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code บัญชีธนาคาร (ทางเลือก)</label>
           <p class="text-[11px] text-[var(--text-4)] mb-2">ใช้แสดงเมื่อลูกค้าเลือกชำระผ่านช่องทางบัญชีธนาคาร</p>
 
-          <% if (payment.bankQrImage) { %>
+          <% if (receiverPayment.bankQrImage) { %>
             <div class="flex items-center gap-3 mb-3 bg-[var(--card)] p-2.5 rounded-xl border border-[var(--border)] max-w-sm">
-              <img src="<%= payment.bankQrImage %>" class="w-20 h-20 object-contain rounded-lg bg-white p-1" alt="QR ธนาคาร" />
+              <img src="<%= receiverPayment.bankQrImage %>" class="w-20 h-20 object-contain rounded-lg bg-white p-1" alt="QR ธนาคาร" />
               <label class="flex items-center gap-2 text-xs text-rose-400 cursor-pointer">
                 <input type="checkbox" name="removeBankQrImage" class="accent-rose-500" /> ลบรูปปัจจุบัน
               </label>
@@ -379,7 +380,7 @@
 
       <div class="pt-2">
         <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
-          💾 บันทึกการตั้งค่าพร้อมเพย์ & บัญชีธนาคาร
+          💾 บันทึกและใช้ข้อมูลของ <%= ({easyslip:'EasySlip',slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go'})[receiverProvider] %>
         </button>
       </div>
 
