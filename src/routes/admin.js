@@ -14,10 +14,8 @@ const rdcwSlip = require('../services/rdcw-slip');
 const { effectiveSlipConfig } = require('../services/slip-config');
 const receiverProfiles = require('../services/receiver-profiles');
 const theme = require('../services/theme');
-const discordBot = require('../services/discord-bot');
 const topupsService = require('../services/topups');
-const licensePlansService = require('../services/license-plans');
-const { MAIN_SITE_URL, MAIN_DOMAIN } = require('../middleware/tenant');
+const { getCloudUrl } = require('../services/cloud-url');
 const { requireAdmin } = require('../middleware/auth');
 
 const bannerUpload = multer({
@@ -152,7 +150,7 @@ router.get('/', (req, res) => {
     // the main site's shops directory, stashed on req by that middleware.
     shopExpiresAt: req.tenantShop ? req.tenantShop.expiresAt : null,
     shopName: req.tenantShop ? req.tenantShop.name : null,
-    shopRenewUrl: MAIN_SITE_URL ? `${MAIN_SITE_URL}/my-shops` : null,
+    shopRenewUrl: `${getCloudUrl()}/my-shops`,
   });
 });
 
@@ -1378,107 +1376,6 @@ router.post('/minigame/plays/:id/deliver', async (req, res) => {
     await store.save();
   }
   res.redirect('/admin/minigame');
-});
-
-// ---------- License plans (sell rental keys) ----------
-// Only exists on the seller's own shop, never on a rented deployment
-// (LICENSE_GATE=on) — a customer must not be able to resell this system.
-router.use('/license-plans', (req, res, next) => {
-  if (license.isGateOn()) return res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบหน้านี้' });
-  next();
-});
-
-router.get('/license-plans', (req, res) => {
-  const sales = store.data.licenseSales.slice(0, 50).map(sale => {
-    const verified = license.isEnabled() ? license.verifyKey(sale.key) : {};
-    return { ...sale, exp: verified.exp || null };
-  });
-  // Shops created via /start (the direct-purchase flow, tracked separately
-  // from the licenseSales/key system above) — each one's own expiresAt is
-  // the real source of truth for when that customer's rented site expires.
-  const rentedShops = [...store.data.shops].sort((a, b) => (a.expiresAt || 0) - (b.expiresAt || 0));
-  res.render('admin/license-plans', {
-    title: 'ขายคีย์เช่าเว็บ', active: 'license-plans',
-    plans: store.data.licensePlans,
-    sales,
-    rentedShops,
-    mainDomain: MAIN_DOMAIN,
-    licenseEnabled: license.isEnabled(),
-    discordSettings: store.data.settings.discord,
-    discordConfigured: discordBot.isConfigured(),
-    discordReady: discordBot.isReady(),
-  });
-});
-
-// ---------- Discord bot (rent-website notifications + ticket system) ----------
-// Bot token itself is DISCORD_BOT_TOKEN (env var, Railway) — only
-// non-secret channel/role IDs are editable from here.
-router.post('/discord/settings', async (req, res) => {
-  store.data.settings.discord = {
-    enabled: req.body.enabled === 'on',
-    notifyChannelId: (req.body.notifyChannelId || '').trim(),
-    ticketPanelChannelId: (req.body.ticketPanelChannelId || '').trim(),
-    ticketCategoryId: (req.body.ticketCategoryId || '').trim(),
-    ticketLogChannelId: (req.body.ticketLogChannelId || '').trim(),
-    supportRoleId: (req.body.supportRoleId || '').trim(),
-  };
-  await store.save();
-  req.flash('success', 'บันทึกการตั้งค่า Discord แล้ว');
-  res.redirect('/admin/license-plans');
-});
-
-router.post('/discord/post-ticket-panel', async (req, res) => {
-  try {
-    await discordBot.postTicketPanel();
-    req.flash('success', 'โพสต์ปุ่มเปิดตั๋วแล้ว');
-  } catch (err) {
-    req.flash('error', err.message || 'โพสต์ไม่สำเร็จ');
-  }
-  res.redirect('/admin/license-plans');
-});
-
-// Permanently deletes a rented shop: its entire tenant dataset (products,
-// orders, users, wallet, settings) plus its entry in this list. Irreversible
-// — the view requires typing the shop's name to confirm before submitting.
-// Uploaded media files (product images etc.) are not swept up here, since
-// they live in a shared media store with no reliable per-tenant index.
-router.post('/rented-shops/:id/delete', async (req, res) => {
-  const shop = store.data.shops.find(s => s.id === req.params.id);
-  if (!shop) {
-    req.flash('error', 'ไม่พบร้านนี้');
-    return res.redirect('/admin/license-plans');
-  }
-  await store.deleteTenantDb(shop.id);
-  store.data.shops = store.data.shops.filter(s => s.id !== shop.id);
-  await store.save();
-  req.flash('success', `ลบร้าน "${shop.name}" แล้ว`);
-  res.redirect('/admin/license-plans');
-});
-
-router.post('/license-plans', async (req, res) => {
-  const result = await licensePlansService.createPlan(req.body);
-  if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/license-plans'); }
-  req.flash('success', 'เพิ่มแพ็กเกจแล้ว');
-  res.redirect('/admin/license-plans');
-});
-
-router.post('/license-plans/:id/edit', async (req, res) => {
-  const result = await licensePlansService.editPlan(req.params.id, req.body);
-  if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/license-plans'); }
-  req.flash('success', 'แก้ไขแพ็กเกจแล้ว');
-  res.redirect('/admin/license-plans');
-});
-
-router.post('/license-plans/:id/toggle', async (req, res) => {
-  await licensePlansService.togglePlan(req.params.id);
-  res.redirect('/admin/license-plans');
-});
-
-router.post('/license-plans/:id/delete', async (req, res) => {
-  const result = await licensePlansService.deletePlan(req.params.id);
-  if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/license-plans'); }
-  req.flash('success', 'ลบแพ็กเกจแล้ว');
-  res.redirect('/admin/license-plans');
 });
 
 // ---------- Announcements ----------

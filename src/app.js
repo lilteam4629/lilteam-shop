@@ -14,8 +14,6 @@ const accountRoutes = require('./routes/account');
 const minigameRoutes = require('./routes/minigame');
 const adminRoutes = require('./routes/admin');
 const licenseRoutes = require('./routes/license');
-const rentWebsiteRoutes = require('./routes/rent-website');
-const tenantRoutes = require('./routes/tenant');
 const internalApiRoutes = require('./routes/internal-api');
 const { tenantResolver, MAIN_DOMAIN } = require('./middleware/tenant');
 const license = require('./services/license');
@@ -144,11 +142,6 @@ app.use((req, res, next) => {
     success: req.flash('success'),
     error: req.flash('error'),
   };
-  // The reseller system (/rent-website) only exists on YOUR OWN main shop.
-  // Rented deployments (LICENSE_GATE=on) never get it, and neither does a
-  // multi-tenant shop's own subdomain (req.tenantShop) — otherwise a shop
-  // you rented out could turn around and "open a new shop" itself.
-  res.locals.rentWebsiteEnabled = !license.isGateOn() && !req.tenantShop;
   // The EasySlip usage/quota page reads the ONE shared EASYSLIP_API_KEY
   // (your own EasySlip account), not anything per-tenant — showing it on a
   // rented shop's own subdomain would leak your account's credit balance
@@ -169,13 +162,8 @@ app.use((req, res, next) => {
 // ever claim that slug even though routing happens at nginx now.
 app.use('/internal/api', internalApiRoutes);
 
-// /start and /my-shops (opening/renewing a multi-tenant shop) only make
-// sense on the MAIN site — a rented shop's own subdomain shouldn't be able
-// to turn around and open another shop from inside itself.
-app.use('/', (req, res, next) => {
-  if (req.tenantShop) return next();
-  tenantRoutes(req, res, next);
-});
+// Old rental bookmarks lead to Cloud; all rental writes happen there.
+app.use(require('./middleware/cloud-redirects'));
 app.use('/', licenseRoutes);
 app.use((req, res, next) => {
   if (!license.isGateOn()) return next();
@@ -190,12 +178,6 @@ app.use('/', authRoutes);
 app.use('/cart', cartRoutes);
 app.use('/account', accountRoutes);
 app.use('/minigame', minigameRoutes);
-if (!license.isGateOn()) {
-  app.use('/rent-website', (req, res, next) => {
-    if (req.tenantShop) return next();
-    rentWebsiteRoutes(req, res, next);
-  });
-}
 app.use('/admin', adminRoutes);
 
 app.use((req, res) => {

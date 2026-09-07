@@ -9,6 +9,8 @@ public/uploads/media/
 *.zip
 *.pem
 *.key
+.migration/
+scripts/prepare-cloud-migration.js
 public/uploads/slips/*
 !public/uploads/slips/.gitkeep
 public/uploads/banner/*

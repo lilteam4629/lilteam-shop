@@ -10,6 +10,7 @@
 // set, this middleware does nothing and every request behaves exactly as
 // it always has — safe to deploy before DNS is finished.
 const store = require('../data/store');
+const { getCloudUrl } = require('../services/cloud-url');
 
 function getMainDomain(req) {
   if (process.env.MAIN_DOMAIN && process.env.MAIN_DOMAIN.trim()) {
@@ -81,7 +82,7 @@ async function tenantResolver(req, res, next) {
   }
 
   if (shop.expiresAt && Date.now() > shop.expiresAt) {
-    const mainUrl = MAIN_SITE_URL || `${req.protocol}://${req.get('host')}`;
+    const mainUrl = getCloudUrl();
     return res.status(402).send(
       `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">` +
       `<title>ร้านหมดอายุ</title><style>body{font-family:sans-serif;background:#100e08;color:#f3ecd8;display:flex;align-items:center;` +

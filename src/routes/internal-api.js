@@ -55,6 +55,8 @@ router.use((req, res, next) => {
   next();
 });
 
+router.use(require('./cloud-management-api'));
+
 function publicUser(user) {
   return { id: user.id, username: user.username, email: user.email, walletBalance: user.walletBalance };
 }
