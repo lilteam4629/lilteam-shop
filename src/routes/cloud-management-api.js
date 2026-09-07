@@ -72,7 +72,11 @@ router.post('/admin/discord/post-ticket-panel', async (req, res) => {
 router.get('/payment-info', (req, res) => {
   const p = store.data.settings.payment || {};
   res.json({ ok: true, payment: { promptpayId: p.promptpayId || '', promptpayName: p.promptpayName || '',
-    bankName: p.bankName || '', bankAccount: p.bankAccountNumber || '', bankAccountName: p.bankAccountName || '' } });
+    promptpayQrImage: p.promptpayQrImage || null, bankName: p.bankName || '', bankAccount: p.bankAccountNumber || '',
+    bankAccountNumber: p.bankAccountNumber || '', bankAccountName: p.bankAccountName || '', bankQrImage: p.bankQrImage || null,
+    truemoneyEnabled: p.truemoneyEnabled !== false && Boolean(p.truemoneyPhone),
+    truemoneyPhone: p.truemoneyEnabled !== false && Boolean(p.truemoneyPhone) ? 'configured' : '',
+    promptpayEnabled: p.slipProvider !== 'slipcheck' && p.slipProvider !== 'rdcw' && p.slipProvider !== 'slip2go' } });
 });
 router.get('/sales', (req, res) => {
   if (!activeUser(req.query.userId)) return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบ' });

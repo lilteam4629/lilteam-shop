@@ -22,6 +22,9 @@ const recaptcha = require('../services/recaptcha');
 const provisioning = require('../services/shop-provisioning');
 const accountRoutes = require('./account');
 const topupsService = require('../services/topups');
+const truemoney = require('../services/truemoney');
+const webhook = require('../services/webhook');
+const discordBot = require('../services/discord-bot');
 const licensePlansService = require('../services/license-plans');
 const { getShopUrl, MAIN_SITE_URL } = require('../middleware/tenant');
 
@@ -30,6 +33,7 @@ const upload = multer({
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype) && file.mimetype !== 'image/svg+xml'),
 });
+const truemoneyRedemptionLocks = new Set();
 
 router.use(express.json());
 
@@ -196,6 +200,87 @@ router.post('/wallet/topup', (req, res) => {
     if (!attached.ok) return res.status(400).json({ error: attached.error, request: created.request });
     res.json({ ok: true, request: attached.request });
   });
+});
+
+router.get('/wallet/topups/:id', (req, res) => {
+  const user = findUserById(req.query.userId);
+  const request = user && store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
+  if (!request) return res.status(404).json({ error: 'ไม่พบคำขอเติมเงิน' });
+  const payment = store.data.settings.payment || {};
+  res.json({ ok: true, request, payment: {
+    promptpayId: payment.promptpayId || '', promptpayName: payment.promptpayName || '',
+    promptpayQrImage: payment.promptpayQrImage || null, bankName: payment.bankName || '',
+    bankAccountNumber: payment.bankAccountNumber || '', bankAccountName: payment.bankAccountName || '',
+    bankQrImage: payment.bankQrImage || null,
+  }, automaticSlipCheck: payment.slipProvider !== 'none' });
+});
+
+router.get('/wallet/topups/:id/slip', async (req, res, next) => {
+  try {
+    const user = findUserById(req.query.userId);
+    const request = user && store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
+    if (!request || !request.slipStorageId) return res.sendStatus(404);
+    const media = await store.getPrivateMedia(request.slipStorageId);
+    if (!media) return res.sendStatus(404);
+    res.setHeader('Content-Type', media.file.metadata?.contentType || 'image/jpeg');
+    res.setHeader('Cache-Control', 'private, no-store');
+    media.stream.on('error', next).pipe(res);
+  } catch (error) { next(error); }
+});
+
+router.post('/wallet/topups/:id/slip', (req, res) => {
+  upload.single('slip')(req, res, async (err) => {
+    if (err || !req.file) return res.status(400).json({ error: 'กรุณาแนบไฟล์รูปสลิปขนาดไม่เกิน 5MB' });
+    const user = findUserById(req.body.userId);
+    if (!user) return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบก่อน' });
+    const result = await accountRoutes.attachSlipToTopupRequest({ requestId: req.params.id, user,
+      fileBuffer: req.file.buffer, fileOptions: { filename: req.file.originalname, contentType: req.file.mimetype },
+      origin: MAIN_SITE_URL || '' });
+    if (!result.ok) return res.status(400).json({ error: result.error });
+    res.json({ ok: true, request: result.request });
+  });
+});
+
+router.post('/wallet/truemoney', async (req, res) => {
+  const user = findUserById(req.body.userId);
+  if (!user) return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบก่อน' });
+  const payment = store.data.settings.payment || {};
+  if (!payment.truemoneyEnabled) return res.status(400).json({ error: 'ระบบเติมเงินผ่านซองของขวัญ TrueMoney ปิดให้บริการชั่วคราว' });
+  const receiverPhone = String(payment.truemoneyPhone || '').trim();
+  if (!/^\d{10}$/.test(receiverPhone)) return res.status(400).json({ error: 'ทางร้านยังไม่ได้ตั้งค่าเบอร์รับเงิน TrueMoney' });
+  const voucherInput = String(req.body.voucherLink || '').trim();
+  const voucherCode = truemoney.extractVoucherCode(voucherInput);
+  if (!voucherCode) return res.status(400).json({ error: 'กรุณากรอกลิงก์ซองของขวัญ TrueMoney ให้ถูกต้อง' });
+  if (truemoneyRedemptionLocks.has(voucherCode)) return res.status(409).json({ error: 'ซองนี้กำลังตรวจสอบ กรุณารอสักครู่' });
+  truemoneyRedemptionLocks.add(voucherCode);
+  try {
+    const reserved = await store.transact(data => {
+      data.truemoneyRedemptions ||= [];
+      if (data.walletTransactions.some(t => t.voucherCode === voucherCode) || data.truemoneyRedemptions.some(x => x.voucherCode === voucherCode && x.status !== 'failed')) return false;
+      data.truemoneyRedemptions.push({ voucherCode, userId: user.id, status: 'processing', createdAt: new Date().toISOString() });
+      return true;
+    });
+    if (!reserved) return res.status(409).json({ error: 'ซองของขวัญนี้ถูกใช้แล้วหรือกำลังตรวจสอบ' });
+    const result = await truemoney.redeemAngpao(voucherInput, receiverPhone);
+    if (!result.success || !Number.isFinite(result.amount) || result.amount <= 0) {
+      await store.transact(data => { const c=(data.truemoneyRedemptions||[]).find(x=>x.voucherCode===voucherCode&&x.status==='processing'); if(c){c.status='failed';c.message=result.message;c.finishedAt=new Date().toISOString();} });
+      return res.status(400).json({ error: result.message || 'ไม่สามารถรับเงินจากซองนี้ได้' });
+    }
+    const amount=result.amount, refCode='TM'+store.genId(6).toUpperCase(), id=store.genId(10), now=new Date().toISOString();
+    await store.transact(data => {
+      if (data.walletTransactions.some(t=>t.voucherCode===voucherCode)) throw new Error('ซองนี้ถูกบันทึกแล้ว');
+      const fresh=data.users.find(u=>u.id===user.id), claim=(data.truemoneyRedemptions||[]).find(x=>x.voucherCode===voucherCode&&x.status==='processing');
+      if(!fresh||!claim||claim.userId!==user.id) throw new Error('ไม่พบรายการรับซอง');
+      fresh.walletBalance=Math.round(((Number(fresh.walletBalance)||0)+amount)*100)/100;
+      data.walletTransactions.push({id:store.genId(10),userId:fresh.id,type:'topup',amount,voucherCode,note:`เติมเงินผ่านซอง TrueMoney (ผู้ส่ง: ${result.senderName||'ไม่ระบุ'}, อ้างอิง ${refCode})`,createdAt:now});
+      data.topupRequests.push({id,userId:fresh.id,amount,method:'truemoney_angpao',refCode,slipPath:null,slipCheck:{checked:true,verified:true,message:`ซองของขวัญสำเร็จ (ผู้ส่ง: ${result.senderName||'-'})`,provider:'truemoney_angpao'},status:'approved',createdAt:now,reviewedAt:now,reviewNote:'ซอง TrueMoney อนุมัติอัตโนมัติ'});
+      claim.status='approved';claim.amount=amount;claim.finishedAt=now;
+    });
+    webhook.notifyTopup({webhookUrl:payment.topupWebhookUrl,username:user.username,email:user.email,amount,refCode,method:'truemoney_angpao',slipUrl:null,autoApproved:true,adminUrl:null}).catch(()=>{});
+    discordBot.notifyNewTopup({username:user.username,amount,refCode,method:'ซองของขวัญ TrueMoney'}).catch(()=>{});
+    res.json({ok:true,requestId:id,amount});
+  } catch (err) { console.error('[Cloud TrueMoney]',err); res.status(500).json({error:'เกิดข้อผิดพลาดในการตรวจสอบซอง กรุณาลองใหม่'}); }
+  finally { truemoneyRedemptionLocks.delete(voucherCode); }
 });
 
 // ---------- Admin (rent-app's own /admin panel drives these) ----------
