@@ -624,26 +624,27 @@ router.get('/users', (req, res) => {
 });
 
 router.post('/users/:id/wallet', async (req, res) => {
-  const amount = parseInt(req.body.amount, 10);
+  const amount = Number(req.body.amount);
   const user = store.data.users.find(u => u.id === req.params.id);
   if (!user) {
     req.flash('error', 'ไม่พบสมาชิก');
     return res.redirect('/admin/users');
   }
-  if (!Number.isFinite(amount) || amount === 0) {
-    req.flash('error', 'กรุณาระบุจำนวนเงินที่ถูกต้อง');
+  if (!Number.isFinite(amount) || amount < 0) {
+    req.flash('error', 'กรุณาระบุยอดเงินใหม่ที่ถูกต้อง');
     return res.redirect('/admin/users');
   }
   await store.transact((data) => {
     const freshUser = data.users.find(u => u.id === req.params.id);
     if (!freshUser) throw new Error('ไม่พบสมาชิก');
-    freshUser.walletBalance = Math.max(0, (Number(freshUser.walletBalance) || 0) + amount);
+    const previousBalance = Number(freshUser.walletBalance) || 0;
+    freshUser.walletBalance = Math.round(amount * 100) / 100;
     data.walletTransactions.push({
-      id: store.genId(10), userId: freshUser.id, type: 'adjust', amount,
-      note: `ผู้ดูแลระบบปรับยอด (${req.body.note || 'ไม่มีหมายเหตุ'})`, createdAt: new Date().toISOString(),
+      id: store.genId(10), userId: freshUser.id, type: 'adjust', amount: Math.round((freshUser.walletBalance - previousBalance) * 100) / 100,
+      note: `ผู้ดูแลระบบกำหนดยอดเป็น ฿${freshUser.walletBalance.toLocaleString()} (${req.body.note || 'ไม่มีหมายเหตุ'})`, createdAt: new Date().toISOString(),
     });
   });
-  req.flash('success', 'ปรับยอดเงินสำเร็จ');
+  req.flash('success', `กำหนดยอดเงินเป็น ฿${amount.toLocaleString()} สำเร็จ`);
   res.redirect('/admin/users');
 });
 

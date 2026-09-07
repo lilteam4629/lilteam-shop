@@ -67,7 +67,7 @@
           <div class="border-t border-[var(--border)] bg-[var(--input)]/30 p-3 space-y-2">
             <!-- Adjust Balance Form -->
             <form action="/admin/users/<%= u.id %>/wallet" method="post" class="flex gap-2">
-              <input type="number" name="amount" required placeholder="ปรับยอด เช่น 100 หรือ -50" class="flex-1 rounded-xl border border-[var(--border-light)] bg-[var(--card)] px-3 py-1.5 text-xs outline-none focus:border-[var(--gold)]" />
+              <input type="number" name="amount" min="0" step="0.01" required placeholder="ใส่ยอดใหม่ เช่น 500" class="flex-1 rounded-xl border border-[var(--border-light)] bg-[var(--card)] px-3 py-1.5 text-xs outline-none focus:border-[var(--gold)]" />
               <button type="submit" class="rounded-xl bg-[var(--gold)] px-3 py-1.5 text-xs font-bold text-[var(--bg)] active:scale-95 transition whitespace-nowrap">
                 บันทึกยอด
               </button>
@@ -161,9 +161,9 @@
 
                     <!-- Adjust Balance Form -->
                     <form action="/admin/users/<%= u.id %>/wallet" method="post" class="inline-flex items-center gap-1">
-                      <input type="number" name="amount" required placeholder="+/-" class="w-16 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1 text-xs outline-none focus:border-[var(--gold)]" />
+                      <input type="number" name="amount" min="0" step="0.01" required placeholder="ยอดใหม่" class="w-20 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1 text-xs outline-none focus:border-[var(--gold)]" />
                       <button type="submit" class="bg-[var(--gold)] text-[var(--bg)] font-bold px-2 py-1 rounded-lg text-xs hover:bg-[var(--gold-hover)] transition" title="ปรับยอดเงินในกระเป๋า">
-                        ปรับ
+                        ตั้งยอด
                       </button>
                     </form>
 
