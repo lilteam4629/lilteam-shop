@@ -289,11 +289,29 @@
     </div>
   <% } %>
 
+  <% if (isBulkImport) { %>
+    <p id="bulkImportProgress" class="hidden text-sm text-[var(--gold)]">⏳ กำลังอัปโหลดรูปและสร้างสินค้า — ไฟล์เยอะอาจใช้เวลาหลายนาที กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...</p>
+  <% } %>
   <div class="flex gap-3">
-    <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm"><%= isBulkImport ? '📁 นำเข้าและสร้างสินค้าทั้งหมด' : (product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า') %></button>
+    <button id="productFormSubmit" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm"><%= isBulkImport ? '📁 นำเข้าและสร้างสินค้าทั้งหมด' : (product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า') %></button>
     <a href="/admin/products" class="px-6 py-2 rounded-lg text-sm border border-[var(--border-light)] hover:bg-[var(--input)]">ยกเลิก</a>
   </div>
 </form>
+<% if (isBulkImport) { %>
+<script>
+  (function () {
+    const form = document.querySelector('form[action="/admin/products/bulk-import"]');
+    const btn = document.getElementById('productFormSubmit');
+    const progress = document.getElementById('bulkImportProgress');
+    if (!form || !btn || !progress) return;
+    form.addEventListener('submit', function () {
+      btn.disabled = true;
+      btn.textContent = 'กำลังนำเข้า...';
+      progress.classList.remove('hidden');
+    });
+  })();
+</script>
+<% } %>
 
 <script>
   (function () {

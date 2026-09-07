@@ -77,8 +77,23 @@ function safeExternalUrl(value) {
   return /^https?:\/\//i.test(url) ? url.slice(0, 1000) : '';
 }
 
+// Firing all uploads (up to 60, 8MB each) at R2 simultaneously saturates the
+// VPS's outbound bandwidth and can make a bulk import take far longer than
+// running a handful at a time — a handful of overlapping requests keeps the
+// connection saturated without the pileup that made large batches feel stuck.
+const BULK_UPLOAD_CONCURRENCY = 6;
+
 async function persistUploadedFiles(files) {
-  return Promise.all((files || []).map(file => store.saveMedia(file.buffer, file.originalname, file.mimetype)));
+  const results = new Array(files.length);
+  let next = 0;
+  async function worker() {
+    while (next < files.length) {
+      const i = next++;
+      results[i] = await store.saveMedia(files[i].buffer, files[i].originalname, files[i].mimetype);
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(BULK_UPLOAD_CONCURRENCY, files.length) }, worker));
+  return results;
 }
 
 // ---------- Dashboard ----------
