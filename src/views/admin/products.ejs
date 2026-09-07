@@ -78,6 +78,9 @@
                     <a href="/admin/products/<%= p.id %>/edit"><%= p.title %></a>
                   </div>
                   <div class="text-[11px] text-[var(--text-4)] font-mono truncate">slug: <%= p.slug %></div>
+                  <% if (p.internalNote) { %>
+                    <div class="text-[11px] text-[var(--text-3)] truncate" title="หมายเหตุภายใน (แอดมินเห็นเท่านั้น)">📝 <%= p.internalNote %></div>
+                  <% } %>
                 </div>
               </div>
             </td>

@@ -116,6 +116,15 @@
 
 
 
+  <% if (!isBulkImport) { %>
+  <div>
+    <label class="block text-sm mb-1 text-[var(--text-3)]">หมายเหตุภายใน (แอดมินเห็นเท่านั้น ลูกค้าไม่เห็น)</label>
+    <input name="internalNote" value="<%= product ? (product.internalNote || '') : '' %>" placeholder="เช่น ชื่อไฟล์รูปต้นฉบับ หรือโน้ตอื่นๆ สำหรับจำ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+  </div>
+  <% } else { %>
+    <p class="text-xs text-[var(--text-4)]">💡 ระบบจะเก็บชื่อไฟล์รูปต้นฉบับไว้เป็นหมายเหตุภายในให้อัตโนมัติทุกชิ้น (แอดมินเห็นเท่านั้น) — ดูได้ที่หน้ารายการสินค้า</p>
+  <% } %>
+
   <div>
     <label class="block text-sm mb-1 text-[var(--text-3)]">รายละเอียดสั้น (แสดงในการ์ดสินค้า)</label>
     <textarea name="description" rows="2" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= product ? product.description : '' %></textarea>

@@ -288,6 +288,9 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     purchaseActionUrl: safeExternalUrl(body.purchaseActionUrl),
     apiProvider: body.apiProvider === 'byshop' ? 'byshop' : (body.apiProvider === 'custom' ? 'custom' : 'none'),
     apiProductId: (body.apiProductId || '').trim(),
+    // Admin-only — never rendered on any customer-facing page. Useful for
+    // things like the original filename behind a renamed product code.
+    internalNote: (body.internalNote || '').trim(),
   };
 }
 
@@ -366,6 +369,7 @@ router.post('/products/bulk-import', (req, res) => {
       const sharedFields = parseProductBody(req.body, [], []);
       delete sharedFields.title;
       delete sharedFields.images;
+      delete sharedFields.internalNote;
 
       const jobId = req.body.jobId;
       setBulkImportProgress(jobId, 0, req.files.length);
@@ -393,6 +397,10 @@ router.post('/products/bulk-import', (req, res) => {
         created.push({
           id: store.genId(8), slug: slugify(title) + '-' + store.genId(4),
           ...sharedFields, title, images: [result.url],
+          // Original filename, kept as an admin-only reference regardless of
+          // naming mode — handy for tying a renamed product code back to
+          // whatever the source image was actually named.
+          internalNote: file.originalname,
           status: 'active', createdAt: now,
         });
       });
