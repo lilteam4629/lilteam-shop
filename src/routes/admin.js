@@ -469,6 +469,16 @@ router.post('/products/:id/delete', async (req, res) => {
   res.redirect('/admin/products');
 });
 
+router.post('/products/set-status-all', async (req, res) => {
+  const status = req.body.status === 'hidden' ? 'hidden' : 'active';
+  store.data.products.forEach(p => { p.status = status; });
+  await store.save();
+  req.flash('success', status === 'active'
+    ? `เปิดขายสินค้าทั้งหมด ${store.data.products.length} รายการแล้ว`
+    : `ซ่อนสินค้าทั้งหมด ${store.data.products.length} รายการแล้ว`);
+  res.redirect('/admin/products');
+});
+
 // Irreversible — wipes every product AND its stock in one go. Gated by a
 // typed confirmation phrase on the products page (see products.ejs) since
 // there's no per-item undo once store.save() commits this. Past orders are
