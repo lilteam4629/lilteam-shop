@@ -2,6 +2,7 @@
 <form action="<%= isBulkImport ? '/admin/products/bulk-import' : (product ? `/admin/products/${product.id}/edit` : '/admin/products/new') %>" method="post" enctype="multipart/form-data"
   class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-3xl space-y-4">
   <% if (isBulkImport) { %>
+    <input type="hidden" name="jobId" id="bulkImportJobId" />
     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm text-[var(--text-2)]">
       📁 เลือกโฟลเดอร์รูปด้านล่าง — ระบบจะสร้าง <b>1 สินค้าต่อ 1 รูป</b> โดยใช้ <b>ชื่อไฟล์เป็นชื่อสินค้า</b> อัตโนมัติ
       ส่วนค่าอื่นๆ ทั้งหมดในฟอร์มนี้ (ราคา, หมวดหมู่, เงื่อนไข ฯลฯ) จะถูกใช้ร่วมกันกับทุกสินค้าที่สร้าง — แก้ไขแต่ละชิ้นแยกทีหลังได้ตามปกติ
@@ -290,7 +291,7 @@
   <% } %>
 
   <% if (isBulkImport) { %>
-    <p id="bulkImportProgress" class="hidden text-sm text-[var(--gold)]">⏳ กำลังอัปโหลดรูปและสร้างสินค้า — ไฟล์เยอะอาจใช้เวลาหลายนาที กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...</p>
+    <p id="bulkImportProgress" class="hidden text-sm text-[var(--gold)]">⏳ กำลังอัปโหลดรูปและสร้างสินค้า — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...</p>
   <% } %>
   <div class="flex gap-3">
     <button id="productFormSubmit" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm"><%= isBulkImport ? '📁 นำเข้าและสร้างสินค้าทั้งหมด' : (product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า') %></button>
@@ -303,11 +304,29 @@
     const form = document.querySelector('form[action="/admin/products/bulk-import"]');
     const btn = document.getElementById('productFormSubmit');
     const progress = document.getElementById('bulkImportProgress');
-    if (!form || !btn || !progress) return;
+    const jobIdInput = document.getElementById('bulkImportJobId');
+    if (!form || !btn || !progress || !jobIdInput) return;
     form.addEventListener('submit', function () {
       btn.disabled = true;
-      btn.textContent = 'กำลังนำเข้า...';
       progress.classList.remove('hidden');
+      const jobId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
+      jobIdInput.value = jobId;
+      let lastDone = -1;
+      const poll = setInterval(function () {
+        fetch('/admin/products/bulk-import/progress/' + jobId)
+          .then(function (r) { return r.json(); })
+          .then(function (data) {
+            if (!data.ok) return;
+            if (data.done === lastDone) return;
+            lastDone = data.done;
+            btn.textContent = 'กำลังนำเข้า... (' + data.done + '/' + data.total + ')';
+            progress.textContent = '⏳ อัปโหลดแล้ว ' + data.done + ' จาก ' + data.total + ' รูป — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...';
+          })
+          .catch(function () {});
+      }, 1000);
+      // The page navigates away on success/failure (a normal form POST
+      // redirect), which naturally stops this interval along with it — no
+      // explicit cleanup needed.
     });
   })();
 </script>

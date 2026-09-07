@@ -83,18 +83,42 @@ function safeExternalUrl(value) {
 // connection saturated without the pileup that made large batches feel stuck.
 const BULK_UPLOAD_CONCURRENCY = 6;
 
-async function persistUploadedFiles(files) {
+async function persistUploadedFiles(files, onProgress) {
   const results = new Array(files.length);
   let next = 0;
+  let done = 0;
   async function worker() {
     while (next < files.length) {
       const i = next++;
       results[i] = await store.saveMedia(files[i].buffer, files[i].originalname, files[i].mimetype);
+      done += 1;
+      if (onProgress) onProgress(done, files.length);
     }
   }
   await Promise.all(Array.from({ length: Math.min(BULK_UPLOAD_CONCURRENCY, files.length) }, worker));
   return results;
 }
+
+// Polled by the bulk-import page while its one big form submission is still
+// in flight (a normal page load can't otherwise show progress mid-request).
+// Keyed by a client-generated jobId; entries are small and self-expiring, so
+// a plain in-memory object is fine — nothing here needs to survive a restart.
+const bulkImportJobs = new Map();
+function setBulkImportProgress(jobId, done, total) {
+  if (!jobId) return;
+  bulkImportJobs.set(jobId, { done, total, updatedAt: Date.now() });
+}
+setInterval(() => {
+  const staleBefore = Date.now() - (10 * 60 * 1000);
+  for (const [jobId, job] of bulkImportJobs) {
+    if (job.updatedAt < staleBefore) bulkImportJobs.delete(jobId);
+  }
+}, 5 * 60 * 1000).unref();
+
+router.get('/products/bulk-import/progress/:jobId', (req, res) => {
+  const job = bulkImportJobs.get(req.params.jobId);
+  res.json(job ? { ok: true, done: job.done, total: job.total } : { ok: false });
+});
 
 // ---------- Dashboard ----------
 router.get('/', (req, res) => {
@@ -314,7 +338,10 @@ router.post('/products/bulk-import', (req, res) => {
       delete sharedFields.title;
       delete sharedFields.images;
 
-      const uploadedImages = await persistUploadedFiles(req.files);
+      const jobId = req.body.jobId;
+      setBulkImportProgress(jobId, 0, req.files.length);
+      const uploadedImages = await persistUploadedFiles(req.files, (done, total) => setBulkImportProgress(jobId, done, total));
+      bulkImportJobs.delete(jobId);
       const now = new Date().toISOString();
       const created = req.files.map((file, i) => {
         const title = file.originalname.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'สินค้าใหม่';
@@ -329,6 +356,7 @@ router.post('/products/bulk-import', (req, res) => {
       req.flash('success', `นำเข้าสินค้าแล้ว ${created.length} รายการ — แก้ไขแต่ละชิ้นแยกได้ตามปกติ`);
       res.redirect('/admin/products');
     } catch (saveError) {
+      bulkImportJobs.delete(req.body.jobId);
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
       res.redirect('/admin/products/bulk-import');
     }
