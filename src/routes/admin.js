@@ -322,11 +322,18 @@ router.get('/products/bulk-import', (req, res) => {
 
 router.post('/products/bulk-import', (req, res) => {
   bulkProductImageUpload.array('productImages', 60)(req, res, store.bindTenantContext(async (err) => {
+    // The bulk-import page normally splits a large folder into several small
+    // requests (see the inline script in product-form.ejs) so no single
+    // request risks tripping nginx's client_max_body_size — each of those
+    // calls sends ajax=1 and expects JSON back instead of a page redirect.
+    const isAjax = req.body && req.body.ajax === '1';
     if (err) {
+      if (isAjax) return res.status(400).json({ ok: false, error: 'อัปโหลดรูปไม่สำเร็จ (รูปละไม่เกิน 8MB)' });
       req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (สูงสุด 60 รูปต่อครั้ง รูปละไม่เกิน 8MB)');
       return res.redirect('/admin/products/bulk-import');
     }
     if (!req.files || !req.files.length) {
+      if (isAjax) return res.status(400).json({ ok: false, error: 'ไม่พบไฟล์รูปในคำขอนี้' });
       req.flash('error', 'ไม่พบรูปในโฟลเดอร์ที่เลือก กรุณาเลือกโฟลเดอร์ที่มีไฟล์รูปอยู่ข้างใน');
       return res.redirect('/admin/products/bulk-import');
     }
@@ -353,10 +360,12 @@ router.post('/products/bulk-import', (req, res) => {
       });
       store.data.products.push(...created);
       await store.save();
+      if (isAjax) return res.json({ ok: true, created: created.length });
       req.flash('success', `นำเข้าสินค้าแล้ว ${created.length} รายการ — แก้ไขแต่ละชิ้นแยกได้ตามปกติ`);
       res.redirect('/admin/products');
     } catch (saveError) {
       bulkImportJobs.delete(req.body.jobId);
+      if (isAjax) return res.status(500).json({ ok: false, error: 'บันทึกรูปสินค้าไม่สำเร็จ' });
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
       res.redirect('/admin/products/bulk-import');
     }

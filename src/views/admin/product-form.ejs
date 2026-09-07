@@ -304,29 +304,80 @@
     const form = document.querySelector('form[action="/admin/products/bulk-import"]');
     const btn = document.getElementById('productFormSubmit');
     const progress = document.getElementById('bulkImportProgress');
-    const jobIdInput = document.getElementById('bulkImportJobId');
-    if (!form || !btn || !progress || !jobIdInput) return;
-    form.addEventListener('submit', function () {
+    const folderInput = document.getElementById('bulkFolderInput');
+    if (!form || !btn || !progress || !folderInput) return;
+
+    // A single request carrying every selected image can trip nginx's
+    // client_max_body_size (default 1MB) long before it reaches this app —
+    // splitting into small chunks and sending them one at a time as plain
+    // AJAX calls keeps every individual request tiny, with no server/nginx
+    // config change required.
+    const MAX_CHUNK_BYTES = 700 * 1024;
+    const MAX_CHUNK_FILES = 10;
+
+    function chunkFiles(files) {
+      const chunks = [];
+      let current = [];
+      let currentBytes = 0;
+      files.forEach(function (file) {
+        if (current.length && (currentBytes + file.size > MAX_CHUNK_BYTES || current.length >= MAX_CHUNK_FILES)) {
+          chunks.push(current);
+          current = [];
+          currentBytes = 0;
+        }
+        current.push(file);
+        currentBytes += file.size;
+      });
+      if (current.length) chunks.push(current);
+      return chunks;
+    }
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      const files = Array.from(folderInput.files || []).filter(function (f) { return /^image\//.test(f.type); });
+      if (!files.length) {
+        alert('กรุณาเลือกโฟลเดอร์ที่มีไฟล์รูปอยู่ข้างใน');
+        return;
+      }
+      const chunks = chunkFiles(files);
+      const baseEntries = Array.from(new FormData(form).entries()).filter(function (entry) { return entry[0] !== 'productImages'; });
+
       btn.disabled = true;
       progress.classList.remove('hidden');
-      const jobId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2);
-      jobIdInput.value = jobId;
-      let lastDone = -1;
-      const poll = setInterval(function () {
-        fetch('/admin/products/bulk-import/progress/' + jobId)
-          .then(function (r) { return r.json(); })
-          .then(function (data) {
-            if (!data.ok) return;
-            if (data.done === lastDone) return;
-            lastDone = data.done;
-            btn.textContent = 'กำลังนำเข้า... (' + data.done + '/' + data.total + ')';
-            progress.textContent = '⏳ อัปโหลดแล้ว ' + data.done + ' จาก ' + data.total + ' รูป — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...';
+
+      let totalDone = 0;
+      let chunkIndex = 0;
+
+      function sendNextChunk() {
+        if (chunkIndex >= chunks.length) {
+          window.location.href = '/admin/products';
+          return;
+        }
+        const chunk = chunks[chunkIndex];
+        const data = new FormData();
+        baseEntries.forEach(function (entry) { data.append(entry[0], entry[1]); });
+        data.append('ajax', '1');
+        chunk.forEach(function (file) { data.append('productImages', file); });
+
+        btn.textContent = 'กำลังนำเข้า... (' + totalDone + '/' + files.length + ')';
+        progress.textContent = '⏳ อัปโหลดแล้ว ' + totalDone + ' จาก ' + files.length + ' รูป — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...';
+
+        fetch('/admin/products/bulk-import', { method: 'POST', body: data })
+          .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง' }; }); })
+          .then(function (result) {
+            if (!result.ok) throw new Error(result.error || 'นำเข้าไม่สำเร็จ');
+            totalDone += chunk.length;
+            chunkIndex += 1;
+            sendNextChunk();
           })
-          .catch(function () {});
-      }, 1000);
-      // The page navigates away on success/failure (a normal form POST
-      // redirect), which naturally stops this interval along with it — no
-      // explicit cleanup needed.
+          .catch(function (error) {
+            btn.disabled = false;
+            btn.textContent = '📁 นำเข้าและสร้างสินค้าทั้งหมด';
+            progress.textContent = '❌ ' + (error.message || 'นำเข้าไม่สำเร็จ') + ' — สร้างสำเร็จไปแล้ว ' + totalDone + ' รายการก่อนหน้านี้ (เช็คได้ที่หน้ารายการสินค้า) ถ้าจะกดนำเข้าซ้ำ ให้เอารูปที่สร้างสำเร็จแล้วออกจากโฟลเดอร์ก่อน ไม่งั้นจะได้สินค้าซ้ำ';
+          });
+      }
+
+      sendNextChunk();
     });
   })();
 </script>
