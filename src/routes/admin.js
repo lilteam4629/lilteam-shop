@@ -328,7 +328,8 @@ router.post('/products/bulk-import', (req, res) => {
     // calls sends ajax=1 and expects JSON back instead of a page redirect.
     const isAjax = req.body && req.body.ajax === '1';
     if (err) {
-      if (isAjax) return res.status(400).json({ ok: false, error: 'อัปโหลดรูปไม่สำเร็จ (รูปละไม่เกิน 8MB)' });
+      console.error('[bulk-import] upload rejected:', err);
+      if (isAjax) return res.status(400).json({ ok: false, error: `อัปโหลดรูปไม่สำเร็จ: ${err.message}` });
       req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (สูงสุด 60 รูปต่อครั้ง รูปละไม่เกิน 8MB)');
       return res.redirect('/admin/products/bulk-import');
     }
@@ -365,7 +366,8 @@ router.post('/products/bulk-import', (req, res) => {
       res.redirect('/admin/products');
     } catch (saveError) {
       bulkImportJobs.delete(req.body.jobId);
-      if (isAjax) return res.status(500).json({ ok: false, error: 'บันทึกรูปสินค้าไม่สำเร็จ' });
+      console.error('[bulk-import] failed:', saveError);
+      if (isAjax) return res.status(500).json({ ok: false, error: saveError.message || 'บันทึกรูปสินค้าไม่สำเร็จ' });
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
       res.redirect('/admin/products/bulk-import');
     }
