@@ -24,8 +24,51 @@
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
       <span>เพิ่มสินค้าใหม่</span>
     </a>
+
+    <% if (products.length) { %>
+    <button type="button" id="delete-all-products-btn" class="inline-flex items-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/50 border border-rose-500/40 text-rose-300 font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+      <span>ลบสินค้าทั้งหมด</span>
+    </button>
+    <% } %>
   </div>
 </div>
+
+<% if (products.length) { %>
+<div id="delete-all-products-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+  <div class="bg-[var(--card)] border border-rose-500/40 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+    <div class="flex items-center gap-3.5 mb-3">
+      <div class="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center shrink-0 text-xl font-bold">⚠️</div>
+      <h3 class="font-bold text-base text-[var(--text)]">ลบสินค้าทั้งหมด <%= products.length %> รายการ</h3>
+    </div>
+    <p class="text-sm text-[var(--text-3)] mb-4 leading-relaxed">
+      การลบนี้จะลบ<b>สินค้าทั้งหมด</b>และ<b>สต็อกสินค้าทั้งหมด</b>ในร้านทันที <b class="text-rose-400">กู้คืนไม่ได้</b> — คำสั่งซื้อเก่าของลูกค้ายังอยู่ตามปกติ ไม่ถูกลบ
+    </p>
+    <label class="block text-xs text-[var(--text-3)] mb-1">พิมพ์ <b class="font-mono text-rose-400">ลบสินค้าทั้งหมด</b> เพื่อยืนยัน</label>
+    <form action="/admin/products/delete-all" method="post">
+      <input name="confirmPhrase" id="delete-all-confirm-input" autocomplete="off" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm mb-4" placeholder="ลบสินค้าทั้งหมด" />
+      <div class="flex items-center justify-end gap-2.5">
+        <button type="button" id="delete-all-products-cancel" class="px-4 py-2 rounded-xl text-sm font-medium text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)] transition">ยกเลิก</button>
+        <button type="submit" id="delete-all-products-submit" disabled class="px-5 py-2 rounded-xl text-sm font-semibold bg-rose-600 text-white shadow-lg transition disabled:opacity-40 disabled:cursor-not-allowed">ลบทั้งหมด</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  (function () {
+    const openBtn = document.getElementById('delete-all-products-btn');
+    const modal = document.getElementById('delete-all-products-modal');
+    const cancelBtn = document.getElementById('delete-all-products-cancel');
+    const input = document.getElementById('delete-all-confirm-input');
+    const submitBtn = document.getElementById('delete-all-products-submit');
+    if (!openBtn || !modal) return;
+    const REQUIRED_PHRASE = 'ลบสินค้าทั้งหมด';
+    openBtn.addEventListener('click', function () { modal.classList.remove('hidden'); input.value = ''; submitBtn.disabled = true; input.focus(); });
+    cancelBtn.addEventListener('click', function () { modal.classList.add('hidden'); });
+    input.addEventListener('input', function () { submitBtn.disabled = input.value.trim() !== REQUIRED_PHRASE; });
+  })();
+</script>
+<% } %>
 
 <!-- Search & Filter Bar -->
 <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 mb-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
