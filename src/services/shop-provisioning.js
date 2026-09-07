@@ -45,7 +45,7 @@ const RESERVED_SLUGS = new Set([
 // module or the database directly, only this process does).
 const tenantActionLocks = new Set();
 
-async function provisionShop({ user, planId, shopName, adminUsername, adminPassword, recaptchaResponse, ip }) {
+async function provisionShop({ user, planId, shopName, adminUsername, adminPassword, recaptchaResponse, ip, skipWallet = false }) {
   if (tenantActionLocks.has(user.id)) {
     return { ok: false, error: 'ระบบกำลังดำเนินการรายการก่อนหน้า กรุณารอสักครู่' };
   }
@@ -67,7 +67,7 @@ async function provisionShop({ user, planId, shopName, adminUsername, adminPassw
     if (adminPassword.length < 8) {
       return { ok: false, error: 'รหัสผ่านแอดมินต้องมีอย่างน้อย 8 ตัวอักษร' };
     }
-    if (user.walletBalance < plan.price) {
+    if (!skipWallet && user.walletBalance < plan.price) {
       return { ok: false, error: 'ยอดเครดิตไม่พอ กรุณาเติมเงินก่อน' };
     }
 
@@ -77,9 +77,9 @@ async function provisionShop({ user, planId, shopName, adminUsername, adminPassw
     }
     slug = slug.toLowerCase();
 
-    user.walletBalance -= plan.price;
+    if (!skipWallet) user.walletBalance -= plan.price;
     if (plan.promo) plan.promoUsedCount = (plan.promoUsedCount || 0) + 1;
-    store.data.walletTransactions.push({
+    if (!skipWallet) store.data.walletTransactions.push({
       id: store.genId(10), userId: user.id, type: 'shop_purchase', amount: -plan.price,
       note: `เปิดร้านใหม่ "${shopName}" (${plan.days} วัน)`, createdAt: new Date().toISOString(),
     });
@@ -100,9 +100,9 @@ async function provisionShop({ user, planId, shopName, adminUsername, adminPassw
       });
     } catch (err) {
       store.data.shops = store.data.shops.filter(s => s.id !== shopId);
-      user.walletBalance += plan.price;
+      if (!skipWallet) user.walletBalance += plan.price;
       if (plan.promo && plan.promoUsedCount > 0) plan.promoUsedCount -= 1;
-      store.data.walletTransactions.push({
+      if (!skipWallet) store.data.walletTransactions.push({
         id: store.genId(10), userId: user.id, type: 'shop_purchase_refund', amount: plan.price,
         note: `คืนเครดิต — เปิดร้าน "${shopName}" ไม่สำเร็จ`, createdAt: new Date().toISOString(),
       });
@@ -123,7 +123,7 @@ async function provisionShop({ user, planId, shopName, adminUsername, adminPassw
   }
 }
 
-async function renewShop({ user, shopId, planId }) {
+async function renewShop({ user, shopId, planId, skipWallet = false }) {
   if (tenantActionLocks.has(user.id)) {
     return { ok: false, error: 'ระบบกำลังดำเนินการรายการก่อนหน้า กรุณารอสักครู่' };
   }
@@ -132,11 +132,11 @@ async function renewShop({ user, shopId, planId }) {
     const shop = store.data.shops.find(s => s.id === shopId && s.ownerId === user.id);
     const plan = store.data.licensePlans.find(p => p.id === planId && isPlanAvailable(p));
     if (!shop || !plan) return { ok: false, error: 'ไม่พบร้านหรือแพ็กเกจนี้' };
-    if (user.walletBalance < plan.price) return { ok: false, error: 'ยอดเครดิตไม่พอ กรุณาเติมเงินก่อน' };
+    if (!skipWallet && user.walletBalance < plan.price) return { ok: false, error: 'ยอดเครดิตไม่พอ กรุณาเติมเงินก่อน' };
 
-    user.walletBalance -= plan.price;
+    if (!skipWallet) user.walletBalance -= plan.price;
     if (plan.promo) plan.promoUsedCount = (plan.promoUsedCount || 0) + 1;
-    store.data.walletTransactions.push({
+    if (!skipWallet) store.data.walletTransactions.push({
       id: store.genId(10), userId: user.id, type: 'shop_renewal', amount: -plan.price,
       note: `ต่ออายุร้าน "${shop.name}" (${plan.days} วัน)`, createdAt: new Date().toISOString(),
     });

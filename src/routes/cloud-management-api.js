@@ -30,6 +30,11 @@ router.post('/auth/platform-admin', async (req, res, next) => {
     res.json({ ok: true, user: publicUser(user) });
   } catch (error) { next(error); } finally { managementLocks.delete(key); }
 });
+router.get('/legacy-cloud-eligibility', (req,res)=>{
+  const id=String(req.query.userId||'');
+  const eligible=store.data.shops.some(s=>s.ownerId===id)||store.data.licenseSales.some(s=>s.userId===id)||store.data.walletTransactions.some(t=>t.userId===id&&['shop_purchase','shop_renewal'].includes(t.type));
+  res.json({ok:true,eligible});
+});
 function verifiedSale(sale) {
   return { ...sale, exp: license.isEnabled() ? license.verifyKey(sale.key).exp || null : null };
 }

@@ -127,7 +127,8 @@ router.get('/plans', (req, res) => {
 
 // ---------- Shops ----------
 router.post('/shops', async (req, res) => {
-  const user = findUserById(req.body.userId);
+  const external = req.body.cloudUser;
+  const user = external && external.id ? { id: String(external.id), username: String(external.username || ''), email: String(external.email || ''), walletBalance: 0 } : findUserById(req.body.userId);
   if (!user) return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบก่อน' });
 
   const result = await provisioning.provisionShop({
@@ -137,14 +138,14 @@ router.post('/shops', async (req, res) => {
     adminUsername: req.body.adminUsername,
     adminPassword: req.body.adminPassword,
     recaptchaResponse: req.body.recaptchaResponse,
-    ip: req.ip,
+    ip: req.ip, skipWallet: Boolean(external),
   });
   if (!result.ok) return res.status(400).json({ error: result.error });
   res.json({ ok: true, ...result });
 });
 
 router.get('/shops', (req, res) => {
-  const user = findUserById(req.query.userId);
+  const user = req.query.cloudUserId ? { id: String(req.query.cloudUserId) } : findUserById(req.query.userId);
   if (!user) return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบก่อน' });
   const shops = store.data.shops
     .filter(s => s.ownerId === user.id)
@@ -154,9 +155,10 @@ router.get('/shops', (req, res) => {
 });
 
 router.post('/shops/:id/renew', async (req, res) => {
-  const user = findUserById(req.body.userId);
+  const external = req.body.cloudUser;
+  const user = external && external.id ? { id: String(external.id), username: String(external.username || ''), email: String(external.email || ''), walletBalance: 0 } : findUserById(req.body.userId);
   if (!user) return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบก่อน' });
-  const result = await provisioning.renewShop({ user, shopId: req.params.id, planId: req.body.planId });
+  const result = await provisioning.renewShop({ user, shopId: req.params.id, planId: req.body.planId, skipWallet: Boolean(external) });
   if (!result.ok) return res.status(400).json({ error: result.error });
   res.json({ ok: true, shop: result.shop });
 });
