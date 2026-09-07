@@ -351,6 +351,16 @@ router.post('/products/bulk-import', (req, res) => {
     // request risks tripping nginx's client_max_body_size — each of those
     // calls sends ajax=1 and expects JSON back instead of a page redirect.
     const isAjax = req.body && req.body.ajax === '1';
+    // multer/busboy decode multipart filename headers as Latin-1 per the
+    // HTTP spec, but browsers send them as UTF-8 bytes — any non-ASCII
+    // filename (Thai text, emoji, accents) comes through garbled unless
+    // it's round-tripped back through the encoding it was actually sent in.
+    // A no-op for plain ASCII filenames, so always safe to apply.
+    if (req.files) {
+      req.files.forEach((file) => {
+        file.originalname = Buffer.from(file.originalname, 'latin1').toString('utf8');
+      });
+    }
     if (err) {
       console.error('[bulk-import] upload rejected:', err);
       if (isAjax) return res.status(400).json({ ok: false, error: `อัปโหลดรูปไม่สำเร็จ: ${err.message}` });
