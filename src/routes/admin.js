@@ -83,6 +83,10 @@ function safeExternalUrl(value) {
 // connection saturated without the pileup that made large batches feel stuck.
 const BULK_UPLOAD_CONCURRENCY = 6;
 
+// Each result is { ok: true, url } or { ok: false, error } — one bad file
+// (corrupt image, mismatched extension, a transient R2 hiccup) no longer
+// aborts every other file in the same request; the caller decides what to
+// do with the ones that failed.
 async function persistUploadedFiles(files, onProgress) {
   const results = new Array(files.length);
   let next = 0;
@@ -90,13 +94,30 @@ async function persistUploadedFiles(files, onProgress) {
   async function worker() {
     while (next < files.length) {
       const i = next++;
-      results[i] = await store.saveMedia(files[i].buffer, files[i].originalname, files[i].mimetype);
+      try {
+        const url = await store.saveMedia(files[i].buffer, files[i].originalname, files[i].mimetype);
+        results[i] = { ok: true, url };
+      } catch (fileError) {
+        results[i] = { ok: false, error: fileError.message || String(fileError) };
+      }
       done += 1;
       if (onProgress) onProgress(done, files.length);
     }
   }
   await Promise.all(Array.from({ length: Math.min(BULK_UPLOAD_CONCURRENCY, files.length) }, worker));
   return results;
+}
+
+// For the single-product create/edit forms, which still want the original
+// all-or-nothing behavior (a handful of images, one request, no reason to
+// half-save a product) — turns persistUploadedFiles' per-file results back
+// into a plain URL array, or throws with every failure reason listed.
+function unwrapUploadResults(results) {
+  const failed = results.filter(r => !r.ok);
+  if (failed.length) {
+    throw new Error(failed.map(f => f.error).join('; '));
+  }
+  return results.map(r => r.url);
 }
 
 // Polled by the bulk-import page while its one big form submission is still
@@ -296,7 +317,7 @@ router.post('/products/new', (req, res) => {
       return res.redirect('/admin/products/new');
     }
     try {
-      const uploadedImages = await persistUploadedFiles(req.files);
+      const uploadedImages = unwrapUploadResults(await persistUploadedFiles(req.files));
       const fields = parseProductBody(req.body, uploadedImages);
       const product = {
         id: store.genId(8), slug: slugify(fields.title) + '-' + store.genId(4),
@@ -348,27 +369,41 @@ router.post('/products/bulk-import', (req, res) => {
 
       const jobId = req.body.jobId;
       setBulkImportProgress(jobId, 0, req.files.length);
-      const uploadedImages = await persistUploadedFiles(req.files, (done, total) => setBulkImportProgress(jobId, done, total));
+      const uploadResults = await persistUploadedFiles(req.files, (done, total) => setBulkImportProgress(jobId, done, total));
       bulkImportJobs.delete(jobId);
       // Titles chosen client-side (either straight from the filename, or an
       // incrementing product code like lilteam-001, lilteam-002, ... typed
       // once by the admin) — one entry per file, same order as productImages.
       const providedTitles = [].concat(req.body.productTitles || []);
       const now = new Date().toISOString();
-      const created = req.files.map((file, i) => {
+      // One bad file (corrupt image, mismatched extension, a transient R2
+      // hiccup) must not block every other product in this chunk — skip it
+      // and report it back so the whole folder can still finish importing.
+      const failed = [];
+      const created = [];
+      req.files.forEach((file, i) => {
+        const result = uploadResults[i];
+        if (!result.ok) {
+          failed.push({ filename: file.originalname, error: result.error });
+          return;
+        }
         const title = (providedTitles[i] && providedTitles[i].trim())
           || file.originalname.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim()
           || 'สินค้าใหม่';
-        return {
+        created.push({
           id: store.genId(8), slug: slugify(title) + '-' + store.genId(4),
-          ...sharedFields, title, images: [uploadedImages[i]],
+          ...sharedFields, title, images: [result.url],
           status: 'active', createdAt: now,
-        };
+        });
       });
       store.data.products.push(...created);
       await store.save();
-      if (isAjax) return res.json({ ok: true, created: created.length });
-      req.flash('success', `นำเข้าสินค้าแล้ว ${created.length} รายการ — แก้ไขแต่ละชิ้นแยกได้ตามปกติ`);
+      if (isAjax) return res.json({ ok: true, created: created.length, failed });
+      if (failed.length) {
+        req.flash('error', `นำเข้าสำเร็จ ${created.length} รายการ แต่มี ${failed.length} รูปที่ล้มเหลว: ${failed.map(f => f.filename).join(', ')}`);
+      } else {
+        req.flash('success', `นำเข้าสินค้าแล้ว ${created.length} รายการ — แก้ไขแต่ละชิ้นแยกได้ตามปกติ`);
+      }
       res.redirect('/admin/products');
     } catch (saveError) {
       bulkImportJobs.delete(req.body.jobId);
@@ -395,7 +430,7 @@ router.post('/products/:id/edit', (req, res) => {
       return res.redirect(`/admin/products/${product.id}/edit`);
     }
     try {
-      const uploadedImages = await persistUploadedFiles(req.files);
+      const uploadedImages = unwrapUploadResults(await persistUploadedFiles(req.files));
       const fields = parseProductBody(req.body, uploadedImages, product.images || []);
       Object.assign(product, fields, { status: req.body.status || 'active' });
       await store.save();

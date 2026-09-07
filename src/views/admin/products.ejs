@@ -169,3 +169,20 @@
     </table>
   </div>
 </div>
+
+<script>
+  (function () {
+    var raw = sessionStorage.getItem('bulkImportSummary');
+    if (!raw) return;
+    sessionStorage.removeItem('bulkImportSummary');
+    try {
+      var summary = JSON.parse(raw);
+      var names = summary.failed.map(function (f) { return f.filename; }).join(', ');
+      if (window.showToast) {
+        showToast('นำเข้าสำเร็จ ' + summary.createdCount + '/' + summary.total + ' รายการ — ล้มเหลว: ' + names, 'warning', 10000);
+      } else {
+        alert('นำเข้าสำเร็จ ' + summary.createdCount + '/' + summary.total + ' รายการ — ล้มเหลว: ' + names);
+      }
+    } catch (e) {}
+  })();
+</script>

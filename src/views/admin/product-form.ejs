@@ -408,14 +408,24 @@
       progress.classList.remove('hidden');
 
       let totalDone = 0;
+      let totalCreated = 0;
       let chunkIndex = 0;
+      const allFailed = [];
 
-      function sendNextChunk() {
-        if (chunkIndex >= chunks.length) {
-          window.location.href = '/admin/products';
-          return;
+      function finish() {
+        const summary = totalCreated + ' จาก ' + files.length + ' รายการ';
+        if (allFailed.length) {
+          sessionStorage.setItem('bulkImportSummary', JSON.stringify({
+            createdCount: totalCreated, total: files.length, failed: allFailed,
+          }));
         }
-        const chunk = chunks[chunkIndex];
+        window.location.href = '/admin/products';
+      }
+
+      // A whole chunk request can fail outright (network blip, R2 hiccup) —
+      // retry it a couple of times before giving up on just that chunk and
+      // moving on, so one bad patch of the folder can't stall everything else.
+      function sendChunk(chunk, attemptsLeft) {
         const data = new FormData();
         baseEntries.forEach(function (entry) { data.append(entry[0], entry[1]); });
         data.append('ajax', '1');
@@ -423,23 +433,38 @@
           data.append('productImages', item.file);
           data.append('productTitles', item.title);
         });
-
-        btn.textContent = 'กำลังนำเข้า... (' + totalDone + '/' + files.length + ')';
-        progress.textContent = '⏳ อัปโหลดแล้ว ' + totalDone + ' จาก ' + files.length + ' รูป — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...';
-
-        fetch('/admin/products/bulk-import', { method: 'POST', body: data })
+        return fetch('/admin/products/bulk-import', { method: 'POST', body: data })
           .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง' }; }); })
           .then(function (result) {
             if (!result.ok) throw new Error(result.error || 'นำเข้าไม่สำเร็จ');
-            totalDone += chunk.length;
-            chunkIndex += 1;
-            sendNextChunk();
+            return result;
           })
           .catch(function (error) {
-            btn.disabled = false;
-            btn.textContent = '📁 นำเข้าและสร้างสินค้าทั้งหมด';
-            progress.textContent = '❌ ' + (error.message || 'นำเข้าไม่สำเร็จ') + ' — สร้างสำเร็จไปแล้ว ' + totalDone + ' รายการก่อนหน้านี้ (เช็คได้ที่หน้ารายการสินค้า) ถ้าจะกดนำเข้าซ้ำ ให้เอารูปที่สร้างสำเร็จแล้วออกจากโฟลเดอร์ก่อน ไม่งั้นจะได้สินค้าซ้ำ';
+            if (attemptsLeft > 1) {
+              return new Promise(function (resolve) { setTimeout(resolve, 800); })
+                .then(function () { return sendChunk(chunk, attemptsLeft - 1); });
+            }
+            chunk.forEach(function (item) { allFailed.push({ filename: item.file.name, error: error.message }); });
+            return { ok: true, created: 0, failed: [] };
           });
+      }
+
+      function sendNextChunk() {
+        if (chunkIndex >= chunks.length) {
+          finish();
+          return;
+        }
+        const chunk = chunks[chunkIndex];
+        btn.textContent = 'กำลังนำเข้า... (' + totalDone + '/' + files.length + ')';
+        progress.textContent = '⏳ อัปโหลดแล้ว ' + totalDone + ' จาก ' + files.length + ' รูป — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...';
+
+        sendChunk(chunk, 3).then(function (result) {
+          totalDone += chunk.length;
+          totalCreated += result.created || 0;
+          if (result.failed && result.failed.length) allFailed.push.apply(allFailed, result.failed);
+          chunkIndex += 1;
+          sendNextChunk();
+        });
       }
 
       sendNextChunk();
