@@ -334,6 +334,12 @@
 
     form.addEventListener('submit', function (event) {
       event.preventDefault();
+      // The admin layout's global submit handler shows a full-page spinner
+      // overlay that only clears on the next real page navigation — since
+      // this upload runs as many small background requests instead of one
+      // navigation, undo that immediately so the progress text below stays
+      // visible instead of hidden behind the overlay for the whole import.
+      document.documentElement.classList.remove('lilteam-navigating');
       const files = Array.from(folderInput.files || []).filter(function (f) { return /^image\//.test(f.type); });
       if (!files.length) {
         alert('กรุณาเลือกโฟลเดอร์ที่มีไฟล์รูปอยู่ข้างใน');
