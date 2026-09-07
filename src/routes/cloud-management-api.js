@@ -38,11 +38,10 @@ router.get('/legacy-cloud-eligibility', (req,res)=>{
 router.get('/legacy-truemoney-config',(req,res)=>{const p=store.data.settings.payment||{};res.json({ok:true,truemoneyEnabled:p.truemoneyEnabled===true,truemoneyPhone:String(p.truemoneyPhone||'')})});
 router.get('/legacy-payment-config', (req, res) => {
   const p = store.data.settings.payment || {};
-  const fields = ['easyslipApiKey','promptpayId','promptpayName',
+  const fields = ['slipProvider','easyslipApiKey','slipokBranchId','slipokApiKey','slipcheckApiKey','slipcheckEndpoint','rdcwClientId','rdcwClientSecret','rdcwEndpoint','slip2goApiKey','slip2goEndpoint','promptpayId','promptpayName',
     'promptpayQrImage','bankName','bankAccountNumber','bankAccountName','bankQrImage','truemoneyPhone'];
   const payment = Object.fromEntries(fields.map(field => [field, p[field] || '']));
   payment.easyslipApiKey ||= process.env.EASYSLIP_API_KEY || '';
-  payment.slipProvider = payment.easyslipApiKey ? 'easyslip' : 'none';
   payment.truemoneyEnabled = p.truemoneyEnabled !== false && Boolean(payment.truemoneyPhone);
   res.json({ ok: true, payment });
 });
@@ -72,10 +71,11 @@ router.post('/admin/rentals/:id/delete', async (req, res, next) => {
 router.post('/admin/discord/settings', async (req, res, next) => {
   try {
     const values = { enabled: req.body.enabled === 'on' };
-    for (const field of ['notifyChannelId', 'ticketPanelChannelId', 'ticketCategoryId', 'ticketLogChannelId', 'supportRoleId']) {
+    for (const field of ['notifyChannelId', 'ticketPanelChannelId', 'ticketCategoryId', 'ticketLogChannelId', 'supportRoleId', 'joinLeaveChannelId', 'rolePanelChannelId', 'roleId']) {
       values[field] = String(req.body[field] || '').trim();
       if (values[field] && !/^\d{15,22}$/.test(values[field])) return res.status(400).json({ error: 'Discord ID ไม่ถูกต้อง' });
     }
+    values.roleLabel = String(req.body.roleLabel || '').trim().slice(0, 80);
     store.data.settings.discord = values;
     await store.save();
     res.json({ ok: true });
@@ -83,6 +83,10 @@ router.post('/admin/discord/settings', async (req, res, next) => {
 });
 router.post('/admin/discord/post-ticket-panel', async (req, res) => {
   try { await discord.postTicketPanel(); res.json({ ok: true }); }
+  catch (error) { res.status(400).json({ error: error.message || 'โพสต์ไม่สำเร็จ' }); }
+});
+router.post('/admin/discord/post-role-panel', async (req, res) => {
+  try { await discord.postRolePanel(); res.json({ ok: true }); }
   catch (error) { res.status(400).json({ error: error.message || 'โพสต์ไม่สำเร็จ' }); }
 });
 router.get('/payment-info', (req, res) => {
