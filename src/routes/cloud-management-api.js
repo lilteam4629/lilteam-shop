@@ -35,6 +35,7 @@ router.get('/legacy-cloud-eligibility', (req,res)=>{
   const eligible=store.data.shops.some(s=>s.ownerId===id)||store.data.licenseSales.some(s=>s.userId===id)||store.data.walletTransactions.some(t=>t.userId===id&&['shop_purchase','shop_renewal'].includes(t.type));
   res.json({ok:true,eligible});
 });
+router.get('/legacy-truemoney-config',(req,res)=>{const p=store.data.settings.payment||{};res.json({ok:true,truemoneyEnabled:p.truemoneyEnabled===true,truemoneyPhone:String(p.truemoneyPhone||'')})});
 function verifiedSale(sale) {
   return { ...sale, exp: license.isEnabled() ? license.verifyKey(sale.key).exp || null : null };
 }
