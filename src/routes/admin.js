@@ -350,9 +350,15 @@ router.post('/products/bulk-import', (req, res) => {
       setBulkImportProgress(jobId, 0, req.files.length);
       const uploadedImages = await persistUploadedFiles(req.files, (done, total) => setBulkImportProgress(jobId, done, total));
       bulkImportJobs.delete(jobId);
+      // Titles chosen client-side (either straight from the filename, or an
+      // incrementing product code like lilteam-001, lilteam-002, ... typed
+      // once by the admin) — one entry per file, same order as productImages.
+      const providedTitles = [].concat(req.body.productTitles || []);
       const now = new Date().toISOString();
       const created = req.files.map((file, i) => {
-        const title = file.originalname.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'สินค้าใหม่';
+        const title = (providedTitles[i] && providedTitles[i].trim())
+          || file.originalname.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim()
+          || 'สินค้าใหม่';
         return {
           id: store.genId(8), slug: slugify(title) + '-' + store.genId(4),
           ...sharedFields, title, images: [uploadedImages[i]],
