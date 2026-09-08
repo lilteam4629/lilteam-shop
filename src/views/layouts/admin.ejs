@@ -21,6 +21,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <% if (typeof active !== 'undefined' && active === 'filter-tags') { %><link rel="stylesheet" href="<%= asset('css/filter-studio-v3.css') %>" /><% } %>
+  <% if (typeof active !== 'undefined' && active === 'home-sections') { %><link rel="stylesheet" href="<%= asset('css/home-sections-v3.css') %>" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
     html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
