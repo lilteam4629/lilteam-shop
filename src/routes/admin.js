@@ -301,9 +301,11 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
 }
 
 router.get('/products', (req, res) => {
+  const filterTagById = new Map(store.data.filterTags.map(tag => [tag.id, tag]));
   const products = store.data.products.map(p => {
     const stockCount = store.data.stockItems.filter(s => s.productId === p.id && s.status === 'available').length;
-    return { ...p, stockCount };
+    const selectedFilterTags = (p.filterTagIds || []).map(id => filterTagById.get(id)).filter(Boolean);
+    return { ...p, stockCount, selectedFilterTags };
   });
   res.render('admin/products', { title: 'สินค้า', active: 'products', products, productCardStyle: store.data.settings.productCardStyle || 'natural' });
 });

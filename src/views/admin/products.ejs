@@ -177,6 +177,16 @@
                   <% if (p.internalNote) { %>
                     <div class="text-[11px] text-[var(--text-3)] truncate" title="หมายเหตุภายใน (แอดมินเห็นเท่านั้น)">📝 <%= p.internalNote %></div>
                   <% } %>
+                  <% if (p.selectedFilterTags && p.selectedFilterTags.length) { %>
+                    <div class="flex items-center gap-1 mt-1.5" title="ตัวกรองที่เลือกไว้">
+                      <% p.selectedFilterTags.slice(0, 8).forEach(tag => { %>
+                        <img src="<%= tag.image %>" alt="<%= tag.name %>" title="<%= tag.name %>" class="w-6 h-6 rounded-full object-cover border border-[var(--gold)]/50 bg-[var(--card)]" />
+                      <% }) %>
+                      <% if (p.selectedFilterTags.length > 8) { %><span class="text-[10px] text-[var(--text-4)]">+<%= p.selectedFilterTags.length - 8 %></span><% } %>
+                    </div>
+                  <% } else { %>
+                    <div class="text-[10px] text-[var(--text-4)] mt-1">ยังไม่ได้เลือกตัวกรอง</div>
+                  <% } %>
                 </div>
               </div>
             </td>
