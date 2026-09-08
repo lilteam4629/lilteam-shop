@@ -586,8 +586,13 @@ router.post('/filter-tags', (req, res) => {
       const failed = [];
       for (const file of files) {
         try {
-          const extension = ({ 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif' })[file.mimetype] || '.img';
-          const image = await store.saveMedia(file.buffer, `filter-${store.genId(10)}${extension}`, file.mimetype);
+          const hex = file.buffer.toString('hex', 0, 4);
+          const detected = hex.startsWith('89504e47') ? { extension: '.png', mime: 'image/png' }
+            : hex.startsWith('ffd8') ? { extension: '.jpg', mime: 'image/jpeg' }
+              : hex.startsWith('47494638') ? { extension: '.gif', mime: 'image/gif' }
+                : (file.buffer.length >= 12 && file.buffer.toString('utf8', 8, 12) === 'WEBP') ? { extension: '.webp', mime: 'image/webp' } : null;
+          if (!detected) throw new Error('ข้อมูลไฟล์ไม่ใช่รูปภาพที่รองรับ');
+          const image = await store.saveMedia(file.buffer, `filter-${store.genId(10)}${detected.extension}`, detected.mime);
           const filterName = files.length === 1 ? name : file.originalname.replace(/\.[^.]+$/, '').trim();
           store.data.filterTags.push({ id: store.genId(8), name: filterName || 'ตัวกรอง', image, createdAt: new Date().toISOString() });
           savedCount += 1;
@@ -596,12 +601,12 @@ router.post('/filter-tags', (req, res) => {
           console.error('[filter-tags] image save failed:', file.originalname, fileError.message);
         }
       }
-      if (!savedCount) throw new Error('บันทึกรูปไม่ได้ทุกไฟล์');
+      if (!savedCount) throw new Error('ไฟล์ที่เลือกไม่ใช่ PNG, JPG, WEBP หรือ GIF ที่ถูกต้อง');
       await store.save();
       req.flash('success', `เพิ่มตัวกรอง ${savedCount} รายการแล้ว${failed.length ? ` (ข้าม ${failed.length} รูปที่มีปัญหา)` : ''}`);
     } catch (saveError) {
       console.error('[filter-tags] bulk save failed:', saveError.message);
-      req.flash('error', 'บันทึกรูปตัวกรองไม่สำเร็จ กรุณาลองใหม่');
+      req.flash('error', `บันทึกรูปตัวกรองไม่สำเร็จ: ${saveError.message}`);
     }
     res.redirect('/admin/filter-tags');
   }));
