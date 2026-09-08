@@ -622,6 +622,17 @@ router.post('/filter-tags/:id/products', async (req, res) => {
   res.redirect('/admin/filter-tags');
 });
 
+router.post('/filter-tags/:tagId/products/:productId/add', async (req, res) => {
+  const tag = store.data.filterTags.find(t => String(t.id) === String(req.params.tagId));
+  const product = store.data.products.find(p => String(p.id) === String(req.params.productId));
+  if (!tag || !product) return res.status(404).json({ ok: false, message: 'ไม่พบตัวกรองหรือสินค้า' });
+  const tags = new Set((product.filterTagIds || []).map(String));
+  tags.add(String(tag.id));
+  product.filterTagIds = [...tags];
+  await store.save();
+  res.json({ ok: true });
+});
+
 router.post('/filter-tags', (req, res) => {
   filterImageUpload.array('filterImages', 60)(req, res, store.bindTenantContext(async (err) => {
     const files = req.files || [];
