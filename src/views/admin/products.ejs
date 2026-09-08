@@ -18,8 +18,10 @@
     <!-- Bulk Actions Dropdown -->
     <% if (products.length) { %>
     <div class="relative" id="bulk-actions-dropdown">
-      <button type="button" id="bulk-actions-toggle" class="inline-flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
-        <span>⋯ จัดการหลายรายการ</span>
+      <button type="button" id="bulk-actions-toggle" class="inline-flex items-center gap-2 bg-gradient-to-br from-[var(--gold)]/15 to-[var(--gold)]/5 hover:from-[var(--gold)]/25 hover:to-[var(--gold)]/10 border border-[var(--gold)]/40 hover:border-[var(--gold)]/70 text-[var(--gold)] font-semibold px-3.5 py-2 rounded-xl text-xs shadow-sm transition active:scale-95">
+        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+        <span>จัดการหลายรายการ</span>
+        <svg class="w-3.5 h-3.5 shrink-0 opacity-70" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
       </button>
       <div id="bulk-actions-menu" class="hidden absolute right-0 mt-2 w-64 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-30 overflow-hidden py-1.5">
         <a href="/admin/products/bulk-import" class="flex items-center gap-2 px-4 py-2.5 text-xs text-[var(--text-2)] hover:bg-[var(--input)] hover:text-[var(--gold)] transition">
