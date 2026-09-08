@@ -13,44 +13,75 @@
       <button name="productCardStyle" value="natural" class="px-3 py-1.5 rounded-lg transition <%= productCardStyle === 'natural' ? 'bg-[var(--gold)] text-[var(--bg)] font-bold shadow-sm' : 'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>">🖼️ เต็มรูป</button>
     </form>
 
-    <!-- Bulk Import Button -->
+    <% const zeroStockCount = products.filter(p => p.stockCount < 1).length; %>
+
+    <!-- Bulk Actions Dropdown -->
+    <% if (products.length) { %>
+    <div class="relative" id="bulk-actions-dropdown">
+      <button type="button" id="bulk-actions-toggle" class="inline-flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
+        <span>⋯ จัดการหลายรายการ</span>
+      </button>
+      <div id="bulk-actions-menu" class="hidden absolute right-0 mt-2 w-64 bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-30 overflow-hidden py-1.5">
+        <a href="/admin/products/bulk-import" class="flex items-center gap-2 px-4 py-2.5 text-xs text-[var(--text-2)] hover:bg-[var(--input)] hover:text-[var(--gold)] transition">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+          <span>นำเข้าจากโฟลเดอร์</span>
+        </a>
+        <% if (zeroStockCount) { %>
+        <form action="/admin/products/stock/add-all" method="post" data-confirm="เพิ่มสต็อก 1 ชิ้นให้สินค้าที่สต็อกว่างทั้ง <%= zeroStockCount %> รายการ (โหมดติดต่อร้านเพื่อรับสินค้า — คุณต้องส่งไอดีให้ลูกค้าเองหลังขายผ่านแชท) ยืนยันไหม?">
+          <button class="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-sky-300 hover:bg-[var(--input)] transition text-left">
+            <span class="w-4 text-center shrink-0">📦</span>
+            <span>เพิ่มสต็อกที่ว่างทั้งหมด (<%= zeroStockCount %>)</span>
+          </button>
+        </form>
+        <% } %>
+        <form action="/admin/products/set-status-all" method="post" data-confirm="เปิดขายสินค้าทั้งหมด <%= products.length %> รายการ?">
+          <input type="hidden" name="status" value="active" />
+          <button class="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-emerald-300 hover:bg-[var(--input)] transition text-left">
+            <span class="w-4 text-center shrink-0">●</span>
+            <span>เปิดขายทั้งหมด</span>
+          </button>
+        </form>
+        <form action="/admin/products/set-status-all" method="post" data-confirm="ซ่อนสินค้าทั้งหมด <%= products.length %> รายการ? ลูกค้าจะมองไม่เห็นสินค้าเหล่านี้ทันที">
+          <input type="hidden" name="status" value="hidden" />
+          <button class="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-[var(--text-2)] hover:bg-[var(--input)] transition text-left">
+            <span class="w-4 text-center shrink-0">●</span>
+            <span>ซ่อนทั้งหมด</span>
+          </button>
+        </form>
+        <div class="my-1 border-t border-[var(--border)]"></div>
+        <button type="button" id="delete-all-products-btn" class="w-full flex items-center gap-2 px-4 py-2.5 text-xs text-rose-300 hover:bg-rose-950/40 transition text-left">
+          <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          <span>ลบสินค้าทั้งหมด</span>
+        </button>
+      </div>
+    </div>
+    <script>
+      (function () {
+        const wrap = document.getElementById('bulk-actions-dropdown');
+        const toggle = document.getElementById('bulk-actions-toggle');
+        const menu = document.getElementById('bulk-actions-menu');
+        if (!wrap || !toggle || !menu) return;
+        toggle.addEventListener('click', function (e) {
+          e.stopPropagation();
+          menu.classList.toggle('hidden');
+        });
+        document.addEventListener('click', function (e) {
+          if (!wrap.contains(e.target)) menu.classList.add('hidden');
+        });
+      })();
+    </script>
+    <% } else { %>
     <a href="/admin/products/bulk-import" class="inline-flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] hover:text-[var(--gold)] font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
       <span>นำเข้าโฟลเดอร์</span>
     </a>
+    <% } %>
 
     <!-- Add Product Button -->
     <a href="/admin/products/new" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-4 py-2 rounded-xl text-xs shadow-md hover:shadow-lg transition active:scale-95">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
       <span>เพิ่มสินค้าใหม่</span>
     </a>
-
-    <% const zeroStockCount = products.filter(p => p.stockCount < 1).length; %>
-    <% if (zeroStockCount) { %>
-    <form action="/admin/products/stock/add-all" method="post" data-confirm="เพิ่มสต็อก 1 ชิ้นให้สินค้าที่สต็อกว่างทั้ง <%= zeroStockCount %> รายการ (โหมดติดต่อร้านเพื่อรับสินค้า — คุณต้องส่งไอดีให้ลูกค้าเองหลังขายผ่านแชท) ยืนยันไหม?">
-      <button class="inline-flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/50 border border-sky-500/40 text-sky-300 font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
-        <span>📦 เพิ่มสต็อกที่ว่างทั้งหมด (<%= zeroStockCount %>)</span>
-      </button>
-    </form>
-    <% } %>
-    <% if (products.length) { %>
-    <form action="/admin/products/set-status-all" method="post" data-confirm="เปิดขายสินค้าทั้งหมด <%= products.length %> รายการ?">
-      <input type="hidden" name="status" value="active" />
-      <button class="inline-flex items-center gap-1.5 bg-emerald-950/40 hover:bg-emerald-900/50 border border-emerald-500/40 text-emerald-300 font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
-        <span>● เปิดขายทั้งหมด</span>
-      </button>
-    </form>
-    <form action="/admin/products/set-status-all" method="post" data-confirm="ซ่อนสินค้าทั้งหมด <%= products.length %> รายการ? ลูกค้าจะมองไม่เห็นสินค้าเหล่านี้ทันที">
-      <input type="hidden" name="status" value="hidden" />
-      <button class="inline-flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
-        <span>● ซ่อนทั้งหมด</span>
-      </button>
-    </form>
-    <button type="button" id="delete-all-products-btn" class="inline-flex items-center gap-1.5 bg-rose-950/40 hover:bg-rose-900/50 border border-rose-500/40 text-rose-300 font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-      <span>ลบสินค้าทั้งหมด</span>
-    </button>
-    <% } %>
   </div>
 </div>
 
