@@ -595,8 +595,10 @@
           if (button) button.disabled = false;
           form.requestSubmit(button || undefined);
         } catch (error) {
-          if (button) { button.disabled = false; button.textContent = button.dataset.oldText || 'บันทึก'; }
-          alert(error.message + '\nกรุณาตรวจ CORS ของ Cloudflare R2 แล้วลองใหม่');
+          // Keep the shop usable when the R2 bucket has not received its CORS
+          // rule yet. Native submit uses the existing bounded VPS uploader.
+          if (button) { button.disabled = false; button.textContent = 'กำลังอัปโหลดแบบสำรอง...'; }
+          HTMLFormElement.prototype.submit.call(form);
         }
       }, true);
     })();

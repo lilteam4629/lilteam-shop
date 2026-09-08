@@ -22,9 +22,16 @@ let directUploadCorsReady = false;
 
 async function ensureDirectUploadCors() {
   if (directUploadCorsReady || !enabled) return;
-  await client.send(new PutBucketCorsCommand({ Bucket: bucket, CORSConfiguration: { CORSRules: [{
-    AllowedOrigins: ['*'], AllowedMethods: ['PUT'], AllowedHeaders: ['content-type'], ExposeHeaders: ['etag'], MaxAgeSeconds: 3600,
-  }] } }));
+  try {
+    await client.send(new PutBucketCorsCommand({ Bucket: bucket, CORSConfiguration: { CORSRules: [{
+      AllowedOrigins: ['*'], AllowedMethods: ['PUT'], AllowedHeaders: ['content-type'], ExposeHeaders: ['etag'], MaxAgeSeconds: 3600,
+    }] } }));
+  } catch (error) {
+    // Object-only R2 keys can sign PUT uploads but cannot edit bucket CORS.
+    // Continue: the bucket may already have CORS configured in Cloudflare.
+    if (!['AccessDenied', 'Forbidden'].includes(error?.name) && error?.$metadata?.httpStatusCode !== 403) throw error;
+    console.warn('[r2] bucket CORS could not be changed with this key; using existing CORS policy');
+  }
   directUploadCorsReady = true;
 }
 
