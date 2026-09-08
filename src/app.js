@@ -1,4 +1,5 @@
 const path = require('path');
+require('express-async-errors');
 const express = require('express');
 const session = require('express-session');
 const MongoStore = require('connect-mongo').default;
@@ -191,9 +192,24 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
+let server = null;
+let shuttingDown = false;
+
+function shutdown(signal) {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  console.log(`[server] ${signal} received, draining active requests...`);
+  if (!server) return process.exit(0);
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(1), 25000).unref();
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
 store.init()
   .then(() => {
-    app.listen(PORT, () => {
+    server = app.listen(PORT, () => {
       console.log(`LilTeam Shop running at http://localhost:${PORT}`);
     });
     discordBot.init().catch((err) => console.error('[discord-bot] init failed:', err));

@@ -412,7 +412,7 @@ async function init() {
     console.log('[store] MONGODB_URI not set — using local db.json (data will reset on redeploy).');
   }
 
-  migrate();
+  await migrate();
 }
 
 // Fills in fields added after a DB was first created, without touching existing data.
@@ -421,10 +421,10 @@ async function init() {
 // see migrateSchema()/loadTenantDb() below — since each tenant's dataset can
 // have been created at an arbitrarily older point in this app's history and
 // is never touched by this startup-only pass otherwise.
-function migrate() {
+async function migrate() {
   let changed = migrateAdminRecovery(db);
   if (migrateSchema(db)) changed = true;
-  if (changed) save();
+  if (changed) await save();
 }
 
 function migrateAdminRecovery(db) {
