@@ -1,6 +1,10 @@
 <% const isBulkImport = typeof bulkMode !== 'undefined' && bulkMode; %>
+<div class="max-w-6xl mb-4">
+  <h1 class="text-xl sm:text-2xl font-bold"><%= isBulkImport ? 'นำเข้าสินค้าหลายรายการ' : (product ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่') %></h1>
+  <p class="text-xs sm:text-sm text-[var(--text-4)] mt-1">กรอกข้อมูลหลักก่อน ส่วนเสริมสามารถเปิดแก้เฉพาะเวลาที่ต้องการ</p>
+</div>
 <form action="<%= isBulkImport ? '/admin/products/bulk-import' : (product ? `/admin/products/${product.id}/edit` : '/admin/products/new') %>" method="post" enctype="multipart/form-data"
-  class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-3xl space-y-4">
+  class="product-editor bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 max-w-6xl grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
   <% if (isBulkImport) { %>
     <input type="hidden" name="jobId" id="bulkImportJobId" />
     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm text-[var(--text-2)]">
@@ -24,13 +28,13 @@
       </div>
     </div>
   <% } else { %>
-    <div>
+    <div class="xl:col-span-2">
       <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อเกม</label>
       <input name="title" required value="<%= product ? product.title : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
   <% } %>
 
-  <div class="grid sm:grid-cols-2 gap-4">
+  <div class="grid sm:grid-cols-2 gap-4 xl:col-span-2">
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">ราคาขาย (บาท)</label>
       <input type="number" name="price" required value="<%= product ? product.price : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
@@ -97,14 +101,14 @@
     });
   </script>
 
-  <div>
+  <div class="xl:col-span-2 bg-[var(--input)]/25 border border-[var(--border-light)] rounded-xl p-3 sm:p-4">
     <label class="block text-sm mb-1 text-[var(--text-3)]">ตัวกรองสินค้า (สินค้านี้มีสิ่งนี้)</label>
     <% if (!filterTags.length) { %>
       <p class="text-xs text-[var(--text-4)]">ยังไม่มีตัวกรองสินค้า — ไปเพิ่มได้ที่เมนู "🏷️ ตัวกรองสินค้า"</p>
     <% } else { %>
-      <div class="flex flex-wrap gap-3">
+      <div class="product-filter-strip flex gap-2 overflow-x-auto pb-1 sm:flex-wrap sm:overflow-visible">
         <% filterTags.forEach(t => { %>
-          <label class="flex items-center gap-2 bg-[var(--input)] border border-[var(--border-light)] rounded-lg pl-2 pr-3 py-1.5 cursor-pointer hover:border-[var(--gold)]">
+          <label class="shrink-0 flex items-center gap-2 bg-[var(--input)] border border-[var(--border-light)] rounded-lg pl-2 pr-3 py-1.5 cursor-pointer hover:border-[var(--gold)] has-[:checked]:border-[var(--gold)] has-[:checked]:bg-[var(--gold)]/10">
             <input type="checkbox" name="filterTagIds" value="<%= t.id %>" <%= product && (product.filterTagIds || []).includes(t.id) ? 'checked':'' %> />
             <img src="<%= t.image %>" class="w-6 h-6 rounded-full object-cover" alt="<%= t.name %>" />
             <span class="text-sm"><%= t.name %></span>
@@ -202,9 +206,10 @@
     })();
   </script>
   <% } else { %>
-  <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-4">
+  <details class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 xl:col-span-2" open>
+    <summary class="font-medium cursor-pointer select-none">🖼️ รูปภาพสินค้า</summary>
+    <div class="space-y-4 mt-4">
     <div>
-      <h3 class="font-medium">รูปภาพสินค้า</h3>
       <p class="text-xs text-[var(--text-4)]">รูปแรกจะใช้เป็นภาพหน้าปกในการ์ดสินค้า อัปโหลดได้สูงสุดครั้งละ 10 รูป</p>
     </div>
 
@@ -242,10 +247,13 @@
       <summary class="cursor-pointer text-xs text-[var(--text-3)]">หรือเพิ่มรูปด้วย URL</summary>
       <textarea name="images" rows="3" placeholder="https://...&#10;https://..." class="mt-2 w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 font-mono text-sm"></textarea>
     </details>
-  </div>
+    </div>
+  </details>
   <% } %>
 
-  <div class="bg-[var(--input)]/40 border border-[var(--gold)]/30 rounded-xl p-4 space-y-4">
+  <details class="bg-[var(--input)]/40 border border-[var(--gold)]/30 rounded-xl p-4" <%= product && product.purchaseApprovalEnabled ? 'open' : '' %>>
+    <summary class="font-medium cursor-pointer select-none">✅ การยืนยันก่อนซื้อ</summary>
+    <div class="space-y-4 mt-4">
     <div>
       <label class="flex items-center gap-2 font-medium cursor-pointer w-fit">
         <input type="checkbox" name="purchaseApprovalEnabled" <%= product && product.purchaseApprovalEnabled ? 'checked' : '' %> class="accent-[var(--gold)]" />
@@ -268,7 +276,8 @@
       </div>
     </div>
     <p class="text-xs text-[var(--text-4)]">ถ้าใส่ลิงก์ ปุ่มจะเปิดหน้าใหม่ให้ลูกค้าไปทำรายการ แล้วกลับมาติ๊กยืนยันและซื้อได้</p>
-  </div>
+    </div>
+  </details>
 
   <details class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4" <%= (product && (product.publishAt || product.eventBadge || product.eventDescription)) ? 'open' : '' %>>
     <summary class="font-medium cursor-pointer select-none">⏰ EVENT UPDATE / ตั้งเวลาเปิดขาย</summary>
@@ -291,7 +300,9 @@
     </div>
   </details>
 
-  <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-4">
+  <details class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4">
+    <summary class="font-medium cursor-pointer select-none">📋 ข้อความและเงื่อนไขในหน้าสินค้า</summary>
+    <div class="space-y-4 mt-4">
     <div>
       <h3 class="font-medium">ข้อความในหน้าสินค้า</h3>
       <p class="text-xs text-[var(--text-4)] mt-1">แก้ไขหรือปิดการแสดงผลได้แยกทีละส่วน เฉพาะสินค้านี้ (ขึ้นบรรทัดใหม่ = แยกเป็นข้อๆ) เว้นว่างไว้เพื่อใช้ข้อความมาตรฐานของร้าน</p>
@@ -320,9 +331,12 @@
       </label>
       <textarea name="warrantyText" rows="3" placeholder="รับประกันสินค้า 90 วันนับจากวันสั่งซื้อ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= product ? (product.warrantyText || '') : '' %></textarea>
     </div>
-  </div>
+    </div>
+  </details>
 
-  <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-3">
+  <details class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4">
+    <summary class="font-medium cursor-pointer select-none">💬 ข้อความติดต่อรับสินค้า</summary>
+    <div class="space-y-3 mt-4">
     <div>
       <h3 class="font-medium">ข้อความ "คัดลอกและเปิด Messenger" (เฉพาะสินค้าที่ตั้งวิธีส่งมอบเป็น "ติดต่อร้านเพื่อรับสินค้า")</h3>
       <p class="text-xs text-[var(--text-4)] mt-1">แก้ได้เฉพาะคำขึ้นต้น/ปิดท้าย — ส่วนหมายเลขคำสั่งซื้อ ชื่อสินค้า ชื่อลูกค้า และข้อมูลที่ต้องเตรียม ระบบล็อกไว้ให้อัตโนมัติ แก้ไม่ได้ กันพลาดข้อมูลหาย</p>
@@ -338,7 +352,8 @@
       <label class="block text-sm mb-1 text-[var(--text-3)]">คำปิดท้าย</label>
       <input name="contactMessageOutro" value="<%= product ? (product.contactMessageOutro || '') : '' %>" placeholder="กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
     </div>
-  </div>
+    </div>
+  </details>
 
   <% if (product) { %>
     <div>
@@ -353,11 +368,25 @@
   <% if (isBulkImport) { %>
     <p id="bulkImportProgress" class="hidden text-sm text-[var(--gold)]">⏳ กำลังอัปโหลดรูปและสร้างสินค้า — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...</p>
   <% } %>
-  <div class="flex gap-3">
-    <button id="productFormSubmit" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm"><%= isBulkImport ? '📁 นำเข้าและสร้างสินค้าทั้งหมด' : (product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า') %></button>
-    <a href="/admin/products" class="px-6 py-2 rounded-lg text-sm border border-[var(--border-light)] hover:bg-[var(--input)]">ยกเลิก</a>
+  <div class="product-form-actions xl:col-span-2 sticky bottom-2 z-20 flex gap-2 p-2 sm:p-3 rounded-xl border border-[var(--border)] bg-[var(--card)]/95 shadow-lg backdrop-blur">
+    <button id="productFormSubmit" class="flex-1 sm:flex-none bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold px-6 py-2.5 rounded-lg text-sm"><%= isBulkImport ? '📁 นำเข้าและสร้างสินค้าทั้งหมด' : (product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า') %></button>
+    <a href="/admin/products" class="px-4 sm:px-6 py-2.5 rounded-lg text-sm text-center border border-[var(--border-light)] hover:bg-[var(--input)]">ยกเลิก</a>
   </div>
 </form>
+<style>
+  .product-editor > script { display:none }
+  .product-editor details > summary { list-style:none }
+  .product-editor details > summary::-webkit-details-marker { display:none }
+  .product-editor details > summary::after { content:'＋'; float:right; color:var(--gold); font-weight:700 }
+  .product-editor details[open] > summary::after { content:'−' }
+  .product-filter-strip { scrollbar-width:thin; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch }
+  .product-filter-strip > label { scroll-snap-align:start }
+  @media(max-width:639px){
+    .product-editor input,.product-editor select,.product-editor textarea{font-size:16px}
+    .product-editor .price-option-row{display:grid;grid-template-columns:auto 4.5rem auto minmax(6rem,1fr) auto}
+    .product-form-actions{margin-left:-.35rem;margin-right:-.35rem}
+  }
+</style>
 <% if (isBulkImport) { %>
 <script>
   (function () {
