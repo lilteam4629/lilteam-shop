@@ -5,6 +5,7 @@ const { nanoid } = require('nanoid');
 const bcrypt = require('bcryptjs');
 const { MongoClient, GridFSBucket, ObjectId } = require('mongodb');
 const { AsyncLocalStorage } = require('async_hooks');
+const crypto = require('crypto');
 const r2 = require('../services/r2');
 
 // Multi-tenant support: each rented "shop" (see src/routes/tenant.js) gets
@@ -335,6 +336,38 @@ async function transact(mutator) {
     }
     throw new Error('ข้อมูลมีการเปลี่ยนแปลงพร้อมกัน กรุณาลองใหม่');
   });
+}
+
+// One transaction reference may credit only one wallet across the main site
+// and Shop Cloud. MongoDB's unique _id makes simultaneous claims atomic.
+async function claimGlobalSlipRef(transRef, details = {}) {
+  const normalized = String(transRef || '').trim();
+  if (!normalized) return false;
+  const key = `used-slip:${crypto.createHash('sha256').update(normalized).digest('hex')}`;
+  if (mongoCollection) {
+    try {
+      await mongoCollection.insertOne({
+        _id: key,
+        transRef: normalized,
+        source: String(details.source || 'main').slice(0, 40),
+        requestId: String(details.requestId || '').slice(0, 100),
+        claimedAt: new Date().toISOString(),
+      });
+      return true;
+    } catch (error) {
+      if (error && error.code === 11000) return false;
+      throw error;
+    }
+  }
+  let claimed = false;
+  await transact(data => {
+    data.globalUsedSlipRefs ||= [];
+    if (!data.globalUsedSlipRefs.includes(normalized)) {
+      data.globalUsedSlipRefs.push(normalized);
+      claimed = true;
+    }
+  });
+  return claimed;
 }
 
 async function init() {
@@ -977,6 +1010,7 @@ module.exports = {
   deleteTenantDb,
   runInTenant,
   transact,
+  claimGlobalSlipRef,
   // Wrap a callback with the CURRENT tenant context so it still resolves
   // the right shop's data even if invoked later through a non-Express
   // callback API (e.g. multer's manual upload.single(...)(req, res, cb)

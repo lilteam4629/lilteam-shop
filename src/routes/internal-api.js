@@ -61,6 +61,17 @@ router.use((req, res, next) => {
 
 router.use(require('./cloud-management-api'));
 
+router.post('/slips/claim', async (req, res, next) => {
+  try {
+    const transRef = String(req.body.transRef || '').trim();
+    if (!transRef) return res.status(400).json({ error: 'ไม่พบเลขอ้างอิงสลิป' });
+    const claimed = await store.claimGlobalSlipRef(transRef, {
+      source: req.body.source || 'shop-cloud', requestId: req.body.requestId,
+    });
+    res.status(claimed ? 200 : 409).json({ ok: claimed, duplicate: !claimed });
+  } catch (error) { next(error); }
+});
+
 function publicUser(user) {
   return { id: user.id, username: user.username, email: user.email, walletBalance: user.walletBalance };
 }

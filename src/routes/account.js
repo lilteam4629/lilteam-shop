@@ -384,33 +384,27 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       || slipok.parseTransDateTime(raw.transDate, raw.transTime)
     );
 
+    if (verified) {
+      const slipAge = transTime && !Number.isNaN(transTime.getTime()) ? Date.now() - transTime.getTime() : null;
+      if (slipAge === null || slipAge > 5 * 60 * 1000 || slipAge < -2 * 60 * 1000) {
+        verified = false;
+        result.message = 'เวลาในสลิปไม่อยู่ในช่วงที่ยอมรับได้ กรุณาแนบสลิปล่าสุด';
+      } else if (!transRef) {
+        verified = false;
+        result.message = 'ไม่พบเลขอ้างอิงธุรกรรม — รอแอดมินตรวจสอบ';
+      } else if (!(await store.claimGlobalSlipRef(transRef, { source: 'main-site', requestId }))) {
+        verified = false;
+        result.message = 'สลิปนี้เคยถูกใช้เติมเงินไปแล้ว ไม่สามารถใช้ซ้ำได้';
+      }
+    }
+
     let finalRequest;
     const applied = await store.transact((data) => {
       const freshRequest = data.topupRequests.find(t => t.id === requestId);
       const freshUser = data.users.find(u => u.id === userId);
       if (!freshRequest || !freshUser || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
       freshRequest.slipCheck = { checked: result.checked, verified: result.verified, message: result.message, provider, transRef };
-      if (verified) {
-        const slipAge = transTime && !Number.isNaN(transTime.getTime()) ? Date.now() - transTime.getTime() : null;
-        if (slipAge === null || slipAge > 5 * 60 * 1000 || slipAge < -2 * 60 * 1000) {
-          verified = false;
-          freshRequest.slipCheck.verified = false;
-          freshRequest.slipCheck.message = 'เวลาในสลิปไม่อยู่ในช่วงที่ยอมรับได้ กรุณาแนบสลิปล่าสุด';
-        }
-        if (!transRef) {
-          verified = false;
-          freshRequest.slipCheck.verified = false;
-          freshRequest.slipCheck.message = 'ไม่พบเลขอ้างอิงธุรกรรม — รอแอดมินตรวจสอบ';
-        }
-        const duplicate = transRef && data.topupRequests.some(t =>
-          t.id !== freshRequest.id && t.status === 'approved' && t.slipCheck?.transRef === transRef
-        );
-        if (duplicate) {
-          verified = false;
-          freshRequest.slipCheck.verified = false;
-          freshRequest.slipCheck.message = 'สลิปนี้เคยถูกใช้เติมเงินไปแล้ว ไม่สามารถใช้ซ้ำได้';
-        }
-      }
+      freshRequest.slipCheck.verified = verified;
       if (verified) {
         freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + freshRequest.amount) * 100) / 100;
         data.walletTransactions.push({
