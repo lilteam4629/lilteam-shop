@@ -12,7 +12,7 @@
   <!-- Channel Select Tabs -->
   <div class="grid grid-cols-2 gap-2 mb-4">
     <button type="button" id="tabTruemoney" onclick="switchTab('truemoney')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]">
-      <span>🧧</span> <span>ซองของขวัญ TrueMoney</span>
+      <img src="/images/truemoney-wallet.jpg" alt="TrueMoney Wallet" class="w-7 h-7 rounded-lg object-cover" /> <span>ซองของขวัญ TrueMoney</span>
     </button>
     <button type="button" id="tabBank" onclick="switchTab('bank')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--border-light)] bg-[var(--card)] text-[var(--text-3)] hover:border-[var(--gold)]/50">
       <span><%= promptpayEnabled ? '📱' : '🏦' %></span> <span><%= promptpayEnabled ? 'พร้อมเพย์ / ธนาคาร' : 'โอนผ่านธนาคาร' %></span>
@@ -22,7 +22,7 @@
   <!-- Form 1: TrueMoney Angpao (Instant & Automatic) -->
   <div id="sectionTruemoney" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-5 shadow-[0_18px_40px_-24px_rgba(0,0,0,.5)]">
     <div class="flex items-center gap-2 text-sm font-semibold text-[var(--gold)]">
-      <span>🧧</span> <span>เติมเงินด้วยซองของขวัญ TrueMoney (เข้าทันที)</span>
+      <img src="/images/truemoney-wallet.jpg" alt="TrueMoney Wallet" class="w-8 h-8 rounded-lg object-cover" /> <span>เติมเงินด้วยซองของขวัญ TrueMoney (เข้าทันที)</span>
     </div>
 
     <% if (payment.truemoneyEnabled === false || !payment.truemoneyPhone) { %>
@@ -41,7 +41,7 @@
         </div>
 
         <button class="group relative w-full overflow-hidden bg-gradient-to-r from-amber-500 via-[var(--gold)] to-amber-600 hover:brightness-110 text-[var(--bg)] font-semibold rounded-xl py-3.5 text-sm transition-all shadow-[0_6px_20px_-6px_rgba(200,166,63,.4)]">
-          <span>🧧 ยืนยันรับเงินจากซองของขวัญ</span>
+          <span class="inline-flex items-center justify-center gap-2"><img src="/images/truemoney-wallet.jpg" alt="" class="w-7 h-7 rounded-lg object-cover" /> ยืนยันรับเงินจากซองของขวัญ</span>
         </button>
       </form>
 
