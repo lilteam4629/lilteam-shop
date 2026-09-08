@@ -617,6 +617,19 @@ router.post('/filter-tags/:id/delete', async (req, res) => {
   res.redirect('/admin/filter-tags');
 });
 
+router.post('/filter-tags/:id/edit', async (req, res) => {
+  const name = String(req.body.name || '').trim();
+  const tag = store.data.filterTags.find(t => t.id === req.params.id);
+  if (!tag) req.flash('error', 'ไม่พบตัวกรองสินค้า');
+  else if (!name) req.flash('error', 'กรุณากรอกชื่อตัวกรอง');
+  else {
+    tag.name = name.slice(0, 100);
+    await store.save();
+    req.flash('success', 'แก้ไขชื่อตัวกรองแล้ว');
+  }
+  res.redirect('/admin/filter-tags');
+});
+
 // ---------- Home page sections ----------
 // Admin-configurable sections shown on the storefront homepage, each
 // either auto-filled with the shop's newest products or a manually

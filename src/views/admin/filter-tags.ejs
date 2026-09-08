@@ -30,7 +30,10 @@
             <img src="<%= t.image %>" alt="<%= t.name %>" class="w-full h-full rounded-full object-cover group-hover:scale-105 transition duration-200" />
           </div>
 
-          <div class="font-bold text-xs sm:text-sm text-[var(--text)] truncate max-w-full"><%= t.name %></div>
+          <form action="/admin/filter-tags/<%= t.id %>/edit" method="post" class="w-full mb-1 flex gap-1">
+            <input name="name" value="<%= t.name %>" required maxlength="100" aria-label="ชื่อตัวกรอง" class="min-w-0 w-full text-center font-bold text-xs bg-[var(--card)] border border-[var(--border-light)] rounded-lg px-2 py-1 outline-none focus:border-[var(--gold)]" />
+            <button type="submit" class="shrink-0 text-[var(--gold)] border border-[var(--gold)]/30 rounded-lg px-2 text-[11px] font-semibold">บันทึก</button>
+          </form>
           <div class="text-[11px] text-[var(--text-4)] mb-3"><%= t.productCount %> สินค้าที่ผูกไว้</div>
 
           <form action="/admin/filter-tags/<%= t.id %>/delete" method="post" data-confirm="ต้องการลบตัวกรอง '<%= t.name %>' ใช่หรือไม่? (จะถูกนำออกจากสินค้าทุกชิ้นที่ผูกไว้)">
