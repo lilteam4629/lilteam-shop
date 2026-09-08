@@ -327,8 +327,11 @@
         } catch (error) {
           // Do not replace one stalled request with another full-page request.
           // On timeout the current page remains usable and the visitor can retry.
-          if (error.name !== 'AbortError') window.location.assign(url.href);
-          else if (request.signal.reason === 'timeout') showNavigationError();
+          if (request.signal.aborted) {
+            if (request.signal.reason === 'timeout') showNavigationError();
+          } else {
+            window.location.assign(url.href);
+          }
         } finally {
           clearTimeout(timeout);
           if (activeRequest === request) {
