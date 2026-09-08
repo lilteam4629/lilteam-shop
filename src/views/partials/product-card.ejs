@@ -122,12 +122,12 @@
         <% } %>
       </div>
       <% if (soldOut) { %>
-        <span class="shrink-0 inline-flex items-center gap-1 bg-[var(--coral)]/15 border border-[var(--coral)]/50 text-[var(--coral)] font-bold text-[9px] px-2 py-1 rounded-full">หมด</span>
+        <span class="shrink-0 inline-flex items-center gap-1 bg-slate-500/20 border border-slate-500/50 text-slate-400 font-bold text-[9px] px-2 py-1 rounded-full">หมด</span>
       <% } else { %>
         <span class="shrink-0 inline-flex items-center gap-1 bg-emerald-500/15 border border-emerald-500/50 text-emerald-400 font-bold text-[9px] px-2 py-1 rounded-full">● พร้อมขาย</span>
       <% } %>
     </div>
-    <span class="mt-1 block w-full text-center rounded-lg py-1.5 text-xs font-bold transition-colors <%= soldOut ? 'bg-[var(--input)] text-[var(--text-4)]' : 'bg-[var(--gold)] text-[var(--bg)] group-hover:bg-[var(--gold-hover)]' %>"><%= soldOut ? 'สินค้าหมด' : 'สั่งซื้อสินค้า' %></span>
+    <span class="mt-1 block w-full text-center rounded-lg py-1.5 text-xs font-bold transition-colors <%= soldOut ? 'bg-slate-500/15 border border-slate-500/30 text-slate-400' : 'bg-[var(--gold)] text-[var(--bg)] group-hover:bg-[var(--gold-hover)]' %>"><%= soldOut ? 'สินค้าหมด' : 'สั่งซื้อสินค้า' %></span>
     <span class="text-[10px] text-[var(--text-4)] text-center truncate"><%= soldOut ? 'รอสินค้าเข้าใหม่' : `สินค้าคงเหลือ ${p.stockCount.toLocaleString()} ชิ้น` %></span>
   </div>
 </a>
