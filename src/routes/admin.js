@@ -594,7 +594,32 @@ router.get('/filter-tags', (req, res) => {
   const filterTags = store.data.filterTags.map(t => ({
     ...t, productCount: store.data.products.filter(p => (p.filterTagIds || []).includes(t.id)).length,
   }));
-  res.render('admin/filter-tags', { title: 'ตัวกรองสินค้า', active: 'filter-tags', filterTags });
+  const products = store.data.products.map(p => ({
+    id: p.id,
+    title: p.title,
+    image: p.images && p.images[0],
+    status: p.status,
+    filterTagIds: p.filterTagIds || [],
+  }));
+  res.render('admin/filter-tags', { title: 'ตัวกรองสินค้า', active: 'filter-tags', filterTags, products });
+});
+
+router.post('/filter-tags/:id/products', async (req, res) => {
+  const tag = store.data.filterTags.find(t => String(t.id) === String(req.params.id));
+  if (!tag) {
+    req.flash('error', 'ไม่พบตัวกรองสินค้า');
+    return res.redirect('/admin/filter-tags');
+  }
+  const selected = new Set([].concat(req.body.productIds || []).map(String));
+  store.data.products.forEach(p => {
+    const tags = new Set((p.filterTagIds || []).map(String));
+    if (selected.has(String(p.id))) tags.add(String(tag.id));
+    else tags.delete(String(tag.id));
+    p.filterTagIds = [...tags];
+  });
+  await store.save();
+  req.flash('success', `อัปเดตสินค้าในตัวกรอง “${tag.name}” แล้ว`);
+  res.redirect('/admin/filter-tags');
 });
 
 router.post('/filter-tags', (req, res) => {
