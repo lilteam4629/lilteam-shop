@@ -410,6 +410,7 @@
   </div>
 
   <!-- Admin Interactive Scripts -->
+  <% if (!preserveSlipContent) { %><script src="/js/admin-content-v2.js" defer></script><% } %>
   <script>
     // Toast Notification System
     window.showToast = function (message, type = 'success', duration = 4000) {
