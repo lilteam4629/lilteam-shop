@@ -7,10 +7,65 @@
       <p class="text-xs text-[var(--text-4)] mt-0.5">รายชื่อสมาชิกและจัดการสิทธิ์การใช้งาน</p>
     </div>
   </div>
-  <a href="#add-user-form" class="inline-flex items-center gap-1.5 bg-[var(--gold)] text-[var(--bg)] font-bold rounded-xl px-4 py-2.5 text-xs shadow-md transition active:scale-95 shrink-0">
+  <button type="button" id="add-user-open-btn" class="inline-flex items-center gap-1.5 bg-[var(--gold)] text-[var(--bg)] font-bold rounded-xl px-4 py-2.5 text-xs shadow-md transition active:scale-95 shrink-0">
     👤+ เพิ่มผู้ใช้
-  </a>
+  </button>
 </div>
+
+<!-- Add User Modal -->
+<div id="add-user-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-base text-[var(--text)]">เพิ่มสมาชิก / แอดมินใหม่</h3>
+      <button type="button" id="add-user-close-btn" class="w-7 h-7 rounded-lg flex items-center justify-center text-[var(--text-4)] hover:text-[var(--text)] hover:bg-[var(--input)] transition">✕</button>
+    </div>
+
+    <form action="/admin/users/new" method="post" class="space-y-3.5">
+      <div>
+        <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ชื่อผู้ใช้ (Username) *</label>
+        <input name="username" required placeholder="เช่น user123" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">อีเมล (Email) *</label>
+        <input name="email" type="email" required placeholder="user@example.com" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">รหัสผ่าน (Password)</label>
+        <input name="password" type="password" placeholder="อย่างน้อย 6 ตัวอักษร" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+      </div>
+
+      <div>
+        <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ระดับสิทธิ์ (Role)</label>
+        <select name="role" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition">
+          <option value="customer">ลูกค้าทั่วไป (Customer)</option>
+          <option value="admin">ผู้ดูแลระบบ (Admin)</option>
+        </select>
+      </div>
+
+      <div class="flex items-center justify-end gap-2.5 pt-2">
+        <button type="button" id="add-user-cancel-btn" class="px-4 py-2 rounded-xl text-xs font-medium text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)] transition">ยกเลิก</button>
+        <button type="submit" class="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] shadow-md transition active:scale-95">+ สร้างบัญชีผู้ใช้</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  (function () {
+    const openBtn = document.getElementById('add-user-open-btn');
+    const modal = document.getElementById('add-user-modal');
+    const closeBtn = document.getElementById('add-user-close-btn');
+    const cancelBtn = document.getElementById('add-user-cancel-btn');
+    if (!openBtn || !modal) return;
+    const open = () => modal.classList.remove('hidden');
+    const close = () => modal.classList.add('hidden');
+    openBtn.addEventListener('click', open);
+    closeBtn.addEventListener('click', close);
+    cancelBtn.addEventListener('click', close);
+    modal.addEventListener('click', function (e) { if (e.target === modal) close(); });
+  })();
+</script>
 
 <!-- Stat Cards -->
 <div class="grid sm:grid-cols-2 gap-4 mb-6">
@@ -30,10 +85,7 @@
   </div>
 </div>
 
-<div class="grid lg:grid-cols-3 gap-6">
-
-  <!-- Left Main Column: Users Table & Search -->
-  <div class="lg:col-span-2 min-w-0 space-y-4">
+<div class="space-y-4">
 
     <!-- Table Panel Header: title + page-size + search -->
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm space-y-3">
@@ -253,48 +305,5 @@
         </div>
       <% } %>
     </div>
-
-  </div>
-
-  <!-- Right Column: Add New User Form Card -->
-  <div>
-    <div id="add-user-form" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm sticky top-20 scroll-mt-20">
-      <div class="flex items-center gap-2.5 mb-4">
-        <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
-          👤
-        </div>
-        <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เพิ่มสมาชิก / แอดมินใหม่</h3>
-      </div>
-
-      <form action="/admin/users/new" method="post" class="space-y-3.5">
-        <div>
-          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ชื่อผู้ใช้ (Username) *</label>
-          <input name="username" required placeholder="เช่น user123" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">อีเมล (Email) *</label>
-          <input name="email" type="email" required placeholder="user@example.com" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">รหัสผ่าน (Password)</label>
-          <input name="password" type="password" placeholder="อย่างน้อย 6 ตัวอักษร" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ระดับสิทธิ์ (Role)</label>
-          <select name="role" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition">
-            <option value="customer">ลูกค้าทั่วไป (Customer)</option>
-            <option value="admin">ผู้ดูแลระบบ (Admin)</option>
-          </select>
-        </div>
-
-        <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] hover:opacity-90 text-[var(--bg)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95 mt-2">
-          + สร้างบัญชีผู้ใช้
-        </button>
-      </form>
-    </div>
-  </div>
 
 </div>
