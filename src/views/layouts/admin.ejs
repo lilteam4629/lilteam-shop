@@ -23,7 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <% if (typeof active !== 'undefined' && active === 'filter-tags') { %><link rel="stylesheet" href="<%= asset('css/filter-studio-v3.css') %>" /><% } %>
   <% if (typeof active !== 'undefined' && active === 'home-sections') { %><link rel="stylesheet" href="<%= asset('css/home-sections-v3.css') %>" /><% } %>
-  <% if (!protectedSlipPage) { %><link rel="stylesheet" href="<%= asset('css/admin-design-v4.css') %>" /><% } %>
+  <% if (!protectedSlipPage) { %><link rel="stylesheet" href="<%= asset('css/admin-workspace-v5.css') %>" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
     html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
@@ -412,6 +412,7 @@
   </div>
 
   <!-- Admin Interactive Scripts -->
+  <% if (!protectedSlipPage) { %><script src="<%= asset('js/admin-workspace-v5.js') %>" defer></script><% } %>
   <script>
     // Toast Notification System
     window.showToast = function (message, type = 'success', duration = 4000) {

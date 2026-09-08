@@ -1,4 +1,4 @@
-# Admin UI V4 coverage checklist
+# Admin Workspace V5 coverage checklist
 
 ## Included menus
 
@@ -32,12 +32,13 @@
 
 - [x] Automatic slip verification (`/admin/easyslip-usage`, `/admin/slip-verification`, redirected API provider routes)
 - [x] Its view files and provider logic were not changed.
-- [x] Admin Design System CSS is conditionally excluded for its active page identifiers.
+- [x] Workspace V5 CSS and JavaScript are conditionally excluded for its active page identifiers.
 
 ## Verification
 
 - [x] Sidebar/menu inventory compared with admin GET routes.
 - [x] 64 form actions inventoried and matched against the existing route families.
+- [x] Fifteen allowed admin templates have dedicated workspace wrappers.
 - [x] EJS templates compile.
 - [x] First-party JavaScript syntax checks.
 - [x] CSS delimiter checks.
