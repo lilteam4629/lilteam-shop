@@ -41,8 +41,8 @@
     <div class="filter-product-list">
       <% products.forEach(p=>{ %><label class="filter-product-row" data-product-name="<%= String(p.title || '').toLowerCase() %>" data-tags='<%- JSON.stringify(p.filterTagIds || []) %>'>
         <input type="checkbox" name="productIds" value="<%= p.id %>" />
+        <span class="filter-product-thumb"><% if(p.image){ %><img src="<%= p.image %>" alt="" loading="lazy" /><% } else { %>◇<% } %></span>
         <span class="filter-product-check">✓</span>
-        <span class="filter-product-thumb"><% if(p.image){ %><img src="<%= p.image %>" alt="" /><% } else { %>◇<% } %></span>
         <span class="filter-product-info"><b><%= p.title %></b><small><%= p.status === 'active' ? 'เปิดขาย' : 'ซ่อนอยู่' %></small></span>
       </label><% }) %>
     </div>
