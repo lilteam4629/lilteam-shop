@@ -2,7 +2,7 @@
 <html lang="th">
 <head>
   <% const protectedSlipPage = ['easyslip-usage', 'slip-verification', 'api-providers'].includes(typeof active === 'undefined' ? '' : active); %>
-  <% const legacyAdminPage = ['products', 'orders', 'coupons', 'settings', 'appearance', 'theme', 'announcements', 'users'].includes(typeof active === 'undefined' ? '' : active); %>
+  <% const legacyAdminPage = ['dashboard', 'products', 'orders', 'coupons', 'settings', 'appearance', 'theme', 'announcements', 'users', 'minigame'].includes(typeof active === 'undefined' ? '' : active); %>
   <% const workspaceEnabled = !protectedSlipPage && !legacyAdminPage; %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
