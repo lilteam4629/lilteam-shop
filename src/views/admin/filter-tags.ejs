@@ -55,21 +55,19 @@
 
       <form action="/admin/filter-tags" method="post" enctype="multipart/form-data" class="space-y-3.5">
         <div>
-          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ชื่อตัวกรอง (แสดงใต้รูป) *</label>
-          <input name="name" required placeholder="เช่น แนะนำ, ขายดี, Denuvo, Nesta" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ชื่อตัวกรอง (ใช้เมื่อเลือก 1 รูป)</label>
+          <input name="name" placeholder="ถ้าเลือกหลายรูป ระบบใช้ชื่อไฟล์เป็นชื่อตัวกรอง" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
         </div>
 
         <div>
           <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">รูปไอคอนตัวกรอง (แนะนำสี่เหลี่ยมจัตุรัส) *</label>
-          <input id="filterImageInput" type="file" name="filterImage" required accept="image/png,image/jpeg,image/webp,image/gif" class="block w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
+          <input id="filterImageInput" type="file" name="filterImages" multiple required accept="image/png,image/jpeg,image/webp,image/gif" class="block w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
 
-          <div id="filterImagePreview" class="hidden mt-3 rounded-2xl overflow-hidden border border-[var(--border-light)] bg-black/20 p-2 text-center">
-            <img class="w-20 h-20 rounded-full mx-auto object-cover border-2 border-[var(--gold)] shadow-md" alt="ตัวอย่างรูปตัวกรอง" />
-          </div>
+          <div id="filterImagePreview" class="hidden mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2 rounded-2xl border border-[var(--border-light)] bg-black/20 p-2"></div>
         </div>
 
         <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95 mt-2">
-          + เพิ่มแท็กตัวกรอง
+          + เพิ่มแท็กตัวกรองที่เลือก
         </button>
       </form>
 
@@ -87,12 +85,20 @@
     const preview = document.getElementById('filterImagePreview');
     if (!input || !preview) return;
     input.addEventListener('change', function () {
-      const file = input.files && input.files[0];
-      preview.classList.toggle('hidden', !file);
-      if (!file) return;
-      const image = preview.querySelector('img');
-      image.src = URL.createObjectURL(file);
-      image.onload = function () { URL.revokeObjectURL(image.src); };
+      const files = Array.from(input.files || []);
+      preview.classList.toggle('hidden', !files.length);
+      preview.innerHTML = '';
+      files.forEach(function(file) {
+        const item = document.createElement('div');
+        item.className = 'min-w-0 text-center';
+        const image = document.createElement('img');
+        image.className = 'w-16 h-16 rounded-full mx-auto object-cover border-2 border-[var(--gold)]';
+        image.src = URL.createObjectURL(file);
+        image.onload = function () { URL.revokeObjectURL(image.src); };
+        const label = document.createElement('div');
+        label.className = 'text-[9px] truncate mt-1'; label.textContent = file.name.replace(/\.[^.]+$/, '');
+        item.append(image, label); preview.appendChild(item);
+      });
     });
   })();
 </script>

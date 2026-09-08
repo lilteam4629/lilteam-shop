@@ -45,6 +45,12 @@ const bulkProductImageUpload = multer({
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
+const filterImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024, files: 60 },
+  fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
+});
+
 const qrImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 4 * 1024 * 1024, files: 2 },
@@ -564,21 +570,25 @@ router.get('/filter-tags', (req, res) => {
 });
 
 router.post('/filter-tags', (req, res) => {
-  productImageUpload.single('filterImage')(req, res, store.bindTenantContext(async (err) => {
-    if (err || !req.file) {
-      req.flash('error', 'กรุณาแนบรูปตัวกรอง (ไฟล์รูปไม่เกิน 8MB)');
+  filterImageUpload.array('filterImages', 60)(req, res, store.bindTenantContext(async (err) => {
+    const files = req.files || [];
+    if (err || !files.length) {
+      req.flash('error', 'กรุณาแนบรูปตัวกรอง (สูงสุด 60 รูป รูปละไม่เกิน 8MB)');
       return res.redirect('/admin/filter-tags');
     }
     const name = (req.body.name || '').trim();
-    if (!name) {
+    if (files.length === 1 && !name) {
       req.flash('error', 'กรุณากรอกชื่อตัวกรอง');
       return res.redirect('/admin/filter-tags');
     }
     try {
-      const image = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
-      store.data.filterTags.push({ id: store.genId(8), name, image, createdAt: new Date().toISOString() });
+      for (const file of files) {
+        const image = await store.saveMedia(file.buffer, file.originalname, file.mimetype);
+        const filterName = files.length === 1 ? name : file.originalname.replace(/\.[^.]+$/, '').trim();
+        store.data.filterTags.push({ id: store.genId(8), name: filterName || 'ตัวกรอง', image, createdAt: new Date().toISOString() });
+      }
       await store.save();
-      req.flash('success', 'เพิ่มตัวกรองและอัปโหลดรูปแล้ว');
+      req.flash('success', `เพิ่มตัวกรอง ${files.length} รายการแล้ว`);
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปตัวกรองไม่สำเร็จ กรุณาลองใหม่');
     }
