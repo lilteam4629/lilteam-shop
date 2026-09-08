@@ -674,6 +674,21 @@ router.post('/filter-tags/:id/delete', async (req, res) => {
   res.redirect('/admin/filter-tags');
 });
 
+router.post('/filter-tags/bulk-delete', async (req, res) => {
+  const ids = new Set([].concat(req.body.tagIds || []).map(String).filter(Boolean));
+  if (!ids.size) {
+    req.flash('error', 'กรุณาเลือกตัวกรองที่ต้องการลบ');
+    return res.redirect('/admin/filter-tags');
+  }
+  store.data.filterTags = store.data.filterTags.filter(t => !ids.has(String(t.id)));
+  store.data.products.forEach(p => {
+    if (p.filterTagIds) p.filterTagIds = p.filterTagIds.filter(id => !ids.has(String(id)));
+  });
+  await store.save();
+  req.flash('success', `ลบตัวกรอง ${ids.size} รายการแล้ว`);
+  res.redirect('/admin/filter-tags');
+});
+
 router.post('/filter-tags/:id/edit', async (req, res) => {
   const name = String(req.body.name || '').trim();
   const tag = store.data.filterTags.find(t => t.id === req.params.id);
