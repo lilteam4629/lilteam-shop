@@ -131,40 +131,73 @@
 @media(prefers-reduced-motion:reduce){.hud-bar-glow,.hud-bar-scan:before{animation:none!important}}
 </style>
 
-<% const popupAnnouncement = [...announcements].filter(a => a.popup).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0]; %>
-<% if (popupAnnouncement) { %>
-<div id="announcement-popup" class="hidden fixed inset-0 z-[9998] items-center justify-center bg-black/70 backdrop-blur-sm p-4" data-announcement-id="<%= popupAnnouncement.id %>">
+<%
+  const welcomePopup = settings.welcomePopup || {};
+  const welcomePopupImages = Array.isArray(welcomePopup.images) ? welcomePopup.images : [];
+  const welcomePopupTitle = welcomePopup.showTitle !== false ? (welcomePopup.title || '') : '';
+  const welcomePopupContent = welcomePopup.showContent !== false ? (welcomePopup.content || '') : '';
+%>
+<% if (welcomePopup.enabled && (welcomePopupImages.length || welcomePopupTitle || welcomePopupContent)) { %>
+<div id="welcome-popup" class="hidden fixed inset-0 z-[9998] items-center justify-center bg-black/70 backdrop-blur-sm p-4" data-popup-id="<%= welcomePopupImages.join('|') %>|<%= welcomePopupTitle %>|<%= welcomePopupContent %>">
   <div class="relative w-full max-w-md bg-[var(--card)] border border-[var(--gold)]/40 rounded-2xl overflow-hidden shadow-2xl">
-    <% if (popupAnnouncement.image) { %>
-      <% if (popupAnnouncement.link) { %><a href="<%= popupAnnouncement.link %>" target="_blank" rel="noopener"><% } %>
-        <img src="<%= popupAnnouncement.image %>" alt="<%= popupAnnouncement.title %>" class="w-full object-contain" />
-      <% if (popupAnnouncement.link) { %></a><% } %>
+    <% if (welcomePopupImages.length) { %>
+      <div class="welcome-popup-slider relative w-full aspect-square bg-[var(--input)] overflow-hidden">
+        <% welcomePopupImages.forEach((image, index) => { %>
+          <img src="<%= image %>" alt="" class="welcome-popup-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" data-index="<%= index %>" />
+        <% }) %>
+        <% if (welcomePopupImages.length > 1) { %>
+          <div class="absolute bottom-2.5 left-0 right-0 flex items-center justify-center gap-1.5 z-10">
+            <% welcomePopupImages.forEach((image, index) => { %>
+              <span class="welcome-popup-dot w-1.5 h-1.5 rounded-full <%= index === 0 ? 'bg-white' : 'bg-white/40' %> transition" data-index="<%= index %>"></span>
+            <% }) %>
+          </div>
+        <% } %>
+      </div>
+    <% } %>
+    <% if (welcomePopupTitle || welcomePopupContent) { %>
+      <div class="p-5 text-center border-t border-[var(--border)]">
+        <% if (welcomePopupTitle) { %><h3 class="font-bold text-base text-[var(--text)] mb-1"><%= welcomePopupTitle %></h3><% } %>
+        <% if (welcomePopupContent) { %><p class="text-sm text-[var(--text-3)] leading-relaxed"><%= welcomePopupContent %></p><% } %>
+      </div>
     <% } %>
     <div class="flex divide-x divide-[var(--border)] border-t border-[var(--border)]">
-      <button type="button" id="announcement-popup-close" class="flex-1 py-3 text-sm font-medium text-[var(--text-2)] hover:bg-[var(--input)]">✕ เข้าสู่เว็บไซต์</button>
-      <button type="button" id="announcement-popup-mute" class="flex-1 py-3 text-sm font-medium text-[var(--coral)] hover:bg-[var(--input)]">🕐 ไม่แสดงผลอีกครั้งใน 1 วัน</button>
+      <button type="button" id="welcome-popup-close" class="flex-1 py-3 text-sm font-medium text-[var(--text-2)] hover:bg-[var(--input)]">✕ เข้าสู่เว็บไซต์</button>
+      <button type="button" id="welcome-popup-mute" class="flex-1 py-3 text-sm font-medium text-[var(--coral)] hover:bg-[var(--input)]">🕐 ไม่แสดงผลอีกครั้งใน 1 วัน</button>
     </div>
   </div>
 </div>
 <script>
   (function () {
-    const modal = document.getElementById('announcement-popup');
+    const modal = document.getElementById('welcome-popup');
     if (!modal) return;
-    const storageKey = 'lilteam_announcement_mute_' + modal.dataset.announcementId;
+    const storageKey = 'lilteam_welcome_popup_mute_' + encodeURIComponent(modal.dataset.popupId).slice(0, 120);
     try {
       const mutedUntil = Number(localStorage.getItem(storageKey) || 0);
       if (Date.now() < mutedUntil) return;
     } catch (e) {}
     modal.classList.remove('hidden');
     modal.classList.add('flex');
-    const close = document.getElementById('announcement-popup-close');
-    const mute = document.getElementById('announcement-popup-mute');
+    const close = document.getElementById('welcome-popup-close');
+    const mute = document.getElementById('welcome-popup-mute');
     if (close) close.addEventListener('click', function () { modal.remove(); });
     if (mute) mute.addEventListener('click', function () {
       try { localStorage.setItem(storageKey, String(Date.now() + 24 * 60 * 60 * 1000)); } catch (e) {}
       modal.remove();
     });
     modal.addEventListener('click', function (e) { if (e.target === modal) modal.remove(); });
+
+    const slides = modal.querySelectorAll('.welcome-popup-slide');
+    const dots = modal.querySelectorAll('.welcome-popup-dot');
+    if (slides.length > 1) {
+      let current = 0;
+      setInterval(function () {
+        slides[current].classList.replace('opacity-100', 'opacity-0');
+        if (dots[current]) dots[current].classList.replace('bg-white', 'bg-white/40');
+        current = (current + 1) % slides.length;
+        slides[current].classList.replace('opacity-0', 'opacity-100');
+        if (dots[current]) dots[current].classList.replace('bg-white/40', 'bg-white');
+      }, 3500);
+    }
   })();
 </script>
 <% } %>

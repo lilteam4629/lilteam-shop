@@ -64,6 +64,12 @@ const prizeImageUpload = multer({
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
+const popupImageUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 8 * 1024 * 1024, files: 20 },
+  fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
+});
+
 router.use(requireAdmin);
 router.use((req, res, next) => {
   res.locals.layout = 'layouts/admin';
@@ -1721,26 +1727,14 @@ router.get('/announcements', (req, res) => {
   res.render('admin/announcements', { title: 'ประกาศ', active: 'announcements', announcements: store.data.announcements });
 });
 
-router.post('/announcements', (req, res) => {
-  bannerUpload.single('image')(req, res, store.bindTenantContext(async (err) => {
-    if (err) {
-      req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 10MB)');
-      return res.redirect('/admin/announcements');
-    }
-    try {
-      const image = firstDirectUpload(req.body, 'image') || (req.file ? await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype) : null);
-      store.data.announcements.push({
-        id: store.genId(8), title: req.body.title, body: req.body.body,
-        image, link: (req.body.link || '').trim(), popup: req.body.popup === 'on',
-        active: true, createdAt: new Date().toISOString(),
-      });
-      await store.save();
-      req.flash('success', 'เพิ่มประกาศแล้ว');
-    } catch (saveError) {
-      req.flash('error', 'บันทึกประกาศไม่สำเร็จ กรุณาลองใหม่');
-    }
-    res.redirect('/admin/announcements');
-  }));
+router.post('/announcements', async (req, res) => {
+  store.data.announcements.push({
+    id: store.genId(8), title: req.body.title, body: req.body.body,
+    active: true, createdAt: new Date().toISOString(),
+  });
+  await store.save();
+  req.flash('success', 'เพิ่มประกาศแล้ว');
+  res.redirect('/admin/announcements');
 });
 
 router.post('/announcements/:id/toggle', async (req, res) => {
@@ -1754,6 +1748,35 @@ router.post('/announcements/:id/delete', async (req, res) => {
   await store.save();
   req.flash('success', 'ลบประกาศแล้ว');
   res.redirect('/admin/announcements');
+});
+
+// ---------- Welcome Popup (separate from the plain text announcement bars above) ----------
+router.post('/welcome-popup', (req, res) => {
+  popupImageUpload.array('images', 20)(req, res, store.bindTenantContext(async (err) => {
+    if (err) {
+      req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 8MB ต่อรูป)');
+      return res.redirect('/admin/appearance');
+    }
+    try {
+      const existing = (store.data.settings.welcomePopup && store.data.settings.welcomePopup.images) || [];
+      const removed = new Set(Array.isArray(req.body.removeImages) ? req.body.removeImages : (req.body.removeImages ? [req.body.removeImages] : []));
+      const kept = existing.filter(image => !removed.has(image));
+      const uploaded = [...directUploadUrls(req.body, 'images'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
+      store.data.settings.welcomePopup = {
+        enabled: req.body.enabled === 'on',
+        showTitle: req.body.showTitle === 'on',
+        showContent: req.body.showContent === 'on',
+        title: (req.body.title || '').trim(),
+        content: (req.body.content || '').trim(),
+        images: [...kept, ...uploaded],
+      };
+      await store.save();
+      req.flash('success', 'บันทึกป๊อปอัพต้อนรับแล้ว');
+    } catch (saveError) {
+      req.flash('error', 'บันทึกไม่สำเร็จ: ' + (saveError.message || String(saveError)));
+    }
+    res.redirect('/admin/appearance');
+  }));
 });
 
 // ---------- Settings ----------

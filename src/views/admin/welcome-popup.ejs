@@ -1,0 +1,111 @@
+<%
+  const popup = settings.welcomePopup || {};
+  const popupImages = Array.isArray(popup.images) ? popup.images : [];
+%>
+<form action="/admin/welcome-popup" method="post" enctype="multipart/form-data">
+  <div class="grid lg:grid-cols-2 gap-5">
+
+    <!-- General Settings -->
+    <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-4 md:p-5">
+      <div class="flex items-center justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-8 h-8 rounded-lg bg-[var(--gold)]/15 text-[var(--gold)] flex items-center justify-center text-sm shrink-0">⚙️</span>
+          <div class="min-w-0">
+            <h3 class="font-semibold text-sm text-[var(--text)]">การตั้งค่าทั่วไป</h3>
+            <p class="text-[11px] text-[var(--text-4)]">เปิด/ปิด และกำหนดเนื้อหาของป๊อปอัพ</p>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+          <input type="checkbox" name="enabled" <%= popup.enabled ? 'checked' : '' %> class="sr-only peer" />
+          <div class="w-11 h-6 bg-[var(--card)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--gold)]"></div>
+        </label>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 mb-4">
+        <label class="flex items-center gap-2 text-xs text-[var(--text-2)] cursor-pointer">
+          <span class="relative inline-flex items-center">
+            <input type="checkbox" name="showTitle" <%= popup.showTitle !== false ? 'checked' : '' %> class="sr-only peer" />
+            <span class="w-9 h-5 bg-[var(--input)] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--gold)]"></span>
+          </span>
+          แสดงหัวข้อ (Title)
+        </label>
+        <label class="flex items-center gap-2 text-xs text-[var(--text-2)] cursor-pointer">
+          <span class="relative inline-flex items-center">
+            <input type="checkbox" name="showContent" <%= popup.showContent !== false ? 'checked' : '' %> class="sr-only peer" />
+            <span class="w-9 h-5 bg-[var(--input)] rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:border-gray-300 after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[var(--gold)]"></span>
+          </span>
+          แสดงเนื้อหา (Content)
+        </label>
+      </div>
+
+      <div class="mb-4">
+        <label class="flex items-center gap-1.5 text-xs font-semibold mb-1.5 text-[var(--text-3)]">🅣 หัวข้อแจ้งเตือน (Title)</label>
+        <input name="title" value="<%= popup.title || 'ยินดีต้อนรับ!' %>" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-sm outline-none focus:border-[var(--gold)] transition" />
+      </div>
+
+      <div>
+        <label class="flex items-center gap-1.5 text-xs font-semibold mb-1.5 text-[var(--text-3)]">☰ ข้อความประชาสัมพันธ์ (Content)</label>
+        <textarea name="content" rows="5" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-sm outline-none focus:border-[var(--gold)] transition resize-y"><%= popup.content || 'ขอบคุณที่ใช้บริการเว็บไซต์ของเรา' %></textarea>
+      </div>
+    </div>
+
+    <!-- Banner Images -->
+    <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-4 md:p-5">
+      <div class="flex items-center gap-2.5 mb-4">
+        <span class="w-8 h-8 rounded-lg bg-[var(--gold)]/15 text-[var(--gold)] flex items-center justify-center text-sm shrink-0">🖼️</span>
+        <div class="min-w-0">
+          <h3 class="font-semibold text-sm text-[var(--text)]">รูปแบบแบนเนอร์ประกาศ (หลายรูปได้)</h3>
+          <p class="text-[11px] text-[var(--text-4)]">สามารถเลือกเพิ่มรูปภาพได้หลายรูป ระบบจะแสดงเป็นสไลด์เลื่อน</p>
+        </div>
+      </div>
+
+      <label class="flex flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-[var(--border-light)] bg-[var(--card)] py-8 px-4 text-center cursor-pointer hover:border-[var(--gold)]/60 transition">
+        <span class="text-xl">⬆</span>
+        <span class="text-xs font-medium text-[var(--text-2)]">คลิกหรือลากภาพมาวางที่นี่ (เลือกได้หลายรูป)</span>
+        <span class="text-[10px] text-[var(--text-4)]">รองรับไฟล์ JPG, PNG, WEBP</span>
+        <input type="file" name="images" accept="image/png,image/jpeg,image/webp" multiple class="hidden" />
+      </label>
+
+      <div class="mt-4">
+        <p class="flex items-center gap-1.5 text-xs font-semibold text-[var(--text-3)] mb-2">🖥 รูปภาพปัจจุบัน (<%= popupImages.length %> รูป)</p>
+        <% if (popupImages.length) { %>
+          <div class="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+            <% popupImages.forEach((image, index) => { %>
+              <label class="group relative rounded-xl overflow-hidden border border-[var(--border-light)] bg-[var(--card)] cursor-pointer">
+                <img src="<%= image %>" alt="รูปที่ <%= index + 1 %>" class="w-full aspect-square object-cover" />
+                <span class="absolute inset-0 flex items-center justify-center gap-1 bg-black/0 group-has-[:checked]:bg-black/50 opacity-0 group-hover:opacity-100 group-has-[:checked]:opacity-100 transition text-[10px] font-semibold text-rose-300">
+                  <input type="checkbox" name="removeImages" value="<%= image %>" class="accent-rose-500" /> ลบ
+                </span>
+              </label>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <p class="text-xs text-[var(--text-4)] py-2">ยังไม่มีรูปภาพ</p>
+        <% } %>
+      </div>
+
+      <p class="mt-4 flex items-start gap-1.5 text-[11px] text-[var(--text-4)] leading-relaxed">
+        <span class="shrink-0">💡</span>
+        <span><b class="text-[var(--text-3)]">เคล็ดลับ:</b> หากมีมากกว่า 1 รูป หน้าร้านจะแสดงเป็น<b class="text-[var(--text-3)]">สไลด์เดอร์</b>พร้อมปุ่มเลื่อนและจุดเลื่อนสไลด์ ให้ลูกค้าดูได้สะดวกครับ</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="flex justify-end mt-5">
+    <button type="submit" class="inline-flex items-center gap-2 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl px-6 py-2.5 text-sm shadow-md transition active:scale-95">
+      💾 บันทึกการเปลี่ยนแปลงทั้งหมด
+    </button>
+  </div>
+</form>
+
+<script>
+  (function () {
+    const input = document.querySelector('input[name="images"]');
+    const dropzone = input && input.closest('label');
+    if (!input || !dropzone) return;
+    input.addEventListener('change', function () {
+      const label = dropzone.querySelector('span.text-xs');
+      if (label && input.files.length) label.textContent = input.files.length + ' ไฟล์ที่เลือก';
+    });
+  })();
+</script>
