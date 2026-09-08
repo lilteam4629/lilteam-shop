@@ -582,14 +582,25 @@ router.post('/filter-tags', (req, res) => {
       return res.redirect('/admin/filter-tags');
     }
     try {
+      let savedCount = 0;
+      const failed = [];
       for (const file of files) {
-        const image = await store.saveMedia(file.buffer, file.originalname, file.mimetype);
-        const filterName = files.length === 1 ? name : file.originalname.replace(/\.[^.]+$/, '').trim();
-        store.data.filterTags.push({ id: store.genId(8), name: filterName || 'ตัวกรอง', image, createdAt: new Date().toISOString() });
+        try {
+          const extension = ({ 'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp', 'image/gif': '.gif' })[file.mimetype] || '.img';
+          const image = await store.saveMedia(file.buffer, `filter-${store.genId(10)}${extension}`, file.mimetype);
+          const filterName = files.length === 1 ? name : file.originalname.replace(/\.[^.]+$/, '').trim();
+          store.data.filterTags.push({ id: store.genId(8), name: filterName || 'ตัวกรอง', image, createdAt: new Date().toISOString() });
+          savedCount += 1;
+        } catch (fileError) {
+          failed.push(file.originalname);
+          console.error('[filter-tags] image save failed:', file.originalname, fileError.message);
+        }
       }
+      if (!savedCount) throw new Error('บันทึกรูปไม่ได้ทุกไฟล์');
       await store.save();
-      req.flash('success', `เพิ่มตัวกรอง ${files.length} รายการแล้ว`);
+      req.flash('success', `เพิ่มตัวกรอง ${savedCount} รายการแล้ว${failed.length ? ` (ข้าม ${failed.length} รูปที่มีปัญหา)` : ''}`);
     } catch (saveError) {
+      console.error('[filter-tags] bulk save failed:', saveError.message);
       req.flash('error', 'บันทึกรูปตัวกรองไม่สำเร็จ กรุณาลองใหม่');
     }
     res.redirect('/admin/filter-tags');
