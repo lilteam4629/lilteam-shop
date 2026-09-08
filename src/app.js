@@ -64,9 +64,12 @@ app.get('/media/:id/:filename?', async (req, res, next) => {
     next(err);
   }
 });
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public'), {
+  etag: true,
+  maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
+}));
 
-// Static assets are served with a 4-hour cache, so an edited stylesheet
+// Static assets are served with a 7-day cache in production, so an edited stylesheet
 // would otherwise keep showing its old version in already-open browsers.
 // Stamping each link with the file's own mtime means every deploy that
 // actually changes a file busts only that file's cache, automatically —

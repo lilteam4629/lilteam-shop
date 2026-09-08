@@ -20,8 +20,10 @@
       } catch (e) {}
     })();
   </script>
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <% if (typeof active !== 'undefined' && active === 'filter-tags') { %><link rel="stylesheet" href="<%= asset('css/filter-studio-v3.css') %>" /><% } %>
   <% if (typeof active !== 'undefined' && active === 'home-sections') { %><link rel="stylesheet" href="<%= asset('css/home-sections-v3.css') %>" /><% } %>
@@ -612,8 +614,25 @@
 
     // Page Navigation Spinner Handler
     (function () {
-      function markNavigating() {
+      let navigationTimer = null;
+      function clearNavigating() {
+        document.documentElement.classList.remove('lilteam-navigating');
+        if (navigationTimer) clearTimeout(navigationTimer);
+        navigationTimer = null;
+      }
+      function markNavigating(submitBtn) {
         document.documentElement.classList.add('lilteam-navigating');
+        if (navigationTimer) clearTimeout(navigationTimer);
+        // A failed request must never leave the whole admin unusable. This
+        // only removes the visual blocker; it does not cancel a form submit.
+        navigationTimer = setTimeout(function () {
+          clearNavigating();
+          if (submitBtn && submitBtn.dataset.lilteamNavigationDisabled === '1') {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            delete submitBtn.dataset.lilteamNavigationDisabled;
+          }
+        }, 12000);
       }
       document.addEventListener('click', function (event) {
         if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -629,12 +648,14 @@
         const submitBtn = event.target.querySelector('button[type="submit"], input[type="submit"]');
         if (submitBtn) {
           submitBtn.disabled = true;
+          submitBtn.dataset.lilteamNavigationDisabled = '1';
           submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
         }
-        markNavigating();
+        markNavigating(submitBtn);
       });
-      window.addEventListener('pageshow', function () {
-        document.documentElement.classList.remove('lilteam-navigating');
+      window.addEventListener('pageshow', clearNavigating);
+      window.addEventListener('focus', function () {
+        if (document.visibilityState === 'visible') clearNavigating();
       });
     })();
 

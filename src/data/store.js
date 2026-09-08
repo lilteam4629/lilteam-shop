@@ -18,6 +18,15 @@ const r2 = require('../services/r2');
 // context (the main site, on its own domain), `store.data` behaves
 // exactly as it always has.
 const tenantContext = new AsyncLocalStorage();
+// A tenant document is the complete shop dataset. Reading that document from
+// MongoDB for every HTML page, image-shell request and form redirect adds an
+// avoidable network round trip to every tenant visit. Keep a short-lived,
+// process-local copy and share an in-flight read between simultaneous requests.
+// Writes below refresh the cache, so changes made by this process are visible
+// immediately; the short TTL still picks up changes made by another instance.
+const TENANT_CACHE_TTL_MS = Math.max(1000, Number(process.env.TENANT_CACHE_TTL_MS) || 10000);
+const tenantDbCache = new Map();
+const tenantDbLoads = new Map();
 
 const DB_PATH = path.join(__dirname, 'db.json');
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -762,16 +771,17 @@ function save() {
   }
 }
 
-function saveTenantDb(shopId, tenantDb) {
+async function saveTenantDb(shopId, tenantDb) {
   if (mongoCollection) {
     // Returned (not fire-and-forget) so createTenantDb can await it — a
     // shop created and then immediately redirected to must already be
     // readable by loadTenantDb on the very next request, or that request
     // sees no data yet and shows "ร้านนี้ยังไม่พร้อมใช้งาน".
-    return mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...tenantDb }, { upsert: true });
+    await mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...tenantDb }, { upsert: true });
+  } else {
+    fs.writeFileSync(tenantDbPath(shopId), JSON.stringify(tenantDb, null, 2));
   }
-  fs.writeFileSync(tenantDbPath(shopId), JSON.stringify(tenantDb, null, 2));
-  return Promise.resolve();
+  tenantDbCache.set(String(shopId), { db: tenantDb, expiresAt: Date.now() + TENANT_CACHE_TTL_MS });
 }
 
 /**
@@ -781,6 +791,8 @@ function saveTenantDb(shopId, tenantDb) {
  * any other tenant.
  */
 async function deleteTenantDb(shopId) {
+  tenantDbCache.delete(String(shopId));
+  tenantDbLoads.delete(String(shopId));
   if (mongoCollection) {
     await mongoCollection.deleteOne({ _id: `shop:${shopId}` });
     return;
@@ -793,6 +805,21 @@ async function deleteTenantDb(shopId) {
  * Load an existing tenant's full dataset, or null if that shop has none yet.
  */
 async function loadTenantDb(shopId) {
+  const cacheKey = String(shopId);
+  const cached = tenantDbCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) return cached.db;
+  if (tenantDbLoads.has(cacheKey)) return tenantDbLoads.get(cacheKey);
+
+  const loadPromise = loadTenantDbUncached(shopId, cacheKey);
+  tenantDbLoads.set(cacheKey, loadPromise);
+  try {
+    return await loadPromise;
+  } finally {
+    tenantDbLoads.delete(cacheKey);
+  }
+}
+
+async function loadTenantDbUncached(shopId, cacheKey) {
   let tenantDb;
   if (mongoCollection) {
     const existing = await mongoCollection.findOne({ _id: `shop:${shopId}` });
@@ -818,6 +845,14 @@ async function loadTenantDb(shopId) {
   // change. The backfilled fields get persisted safely the normal way, the
   // next time this tenant's own request path calls store.save().
   migrateSchema(tenantDb);
+  tenantDbCache.set(cacheKey, { db: tenantDb, expiresAt: Date.now() + TENANT_CACHE_TTL_MS });
+  // Avoid an unbounded map if many expired tenant shops are visited over time.
+  if (tenantDbCache.size > 200) {
+    const now = Date.now();
+    for (const [key, entry] of tenantDbCache) {
+      if (entry.expiresAt <= now) tenantDbCache.delete(key);
+    }
+  }
   return tenantDb;
 }
 

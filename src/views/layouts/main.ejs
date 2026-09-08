@@ -35,8 +35,10 @@
       } catch (e) {}
     })();
   </script>
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
@@ -262,12 +264,28 @@
         window.scrollTo(0, 0);
       }
 
+      function showNavigationError() {
+        let notice = document.getElementById('lilteam-navigation-error');
+        if (!notice) {
+          notice = document.createElement('div');
+          notice.id = 'lilteam-navigation-error';
+          notice.setAttribute('role', 'status');
+          notice.style.cssText = 'position:fixed;z-index:10000;left:50%;bottom:1rem;transform:translateX(-50%);max-width:calc(100vw - 2rem);padding:.7rem 1rem;border:1px solid var(--border);border-radius:.75rem;background:var(--card);color:var(--text);box-shadow:0 12px 35px rgba(0,0,0,.3);font-size:.82rem;text-align:center';
+          document.body.appendChild(notice);
+        }
+        notice.textContent = 'การเชื่อมต่อใช้เวลานาน กรุณากดอีกครั้ง';
+        notice.hidden = false;
+        clearTimeout(notice._hideTimer);
+        notice._hideTimer = setTimeout(function () { notice.hidden = true; }, 4500);
+      }
+
       async function loadPage(url, options) {
         options = options || {};
         if (activeRequest) activeRequest.abort();
         const request = new AbortController();
         activeRequest = request;
         document.documentElement.classList.add('lilteam-navigating');
+        const timeout = setTimeout(function () { request.abort('timeout'); }, 12000);
 
         try {
           const response = await fetch(url.href, {
@@ -307,8 +325,12 @@
           restoreScroll(finalUrl, options.scrollPosition);
           document.dispatchEvent(new CustomEvent('lilteam:page-loaded', { detail: { url: finalUrl.href } }));
         } catch (error) {
+          // Do not replace one stalled request with another full-page request.
+          // On timeout the current page remains usable and the visitor can retry.
           if (error.name !== 'AbortError') window.location.assign(url.href);
+          else if (request.signal.reason === 'timeout') showNavigationError();
         } finally {
+          clearTimeout(timeout);
           if (activeRequest === request) {
             document.documentElement.classList.remove('lilteam-navigating');
             activeRequest = null;
@@ -365,6 +387,14 @@
           history: 'pop',
           scrollPosition: event.state ? { x: event.state.scrollX, y: event.state.scrollY } : null,
         });
+      });
+
+      window.addEventListener('pageshow', function () {
+        document.documentElement.classList.remove('lilteam-navigating');
+      });
+      window.addEventListener('offline', function () {
+        if (activeRequest) activeRequest.abort('offline');
+        document.documentElement.classList.remove('lilteam-navigating');
       });
 
       history.replaceState(Object.assign({}, history.state || {}, {
