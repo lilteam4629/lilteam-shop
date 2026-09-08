@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+  <% const protectedSlipPage = ['easyslip-usage', 'slip-verification', 'api-providers'].includes(typeof active === 'undefined' ? '' : active); %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %> | ระบบจัดการหลังบ้าน - <%= settings.shopName %></title>
@@ -22,6 +23,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <% if (typeof active !== 'undefined' && active === 'filter-tags') { %><link rel="stylesheet" href="<%= asset('css/filter-studio-v3.css') %>" /><% } %>
   <% if (typeof active !== 'undefined' && active === 'home-sections') { %><link rel="stylesheet" href="<%= asset('css/home-sections-v3.css') %>" /><% } %>
+  <% if (!protectedSlipPage) { %><link rel="stylesheet" href="<%= asset('css/admin-design-v4.css') %>" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
     html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
@@ -92,7 +94,7 @@
     }
   </style>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--bg)]">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--bg)] <%= protectedSlipPage ? '' : `admin-pro admin-page-${active || 'page'}` %>">
 
   <!-- Navigation spinner overlay -->
   <div id="page-loading-overlay" aria-hidden="true">
