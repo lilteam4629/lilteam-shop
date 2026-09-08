@@ -586,6 +586,7 @@ router.post('/filter-tags', (req, res) => {
     try {
       let savedCount = 0;
       const failed = [];
+      const failureReasons = [];
       for (const file of files) {
         try {
           const hex = file.buffer.toString('hex', 0, 4);
@@ -613,10 +614,13 @@ router.post('/filter-tags', (req, res) => {
           savedCount += 1;
         } catch (fileError) {
           failed.push(file.originalname);
+          failureReasons.push(fileError.message);
           console.error('[filter-tags] image save failed:', file.originalname, fileError.message);
         }
       }
-      if (!savedCount) throw new Error('ไฟล์ที่เลือกไม่ใช่ PNG, JPG, WEBP หรือ GIF ที่ถูกต้อง');
+      if (!savedCount) {
+        throw new Error(failureReasons[0] || 'ไม่สามารถอ่านหรือบันทึกไฟล์รูปภาพได้');
+      }
       await store.save();
       req.flash('success', `เพิ่มตัวกรอง ${savedCount} รายการแล้ว${failed.length ? ` (ข้าม ${failed.length} รูปที่มีปัญหา)` : ''}`);
     } catch (saveError) {
