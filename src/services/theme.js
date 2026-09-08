@@ -221,6 +221,7 @@ function renderCss(theme) {
     }
     html.light {${block(preset.light)}
     }
+    html.light .premium-natural-card { background: var(--input); }
     ${extra}`;
 }
 
