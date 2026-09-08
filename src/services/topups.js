@@ -8,6 +8,10 @@ async function approveTopup(requestId) {
   }
   const user = store.data.users.find(u => u.id === request.userId);
   if (!user) return { ok: false, error: 'ไม่พบผู้ใช้' };
+  const transRef = String(request.slipCheck?.transRef || '').trim();
+  if (transRef && !(await store.claimGlobalSlipRef(transRef, { source: 'main-site', requestId }))) {
+    return { ok: false, error: 'สลิปนี้เคยถูกใช้เติมเงินในอีกเว็บแล้ว' };
+  }
 
   const approved = await store.transact((data) => {
     const freshRequest = data.topupRequests.find(t => t.id === requestId);

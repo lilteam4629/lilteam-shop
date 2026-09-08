@@ -355,7 +355,12 @@ async function claimGlobalSlipRef(transRef, details = {}) {
       });
       return true;
     } catch (error) {
-      if (error && error.code === 11000) return false;
+      if (error && error.code === 11000) {
+        const existing = await mongoCollection.findOne({ _id: key });
+        return Boolean(existing
+          && existing.requestId === String(details.requestId || '').slice(0, 100)
+          && existing.source === String(details.source || 'main').slice(0, 40));
+      }
       throw error;
     }
   }
