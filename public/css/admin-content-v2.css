@@ -1,0 +1,85 @@
+/* Content-only redesign. Sidebar/header stay untouched. Slip settings do not load this file. */
+.admin-content-redesign main{--ui-radius:22px;--ui-radius-sm:14px;position:relative;padding-top:30px!important;padding-bottom:64px!important}
+.admin-content-redesign main:before{content:"";position:absolute;z-index:-1;top:0;right:1.5rem;left:1.5rem;height:230px;border-radius:28px;background:linear-gradient(128deg,color-mix(in srgb,var(--gold) 10%,var(--card)),color-mix(in srgb,var(--input) 86%,transparent));border:1px solid color-mix(in srgb,var(--border) 78%,var(--gold));opacity:.66;mask-image:linear-gradient(#000,transparent)}
+
+/* Page introductions */
+.admin-content-redesign main>div:first-of-type:not([data-flash]),
+.admin-content-redesign main>p:first-child{position:relative}
+.admin-content-redesign main h1{font-size:clamp(1.45rem,2.1vw,2rem)!important;line-height:1.2!important;letter-spacing:-.035em!important}
+.admin-content-redesign main h2{letter-spacing:-.02em}
+.admin-content-redesign main h1:after{content:"";display:block;width:42px;height:4px;margin-top:10px;border-radius:99px;background:linear-gradient(90deg,var(--gold),color-mix(in srgb,var(--gold) 20%,transparent))}
+
+/* Cards and sections */
+.admin-content-redesign main section,
+.admin-content-redesign main div[class*="bg-[var(--card)]"],
+.admin-content-redesign main form[class*="bg-[var(--card)]"],
+.admin-content-redesign main details[class*="bg-[var(--card)]"]{border-color:color-mix(in srgb,var(--border) 78%,var(--gold))!important;border-radius:var(--ui-radius)!important;background:color-mix(in srgb,var(--card) 96%,transparent)!important;box-shadow:0 14px 38px rgba(0,0,0,.055),inset 0 1px color-mix(in srgb,#fff 20%,transparent)!important;backdrop-filter:blur(12px)}
+.admin-content-redesign main details{transition:border-color .2s,box-shadow .2s,transform .2s}
+.admin-content-redesign main details:hover{border-color:color-mix(in srgb,var(--gold) 42%,var(--border))!important}
+.admin-content-redesign main details[open]{box-shadow:0 18px 46px rgba(0,0,0,.08)!important}
+.admin-content-redesign main details>summary{list-style:none!important}
+.admin-content-redesign main details>summary::-webkit-details-marker{display:none}
+.admin-content-redesign main details>summary:after{content:"＋";float:right;display:grid;place-items:center;width:26px;height:26px;border-radius:9px;background:color-mix(in srgb,var(--gold) 12%,var(--input));color:var(--gold);font-size:14px}
+.admin-content-redesign main details[open]>summary:after{content:"−"}
+
+/* Forms */
+.admin-content-redesign main label{font-weight:400}
+.admin-content-redesign main input:not([type=checkbox]):not([type=radio]):not([type=color]),
+.admin-content-redesign main select,.admin-content-redesign main textarea{border-color:color-mix(in srgb,var(--border-light) 80%,var(--gold))!important;border-radius:var(--ui-radius-sm)!important;background:color-mix(in srgb,var(--input) 90%,transparent)!important;box-shadow:inset 0 1px 2px rgba(0,0,0,.035);transition:border-color .18s,box-shadow .18s,background .18s!important}
+.admin-content-redesign main input:not([type=checkbox]):not([type=radio]):not([type=color]),.admin-content-redesign main select{min-height:44px}
+.admin-content-redesign main textarea{min-height:94px}
+.admin-content-redesign main input:focus,.admin-content-redesign main select:focus,.admin-content-redesign main textarea:focus{outline:none!important;border-color:var(--gold)!important;background:var(--card)!important;box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 12%,transparent)!important}
+.admin-content-redesign main input[type=checkbox],.admin-content-redesign main input[type=radio]{width:17px;height:17px;accent-color:var(--gold)}
+.admin-content-redesign main input[type=file]::file-selector-button{border:0;border-radius:11px;padding:9px 14px;margin-right:12px;background:color-mix(in srgb,var(--gold) 15%,var(--input));color:var(--gold);font-family:inherit;font-weight:600;cursor:pointer}
+
+/* Actions */
+.admin-content-redesign main button,.admin-content-redesign main a[class*="px-"]{border-radius:13px!important;transition:transform .16s,box-shadow .16s,filter .16s,background .16s!important}
+.admin-content-redesign main button:hover,.admin-content-redesign main a[class*="px-"]:hover{transform:translateY(-1px);filter:brightness(1.03)}
+.admin-content-redesign main button:active,.admin-content-redesign main a[class*="px-"]:active{transform:scale(.98)}
+.admin-content-redesign main button[class*="bg-[var(--gold)]"],.admin-content-redesign main a[class*="from-[var(--gold)]"]{border:0!important;background:linear-gradient(135deg,var(--gold),color-mix(in srgb,var(--gold) 68%,#ff7657))!important;box-shadow:0 9px 22px color-mix(in srgb,var(--gold) 21%,transparent)!important}
+
+/* Data tables */
+.admin-content-redesign main table{border-collapse:separate!important;border-spacing:0 8px!important}
+.admin-content-redesign main thead{background:transparent!important;border:0!important}
+.admin-content-redesign main thead th{padding:8px 14px!important;border:0!important;font-size:10px!important;letter-spacing:.08em!important;text-transform:uppercase;color:var(--text-4)!important}
+.admin-content-redesign main tbody tr{background:color-mix(in srgb,var(--card) 96%,var(--input));box-shadow:0 6px 18px rgba(0,0,0,.035);transition:transform .16s,box-shadow .16s}
+.admin-content-redesign main tbody tr:hover{transform:translateY(-1px);box-shadow:0 11px 28px rgba(0,0,0,.075)}
+.admin-content-redesign main tbody td{padding:13px 14px!important;border-top:1px solid var(--border)!important;border-bottom:1px solid var(--border)!important}
+.admin-content-redesign main tbody td:first-child{border-left:1px solid var(--border)!important;border-radius:15px 0 0 15px}
+.admin-content-redesign main tbody td:last-child{border-right:1px solid var(--border)!important;border-radius:0 15px 15px 0}
+
+/* Page-specific character */
+.admin-page-dashboard main div[class*="grid"]>div[class*="bg-[var(--card)]"]{position:relative;overflow:hidden}
+.admin-page-dashboard main div[class*="grid"]>div[class*="bg-[var(--card)]"]:after{content:"";position:absolute;right:-25px;bottom:-35px;width:90px;height:90px;border-radius:50%;background:var(--gold);opacity:.055}
+.admin-page-products main img,.admin-page-filter-tags main img,.admin-page-scheduled-products main img{transition:transform .28s ease,filter .28s ease}
+.admin-page-products main tr:hover img,.admin-page-filter-tags main [class*="group"]:hover img,.admin-page-scheduled-products main [class*="group"]:hover img{transform:scale(1.045);filter:saturate(1.08)}
+.admin-page-users main tbody tr,.admin-page-orders main tbody tr,.admin-page-topups main tbody tr{background:linear-gradient(90deg,color-mix(in srgb,var(--gold) 2%,var(--card)),var(--card))}
+.admin-page-theme main .accent-swatch{box-shadow:0 5px 14px rgba(0,0,0,.16)}
+.admin-page-theme main .accent-swatch-input:checked+.accent-swatch{box-shadow:0 0 0 4px var(--card),0 0 0 7px var(--gold),0 8px 20px rgba(0,0,0,.2)!important;transform:scale(1.08)}
+.admin-page-minigame main>details:first-of-type{background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 8%,var(--card)),var(--card))!important}
+
+/* Product editor: structured canvas, without tabs or changed navigation */
+.admin-page-products main>form{max-width:1100px!important;padding:24px!important;border:1px solid color-mix(in srgb,var(--border) 78%,var(--gold))!important;border-radius:26px!important;background:color-mix(in srgb,var(--card) 97%,transparent)!important;box-shadow:0 20px 55px rgba(0,0,0,.075)!important}
+.admin-page-products main>form>details,.admin-page-products main>form>div[class*="bg-[var(--input)]"]{border-radius:18px!important;background:color-mix(in srgb,var(--input) 45%,var(--card))!important}
+.admin-page-products main>form>div:last-child{position:sticky;z-index:20;bottom:10px;padding:10px;border:1px solid var(--border);border-radius:17px;background:color-mix(in srgb,var(--card) 92%,transparent);box-shadow:0 14px 35px rgba(0,0,0,.15);backdrop-filter:blur(14px)}
+
+/* Responsive content, sidebar untouched */
+@media(max-width:1023px){
+  .admin-content-redesign main{padding:20px 14px 96px!important}
+  .admin-content-redesign main:before{right:10px;left:10px;border-radius:22px}
+  .admin-content-redesign main div:has(>table){overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .admin-content-redesign main table{min-width:720px}
+}
+@media(max-width:639px){
+  .admin-content-redesign main{padding-inline:10px!important}
+  .admin-content-redesign main:before{height:170px}
+  .admin-content-redesign main h1{font-size:1.35rem!important}
+  .admin-content-redesign main h2{font-size:1.05rem!important}
+  .admin-content-redesign main input:not([type=checkbox]):not([type=radio]),.admin-content-redesign main select,.admin-content-redesign main textarea{font-size:16px!important}
+  .admin-content-redesign main section,.admin-content-redesign main div[class*="bg-[var(--card)]"],.admin-content-redesign main form[class*="bg-[var(--card)]"]{border-radius:18px!important}
+  .admin-content-redesign main form{padding:15px!important}
+  .admin-page-products main>form{padding:14px!important;border-radius:20px!important}
+  .admin-page-products main>form>div:last-child{margin-inline:-5px;display:flex!important}
+  .admin-page-products main>form>div:last-child button{flex:1}
+}
+@media(prefers-reduced-motion:reduce){.admin-content-redesign main *{animation-duration:.01ms!important;transition-duration:.01ms!important}}
