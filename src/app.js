@@ -1,3 +1,4 @@
+const fs = require('fs');
 const path = require('path');
 require('express-async-errors');
 const express = require('express');
@@ -65,6 +66,23 @@ app.get('/media/:id/:filename?', async (req, res, next) => {
 });
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
+// Static assets are served with a 4-hour cache, so an edited stylesheet
+// would otherwise keep showing its old version in already-open browsers.
+// Stamping each link with the file's own mtime means every deploy that
+// actually changes a file busts only that file's cache, automatically —
+// no hand-maintained ?v=x.y.z to forget to bump.
+const assetVersions = new Map();
+app.locals.asset = (publicPath) => {
+  if (!assetVersions.has(publicPath)) {
+    let stamp = Date.now();
+    try {
+      stamp = fs.statSync(path.join(__dirname, '..', 'public', publicPath)).mtimeMs;
+    } catch { /* missing file: fall back to boot time so links still work */ }
+    assetVersions.set(publicPath, Math.floor(stamp).toString(36));
+  }
+  return `/${publicPath.replace(/^\/+/, '')}?v=${assetVersions.get(publicPath)}`;
+};
+
 // Resolves store.data to the right shop's own dataset based on subdomain,
 // BEFORE session/auth/every route below — see src/middleware/tenant.js.
 // No-ops entirely until MAIN_DOMAIN is set, so this is safe to deploy
@@ -76,7 +94,6 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Persistent session store for local development (prevents getting logged out on server reload)
-const fs = require('fs');
 const SESSION_DIR = path.join(__dirname, '..', 'data', 'sessions');
 if (!fs.existsSync(SESSION_DIR)) {
   try { fs.mkdirSync(SESSION_DIR, { recursive: true }); } catch (e) {}
