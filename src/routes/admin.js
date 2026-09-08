@@ -469,6 +469,35 @@ router.post('/products/:id/delete', async (req, res) => {
   res.redirect('/admin/products');
 });
 
+// Bulk-adds 1 sellable unit to every product that currently has zero stock,
+// using "contact" fulfillment (no username/password needed — the admin
+// delivers the account manually via chat after purchase, same as the
+// per-product /stock/add flow already does for that mode). Only ever
+// touches products that are at zero stock, so it can never oversell or
+// clobber real credential-based stock someone already set up.
+router.post('/products/stock/add-all', async (req, res) => {
+  const stockCountByProduct = new Map();
+  store.data.stockItems.forEach(s => {
+    if (s.status === 'available') stockCountByProduct.set(s.productId, (stockCountByProduct.get(s.productId) || 0) + 1);
+  });
+  const now = new Date().toISOString();
+  let updated = 0;
+  store.data.products.forEach(product => {
+    if (stockCountByProduct.get(product.id) > 0) return;
+    product.fulfillmentMode = 'contact';
+    store.data.stockItems.push({
+      id: store.genId(10), productId: product.id, username: '', password: '', extra: '',
+      fulfillmentMode: 'contact', status: 'available', soldOrderId: null, addedAt: now,
+    });
+    updated++;
+  });
+  await store.save();
+  req.flash('success', updated
+    ? `เพิ่มสต็อก 1 ชิ้นให้สินค้าที่สต็อกว่างแล้ว ${updated} รายการ (โหมด "ติดต่อร้านเพื่อรับสินค้า" — ส่งไอดีให้ลูกค้าเองหลังขายผ่านแชท)`
+    : 'ไม่มีสินค้าที่สต็อกว่างเลย ไม่ได้เพิ่มอะไร');
+  res.redirect('/admin/products');
+});
+
 router.post('/products/set-status-all', async (req, res) => {
   const status = req.body.status === 'hidden' ? 'hidden' : 'active';
   store.data.products.forEach(p => { p.status = status; });

@@ -25,6 +25,14 @@
       <span>เพิ่มสินค้าใหม่</span>
     </a>
 
+    <% const zeroStockCount = products.filter(p => p.stockCount < 1).length; %>
+    <% if (zeroStockCount) { %>
+    <form action="/admin/products/stock/add-all" method="post" data-confirm="เพิ่มสต็อก 1 ชิ้นให้สินค้าที่สต็อกว่างทั้ง <%= zeroStockCount %> รายการ (โหมดติดต่อร้านเพื่อรับสินค้า — คุณต้องส่งไอดีให้ลูกค้าเองหลังขายผ่านแชท) ยืนยันไหม?">
+      <button class="inline-flex items-center gap-1.5 bg-sky-950/40 hover:bg-sky-900/50 border border-sky-500/40 text-sky-300 font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
+        <span>📦 เพิ่มสต็อกที่ว่างทั้งหมด (<%= zeroStockCount %>)</span>
+      </button>
+    </form>
+    <% } %>
     <% if (products.length) { %>
     <form action="/admin/products/set-status-all" method="post" data-confirm="เปิดขายสินค้าทั้งหมด <%= products.length %> รายการ?">
       <input type="hidden" name="status" value="active" />
