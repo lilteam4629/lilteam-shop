@@ -899,10 +899,10 @@ function validateImage(buffer, filename, contentType) {
       throw new Error('ข้อมูลไฟล์ไม่ใช่ไฟล์รูปภาพที่ถูกต้อง');
     }
 
-    const bufferStr = buffer.toString('binary');
-    if (bufferStr.includes('<?php') || bufferStr.includes('<?=') || /<script[\s>]/i.test(bufferStr)) {
-      throw new Error('ตรวจพบโค้ดอันตรายในไฟล์รูปภาพ ไม่อนุญาตให้อัปโหลด');
-    }
+    // A validated raster image is binary data. Searching the entire buffer
+    // for words such as "<script" causes random compressed image bytes to be
+    // rejected as code. SVG is already blocked above; raster files are
+    // accepted only when their real magic bytes match the declared format.
   }
 
 }
