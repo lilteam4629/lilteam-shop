@@ -100,9 +100,9 @@
   <!-- Mobile Top Header Bar -->
   <header class="lg:hidden sticky top-0 z-40 flex items-center justify-between bg-[var(--card)]/90 backdrop-blur-md border-b border-[var(--border)] px-4 py-3">
     <a href="/admin" class="flex items-center gap-2 font-bold text-base tracking-wide">
-      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-[var(--gold-dark)] to-[var(--gold)] flex items-center justify-center text-[var(--bg)] font-extrabold shadow-sm">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-[var(--gold-dark)] to-[var(--gold)] flex items-center justify-center text-[var(--bg)] font-extrabold shadow-sm p-1">
         <% if (settings.branding && settings.branding.logoImage) { %>
-          <img src="<%= settings.branding.logoImage %>" class="w-full h-full object-cover rounded-lg" alt="Logo" />
+          <img src="<%= settings.branding.logoImage %>" class="w-full h-full object-contain" alt="Logo" />
         <% } else { %>
           L
         <% } %>
