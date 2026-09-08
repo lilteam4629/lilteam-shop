@@ -132,9 +132,9 @@
     <div class="flex-1 min-h-0 overflow-y-auto">
       <div class="p-4 sm:p-5 flex items-center justify-between border-b border-[var(--border)]">
         <a href="/admin" class="flex items-center gap-3 font-bold text-base min-w-0">
-          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[var(--gold-dark)] to-[var(--gold)] shrink-0 flex items-center justify-center text-[var(--bg)] font-black text-lg shadow-[0_0_15px_color-mix(in_srgb,var(--gold)_25%,transparent)]">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-[var(--gold-dark)] to-[var(--gold)] shrink-0 flex items-center justify-center text-[var(--bg)] font-black text-lg shadow-[0_0_15px_color-mix(in_srgb,var(--gold)_25%,transparent)] p-1">
             <% if (settings.branding && settings.branding.logoImage) { %>
-              <img src="<%= settings.branding.logoImage %>" class="w-full h-full object-cover rounded-xl" alt="Logo" />
+              <img src="<%= settings.branding.logoImage %>" class="w-full h-full object-contain" alt="Logo" />
             <% } else { %>
               L
             <% } %>
