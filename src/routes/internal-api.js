@@ -26,6 +26,7 @@ const truemoney = require('../services/truemoney');
 const webhook = require('../services/webhook');
 const discordBot = require('../services/discord-bot');
 const licensePlansService = require('../services/license-plans');
+const r2 = require('../services/r2');
 const { getShopUrl, MAIN_SITE_URL } = require('../middleware/tenant');
 
 const upload = multer({
@@ -60,6 +61,11 @@ router.use((req, res, next) => {
 });
 
 router.use(require('./cloud-management-api'));
+
+router.post('/media/direct-upload', async (req, res) => {
+  try { res.json({ ok: true, ...(await r2.createDirectUpload(req.body.filename, req.body.contentType)) }); }
+  catch (error) { res.status(400).json({ ok: false, error: error.message }); }
+});
 
 router.post('/slips/claim', async (req, res, next) => {
   try {

@@ -165,7 +165,7 @@
 
                     <div>
                       <form id="<%= imgFormId %>" action="/admin/minigame/prizes/<%= p.id %>/image" method="post" enctype="multipart/form-data" class="hidden"></form>
-                      <input form="<%= imgFormId %>" type="file" name="image" accept="image/*" onchange="this.form.submit()" class="hidden" id="<%= imgFormId %>-input" />
+                      <input form="<%= imgFormId %>" type="file" name="image" accept="image/*" onchange="this.form.requestSubmit()" class="hidden" id="<%= imgFormId %>-input" />
                       <label for="<%= imgFormId %>-input" class="text-[var(--gold)] text-[10px] cursor-pointer hover:underline block font-semibold">เปลี่ยนรูป</label>
                       <% if (p.image) { %>
                         <form action="/admin/minigame/prizes/<%= p.id %>/image/remove" method="post" class="inline">

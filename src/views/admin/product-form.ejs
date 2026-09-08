@@ -438,11 +438,13 @@
         const data = new FormData();
         baseEntries.forEach(function (entry) { data.append(entry[0], entry[1]); });
         data.append('ajax', '1');
-        chunk.forEach(function (item) {
-          data.append('productImages', item.file);
-          data.append('productTitles', item.title);
-        });
-        return fetch('/admin/products/bulk-import', { method: 'POST', body: data })
+        return window.lilteamDirectUploadFiles(chunk.map(function (item) { return item.file; }))
+          .then(function (urls) {
+            data.append('productImagesR2Urls', JSON.stringify(urls));
+            data.append('productImagesR2Names', JSON.stringify(chunk.map(function (item) { return item.file.name; })));
+            chunk.forEach(function (item) { data.append('productTitles', item.title); });
+            return fetch('/admin/products/bulk-import', { method: 'POST', body: data });
+          })
           .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง' }; }); })
           .then(function (result) {
             if (!result.ok) throw new Error(result.error || 'นำเข้าไม่สำเร็จ');

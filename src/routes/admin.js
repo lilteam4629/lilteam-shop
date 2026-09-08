@@ -17,6 +17,7 @@ const theme = require('../services/theme');
 const topupsService = require('../services/topups');
 const { getCloudUrl } = require('../services/cloud-url');
 const { requireAdmin } = require('../middleware/auth');
+const r2 = require('../services/r2');
 
 const bannerUpload = multer({
   storage: multer.memoryStorage(),
@@ -82,6 +83,21 @@ function safeExternalUrl(value) {
   const url = String(value || '').trim();
   return /^https?:\/\//i.test(url) ? url.slice(0, 1000) : '';
 }
+
+function directUploadUrls(body, field) {
+  try {
+    const values = JSON.parse(body[`${field}R2Urls`] || '[]');
+    return Array.isArray(values) ? values.map(safeExternalUrl).filter(Boolean) : [];
+  } catch (_) { return []; }
+}
+const firstDirectUpload = (body, field) => directUploadUrls(body || {}, field)[0] || '';
+
+router.post('/media/direct-upload', express.json(), async (req, res) => {
+  try {
+    const result = await r2.createDirectUpload(req.body.filename, req.body.contentType);
+    res.json({ ok: true, ...result });
+  } catch (error) { res.status(400).json({ ok: false, error: error.message }); }
+});
 
 // Firing all uploads (up to 60, 8MB each) at R2 simultaneously saturates the
 // VPS's outbound bandwidth and can make a bulk import take far longer than
@@ -328,7 +344,7 @@ router.post('/products/new', (req, res) => {
       return res.redirect('/admin/products/new');
     }
     try {
-      const uploadedImages = unwrapUploadResults(await persistUploadedFiles(req.files));
+      const uploadedImages = [...directUploadUrls(req.body, 'productImages'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
       const fields = parseProductBody(req.body, uploadedImages);
       const product = {
         id: store.genId(8), slug: slugify(fields.title) + '-' + store.genId(4),
@@ -375,7 +391,10 @@ router.post('/products/bulk-import', (req, res) => {
       req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (สูงสุด 60 รูปต่อครั้ง รูปละไม่เกิน 8MB)');
       return res.redirect('/admin/products/bulk-import');
     }
-    if (!req.files || !req.files.length) {
+    const directImages = directUploadUrls(req.body || {}, 'productImages');
+    let directNames = [];
+    try { directNames = JSON.parse(req.body.productImagesR2Names || '[]'); } catch (_) {}
+    if ((!req.files || !req.files.length) && !directImages.length) {
       if (isAjax) return res.status(400).json({ ok: false, error: 'ไม่พบไฟล์รูปในคำขอนี้' });
       req.flash('error', 'ไม่พบรูปในโฟลเดอร์ที่เลือก กรุณาเลือกโฟลเดอร์ที่มีไฟล์รูปอยู่ข้างใน');
       return res.redirect('/admin/products/bulk-import');
@@ -390,8 +409,9 @@ router.post('/products/bulk-import', (req, res) => {
       delete sharedFields.internalNote;
 
       const jobId = req.body.jobId;
-      setBulkImportProgress(jobId, 0, req.files.length);
-      const uploadResults = await persistUploadedFiles(req.files, (done, total) => setBulkImportProgress(jobId, done, total));
+      const files = req.files || [];
+      setBulkImportProgress(jobId, 0, files.length + directImages.length);
+      const uploadResults = await persistUploadedFiles(files, (done, total) => setBulkImportProgress(jobId, done, total + directImages.length));
       bulkImportJobs.delete(jobId);
       // Titles chosen client-side (either straight from the filename, or an
       // incrementing product code like lilteam-001, lilteam-002, ... typed
@@ -403,13 +423,19 @@ router.post('/products/bulk-import', (req, res) => {
       // and report it back so the whole folder can still finish importing.
       const failed = [];
       const created = [];
-      req.files.forEach((file, i) => {
+      directImages.forEach((url, i) => {
+        const filename = String(directNames[i] || `สินค้า-${i + 1}`);
+        const title = (providedTitles[i] && providedTitles[i].trim()) || filename.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim() || 'สินค้าใหม่';
+        created.push({ id: store.genId(8), slug: slugify(title) + '-' + store.genId(4), ...sharedFields, title, images: [url], internalNote: filename, status: 'active', createdAt: now });
+      });
+      files.forEach((file, i) => {
         const result = uploadResults[i];
         if (!result.ok) {
           failed.push({ filename: file.originalname, error: result.error });
           return;
         }
-        const title = (providedTitles[i] && providedTitles[i].trim())
+        const titleIndex = directImages.length + i;
+        const title = (providedTitles[titleIndex] && providedTitles[titleIndex].trim())
           || file.originalname.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim()
           || 'สินค้าใหม่';
         created.push({
@@ -456,7 +482,7 @@ router.post('/products/:id/edit', (req, res) => {
       return res.redirect(`/admin/products/${product.id}/edit`);
     }
     try {
-      const uploadedImages = unwrapUploadResults(await persistUploadedFiles(req.files));
+      const uploadedImages = [...directUploadUrls(req.body, 'productImages'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
       const fields = parseProductBody(req.body, uploadedImages, product.images || []);
       Object.assign(product, fields, { status: req.body.status || 'active' });
       await store.save();
@@ -574,12 +600,13 @@ router.get('/filter-tags', (req, res) => {
 router.post('/filter-tags', (req, res) => {
   filterImageUpload.array('filterImages', 60)(req, res, store.bindTenantContext(async (err) => {
     const files = req.files || [];
-    if (err || !files.length) {
+    const directImages = directUploadUrls(req.body || {}, 'filterImages');
+    if (err || (!files.length && !directImages.length)) {
       req.flash('error', 'กรุณาแนบรูปตัวกรอง (สูงสุด 60 รูป รูปละไม่เกิน 8MB)');
       return res.redirect('/admin/filter-tags');
     }
     const name = (req.body.name || '').trim();
-    if (files.length === 1 && !name) {
+    if ((files.length + directImages.length) === 1 && !name) {
       req.flash('error', 'กรุณากรอกชื่อตัวกรอง');
       return res.redirect('/admin/filter-tags');
     }
@@ -587,6 +614,12 @@ router.post('/filter-tags', (req, res) => {
       let savedCount = 0;
       const failed = [];
       const failureReasons = [];
+      const directNames = (() => { try { return JSON.parse(req.body.filterImagesR2Names || '[]'); } catch (_) { return []; } })();
+      directImages.forEach((image, index) => {
+        const filterName = directImages.length === 1 && !files.length ? name : String(directNames[index] || '').replace(/\.[^.]+$/, '').trim();
+        store.data.filterTags.push({ id: store.genId(8), name: filterName || 'ตัวกรอง', image, createdAt: new Date().toISOString() });
+        savedCount += 1;
+      });
       for (const file of files) {
         try {
           const hex = file.buffer.toString('hex', 0, 4);
@@ -1374,6 +1407,10 @@ router.post('/topups/payment-settings', (req, res) => {
     try {
       const promptpayFile = req.files && req.files.promptpayQrImage && req.files.promptpayQrImage[0];
       const bankFile = req.files && req.files.bankQrImage && req.files.bankQrImage[0];
+      const directPromptpay = firstDirectUpload(req.body, 'promptpayQrImage');
+      const directBank = firstDirectUpload(req.body, 'bankQrImage');
+      if (directPromptpay) store.data.settings.payment.promptpayQrImage = directPromptpay;
+      if (directBank) store.data.settings.payment.bankQrImage = directBank;
       if (promptpayFile) {
         store.data.settings.payment.promptpayQrImage = await store.saveMedia(promptpayFile.buffer, promptpayFile.originalname, promptpayFile.mimetype);
       }
@@ -1500,7 +1537,7 @@ router.post('/minigame/prizes', (req, res) => {
       req.flash('error', 'กรุณากรอกชื่อรางวัล');
       return res.redirect('/admin/minigame');
     }
-    let image = null;
+    let image = firstDirectUpload(req.body, 'image') || null;
     if (req.file) {
       try {
         image = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
@@ -1525,12 +1562,13 @@ router.post('/minigame/prizes', (req, res) => {
 router.post('/minigame/prizes/:id/image', (req, res) => {
   prizeImageUpload.single('image')(req, res, store.bindTenantContext(async (err) => {
     const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
-    if (err || !req.file || !prize) {
+    const directImage = firstDirectUpload(req.body || {}, 'image');
+    if (err || (!req.file && !directImage) || !prize) {
       req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/minigame');
     }
     try {
-      prize.image = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      prize.image = directImage || await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
       await store.save();
       req.flash('success', `เปลี่ยนรูป "${prize.name}" แล้ว`);
     } catch (saveError) {
@@ -1621,7 +1659,7 @@ router.post('/announcements', (req, res) => {
       return res.redirect('/admin/announcements');
     }
     try {
-      const image = req.file ? await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype) : null;
+      const image = firstDirectUpload(req.body, 'image') || (req.file ? await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype) : null);
       store.data.announcements.push({
         id: store.genId(8), title: req.body.title, body: req.body.body,
         image, link: (req.body.link || '').trim(), popup: req.body.popup === 'on',
@@ -1761,12 +1799,13 @@ router.post('/snow-toggle', async (req, res) => {
 // ---------- Hero banner ----------
 router.post('/site-logo/upload', (req, res) => {
   logoUpload.single('logoImage')(req, res, store.bindTenantContext(async (err) => {
-    if (err || !req.file) {
+    const directImage = firstDirectUpload(req.body || {}, 'logoImage');
+    if (err || (!req.file && !directImage)) {
       req.flash('error', 'อัปโหลดโลโก้ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/appearance');
     }
     try {
-      store.data.settings.branding.logoImage = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      store.data.settings.branding.logoImage = directImage || await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
       await store.save();
       req.flash('success', 'อัปโหลดโลโก้เว็บไซต์แล้ว และจะไม่หายเมื่อ Deploy');
     } catch (saveError) {
@@ -1778,12 +1817,13 @@ router.post('/site-logo/upload', (req, res) => {
 
 router.post('/hero-banner/upload', (req, res) => {
   bannerUpload.single('bannerImage')(req, res, store.bindTenantContext(async (err) => {
-    if (err || !req.file) {
+    const directImage = firstDirectUpload(req.body || {}, 'bannerImage');
+    if (err || (!req.file && !directImage)) {
       req.flash('error', 'อัปโหลดแบนเนอร์ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 10MB)');
       return res.redirect('/admin/appearance');
     }
     try {
-      store.data.settings.hero.bannerImage = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      store.data.settings.hero.bannerImage = directImage || await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
       await store.save();
       req.flash('success', 'อัปโหลดแบนเนอร์แล้ว และจะไม่หายเมื่อ Deploy');
     } catch (saveError) {

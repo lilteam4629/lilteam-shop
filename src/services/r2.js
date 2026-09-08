@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const path = require('path');
-const { S3Client, PutObjectCommand, HeadObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, HeadObjectCommand, PutBucketCorsCommand } = require('@aws-sdk/client-s3');
+const { getSignedUrl } = require('@aws-sdk/s3-request-presigner');
 
 const accountId = String(process.env.R2_ACCOUNT_ID || '').trim();
 const accessKeyId = String(process.env.R2_ACCESS_KEY_ID || '').trim();
@@ -17,6 +18,15 @@ const client = enabled
       credentials: { accessKeyId, secretAccessKey },
     })
   : null;
+let directUploadCorsReady = false;
+
+async function ensureDirectUploadCors() {
+  if (directUploadCorsReady || !enabled) return;
+  await client.send(new PutBucketCorsCommand({ Bucket: bucket, CORSConfiguration: { CORSRules: [{
+    AllowedOrigins: ['*'], AllowedMethods: ['PUT'], AllowedHeaders: ['content-type'], ExposeHeaders: ['etag'], MaxAgeSeconds: 3600,
+  }] } }));
+  directUploadCorsReady = true;
+}
 
 function safeFilename(filename) {
   const parsed = path.parse(String(filename || 'upload'));
@@ -75,6 +85,22 @@ async function uploadMedia(buffer, filename, contentType, options = {}) {
   return { url: publicUrlForKey(key), key, bytes: prepared.body.length, contentType: prepared.contentType };
 }
 
+async function createDirectUpload(filename, contentType) {
+  if (!enabled) throw new Error('R2 ยังไม่ได้ตั้งค่า');
+  await ensureDirectUploadCors();
+  const allowed = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
+  const mime = String(contentType || '').toLowerCase();
+  if (!allowed.has(mime)) throw new Error('รองรับเฉพาะ PNG, JPG, WEBP และ GIF');
+  const safe = safeFilename(filename);
+  const extensions = { 'image/jpeg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif' };
+  const date = new Date();
+  const key = `media/${date.getUTCFullYear()}/${String(date.getUTCMonth() + 1).padStart(2, '0')}/${crypto.randomUUID()}-${safe.base}${extensions[mime]}`;
+  const uploadUrl = await getSignedUrl(client, new PutObjectCommand({
+    Bucket: bucket, Key: key, ContentType: mime,
+  }), { expiresIn: 300 });
+  return { uploadUrl, publicUrl: publicUrlForKey(key) };
+}
+
 async function objectExists(key) {
   if (!enabled) return false;
   try {
@@ -89,6 +115,7 @@ async function objectExists(key) {
 module.exports = {
   isEnabled: () => enabled,
   uploadMedia,
+  createDirectUpload,
   objectExists,
   publicUrlForKey,
 };

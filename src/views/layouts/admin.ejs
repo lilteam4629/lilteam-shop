@@ -550,6 +550,57 @@
       });
     })();
 
+    // Public admin images upload straight from the browser to Cloudflare R2.
+    // The VPS only receives the resulting URLs, so large batches cannot fill RAM.
+    (function () {
+      async function uploadFile(file) {
+        const response = await fetch('/admin/media/direct-upload', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, contentType: file.type }),
+        });
+        const signed = await response.json();
+        if (!response.ok || !signed.ok) throw new Error(signed.error || 'สร้างลิงก์ฝากรูปไม่สำเร็จ');
+        const uploaded = await fetch(signed.uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
+        if (!uploaded.ok) throw new Error('ส่งรูปไป Cloudflare R2 ไม่สำเร็จ (' + uploaded.status + ')');
+        return signed.publicUrl;
+      }
+      window.lilteamDirectUploadFiles = async function (files, onProgress) {
+        const output = new Array(files.length); let next = 0; let done = 0;
+        async function worker() {
+          while (next < files.length) { const index = next++; output[index] = await uploadFile(files[index]); done++; if (onProgress) onProgress(done, files.length); }
+        }
+        await Promise.all(Array.from({ length: Math.min(4, files.length) }, worker));
+        return output;
+      };
+      document.addEventListener('submit', async function (event) {
+        if (event.defaultPrevented) return;
+        const form = event.target;
+        if ((form.getAttribute('action') || '').includes('/products/bulk-import')) return;
+        const inputs = Array.from(form.elements || []).filter(function (input) {
+          if (input.type !== 'file') return false;
+          return input.name !== 'slip' && input.files && input.files.length;
+        });
+        if (!inputs.length) return;
+        event.preventDefault(); event.stopImmediatePropagation();
+        const button = form.querySelector('button[type="submit"],input[type="submit"]');
+        if (button) { button.disabled = true; button.dataset.oldText = button.textContent; button.textContent = 'กำลังฝากรูป...'; }
+        try {
+          for (const input of inputs) {
+            const files = Array.from(input.files);
+            const urls = await window.lilteamDirectUploadFiles(files, function (done, total) { if (button) button.textContent = 'กำลังฝากรูป ' + done + '/' + total; });
+            const urlField = document.createElement('input'); urlField.type = 'hidden'; urlField.name = input.name + 'R2Urls'; urlField.value = JSON.stringify(urls); form.appendChild(urlField);
+            const nameField = document.createElement('input'); nameField.type = 'hidden'; nameField.name = input.name + 'R2Names'; nameField.value = JSON.stringify(files.map(function (f) { return f.name; })); form.appendChild(nameField);
+            input.required = false; input.value = '';
+          }
+          if (button) button.disabled = false;
+          form.requestSubmit(button || undefined);
+        } catch (error) {
+          if (button) { button.disabled = false; button.textContent = button.dataset.oldText || 'บันทึก'; }
+          alert(error.message + '\nกรุณาตรวจ CORS ของ Cloudflare R2 แล้วลองใหม่');
+        }
+      }, true);
+    })();
+
     // Page Navigation Spinner Handler
     (function () {
       function markNavigating() {
