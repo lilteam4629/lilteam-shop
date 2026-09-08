@@ -1775,6 +1775,7 @@ router.post('/settings', async (req, res) => {
     contactFacebook: normalizeExternalLink(contactFacebook),
     contactMessenger: normalizeExternalLink(contactMessenger),
     contactFacebookName, contactResponseTime, openHours,
+    showOpenHoursBar: req.body.showOpenHoursBar === 'on',
   });
   await store.save();
   req.flash('success', 'บันทึกการตั้งค่าแล้ว');

@@ -72,6 +72,17 @@
         </div>
       </div>
 
+      <div class="flex items-center justify-between gap-4 rounded-xl border border-[var(--border-light)] bg-[var(--input)]/50 px-3.5 py-2.5">
+        <div>
+          <div class="font-bold text-xs text-[var(--text)]">แสดงแถบเวลาเปิดบริการหน้าหลัก</div>
+          <div class="text-[11px] text-[var(--text-4)]">แถบสถานะ "เปิดให้บริการ" พร้อมเวลาและคำโปรยร้าน ด้านบนสุดของหน้าหลัก</div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+          <input type="checkbox" name="showOpenHoursBar" <%= settings.showOpenHoursBar !== false ? 'checked' : '' %> class="sr-only peer" />
+          <div class="w-11 h-6 bg-[var(--input)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--gold)]"></div>
+        </label>
+      </div>
+
       <div class="grid sm:grid-cols-3 gap-4">
         <div>
           <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">Facebook Page URL</label>
