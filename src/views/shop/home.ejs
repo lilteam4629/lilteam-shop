@@ -84,23 +84,31 @@
 </style>
 
 <section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6">
-  <div class="flex items-center gap-2 bg-[var(--card)] border border-[var(--border)] rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
-    <span class="relative flex h-2.5 w-2.5 shrink-0">
-      <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-      <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
-    </span>
-    <div class="flex-1 relative h-5 overflow-hidden">
-      <span class="marquee-track flex items-center gap-2">🕐 <%= settings.openHours %> &nbsp;&nbsp;•&nbsp;&nbsp; <%= settings.tagline %></span>
+  <div class="flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden border border-[var(--border)]"
+    style="background:linear-gradient(110deg,var(--card),color-mix(in srgb,var(--gold) 5%,var(--card)));box-shadow:0 10px 26px -20px color-mix(in srgb,var(--gold) 60%,transparent)">
+    <span class="hidden sm:flex h-7 w-7 shrink-0 items-center justify-center rounded-full" style="background:color-mix(in srgb,var(--gold) 12%,transparent)">🕐</span>
+    <div class="flex-1 relative h-5 overflow-hidden min-w-0">
+      <span class="marquee-track flex items-center gap-2"><span class="sm:hidden">🕐</span> <%= settings.openHours %> &nbsp;&nbsp;•&nbsp;&nbsp; <%= settings.tagline %></span>
     </div>
-    <span class="text-emerald-400 text-xs shrink-0 ml-2">เปิดให้บริการ</span>
+    <span class="inline-flex items-center gap-1.5 shrink-0 ml-2 pl-2.5 pr-3 py-1 rounded-full text-[11px] font-bold text-emerald-400"
+      style="background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.35)">
+      <span class="relative flex h-2 w-2 shrink-0">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+      </span>
+      เปิดให้บริการ
+    </span>
   </div>
 </section>
 
 <% if (announcements.length) { %>
-<div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-2">
+<div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-2 space-y-2">
   <% announcements.forEach(a => { %>
-    <div class="bg-[var(--card)] border border-[var(--gold)]/40 border-l-4 border-l-[var(--gold)] text-[var(--text)] text-sm rounded-lg px-4 py-3 mb-2">
-      <b class="text-[var(--gold)]">📢 <%= a.title %></b> — <%= a.body %>
+    <div class="flex items-start gap-3 rounded-xl px-4 py-3 border border-[var(--gold)]/30 text-[var(--text)] text-sm"
+      style="background:linear-gradient(110deg,color-mix(in srgb,var(--gold) 8%,var(--card)),var(--card));box-shadow:0 10px 26px -22px color-mix(in srgb,var(--gold) 70%,transparent)">
+      <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-sm"
+        style="background:linear-gradient(145deg,var(--gold-light),var(--gold-dark));color:#171207">📢</span>
+      <p class="min-w-0 leading-relaxed"><b class="text-[var(--gold)]"><%= a.title %></b> — <%= a.body %></p>
     </div>
   <% }) %>
 </div>
