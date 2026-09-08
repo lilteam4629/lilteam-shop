@@ -933,12 +933,26 @@ router.post('/orders/:id/status', async (req, res) => {
 router.get('/users', (req, res) => {
   const q = String(req.query.q || '').trim();
   const needle = q.toLocaleLowerCase('th-TH');
-  const users = [...store.data.users]
+  const matched = [...store.data.users]
     .filter(user => !needle
       || String(user.username || '').toLocaleLowerCase('th-TH').includes(needle)
       || String(user.email || '').toLocaleLowerCase('th-TH').includes(needle))
     .sort((a, b) => String(a.username || '').localeCompare(String(b.username || ''), 'th'));
-  res.render('admin/users', { title: 'สมาชิก', active: 'users', users, q, totalUsers: store.data.users.length });
+
+  const pageSizeOptions = [10, 25, 50, 100];
+  const pageSize = pageSizeOptions.includes(Number(req.query.pageSize)) ? Number(req.query.pageSize) : 10;
+  const totalPages = Math.max(1, Math.ceil(matched.length / pageSize));
+  const page = Math.min(totalPages, Math.max(1, Number(req.query.page) || 1));
+  const users = matched.slice((page - 1) * pageSize, page * pageSize);
+
+  const totalWalletBalance = store.data.users.reduce((sum, u) => sum + (Number(u.walletBalance) || 0), 0);
+
+  res.render('admin/users', {
+    title: 'สมาชิก', active: 'users', users, q,
+    totalUsers: store.data.users.length,
+    totalWalletBalance, matchedCount: matched.length,
+    page, totalPages, pageSize, pageSizeOptions,
+  });
 });
 
 router.post('/users/:id/wallet', async (req, res) => {

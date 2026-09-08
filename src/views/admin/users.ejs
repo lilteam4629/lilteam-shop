@@ -1,8 +1,32 @@
 <!-- Users Management Header -->
 <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-  <div>
-    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">จัดการสมาชิก & ผู้ใช้งาน</h1>
-    <p class="text-xs text-[var(--text-4)] mt-0.5">ค้นหา ปรับยอดเครดิตกระเป๋าเงิน และจัดการสิทธิ์การใช้งานของผู้ใช้ทั้งหมดในระบบ (<%= totalUsers %> บัญชี)</p>
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center text-lg shrink-0">👥</div>
+    <div>
+      <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">จัดการสมาชิก & ผู้ใช้งาน</h1>
+      <p class="text-xs text-[var(--text-4)] mt-0.5">รายชื่อสมาชิกและจัดการสิทธิ์การใช้งาน</p>
+    </div>
+  </div>
+  <a href="#add-user-form" class="inline-flex items-center gap-1.5 bg-[var(--gold)] text-[var(--bg)] font-bold rounded-xl px-4 py-2.5 text-xs shadow-md transition active:scale-95 shrink-0">
+    👤+ เพิ่มผู้ใช้
+  </a>
+</div>
+
+<!-- Stat Cards -->
+<div class="grid sm:grid-cols-2 gap-4 mb-6">
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex items-center justify-between">
+    <div>
+      <div class="text-xs text-[var(--text-4)] font-medium">ผู้ใช้ทั้งหมด</div>
+      <div class="text-2xl font-bold text-[var(--text)] mt-1"><%= totalUsers.toLocaleString() %></div>
+    </div>
+    <div class="w-11 h-11 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center text-lg">👥</div>
+  </div>
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm flex items-center justify-between">
+    <div>
+      <div class="text-xs text-[var(--text-4)] font-medium">ยอดเงินรวมในระบบ</div>
+      <div class="text-2xl font-bold text-[var(--gold)] mt-1">฿<%= totalWalletBalance.toLocaleString(undefined, { minimumFractionDigits: 2 }) %></div>
+    </div>
+    <div class="w-11 h-11 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center text-lg">💰</div>
   </div>
 </div>
 
@@ -11,24 +35,39 @@
   <!-- Left Main Column: Users Table & Search -->
   <div class="lg:col-span-2 min-w-0 space-y-4">
 
-    <!-- Search Form -->
-    <form method="get" action="/admin/users" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-2.5">
-      <div class="relative flex-1">
-        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">⌕</span>
-        <input name="q" value="<%= q %>" autocomplete="off" placeholder="ค้นหาชื่อผู้ใช้ (Username) หรืออีเมล..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-9 pr-3 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+    <!-- Table Panel Header: title + page-size + search -->
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm space-y-3">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center text-sm shrink-0">▦</div>
+        <div>
+          <h3 class="font-bold text-sm text-[var(--text)]">จัดการผู้ใช้งาน</h3>
+          <p class="text-[11px] text-[var(--text-4)]">ตารางแสดงรายชื่อสมาชิกและข้อมูลต่างๆ</p>
+        </div>
       </div>
-      <button type="submit" class="bg-[var(--gold)] text-[var(--bg)] font-bold rounded-xl px-5 py-2 text-xs shadow-md transition active:scale-95">
-        ค้นหา
-      </button>
-      <% if (q) { %>
-        <a href="/admin/users" class="border border-[var(--border-light)] rounded-xl px-4 py-2 text-xs text-center hover:border-[var(--gold)] transition">
-          ล้าง
-        </a>
-      <% } %>
-    </form>
 
-    <div class="text-xs text-[var(--text-4)] px-1">
-      <%= q ? `ผลการค้นหา: พบ ${users.length} จากทั้งหมด ${totalUsers} บัญชี` : `แสดงทั้งหมด ${users.length} บัญชี` %>
+      <form method="get" action="/admin/users" class="flex flex-col sm:flex-row sm:items-center gap-2.5">
+        <label class="flex items-center gap-1.5 text-xs text-[var(--text-4)] shrink-0">
+          แสดง
+          <select name="pageSize" onchange="this.form.requestSubmit()" class="bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 text-xs outline-none focus:border-[var(--gold)] transition">
+            <% pageSizeOptions.forEach(n => { %>
+              <option value="<%= n %>" <%= pageSize === n ? 'selected' : '' %>><%= n %></option>
+            <% }) %>
+          </select>
+          รายการ (จากทั้งหมด <%= matchedCount %> คน)
+        </label>
+        <div class="relative flex-1">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">⌕</span>
+          <input name="q" value="<%= q %>" autocomplete="off" placeholder="ค้นหา Username หรือ Email..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-9 pr-3 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+        <button type="submit" class="bg-[var(--gold)] text-[var(--bg)] font-bold rounded-xl px-5 py-2 text-xs shadow-md transition active:scale-95 shrink-0">
+          ค้นหา
+        </button>
+        <% if (q) { %>
+          <a href="/admin/users" class="border border-[var(--border-light)] rounded-xl px-4 py-2 text-xs text-center hover:border-[var(--gold)] transition shrink-0">
+            ล้าง
+          </a>
+        <% } %>
+      </form>
     </div>
 
     <!-- Mobile User Cards -->
@@ -102,6 +141,7 @@
         <table class="w-full text-left text-xs sm:text-sm">
           <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
             <tr>
+              <th class="py-3.5 px-4 font-semibold">ID</th>
               <th class="py-3.5 px-4 font-semibold">ผู้ใช้งาน</th>
               <th class="py-3.5 px-4 font-semibold">สิทธิ์</th>
               <th class="py-3.5 px-4 font-semibold">ยอดเครดิต</th>
@@ -110,8 +150,11 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-[var(--border)]">
-            <% users.forEach(u => { %>
+            <% users.forEach((u, i) => { %>
               <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+
+                <!-- Row Number -->
+                <td class="py-3 px-4 text-[var(--text-4)] font-mono text-[11px]">#<%= (page - 1) * pageSize + i + 1 %></td>
 
                 <!-- User Info -->
                 <td class="py-3 px-4">
@@ -189,7 +232,7 @@
 
             <% if (!users.length) { %>
               <tr>
-                <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="5">
+                <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="6">
                   ไม่พบสมาชิกที่ตรงกับคำค้นหา “<%= q %>”
                 </td>
               </tr>
@@ -198,13 +241,24 @@
           </tbody>
         </table>
       </div>
+
+      <% if (totalPages > 1) { %>
+        <div class="flex items-center justify-between gap-3 border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--text-4)]">
+          <span>หน้า <%= page %> จาก <%= totalPages %></span>
+          <div class="flex items-center gap-1.5">
+            <% const qs = (p) => `?q=${encodeURIComponent(q)}&pageSize=${pageSize}&page=${p}`; %>
+            <a href="<%= qs(Math.max(1, page - 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] <%= page <= 1 ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">‹ ก่อนหน้า</a>
+            <a href="<%= qs(Math.min(totalPages, page + 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] <%= page >= totalPages ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">ถัดไป ›</a>
+          </div>
+        </div>
+      <% } %>
     </div>
 
   </div>
 
   <!-- Right Column: Add New User Form Card -->
   <div>
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm sticky top-20">
+    <div id="add-user-form" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm sticky top-20 scroll-mt-20">
       <div class="flex items-center gap-2.5 mb-4">
         <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
           👤
