@@ -1,8 +1,20 @@
 <% const isBulkImport = typeof bulkMode !== 'undefined' && bulkMode; %>
-<div class="max-w-6xl mb-4">
-  <h1 class="text-xl sm:text-2xl font-bold"><%= isBulkImport ? 'นำเข้าสินค้าหลายรายการ' : (product ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่') %></h1>
-  <p class="text-xs sm:text-sm text-[var(--text-4)] mt-1">กรอกข้อมูลหลักก่อน ส่วนเสริมสามารถเปิดแก้เฉพาะเวลาที่ต้องการ</p>
+<div class="product-editor-hero max-w-6xl mb-4 rounded-2xl border border-[var(--border)] p-5 sm:p-6 overflow-hidden">
+  <div class="relative z-10 flex items-center gap-4">
+    <div class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl grid place-items-center text-2xl bg-[var(--gold)] text-[var(--bg)] shadow-lg">📦</div>
+    <div>
+      <p class="text-[11px] font-bold tracking-[.16em] uppercase text-[var(--gold)]">PRODUCT ST WORKSPACE</p>
+      <h1 class="text-xl sm:text-2xl font-bold mt-1"><%= isBulkImport ? 'นำเข้าสินค้าหลายรายการ' : (product ? `แก้ไข ${product.title}` : 'สร้างสินค้าใหม่') %></h1>
+      <p class="text-xs sm:text-sm text-[var(--text-4)] mt-1">จัดการข้อมูลสินค้าอย่างเป็นขั้นตอน บันทึกครั้งเดียวเมื่อเสร็จ</p>
+    </div>
+  </div>
 </div>
+<nav class="product-editor-tabs max-w-6xl sticky top-2 z-30 mb-4 p-1.5 rounded-2xl border border-[var(--border)] bg-[var(--card)]/95 backdrop-blur shadow-md" aria-label="ส่วนแก้ไขสินค้า">
+  <button type="button" data-editor-tab="basic" class="is-active"><span>01</span><b>ข้อมูลหลัก</b></button>
+  <button type="button" data-editor-tab="media"><span>02</span><b>รูปและตัวกรอง</b></button>
+  <button type="button" data-editor-tab="sales"><span>03</span><b>การขาย</b></button>
+  <button type="button" data-editor-tab="content"><span>04</span><b>ข้อความ</b></button>
+</nav>
 <form action="<%= isBulkImport ? '/admin/products/bulk-import' : (product ? `/admin/products/${product.id}/edit` : '/admin/products/new') %>" method="post" enctype="multipart/form-data"
   class="product-editor bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 sm:p-6 max-w-6xl grid grid-cols-1 xl:grid-cols-2 gap-4 items-start">
   <% if (isBulkImport) { %>
@@ -28,13 +40,13 @@
       </div>
     </div>
   <% } else { %>
-    <div class="xl:col-span-2">
+    <div class="xl:col-span-2" data-editor-section="basic">
       <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อเกม</label>
       <input name="title" required value="<%= product ? product.title : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
   <% } %>
 
-  <div class="grid sm:grid-cols-2 gap-4 xl:col-span-2">
+  <div class="grid sm:grid-cols-2 gap-4 xl:col-span-2" data-editor-section="basic">
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">ราคาขาย (บาท)</label>
       <input type="number" name="price" required value="<%= product ? product.price : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
@@ -45,7 +57,7 @@
     </div>
   </div>
 
-  <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.flashSalePrice != null) ? 'open' : '' %>>
+  <details data-editor-section="sales" class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.flashSalePrice != null) ? 'open' : '' %>>
     <summary class="font-medium text-[var(--gold)] cursor-pointer select-none">⚡ Flash Sale</summary>
     <div class="space-y-4 mt-4">
     <p class="text-xs text-[var(--text-4)]">ตั้งราคาพิเศษและเวลาไทยล่วงหน้า ระบบจะเริ่มลดราคาและคืนราคาขายเดิมให้อัตโนมัติเมื่อหมดเวลา เว้นว่างทั้งหมดหากไม่ใช้</p>
@@ -67,7 +79,7 @@
     </div>
   </details>
 
-  <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.priceOptions && product.priceOptions.length) ? 'open' : '' %>>
+  <details data-editor-section="sales" class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.priceOptions && product.priceOptions.length) ? 'open' : '' %>>
     <summary class="font-medium text-[var(--gold)] cursor-pointer select-none">💰 ราคาลดตามจำนวนซื้อ (ยิ่งซื้อเยอะยิ่งถูก)</summary>
     <div class="space-y-3 mt-4">
       <p class="text-xs text-[var(--text-4)]">พิมพ์แค่ "ซื้อกี่ชิ้น ราคารวมเท่าไหร่" ระบบคิดราคาต่อชิ้นและราคาตามจำนวนที่ลูกค้าซื้อให้อัตโนมัติ เช่น ซื้อ 5 ชิ้น ราคารวม 200 บาท เว้นว่างไว้ทั้งหมดถ้าไม่ต้องการใช้ (ใช้ราคาขายด้านบนตามปกติ)</p>
@@ -101,7 +113,7 @@
     });
   </script>
 
-  <div class="xl:col-span-2 bg-[var(--input)]/25 border border-[var(--border-light)] rounded-xl p-3 sm:p-4">
+  <div data-editor-section="media" class="xl:col-span-2 bg-[var(--input)]/25 border border-[var(--border-light)] rounded-xl p-3 sm:p-4">
     <label class="block text-sm mb-1 text-[var(--text-3)]">ตัวกรองสินค้า (สินค้านี้มีสิ่งนี้)</label>
     <% if (!filterTags.length) { %>
       <p class="text-xs text-[var(--text-4)]">ยังไม่มีตัวกรองสินค้า — ไปเพิ่มได้ที่เมนู "🏷️ ตัวกรองสินค้า"</p>
@@ -121,7 +133,7 @@
 
 
   <% if (!isBulkImport) { %>
-  <div>
+  <div data-editor-section="basic">
     <label class="block text-sm mb-1 text-[var(--text-3)]">หมายเหตุภายใน (แอดมินเห็นเท่านั้น ลูกค้าไม่เห็น)</label>
     <input name="internalNote" value="<%= product ? (product.internalNote || '') : '' %>" placeholder="เช่น ชื่อไฟล์รูปต้นฉบับ หรือโน้ตอื่นๆ สำหรับจำ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
   </div>
@@ -129,16 +141,16 @@
     <p class="text-xs text-[var(--text-4)]">💡 ระบบจะเก็บชื่อไฟล์รูปต้นฉบับไว้เป็นหมายเหตุภายในให้อัตโนมัติทุกชิ้น (แอดมินเห็นเท่านั้น) — ดูได้ที่หน้ารายการสินค้า</p>
   <% } %>
 
-  <div>
+  <div data-editor-section="basic">
     <label class="block text-sm mb-1 text-[var(--text-3)]">รายละเอียดสั้น (แสดงในการ์ดสินค้า)</label>
     <textarea name="description" rows="2" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= product ? product.description : '' %></textarea>
   </div>
-  <div>
+  <div data-editor-section="basic">
     <label class="block text-sm mb-1 text-[var(--text-3)]">รายละเอียดเกม (แท็บ "รายละเอียด")</label>
     <textarea name="aboutText" rows="4" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2"><%= product ? product.aboutText : '' %></textarea>
   </div>
   <% if (isBulkImport) { %>
-  <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-3">
+  <div data-editor-section="media" class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 space-y-3 xl:col-span-2">
     <div>
       <h3 class="font-medium">เลือกโฟลเดอร์รูป</h3>
       <p class="text-xs text-[var(--text-4)]">เลือกทั้งโฟลเดอร์ได้เลย ระบบจะดึงเฉพาะไฟล์รูปในนั้นมาสร้างสินค้าให้อัตโนมัติ (สูงสุด 60 รูปต่อครั้ง)</p>
@@ -206,7 +218,7 @@
     })();
   </script>
   <% } else { %>
-  <details class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 xl:col-span-2" open>
+  <details data-editor-section="media" class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 xl:col-span-2" open>
     <summary class="font-medium cursor-pointer select-none">🖼️ รูปภาพสินค้า</summary>
     <div class="space-y-4 mt-4">
     <div>
@@ -251,7 +263,7 @@
   </details>
   <% } %>
 
-  <details class="bg-[var(--input)]/40 border border-[var(--gold)]/30 rounded-xl p-4" <%= product && product.purchaseApprovalEnabled ? 'open' : '' %>>
+  <details data-editor-section="sales" class="bg-[var(--input)]/40 border border-[var(--gold)]/30 rounded-xl p-4" <%= product && product.purchaseApprovalEnabled ? 'open' : '' %>>
     <summary class="font-medium cursor-pointer select-none">✅ การยืนยันก่อนซื้อ</summary>
     <div class="space-y-4 mt-4">
     <div>
@@ -279,7 +291,7 @@
     </div>
   </details>
 
-  <details class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4" <%= (product && (product.publishAt || product.eventBadge || product.eventDescription)) ? 'open' : '' %>>
+  <details data-editor-section="sales" class="bg-[var(--input)]/45 border border-[var(--border-light)] rounded-xl p-4" <%= (product && (product.publishAt || product.eventBadge || product.eventDescription)) ? 'open' : '' %>>
     <summary class="font-medium cursor-pointer select-none">⏰ EVENT UPDATE / ตั้งเวลาเปิดขาย</summary>
     <div class="space-y-3 mt-3">
     <p class="text-xs text-[var(--text-4)]">เว้นวันเวลาไว้หากต้องการเปิดขายทันที หากตั้งเวลา สินค้าจะถูกซ่อนไว้และเปิดขายอัตโนมัติเมื่อถึงเวลาไทย</p>
@@ -300,7 +312,7 @@
     </div>
   </details>
 
-  <details class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4">
+  <details data-editor-section="content" class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 xl:col-span-2">
     <summary class="font-medium cursor-pointer select-none">📋 ข้อความและเงื่อนไขในหน้าสินค้า</summary>
     <div class="space-y-4 mt-4">
     <div>
@@ -334,7 +346,7 @@
     </div>
   </details>
 
-  <details class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4">
+  <details data-editor-section="content" class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-4 xl:col-span-2">
     <summary class="font-medium cursor-pointer select-none">💬 ข้อความติดต่อรับสินค้า</summary>
     <div class="space-y-3 mt-4">
     <div>
@@ -356,7 +368,7 @@
   </details>
 
   <% if (product) { %>
-    <div>
+    <div data-editor-section="basic">
       <label class="block text-sm mb-1 text-[var(--text-3)]">สถานะ</label>
       <select name="status" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
         <option value="active" <%= product.status==='active'?'selected':'' %>>เปิดขาย</option>
@@ -374,7 +386,19 @@
   </div>
 </form>
 <style>
+  .product-editor-hero{position:relative;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 13%,var(--card)),var(--card) 58%);box-shadow:0 16px 45px color-mix(in srgb,var(--gold) 8%,transparent)}
+  .product-editor-hero:after{content:'';position:absolute;width:15rem;height:15rem;right:-4rem;top:-8rem;border-radius:999px;background:var(--gold);opacity:.08;filter:blur(4px)}
+  .product-editor-tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.35rem}
+  .product-editor-tabs button{display:flex;align-items:center;justify-content:center;gap:.55rem;min-height:3rem;padding:.55rem .8rem;border-radius:.85rem;color:var(--text-3);transition:.2s ease}
+  .product-editor-tabs button span{display:grid;place-items:center;width:1.65rem;height:1.65rem;border-radius:.55rem;background:var(--input);font-size:.65rem;font-weight:800}
+  .product-editor-tabs button b{font-size:.82rem;white-space:nowrap}
+  .product-editor-tabs button:hover{color:var(--text);background:var(--input)}
+  .product-editor-tabs button.is-active{color:var(--bg);background:linear-gradient(135deg,var(--gold),var(--gold-hover));box-shadow:0 7px 18px color-mix(in srgb,var(--gold) 24%,transparent)}
+  .product-editor-tabs button.is-active span{background:color-mix(in srgb,var(--bg) 15%,transparent);color:inherit}
   .product-editor > script { display:none }
+  .product-editor > [data-editor-section]{animation:editorSectionIn .22s ease both}
+  @keyframes editorSectionIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+  .product-editor > div[data-editor-section],.product-editor > details[data-editor-section]{box-shadow:0 8px 24px rgba(0,0,0,.035)}
   .product-editor details > summary { list-style:none }
   .product-editor details > summary::-webkit-details-marker { display:none }
   .product-editor details > summary::after { content:'＋'; float:right; color:var(--gold); font-weight:700 }
@@ -382,11 +406,41 @@
   .product-filter-strip { scrollbar-width:thin; scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch }
   .product-filter-strip > label { scroll-snap-align:start }
   @media(max-width:639px){
+    .product-editor-tabs{display:flex;overflow-x:auto;scrollbar-width:none;top:.4rem}
+    .product-editor-tabs::-webkit-scrollbar{display:none}
+    .product-editor-tabs button{min-width:8.2rem}
+    .product-editor-hero{padding:1rem}
+    .product-editor-hero .w-12{width:2.75rem;height:2.75rem;border-radius:.8rem}
     .product-editor input,.product-editor select,.product-editor textarea{font-size:16px}
     .product-editor .price-option-row{display:grid;grid-template-columns:auto 4.5rem auto minmax(6rem,1fr) auto}
     .product-form-actions{margin-left:-.35rem;margin-right:-.35rem}
   }
 </style>
+<script>
+  (function () {
+    const form = document.querySelector('.product-editor');
+    const tabs = Array.from(document.querySelectorAll('[data-editor-tab]'));
+    if (!form || !tabs.length) return;
+    const sections = Array.from(form.children).filter(function (el) { return el.dataset && el.dataset.editorSection; });
+
+    function showSection(name) {
+      sections.forEach(function (section) { section.classList.toggle('hidden', section.dataset.editorSection !== name); });
+      tabs.forEach(function (tab) {
+        const active = tab.dataset.editorTab === name;
+        tab.classList.toggle('is-active', active);
+        tab.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+      sessionStorage.setItem('productEditorTab', name);
+    }
+
+    tabs.forEach(function (tab) { tab.addEventListener('click', function () { showSection(tab.dataset.editorTab); }); });
+    form.addEventListener('invalid', function (event) {
+      const section = event.target.closest('[data-editor-section]');
+      if (section) showSection(section.dataset.editorSection);
+    }, true);
+    showSection(sessionStorage.getItem('productEditorTab') || 'basic');
+  })();
+</script>
 <% if (isBulkImport) { %>
 <script>
   (function () {
