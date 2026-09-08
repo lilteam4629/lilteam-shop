@@ -20,8 +20,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-  <% const preserveSlipContent = typeof active !== 'undefined' && (active === 'easyslip-usage' || active === 'slip-verification'); %>
-  <% if (!preserveSlipContent) { %><link rel="stylesheet" href="/css/admin-content-v2.css" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
     html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
@@ -92,7 +90,7 @@
     }
   </style>
 </head>
-<body class="<%= preserveSlipContent ? 'admin-slip-preserve' : `admin-content-redesign admin-page-${typeof active !== 'undefined' ? active : 'page'}` %> bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--bg)]">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--bg)]">
 
   <!-- Navigation spinner overlay -->
   <div id="page-loading-overlay" aria-hidden="true">
@@ -410,7 +408,6 @@
   </div>
 
   <!-- Admin Interactive Scripts -->
-  <% if (!preserveSlipContent) { %><script src="/js/admin-content-v2.js" defer></script><% } %>
   <script>
     // Toast Notification System
     window.showToast = function (message, type = 'success', duration = 4000) {

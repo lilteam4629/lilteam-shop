@@ -1,40 +1,107 @@
-<div class="filter-studio space-y-5">
-  <section class="filter-studio-hero">
-    <div><span class="filter-studio-kicker">FILTER LIBRARY</span><h1>คลังตัวกรองสินค้า</h1><p>ค้นหา แก้ไข และจัดการตัวกรองหลายรายการได้จากหน้าเดียว</p></div>
-    <button type="button" id="open-filter-create" class="filter-primary-action"><span>＋</span> สร้างตัวกรอง</button>
-  </section>
-  <section class="filter-stats-grid">
-    <div><span>ตัวกรองทั้งหมด</span><b><%= filterTags.length %></b><small>รายการ</small></div>
-    <div><span>กำลังใช้งาน</span><b><%= filterTags.filter(t=>t.productCount>0).length %></b><small>รายการ</small></div>
-    <div><span>ยังไม่ผูกสินค้า</span><b><%= filterTags.filter(t=>!t.productCount).length %></b><small>รายการ</small></div>
-  </section>
-  <section class="filter-library-panel">
-    <div class="filter-library-toolbar">
-      <div class="filter-search-box"><span>⌕</span><input id="filter-library-search" placeholder="ค้นหาชื่อตัวกรอง..." /></div>
-      <div class="filter-toolbar-actions"><button type="button" id="filter-select-all">เลือกทั้งหมด</button><form id="filter-bulk-delete" action="/admin/filter-tags/bulk-delete" method="post" data-confirm="ลบตัวกรองที่เลือกทั้งหมดใช่หรือไม่?"><div id="filter-selected-inputs"></div><button id="filter-delete-selected" disabled>ลบที่เลือก <span id="filter-selected-count">0</span></button></form></div>
-    </div>
-    <% if (!filterTags.length) { %><div class="filter-empty"><span>✦</span><h2>คลังตัวกรองยังว่าง</h2><p>กด “สร้างตัวกรอง” เพื่อเพิ่มรายการแรก</p></div><% } else { %>
-    <div id="filter-library-grid" class="filter-library-grid">
-      <% filterTags.forEach(t=>{ %><article class="filter-library-card" data-filter-card data-name="<%= t.name.toLowerCase() %>" data-id="<%= t.id %>">
-        <button type="button" class="filter-select-toggle" aria-label="เลือก <%= t.name %>"><span>✓</span></button>
-        <div class="filter-image-stage"><img src="<%= t.image %>" alt="<%= t.name %>" /></div>
-        <div class="filter-card-body"><div class="filter-card-name"><b><%= t.name %></b><span><%= t.productCount %> สินค้า</span></div><div class="filter-usage"><i style="width:<%= Math.min(100,t.productCount*12) %>%"></i></div>
-          <div class="filter-card-actions"><button type="button" class="filter-edit-toggle">แก้ไขชื่อ</button><form action="/admin/filter-tags/<%= t.id %>/delete" method="post" data-confirm="ต้องการลบตัวกรอง '<%= t.name %>' ใช่หรือไม่?"><button>ลบ</button></form></div>
-          <form action="/admin/filter-tags/<%= t.id %>/edit" method="post" class="filter-inline-editor hidden"><input name="name" value="<%= t.name %>" required maxlength="100" /><button>บันทึก</button></form>
-        </div></article><% }) %>
-    </div><div id="filter-no-result" class="filter-empty hidden"><span>⌕</span><h2>ไม่พบตัวกรอง</h2><p>ลองค้นหาด้วยคำอื่น</p></div><% } %>
-  </section>
+<!-- Filter Tags Header -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+  <div>
+    <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">แท็กตัวกรองสินค้า</h1>
+    <p class="text-xs text-[var(--text-4)] mt-0.5">สร้างแท็กไอคอนทรงกลมสำหรับใช้กรองและไฮไลท์สินค้าบนหน้าแรก (<%= filterTags.length %> แท็ก)</p>
+  </div>
 </div>
-<div id="filter-create-drawer" class="filter-drawer" aria-hidden="true"><button type="button" class="filter-drawer-backdrop" id="close-filter-create"></button><aside>
-  <div class="filter-drawer-head"><div><span>NEW FILTER</span><h2>สร้างตัวกรองใหม่</h2></div><button type="button" id="close-filter-create-x">✕</button></div>
-  <form action="/admin/filter-tags" method="post" enctype="multipart/form-data" class="filter-create-form">
-    <label><span>ชื่อตัวกรอง</span><small>ใช้เมื่อเลือกรูปเดียว</small><input name="name" placeholder="เช่น Messi, Epic, Barcelona" /></label>
-    <label class="filter-drop-zone" for="filterImageInput"><input id="filterImageInput" type="file" name="filterImages" multiple required accept="image/png,image/jpeg,image/webp,image/gif" /><span class="filter-drop-icon">⬆</span><b>วางรูปที่นี่ หรือกดเลือกไฟล์</b><small>เลือกหลายรูปได้ ระบบใช้ชื่อไฟล์เป็นชื่อรายการ</small></label>
-    <div id="filterImagePreview" class="filter-upload-preview hidden"></div><button class="filter-create-submit">สร้างตัวกรองที่เลือก</button>
-  </form>
-</aside></div>
+
+<div class="grid lg:grid-cols-3 gap-6">
+
+  <!-- Left Main Column: Tags Grid -->
+  <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">แท็กตัวกรองที่ใช้งานอยู่</h3>
+      <span class="text-xs text-[var(--text-4)]">ทั้งหมด <%= filterTags.length %> รายการ</span>
+    </div>
+
+    <% if (!filterTags.length) { %>
+      <div class="py-12 text-center text-xs text-[var(--text-4)] border border-dashed border-[var(--border-light)] rounded-2xl">
+        <div class="text-3xl mb-2">🏷️</div>
+        <div class="text-sm font-semibold text-[var(--text-3)]">ยังไม่มีแท็กตัวกรองสินค้า</div>
+        <p class="text-xs text-[var(--text-4)] mt-1">เพิ่มแท็กใหม่ได้จากแบบฟอร์มด้านขวา</p>
+      </div>
+    <% } %>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5">
+      <% filterTags.forEach(t => { %>
+        <div class="bg-[var(--input)]/40 border border-[var(--border-light)] hover:border-[var(--gold)]/40 rounded-2xl p-4 text-center transition group relative shadow-sm flex flex-col items-center justify-between">
+          <div class="w-16 h-16 rounded-full overflow-hidden mb-2.5 border-2 border-[var(--gold)]/40 shadow-sm p-0.5 bg-[var(--card)]">
+            <img src="<%= t.image %>" alt="<%= t.name %>" class="w-full h-full rounded-full object-cover group-hover:scale-105 transition duration-200" />
+          </div>
+
+          <form action="/admin/filter-tags/<%= t.id %>/edit" method="post" class="w-full mb-1 flex gap-1">
+            <input name="name" value="<%= t.name %>" required maxlength="100" aria-label="ชื่อตัวกรอง" class="min-w-0 w-full text-center font-bold text-xs bg-[var(--card)] border border-[var(--border-light)] rounded-lg px-2 py-1 outline-none focus:border-[var(--gold)]" />
+            <button type="submit" class="shrink-0 text-[var(--gold)] border border-[var(--gold)]/30 rounded-lg px-2 text-[11px] font-semibold">บันทึก</button>
+          </form>
+          <div class="text-[11px] text-[var(--text-4)] mb-3"><%= t.productCount %> สินค้าที่ผูกไว้</div>
+
+          <form action="/admin/filter-tags/<%= t.id %>/delete" method="post" data-confirm="ต้องการลบตัวกรอง '<%= t.name %>' ใช่หรือไม่? (จะถูกนำออกจากสินค้าทุกชิ้นที่ผูกไว้)">
+            <button type="submit" class="border border-rose-500/30 text-rose-400 hover:bg-rose-500/10 font-semibold text-[11px] px-3 py-1 rounded-xl transition">
+              ลบแท็ก
+            </button>
+          </form>
+        </div>
+      <% }) %>
+    </div>
+  </div>
+
+  <!-- Right Column: Add Tag Form Card -->
+  <div>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm sticky top-20">
+      <div class="flex items-center gap-2.5 mb-4">
+        <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
+          🏷️
+        </div>
+        <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เพิ่มตัวกรองใหม่</h3>
+      </div>
+
+      <form action="/admin/filter-tags" method="post" enctype="multipart/form-data" class="space-y-3.5">
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ชื่อตัวกรอง (ใช้เมื่อเลือก 1 รูป)</label>
+          <input name="name" placeholder="ถ้าเลือกหลายรูป ระบบใช้ชื่อไฟล์เป็นชื่อตัวกรอง" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">รูปไอคอนตัวกรอง (แนะนำสี่เหลี่ยมจัตุรัส) *</label>
+          <input id="filterImageInput" type="file" name="filterImages" multiple required accept="image/png,image/jpeg,image/webp,image/gif" class="block w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
+
+          <div id="filterImagePreview" class="hidden mt-3 grid grid-cols-3 sm:grid-cols-5 gap-2 rounded-2xl border border-[var(--border-light)] bg-black/20 p-2"></div>
+        </div>
+
+        <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95 mt-2">
+          + เพิ่มแท็กตัวกรองที่เลือก
+        </button>
+      </form>
+
+      <p class="text-[11px] text-[var(--text-4)] mt-4 leading-relaxed">
+        💡 หลังจากเพิ่มแล้ว สามารถเข้าไปที่หน้าแก้ไขสินค้าเพื่อติ๊กเลือกแท็กนี้ให้กับสินค้าที่ต้องการได้ทันที
+      </p>
+    </div>
+  </div>
+
+</div>
+
 <script>
-(function(){const drawer=document.getElementById('filter-create-drawer'),setDrawer=o=>{drawer.classList.toggle('is-open',o);drawer.setAttribute('aria-hidden',o?'false':'true');document.body.style.overflow=o?'hidden':''};document.getElementById('open-filter-create')?.addEventListener('click',()=>setDrawer(true));document.getElementById('close-filter-create')?.addEventListener('click',()=>setDrawer(false));document.getElementById('close-filter-create-x')?.addEventListener('click',()=>setDrawer(false));document.addEventListener('keydown',e=>{if(e.key==='Escape')setDrawer(false)});
-const cards=[...document.querySelectorAll('[data-filter-card]')],selected=new Set(),sync=()=>{document.getElementById('filter-selected-count').textContent=selected.size;document.getElementById('filter-delete-selected').disabled=!selected.size;document.getElementById('filter-selected-inputs').innerHTML=[...selected].map(id=>'<input type="hidden" name="tagIds" value="'+id+'">').join('');cards.forEach(c=>c.classList.toggle('is-selected',selected.has(c.dataset.id)))};document.getElementById('filter-library-search')?.addEventListener('input',e=>{let shown=0;cards.forEach(c=>{const ok=c.dataset.name.includes(e.target.value.trim().toLowerCase());c.classList.toggle('hidden',!ok);if(ok)shown++});document.getElementById('filter-no-result')?.classList.toggle('hidden',shown!==0)});cards.forEach(c=>{c.querySelector('.filter-select-toggle').onclick=()=>{selected.has(c.dataset.id)?selected.delete(c.dataset.id):selected.add(c.dataset.id);sync()};c.querySelector('.filter-edit-toggle').onclick=()=>c.querySelector('.filter-inline-editor').classList.toggle('hidden')});document.getElementById('filter-select-all')?.addEventListener('click',()=>{const visible=cards.filter(c=>!c.classList.contains('hidden')),all=visible.every(c=>selected.has(c.dataset.id));visible.forEach(c=>all?selected.delete(c.dataset.id):selected.add(c.dataset.id));sync()});
-const input=document.getElementById('filterImageInput'),preview=document.getElementById('filterImagePreview');input?.addEventListener('change',()=>{preview.innerHTML='';const files=[...(input.files||[])];preview.classList.toggle('hidden',!files.length);files.forEach(file=>{const item=document.createElement('div'),img=document.createElement('img'),span=document.createElement('span');img.src=URL.createObjectURL(file);img.onload=()=>URL.revokeObjectURL(img.src);span.textContent=file.name.replace(/\.[^.]+$/,'');item.append(img,span);preview.append(item)})})})();
+  (function () {
+    const input = document.getElementById('filterImageInput');
+    const preview = document.getElementById('filterImagePreview');
+    if (!input || !preview) return;
+    input.addEventListener('change', function () {
+      const files = Array.from(input.files || []);
+      preview.classList.toggle('hidden', !files.length);
+      preview.innerHTML = '';
+      files.forEach(function(file) {
+        const item = document.createElement('div');
+        item.className = 'min-w-0 text-center';
+        const image = document.createElement('img');
+        image.className = 'w-16 h-16 rounded-full mx-auto object-cover border-2 border-[var(--gold)]';
+        image.src = URL.createObjectURL(file);
+        image.onload = function () { URL.revokeObjectURL(image.src); };
+        const label = document.createElement('div');
+        label.className = 'text-[9px] truncate mt-1'; label.textContent = file.name.replace(/\.[^.]+$/, '');
+        item.append(image, label); preview.appendChild(item);
+      });
+    });
+  })();
 </script>
