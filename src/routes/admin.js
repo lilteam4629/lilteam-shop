@@ -630,7 +630,11 @@ router.post('/filter-tags/:tagId/products/:productId/add', async (req, res) => {
   tags.add(String(tag.id));
   product.filterTagIds = [...tags];
   await store.save();
-  res.json({ ok: true });
+  res.json({
+    ok: true,
+    tag: { id: String(tag.id), name: tag.name, image: tag.image },
+    filterTagIds: product.filterTagIds,
+  });
 });
 
 router.post('/filter-tags', (req, res) => {
