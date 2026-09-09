@@ -184,3 +184,24 @@
 @media (max-width: 390px) {
   aside.store-nav__mobile-row { width: min(330px,90vw) !important; padding-inline: 17px !important; }
 }
+
+/* Fixed physical gutters are reliable on Safari and override w-full utilities. */
+@media (max-width: 700px) {
+  .banner-hero-shell,
+  .modern-fan-heading,
+  .store-status-section,
+  .store-announcements,
+  .event-update,
+  .latest-orders-section,
+  .store-filter-section,
+  .store-product-gallery,
+  .store-content-section,
+  .store-footer-inner {
+    width: auto !important;
+    max-width: none !important;
+    margin-left: 24px !important;
+    margin-right: 24px !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+}
