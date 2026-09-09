@@ -170,3 +170,17 @@
   .store-filter-section .filter-action-bar strong { display: inline !important; font-size: 12px !important; }
   .store-filter-section .filter-action-bar button { min-width: 145px !important; height: 38px !important; min-height: 38px !important; border-radius: 9px !important; }
 }
+
+/* Preserve the drawer dimensions after the shared mobile gutter rules above. */
+@media (max-width: 900px) {
+  aside.store-nav__mobile-row {
+    position: fixed !important;
+    inset: 0 auto 0 0 !important;
+    width: min(350px,88vw) !important;
+    height: 100dvh !important;
+    padding: 0 20px 28px !important;
+  }
+}
+@media (max-width: 390px) {
+  aside.store-nav__mobile-row { width: min(330px,90vw) !important; padding-inline: 17px !important; }
+}
