@@ -159,6 +159,9 @@ function defaultData() {
       branding: {
         logoImage: null,
       },
+      authAppearance: {
+        backgroundImage: null,
+      },
       theme: {
         accent: '#c8a63f',
         bgPreset: 'warmDark',
@@ -486,6 +489,10 @@ function migrateSchema(db) {
   }
   if (!db.settings.branding) {
     db.settings.branding = { logoImage: null };
+    changed = true;
+  }
+  if (!db.settings.authAppearance) {
+    db.settings.authAppearance = { backgroundImage: null };
     changed = true;
   }
   if (!db.settings.theme) {

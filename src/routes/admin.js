@@ -1929,6 +1929,33 @@ router.post('/hero-banner/upload', (req, res) => {
   }));
 });
 
+router.post('/auth-background/upload', (req, res) => {
+  bannerUpload.single('authBackgroundImage')(req, res, store.bindTenantContext(async (err) => {
+    const directImage = firstDirectUpload(req.body || {}, 'authBackgroundImage');
+    if (err || (!req.file && !directImage)) {
+      req.flash('error', 'อัปโหลดพื้นหลังหน้าเข้าสู่ระบบไม่สำเร็จ (รองรับไฟล์รูปภาพไม่เกิน 10MB)');
+      return res.redirect('/admin/appearance');
+    }
+    try {
+      store.data.settings.authAppearance = store.data.settings.authAppearance || {};
+      store.data.settings.authAppearance.backgroundImage = directImage || await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      await store.save();
+      req.flash('success', 'บันทึกพื้นหลังหน้าเข้าสู่ระบบและสมัครสมาชิกแล้ว');
+    } catch (saveError) {
+      req.flash('error', 'บันทึกภาพพื้นหลังไม่สำเร็จ กรุณาลองใหม่');
+    }
+    res.redirect('/admin/appearance');
+  }));
+});
+
+router.post('/auth-background/remove', async (req, res) => {
+  store.data.settings.authAppearance = store.data.settings.authAppearance || {};
+  store.data.settings.authAppearance.backgroundImage = null;
+  await store.save();
+  req.flash('success', 'นำพื้นหลังเฉพาะหน้าเข้าสู่ระบบออกแล้ว ระบบจะใช้แบนเนอร์ร้านแทน');
+  res.redirect('/admin/appearance');
+});
+
 router.post('/hero-banner/mode', async (req, res) => {
   const mode = req.body.mode === 'banner' ? 'banner' : 'default';
   if (mode === 'banner' && !store.data.settings.hero.bannerImage) {

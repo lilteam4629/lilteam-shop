@@ -106,6 +106,21 @@
   .store-filter-section #filterWidget { max-width: 100%; }
   .store-nav__inner,
   .store-nav__mobile-row { padding-left: 14px !important; padding-right: 14px !important; }
+  .store-nav { contain: none !important; overflow: visible !important; }
+  .store-nav__inner { position: relative; z-index: 20; }
+  .store-nav__actions { position: relative; z-index: 30; }
+  .store-nav__account[open] { position: relative; z-index: 100; }
+  .store-nav__account-menu {
+    position: fixed !important;
+    z-index: 9999 !important;
+    top: 62px !important;
+    right: 14px !important;
+    width: min(320px,calc(100vw - 28px)) !important;
+    max-height: calc(100dvh - 76px) !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+  }
+  .store-nav__mobile-row { position: relative; z-index: 1; }
 }
 
 @media (max-width: 380px) {
@@ -117,4 +132,37 @@
   .store-product-gallery { width: calc(100% - 22px) !important; }
   .store-nav__inner,
   .store-nav__mobile-row { padding-left: 11px !important; padding-right: 11px !important; }
+  .store-nav__account-menu { right: 11px !important; width: calc(100vw - 22px) !important; }
+}
+
+/* The filter library is a compact chooser on phones, not a desktop panel
+   stacked vertically. It keeps every control while using roughly half the height. */
+@media (max-width: 640px) {
+  .store-filter-section #filterWidget { padding: 12px !important; border-radius: 16px !important; }
+  .store-filter-section #filterWidget > div:first-child { flex-wrap: nowrap !important; gap: 8px !important; margin-bottom: 10px !important; }
+  .store-filter-section #filterWidget > div:first-child > div:first-child { gap: 9px !important; min-width: 0; }
+  .store-filter-section .filter-title-icon { width: 38px !important; height: 38px !important; flex: 0 0 38px; border-radius: 11px !important; }
+  .store-filter-section .filter-title-icon svg { width: 18px !important; height: 18px !important; }
+  .store-filter-section #filterWidget h2 { font-size: 15px !important; }
+  .store-filter-section #filterWidget h2 + p { display: none !important; }
+  .store-filter-section .filter-live-summary { width: auto !important; margin-left: auto; }
+  .store-filter-section .filter-live-summary > p { display: flex; align-items: baseline; gap: 3px; font-size: 9px !important; }
+  .store-filter-section .filter-live-summary > p b { font-size: 14px !important; }
+  .store-filter-section .filter-control-row { grid-template-columns: 1fr 1fr !important; gap: 7px !important; margin: 9px 0 10px !important; }
+  .store-filter-section .filter-search-control { grid-column: 1 / -1; height: 40px !important; padding: 0 12px !important; border-radius: 10px !important; }
+  .store-filter-section .filter-select-control { height: 34px !important; padding: 0 9px !important; border-radius: 9px !important; }
+  .store-filter-section .filter-select-control select { font-size: 11px !important; }
+  .store-filter-section #filterTags { gap: 7px !important; padding: 0 !important; }
+  .store-filter-section .filter-chip { width: 92px !important; grid-template-rows: 92px auto !important; border-radius: 11px !important; }
+  .store-filter-section .filter-chip > span:first-child { height: 92px !important; padding: 3px !important; }
+  .store-filter-section .filter-chip > span:nth-child(2) { padding: 6px 7px !important; }
+  .store-filter-section .filter-chip > span:nth-child(2) > span:first-child { font-size: 10px !important; }
+  .store-filter-section .filter-chip .chip-hint { display: none !important; }
+  .store-filter-section .filter-chip .check-badge { top: 5px !important; right: 5px !important; width: 21px !important; height: 21px !important; font-size: 11px !important; }
+  .store-filter-section #scrollLeftBtn,
+  .store-filter-section #scrollRightBtn { width: 30px !important; min-width: 30px !important; height: 44px !important; min-height: 44px !important; }
+  .store-filter-section .filter-action-bar { min-height: 52px; margin: 10px -12px -12px !important; padding: 7px 12px !important; }
+  .store-filter-section .filter-action-bar p { display: flex; align-items: baseline; gap: 4px; font-size: 9px !important; }
+  .store-filter-section .filter-action-bar strong { display: inline !important; font-size: 12px !important; }
+  .store-filter-section .filter-action-bar button { min-width: 145px !important; height: 38px !important; min-height: 38px !important; border-radius: 9px !important; }
 }

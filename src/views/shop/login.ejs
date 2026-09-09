@@ -1,15 +1,18 @@
-<section class="max-w-md mx-auto px-4 py-14">
-  <h1 class="text-2xl font-bold mb-6 text-center">เข้าสู่ระบบ</h1>
-  <form action="/login" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 space-y-4">
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อผู้ใช้ หรือ อีเมล</label>
-      <input name="username" required autocapitalize="none" autocorrect="off" spellcheck="false" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--gold)]" />
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">รหัสผ่าน</label>
-      <input type="password" name="password" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--gold)]" />
-    </div>
-    <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] rounded-lg py-2.5 font-medium">เข้าสู่ระบบ</button>
-  </form>
-  <p class="text-center text-sm text-[var(--text-3)] mt-4">ยังไม่มีบัญชี? <a href="/register" class="text-[var(--gold)]">สมัครสมาชิก</a></p>
+<% const authBg = (settings.authAppearance && settings.authAppearance.backgroundImage) || (settings.hero && settings.hero.bannerImage) || ''; %>
+<section class="auth-stage" style="--auth-bg:url('<%= authBg %>')">
+  <div class="auth-stage__veil"></div>
+  <div class="auth-card">
+    <div class="auth-card__mark">LOGIN</div>
+    <header><span>MEMBER ACCESS</span><h1>เข้าสู่ระบบ</h1><p>กรอกข้อมูลบัญชีเพื่อใช้งานต่อ</p></header>
+    <form action="/login" method="post" class="auth-form">
+      <label><span>ชื่อผู้ใช้ หรือ อีเมล</span><input name="username" required autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="username หรือ user@email.com" autocomplete="username" /></label>
+      <label><span>รหัสผ่าน</span><div class="auth-password"><input type="password" name="password" required placeholder="password" autocomplete="current-password" /><button type="button" data-password-toggle>แสดง</button></div></label>
+      <button class="auth-submit"><svg><use href="#ui-shield"/></svg> เข้าสู่ระบบอย่างปลอดภัย <span>→</span></button>
+    </form>
+    <div class="auth-divider"><span>หรือ</span></div>
+    <a href="/" class="auth-secondary"><svg><use href="#ui-home"/></svg> กลับไปเลือกสินค้า</a>
+    <p class="auth-switch">ยังไม่มีบัญชี? <a href="/register">สมัครสมาชิก</a></p>
+    <div class="auth-help"><svg><use href="#ui-help"/></svg><span>มีปัญหาในการเข้าใช้งาน?<br><a href="/contact">ติดต่อร้านเพื่อขอความช่วยเหลือ</a></span></div>
+  </div>
 </section>
+<script>document.querySelectorAll('[data-password-toggle]').forEach(button=>button.addEventListener('click',()=>{const input=button.parentElement.querySelector('input');input.type=input.type==='password'?'text':'password';button.textContent=input.type==='password'?'แสดง':'ซ่อน'}));</script>

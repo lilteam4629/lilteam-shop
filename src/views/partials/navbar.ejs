@@ -35,6 +35,7 @@
       <input type="search" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="ค้นหาสินค้า..." aria-label="ค้นหาสินค้า" /><button aria-label="ค้นหา"><svg><use href="#ui-search"/></svg></button>
     </form>
     <div class="store-nav__actions">
+      <button id="theme-toggle-btn" type="button" title="สลับโหมดมืด/สว่าง" aria-label="สลับโหมดมืดและสว่าง" class="store-nav__round store-nav__theme"><span id="theme-toggle-icon"><svg class="theme-icon-moon"><use href="#ui-moon"/></svg><svg class="theme-icon-sun"><use href="#ui-sun"/></svg></span></button>
       <a href="/cart" class="store-nav__round store-nav__cart" aria-label="ตะกร้าสินค้า"><svg><use href="#ui-cart"/></svg><% if (cartCount > 0) { %><b><%= cartCount %></b><% } %></a>
       <% if (currentUser) { %>
         <a href="/account/topup" class="store-nav__wallet"><span>฿<%= currentUser.walletBalance.toLocaleString() %></span><b>＋</b></a>

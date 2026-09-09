@@ -1,29 +1,22 @@
-<section class="max-w-md mx-auto px-4 py-14">
-  <h1 class="text-2xl font-bold mb-6 text-center">สมัครสมาชิก</h1>
-  <form action="/register" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 space-y-4">
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ชื่อผู้ใช้</label>
-      <input name="username" required autocapitalize="none" autocorrect="off" spellcheck="false" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--gold)]" />
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">อีเมล</label>
-      <input type="email" name="email" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--gold)]" />
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">รหัสผ่าน</label>
-      <input type="password" name="password" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--gold)]" />
-    </div>
-    <div>
-      <label class="block text-sm mb-1 text-[var(--text-3)]">ยืนยันรหัสผ่าน</label>
-      <input type="password" name="confirmPassword" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 focus:outline-none focus:border-[var(--gold)]" />
-    </div>
-    <% if (recaptchaSiteKey) { %>
-      <div class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></div>
-    <% } %>
-    <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] rounded-lg py-2.5 font-medium">สมัครสมาชิก</button>
-  </form>
-  <% if (recaptchaSiteKey) { %>
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-  <% } %>
-  <p class="text-center text-sm text-[var(--text-3)] mt-4">มีบัญชีอยู่แล้ว? <a href="/login" class="text-[var(--gold)]">เข้าสู่ระบบ</a></p>
+<% const authBg = (settings.authAppearance && settings.authAppearance.backgroundImage) || (settings.hero && settings.hero.bannerImage) || ''; %>
+<section class="auth-stage auth-stage--register" style="--auth-bg:url('<%= authBg %>')">
+  <div class="auth-stage__veil"></div>
+  <div class="auth-card">
+    <div class="auth-card__mark">SIGN UP</div>
+    <header><span>NEW MEMBER</span><h1>สมัครสมาชิก</h1><p>สร้างบัญชีใหม่เพื่อเริ่มต้นใช้งาน</p></header>
+    <form action="/register" method="post" class="auth-form">
+      <label><span>ชื่อผู้ใช้</span><input name="username" required autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="username" autocomplete="username" /></label>
+      <label><span>อีเมล</span><input type="email" name="email" required placeholder="user@email.com" autocomplete="email" /></label>
+      <div class="auth-form__pair">
+        <label><span>รหัสผ่าน</span><div class="auth-password"><input type="password" name="password" required placeholder="password" autocomplete="new-password" /><button type="button" data-password-toggle>แสดง</button></div></label>
+        <label><span>ยืนยันรหัสผ่าน</span><div class="auth-password"><input type="password" name="confirmPassword" required placeholder="password again" autocomplete="new-password" /><button type="button" data-password-toggle>แสดง</button></div></label>
+      </div>
+      <% if (recaptchaSiteKey) { %><div class="auth-captcha"><div class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></div></div><% } %>
+      <button class="auth-submit"><svg><use href="#ui-shield"/></svg> สมัครสมาชิกอย่างปลอดภัย <span>→</span></button>
+    </form>
+    <p class="auth-switch">มีบัญชีอยู่แล้ว? <a href="/login">เข้าสู่ระบบ</a></p>
+    <div class="auth-help"><svg><use href="#ui-help"/></svg><span>การสมัครถือว่าคุณยอมรับเงื่อนไขของร้าน<br><a href="/help">อ่านวิธีใช้งานก่อนเริ่มซื้อสินค้า</a></span></div>
+  </div>
 </section>
+<% if (recaptchaSiteKey) { %><script src="https://www.google.com/recaptcha/api.js" async defer></script><% } %>
+<script>document.querySelectorAll('[data-password-toggle]').forEach(button=>button.addEventListener('click',()=>{const input=button.parentElement.querySelector('input');input.type=input.type==='password'?'text':'password';button.textContent=input.type==='password'?'แสดง':'ซ่อน'}));</script>
