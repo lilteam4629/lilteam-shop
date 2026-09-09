@@ -1,7 +1,15 @@
 <% const storefrontBackground = settings.storefrontAppearance && settings.storefrontAppearance.backgroundImage; %>
 <% if (storefrontBackground) { %>
 <style>
-  body { background-image:url('<%= storefrontBackground %>')!important;background-repeat:no-repeat!important;background-position:center top!important;background-size:contain!important;background-attachment:fixed!important; }
+  body {
+    background-color:var(--bg)!important;
+    background-image:linear-gradient(color-mix(in srgb,var(--bg) 58%,transparent),color-mix(in srgb,var(--bg) 70%,transparent)),url('<%= storefrontBackground %>'),url('<%= storefrontBackground %>')!important;
+    background-repeat:no-repeat,no-repeat,no-repeat!important;
+    background-position:center top,center top,center top!important;
+    background-size:100% 100%,min(100vw,1920px) auto,cover!important;
+    background-attachment:fixed,fixed,fixed!important;
+    background-blend-mode:normal,normal,soft-light!important;
+  }
   @media(max-width:700px){body{background-attachment:scroll!important}}
 </style>
 <% } %>
@@ -269,13 +277,7 @@
 
 <% if (latestOrders && latestOrders.length) { %>
 <section class="latest-orders-section storefront-control-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-5">
-  <div class="flex items-end justify-between gap-3 mb-3">
-    <div>
-      <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2"><span class="latest-orders-live"></span>รายการสั่งซื้อล่าสุด</h2>
-      <p class="text-[10px] sm:text-xs text-[var(--text-4)] mt-0.5">อัปเดตคำสั่งซื้อจากลูกค้าของร้าน</p>
-    </div>
-    <span class="text-[10px] text-emerald-400 border border-emerald-400/25 bg-emerald-400/10 rounded-full px-2.5 py-1">LIVE</span>
-  </div>
+  <div class="latest-orders-heading"><span class="latest-orders-heading-icon"><svg><use href="#ui-clock"/></svg></span><div><h2>รายการสั่งซื้อล่าสุด</h2><p>Latest order list</p></div></div>
   <div class="latest-orders-shell">
     <div class="latest-orders-track">
       <% for (let duplicate = 0; duplicate < 2; duplicate++) { %>
@@ -301,14 +303,15 @@
 </section>
 
 <style>
-  .latest-orders-live { width: .55rem; height: .55rem; border-radius: 999px; background: #34d399; box-shadow: 0 0 0 4px rgba(52,211,153,.1), 0 0 14px rgba(52,211,153,.7); }
+  .latest-orders-heading{display:flex;align-items:flex-start;gap:11px;margin-bottom:14px}.latest-orders-heading-icon{display:grid;place-items:center;width:36px;height:36px;flex:none;border:1px solid var(--border-light);border-radius:9px;background:var(--card);color:var(--text-2)}.latest-orders-heading-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8}.latest-orders-heading h2{color:var(--text);font-size:19px!important;font-weight:800;line-height:1.15}.latest-orders-heading p{margin-top:5px;color:var(--text-4);font-size:11px}
   .latest-orders-shell {
     overflow: hidden; padding: .75rem;
     border: 1px solid var(--border);
     border-radius: 1rem;
-    background: linear-gradient(135deg, color-mix(in srgb, var(--card) 96%, transparent), color-mix(in srgb, var(--input) 90%, transparent));
-    -webkit-mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
-    mask-image: linear-gradient(90deg, transparent, #000 2%, #000 98%, transparent);
+    background: var(--card)!important;
+    background-image:none!important;
+    -webkit-mask-image:none!important;
+    mask-image:none!important;
   }
   .latest-orders-track { display: flex; width: max-content; gap: .75rem; animation: latest-orders-scroll 28s linear infinite; will-change: transform; }
   .latest-orders-shell:active .latest-orders-track { animation-play-state: paused; }
@@ -319,19 +322,20 @@
     padding: .65rem .75rem;
     border-radius: .85rem;
     border: 1px solid var(--border-light);
-    background: color-mix(in srgb, var(--bg) 48%, var(--card));
+    background: var(--input);
     box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
     transition: border-color .2s, transform .2s, background .2s;
   }
   .latest-order-card:hover { border-color: color-mix(in srgb, var(--gold) 65%, transparent); transform: translateY(-1px); background: var(--input); }
   .latest-order-image-wrap {
-    width: 3.6rem; height: 4.25rem; flex: 0 0 auto;
+    width: 3.35rem; height: 3.35rem; flex: 0 0 auto;
     display: grid; place-items: center; overflow: hidden;
     border-radius: .65rem; background: var(--input);
   }
   .latest-order-image { width: 100%; height: 100%; object-fit: contain; }
   @keyframes latest-orders-scroll { to { transform: translateX(calc(-50% - .375rem)); } }
   @media (max-width: 639px) {
+    .latest-orders-heading{gap:9px;margin-bottom:10px}.latest-orders-heading-icon{width:32px;height:32px}.latest-orders-heading h2{font-size:16px!important}.latest-orders-heading p{font-size:9px;margin-top:3px}
     .latest-orders-section { padding-top: 1rem; }
     .latest-orders-shell { padding: .55rem; border-radius: .85rem; }
     .latest-orders-track, .latest-orders-group { gap: .55rem; }
