@@ -129,5 +129,5 @@
 @media(max-width:700px){.all-products-grid .premium-natural-card h3,.product-catalog-grid .premium-natural-card h3{min-height:34px!important;max-height:34px}.all-products-grid .premium-natural-card>div:first-child>div,.product-catalog-grid .premium-natural-card>div:first-child>div{aspect-ratio:16/10!important}}
 
 /* Keep every primary home section on one shared left/right guide. */
-.banner-hero-shell,.modern-fan-heading,.store-status-section,.store-announcements,.event-update,.latest-orders-section,.store-filter-section,.store-product-gallery,.store-content-section{width:min(1500px,calc(100% - 32px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+.banner-hero-shell,.modern-fan-heading,.store-status-section,.store-announcements,.event-update,.latest-orders-section,.store-filter-section,.store-product-gallery,.store-content-section{width:min(1320px,calc(100% - 48px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
 @media(max-width:700px){.banner-hero-shell,.modern-fan-heading,.store-status-section,.store-announcements,.event-update,.latest-orders-section,.store-filter-section,.store-product-gallery,.store-content-section{width:calc(100% - 48px)!important}.store-product-gallery{padding-left:0!important;padding-right:0!important}}
