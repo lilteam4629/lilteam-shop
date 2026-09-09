@@ -165,10 +165,44 @@
   .store-filter-section .filter-chip .check-badge { top: 5px !important; right: 5px !important; width: 21px !important; height: 21px !important; font-size: 11px !important; }
   .store-filter-section #scrollLeftBtn,
   .store-filter-section #scrollRightBtn { width: 30px !important; min-width: 30px !important; height: 44px !important; min-height: 44px !important; }
-  .store-filter-section .filter-action-bar { min-height: 52px; margin: 10px -12px -12px !important; padding: 7px 12px !important; }
-  .store-filter-section .filter-action-bar p { display: flex; align-items: baseline; gap: 4px; font-size: 9px !important; }
-  .store-filter-section .filter-action-bar strong { display: inline !important; font-size: 12px !important; }
-  .store-filter-section .filter-action-bar button { min-width: 145px !important; height: 38px !important; min-height: 38px !important; border-radius: 9px !important; }
+  .store-filter-section .filter-action-bar {
+    display: grid !important;
+    grid-template-columns: max-content minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    min-height: 62px;
+    margin: 10px -12px -12px !important;
+    padding: 9px 12px calc(9px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  .store-filter-section .filter-action-bar p {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    min-width: max-content;
+    margin: 0;
+    white-space: nowrap;
+    font-size: 10px !important;
+    line-height: 1;
+  }
+  .store-filter-section .filter-action-bar strong { display: inline !important; margin: 0 !important; font-size: 13px !important; white-space: nowrap; }
+  .store-filter-section .filter-action-bar button {
+    width: 100%;
+    min-width: 0 !important;
+    height: 42px !important;
+    min-height: 42px !important;
+    padding: 0 14px !important;
+    border-radius: 11px !important;
+    gap: 8px !important;
+    white-space: nowrap;
+  }
+  .store-filter-section .filter-action-bar button span { font-size: 20px !important; }
+}
+
+@media (max-width: 360px) {
+  .store-filter-section .filter-action-bar { gap: 8px; padding-inline: 10px !important; }
+  .store-filter-section .filter-action-bar p { font-size: 9px !important; }
+  .store-filter-section .filter-action-bar strong { font-size: 12px !important; }
+  .store-filter-section .filter-action-bar button { padding-inline: 9px !important; font-size: 10px !important; }
 }
 
 /* Preserve the drawer dimensions after the shared mobile gutter rules above. */
