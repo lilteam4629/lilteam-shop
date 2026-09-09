@@ -13,7 +13,7 @@
      needs uniform card sizes; the regular grid shows the image at its full natural size —
      same overlay look, just no forced crop — unless the shop opts into
      settings.productCardStyle = 'natural' (price/title below the image instead). -->
-<a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
+<a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-stock="<%= soldOut ? 'sold' : 'available' %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
   class="premium-product-card spotlight-card filterable-card group relative block w-full <%= isFan ? 'h-full aspect-[3/4]' : 'self-start' %> rounded-2xl overflow-hidden border bg-[var(--card)] <%= p.flashSaleActive ? 'border-[var(--gold)]' : 'border-[var(--gold)]/40' %>
          transition-all duration-300 hover:border-[var(--gold)]">
 
@@ -71,7 +71,7 @@
 <% } else { %>
 <!-- Natural card (opt-in via settings.productCardStyle): image shown exactly as uploaded,
      full size, nothing drawn on top of it -->
-<a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
+<a href="/game/<%= p.slug %>" style="--mx:50%;--my:50%;" data-product-id="<%= p.id %>" data-stock="<%= soldOut ? 'sold' : 'available' %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
   class="premium-natural-card premium-product-card spotlight-card filterable-card group relative flex flex-col w-full self-start rounded-2xl overflow-hidden border bg-[var(--card)] <%= p.flashSaleActive ? 'border-[var(--gold)]' : 'border-[var(--gold)]/40' %>
          transition-all duration-300 hover:border-[var(--gold)]">
 

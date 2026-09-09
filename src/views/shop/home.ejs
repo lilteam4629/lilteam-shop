@@ -358,7 +358,11 @@
     </div>
   <% } %>
 
-  <%- include('../partials/section-hud-header', { icon: '🎮', title: 'สินค้าเกมทั้งหมด', subtitle: 'All Products', href: '/products' }) %>
+  <div class="home-catalog-head">
+    <div class="home-catalog-title"><span><svg><use href="#ui-box"/></svg></span><div><h2>สินค้าทั้งหมด</h2><p>All Products&nbsp; • &nbsp;<%= productTotal %> รายการ</p></div></div>
+    <label class="home-catalog-search"><svg><use href="#ui-search"/></svg><input id="homeCatalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off"></label>
+    <div class="home-catalog-filters" aria-label="กรองสินค้า"><button type="button" class="is-active" data-home-stock="all">ทั้งหมด</button><button type="button" data-home-stock="available"><i></i> พร้อมขาย</button><button type="button" data-home-stock="sold"><i></i> สินค้าหมด</button></div>
+  </div>
   <div class="all-products-grid product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4">
     <% if (products.length) { %>
       <% products.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
@@ -372,6 +376,7 @@
     <p class="text-center text-[var(--text-4)] text-xs mt-6">ยังไม่มีสินค้า — เพิ่มสินค้าได้ที่หน้าแอดมิน (รูปด้านบนเป็นแค่ตัวอย่าง)</p>
   <% } %>
 </section>
+<script>(function(){const grid=document.querySelector('.all-products-grid'),search=document.getElementById('homeCatalogSearch'),buttons=[...document.querySelectorAll('[data-home-stock]')];if(!grid||!search)return;let stock='all';function apply(){const term=search.value.trim().toLowerCase();grid.querySelectorAll('.filterable-card').forEach(card=>{const matchesText=!term||(card.dataset.title||'').includes(term);const matchesStock=stock==='all'||card.dataset.stock===stock;card.hidden=!(matchesText&&matchesStock)});}search.addEventListener('input',apply);buttons.forEach(button=>button.addEventListener('click',()=>{stock=button.dataset.homeStock;buttons.forEach(item=>item.classList.toggle('is-active',item===button));apply()}));})();</script>
 
 <%
   const boxGamePrizes = miniGamePrizes.filter(p => (p.gameType || 'box') === 'box');
