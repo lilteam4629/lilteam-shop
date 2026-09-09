@@ -71,6 +71,10 @@ body.admin-reference-ui .filter-library-panel,body.admin-reference-ui .hs-list,b
 body.admin-reference-ui .filter-card,body.admin-reference-ui .hs-card{border-color:var(--studio-line)!important;border-radius:12px!important;background:var(--card)!important;box-shadow:none!important}
 body.admin-reference-ui .filter-image-stage{background:var(--studio-soft)!important}
 body.admin-reference-ui .filter-drag-palette{background:color-mix(in srgb,var(--card) 96%,var(--text))!important;border-color:var(--studio-line)!important;box-shadow:0 6px 22px rgba(0,0,0,.08)!important}
+body.admin-reference-ui .filter-search-box{min-height:44px;padding:0 13px!important;border:1px solid var(--studio-line)!important;border-radius:11px!important;background:var(--input)!important;box-shadow:none!important;overflow:hidden}
+body.admin-reference-ui main .filter-search-box input:not([type=checkbox]):not([type=radio]){min-height:42px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+body.admin-reference-ui .filter-search-box:focus-within{border-color:var(--gold)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 12%,transparent)!important}
+body.admin-reference-ui .filter-search-box>span{color:var(--text-4)}
 
 /* Dialogs and drawers */
 body.admin-reference-ui .filter-drawer-backdrop{background:rgba(0,0,0,.52)!important;backdrop-filter:blur(3px)}
