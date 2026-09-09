@@ -2,7 +2,33 @@
   <%- include('../partials/locker-hero', { newest, stats, settings, filterTags, publicPreview: typeof publicPreview !== 'undefined' ? publicPreview : false }) %>
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
   <section class="border-b border-[var(--border)]">
-    <div class="w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
+    <div class="banner-hero-shell w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
+      <div class="lilteam-hero-command">
+        <div class="lilteam-hero-command__grid"></div>
+        <div class="lilteam-hero-command__beam"></div>
+        <div class="lilteam-hero-command__copy">
+          <span class="lilteam-hero-command__eyebrow"><i></i> LILTEAM DIGITAL STORE</span>
+          <h1>ยินดีต้อนรับสู่ <em><%= settings.shopName %></em></h1>
+          <p><%= settings.tagline %></p>
+          <div class="lilteam-hero-command__actions">
+            <a href="/products" class="lilteam-hero-command__primary">เลือกดูสินค้า <span>→</span></a>
+            <a href="/help" class="lilteam-hero-command__secondary">วิธีสั่งซื้อ</a>
+          </div>
+        </div>
+        <div class="lilteam-hero-command__stats">
+          <div><b><%= stats.gameCount.toLocaleString() %></b><span>สินค้าทั้งหมด</span></div>
+          <div><b>24/7</b><span>สั่งซื้อได้ตลอด</span></div>
+          <div><b>FAST</b><span>ส่งอัตโนมัติ</span></div>
+        </div>
+        <nav class="lilteam-hero-command__categories" aria-label="ทางลัดหมวดหมู่">
+          <span>เลือกหมวด</span>
+          <% homeSections.slice(0, 4).forEach(section => { %>
+            <a href="#home-section-<%= section.id %>"><%= section.title %></a>
+          <% }) %>
+          <% if (!homeSections.length) { %><a href="/products">สินค้าแนะนำ</a><a href="/products?sort=newest">สินค้ามาใหม่</a><% } %>
+          <a href="/products" class="all">ดูทั้งหมด</a>
+        </nav>
+      </div>
       <% if (settings.hero.bannerLink) { %>
         <a href="<%= settings.hero.bannerLink %>"
           class="group block overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]
@@ -333,10 +359,12 @@
 <section class="store-product-gallery w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
   <% if (homeSections.length) { %>
     <% homeSections.forEach(section => { %>
+      <section id="home-section-<%= section.id %>" class="scroll-mt-28">
       <%- include('../partials/section-hud-header', { icon: '✨', title: section.title, subtitle: '', href: null }) %>
       <div class="product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4 mb-10">
         <% section.products.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
       </div>
+      </section>
     <% }) %>
   <% } else if (!products.length) { %>
     <%- include('../partials/section-hud-header', { icon: '✨', title: 'เกมมาใหม่', subtitle: 'New Arrivals', href: null }) %>
