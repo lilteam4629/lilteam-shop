@@ -16,7 +16,28 @@
       <a href="/cart" class="store-nav__round store-nav__cart" aria-label="ตะกร้าสินค้า"><span>🛒</span><% if (cartCount > 0) { %><b><%= cartCount %></b><% } %></a>
       <% if (currentUser) { %>
         <a href="/account/topup" class="store-nav__wallet"><span>฿<%= currentUser.walletBalance.toLocaleString() %></span><b>＋</b></a>
-        <details class="store-nav__account"><summary><span class="store-nav__avatar"><%= (currentUser.username || 'U')[0].toUpperCase() %></span><span class="store-nav__account-name"><%= currentUser.username %></span><span>⌄</span></summary><div class="store-nav__account-menu"><a href="/account">บัญชีของฉัน</a><a href="/account/orders">คำสั่งซื้อของฉัน</a><a href="/account/topup">เติมเงิน</a><% if (currentUser.role === 'admin') { %><a href="/admin">ระบบหลังบ้าน</a><% } %><a href="/logout" class="danger">ออกจากระบบ</a></div></details>
+        <details class="store-nav__account">
+          <summary><span class="store-nav__avatar"><%= (currentUser.username || 'U')[0].toUpperCase() %></span><span class="store-nav__account-name"><%= currentUser.username %></span><span class="store-nav__chevron">⌄</span></summary>
+          <div class="store-nav__account-menu">
+            <div class="store-nav__profile-card">
+              <span class="store-nav__profile-avatar"><%= (currentUser.username || 'U')[0].toUpperCase() %></span>
+              <span><strong><%= currentUser.username %></strong><small><%= currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิก' %></small></span>
+              <b>฿<%= currentUser.walletBalance.toLocaleString() %></b>
+            </div>
+            <% if (currentUser.role === 'admin') { %><a href="/admin" class="store-nav__admin-link"><i>◆</i><span><strong>จัดการหลังบ้าน</strong><small>สินค้า คำสั่งซื้อ และร้านค้า</small></span><em>→</em></a><% } %>
+            <div class="store-nav__menu-group">
+              <a href="/account"><i>♙</i><span>บัญชีของฉัน</span></a>
+              <a href="/cart"><i>⌑</i><span>ตะกร้าสินค้า</span><% if (cartCount > 0) { %><em><%= cartCount %></em><% } %></a>
+              <a href="/account/orders"><i>▣</i><span>คำสั่งซื้อของฉัน</span></a>
+              <a href="/account/topup"><i>฿</i><span>เติมเงิน</span></a>
+            </div>
+            <div class="store-nav__menu-group store-nav__menu-group--support">
+              <a href="/help"><i>?</i><span>คู่มือการใช้งาน</span></a>
+              <a href="/contact"><i>✆</i><span>ติดต่อร้าน</span></a>
+            </div>
+            <a href="/logout" class="store-nav__logout"><i>↪</i><span>ออกจากระบบ</span></a>
+          </div>
+        </details>
       <% } else { %>
         <a href="/register" class="store-nav__register"><span>♙</span> สมัครสมาชิก</a><a href="/login" class="store-nav__login"><span>♙</span> เข้าสู่ระบบ</a>
       <% } %>
@@ -24,4 +45,4 @@
   </div>
   <div class="store-nav__mobile-row"><nav aria-label="เมนูมือถือ"><a href="/">หน้าแรก</a><a href="/products">หมวดหมู่สินค้า</a><a href="/products">สินค้าทั้งหมด</a><a href="/help">วิธีใช้งาน</a><a href="/contact">ติดต่อร้าน</a></nav><form action="/search" method="get"><input type="search" name="q" placeholder="ค้นหาสินค้า..." /><button>⌕</button></form></div>
 </header>
-<script>(function(){document.addEventListener('keydown',function(event){if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){const search=document.querySelector('.store-nav__search input');if(!search)return;event.preventDefault();search.focus();}})})();</script>
+<script>(function(){const account=document.querySelector('.store-nav__account');document.addEventListener('keydown',function(event){if((event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='k'){const search=document.querySelector('.store-nav__search input');if(!search)return;event.preventDefault();search.focus();}if(event.key==='Escape'&&account)account.removeAttribute('open');});document.addEventListener('click',function(event){if(account&&account.open&&!account.contains(event.target))account.removeAttribute('open');});})();</script>
