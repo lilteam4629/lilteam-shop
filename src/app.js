@@ -69,12 +69,24 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
   maxAge: process.env.NODE_ENV === 'production' ? '7d' : 0,
 }));
 
+// Pages must always revalidate so an already-open storefront cannot keep an
+// older EJS layout after a deploy. Fingerprinted static assets remain cached.
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  next();
+});
+
 // Static assets are served with a 7-day cache in production, so an edited stylesheet
 // would otherwise keep showing its old version in already-open browsers.
 // Stamping each link with the file's own mtime means every deploy that
 // actually changes a file busts only that file's cache, automatically —
 // no hand-maintained ?v=x.y.z to forget to bump.
 const assetVersions = new Map();
+const deployAssetStamp = (
+  process.env.RAILWAY_GIT_COMMIT_SHA ||
+  process.env.COMMIT_SHA ||
+  `${packageInfo.version}-${Date.now()}`
+).replace(/[^a-zA-Z0-9._-]/g, '');
 app.locals.asset = (publicPath) => {
   if (!assetVersions.has(publicPath)) {
     let stamp = Date.now();
@@ -83,7 +95,7 @@ app.locals.asset = (publicPath) => {
     } catch { /* missing file: fall back to boot time so links still work */ }
     assetVersions.set(publicPath, Math.floor(stamp).toString(36));
   }
-  return `/${publicPath.replace(/^\/+/, '')}?v=${assetVersions.get(publicPath)}`;
+  return `/${publicPath.replace(/^\/+/, '')}?v=${deployAssetStamp}-${assetVersions.get(publicPath)}`;
 };
 
 // Resolves store.data to the right shop's own dataset based on subdomain,
