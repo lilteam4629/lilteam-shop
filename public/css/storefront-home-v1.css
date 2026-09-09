@@ -231,3 +231,65 @@
 .storefront-hero-banner .lilteam-hero-command{background:transparent!important}
 .storefront-hero-banner .lilteam-hero-command:before,.storefront-hero-banner .lilteam-hero-command:after{display:none!important}
 @media(max-width:700px){.storefront-hero-banner:before{inset:-20% -35%;opacity:.75}.storefront-hero-banner:after{left:-25%;width:120%;filter:blur(26px)}}
+
+/* Keep the decoration small and borderless, only behind the welcome message. */
+.storefront-hero-banner{overflow:visible;background:var(--bg);border:0!important}
+.storefront-hero-banner:before,.storefront-hero-banner:after{display:none!important}
+.storefront-hero-banner .lilteam-hero-command{border:0!important;background:transparent!important;box-shadow:none!important}
+.storefront-hero-banner .lilteam-hero-command:before{
+  content:""!important;
+  position:absolute;
+  z-index:-1;
+  top:4px;
+  bottom:4px;
+  left:0;
+  width:min(620px,58%);
+  display:block!important;
+  border:0!important;
+  background:
+    radial-gradient(ellipse at 20% 48%,color-mix(in srgb,var(--gold) 13%,transparent),transparent 58%),
+    repeating-linear-gradient(132deg,color-mix(in srgb,var(--gold) 6%,transparent) 0 1px,transparent 1px 27px);
+  -webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.9),transparent 100%);
+  mask-image:linear-gradient(90deg,rgba(0,0,0,.9),transparent 100%);
+  pointer-events:none;
+}
+.storefront-hero-banner .lilteam-hero-command:after{display:none!important}
+@media(max-width:700px){.storefront-hero-banner .lilteam-hero-command:before{top:0;bottom:0;width:88%;opacity:.72}}
+
+/* Reference treatment: one shallow technical grid strip above the artwork. */
+.storefront-hero-banner{position:relative;isolation:isolate;overflow:hidden;background:var(--bg)!important}
+.storefront-hero-banner:before{
+  content:"";
+  position:absolute;
+  z-index:-2;
+  top:0;
+  right:0;
+  left:0;
+  height:150px;
+  display:block!important;
+  background-image:
+    linear-gradient(color-mix(in srgb,var(--text) 7%,transparent) 1px,transparent 1px),
+    linear-gradient(90deg,color-mix(in srgb,var(--text) 7%,transparent) 1px,transparent 1px),
+    radial-gradient(circle,color-mix(in srgb,var(--gold) 16%,transparent) 0 1px,transparent 1.5px);
+  background-size:40px 28px,40px 28px,18px 18px;
+  -webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.42) 62%,transparent 100%);
+  mask-image:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.42) 62%,transparent 100%);
+  transform:perspective(620px) rotateX(7deg) scale(1.04);
+  transform-origin:top center;
+  pointer-events:none;
+}
+.storefront-hero-banner:after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:-70px;
+  left:16%;
+  width:48%;
+  height:180px;
+  display:block!important;
+  background:radial-gradient(ellipse,color-mix(in srgb,var(--gold) 9%,transparent),transparent 70%);
+  filter:blur(28px);
+  pointer-events:none;
+}
+.storefront-hero-banner .lilteam-hero-command:before,.storefront-hero-banner .lilteam-hero-command:after{display:none!important}
+@media(max-width:700px){.storefront-hero-banner:before{height:138px;background-size:30px 24px,30px 24px,16px 16px}.storefront-hero-banner:after{left:-5%;width:85%}}
