@@ -1948,6 +1948,25 @@ router.post('/auth-background/upload', (req, res) => {
   }));
 });
 
+router.post('/storefront-background/upload', (req, res) => {
+  bannerUpload.single('storefrontBackgroundImage')(req, res, store.bindTenantContext(async (err) => {
+    const directImage = firstDirectUpload(req.body || {}, 'storefrontBackgroundImage');
+    if (err || (!req.file && !directImage)) { req.flash('error', 'อัปโหลดพื้นหลังหน้าร้านไม่สำเร็จ (รองรับไฟล์รูปภาพไม่เกิน 10MB)'); return res.redirect('/admin/appearance'); }
+    try {
+      store.data.settings.storefrontAppearance = store.data.settings.storefrontAppearance || {};
+      store.data.settings.storefrontAppearance.backgroundImage = directImage || await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      await store.save(); req.flash('success', 'บันทึกภาพพื้นหลังหน้าร้านแล้ว ภาพจะแสดงเต็มโดยไม่ครอป');
+    } catch (saveError) { req.flash('error', 'บันทึกภาพพื้นหลังหน้าร้านไม่สำเร็จ กรุณาลองใหม่'); }
+    res.redirect('/admin/appearance');
+  }));
+});
+
+router.post('/storefront-background/remove', async (req, res) => {
+  store.data.settings.storefrontAppearance = store.data.settings.storefrontAppearance || {};
+  store.data.settings.storefrontAppearance.backgroundImage = null;
+  await store.save(); req.flash('success', 'นำภาพพื้นหลังหน้าร้านออกแล้ว'); res.redirect('/admin/appearance');
+});
+
 router.post('/auth-background/remove', async (req, res) => {
   store.data.settings.authAppearance = store.data.settings.authAppearance || {};
   store.data.settings.authAppearance.backgroundImage = null;

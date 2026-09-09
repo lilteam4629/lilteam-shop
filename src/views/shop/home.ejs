@@ -1,3 +1,11 @@
+<% const storefrontBackground = settings.storefrontAppearance && settings.storefrontAppearance.backgroundImage; %>
+<% if (storefrontBackground) { %>
+<style>
+  body { background-image:url('<%= storefrontBackground %>')!important;background-repeat:no-repeat!important;background-position:center top!important;background-size:contain!important;background-attachment:fixed!important; }
+  @media(max-width:700px){body{background-attachment:scroll!important}}
+</style>
+<% } %>
+
 <% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2) { %>
   <%- include('../partials/locker-hero', { newest, stats, settings, filterTags, publicPreview: typeof publicPreview !== 'undefined' ? publicPreview : false }) %>
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
