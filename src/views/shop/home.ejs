@@ -10,6 +10,9 @@
     background-attachment:fixed!important;
     background-blend-mode:normal!important;
   }
+  .storefront-hero-banner { background:transparent!important;background-image:none!important; }
+  .storefront-hero-banner::before,.storefront-hero-banner::after { display:none!important;content:none!important; }
+  .storefront-hero-banner>.banner-hero-shell { background:transparent!important; }
   @media(max-width:700px){body{background-attachment:scroll!important}}
 </style>
 <% } %>
