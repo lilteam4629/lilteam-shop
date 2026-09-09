@@ -42,11 +42,11 @@
         <a href="/account/topup" class="store-nav__wallet"><span>฿<%= currentUser.walletBalance.toLocaleString() %></span><b>＋</b></a>
         <details class="store-nav__account">
           <summary><span class="store-nav__avatar"><%= (currentUser.username || 'U')[0].toUpperCase() %></span><span class="store-nav__account-name"><%= currentUser.username %></span><span class="store-nav__chevron">⌄</span></summary>
-          <div class="store-nav__account-menu">
+          <div class="store-nav__account-menu" <% if (settings.hero && settings.hero.bannerImage) { %>style="--account-menu-bg:url('<%= settings.hero.bannerImage %>')"<% } %>>
             <div class="store-nav__profile-card">
               <span class="store-nav__profile-avatar"><%= (currentUser.username || 'U')[0].toUpperCase() %></span>
-              <span><strong><%= currentUser.username %></strong><small><%= currentUser.role === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิก' %></small></span>
-              <b>฿<%= currentUser.walletBalance.toLocaleString() %></b>
+              <span><strong><%= currentUser.username %></strong><small><svg><use href="#ui-<%= currentUser.role === 'admin' ? 'shield' : 'user' %>"/></svg><%= currentUser.role === 'admin' ? 'ADMIN' : 'สมาชิก' %></small></span>
+              <b><small>ยอดเงิน</small> ฿<%= currentUser.walletBalance.toLocaleString() %>.00</b>
             </div>
             <% if (currentUser.role === 'admin') { %><a href="/admin" class="store-nav__admin-link"><i><svg><use href="#ui-shield"/></svg></i><span><strong>จัดการหลังบ้าน</strong><small>สินค้า คำสั่งซื้อ และร้านค้า</small></span><em>→</em></a><% } %>
             <div class="store-nav__menu-group">
