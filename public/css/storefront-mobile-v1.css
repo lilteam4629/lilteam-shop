@@ -270,3 +270,35 @@
 @media (max-width: 390px) {
   aside.store-nav__mobile-row { padding-inline: 17px !important; }
 }
+
+/* Slim mobile drawer: preserve tap targets without covering nearly the whole screen. */
+@media (max-width: 900px) {
+  aside.store-nav__mobile-row {
+    width: min(285px,76vw) !important;
+    padding: 0 15px 18px !important;
+  }
+  aside.store-nav__mobile-row > header {
+    min-height: 64px !important;
+    margin: 0 -15px 12px !important;
+    padding: 0 15px !important;
+  }
+  aside.store-nav__mobile-row .store-nav__drawer-brand { gap: 8px !important; font-size: 14px !important; }
+  aside.store-nav__mobile-row .store-nav__drawer-brand img,
+  aside.store-nav__mobile-row .store-nav__drawer-brand > span { width: 32px !important; height: 32px !important; border-radius: 8px !important; }
+  aside.store-nav__mobile-row .store-nav__mobile-close { width: 34px !important; height: 34px !important; min-height: 34px !important; font-size: 21px !important; }
+  aside.store-nav__mobile-row form { height: 36px !important; margin-bottom: 8px !important; }
+  aside.store-nav__mobile-row input { font-size: 13px !important; }
+  aside.store-nav__mobile-row nav a {
+    min-height: 40px !important;
+    gap: 11px !important;
+    padding: 0 7px !important;
+    border-radius: 8px !important;
+    font-size: 12px !important;
+  }
+  aside.store-nav__mobile-row nav a svg { width: 18px !important; height: 18px !important; }
+  aside.store-nav__mobile-row .store-nav__drawer-section { margin: 11px 0 6px !important; font-size: 8px !important; }
+}
+@media (max-width: 390px) {
+  aside.store-nav__mobile-row { width: min(275px,78vw) !important; padding-inline: 14px !important; }
+  aside.store-nav__mobile-row > header { margin-inline: -14px !important; padding-inline: 14px !important; }
+}
