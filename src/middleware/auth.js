@@ -30,6 +30,7 @@ function attachUser(req, res, next) {
     contactFacebook: normalizeExternalLink(store.data.settings.contactFacebook),
     contactMessenger: normalizeExternalLink(store.data.settings.contactMessenger),
   };
+  res.locals.navFilterTags = Array.isArray(store.data.filterTags) ? store.data.filterTags : [];
   res.locals.themeCss = theme.renderCss(store.data.settings.theme);
   next();
 }
