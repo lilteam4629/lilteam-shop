@@ -1,7 +1,7 @@
 <% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2) { %>
   <%- include('../partials/locker-hero', { newest, stats, settings, filterTags, publicPreview: typeof publicPreview !== 'undefined' ? publicPreview : false }) %>
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
-  <section class="border-b border-[var(--border)]">
+  <section class="storefront-hero-banner border-b border-[var(--border)]">
     <div class="banner-hero-shell w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
       <div class="lilteam-hero-command">
         <div class="lilteam-hero-command__copy">
