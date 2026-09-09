@@ -1795,11 +1795,6 @@ router.get('/effects', (req, res) => {
 router.get('/appearance', (req, res) => {
   res.render('admin/appearance', {
     title: 'รูปหน้าเว็บและโลโก้', active: 'appearance',
-    currentTheme: store.data.settings.theme,
-    accentPresets: theme.getAccentPresets(),
-    bgPresets: theme.getBgPresets(),
-    styles: theme.getStyles(),
-    announcements: store.data.announcements,
   });
 });
 
