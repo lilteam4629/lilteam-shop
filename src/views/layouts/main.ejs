@@ -189,7 +189,7 @@
       function isLight() { return document.documentElement.classList.contains('light'); }
       function updateIcon() {
         const icon = document.getElementById('theme-toggle-icon');
-        if (icon) icon.textContent = isLight() ? '☀️' : '🌙';
+        if (icon) icon.dataset.mode = isLight() ? 'light' : 'dark';
       }
       updateIcon();
       document.addEventListener('click', function (e) {
