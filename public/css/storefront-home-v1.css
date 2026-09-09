@@ -87,4 +87,12 @@
 .latest-order-image-wrap{width:42px!important;height:48px!important;border-radius:8px!important}.latest-order-image-wrap>svg{width:19px;height:19px;fill:none;stroke:var(--gold);stroke-width:1.8}
 .latest-order-card span.flex svg{width:11px;height:11px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8}
 @media(max-width:639px){.latest-orders-track{animation-duration:29s!important}.latest-order-card{width:210px!important;min-height:62px!important}.latest-order-image-wrap{width:39px!important;height:45px!important}}
+
+/* Wide, low-profile welcome bar. */
+.banner-hero-shell .lilteam-hero-command{width:100%;border:1px solid color-mix(in srgb,var(--gold) 30%,var(--border))!important;border-radius:18px!important;background:linear-gradient(105deg,color-mix(in srgb,var(--gold) 7%,var(--card)),var(--card))!important;overflow:hidden!important}
+.banner-hero-shell .lilteam-hero-command__copy{display:grid;width:100%;max-width:none!important;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"eyebrow actions" "title actions" "description actions";align-items:center;column-gap:36px;padding:25px 30px!important}
+.banner-hero-shell .lilteam-hero-command__eyebrow{grid-area:eyebrow}.banner-hero-shell .lilteam-hero-command h1{grid-area:title;margin-top:8px!important;white-space:nowrap;font-size:clamp(30px,3vw,48px)!important}
+.banner-hero-shell .lilteam-hero-command__copy>p{grid-area:description;margin-top:9px!important}.banner-hero-shell .lilteam-hero-command__actions{grid-area:actions;align-self:center;margin-top:0!important;white-space:nowrap}
+@media(max-width:900px){.banner-hero-shell .lilteam-hero-command__copy{grid-template-columns:1fr;grid-template-areas:"eyebrow" "title" "description" "actions";padding:23px!important}.banner-hero-shell .lilteam-hero-command h1{white-space:normal}.banner-hero-shell .lilteam-hero-command__actions{margin-top:16px!important}}
+@media(max-width:640px){.banner-hero-shell .lilteam-hero-command{margin:10px!important;width:calc(100% - 20px)!important;border-radius:15px!important}.banner-hero-shell .lilteam-hero-command__copy{padding:19px!important}.banner-hero-shell .lilteam-hero-command h1{font-size:31px!important;line-height:1.02!important}.banner-hero-shell .lilteam-hero-command__copy>p span{display:none}.banner-hero-shell .lilteam-hero-command__actions{margin-top:14px!important}}
 @media(max-width:700px){.store-product-gallery{width:calc(100% - 12px)!important;padding:10px!important;border-radius:16px}.store-product-gallery>.section-hud-header{padding:3px 2px 11px}}
