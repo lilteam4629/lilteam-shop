@@ -4,30 +4,15 @@
   <section class="border-b border-[var(--border)]">
     <div class="banner-hero-shell w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
       <div class="lilteam-hero-command">
-        <div class="lilteam-hero-command__grid"></div>
-        <div class="lilteam-hero-command__beam"></div>
         <div class="lilteam-hero-command__copy">
-          <span class="lilteam-hero-command__eyebrow"><i></i> LILTEAM DIGITAL STORE</span>
-          <h1>ยินดีต้อนรับสู่ <em><%= settings.shopName %></em></h1>
-          <p><%= settings.tagline %></p>
+          <span class="lilteam-hero-command__eyebrow">LILTEAM DIGITAL STORE</span>
+          <h1>ยินดีต้อนรับสู่<br><em><%= settings.shopName %></em></h1>
+          <p><%= settings.tagline %><br><span>เลือกซื้อสินค้าและชำระเงินได้สะดวกตลอด 24 ชั่วโมง</span></p>
           <div class="lilteam-hero-command__actions">
-            <a href="/products" class="lilteam-hero-command__primary">เลือกดูสินค้า <span>→</span></a>
-            <a href="/help" class="lilteam-hero-command__secondary">วิธีสั่งซื้อ</a>
+            <a href="/products" class="lilteam-hero-command__primary"><svg><use href="#ui-cart"/></svg> เลือกดูสินค้า <span>→</span></a>
+            <a href="/help" class="lilteam-hero-command__secondary"><svg><use href="#ui-book"/></svg> วิธีสั่งซื้อ</a>
           </div>
         </div>
-        <div class="lilteam-hero-command__stats">
-          <div><b><%= stats.gameCount.toLocaleString() %></b><span>สินค้าทั้งหมด</span></div>
-          <div><b>24/7</b><span>สั่งซื้อได้ตลอด</span></div>
-          <div><b>FAST</b><span>ส่งอัตโนมัติ</span></div>
-        </div>
-        <nav class="lilteam-hero-command__categories" aria-label="ทางลัดหมวดหมู่">
-          <span>เลือกหมวด</span>
-          <% homeSections.slice(0, 4).forEach(section => { %>
-            <a href="#home-section-<%= section.id %>"><%= section.title %></a>
-          <% }) %>
-          <% if (!homeSections.length) { %><a href="/products">สินค้าแนะนำ</a><a href="/products?sort=newest">สินค้ามาใหม่</a><% } %>
-          <a href="/products" class="all">ดูทั้งหมด</a>
-        </nav>
       </div>
       <% if (settings.hero.bannerLink) { %>
         <a href="<%= settings.hero.bannerLink %>"
