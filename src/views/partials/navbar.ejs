@@ -51,7 +51,8 @@
       <a href="/cart" class="store-nav__round store-nav__cart" aria-label="ตะกร้าสินค้า"><svg><use href="#ui-cart"/></svg><% if (cartCount > 0) { %><b><%= cartCount %></b><% } %></a>
       <% if (currentUser) { %>
         <a href="/account/topup" class="store-nav__mobile-topup" aria-label="เติมเงิน"><svg><use href="#ui-wallet"/></svg><span>เติมเงิน</span></a>
-        <a href="/account/topup" class="store-nav__wallet"><span><small>เติมเงิน</small>฿<%= currentUser.walletBalance.toLocaleString() %></span><b>＋</b></a>
+        <a href="/account/topup" class="store-nav__desktop-topup" aria-label="เติมเงิน"><svg><use href="#ui-wallet"/></svg><span>เติมเงิน</span></a>
+        <a href="/account/topup" class="store-nav__wallet" aria-label="ยอดเงิน ฿<%= currentUser.walletBalance.toLocaleString() %>"><span>฿<%= currentUser.walletBalance.toLocaleString() %></span><b>＋</b></a>
         <details class="store-nav__account">
           <summary><span class="store-nav__avatar"><%= (currentUser.username || 'U')[0].toUpperCase() %></span><span class="store-nav__account-name"><%= currentUser.username %></span><span class="store-nav__chevron">⌄</span></summary>
           <div class="store-nav__account-menu" <% if (settings.hero && settings.hero.bannerImage) { %>style="--account-menu-bg:url('<%= settings.hero.bannerImage %>')"<% } %>>

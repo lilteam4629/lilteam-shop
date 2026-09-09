@@ -88,3 +88,6 @@ html:not(.light) .store-nav__account-name,html:not(.light) .store-nav__chevron{c
 
 /* Compact desktop bar while keeping its information easy to read. */
 @media(min-width:901px){.store-nav__inner{min-height:64px}.store-nav__brand{font-size:18px}.store-nav__brand img,.store-nav__logo-fallback{width:40px;height:40px}.store-nav__links a{font-size:13px}.store-nav__search{height:40px}.store-nav__search input{font-size:13px}.store-nav__round{width:40px;height:40px}.store-nav__wallet,.store-nav__register,.store-nav__login{height:40px;font-size:12px}.store-nav__account summary{height:42px;font-size:12px}.store-nav__avatar{width:38px;height:38px}}
+/* A dedicated desktop top-up action keeps the wallet balance readable. */
+.store-nav__desktop-topup{display:flex;align-items:center;justify-content:center;gap:6px;height:39px;padding:0 13px;border:1px solid color-mix(in srgb,var(--gold) 48%,var(--border));border-radius:9px;background:color-mix(in srgb,var(--gold) 11%,var(--card));color:var(--gold);font-size:10px;font-weight:800;transition:.15s}.store-nav__desktop-topup svg{width:15px;height:15px}.store-nav__desktop-topup:hover{border-color:var(--gold);background:var(--gold);color:var(--bg);transform:translateY(-1px)}
+@media(max-width:900px){.store-nav__desktop-topup{display:none!important}}

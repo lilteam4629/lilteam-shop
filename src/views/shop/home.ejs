@@ -424,10 +424,10 @@
           %>
             <div class="mg-prize-chip mg-tier-<%= tier %> <%= outOfStock ? 'opacity-50' : '' %>">
               <% if (p.image) { %>
-                <a href="<%= p.image %>" target="_blank" rel="noopener" class="mg-prize-image-link" title="กดเพื่อดูรูป <%= p.name %> ขนาดเต็ม" aria-label="ดูรูป <%= p.name %> ขนาดเต็ม">
+                <button type="button" class="mg-prize-image-link" data-prize-image="<%= p.image %>" data-prize-name="<%= p.name %>" title="กดเพื่อดูรูป <%= p.name %> ขนาดใหญ่" aria-label="ดูรูป <%= p.name %> ขนาดใหญ่">
                   <img src="<%= p.image %>" alt="<%= p.name %>" class="mg-prize-image" />
                   <span class="mg-prize-zoom" aria-hidden="true">⌕</span>
-                </a>
+                </button>
               <% } else { %>
                 <div class="text-2xl leading-none"><%= tierIcon %></div>
               <% } %>
@@ -550,7 +550,7 @@
   .mg-prize-chip:hover { transform: translateY(-1px); }
   .mg-prize-image-link {
     position: relative; flex: 0 0 auto;
-    width: 3.75rem; height: 4.75rem;
+    width: 4.5rem; height: 5.5rem;
     display: flex; align-items: center; justify-content: center;
     overflow: hidden;
     border-radius: .65rem;
@@ -573,6 +573,7 @@
     opacity: .85;
   }
   .mg-prize-image-link:hover { border-color: var(--gold); }
+  .mg-prize-image-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .mg-prize-image-link:hover .mg-prize-zoom { opacity: 1; }
   .mg-tier-legendary { border-color: color-mix(in srgb, var(--gold) 55%, transparent); box-shadow: 0 0 16px -6px color-mix(in srgb, var(--gold) 60%, transparent); }
   .mg-tier-legendary .text-lg { color: var(--gold); }
@@ -615,7 +616,12 @@
       <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <% railGamePrizes.forEach(p => { %>
           <div class="mg-prize-chip <%= p.stock !== null && p.stock <= 0 ? 'opacity-50' : '' %>">
-            <% if (p.image) { %><img src="<%= p.image %>" alt="<%= p.name %>" class="w-12 h-12 object-contain rounded" /><% } else { %><div class="text-2xl"><%= p.isPrize ? '🎁' : '💨' %></div><% } %>
+            <% if (p.image) { %>
+              <button type="button" class="mg-prize-image-link" data-prize-image="<%= p.image %>" data-prize-name="<%= p.name %>" title="กดเพื่อดูรูป <%= p.name %> ขนาดใหญ่" aria-label="ดูรูป <%= p.name %> ขนาดใหญ่">
+                <img src="<%= p.image %>" alt="<%= p.name %>" class="mg-prize-image" />
+                <span class="mg-prize-zoom" aria-hidden="true">⌕</span>
+              </button>
+            <% } else { %><div class="text-2xl"><%= p.isPrize ? '🎁' : '💨' %></div><% } %>
             <div class="flex-1 min-w-0"><div class="text-sm font-semibold truncate"><%= p.name %></div><div class="text-[10px] text-[var(--text-4)]">โอกาส <%= p.percent %>%</div></div>
           </div>
         <% }) %>
@@ -623,4 +629,38 @@
     </div>
   </div>
 </section>
+<% } %>
+
+<% if ((settings.miniGame && settings.miniGame.boxEnabled && boxGamePrizes.length) || (settings.miniGame && settings.miniGame.railEnabled && railGamePrizes.length)) { %>
+<div id="prizeImageModal" class="mg-image-modal" hidden role="dialog" aria-modal="true" aria-labelledby="prizeImageModalTitle">
+  <button type="button" class="mg-image-modal-backdrop" data-prize-modal-close aria-label="ปิดรูป"></button>
+  <div class="mg-image-modal-card" role="document">
+    <div class="mg-image-modal-head">
+      <h3 id="prizeImageModalTitle">ดูรูปรางวัล</h3>
+      <button type="button" class="mg-image-modal-close" data-prize-modal-close aria-label="ปิด">×</button>
+    </div>
+    <div class="mg-image-modal-stage"><img src="" alt="" /></div>
+    <p class="mg-image-modal-name"></p>
+  </div>
+</div>
+<style>
+  .mg-image-modal[hidden]{display:none!important}.mg-image-modal{position:fixed;z-index:10050;inset:0;display:grid;place-items:center;padding:18px}.mg-image-modal-backdrop{position:absolute;inset:0;width:100%;height:100%;border:0;background:rgba(3,7,18,.82);backdrop-filter:blur(9px)}.mg-image-modal-card{position:relative;width:min(92vw,760px);max-height:92dvh;overflow:auto;border:1px solid color-mix(in srgb,var(--gold) 55%,var(--border-light));border-radius:18px;background:var(--card);box-shadow:0 28px 90px rgba(0,0,0,.55)}.mg-image-modal-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--border-light)}.mg-image-modal-head h3{font-size:14px;font-weight:800;color:var(--text)}.mg-image-modal-close{display:grid;place-items:center;width:34px;height:34px;border:1px solid var(--border-light);border-radius:50%;background:var(--input);color:var(--text);font-size:24px;line-height:1}.mg-image-modal-stage{display:grid;place-items:center;min-height:260px;height:min(68vh,680px);padding:14px;background:color-mix(in srgb,var(--bg) 80%,black 8%)}.mg-image-modal-stage img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}.mg-image-modal-name{padding:11px 14px;text-align:center;color:var(--text);font-size:13px;font-weight:700}@media(max-width:640px){.mg-prize-image-link{width:4rem;height:4.8rem}.mg-image-modal{padding:10px}.mg-image-modal-card{width:100%;border-radius:14px}.mg-image-modal-stage{height:68dvh;min-height:240px;padding:8px}}
+</style>
+<script>
+  (function(){
+    const modal=document.getElementById('prizeImageModal');
+    if(!modal||modal.dataset.bound==='1')return;
+    modal.dataset.bound='1';
+    const image=modal.querySelector('.mg-image-modal-stage img');
+    const name=modal.querySelector('.mg-image-modal-name');
+    let opener=null;
+    function closeModal(){modal.hidden=true;document.documentElement.style.overflow='';image.src='';if(opener)opener.focus()}
+    document.addEventListener('click',function(event){
+      const trigger=event.target.closest('[data-prize-image]');
+      if(trigger){event.preventDefault();opener=trigger;image.src=trigger.dataset.prizeImage;image.alt=trigger.dataset.prizeName||'รูปรางวัล';name.textContent=trigger.dataset.prizeName||'';modal.hidden=false;document.documentElement.style.overflow='hidden';modal.querySelector('.mg-image-modal-close').focus();return}
+      if(event.target.closest('[data-prize-modal-close]'))closeModal();
+    });
+    document.addEventListener('keydown',function(event){if(event.key==='Escape'&&!modal.hidden)closeModal()});
+  })();
+</script>
 <% } %>

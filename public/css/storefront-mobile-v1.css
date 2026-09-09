@@ -389,6 +389,76 @@
   aside.store-nav__mobile-row > header { margin-inline: -14px !important; padding-inline: 14px !important; }
 }
 
+/* Dense named filter grid on phones: full artwork, no clipped horizontal cards. */
+@media (max-width: 640px) {
+  .store-filter-section #filterTags {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill,minmax(56px,1fr)) !important;
+    gap: 7px !important;
+    width: 100% !important;
+    overflow: visible !important;
+    scroll-snap-type: none !important;
+  }
+  .store-filter-section .filter-chip {
+    display: grid !important;
+    grid-template-columns: minmax(0,1fr) !important;
+    grid-template-rows: auto 19px !important;
+    width: 100% !important;
+    height: auto !important;
+    min-width: 0 !important;
+    min-height: 0 !important;
+    gap: 0 !important;
+    border: 0 !important;
+    border-radius: 9px !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    overflow: visible !important;
+  }
+  .store-filter-section .filter-chip > span:first-child {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 1 / 1 !important;
+    padding: 3px !important;
+    border: 1.5px solid var(--border-light) !important;
+    border-radius: 9px !important;
+    background: var(--card) !important;
+  }
+  .store-filter-section .filter-chip img {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 6px !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+  .store-filter-section .filter-chip > span:nth-child(2) {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+    display: block !important;
+    min-width: 0 !important;
+    padding: 3px 1px 0 !important;
+    text-align: center !important;
+  }
+  .store-filter-section .filter-chip > span:nth-child(2) > span:first-child {
+    display: block !important;
+    overflow: hidden !important;
+    color: var(--text-2) !important;
+    font-size: 8px !important;
+    font-weight: 750 !important;
+    line-height: 1.15 !important;
+    text-align: center !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  .store-filter-section .filter-chip.active > span:first-child {
+    border-color: var(--gold) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb,var(--gold) 18%,transparent) !important;
+  }
+  .store-filter-section #scrollLeftBtn,
+  .store-filter-section #scrollRightBtn { display: none !important; }
+}
+
 /* Match the redesigned compact filter rail on phones. */
 @media (max-width: 640px) {
   .store-filter-section .filter-chip {
