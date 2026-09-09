@@ -77,3 +77,44 @@
   .marquee-track { animation: none !important; transform: none !important; }
   .latest-orders-track { animation-duration: 48s !important; }
 }
+
+/* One consistent storefront gutter. Keep every home block wide without
+   allowing generic full-width section rules to press content to the glass. */
+@media (max-width: 820px) {
+  .banner-hero-shell,
+  .store-status-section,
+  .store-announcements,
+  .latest-orders-section,
+  .store-filter-section,
+  .store-product-gallery {
+    width: calc(100% - 28px) !important;
+    max-width: none !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+  .banner-hero-shell .lilteam-hero-command {
+    width: 100% !important;
+    margin: 0 0 10px !important;
+  }
+  .banner-hero-shell .lilteam-hero-command__copy { padding-left: 4px !important; padding-right: 4px !important; }
+  .banner-hero-shell > a,
+  .banner-hero-shell > div:not(.lilteam-hero-command),
+  .store-announcements .announce-hud,
+  .latest-orders-shell,
+  .store-filter-section #filterWidget { max-width: 100%; }
+  .store-nav__inner,
+  .store-nav__mobile-row { padding-left: 14px !important; padding-right: 14px !important; }
+}
+
+@media (max-width: 380px) {
+  .banner-hero-shell,
+  .store-status-section,
+  .store-announcements,
+  .latest-orders-section,
+  .store-filter-section,
+  .store-product-gallery { width: calc(100% - 22px) !important; }
+  .store-nav__inner,
+  .store-nav__mobile-row { padding-left: 11px !important; padding-right: 11px !important; }
+}
