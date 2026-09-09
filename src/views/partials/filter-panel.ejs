@@ -5,7 +5,7 @@
 <div class="relative overflow-hidden bg-gradient-to-br from-[var(--card)] to-[var(--input)] border border-[var(--border)] rounded-2xl p-3 sm:p-5 mb-6" id="filterWidget">
   <div class="relative flex flex-wrap items-center justify-between gap-3 mb-4">
     <div class="flex items-center gap-3">
-      <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 border border-[var(--gold)]/20 flex items-center justify-center text-lg">🏷️</span>
+      <span class="filter-title-icon"><svg><use href="#ui-tag"/></svg></span>
       <div>
         <div class="flex items-center gap-2 flex-wrap">
           <h2 class="text-sm sm:text-base font-semibold text-[var(--text)]">เลือกประเภทที่สนใจ</h2>
@@ -14,7 +14,9 @@
         <p class="text-[11px] sm:text-xs text-[var(--text-4)]">เลือกได้หลายประเภท — สินค้าต้องมีครบทุกประเภทที่เลือก</p>
       </div>
     </div>
-    <div class="flex items-center gap-3">
+    <div class="filter-live-summary flex items-center gap-2">
+      <span id="filterSelectionCount" class="filter-selection-count hidden"><b>0</b> เลือกแล้ว</span>
+      <button type="button" id="filterClearBtn" class="filter-clear-btn hidden">ล้าง</button>
       <p class="text-xs sm:text-sm text-[var(--text-3)] whitespace-nowrap"><b class="text-[var(--gold)] text-sm sm:text-base"><%= typeof filterProductCount !== 'undefined' ? filterProductCount : 0 %></b> สินค้า</p>
       <% if (_activeFilterTags.length) { %><a href="/products" class="text-xs text-[var(--coral)] border border-[var(--coral)]/30 hover:bg-[var(--coral)]/10 rounded-lg px-2.5 py-1.5 whitespace-nowrap transition">ล้างตัวกรอง</a><% } %>
     </div>
@@ -62,6 +64,8 @@
     const scrollLeftBtn = document.getElementById('scrollLeftBtn');
     const scrollRightBtn = document.getElementById('scrollRightBtn');
     const applyBtn = document.getElementById('filterApplyBtn');
+    const selectionCount = document.getElementById('filterSelectionCount');
+    const clearBtn = document.getElementById('filterClearBtn');
     const selected = new Set(<%- JSON.stringify(_activeIds) %>);
     let searchQuery = '';
 
@@ -77,6 +81,12 @@
     function updateApplyBtn() {
       applyBtn.disabled = selected.size === 0;
       applyBtn.textContent = selected.size ? `ดูสินค้าที่เลือก (${selected.size})` : 'ดูสินค้าที่เลือก';
+      if (selectionCount) {
+        selectionCount.classList.toggle('hidden', selected.size === 0);
+        const amount = selectionCount.querySelector('b');
+        if (amount) amount.textContent = selected.size;
+      }
+      if (clearBtn) clearBtn.classList.toggle('hidden', selected.size === 0);
     }
     tagsWrap.querySelectorAll('.filter-chip').forEach((button) => {
       button.addEventListener('click', () => {
@@ -89,6 +99,11 @@
     applyBtn.addEventListener('click', () => {
       if (!selected.size) return;
       window.location.href = '/products?tags=' + Array.from(selected).map(encodeURIComponent).join(',');
+    });
+    if (clearBtn) clearBtn.addEventListener('click', () => {
+      selected.clear();
+      tagsWrap.querySelectorAll('.filter-chip').forEach(button => button.classList.remove('active'));
+      updateApplyBtn();
     });
     searchInput.addEventListener('input', () => {
       searchQuery = normalizeText(searchInput.value);
