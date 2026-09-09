@@ -7,7 +7,8 @@
     "start": "node src/app.js",
     "dev": "node src/app.js",
     "migrate:r2": "node scripts/migrate-gridfs-to-r2.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node scripts/smoke-server.js",
+    "test:smoke": "node scripts/smoke-server.js"
   },
   "engines": {
     "node": ">=20.9.0"

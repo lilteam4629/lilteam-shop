@@ -389,7 +389,15 @@ async function claimGlobalSlipRef(transRef, details = {}) {
 
 async function init() {
   if (MONGODB_URI) {
-    mongoClient = new MongoClient(MONGODB_URI);
+    if (mongoClient) await mongoClient.close().catch(() => {});
+    mongoClient = new MongoClient(MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
+      maxPoolSize: 20,
+      minPoolSize: 1,
+      retryReads: true,
+      retryWrites: true,
+    });
     await mongoClient.connect();
     const mongoDb = mongoClient.db(MONGODB_DB_NAME);
     mongoCollection = mongoDb.collection('app_data');
@@ -425,6 +433,12 @@ async function init() {
   }
 
   await migrate();
+}
+
+async function healthCheck() {
+  if (!mongoClient) return true;
+  await mongoClient.db(MONGODB_DB_NAME).command({ ping: 1 }, { maxTimeMS: 2000 });
+  return true;
 }
 
 // Fills in fields added after a DB was first created, without touching existing data.
@@ -1051,6 +1065,7 @@ module.exports = {
   getMedia,
   isPersistent: () => Boolean(mongoCollection),
   getSystemStatus,
+  healthCheck,
   genId: (len) => nanoid(len || 8),
   loadTenantDb,
   createTenantDb,

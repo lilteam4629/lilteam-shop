@@ -15,10 +15,12 @@ services:
       retries: 12
     networks: [internal]
 
-  app:
+  app-blue: &app
     build:
       context: ../..
       dockerfile: Dockerfile
+    image: lilteam-app:${LILTEAM_IMAGE_TAG:-latest}
+    container_name: lilteam-app-blue
     restart: unless-stopped
     stop_grace_period: 30s
     env_file: /opt/lilteam/.env
@@ -29,13 +31,27 @@ services:
     depends_on:
       mongodb:
         condition: service_healthy
-    ports:
-      - "127.0.0.1:3000:3000"
+    expose: ["3000"]
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
-      interval: 15s
-      timeout: 5s
-      retries: 12
+      interval: 5s
+      timeout: 4s
+      retries: 24
+    networks: [internal]
+
+  app-green:
+    <<: *app
+    container_name: lilteam-app-green
+
+  proxy:
+    image: nginx:1.27-alpine
+    container_name: lilteam-proxy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /opt/lilteam/runtime:/etc/nginx/dynamic:ro
     networks: [internal]
 
 networks:

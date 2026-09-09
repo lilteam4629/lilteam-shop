@@ -219,6 +219,10 @@
     // Keep the outer document (and therefore the music player) alive while visitors
     // move around the storefront. Only the server-rendered page shell is replaced.
     (function () {
+      // Native navigation deliberately replaces the document. Re-executing page
+      // scripts in a persistent shell leaked document listeners and intervals on
+      // every visit, eventually making long mobile sessions lag or freeze.
+      return;
       const SHELL_ID = 'site-page-shell';
       let activeRequest = null;
 

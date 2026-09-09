@@ -40,13 +40,19 @@ app.set('layout', 'layouts/main');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.get('/health', (req, res) => {
-  res.json({
-    ok: true,
-    version: packageInfo.version,
-    commit: (process.env.RAILWAY_GIT_COMMIT_SHA || process.env.COMMIT_SHA || '').slice(0, 12) || null,
-    ...store.getSystemStatus(),
-  });
+app.get('/health', async (req, res) => {
+  try {
+    await store.healthCheck();
+    res.json({
+      ok: true,
+      uptime: Math.floor(process.uptime()),
+      version: packageInfo.version,
+      commit: (process.env.RAILWAY_GIT_COMMIT_SHA || process.env.COMMIT_SHA || '').slice(0, 12) || null,
+      ...store.getSystemStatus(),
+    });
+  } catch (error) {
+    res.status(503).json({ ok: false, error: 'storage_unavailable' });
+  }
 });
 app.get('/media/:id/:filename?', async (req, res, next) => {
   try {
@@ -236,14 +242,32 @@ function shutdown(signal) {
   setTimeout(() => process.exit(1), 25000).unref();
 }
 
+async function initializeStore() {
+  const attempts = 8;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      await store.init();
+      return;
+    } catch (error) {
+      console.error(`[store] initialization attempt ${attempt}/${attempts} failed:`, error.message);
+      if (attempt === attempts) throw error;
+      const delay = Math.min(10000, 1000 * (2 ** (attempt - 1)));
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));
 
-store.init()
+initializeStore()
   .then(() => {
     server = app.listen(PORT, () => {
       console.log(`LilTeam Shop running at http://localhost:${PORT}`);
     });
+    server.keepAliveTimeout = 65000;
+    server.headersTimeout = 66000;
+    server.requestTimeout = 60000;
     discordBot.init().catch((err) => console.error('[discord-bot] init failed:', err));
   })
   .catch((err) => {
