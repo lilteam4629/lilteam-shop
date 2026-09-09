@@ -1,6 +1,13 @@
 <% const isBulkImport = typeof bulkMode !== 'undefined' && bulkMode; %>
 <form action="<%= isBulkImport ? '/admin/products/bulk-import' : (product ? `/admin/products/${product.id}/edit` : '/admin/products/new') %>" method="post" enctype="multipart/form-data"
   class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-3xl space-y-4">
+  <div class="studio-form-head">
+    <div>
+      <h1><%= isBulkImport ? 'นำเข้าสินค้าหลายรายการ' : (product ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่') %></h1>
+      <p><%= isBulkImport ? 'ตั้งค่าข้อมูลร่วมและสร้างสินค้าจากรูปหลายรูปในครั้งเดียว' : 'กรอกข้อมูลสินค้า ราคา การส่งมอบ และรูปภาพให้ครบถ้วน' %></p>
+    </div>
+    <a href="/admin/products" class="studio-form-close" aria-label="กลับไปรายการสินค้า">×</a>
+  </div>
   <% if (isBulkImport) { %>
     <input type="hidden" name="jobId" id="bulkImportJobId" />
     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm text-[var(--text-2)]">

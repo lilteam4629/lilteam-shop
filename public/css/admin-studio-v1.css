@@ -1,0 +1,104 @@
+/* LilTeam Studio Admin — rebuilt from the inspected reference layout while
+   preserving LilTeam routes, forms, fields and server-side behaviour. */
+body.admin-reference-ui{--studio-ink:#f4f4f5;--studio-on-ink:#18181b;--studio-line:color-mix(in srgb,var(--text) 13%,transparent);--studio-soft:color-mix(in srgb,var(--text) 5%,var(--card));--studio-muted:var(--text-4);background:var(--bg);font-feature-settings:"kern";letter-spacing:-.008em}
+html.light body.admin-reference-ui{--studio-ink:#18181b;--studio-on-ink:#fff;--studio-line:#e4e4e7;--studio-soft:#f7f7f8;--studio-muted:#71717a;background:#fff}
+
+/* Shell */
+body.admin-reference-ui #admin-sidebar{width:258px!important;background:var(--card)!important;border-color:var(--studio-line)!important;box-shadow:none!important}
+body.admin-reference-ui #admin-sidebar>div:first-child>div:first-child{min-height:72px;padding:16px 20px!important}
+body.admin-reference-ui #admin-sidebar nav{padding:14px 16px 22px!important;display:grid;gap:18px!important}
+body.admin-reference-ui #admin-sidebar nav>div{display:grid;gap:3px!important}
+body.admin-reference-ui .sidebar-heading{padding:0 11px 6px!important;color:var(--studio-muted)!important;font-size:10px!important;font-weight:700!important;letter-spacing:.04em!important;text-transform:none!important}
+body.admin-reference-ui .sidebar-link{min-height:40px;padding:9px 11px!important;border:0!important;border-radius:10px!important;color:var(--text-3)!important;font-size:13px!important;font-weight:500!important;box-shadow:none!important}
+body.admin-reference-ui .sidebar-link:hover{background:var(--studio-soft)!important;color:var(--text)!important}
+body.admin-reference-ui .sidebar-link[class*="bg-[var(--gold)]"]{background:var(--studio-soft)!important;color:var(--text)!important;font-weight:650!important}
+body.admin-reference-ui .sidebar-link svg{width:18px!important;height:18px!important;color:var(--text-4)!important;transform:none!important}
+body.admin-reference-ui .sidebar-link[class*="bg-[var(--gold)]"] svg{color:var(--text)!important}
+body.admin-reference-ui #admin-sidebar>div:last-child{padding:10px 16px!important;background:var(--card)!important;border-color:var(--studio-line)!important;box-shadow:none!important}
+body.admin-reference-ui>div.flex-1>header{min-height:58px;padding:10px 30px!important;background:color-mix(in srgb,var(--card) 94%,transparent)!important;border-color:var(--studio-line)!important;box-shadow:none!important}
+body.admin-reference-ui>div.flex-1>header>div:first-child{visibility:hidden}
+body.admin-reference-ui>div.flex-1>header>div:last-child>div:first-child{display:none!important}
+body.admin-reference-ui>div.flex-1>header>div:last-child>a{display:none!important}
+body.admin-reference-ui>div.flex-1>main{max-width:1600px!important;padding:32px!important}
+
+/* Typography and page headers */
+body.admin-reference-ui main h1{font-size:28px!important;font-weight:800!important;line-height:1.15!important;letter-spacing:-.035em!important}
+body.admin-reference-ui main h2{font-weight:750;letter-spacing:-.025em}
+body.admin-reference-ui main h3{font-weight:700;letter-spacing:-.018em}
+body.admin-reference-ui main>div:first-child:not([data-flash]),body.admin-reference-ui main>section:first-child{position:relative}
+body.admin-reference-ui main p{line-height:1.55}
+
+/* Flat reference cards */
+body.admin-reference-ui main [class*="bg-[var(--card)]"],
+body.admin-reference-ui main [class*="bg-[var(--input)]"]{box-shadow:none}
+body.admin-reference-ui main [class*="rounded-2xl"],body.admin-reference-ui main [class*="rounded-xl"]{border-radius:13px!important}
+body.admin-reference-ui main [class*="border-[var(--border)]"],body.admin-reference-ui main [class*="border-[var(--border-light)]"]{border-color:var(--studio-line)!important}
+body.admin-reference-ui main [class*="shadow-"]{box-shadow:0 1px 2px rgba(0,0,0,.035)!important}
+body.admin-reference-ui main details{background:var(--card)!important;border:1px solid var(--studio-line)!important}
+body.admin-reference-ui main details>summary{min-height:48px;display:flex;align-items:center}
+
+/* Buttons */
+body.admin-reference-ui main button,body.admin-reference-ui main a{touch-action:manipulation}
+body.admin-reference-ui main button[class*="bg-[var(--gold)]"],body.admin-reference-ui main a[class*="bg-[var(--gold)]"],body.admin-reference-ui main button[class*="from-[var(--gold)]"],body.admin-reference-ui main a[class*="from-[var(--gold)]"],body.admin-reference-ui .filter-primary-action,body.admin-reference-ui .filter-create-submit,body.admin-reference-ui .filter-product-savebar button,body.admin-reference-ui .hs-create button,body.admin-reference-ui .hs-save{background:var(--studio-ink)!important;background-image:none!important;border:1px solid var(--studio-ink)!important;color:var(--studio-on-ink)!important;border-radius:10px!important;box-shadow:none!important;font-weight:650!important}
+body.admin-reference-ui main button[class*="bg-[var(--gold)]"]:hover,body.admin-reference-ui main a[class*="bg-[var(--gold)]"]:hover,body.admin-reference-ui .filter-primary-action:hover{opacity:.86}
+body.admin-reference-ui main button[class*="bg-[var(--input)]"],body.admin-reference-ui main a[class*="bg-[var(--input)]"]{background:var(--card)!important;border:1px solid var(--studio-line)!important;border-radius:10px!important;box-shadow:none!important}
+body.admin-reference-ui main button:focus-visible,body.admin-reference-ui main a:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+body.admin-reference-ui main button:disabled{opacity:.42!important;cursor:not-allowed!important}
+
+/* Forms */
+body.admin-reference-ui main input:not([type=checkbox]):not([type=radio]):not([type=color]):not([type=file]),body.admin-reference-ui main select,body.admin-reference-ui main textarea{min-height:44px;background:var(--card)!important;border:1px solid var(--studio-line)!important;border-radius:10px!important;color:var(--text)!important;box-shadow:none!important;outline:0!important}
+body.admin-reference-ui main textarea{min-height:100px}
+body.admin-reference-ui main input:focus,body.admin-reference-ui main select:focus,body.admin-reference-ui main textarea:focus{border-color:color-mix(in srgb,var(--text) 55%,var(--studio-line))!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--text) 8%,transparent)!important}
+body.admin-reference-ui main label{font-weight:500}
+body.admin-reference-ui main input[type=checkbox],body.admin-reference-ui main input[type=radio]{accent-color:var(--studio-ink)}
+body.admin-reference-ui main input[type=file]::file-selector-button{background:var(--studio-soft)!important;color:var(--text)!important;border:0!important;border-radius:8px!important}
+
+/* Tables and toolbars */
+body.admin-reference-ui main [class*="overflow-x-auto"]{border-radius:12px!important;border-color:var(--studio-line)!important;background:var(--card)}
+body.admin-reference-ui main table{width:100%;border-collapse:separate;border-spacing:0}
+body.admin-reference-ui main thead th{padding:13px 14px!important;background:var(--studio-soft)!important;color:var(--studio-muted)!important;font-size:10px!important;font-weight:700!important;letter-spacing:.025em!important;text-transform:none!important;border-color:var(--studio-line)!important}
+body.admin-reference-ui main tbody td{padding:14px!important;border-color:var(--studio-line)!important;font-size:12px}
+body.admin-reference-ui main tbody tr{transition:background .15s ease}
+body.admin-reference-ui main tbody tr:hover{background:var(--studio-soft)!important}
+
+/* Filter library and home-section pages */
+body.admin-reference-ui .filter-studio,body.admin-reference-ui .home-sections-studio{gap:18px!important}
+body.admin-reference-ui .filter-studio-hero,body.admin-reference-ui .hs-hero{padding:22px 24px!important;background:var(--card)!important;border:1px solid var(--studio-line)!important;border-radius:13px!important;box-shadow:none!important}
+body.admin-reference-ui .filter-studio-kicker,body.admin-reference-ui .hs-kicker{color:var(--studio-muted)!important;letter-spacing:.1em!important}
+body.admin-reference-ui .filter-stats-grid>div,body.admin-reference-ui .hs-stat{background:var(--card)!important;border-color:var(--studio-line)!important;border-radius:13px!important;box-shadow:none!important}
+body.admin-reference-ui .filter-stats-grid b,body.admin-reference-ui .hs-stat b{color:var(--text)!important}
+body.admin-reference-ui .filter-library-panel,body.admin-reference-ui .hs-list,body.admin-reference-ui .hs-create{background:var(--card)!important;border-color:var(--studio-line)!important;border-radius:13px!important;box-shadow:none!important}
+body.admin-reference-ui .filter-card,body.admin-reference-ui .hs-card{border-color:var(--studio-line)!important;border-radius:12px!important;background:var(--card)!important;box-shadow:none!important}
+body.admin-reference-ui .filter-image-stage{background:var(--studio-soft)!important}
+body.admin-reference-ui .filter-drag-palette{background:color-mix(in srgb,var(--card) 96%,var(--text))!important;border-color:var(--studio-line)!important;box-shadow:0 6px 22px rgba(0,0,0,.08)!important}
+
+/* Dialogs and drawers */
+body.admin-reference-ui .filter-drawer-backdrop{background:rgba(0,0,0,.52)!important;backdrop-filter:blur(3px)}
+body.admin-reference-ui .filter-drawer aside{background:var(--card)!important;border-color:var(--studio-line)!important;box-shadow:-18px 0 55px rgba(0,0,0,.18)!important}
+body.admin-reference-ui #admin-confirm-modal{background:rgba(0,0,0,.52)!important;backdrop-filter:blur(5px)!important}
+body.admin-reference-ui #admin-confirm-card{max-width:470px!important;border-radius:13px!important;border-color:var(--studio-line)!important;background:var(--card)!important;box-shadow:0 24px 80px rgba(0,0,0,.24)!important}
+
+/* Page-specific structures */
+body.admin-reference-ui.admin-page-dashboard main>div.grid{gap:16px!important}
+body.admin-reference-ui.admin-page-dashboard main>div.grid>div{min-height:130px;border-color:var(--studio-line)!important;background:var(--card)!important}
+body.admin-reference-ui.admin-page-products #admin-products-table{min-width:980px}
+body.admin-reference-ui.admin-page-products #admin-products-table img{border-radius:9px!important}
+body.admin-reference-ui.admin-page-products main>form[enctype="multipart/form-data"]{max-width:980px!important;margin-inline:auto;padding:0 28px 28px!important;overflow:hidden;border-radius:14px!important}
+body.admin-reference-ui .studio-form-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin:0 -28px 24px;padding:22px 28px;border-bottom:1px solid var(--studio-line);background:var(--card)}
+body.admin-reference-ui .studio-form-head h1{font-size:22px!important}
+body.admin-reference-ui .studio-form-head p{margin-top:4px;color:var(--studio-muted);font-size:11px}
+body.admin-reference-ui .studio-form-close{display:grid;place-items:center;width:38px;height:38px;min-height:38px!important;border:1px solid var(--studio-line);border-radius:10px;color:var(--text-3);font-size:20px}
+body.admin-reference-ui.admin-page-scheduled-products .workspace-schedule{display:grid;gap:18px}
+body.admin-reference-ui.admin-page-scheduled-products .workspace-schedule>div.grid{grid-template-columns:repeat(auto-fit,minmax(320px,1fr))!important}
+body.admin-reference-ui.admin-page-orders main>div:last-of-type,body.admin-reference-ui.admin-page-topups main>div,body.admin-reference-ui.admin-page-users main>div,body.admin-reference-ui.admin-page-coupons main>div{border-color:var(--studio-line)!important}
+body.admin-reference-ui.admin-page-settings main>.space-y-6{max-width:1180px!important}
+body.admin-reference-ui.admin-page-settings main>.space-y-6>div{background:var(--card)!important}
+body.admin-reference-ui.admin-page-theme main>form{max-width:1100px!important;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px!important}
+body.admin-reference-ui.admin-page-theme main>form>div:last-of-type,body.admin-reference-ui.admin-page-theme main>form>button{grid-column:1/-1}
+body.admin-reference-ui.admin-page-appearance main>.grid{max-width:1280px!important}
+body.admin-reference-ui.admin-page-minigame main>details,body.admin-reference-ui.admin-page-minigame main>div{border-color:var(--studio-line)!important}
+
+/* Mobile */
+@media(max-width:1023px){body.admin-reference-ui>header{min-height:60px;background:color-mix(in srgb,var(--card) 96%,transparent)!important;border-color:var(--studio-line)!important;box-shadow:none!important}body.admin-reference-ui #admin-sidebar{width:min(290px,88vw)!important}body.admin-reference-ui>div.flex-1>main{padding:18px 14px 88px!important}}
+@media(max-width:700px){body.admin-reference-ui main h1{font-size:23px!important}body.admin-reference-ui main>div:first-child{gap:12px!important}body.admin-reference-ui main [class*="grid-cols-4"],body.admin-reference-ui main [class*="grid-cols-3"]{grid-template-columns:repeat(2,minmax(0,1fr))!important}body.admin-reference-ui main [class*="sm:grid-cols-2"]{grid-template-columns:1fr!important}body.admin-reference-ui main button,body.admin-reference-ui main a[class*="px-"]{min-height:40px}body.admin-reference-ui main table{min-width:720px}body.admin-reference-ui main [class*="overflow-x-auto"]{overflow-x:auto;-webkit-overflow-scrolling:touch}body.admin-reference-ui.admin-page-theme main>form{grid-template-columns:1fr}body.admin-reference-ui.admin-page-theme main>form>*{grid-column:auto!important}body.admin-reference-ui .filter-studio-hero,body.admin-reference-ui .hs-hero{padding:18px!important}body.admin-reference-ui .filter-drawer aside{width:100vw!important;padding:16px!important}body.admin-reference-ui.admin-page-products main>form[enctype="multipart/form-data"]{padding:0 16px 20px!important}body.admin-reference-ui .studio-form-head{margin:0 -16px 20px;padding:18px 16px}}
+@media(prefers-reduced-motion:reduce){body.admin-reference-ui *,body.admin-reference-ui *:before,body.admin-reference-ui *:after{scroll-behavior:auto!important;animation-duration:.01ms!important;transition-duration:.01ms!important}}
