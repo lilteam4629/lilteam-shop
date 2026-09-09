@@ -25,14 +25,16 @@
       <strong><%= settings.shopName %></strong>
     </a>
     <nav class="store-nav__links" aria-label="เมนูหลัก">
-      <a href="/"><svg><use href="#ui-home"/></svg> หน้าแรก</a><a href="/products"><svg><use href="#ui-grid"/></svg> หมวดหมู่สินค้า</a><a href="/products"><svg><use href="#ui-box"/></svg> สินค้าทั้งหมด</a>
-      <% if (currentUser) { %><a href="/account/orders"><svg><use href="#ui-receipt"/></svg> คำสั่งซื้อ</a><% } %>
+      <a href="/" class="<%= typeof currentPath !== 'undefined' && currentPath === '/' ? 'is-active' : '' %>"><svg><use href="#ui-home"/></svg> หน้าแรก</a>
+      <a href="/products" class="<%= typeof currentPath !== 'undefined' && currentPath === '/products' ? 'is-active' : '' %>"><svg><use href="#ui-box"/></svg> สินค้าทั้งหมด</a>
+      <a href="/products" class="store-nav__category-link"><svg><use href="#ui-grid"/></svg> หมวดหมู่ <span>⌄</span></a>
+      <a href="/help"><svg><use href="#ui-book"/></svg> วิธีสั่งซื้อ</a>
+      <a href="/contact"><svg><use href="#ui-phone"/></svg> ติดต่อเรา</a>
     </nav>
     <form action="/search" method="get" class="store-nav__search" role="search">
       <input type="search" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="ค้นหาสินค้า..." aria-label="ค้นหาสินค้า" /><button aria-label="ค้นหา"><svg><use href="#ui-search"/></svg></button>
     </form>
     <div class="store-nav__actions">
-      <button id="theme-toggle-btn" type="button" title="สลับโหมดมืด/สว่าง" class="store-nav__round"><span id="theme-toggle-icon"><svg class="theme-icon-moon"><use href="#ui-moon"/></svg><svg class="theme-icon-sun"><use href="#ui-sun"/></svg></span></button>
       <a href="/cart" class="store-nav__round store-nav__cart" aria-label="ตะกร้าสินค้า"><svg><use href="#ui-cart"/></svg><% if (cartCount > 0) { %><b><%= cartCount %></b><% } %></a>
       <% if (currentUser) { %>
         <a href="/account/topup" class="store-nav__wallet"><span>฿<%= currentUser.walletBalance.toLocaleString() %></span><b>＋</b></a>
