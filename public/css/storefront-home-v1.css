@@ -108,4 +108,6 @@
 .banner-hero-shell>a,.banner-hero-shell>div:not(.lilteam-hero-command){display:block!important;width:100%!important;background:var(--card)}
 .banner-hero-shell>a>img,.banner-hero-shell>div:not(.lilteam-hero-command)>img{display:block!important;width:100%!important;height:auto!important;max-height:none!important;object-fit:contain!important}
 @media(max-width:640px){.banner-hero-shell{padding-top:0!important}.banner-hero-shell .lilteam-hero-command{margin:8px!important;width:calc(100% - 16px)!important}.banner-hero-shell .lilteam-hero-command__copy{padding:13px!important}.banner-hero-shell .lilteam-hero-command h1{font-size:20px!important}.banner-hero-shell .lilteam-hero-command__copy>p span{display:none}.banner-hero-shell .lilteam-hero-command__actions{margin-top:9px!important}.banner-hero-shell .lilteam-hero-command__actions a{flex:0 1 auto!important}}
+/* Let the compact welcome copy sit directly on the page, without a card frame. */
+.banner-hero-shell .lilteam-hero-command{border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
 @media(max-width:700px){.store-product-gallery{width:calc(100% - 12px)!important;padding:10px!important;border-radius:16px}.store-product-gallery>.section-hud-header{padding:3px 2px 11px}}
