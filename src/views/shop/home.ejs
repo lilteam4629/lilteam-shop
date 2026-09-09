@@ -84,7 +84,7 @@
 </style>
 
 <% if (settings.showOpenHoursBar !== false) { %>
-<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6">
+<section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6">
   <div class="hud-bar relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
     <div class="hud-bar-glow"></div>
     <div class="hud-bar-scan"></div>
@@ -104,7 +104,7 @@
 <% } %>
 
 <% if (announcements.length) { %>
-<div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-2 space-y-2">
+<div class="store-announcements w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-2 space-y-2">
   <% announcements.forEach(a => { %>
     <div class="announce-hud relative flex items-start gap-3 rounded-xl px-4 py-3 text-[var(--text)] text-sm overflow-hidden">
       <div class="announce-hud-glow"></div>
@@ -249,7 +249,7 @@
 <% } %>
 
 <% if (latestOrders && latestOrders.length) { %>
-<section class="latest-orders-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-5">
+<section class="latest-orders-section storefront-control-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-5">
   <div class="flex items-end justify-between gap-3 mb-3">
     <div>
       <h2 class="text-lg sm:text-xl font-bold flex items-center gap-2"><span class="latest-orders-live"></span>รายการสั่งซื้อล่าสุด</h2>
@@ -325,7 +325,7 @@
 <% } %>
 
 <% if (filterTags && filterTags.length) { %>
-<section class="w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto pt-4">
+<section class="store-filter-section w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto pt-4">
   <%- include('../partials/filter-panel', { filterTags }) %>
 </section>
 <% } %>
