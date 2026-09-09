@@ -154,6 +154,25 @@
   .store-filter-section .filter-live-summary > p b { font-size: 14px !important; }
   .store-filter-section .filter-control-row { grid-template-columns: 1fr 1fr !important; gap: 7px !important; margin: 9px 0 10px !important; }
   .store-filter-section .filter-search-control { grid-column: 1 / -1; height: 40px !important; padding: 0 12px !important; border-radius: 10px !important; }
+  .store-filter-section .filter-search-control {
+    overflow: hidden;
+    background: color-mix(in srgb,var(--input) 60%,var(--card)) !important;
+  }
+  .store-filter-section .filter-search-control input,
+  .store-filter-section .filter-search-control input:focus,
+  .store-filter-section .filter-search-control input:active {
+    align-self: stretch;
+    min-height: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .store-filter-section .filter-search-control input::-webkit-search-cancel-button { display: none; }
   .store-filter-section .filter-select-control { height: 34px !important; padding: 0 9px !important; border-radius: 9px !important; }
   .store-filter-section .filter-select-control select { font-size: 11px !important; }
   .store-filter-section #filterTags { gap: 7px !important; padding: 0 !important; }
