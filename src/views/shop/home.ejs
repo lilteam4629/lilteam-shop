@@ -383,7 +383,7 @@
   const railGamePrizes = miniGamePrizes.filter(p => p.gameType === 'rail');
 %>
 <% if (settings.miniGame && settings.miniGame.boxEnabled && boxGamePrizes.length) { %>
-<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-10">
+<section class="store-content-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-10">
   <div class="mg-panel relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 p-6 sm:p-10">
     <div class="mg-sparkle-field absolute inset-0 pointer-events-none overflow-hidden">
       <% for (let i = 0; i < 14; i++) { %>
@@ -589,7 +589,7 @@
 <% } %>
 
 <% if (settings.miniGame && settings.miniGame.railEnabled && railGamePrizes.length) { %>
-<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-10">
+<section class="store-content-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-10">
   <div class="mg-panel relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 p-6 sm:p-10">
     <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
       <div>

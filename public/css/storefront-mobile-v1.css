@@ -84,10 +84,12 @@
   .banner-hero-shell,
   .store-status-section,
   .store-announcements,
+  .event-update,
   .latest-orders-section,
   .store-filter-section,
-  .store-product-gallery {
-    width: calc(100% - 28px) !important;
+  .store-product-gallery,
+  .store-content-section {
+    width: calc(100% - 32px) !important;
     max-width: none !important;
     margin-left: auto !important;
     margin-right: auto !important;
@@ -127,12 +129,14 @@
   .banner-hero-shell,
   .store-status-section,
   .store-announcements,
+  .event-update,
   .latest-orders-section,
   .store-filter-section,
-  .store-product-gallery { width: calc(100% - 22px) !important; }
+  .store-product-gallery,
+  .store-content-section { width: calc(100% - 32px) !important; }
   .store-nav__inner,
-  .store-nav__mobile-row { padding-left: 11px !important; padding-right: 11px !important; }
-  .store-nav__account-menu { right: 11px !important; width: calc(100vw - 22px) !important; }
+  .store-nav__mobile-row { padding-left: 16px !important; padding-right: 16px !important; }
+  .store-nav__account-menu { right: 16px !important; width: calc(100vw - 32px) !important; }
 }
 
 /* The filter library is a compact chooser on phones, not a desktop panel
