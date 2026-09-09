@@ -8,6 +8,7 @@
     <div><span>กำลังใช้งาน</span><b><%= filterTags.filter(t=>t.productCount>0).length %></b><small>รายการ</small></div>
     <div><span>ยังไม่ผูกสินค้า</span><b><%= filterTags.filter(t=>!t.productCount).length %></b><small>รายการ</small></div>
   </section>
+  <section class="filter-library-panel p-4 sm:p-5"><form action="/admin/filter-tags/heading" method="post" class="flex flex-col sm:flex-row sm:items-end gap-3"><label class="flex-1"><span class="block text-sm font-semibold mb-1">หัวข้อบนตัวกรองหน้าร้าน</span><small class="block text-[10px] text-[var(--text-4)] mb-2">แก้ข้อความที่แสดงเหนือแถวรูปตัวกรองได้</small><input name="filterHeading" value="<%= settings.filterHeading || 'เลือกตัวที่ต้องการตามหา' %>" maxlength="100" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3 py-2.5 text-sm" /></label><button class="filter-primary-action justify-center">บันทึกหัวข้อ</button></form></section>
   <section class="filter-library-panel">
     <div class="filter-library-toolbar">
       <div class="filter-search-box"><span>⌕</span><input id="filter-library-search" placeholder="ค้นหาชื่อตัวกรอง..." /></div>

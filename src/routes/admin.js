@@ -1755,6 +1755,13 @@ router.get('/welcome-popup', (req, res) => {
   res.render('admin/welcome-popup', { title: 'ป๊อปอัปต้อนรับ', active: 'welcome-popup' });
 });
 
+router.post('/filter-tags/heading', async (req, res) => {
+  const heading = String(req.body.filterHeading || '').trim();
+  if (!heading) req.flash('error', 'กรุณากรอกหัวข้อตัวกรอง');
+  else { store.data.settings.filterHeading = heading.slice(0, 100); await store.save(); req.flash('success', 'บันทึกหัวข้อตัวกรองแล้ว'); }
+  res.redirect('/admin/filter-tags');
+});
+
 router.post('/welcome-popup', (req, res) => {
   popupImageUpload.array('images', 20)(req, res, store.bindTenantContext(async (err) => {
     if (err) {
