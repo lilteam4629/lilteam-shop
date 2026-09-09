@@ -152,3 +152,41 @@
 .banner-hero-shell,.modern-fan-heading,.store-status-section,.store-announcements,.event-update,.latest-orders-section,.store-filter-section,.store-product-gallery,.store-content-section{width:min(1320px,calc(100% - 48px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
 .all-products-grid .filterable-card{content-visibility:auto;contain-intrinsic-size:auto 340px}
 @media(max-width:700px){.banner-hero-shell,.modern-fan-heading,.store-status-section,.store-announcements,.event-update,.latest-orders-section,.store-filter-section,.store-product-gallery,.store-content-section{width:calc(100% - 48px)!important}.store-product-gallery{padding-left:0!important;padding-right:0!important}}
+
+/* Theme-aware sport pattern that travels from left to right behind the welcome copy. */
+.banner-hero-shell .lilteam-hero-command{
+  position:relative;
+  isolation:isolate;
+  background:
+    radial-gradient(circle at 9% 42%,color-mix(in srgb,var(--gold) 18%,transparent),transparent 24%),
+    linear-gradient(90deg,color-mix(in srgb,var(--gold) 11%,var(--bg)) 0%,color-mix(in srgb,var(--gold) 5%,var(--bg)) 44%,var(--bg) 100%)!important;
+}
+.banner-hero-shell .lilteam-hero-command:before{
+  content:""!important;
+  position:absolute;
+  z-index:-1;
+  inset:0;
+  display:block!important;
+  background:
+    linear-gradient(118deg,transparent 0 16%,color-mix(in srgb,var(--gold) 15%,transparent) 16.3% 16.8%,transparent 17.1% 27%,color-mix(in srgb,var(--gold) 9%,transparent) 27.3% 27.7%,transparent 28%),
+    repeating-linear-gradient(135deg,color-mix(in srgb,var(--gold) 7%,transparent) 0 1px,transparent 1px 22px);
+  -webkit-mask-image:linear-gradient(90deg,#000 0%,rgba(0,0,0,.82) 48%,transparent 92%);
+  mask-image:linear-gradient(90deg,#000 0%,rgba(0,0,0,.82) 48%,transparent 92%);
+  pointer-events:none;
+}
+.banner-hero-shell .lilteam-hero-command:after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  top:-70px;
+  left:8%;
+  width:260px;
+  height:260px;
+  border:1px solid color-mix(in srgb,var(--gold) 13%,transparent);
+  border-radius:50%;
+  box-shadow:0 0 0 34px color-mix(in srgb,var(--gold) 4%,transparent),0 0 0 70px color-mix(in srgb,var(--gold) 3%,transparent);
+  opacity:.72;
+  pointer-events:none;
+}
+.banner-hero-shell .lilteam-hero-command__copy{position:relative;z-index:1}
+@media(max-width:700px){.banner-hero-shell .lilteam-hero-command:after{left:-90px;opacity:.5}.banner-hero-shell .lilteam-hero-command:before{-webkit-mask-image:linear-gradient(90deg,#000,transparent 100%);mask-image:linear-gradient(90deg,#000,transparent 100%)}}
