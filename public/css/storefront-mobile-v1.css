@@ -302,3 +302,26 @@
   aside.store-nav__mobile-row { width: min(275px,78vw) !important; padding-inline: 14px !important; }
   aside.store-nav__mobile-row > header { margin-inline: -14px !important; padding-inline: 14px !important; }
 }
+
+/* Match the redesigned compact filter rail on phones. */
+@media (max-width: 640px) {
+  .store-filter-section .filter-chip {
+    display: grid !important;
+    grid-template-columns: 43px minmax(0,1fr) !important;
+    grid-template-rows: 54px !important;
+    width: 116px !important;
+    height: 54px !important;
+    min-height: 54px !important;
+  }
+  .store-filter-section .filter-chip > span:first-child {
+    width: 43px !important;
+    height: 54px !important;
+    padding: 3px !important;
+    border-right: 1px solid var(--border) !important;
+    border-bottom: 0 !important;
+  }
+  .store-filter-section .filter-chip img { width: 100% !important; height: 100% !important; object-fit: contain !important; object-position: center !important; }
+  .store-filter-section .filter-chip > span:nth-child(2) { display: flex !important; justify-content: center; padding: 5px 6px !important; }
+  .store-filter-section .filter-action-bar { min-height: 48px !important; padding-top: 5px !important; padding-bottom: calc(5px + env(safe-area-inset-bottom,0px)) !important; }
+  .store-filter-section .filter-action-bar button { height: 36px !important; min-height: 36px !important; }
+}
