@@ -23,7 +23,7 @@
 .store-filter-section{padding-top:14px!important}.store-filter-section #filterWidget{padding:18px!important;border-radius:20px!important;background:linear-gradient(145deg,var(--card),color-mix(in srgb,var(--gold) 5%,var(--input)))!important;box-shadow:0 22px 60px -45px color-mix(in srgb,var(--gold) 95%,transparent)}
 .store-filter-section #filterWidget>div:nth-of-type(2){padding-bottom:14px;border-bottom:1px solid var(--border)}.store-filter-section #filterSearch{height:40px!important;border-color:var(--border)!important;background:var(--input)!important}.store-filter-section .filter-chip{width:154px!important;border-radius:14px!important;background:var(--card)!important}.store-filter-section .filter-chip>span:first-child{aspect-ratio:1/1.16;background:color-mix(in srgb,var(--bg) 72%,var(--card))}.store-filter-section .filter-chip img{width:100%!important;height:100%!important;object-fit:cover!important}.store-filter-section .filter-chip.active{border-color:var(--gold)!important;background:color-mix(in srgb,var(--gold) 9%,var(--card))!important;box-shadow:0 12px 26px -18px color-mix(in srgb,var(--gold) 90%,transparent)!important}.store-filter-section #filterApplyBtn{min-height:40px;border-radius:11px!important;box-shadow:0 9px 24px -16px color-mix(in srgb,var(--gold) 95%,transparent)}
 @media(max-width:700px){.store-status-section,.store-announcements,.latest-orders-section,.store-filter-section{width:calc(100% - 20px)!important}.store-status-section{padding-top:10px!important}.store-status-section .hud-bar{min-height:42px}.store-announcements .announce-hud:after{display:none}.latest-order-card{width:220px!important}.store-filter-section #filterWidget{padding:13px!important;border-radius:16px!important}.store-filter-section .filter-chip{width:128px!important}.store-filter-section .filter-chip>span:first-child{aspect-ratio:1/1.08}.store-filter-section #filterApplyBtn{position:sticky;bottom:10px;z-index:8;width:100%!important}}
-@media(prefers-reduced-motion:reduce){.latest-orders-track{animation:none!important}}
+@media(prefers-reduced-motion:reduce){.latest-orders-track{animation-duration:48s!important}}
 
 /* Product gallery — editorial cards with clearer hierarchy. */
 .store-product-gallery{width:min(1500px,calc(100% - 32px))!important;max-width:none!important;margin-top:8px;padding:22px!important;border:1px solid var(--border);border-radius:22px;background:linear-gradient(145deg,color-mix(in srgb,var(--gold) 4%,var(--card)),var(--card));box-shadow:0 24px 70px -58px #000}
@@ -74,4 +74,17 @@
 .banner-hero-shell .lilteam-hero-command__actions svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .banner-hero-shell .lilteam-hero-command__primary span{margin-left:6px}
 @media(max-width:640px){.banner-hero-shell .lilteam-hero-command{margin:0 12px 10px!important}.banner-hero-shell .lilteam-hero-command__copy{padding:25px 0 20px!important}.banner-hero-shell .lilteam-hero-command h1{font-size:38px!important}.banner-hero-shell .lilteam-hero-command__copy>p{font-size:12px!important}.banner-hero-shell .lilteam-hero-command__actions{display:grid;grid-template-columns:1fr 1fr}.banner-hero-shell .lilteam-hero-command__actions a{padding:0 11px}}
+
+/* Live activity strip: slim announcement plus an always-moving order rail. */
+.store-announcements .announce-hud{min-height:42px!important;padding:6px 10px!important;border-radius:11px!important}
+.store-announcements .announce-hud-icon{width:28px!important;height:28px!important;color:var(--bg)!important}
+.store-announcements .announce-hud-icon svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.latest-orders-section{padding-top:14px!important}.latest-orders-section>div:first-child{align-items:center!important;margin-bottom:7px!important}
+.latest-orders-shell{padding:6px!important;border-radius:13px!important}
+.latest-orders-track{animation-name:latest-orders-scroll!important;animation-duration:34s!important;animation-timing-function:linear!important;animation-iteration-count:infinite!important;animation-play-state:running;transform:translateZ(0);backface-visibility:hidden}
+.latest-orders-shell:hover .latest-orders-track,.latest-orders-shell:focus-within .latest-orders-track{animation-play-state:paused}
+.latest-order-card{width:238px!important;min-height:66px!important;padding:7px 9px!important;gap:9px!important;border-radius:10px!important}
+.latest-order-image-wrap{width:42px!important;height:48px!important;border-radius:8px!important}.latest-order-image-wrap>svg{width:19px;height:19px;fill:none;stroke:var(--gold);stroke-width:1.8}
+.latest-order-card span.flex svg{width:11px;height:11px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8}
+@media(max-width:639px){.latest-orders-track{animation-duration:29s!important}.latest-order-card{width:210px!important;min-height:62px!important}.latest-order-image-wrap{width:39px!important;height:45px!important}}
 @media(max-width:700px){.store-product-gallery{width:calc(100% - 12px)!important;padding:10px!important;border-radius:16px}.store-product-gallery>.section-hud-header{padding:3px 2px 11px}}

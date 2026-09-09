@@ -119,7 +119,7 @@
   <% announcements.forEach(a => { %>
     <div class="announce-hud relative flex items-start gap-3 rounded-xl px-4 py-3 text-[var(--text)] text-sm overflow-hidden">
       <div class="announce-hud-glow"></div>
-      <span class="announce-hud-icon relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm">📢</span>
+      <span class="announce-hud-icon relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"><svg><use href="#ui-megaphone"/></svg></span>
       <p class="relative z-[1] min-w-0 leading-relaxed"><b class="text-[var(--gold)]"><%= a.title %></b> — <%= a.body %></p>
     </div>
   <% }) %>
@@ -275,13 +275,13 @@
           <% latestOrders.forEach(order => { %>
             <a href="<%= order.slug ? '/game/' + order.slug : '/products' %>" class="latest-order-card">
               <span class="latest-order-image-wrap">
-                <% if (order.image) { %><img src="<%= order.image %>" alt="<%= order.title %>" class="latest-order-image" /><% } else { %><span>🎮</span><% } %>
+                <% if (order.image) { %><img src="<%= order.image %>" alt="<%= order.title %>" class="latest-order-image" /><% } else { %><svg><use href="#ui-box"/></svg><% } %>
               </span>
               <span class="min-w-0 flex-1">
                 <span class="block text-xs sm:text-sm font-semibold truncate text-[var(--text)]"><%= order.title %><%= order.extraItems ? ' +' + order.extraItems + ' รายการ' : '' %></span>
                 <span class="block text-xs sm:text-sm font-bold text-[var(--gold)] mt-1">฿<%= order.amount.toLocaleString() %>.00</span>
                 <span class="flex items-center gap-1 text-[9px] sm:text-[10px] text-[var(--text-4)] mt-1 truncate">
-                  <span>◷</span><%= new Date(order.createdAt).toLocaleString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %> <span>•</span> <%= order.buyer %>
+                  <svg><use href="#ui-clock"/></svg><%= new Date(order.createdAt).toLocaleString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %> <span>•</span> <%= order.buyer %>
                 </span>
               </span>
             </a>
