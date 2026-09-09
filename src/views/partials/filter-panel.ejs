@@ -21,9 +21,10 @@
       <% if (_activeFilterTags.length) { %><a href="/products" class="text-xs text-[var(--coral)] border border-[var(--coral)]/30 hover:bg-[var(--coral)]/10 rounded-lg px-2.5 py-1.5 whitespace-nowrap transition">ล้างตัวกรอง</a><% } %>
     </div>
   </div>
-  <div class="relative mb-3">
-    <svg viewBox="0 0 24 24" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 fill-none stroke-[var(--text-4)]" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-    <input id="filterSearch" type="search" autocomplete="off" placeholder="ค้นหาตัวกรอง เช่น Messi, Denuvo..." class="w-full sm:max-w-sm h-11 bg-black/20 border border-[var(--border-light)] rounded-xl pl-10 pr-4 text-sm text-[var(--text)] placeholder:text-[var(--text-4)] focus:outline-none focus:border-[var(--gold)]/70 focus:ring-2 focus:ring-[var(--gold)]/10 transition" />
+  <div class="filter-control-row">
+    <label class="filter-search-control"><svg><use href="#ui-search"/></svg><input id="filterSearch" type="search" autocomplete="off" placeholder="ค้นหาตัวกรอง เช่น Messi, Denuvo..." /></label>
+    <label class="filter-select-control"><svg><use href="#ui-grid"/></svg><select id="filterView"><option value="all">ทุกตัวกรอง</option><option value="selected">เลือกแล้ว</option><option value="unselected">ยังไม่ได้เลือก</option></select></label>
+    <label class="filter-select-control"><svg><use href="#ui-tag"/></svg><select id="filterSort"><option value="default">เรียงตามค่าเริ่มต้น</option><option value="name-asc">ชื่อ ก–ฮ</option><option value="name-desc">ชื่อ ฮ–ก</option></select></label>
   </div>
   <div class="relative flex items-center gap-2">
     <button type="button" id="scrollLeftBtn" aria-label="เลื่อนตัวกรองไปทางซ้าย" class="hidden shrink-0 w-9 h-9 items-center justify-center rounded-full bg-[var(--card)] border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">‹</button>
@@ -43,7 +44,7 @@
     </div>
     <button type="button" id="scrollRightBtn" aria-label="เลื่อนตัวกรองไปทางขวา" class="hidden shrink-0 w-9 h-9 items-center justify-center rounded-full bg-[var(--card)] border border-[var(--border-light)] text-[var(--text-3)] hover:text-[var(--gold)] hover:border-[var(--gold)]/50 transition">›</button>
   </div>
-  <button type="button" id="filterApplyBtn" disabled class="mt-3 w-full sm:w-auto bg-[var(--gold)] hover:bg-[var(--gold-hover)] disabled:opacity-40 disabled:cursor-not-allowed text-[var(--bg)] font-semibold rounded-xl px-5 py-2.5 text-sm transition">ดูสินค้าที่เลือก</button>
+  <div class="filter-action-bar"><p>เลือกแล้ว <strong id="filterFooterCount">0 รายการ</strong></p><button type="button" id="filterApplyBtn" disabled>ดูสินค้าที่เลือก <span>›</span></button></div>
 </div>
 
 <style>
@@ -66,6 +67,9 @@
     const applyBtn = document.getElementById('filterApplyBtn');
     const selectionCount = document.getElementById('filterSelectionCount');
     const clearBtn = document.getElementById('filterClearBtn');
+    const viewSelect = document.getElementById('filterView');
+    const sortSelect = document.getElementById('filterSort');
+    const footerCount = document.getElementById('filterFooterCount');
     const selected = new Set(<%- JSON.stringify(_activeIds) %>);
     let searchQuery = '';
 
@@ -74,19 +78,22 @@
     }
     function filterTagChoices() {
       tagsWrap.querySelectorAll('.filter-chip').forEach((button) => {
-        const visible = !searchQuery || normalizeText(button.dataset.name).includes(searchQuery);
+        const view = viewSelect ? viewSelect.value : 'all';
+        const selectedMatch = view === 'all' || (view === 'selected' ? selected.has(button.dataset.tagId) : !selected.has(button.dataset.tagId));
+        const visible = selectedMatch && (!searchQuery || normalizeText(button.dataset.name).includes(searchQuery));
         button.style.display = visible ? '' : 'none';
       });
     }
     function updateApplyBtn() {
       applyBtn.disabled = selected.size === 0;
-      applyBtn.textContent = selected.size ? `ดูสินค้าที่เลือก (${selected.size})` : 'ดูสินค้าที่เลือก';
+      applyBtn.innerHTML = `${selected.size ? `ดูสินค้าที่เลือก (${selected.size})` : 'ดูสินค้าที่เลือก'} <span>›</span>`;
       if (selectionCount) {
         selectionCount.classList.toggle('hidden', selected.size === 0);
         const amount = selectionCount.querySelector('b');
         if (amount) amount.textContent = selected.size;
       }
       if (clearBtn) clearBtn.classList.toggle('hidden', selected.size === 0);
+      if (footerCount) footerCount.textContent = `${selected.size} รายการ`;
     }
     tagsWrap.querySelectorAll('.filter-chip').forEach((button) => {
       button.addEventListener('click', () => {
@@ -94,6 +101,7 @@
         if (selected.has(id)) { selected.delete(id); button.classList.remove('active'); }
         else { selected.add(id); button.classList.add('active'); }
         updateApplyBtn();
+        filterTagChoices();
       });
     });
     applyBtn.addEventListener('click', () => {
@@ -104,10 +112,18 @@
       selected.clear();
       tagsWrap.querySelectorAll('.filter-chip').forEach(button => button.classList.remove('active'));
       updateApplyBtn();
+      filterTagChoices();
     });
     searchInput.addEventListener('input', () => {
       searchQuery = normalizeText(searchInput.value);
       filterTagChoices();
+      updateScrollButtons();
+    });
+    if (viewSelect) viewSelect.addEventListener('change', filterTagChoices);
+    if (sortSelect) sortSelect.addEventListener('change', () => {
+      const cards = [...tagsWrap.querySelectorAll('.filter-chip')];
+      if (sortSelect.value !== 'default') cards.sort((a,b) => normalizeText(a.dataset.name).localeCompare(normalizeText(b.dataset.name),'th') * (sortSelect.value === 'name-desc' ? -1 : 1));
+      cards.forEach(card => tagsWrap.appendChild(card));
       updateScrollButtons();
     });
     function updateScrollButtons() {
