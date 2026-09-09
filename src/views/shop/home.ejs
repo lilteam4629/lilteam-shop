@@ -3,12 +3,12 @@
 <style>
   body {
     background-color:var(--bg)!important;
-    background-image:linear-gradient(color-mix(in srgb,var(--bg) 58%,transparent),color-mix(in srgb,var(--bg) 70%,transparent)),url('<%= storefrontBackground %>'),url('<%= storefrontBackground %>')!important;
-    background-repeat:no-repeat,no-repeat,no-repeat!important;
-    background-position:center top,center top,center top!important;
-    background-size:100% 100%,min(100vw,1920px) auto,cover!important;
-    background-attachment:fixed,fixed,fixed!important;
-    background-blend-mode:normal,normal,soft-light!important;
+    background-image:url('<%= storefrontBackground %>')!important;
+    background-repeat:no-repeat!important;
+    background-position:center top!important;
+    background-size:min(100vw,1920px) auto!important;
+    background-attachment:fixed!important;
+    background-blend-mode:normal!important;
   }
   @media(max-width:700px){body{background-attachment:scroll!important}}
 </style>
