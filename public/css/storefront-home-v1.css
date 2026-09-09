@@ -130,4 +130,5 @@
 
 /* Keep every primary home section on one shared left/right guide. */
 .banner-hero-shell,.modern-fan-heading,.store-status-section,.store-announcements,.event-update,.latest-orders-section,.store-filter-section,.store-product-gallery,.store-content-section{width:min(1320px,calc(100% - 48px))!important;max-width:none!important;margin-left:auto!important;margin-right:auto!important}
+.all-products-grid .filterable-card{content-visibility:auto;contain-intrinsic-size:auto 340px}
 @media(max-width:700px){.banner-hero-shell,.modern-fan-heading,.store-status-section,.store-announcements,.event-update,.latest-orders-section,.store-filter-section,.store-product-gallery,.store-content-section{width:calc(100% - 48px)!important}.store-product-gallery{padding-left:0!important;padding-right:0!important}}

@@ -206,13 +206,22 @@
       document.addEventListener('lilteam:page-loaded', updateIcon);
     })();
 
-    document.addEventListener('mousemove', (e) => {
-      const card = e.target.closest('.spotlight-card');
-      if (!card) return;
-      const rect = card.getBoundingClientRect();
-      card.style.setProperty('--mx', ((e.clientX - rect.left) / rect.width) * 100 + '%');
-      card.style.setProperty('--my', ((e.clientY - rect.top) / rect.height) * 100 + '%');
-    });
+    let spotlightFrame = 0;
+    let spotlightEvent = null;
+    document.addEventListener('pointermove', (e) => {
+      if (e.pointerType && e.pointerType !== 'mouse') return;
+      spotlightEvent = e;
+      if (spotlightFrame) return;
+      spotlightFrame = requestAnimationFrame(() => {
+        spotlightFrame = 0;
+        const event = spotlightEvent;
+        const card = event && event.target.closest('.spotlight-card');
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        card.style.setProperty('--mx', ((event.clientX - rect.left) / rect.width) * 100 + '%');
+        card.style.setProperty('--my', ((event.clientY - rect.top) / rect.height) * 100 + '%');
+      });
+    }, { passive: true });
   </script>
 
   <script>
