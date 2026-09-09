@@ -80,23 +80,21 @@
       <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 text-[var(--gold)] flex items-center justify-center text-xl">▣</span>
       <div>
         <h2 class="font-semibold text-lg">พื้นหลังเข้าสู่ระบบและสมัครสมาชิก</h2>
-        <p class="text-xs text-[var(--text-4)]">ภาพนี้จะแสดงเต็มหน้าหลังการ์ดฟอร์ม หากไม่เลือก ระบบจะใช้ภาพแบนเนอร์หน้าหลักโดยอัตโนมัติ</p>
+        <p class="text-xs text-[var(--text-4)]">อัปโหลดรูปแนวตั้ง แนวนอน หรือจัตุรัสได้ ระบบจะแสดงครบทั้งภาพโดยไม่ครอป หากไม่เลือกจะใช้พื้นธีมปกติ</p>
       </div>
     </div>
     <% const authBackground = settings.authAppearance && settings.authAppearance.backgroundImage; %>
     <% if (authBackground) { %>
-      <img src="<%= authBackground %>" class="w-full max-h-80 object-cover rounded-xl border border-[var(--border)] mb-4" alt="พื้นหลังหน้าเข้าสู่ระบบ" />
-    <% } else if (settings.hero && settings.hero.bannerImage) { %>
-      <div class="relative mb-4"><img src="<%= settings.hero.bannerImage %>" class="w-full max-h-80 object-cover rounded-xl border border-[var(--border)] opacity-70" alt="ใช้แบนเนอร์เป็นพื้นหลัง" /><span class="absolute left-3 bottom-3 rounded-lg bg-black/70 px-3 py-1.5 text-xs text-white">กำลังใช้แบนเนอร์หน้าหลัก</span></div>
+      <div class="auth-background-preview mb-4"><img src="<%= authBackground %>" alt="พื้นหลังหน้าเข้าสู่ระบบ" /></div>
     <% } else { %>
-      <div class="mb-4"><%- include('../partials/image-placeholder', { w: 1600, h: 1000, ratioClass: 'aspect-[16/7]' }) %></div>
+      <div class="auth-background-empty mb-4"><strong>ยังไม่ได้เลือกรูปพื้นหลัง</strong><span>รองรับรูปทุกสัดส่วนและจะแสดงเต็มภาพ</span></div>
     <% } %>
     <div class="flex flex-col sm:flex-row gap-3">
       <form action="/admin/auth-background/upload" method="post" enctype="multipart/form-data" class="flex-1 space-y-3">
         <input type="file" name="authBackgroundImage" accept="image/png,image/jpeg,image/webp" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
         <button class="w-full sm:w-auto bg-[var(--gold)] text-[var(--bg)] font-medium px-6 py-2.5 rounded-lg text-sm">อัปโหลดพื้นหลัง</button>
       </form>
-      <% if (authBackground) { %><form action="/admin/auth-background/remove" method="post" data-confirm="นำพื้นหลังเฉพาะออกและกลับไปใช้แบนเนอร์หน้าหลักใช่หรือไม่?"><button class="border border-[var(--coral)]/40 text-[var(--coral)] px-5 py-2.5 rounded-lg text-sm">ใช้แบนเนอร์แทน</button></form><% } %>
+      <% if (authBackground) { %><form action="/admin/auth-background/remove" method="post" data-confirm="ลบรูปพื้นหลังเข้าสู่ระบบและกลับไปใช้พื้นธีมปกติใช่หรือไม่?"><button class="border border-[var(--coral)]/40 text-[var(--coral)] px-5 py-2.5 rounded-lg text-sm">ลบรูปพื้นหลัง</button></form><% } %>
     </div>
   </section>
 
