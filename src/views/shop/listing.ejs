@@ -1,41 +1,15 @@
-<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
-  <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
-    <h1 class="text-2xl font-bold"><%= title %></h1>
-    <% if (listType) { %>
-      <form method="get" class="flex items-center gap-2 text-sm">
-        <% if (typeof activeFilterTags !== 'undefined' && activeFilterTags.length) { %><input type="hidden" name="tags" value="<%= activeFilterTags.map(t => t.id).join(',') %>" /><% } %>
-        <label class="text-[var(--text-3)]">เรียงตาม</label>
-        <select name="sort" onchange="this.form.submit()" class="bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2">
-          <option value="" <%= sort==='' ? 'selected':'' %>>ยอดนิยม</option>
-          <option value="newest" <%= sort==='newest' ? 'selected':'' %>>มาใหม่ล่าสุด</option>
-          <option value="price_asc" <%= sort==='price_asc' ? 'selected':'' %>>ราคาน้อย → มาก</option>
-          <option value="price_desc" <%= sort==='price_desc' ? 'selected':'' %>>ราคามาก → น้อย</option>
-          <option value="discount" <%= sort==='discount' ? 'selected':'' %>>ส่วนลดมากสุด</option>
-          <option value="name" <%= sort==='name' ? 'selected':'' %>>ชื่อ ก-ฮ / A-Z</option>
-        </select>
-      </form>
-    <% } %>
-  </div>
-
-  <% if (listType && filterTags && filterTags.length) { %>
-    <%- include('../partials/filter-panel', { filterTags }) %>
-  <% } %>
-
-  <% if (typeof activeFilterTags !== 'undefined' && activeFilterTags.length) { %>
-    <div class="flex items-center justify-between gap-3 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl px-4 py-3 mb-5">
-      <div class="text-sm">กำลังแสดงเฉพาะ <b class="text-[var(--gold)]"><%= activeFilterTags.map(t => t.name).join(' + ') %></b></div>
-      <a href="/products" class="text-xs text-[var(--coral)] hover:underline whitespace-nowrap">ดูสินค้าทั้งหมด</a>
-    </div>
-  <% } %>
-
-  <% if (!products.length) { %>
-    <p class="text-[var(--text-3)]">ไม่พบสินค้าที่ค้นหา</p>
-  <% } else { %>
-    <div id="filterResults" class="product-catalog-grid product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-      <% products.forEach(p => { %>
-        <%- include('../partials/product-card', { p }) %>
-      <% }) %>
-    </div>
-    <p class="text-center text-[var(--text-4)] text-xs mt-8">แสดง <%= products.length %> รายการ</p>
+<section class="catalog-page w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
+  <header class="catalog-head">
+    <div class="catalog-title"><span class="catalog-title-icon"><svg><use href="#ui-box"/></svg></span><span><h1><%= title %></h1><small>All Products <i>•</i> <b id="catalogVisibleCount"><%= products.length %></b> รายการ</small></span></div>
+    <label class="catalog-search"><svg><use href="#ui-search"/></svg><input id="catalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off" /></label>
+    <div class="catalog-status-tabs" role="group" aria-label="กรองสถานะสินค้า"><button type="button" class="active" data-stock-filter="all">ทั้งหมด</button><button type="button" data-stock-filter="available"><i class="available"></i>พร้อมขาย</button><button type="button" data-stock-filter="sold"><i></i>สินค้าหมด</button></div>
+  </header>
+  <% if (listType) { %><div class="catalog-sort-row"><span>พบสินค้า <b><%= products.length %></b> รายการ</span><form method="get"><% if (typeof activeFilterTags !== 'undefined' && activeFilterTags.length) { %><input type="hidden" name="tags" value="<%= activeFilterTags.map(t => t.id).join(',') %>" /><% } %><label>เรียงตาม</label><select name="sort" onchange="this.form.submit()"><option value="" <%= sort==='' ? 'selected':'' %>>ยอดนิยม</option><option value="newest" <%= sort==='newest' ? 'selected':'' %>>มาใหม่ล่าสุด</option><option value="price_asc" <%= sort==='price_asc' ? 'selected':'' %>>ราคาน้อย → มาก</option><option value="price_desc" <%= sort==='price_desc' ? 'selected':'' %>>ราคามาก → น้อย</option><option value="discount" <%= sort==='discount' ? 'selected':'' %>>ส่วนลดมากสุด</option><option value="name" <%= sort==='name' ? 'selected':'' %>>ชื่อ ก-ฮ / A-Z</option></select></form></div><% } %>
+  <% if (listType && filterTags && filterTags.length) { %><details class="catalog-advanced-filter" <%= typeof activeFilterTags !== 'undefined' && activeFilterTags.length ? 'open' : '' %>><summary><span><svg><use href="#ui-tag"/></svg>ตัวกรองเพิ่มเติม</span><small>เลือกประเภทสินค้า</small></summary><div><%- include('../partials/filter-panel', { filterTags }) %></div></details><% } %>
+  <% if (typeof activeFilterTags !== 'undefined' && activeFilterTags.length) { %><div class="catalog-active-tags"><span>กำลังแสดงเฉพาะ <b><%= activeFilterTags.map(t => t.name).join(' + ') %></b></span><a href="/products">ล้างตัวกรอง</a></div><% } %>
+  <% if (!products.length) { %><div class="catalog-empty"><svg><use href="#ui-search"/></svg><h2>ไม่พบสินค้า</h2><p>ลองเปลี่ยนคำค้นหาหรือตัวกรองสินค้า</p></div><% } else { %>
+    <div id="catalogGrid" class="catalog-grid"><% products.forEach(p => { const soldOut = p.stockCount < 1; const crossedPrice = p.flashSaleActive ? p.regularPrice : p.originalPrice; %><article class="catalog-card" data-stock="<%= soldOut ? 'sold' : 'available' %>" data-search="<%= String(p.title || '').toLowerCase() %> <%= String(p.slug || '').toLowerCase() %> <%= (p.genres || []).join(' ').toLowerCase() %>"><a href="/game/<%= p.slug %>" class="catalog-image"><img src="<%= p.images[0] %>" alt="<%= p.title %>" loading="lazy" decoding="async" /><span class="catalog-stock <%= soldOut ? 'sold' : 'ready' %>"><%= soldOut ? 'สินค้าหมด' : 'พร้อมขาย' %></span></a><div class="catalog-card-body"><a href="/game/<%= p.slug %>" class="catalog-card-title"><%= p.title %></a><div class="catalog-price"><b>฿<%= p.price.toLocaleString() %>.00</b><% if (crossedPrice > p.price) { %><del>฿<%= crossedPrice.toLocaleString() %>.00</del><% } %></div><a href="<%= soldOut ? '/contact' : '/game/' + p.slug %>" class="catalog-cta <%= soldOut ? 'sold' : '' %>"><svg><use href="#<%= soldOut ? 'ui-clock' : 'ui-cart' %>"/></svg><%= soldOut ? 'สอบถามสินค้าเข้าใหม่' : 'ดูรายละเอียดสินค้า' %></a></div></article><% }) %></div>
+    <div id="catalogNoResults" class="catalog-empty hidden"><svg><use href="#ui-search"/></svg><h2>ไม่พบสินค้าที่ตรงกัน</h2><p>ลองใช้คำค้นหาอื่นหรือเลือกสถานะทั้งหมด</p></div>
   <% } %>
 </section>
+<script>(()=>{const search=document.getElementById('catalogSearch'),cards=[...document.querySelectorAll('.catalog-card')];if(!search||!cards.length)return;const tabs=[...document.querySelectorAll('[data-stock-filter]')],count=document.getElementById('catalogVisibleCount'),empty=document.getElementById('catalogNoResults');let stock='all';const normal=value=>String(value||'').normalize('NFKC').trim().toLocaleLowerCase('th-TH');const apply=()=>{const query=normal(search.value);let visible=0;cards.forEach(card=>{const show=(!query||normal(card.dataset.search).includes(query))&&(stock==='all'||card.dataset.stock===stock);card.hidden=!show;if(show)visible++});if(count)count.textContent=visible;if(empty)empty.classList.toggle('hidden',visible!==0)};search.addEventListener('input',apply);tabs.forEach(tab=>tab.addEventListener('click',()=>{stock=tab.dataset.stockFilter;tabs.forEach(item=>item.classList.toggle('active',item===tab));apply()}))})();</script>
