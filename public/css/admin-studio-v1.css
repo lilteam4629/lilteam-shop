@@ -64,6 +64,7 @@ body.admin-reference-ui main tbody tr:hover{background:var(--studio-soft)!import
 /* Filter library and home-section pages */
 body.admin-reference-ui .filter-studio,body.admin-reference-ui .home-sections-studio{gap:18px!important}
 body.admin-reference-ui .filter-studio-hero,body.admin-reference-ui .hs-hero{padding:22px 24px!important;background:var(--card)!important;border:1px solid var(--studio-line)!important;border-radius:13px!important;box-shadow:none!important}
+body.admin-reference-ui .filter-studio-hero:after,body.admin-reference-ui .studio-page-head:after,body.admin-reference-ui .admin-workspace-view>div:first-child:after{display:none!important;content:none!important}
 body.admin-reference-ui .filter-studio-kicker,body.admin-reference-ui .hs-kicker{color:var(--studio-muted)!important;letter-spacing:.1em!important}
 body.admin-reference-ui .filter-stats-grid>div,body.admin-reference-ui .hs-stat{background:var(--card)!important;border-color:var(--studio-line)!important;border-radius:13px!important;box-shadow:none!important}
 body.admin-reference-ui .filter-stats-grid b,body.admin-reference-ui .hs-stat b{color:var(--text)!important}
