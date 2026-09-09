@@ -293,3 +293,25 @@
 }
 .storefront-hero-banner .lilteam-hero-command:before,.storefront-hero-banner .lilteam-hero-command:after{display:none!important}
 @media(max-width:700px){.storefront-hero-banner:before{height:138px;background-size:30px 24px,30px 24px,16px 16px}.storefront-hero-banner:after{left:-5%;width:85%}}
+
+/* Compact filter chooser: show more of the page while preserving complete artwork. */
+.store-filter-section #filterWidget{padding:12px!important;border-radius:15px!important}
+.store-filter-section #filterWidget>div:first-child{gap:8px!important;margin-bottom:7px!important}
+.store-filter-section .filter-title-icon{width:34px!important;height:34px!important;border-radius:10px!important}
+.store-filter-section .filter-title-icon svg{width:16px!important;height:16px!important}
+.store-filter-section #filterWidget h2{font-size:13px!important}
+.store-filter-section #filterWidget h2+ p{font-size:9px!important}
+.store-filter-section .filter-control-row{grid-template-columns:minmax(220px,1fr) 180px 210px;gap:9px;margin:8px 0 9px!important}
+.store-filter-section .filter-search-control,.store-filter-section .filter-select-control{height:38px;padding:0 11px;border-radius:9px}
+.store-filter-section .filter-search-control svg,.store-filter-section .filter-select-control svg{width:16px;height:16px}
+.store-filter-section .filter-search-control input,.store-filter-section .filter-select-control select{font-size:10px}
+.store-filter-section .filter-chip{width:92px!important;grid-template-rows:92px auto!important;border-radius:10px!important;box-shadow:none}
+.store-filter-section .filter-chip>span:first-child{height:92px!important;padding:3px!important;background:var(--input)!important}
+.store-filter-section .filter-chip img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important;border-radius:7px}
+.store-filter-section .filter-chip>span:nth-child(2){padding:5px 6px!important}
+.store-filter-section .filter-chip>span:nth-child(2)>span:first-child{font-size:10px!important}
+.store-filter-section .filter-chip .chip-hint{display:none!important}
+.store-filter-section .filter-chip .check-badge{top:5px!important;right:5px!important;width:20px!important;height:20px!important;font-size:10px!important}
+.store-filter-section .filter-action-bar{min-height:50px;margin:9px -12px -12px;padding:7px 12px}
+.store-filter-section .filter-action-bar button{min-width:175px;height:38px;padding:0 14px;border-radius:9px;font-size:10px}
+@media(max-width:900px){.store-filter-section .filter-control-row{grid-template-columns:1fr 1fr}.store-filter-section .filter-search-control{grid-column:1/-1}}
