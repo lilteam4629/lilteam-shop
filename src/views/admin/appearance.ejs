@@ -1,4 +1,12 @@
-<div class="grid xl:grid-cols-2 gap-6 max-w-6xl">
+<div class="studio-page-head mb-6 xl:col-span-2">
+  <div>
+    <span class="studio-page-kicker">BRAND MEDIA</span>
+    <h1>รูปและแบนเนอร์</h1>
+    <p>จัดการเฉพาะโลโก้และภาพหลักของร้าน แยกจากธีมและป้ายประกาศ</p>
+  </div>
+  <a href="/" target="_blank" rel="noopener" class="studio-secondary-action">ดูหน้าร้าน ↗</a>
+</div>
+<div class="grid xl:grid-cols-2 gap-6 w-full">
   <section class="xl:col-span-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 p-5">
     <div>
       <h2 class="font-semibold text-lg text-[var(--gold)]">🧪 ทดลองหน้าแรกแบบห้องล็อกเกอร์</h2>
@@ -85,25 +93,4 @@
     <%- include('theme') %>
   </section>
 
-  <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 md:p-6 xl:col-span-2">
-    <div class="flex items-start gap-3 mb-5">
-      <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 text-[var(--gold)] flex items-center justify-center text-xl">📢</span>
-      <div>
-        <h2 class="font-semibold text-lg">ประกาศ</h2>
-        <p class="text-xs text-[var(--text-4)]">ข้อความประกาศแถบเล็กที่แสดงให้ลูกค้าเห็นบนหน้าร้าน</p>
-      </div>
-    </div>
-    <%- include('announcements') %>
-  </section>
-
-  <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 md:p-6 xl:col-span-2">
-    <div class="flex items-start gap-3 mb-5">
-      <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 text-[var(--gold)] flex items-center justify-center text-xl">📣</span>
-      <div>
-        <h2 class="font-semibold text-lg">ป๊อปอัพต้อนรับ</h2>
-        <p class="text-xs text-[var(--text-4)]">ปรับแต่งการแจ้งเตือนและแบนเนอร์รูปภาพป๊อปอัพ (รองรับหลายรูปภาพเป็นสไลด์เดอร์)</p>
-      </div>
-    </div>
-    <%- include('welcome-popup') %>
-  </section>
 </div>

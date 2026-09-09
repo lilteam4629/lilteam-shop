@@ -2,6 +2,14 @@
   const popup = settings.welcomePopup || {};
   const popupImages = Array.isArray(popup.images) ? popup.images : [];
 %>
+<div class="studio-page-head mb-6">
+  <div>
+    <span class="studio-page-kicker">WELCOME EXPERIENCE</span>
+    <h1>ป๊อปอัปต้อนรับ</h1>
+    <p>จัดการข้อความและภาพสไลด์ที่ลูกค้าเห็นเมื่อเข้าหน้าร้าน</p>
+  </div>
+  <a href="/" target="_blank" rel="noopener" class="studio-secondary-action">ดูหน้าร้าน ↗</a>
+</div>
 <form action="/admin/welcome-popup" method="post" enctype="multipart/form-data">
   <div class="grid lg:grid-cols-2 gap-5">
 

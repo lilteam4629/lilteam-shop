@@ -1,6 +1,6 @@
 <% const isBulkImport = typeof bulkMode !== 'undefined' && bulkMode; %>
 <form action="<%= isBulkImport ? '/admin/products/bulk-import' : (product ? `/admin/products/${product.id}/edit` : '/admin/products/new') %>" method="post" enctype="multipart/form-data"
-  class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 max-w-3xl space-y-4">
+  class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 w-full space-y-4">
   <div class="studio-form-head">
     <div>
       <h1><%= isBulkImport ? 'นำเข้าสินค้าหลายรายการ' : (product ? 'แก้ไขสินค้า' : 'เพิ่มสินค้าใหม่') %></h1>

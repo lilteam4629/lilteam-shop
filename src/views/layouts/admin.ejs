@@ -257,9 +257,29 @@
         <div class="space-y-1">
           <div class="sidebar-heading px-3 text-[11px] font-semibold tracking-wider text-[var(--text-4)] uppercase">ตกแต่ง & การตั้งค่า</div>
 
-          <a href="/admin/appearance" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= (active==='appearance'||active==='theme'||active==='announcements')?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="ตกแต่งหน้าเว็บ">
-            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= (active==='appearance'||active==='theme'||active==='announcements')?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-            <span class="sidebar-text">ธีม & ป้ายประกาศ</span>
+          <a href="/admin/appearance" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='appearance'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="จัดการโลโก้และแบนเนอร์">
+            <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='appearance'?'text-[var(--gold)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <span class="sidebar-text">รูปและแบนเนอร์</span>
+          </a>
+
+          <a href="/admin/theme" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='theme'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="เปลี่ยนสีและธีมร้าน">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3a9 9 0 100 18h1.5a1.5 1.5 0 000-3H12a2 2 0 010-4h2a7 7 0 000-14h-2zM7.5 10h.01M9 6.5h.01M14 6h.01"/></svg>
+            <span class="sidebar-text">ธีมร้านค้า</span>
+          </a>
+
+          <a href="/admin/announcements" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='announcements'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="จัดการแถบข้อความประกาศ">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5L6 9H3v6h3l5 4V5zm4.5 4a4 4 0 010 6M18 6a8 8 0 010 12"/></svg>
+            <span class="sidebar-text">ป้ายประกาศ</span>
+          </a>
+
+          <a href="/admin/welcome-popup" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='welcome-popup'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="จัดการป๊อปอัปต้อนรับ">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h6m8 0a9 9 0 11-4.1-7.55L21 3v9z"/></svg>
+            <span class="sidebar-text">ป๊อปอัปต้อนรับ</span>
+          </a>
+
+          <a href="/admin/effects" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='effects'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="เพลงและเอฟเฟกต์หน้าร้าน">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 18V5l11-2v13M9 9l11-2M6 18a3 3 0 11-6 0 3 3 0 016 0zm14-2a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span class="sidebar-text">ลูกเล่นหน้าเว็บ</span>
           </a>
 
           <a href="/admin/settings" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='settings'?'bg-[var(--gold)]/10 text-[var(--gold)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="ตั้งค่าร้านค้า">
@@ -354,7 +374,7 @@
     </header>
 
     <!-- Main Content Area -->
-    <main class="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
+    <main class="flex-1 p-4 sm:p-6 lg:p-8 w-full">
 
       <!-- System Storage Alert Banner -->
       <% if (!persistentStorageEnabled) { %>

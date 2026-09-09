@@ -1751,11 +1751,15 @@ router.post('/announcements/:id/delete', async (req, res) => {
 });
 
 // ---------- Welcome Popup (separate from the plain text announcement bars above) ----------
+router.get('/welcome-popup', (req, res) => {
+  res.render('admin/welcome-popup', { title: 'ป๊อปอัปต้อนรับ', active: 'welcome-popup' });
+});
+
 router.post('/welcome-popup', (req, res) => {
   popupImageUpload.array('images', 20)(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 8MB ต่อรูป)');
-      return res.redirect('/admin/appearance');
+      return res.redirect('/admin/welcome-popup');
     }
     try {
       const existing = (store.data.settings.welcomePopup && store.data.settings.welcomePopup.images) || [];
@@ -1775,13 +1779,17 @@ router.post('/welcome-popup', (req, res) => {
     } catch (saveError) {
       req.flash('error', 'บันทึกไม่สำเร็จ: ' + (saveError.message || String(saveError)));
     }
-    res.redirect('/admin/appearance');
+    res.redirect('/admin/welcome-popup');
   }));
 });
 
 // ---------- Settings ----------
 router.get('/settings', (req, res) => {
   res.render('admin/settings', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isGateOn() });
+});
+
+router.get('/effects', (req, res) => {
+  res.render('admin/effects', { title: 'ลูกเล่นหน้าเว็บ', active: 'effects' });
 });
 
 router.get('/appearance', (req, res) => {
@@ -1864,21 +1872,21 @@ router.post('/music-player', async (req, res) => {
 
   if (enabled && !youtubeUrl) {
     req.flash('error', 'กรุณาใส่ลิงก์ YouTube ก่อนเปิดใช้งานเพลง');
-    return res.redirect('/admin/settings');
+    return res.redirect('/admin/effects');
   }
   if (enabled && !extractYouTubeVideoId(youtubeUrl)) {
     req.flash('error', 'ลิงก์นี้ไม่ใช่วิดีโอ YouTube ที่รองรับ กรุณาใช้ลิงก์วิดีโอแบบ watch, youtu.be, Shorts หรือ Live (ไม่รองรับลิงก์ Playlist อย่างเดียว)');
-    return res.redirect('/admin/settings');
+    return res.redirect('/admin/effects');
   }
   if (endSeconds > 0 && endSeconds <= startSeconds) {
     req.flash('error', 'เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มต้น');
-    return res.redirect('/admin/settings');
+    return res.redirect('/admin/effects');
   }
 
   store.data.settings.music = { enabled, youtubeUrl, defaultVolume, startSeconds, endSeconds };
   await store.save();
   req.flash('success', 'บันทึกการตั้งค่าเพลงหน้าเว็บแล้ว');
-  res.redirect('/admin/settings');
+  res.redirect('/admin/effects');
 });
 
 // ---------- Snow effect ----------
@@ -1886,7 +1894,7 @@ router.post('/snow-toggle', async (req, res) => {
   store.data.settings.snow = { enabled: req.body.enabled === 'on' };
   await store.save();
   req.flash('success', store.data.settings.snow.enabled ? 'เปิดใช้งานหิมะตกแล้ว' : 'ปิดใช้งานหิมะตกแล้ว');
-  res.redirect('/admin/settings');
+  res.redirect('/admin/effects');
 });
 
 // ---------- Hero banner ----------

@@ -6,7 +6,7 @@
   </div>
 </div>
 
-<div class="space-y-6 max-w-4xl">
+<div class="space-y-6 w-full">
 
   <!-- License Status Card (If enabled) -->
   <% if (licenseEnabled) { %>
@@ -109,80 +109,6 @@
         </button>
       </div>
     </form>
-  </div>
-
-  <!-- Background Music Player Card -->
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
-    <div class="flex items-center gap-2.5 mb-4 pb-3 border-b border-[var(--border)]">
-      <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
-        🎵
-      </div>
-      <div>
-        <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เพลงพื้นหลังหน้าเว็บ (Background Music Player)</h3>
-        <p class="text-[11px] text-[var(--text-4)]">เล่นเพลงจาก YouTube พื้นหลัง ลูกค้าสามารถปรับระดับเสียงหรือย่อเก็บได้</p>
-      </div>
-    </div>
-
-    <form action="/admin/music-player" method="post" class="space-y-4">
-      <div>
-        <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">ลิงก์วิดีโอ YouTube</label>
-        <input name="youtubeUrl" value="<%= settings.music.youtubeUrl %>" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
-        <p class="text-[11px] text-[var(--text-4)] mt-1">รองรับ YouTube, YouTube Music, youtu.be, Shorts และ Live</p>
-      </div>
-
-      <div class="grid grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">เริ่มเล่นที่ (นาที:วินาที)</label>
-          <input name="startTime" value="<%= Math.floor(settings.music.startSeconds/60) %>:<%= String(settings.music.startSeconds%60).padStart(2,'0') %>" placeholder="0:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
-        </div>
-        <div>
-          <label class="block text-xs font-semibold mb-1 text-[var(--text-3)]">จบท่อนที่ (ไม่บังคับ)</label>
-          <input name="endTime" value="<%= settings.music.endSeconds ? Math.floor(settings.music.endSeconds/60) + ':' + String(settings.music.endSeconds%60).padStart(2,'0') : '' %>" placeholder="0:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
-        </div>
-      </div>
-
-      <div>
-        <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ระดับเสียงเริ่มต้น (<%= settings.music.defaultVolume %>%)</label>
-        <input type="range" name="defaultVolume" min="0" max="100" value="<%= settings.music.defaultVolume %>" class="w-full accent-[var(--gold)] h-2 bg-[var(--input)] rounded-lg cursor-pointer" />
-      </div>
-
-      <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-xl p-3.5 flex items-center justify-between">
-        <div>
-          <div class="font-bold text-xs text-[var(--text)]">เปิดใช้งานเพลงพื้นหลัง</div>
-          <div class="text-[11px] text-[var(--text-4)]">เล่นเพลงอัตโนมัติเมื่อลูกค้าเข้าสู่หน้าเว็บ</div>
-        </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" name="enabled" <%= settings.music.enabled ? 'checked' : '' %> class="sr-only peer" onchange="this.form.requestSubmit()" />
-          <div class="w-11 h-6 bg-[var(--input)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--gold)]"></div>
-        </label>
-      </div>
-
-      <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
-        💾 บันทึกการตั้งค่าเพลง
-      </button>
-    </form>
-  </div>
-
-  <!-- Snow Particle Effect Card -->
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
-    <div class="flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center font-bold text-sm">
-          ❄️
-        </div>
-        <div>
-          <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เอฟเฟกต์หิมะตกหน้าเว็บ (Snow Particles)</h3>
-          <p class="text-[11px] text-[var(--text-4)]">เพิ่มอนุภาคหิมะโปรยปรายตกแต่งบนหน้าเว็บ (ไม่บดบังหรือรบกวนการคลิกของลูกค้า)</p>
-        </div>
-      </div>
-
-      <form action="/admin/snow-toggle" method="post">
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" name="enabled" <%= settings.snow.enabled ? 'checked' : '' %> class="sr-only peer" onchange="this.form.submit()" />
-          <div class="w-11 h-6 bg-[var(--input)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-sky-500"></div>
-        </label>
-      </form>
-    </div>
   </div>
 
 </div>
