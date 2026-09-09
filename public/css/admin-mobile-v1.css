@@ -1,0 +1,82 @@
+/* Admin mobile guardrails. This file is never loaded on automatic slip verification pages. */
+@media (max-width: 1023px) {
+  html, body { width: 100%; max-width: 100%; overflow-x: clip; }
+  body.admin-reference-ui { -webkit-text-size-adjust: 100%; }
+  body.admin-reference-ui > .flex-1, body.admin-reference-ui main, body.admin-reference-ui main > * { min-width: 0; max-width: 100%; }
+  body.admin-reference-ui > header { padding-left: 12px !important; padding-right: 12px !important; }
+  body.admin-reference-ui > header > * { min-width: 0; }
+  body.admin-reference-ui #admin-sidebar { max-width: calc(100vw - 28px) !important; padding-bottom: env(safe-area-inset-bottom); }
+  body.admin-reference-ui img, body.admin-reference-ui video, body.admin-reference-ui canvas, body.admin-reference-ui svg { max-width: 100%; }
+
+  body.admin-reference-ui main input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  body.admin-reference-ui main select,
+  body.admin-reference-ui main textarea { max-width: 100%; font-size: 16px !important; }
+  body.admin-reference-ui main button,
+  body.admin-reference-ui main a { touch-action: manipulation; }
+  body.admin-reference-ui main button,
+  body.admin-reference-ui main a[class*="px-"] { min-height: 44px; }
+
+  body.admin-reference-ui main [class*="overflow-x-auto"] {
+    max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch; scrollbar-width: thin;
+  }
+  body.admin-reference-ui main table { width: 100%; }
+  body.admin-reference-ui main table th,
+  body.admin-reference-ui main table td { white-space: nowrap; }
+
+  body.admin-reference-ui .admin-action-menu {
+    position: fixed !important; z-index: 70 !important; top: auto !important;
+    right: 12px !important; bottom: max(12px,env(safe-area-inset-bottom)) !important;
+    left: 12px !important; width: auto !important; max-height: min(68dvh,560px); overflow-y: auto !important;
+    margin: 0 !important; border-radius: 20px !important;
+  }
+  body.admin-reference-ui .admin-action-menu::before { display: none; }
+  body.admin-reference-ui .admin-action-item { min-height: 46px !important; }
+
+  body.admin-reference-ui [id$="-modal"][class*="fixed"],
+  body.admin-reference-ui #admin-confirm-modal {
+    padding: max(12px,env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom)) !important;
+  }
+  body.admin-reference-ui [id$="-modal"][class*="fixed"] > *,
+  body.admin-reference-ui #admin-confirm-card {
+    max-width: 100% !important; max-height: calc(100dvh - 24px); overflow-y: auto; overscroll-behavior: contain;
+  }
+  body.admin-reference-ui .filter-drawer aside,
+  body.admin-reference-ui .hs-drawer aside { width: min(100vw,520px) !important; max-width: 100%; padding-bottom: max(18px,env(safe-area-inset-bottom)) !important; }
+  body.admin-reference-ui #admin-toast-container { right: 10px !important; bottom: max(10px,env(safe-area-inset-bottom)) !important; left: 10px !important; width: auto !important; max-width: none !important; padding: 0 !important; }
+}
+
+@media (max-width: 700px) {
+  body.admin-reference-ui > div.flex-1 > main { padding: 12px 10px 72px !important; }
+  body.admin-reference-ui main h1 { line-height: 1.18; overflow-wrap: anywhere; }
+  body.admin-reference-ui main [class*="grid-cols-4"],
+  body.admin-reference-ui main [class*="grid-cols-3"] { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+  body.admin-reference-ui main [class*="sm:grid-cols-3"],
+  body.admin-reference-ui main [class*="sm:grid-cols-2"],
+  body.admin-reference-ui main [class*="lg:grid-cols-3"] { grid-template-columns: 1fr !important; }
+  body.admin-reference-ui main [class*="p-6"] { padding: 17px !important; }
+  body.admin-reference-ui main [class*="gap-6"] { gap: 14px !important; }
+  body.admin-reference-ui main .flex.items-center.justify-between { flex-wrap: wrap; row-gap: 10px; }
+  body.admin-reference-ui main table { min-width: 680px; }
+  body.admin-reference-ui main table img { max-width: 120px; height: auto; }
+  body.admin-reference-ui.admin-page-products .admin-product-thumb { width: 130px !important; height: 82px !important; }
+  body.admin-reference-ui .studio-page-head { gap: 14px !important; padding: 17px !important; border-radius: 18px !important; }
+  body.admin-reference-ui .studio-content-grid { gap: 12px !important; }
+  body.admin-reference-ui .hs-board { padding: 10px !important; }
+  body.admin-reference-ui .hs-form-grid { grid-template-columns: 1fr !important; }
+  body.admin-reference-ui .hs-picker > header { align-items: stretch; flex-direction: column; }
+  body.admin-reference-ui .hs-picker > header input { max-width: none; }
+}
+
+@media (max-width: 380px) {
+  body.admin-reference-ui main [class*="grid-cols-4"],
+  body.admin-reference-ui main [class*="grid-cols-3"],
+  body.admin-reference-ui main [class*="grid-cols-2"] { grid-template-columns: 1fr !important; }
+  body.admin-reference-ui > div.flex-1 > main { padding-inline: 8px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.admin-reference-ui *, body.admin-reference-ui *::before, body.admin-reference-ui *::after {
+    scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important;
+  }
+}
