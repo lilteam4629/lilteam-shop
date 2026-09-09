@@ -35,17 +35,21 @@ async function init() {
     return;
   }
   const { Client, GatewayIntentBits } = Discord;
-  client = new Client({ intents: [GatewayIntentBits.Guilds] });
+  client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
 
   client.once('ready', () => {
     console.log(`[discord-bot] Logged in as ${client.user.tag}`);
   });
+
+  client.on('guildMemberAdd', (member) => handleMemberJoin(member).catch((err) => console.error('[discord-bot] guildMemberAdd error:', err.message)));
+  client.on('guildMemberRemove', (member) => handleMemberLeave(member).catch((err) => console.error('[discord-bot] guildMemberRemove error:', err.message)));
 
   client.on('interactionCreate', async (interaction) => {
     try {
       if (!interaction.isButton()) return;
       if (interaction.customId === 'open_ticket') return await handleOpenTicket(interaction);
       if (interaction.customId === 'close_ticket') return await handleCloseTicket(interaction);
+      if (interaction.customId === 'toggle_role') return await handleToggleRole(interaction);
     } catch (err) {
       console.error('[discord-bot] interaction error:', err);
       if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
@@ -115,11 +119,12 @@ async function notifyRenewal({ shopName, ownerUsername, days, price, expiresAt }
 // channel. Safe to call repeatedly — admin just gets one more panel message
 // each time; old ones can be deleted by hand in Discord if desired.
 async function postTicketPanel() {
-  if (!client) throw new Error('บอทยังไม่เชื่อมต่อ (ตรวจสอบ DISCORD_BOT_TOKEN บน Railway และสถานะบอทด้านล่าง)');
+  if (!isReady()) throw new Error('บอทยังไม่เชื่อมต่อ (ตรวจสอบ DISCORD_BOT_TOKEN และสถานะบอท)');
   const settings = cfg();
+  if (!settings.enabled) throw new Error('กรุณาเปิดใช้งาน Discord ก่อน');
   if (!settings.ticketPanelChannelId) throw new Error('กรุณาตั้งค่า Ticket Panel Channel ID ก่อน');
   const channel = await client.channels.fetch(settings.ticketPanelChannelId);
-  if (!channel) throw new Error('ไม่พบห้องที่ตั้งค่าไว้ (ตรวจสอบ Channel ID และสิทธิ์บอทในห้องนั้น)');
+  if (!channel || !channel.isTextBased()) throw new Error('ห้อง Ticket ไม่ถูกต้องหรือส่งข้อความไม่ได้');
   const embed = new Discord.EmbedBuilder()
     .setColor(0xc8a63f)
     .setTitle('📩 ติดต่อทีมงาน')
@@ -128,6 +133,84 @@ async function postTicketPanel() {
     new Discord.ButtonBuilder().setCustomId('open_ticket').setLabel('เปิดตั๋วสอบถาม').setEmoji('📩').setStyle(Discord.ButtonStyle.Primary),
   );
   await channel.send({ embeds: [embed], components: [row] });
+}
+
+async function handleMemberJoin(member) {
+  const settings = cfg();
+  if (!settings.enabled) return;
+  const channelId = settings.joinChannelId || settings.joinLeaveChannelId;
+  if (!channelId) return;
+  const channel = await client.channels.fetch(channelId).catch(() => null);
+  if (!channel || !channel.isTextBased()) return;
+  const embed = new Discord.EmbedBuilder()
+    .setColor(0x4ade80)
+    .setDescription(`📥 <@${member.id}> เข้าร่วมเซิร์ฟเวอร์ (**${member.user.tag}**)`)
+    .setThumbnail(member.user.displayAvatarURL())
+    .setTimestamp(new Date());
+  await channel.send({ embeds: [embed] }).catch((err) => console.error('[discord-bot] join notification failed:', err.message));
+}
+
+async function handleMemberLeave(member) {
+  const settings = cfg();
+  if (!settings.enabled) return;
+  const channelId = settings.leaveChannelId || settings.joinLeaveChannelId;
+  if (!channelId) return;
+  const channel = await client.channels.fetch(channelId).catch(() => null);
+  if (!channel || !channel.isTextBased()) return;
+  const embed = new Discord.EmbedBuilder()
+    .setColor(0xf87171)
+    .setDescription(`📤 <@${member.id}> ออกจากเซิร์ฟเวอร์ (**${member.user.tag}**)`)
+    .setThumbnail(member.user.displayAvatarURL())
+    .setTimestamp(new Date());
+  await channel.send({ embeds: [embed] }).catch((err) => console.error('[discord-bot] leave notification failed:', err.message));
+}
+
+// Posts the "กดรับยศ" panel — clicking the button toggles the configured
+// role on/off for whoever clicks it. Safe to call repeatedly.
+async function postRolePanel() {
+  if (!isReady()) throw new Error('บอทยังไม่เชื่อมต่อ (ตรวจสอบ DISCORD_BOT_TOKEN และสถานะบอท)');
+  const settings = cfg();
+  if (!settings.enabled) throw new Error('กรุณาเปิดใช้งาน Discord ก่อน');
+  if (!settings.rolePanelChannelId) throw new Error('กรุณาตั้งค่า Role Panel Channel ID ก่อน');
+  if (!settings.roleId) throw new Error('กรุณาตั้งค่า Role ID ก่อน');
+  const channel = await client.channels.fetch(settings.rolePanelChannelId);
+  if (!channel || !channel.isTextBased()) throw new Error('ห้อง Role Panel ไม่ถูกต้องหรือส่งข้อความไม่ได้');
+  const embed = new Discord.EmbedBuilder()
+    .setColor(0xc8a63f)
+    .setTitle('🎭 รับยศ')
+    .setDescription(settings.roleLabel ? `กดปุ่มด้านล่างเพื่อรับ/ถอดยศ **${settings.roleLabel}**` : 'กดปุ่มด้านล่างเพื่อรับ/ถอดยศ');
+  const row = new Discord.ActionRowBuilder().addComponents(
+    new Discord.ButtonBuilder().setCustomId('toggle_role').setLabel(settings.roleLabel || 'กดรับยศ').setEmoji('🎭').setStyle(Discord.ButtonStyle.Success),
+  );
+  await channel.send({ embeds: [embed], components: [row] });
+}
+
+async function handleToggleRole(interaction) {
+  const settings = cfg();
+  if (!settings.enabled || !settings.roleId) {
+    return interaction.reply({ content: 'ระบบรับยศยังไม่พร้อมใช้งาน กรุณาติดต่อผู้ดูแล', ephemeral: true });
+  }
+  if (!interaction.inGuild() || !interaction.member || !interaction.member.roles || !interaction.member.roles.cache) {
+    return interaction.reply({ content: 'ปุ่มนี้ใช้ได้เฉพาะภายในเซิร์ฟเวอร์', ephemeral: true });
+  }
+  const role = await interaction.guild.roles.fetch(settings.roleId).catch(() => null);
+  if (!role || role.managed) {
+    return interaction.reply({ content: 'ไม่พบยศที่ตั้งค่าไว้ หรือเป็นยศที่ระบบจัดการ', ephemeral: true });
+  }
+  const member = interaction.member;
+  const hasRole = member.roles.cache.has(settings.roleId);
+  try {
+    if (hasRole) {
+      await member.roles.remove(settings.roleId);
+      await interaction.reply({ content: '✅ ถอดยศแล้ว', ephemeral: true });
+    } else {
+      await member.roles.add(settings.roleId);
+      await interaction.reply({ content: '✅ รับยศแล้ว', ephemeral: true });
+    }
+  } catch (err) {
+    console.error('[discord-bot] toggle role failed:', err.message);
+    await interaction.reply({ content: 'ไม่สามารถให้ยศได้ (ตรวจสอบสิทธิ์ของบอทและลำดับยศ)', ephemeral: true });
+  }
 }
 
 function ticketChannelNameFor(user) {
@@ -194,4 +277,4 @@ async function handleCloseTicket(interaction) {
   setTimeout(() => channel.delete().catch(() => {}), 5000);
 }
 
-module.exports = { init, isConfigured, isReady, notifyNewRental, notifyRenewal, postTicketPanel };
+module.exports = { init, isConfigured, isReady, notifyNewRental, notifyRenewal, postTicketPanel, postRolePanel };

@@ -71,10 +71,16 @@ router.post('/admin/rentals/:id/delete', async (req, res, next) => {
 router.post('/admin/discord/settings', async (req, res, next) => {
   try {
     const values = { enabled: req.body.enabled === 'on' };
-    for (const field of ['notifyChannelId', 'ticketPanelChannelId', 'ticketCategoryId', 'ticketLogChannelId', 'supportRoleId', 'joinLeaveChannelId', 'rolePanelChannelId', 'roleId']) {
+    for (const field of ['notifyChannelId', 'ticketPanelChannelId', 'ticketCategoryId', 'ticketLogChannelId', 'supportRoleId', 'joinChannelId', 'leaveChannelId', 'rolePanelChannelId', 'roleId']) {
       values[field] = String(req.body[field] || '').trim();
       if (values[field] && !/^\d{15,22}$/.test(values[field])) return res.status(400).json({ error: 'Discord ID ไม่ถูกต้อง' });
     }
+    // Older Cloud clients used one channel for both events. Accept that field
+    // during rollout so saving from an older tab cannot silently erase alerts.
+    const legacyJoinLeaveId = String(req.body.joinLeaveChannelId || '').trim();
+    if (legacyJoinLeaveId && !/^\d{15,22}$/.test(legacyJoinLeaveId)) return res.status(400).json({ error: 'Discord ID ไม่ถูกต้อง' });
+    values.joinChannelId ||= legacyJoinLeaveId;
+    values.leaveChannelId ||= legacyJoinLeaveId;
     values.roleLabel = String(req.body.roleLabel || '').trim().slice(0, 80);
     store.data.settings.discord = values;
     await store.save();
