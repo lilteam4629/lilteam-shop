@@ -330,7 +330,7 @@
 </section>
 <% } %>
 
-<section class="w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
+<section class="store-product-gallery w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
   <% if (homeSections.length) { %>
     <% homeSections.forEach(section => { %>
       <%- include('../partials/section-hud-header', { icon: '✨', title: section.title, subtitle: '', href: null }) %>
@@ -346,7 +346,7 @@
   <% } %>
 
   <%- include('../partials/section-hud-header', { icon: '🎮', title: 'สินค้าเกมทั้งหมด', subtitle: 'All Products', href: '/products' }) %>
-  <div class="product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4">
+  <div class="all-products-grid product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4">
     <% if (products.length) { %>
       <% products.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
     <% } else { %>
