@@ -162,9 +162,11 @@
             <!-- Product Info -->
             <td class="py-3 px-4">
               <div class="flex items-center gap-3">
-                <div class="w-12 h-10 rounded-lg overflow-hidden bg-[var(--input)] border border-[var(--border)] shrink-0 shadow-sm">
+                <div class="admin-product-thumb rounded-lg overflow-hidden bg-[var(--input)] border border-[var(--border)] shrink-0 shadow-sm">
                   <% if (p.images && p.images[0]) { %>
-                    <img src="<%= p.images[0] %>" class="w-full h-full object-cover" alt="<%= p.title %>" />
+                    <a href="<%= p.images[0] %>" target="_blank" rel="noopener" title="เปิดดูรูป <%= p.title %> ขนาดเต็ม" class="block w-full h-full">
+                      <img src="<%= p.images[0] %>" class="w-full h-full object-contain" alt="<%= p.title %>" loading="lazy" />
+                    </a>
                   <% } else { %>
                     <div class="w-full h-full flex items-center justify-center text-xs text-[var(--text-4)]">🎮</div>
                   <% } %>
