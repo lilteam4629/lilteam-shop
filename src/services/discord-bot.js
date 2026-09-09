@@ -23,6 +23,27 @@ function cfg() {
   return (store.data.settings && store.data.settings.discord) || {};
 }
 
+function attachClientHandlers(target) {
+  target.once('ready', () => {
+    console.log(`[discord-bot] Logged in as ${target.user.tag}`);
+  });
+  target.on('guildMemberAdd', (member) => handleMemberJoin(member).catch((err) => console.error('[discord-bot] guildMemberAdd error:', err.message)));
+  target.on('guildMemberRemove', (member) => handleMemberLeave(member).catch((err) => console.error('[discord-bot] guildMemberRemove error:', err.message)));
+  target.on('interactionCreate', async (interaction) => {
+    try {
+      if (!interaction.isButton()) return;
+      if (interaction.customId === 'open_ticket') return await handleOpenTicket(interaction);
+      if (interaction.customId === 'close_ticket') return await handleCloseTicket(interaction);
+      if (interaction.customId === 'toggle_role') return await handleToggleRole(interaction);
+    } catch (err) {
+      console.error('[discord-bot] interaction error:', err);
+      if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
+        interaction.reply({ content: 'เกิดข้อผิดพลาด กรุณาลองใหม่', ephemeral: true }).catch(() => {});
+      }
+    }
+  });
+}
+
 async function init() {
   if (!TOKEN) {
     console.log('[discord-bot] DISCORD_BOT_TOKEN not set — Discord bot disabled.');
@@ -36,33 +57,29 @@ async function init() {
   }
   const { Client, GatewayIntentBits } = Discord;
   client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
-
-  client.once('ready', () => {
-    console.log(`[discord-bot] Logged in as ${client.user.tag}`);
-  });
-
-  client.on('guildMemberAdd', (member) => handleMemberJoin(member).catch((err) => console.error('[discord-bot] guildMemberAdd error:', err.message)));
-  client.on('guildMemberRemove', (member) => handleMemberLeave(member).catch((err) => console.error('[discord-bot] guildMemberRemove error:', err.message)));
-
-  client.on('interactionCreate', async (interaction) => {
-    try {
-      if (!interaction.isButton()) return;
-      if (interaction.customId === 'open_ticket') return await handleOpenTicket(interaction);
-      if (interaction.customId === 'close_ticket') return await handleCloseTicket(interaction);
-      if (interaction.customId === 'toggle_role') return await handleToggleRole(interaction);
-    } catch (err) {
-      console.error('[discord-bot] interaction error:', err);
-      if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
-        interaction.reply({ content: 'เกิดข้อผิดพลาด กรุณาลองใหม่', ephemeral: true }).catch(() => {});
-      }
-    }
-  });
+  attachClientHandlers(client);
 
   try {
     await client.login(TOKEN);
   } catch (err) {
     console.error('[discord-bot] login failed:', err.message);
-    client = null;
+    // GuildMembers is a privileged intent. Keep tickets and role buttons
+    // available if the owner has not enabled it in Developer Portal yet.
+    const disallowedIntent = err.code === 'DisallowedIntents' || /disallowed intents?/i.test(String(err.message));
+    if (!disallowedIntent) {
+      client = null;
+      return;
+    }
+    try {
+      client.destroy();
+      client = new Client({ intents: [GatewayIntentBits.Guilds] });
+      attachClientHandlers(client);
+      await client.login(TOKEN);
+      console.warn('[discord-bot] Connected without member events. Enable Server Members Intent to receive join/leave alerts.');
+    } catch (fallbackError) {
+      console.error('[discord-bot] fallback login failed:', fallbackError.message);
+      client = null;
+    }
   }
 }
 
