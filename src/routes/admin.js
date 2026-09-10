@@ -329,7 +329,8 @@ router.get('/products', (req, res) => {
     const selectedFilterTags = (p.filterTagIds || []).map(id => filterTagById.get(id)).filter(Boolean);
     return { ...p, stockCount, selectedFilterTags };
   });
-  res.render('admin/products', { title: 'สินค้า', active: 'products', products, productCardStyle: store.data.settings.productCardStyle || 'natural' });
+  const totalProductPrice = products.reduce((sum, product) => sum + (Number(product.price) || 0), 0);
+  res.render('admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, productCardStyle: store.data.settings.productCardStyle || 'natural' });
 });
 
 router.post('/products/card-style', async (req, res) => {
