@@ -70,13 +70,13 @@
       const mobileLayouts = {
         1: [{ left: '50%', width: '48%', y: '0vw', rotate: 0 }],
         2: [
-          { left: '34%', width: '43%', y: '4vw', rotate: -5 },
-          { left: '66%', width: '43%', y: '4vw', rotate: 5 },
+          { left: '32%', width: '40%', y: '0vw', rotate: 0 },
+          { left: '68%', width: '40%', y: '0vw', rotate: 0 },
         ],
         3: [
-          { left: '22%', width: '36%', y: '8vw', rotate: -7 },
-          { left: '50%', width: '48%', y: '0vw', rotate: 0 },
-          { left: '78%', width: '36%', y: '8vw', rotate: 7 },
+          { left: '20%', width: '38%', y: '0vw', rotate: 0 },
+          { left: '50%', width: '38%', y: '0vw', rotate: 0 },
+          { left: '80%', width: '38%', y: '0vw', rotate: 0 },
         ],
       };
       const mobileLayout = mobileLayouts[mobileNewest.length];
@@ -92,10 +92,10 @@
   <!-- Full 5-card fan for tablet/desktop -->
   <div class="modern-fan-stage modern-fan-desktop hidden sm:block relative max-w-6xl mx-auto mb-6" style="height: clamp(295px, 42vw, 405px);">
     <%
-      const rot = [-10, -5, 0, 5, 10];
+      const rot = [0, 0, 0, 0, 0];
       const tx = ['-40%', '-20%', '0%', '20%', '40%'];
-      const ty = [58, 24, 0, 24, 58];
-      const widths = ['clamp(150px,18vw,200px)', 'clamp(172px,21vw,230px)', 'clamp(198px,24vw,265px)', 'clamp(172px,21vw,230px)', 'clamp(150px,18vw,200px)'];
+      const ty = [18, 18, 18, 18, 18];
+      const widths = Array(5).fill('clamp(170px,20vw,220px)');
     %>
     <% newest.slice(0,5).forEach((p, i) => { %>
       <div class="modern-fan-card absolute top-0 left-1/2 aspect-[3/4] hover:z-30"
