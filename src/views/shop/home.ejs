@@ -13,6 +13,12 @@
   .storefront-hero-banner { background:transparent!important;background-image:none!important; }
   .storefront-hero-banner::before,.storefront-hero-banner::after { display:none!important;content:none!important; }
   .storefront-hero-banner>.banner-hero-shell { background:transparent!important; }
+  @media(min-width:901px){
+    .storefront-hero-banner .lilteam-hero-command__copy{width:max-content!important;max-width:min(760px,calc(100% - 32px))!important;margin:14px!important;padding:16px 18px!important;border:1px solid color-mix(in srgb,var(--border-light) 72%,transparent)!important;border-radius:14px!important;background:color-mix(in srgb,var(--card) 88%,transparent)!important;box-shadow:0 12px 30px rgba(0,0,0,.16)!important;backdrop-filter:blur(12px) saturate(.85)!important;-webkit-backdrop-filter:blur(12px) saturate(.85)!important}
+    .storefront-hero-banner .lilteam-hero-command__eyebrow,.storefront-hero-banner .lilteam-hero-command h1,.storefront-hero-banner .lilteam-hero-command__copy>p{text-shadow:0 1px 2px var(--card),0 0 8px var(--card)!important}
+    .latest-orders-heading,.home-catalog-title{width:max-content;max-width:100%;padding:7px 10px!important;border:1px solid color-mix(in srgb,var(--border-light) 72%,transparent);border-radius:11px;background:color-mix(in srgb,var(--card) 90%,transparent);box-shadow:0 8px 22px rgba(0,0,0,.12);backdrop-filter:blur(12px) saturate(.85);-webkit-backdrop-filter:blur(12px) saturate(.85)}
+    .latest-orders-heading h2,.latest-orders-heading p,.home-catalog-title h2,.home-catalog-title p{text-shadow:0 1px 2px var(--card),0 0 7px var(--card)!important}
+  }
   @media(max-width:900px){body{background-image:none!important;background-color:var(--bg)!important;background-attachment:scroll!important}}
 </style>
 <% } %>
