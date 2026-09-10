@@ -1,6 +1,6 @@
 <% const _activeIds=(typeof activeFilterTags!=='undefined'?activeFilterTags:[]).map(t=>String(t.id)); %>
 <div id="filterWidget" class="simple-filter-widget"><h2 class="simple-filter-heading"><%= (settings.filterHeading || 'เลือกตัวที่ต้องการตามหา') %></h2><div id="filterTags" class="simple-filter-grid" aria-label="เลือกตัวกรองสินค้า">
-<% filterTags.forEach(t=>{ const active=_activeIds.includes(String(t.id)); %><button type="button" class="filter-chip <%= active?'active':'' %>" data-tag-id="<%= t.id %>" aria-pressed="<%= active?'true':'false' %>"><span class="simple-filter-image"><img src="<%= t.image %>" alt="<%= t.name %>" /></span><span class="simple-filter-name"><%= t.name %></span><span class="check-badge" aria-hidden="true">✓</span></button><% }) %>
+<% filterTags.forEach(t=>{ const active=_activeIds.includes(String(t.id)); %><button type="button" class="filter-chip <%= active?'active':'' %>" data-tag-id="<%= t.id %>" aria-pressed="<%= active?'true':'false' %>"><span class="simple-filter-image"><img src="<%= t.image %>" alt="<%= t.name %>" loading="lazy" decoding="async" /></span><span class="simple-filter-name"><%= t.name %></span><span class="check-badge" aria-hidden="true">✓</span></button><% }) %>
 </div></div>
 <style>
 .simple-filter-widget{margin-bottom:18px!important;padding:12px!important;border:1px solid var(--border-light)!important;border-radius:15px!important;background:var(--card)!important;background-image:none!important;box-shadow:0 10px 28px -24px rgba(0,0,0,.45)!important}

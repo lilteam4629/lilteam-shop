@@ -57,14 +57,16 @@ function maskUsername(username) {
 }
 
 function latestOrderCards() {
+  const productsById = new Map(store.data.products.map(product => [product.id, product]));
+  const usersById = new Map(store.data.users.map(user => [user.id, user]));
   return [...store.data.orders]
     .filter(order => order.status !== 'cancelled' && order.items && order.items.length)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 10)
     .map(order => {
       const firstItem = order.items[0];
-      const product = store.data.products.find(item => item.id === firstItem.productId);
-      const buyer = store.data.users.find(user => user.id === order.userId);
+      const product = productsById.get(firstItem.productId);
+      const buyer = usersById.get(order.userId);
       return {
         title: firstItem.title,
         extraItems: Math.max(0, order.items.length - 1),

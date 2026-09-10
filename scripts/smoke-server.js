@@ -25,8 +25,10 @@ const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 function request(path, timeout = 10000) {
   return new Promise((resolve, reject) => {
     const req = http.get(`${baseUrl}${path}`, response => {
-      response.resume();
-      response.on('end', () => resolve(response));
+      let body = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => { body += chunk; });
+      response.on('end', () => { response.body = body; resolve(response); });
     });
     req.setTimeout(timeout, () => req.destroy(new Error('request timeout')));
     req.on('error', reject);
@@ -55,7 +57,9 @@ async function run() {
     }
     if (!ready) throw new Error(`server did not become healthy: ${lastError && lastError.message}\n${output}`);
     await fetchOk('/health', 'application/json');
-    await fetchOk('/', 'text/html');
+    const home = await fetchOk('/', 'text/html');
+    if (!home.body.includes('/css/tailwind.generated.css')) throw new Error('home is missing the precompiled Tailwind stylesheet');
+    if (home.body.includes('cdn.tailwindcss.com')) throw new Error('home still loads the Tailwind browser compiler');
     await fetchOk('/products', 'text/html');
     await fetchOk('/css/storefront-mobile-v1.css', 'text/css');
     console.log('Smoke checks passed: health, home, products, static assets');
