@@ -1,29 +1,9 @@
-<footer class="bg-[var(--card)] border-t border-[var(--border)] mt-10">
-  <div class="store-footer-inner w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8 grid sm:grid-cols-2 gap-6 text-sm text-[var(--text-3)]">
-    <div>
-      <div class="flex items-center gap-2 font-bold text-[var(--text)] mb-2">
-        <% if (settings.branding && settings.branding.logoImage) { %>
-          <img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" class="w-10 h-10 rounded-xl object-contain p-1 bg-gradient-to-br from-[var(--gold-light)] via-[var(--gold)] to-[var(--gold-dark)] border border-[var(--gold)]/50 shadow-[0_0_16px_rgba(0,0,0,.2)] brightness-110 contrast-125 saturate-110" />
-        <% } %>
-        <span><%= settings.shopName %></span>
-      </div>
-      <p><%= settings.tagline %></p>
-      <p class="mt-1">เปิดบริการ: <%= settings.openHours %></p>
-    </div>
-    <div>
-      <div class="font-bold text-[var(--text)] mb-2">ติดต่อเรา</div>
-      <p>Line: <%= settings.contactLine %></p>
-      <p>Facebook: <a class="text-[var(--gold)]" href="<%= settings.contactFacebook %>" target="_blank" rel="noopener">แฟนเพจร้านค้า</a></p>
-      <p><a href="/contact" class="text-[var(--gold)]">ติดต่อร้าน →</a></p>
-    </div>
-  </div>
-  <div class="text-center text-xs text-[var(--text-4)] pb-6">&copy; <%= new Date().getFullYear() %> <%= settings.shopName %></div>
-  <!-- Platform-wide fraud-report notice. Intentionally hardcoded (not read
-       from a shop's own settings) so a scamming tenant can't edit or
-       remove it — every shop on this platform shows the platform owner's
-       own contact, not the tenant's. -->
-  <div class="border-t border-[var(--border)] py-3 text-center text-[11px] text-[var(--text-4)]">
-    ⚠️ พบร้านนี้มีพฤติกรรมโกง? แจ้งเราได้ที่
-    <a href="https://web.facebook.com/aurupong.sungthim.2024" target="_blank" rel="noopener" class="text-[var(--gold)] hover:underline">Facebook</a>
+<footer class="mt-10 border-t border-[var(--border)] bg-[var(--card)]">
+  <div class="store-footer-inner mx-auto flex w-full max-w-[1320px] flex-col items-center justify-between gap-2 px-4 py-3 text-center text-[10px] text-[var(--text-4)] sm:flex-row sm:text-left">
+    <p>&copy; <%= new Date().getFullYear() %> <%= settings.shopName %> • Made by <strong class="text-[var(--text-3)]"><%= settings.shopName %></strong> &nbsp; Powered by &nbsp;<strong class="text-[var(--text-3)]"><%= settings.shopName %></strong></p>
+    <nav class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:justify-end" aria-label="ลิงก์ส่วนท้ายเว็บไซต์">
+      <a href="/help" class="hover:text-[var(--gold)]">คู่มือการใช้งาน</a>
+      <a href="https://web.facebook.com/aurupong.sungthim.2024" target="_blank" rel="noopener" class="hover:text-[var(--gold)]">ติดต่อร้านไม่ได้ / ต้องการรายงานปัญหาร้านค้าฉ้อโกง? ↗</a>
+    </nav>
   </div>
 </footer>
