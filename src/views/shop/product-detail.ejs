@@ -193,15 +193,24 @@
 
       <% if (product.howToReceiveEnabled !== false) { %>
         <% const howToReceiveText = product.howToReceiveText || 'รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ ตรวจสอบได้ที่หน้าคำสั่งซื้อของคุณ\nระบบส่งมอบอัตโนมัติตลอด 24 ชั่วโมง\nหากติดปัญหาแจ้งทางร้านได้ที่หน้าติดต่อร้าน'; %>
-        <div class="mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 text-sm space-y-2">
-          <div class="font-medium text-[var(--gold)] mb-1">วิธีรับสินค้า</div>
+        <div class="receive-highlight mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+          <div class="receive-highlight-title">✦ วิธีรับสินค้า ✦</div>
           <% howToReceiveText.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => { %>
-            <p class="text-[var(--text-2)]">✅ <%= line %></p>
+            <p><span>✓</span><strong><%= line %></strong></p>
           <% }) %>
         </div>
       <% } %>
     </div>
   </div>
+
+  <style>
+    .receive-highlight{position:relative;overflow:hidden;background:linear-gradient(135deg,color-mix(in srgb,var(--gold) 12%,var(--card)),var(--card) 68%)!important;border-color:color-mix(in srgb,var(--gold) 45%,var(--border))!important;box-shadow:0 12px 30px -24px color-mix(in srgb,var(--gold) 90%,transparent)}
+    .receive-highlight:after{content:'✦';position:absolute;right:14px;top:8px;color:color-mix(in srgb,var(--gold) 18%,transparent);font-size:52px;line-height:1;pointer-events:none}
+    .receive-highlight-title{position:relative;z-index:1;margin-bottom:10px;background:linear-gradient(90deg,var(--gold),var(--coral),var(--gold));background-clip:text;-webkit-background-clip:text;color:transparent;font-size:clamp(18px,2vw,25px);font-weight:950;letter-spacing:.02em;line-height:1.2}
+    .receive-highlight p{position:relative;z-index:1;display:flex;align-items:flex-start;gap:9px;color:var(--text);font-size:clamp(14px,1.35vw,18px);line-height:1.55}
+    .receive-highlight p>span{display:grid;width:23px;height:23px;flex:none;place-items:center;margin-top:1px;border-radius:50%;background:var(--gold);color:var(--bg);font-size:13px;font-weight:950;box-shadow:0 4px 12px color-mix(in srgb,var(--gold) 35%,transparent)}
+    .receive-highlight p>strong{font-weight:750}
+  </style>
 
   <div class="mt-10">
     <div class="flex gap-1 border-b border-[var(--border)] text-sm overflow-x-auto" id="tabbar">
