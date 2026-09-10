@@ -923,9 +923,21 @@ router.post('/products/:id/stock/:stockId/delete', async (req, res) => {
 
 // ---------- Orders ----------
 router.get('/orders', (req, res) => {
+  const productsById = new Map(store.data.products.map(product => [product.id, product]));
   const orders = [...store.data.orders]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
-    .map(o => ({ ...o, buyer: store.data.users.find(u => u.id === o.userId) }));
+    .map(o => {
+      const buyer = store.data.users.find(u => u.id === o.userId);
+      const itemSearchTerms = (o.items || []).flatMap(item => {
+        const product = productsById.get(item.productId);
+        return [item.title, item.productId, item.importedFileCode, product?.internalNote];
+      });
+      return {
+        ...o,
+        buyer,
+        searchTerms: [o.id, buyer?.username, buyer?.email, ...itemSearchTerms].filter(Boolean).join(' '),
+      };
+    });
   res.render('admin/orders', { title: 'คำสั่งซื้อ', active: 'orders', orders });
 });
 
@@ -933,9 +945,15 @@ router.get('/orders/:id', (req, res) => {
   const order = store.data.orders.find(o => o.id === req.params.id);
   if (!order) { req.flash('error', 'ไม่พบคำสั่งซื้อ'); return res.redirect('/admin/orders'); }
   const buyer = store.data.users.find(u => u.id === order.userId);
-  const itemsWithCreds = order.items.map(oi => ({
-    ...oi, credentials: store.data.stockItems.find(s => s.id === oi.stockItemId),
-  }));
+  const itemsWithCreds = order.items.map(oi => {
+    const product = store.data.products.find(p => p.id === oi.productId);
+    return {
+      ...oi,
+      credentials: store.data.stockItems.find(s => s.id === oi.stockItemId),
+      productImage: oi.productImage || product?.images?.[0] || '',
+      importedFileCode: oi.importedFileCode || product?.internalNote || '',
+    };
+  });
   res.render('admin/order-detail', { title: `คำสั่งซื้อ #${order.id}`, active: 'orders', order, buyer, itemsWithCreds });
 });
 

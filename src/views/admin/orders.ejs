@@ -17,7 +17,7 @@
 <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 mb-6 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
   <div class="relative w-full sm:w-80">
     <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--text-4)] text-sm">⌕</span>
-    <input type="text" data-table-search="#admin-orders-table" placeholder="ค้นหารหัสคำสั่งซื้อ หรือชื่อผู้ซื้อ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-9 pr-3 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
+    <input type="text" data-table-search="#admin-orders-table" placeholder="ค้นหารหัสคำสั่งซื้อ ผู้ซื้อ หรือรหัสไฟล์สินค้า..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl pl-9 pr-3 py-2 text-xs outline-none focus:border-[var(--gold)] transition" />
   </div>
 
   <div class="flex items-center gap-3 text-xs text-[var(--text-4)] w-full sm:w-auto justify-between sm:justify-end">
@@ -49,6 +49,7 @@
       <tbody class="divide-y divide-[var(--border)]">
         <% orders.forEach(o => { %>
           <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+            <td class="hidden" aria-hidden="true"><%= o.searchTerms %></td>
 
             <!-- Order ID -->
             <td class="py-3 px-4 whitespace-nowrap">

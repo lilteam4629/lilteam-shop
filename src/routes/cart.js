@@ -243,6 +243,8 @@ router.post('/checkout', requireLogin, (req, res) => {
             productId: item.product.id,
             title: item.product.title,
             price: item.unitPrice,
+            productImage: item.product.images?.[0] || '',
+            importedFileCode: item.product.internalNote || '',
             stockItemId: stockItem.id,
             fulfillmentMode: item.product.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
             fulfillmentInstructions: item.product.fulfillmentInstructions || '',
