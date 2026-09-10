@@ -479,6 +479,19 @@ router.get('/products/:id/edit', (req, res) => {
   res.render('admin/product-form', { title: 'แก้ไขสินค้า', active: 'products', product, genres: store.data.settings.genres, filterTags: store.data.filterTags });
 });
 
+router.post('/products/:id/price', async (req, res) => {
+  const product = store.data.products.find(p => p.id === req.params.id);
+  if (!product) return res.status(404).json({ ok: false, message: 'ไม่พบสินค้า' });
+  const rawPrice = String(req.body.price == null ? '' : req.body.price).trim();
+  const price = Number(rawPrice);
+  if (!rawPrice || !Number.isInteger(price) || price < 0 || price > 100000000) {
+    return res.status(400).json({ ok: false, message: 'กรุณากรอกราคาเป็นจำนวนเต็มตั้งแต่ 0 ถึง 100,000,000 บาท' });
+  }
+  product.price = price;
+  await store.save();
+  res.json({ ok: true, price, formattedPrice: `฿${price.toLocaleString('th-TH')}` });
+});
+
 router.post('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }

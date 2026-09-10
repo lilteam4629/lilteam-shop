@@ -167,9 +167,9 @@
               <div class="flex items-center gap-3">
                 <div class="admin-product-thumb rounded-lg overflow-hidden bg-[var(--input)] border border-[var(--border)] shrink-0 shadow-sm">
                   <% if (p.images && p.images[0]) { %>
-                    <a href="<%= p.images[0] %>" target="_blank" rel="noopener" title="เปิดดูรูป <%= p.title %> ขนาดเต็ม" class="block w-full h-full">
+                    <button type="button" data-product-gallery data-title="<%= p.title %>" data-images="<%= JSON.stringify(p.images || []) %>" title="เปิดดูรูป <%= p.title %> ขนาดเต็ม" class="block w-full h-full cursor-zoom-in">
                       <img src="<%= p.images[0] %>" class="w-full h-full object-contain" alt="<%= p.title %>" loading="lazy" />
-                    </a>
+                    </button>
                   <% } else { %>
                     <div class="w-full h-full flex items-center justify-center text-xs text-[var(--text-4)]">🎮</div>
                   <% } %>
@@ -198,7 +198,7 @@
 
             <!-- Price -->
             <td class="py-3 px-4 whitespace-nowrap">
-              <div class="font-bold text-sm text-[var(--gold)]">฿<%= p.price.toLocaleString() %></div>
+              <button type="button" data-price-edit data-product-id="<%= p.id %>" data-product-title="<%= p.title %>" data-price="<%= p.price %>" class="font-bold text-sm text-[var(--gold)] hover:underline decoration-dashed underline-offset-4" title="กดเพื่อแก้ราคา">฿<%= p.price.toLocaleString() %></button>
               <% if (p.originalPrice > p.price) { %>
                 <div class="text-[11px] text-[var(--coral)] line-through">฿<%= p.originalPrice.toLocaleString() %></div>
               <% } %>
@@ -284,7 +284,27 @@
   </div>
 </div>
 
+<dialog id="product-gallery-dialog" class="m-auto w-[min(94vw,1100px)] max-h-[92vh] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)] text-[var(--text)] shadow-2xl backdrop:bg-black/75">
+  <div class="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3"><strong id="product-gallery-title" class="truncate"></strong><button type="button" data-gallery-close class="grid h-9 w-9 place-items-center rounded-lg bg-[var(--input)] text-xl">×</button></div>
+  <div class="relative grid min-h-[260px] max-h-[72vh] place-items-center bg-black/90 p-3"><button type="button" data-gallery-prev class="absolute left-3 z-10 grid h-10 w-10 place-items-center rounded-full bg-black/60 text-xl text-white">‹</button><img id="product-gallery-image" src="" alt="" class="max-h-[68vh] max-w-full object-contain"><button type="button" data-gallery-next class="absolute right-3 z-10 grid h-10 w-10 place-items-center rounded-full bg-black/60 text-xl text-white">›</button></div>
+  <div id="product-gallery-count" class="px-4 py-2 text-center text-xs text-[var(--text-3)]"></div>
+</dialog>
+
+<dialog id="price-edit-dialog" class="m-auto w-[min(92vw,420px)] rounded-2xl border border-[var(--border)] bg-[var(--card)] p-0 text-[var(--text)] shadow-2xl backdrop:bg-black/70">
+  <form id="price-edit-form" class="p-5"><div class="flex items-start justify-between gap-3"><div><h2 class="text-lg font-bold">แก้ไขราคาสินค้า</h2><p id="price-edit-title" class="mt-1 text-xs text-[var(--text-3)]"></p></div><button type="button" data-price-close class="grid h-8 w-8 place-items-center rounded-lg bg-[var(--input)] text-lg">×</button></div><label class="mt-5 block text-xs font-semibold">ราคาขาย (บาท)<input id="price-edit-input" name="price" type="number" min="0" max="100000000" step="1" required class="mt-2 w-full rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-4 py-3 text-lg font-bold outline-none focus:border-[var(--gold)]"></label><p id="price-edit-error" class="mt-2 hidden text-xs text-red-500"></p><div class="mt-5 flex justify-end gap-2"><button type="button" data-price-close class="rounded-xl border border-[var(--border)] px-4 py-2 text-sm">ยกเลิก</button><button type="submit" class="rounded-xl bg-[var(--gold)] px-5 py-2 text-sm font-bold text-[var(--bg)]">บันทึกราคา</button></div></form>
+</dialog>
+
 <script>
+  (function () {
+    var galleryDialog=document.getElementById('product-gallery-dialog'),galleryImage=document.getElementById('product-gallery-image'),galleryTitle=document.getElementById('product-gallery-title'),galleryCount=document.getElementById('product-gallery-count'),images=[],index=0;
+    function showImage(){galleryImage.src=images[index]||'';galleryCount.textContent=images.length?(index+1)+' / '+images.length:'';galleryDialog.querySelector('[data-gallery-prev]').hidden=images.length<2;galleryDialog.querySelector('[data-gallery-next]').hidden=images.length<2;}
+    document.querySelectorAll('[data-product-gallery]').forEach(function(button){button.addEventListener('click',function(){try{images=JSON.parse(button.dataset.images||'[]')}catch(e){images=[]}if(!images.length)return;index=0;galleryTitle.textContent=button.dataset.title||'รูปสินค้า';showImage();galleryDialog.showModal()})});
+    galleryDialog.querySelector('[data-gallery-prev]').addEventListener('click',function(){index=(index-1+images.length)%images.length;showImage()});galleryDialog.querySelector('[data-gallery-next]').addEventListener('click',function(){index=(index+1)%images.length;showImage()});galleryDialog.querySelector('[data-gallery-close]').addEventListener('click',function(){galleryDialog.close()});galleryDialog.addEventListener('click',function(event){if(event.target===galleryDialog)galleryDialog.close()});
+    var priceDialog=document.getElementById('price-edit-dialog'),priceForm=document.getElementById('price-edit-form'),priceInput=document.getElementById('price-edit-input'),priceTitle=document.getElementById('price-edit-title'),priceError=document.getElementById('price-edit-error'),activePriceButton=null;
+    document.querySelectorAll('[data-price-edit]').forEach(function(button){button.addEventListener('click',function(){activePriceButton=button;priceTitle.textContent=button.dataset.productTitle||'';priceInput.value=button.dataset.price||0;priceError.classList.add('hidden');priceDialog.showModal();setTimeout(function(){priceInput.focus();priceInput.select()},0)})});
+    priceDialog.querySelectorAll('[data-price-close]').forEach(function(button){button.addEventListener('click',function(){priceDialog.close()})});priceDialog.addEventListener('click',function(event){if(event.target===priceDialog)priceDialog.close()});
+    priceForm.addEventListener('submit',async function(event){event.preventDefault();if(!activePriceButton)return;var submit=priceForm.querySelector('[type="submit"]');submit.disabled=true;priceError.classList.add('hidden');try{var body=new URLSearchParams({price:priceInput.value}),response=await fetch('/admin/products/'+encodeURIComponent(activePriceButton.dataset.productId)+'/price',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:body}),data=await response.json();if(!response.ok||!data.ok)throw new Error(data.message||'บันทึกราคาไม่สำเร็จ');activePriceButton.textContent=data.formattedPrice;activePriceButton.dataset.price=String(data.price);priceDialog.close();if(window.showToast)showToast('บันทึกราคาแล้ว','success')}catch(error){priceError.textContent=error.message;priceError.classList.remove('hidden')}finally{submit.disabled=false}});
+  })();
   (function () {
     var raw = sessionStorage.getItem('bulkImportSummary');
     if (!raw) return;
