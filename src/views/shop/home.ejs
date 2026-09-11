@@ -239,13 +239,15 @@
     const dots = modal.querySelectorAll('.welcome-popup-dot');
     if (slides.length > 1) {
       let current = 0;
-      setInterval(function () {
+      const popupTimer = setInterval(function () {
+        if (!modal.isConnected) { clearInterval(popupTimer); return; }
         slides[current].classList.replace('opacity-100', 'opacity-0');
         if (dots[current]) dots[current].classList.replace('bg-white', 'bg-white/40');
         current = (current + 1) % slides.length;
         slides[current].classList.replace('opacity-0', 'opacity-100');
         if (dots[current]) dots[current].classList.replace('bg-white/40', 'bg-white');
       }, 3500);
+      document.addEventListener('lilteam:page-unloading', function () { clearInterval(popupTimer); }, { once: true });
     }
   })();
 </script>
@@ -292,7 +294,7 @@
     if(!cards.length)return;
     function timeOf(value){return Date.parse(/[zZ]|[+-]\d\d:\d\d$/.test(value)?value:value+':00+07:00');}
     function update(){let expired=false;cards.forEach(card=>{const left=timeOf(card.dataset.eventStart)-Date.now();if(left<=0){expired=true;return;}const total=Math.floor(left/1000),days=Math.floor(total/86400),hours=Math.floor(total%86400/3600),minutes=Math.floor(total%3600/60),seconds=total%60;card.querySelector('.event-countdown').textContent=(days?days+' วัน ':'')+[hours,minutes,seconds].map(n=>String(n).padStart(2,'0')).join(':');});if(expired)location.reload();}
-    update();setInterval(update,1000);
+    update();const eventTimer=setInterval(update,1000);document.addEventListener('lilteam:page-unloading',function(){clearInterval(eventTimer)},{once:true});
   })();
 </script>
 <% } %>
@@ -690,12 +692,14 @@
     const name=modal.querySelector('.mg-image-modal-name');
     let opener=null;
     function closeModal(){modal.hidden=true;document.documentElement.style.overflow='';image.src='';if(opener)opener.focus()}
+    const pageController=new AbortController(),pageEvents={signal:pageController.signal};
+    document.addEventListener('lilteam:page-unloading',function(){pageController.abort()},{once:true,signal:pageController.signal});
     document.addEventListener('click',function(event){
       const trigger=event.target.closest('[data-prize-image]');
       if(trigger){event.preventDefault();opener=trigger;image.src=trigger.dataset.prizeImage;image.alt=trigger.dataset.prizeName||'รูปรางวัล';name.textContent=trigger.dataset.prizeName||'';modal.hidden=false;document.documentElement.style.overflow='hidden';modal.querySelector('.mg-image-modal-close').focus();return}
       if(event.target.closest('[data-prize-modal-close]'))closeModal();
-    });
-    document.addEventListener('keydown',function(event){if(event.key==='Escape'&&!modal.hidden)closeModal()});
+    },pageEvents);
+    document.addEventListener('keydown',function(event){if(event.key==='Escape'&&!modal.hidden)closeModal()},pageEvents);
   })();
 </script>
 <% } %>

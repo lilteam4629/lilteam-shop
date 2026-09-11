@@ -60,6 +60,7 @@ async function run() {
     const home = await fetchOk('/', 'text/html');
     if (!home.body.includes('/css/tailwind.generated.css')) throw new Error('home is missing the precompiled Tailwind stylesheet');
     if (home.body.includes('cdn.tailwindcss.com')) throw new Error('home still loads the Tailwind browser compiler');
+    if (!home.body.includes('data-seamless-navigation="true"')) throw new Error('home is missing persistent navigation for uninterrupted music');
     await fetchOk('/products', 'text/html');
     await fetchOk('/css/storefront-mobile-v1.css', 'text/css');
     console.log('Smoke checks passed: health, home, products, static assets');

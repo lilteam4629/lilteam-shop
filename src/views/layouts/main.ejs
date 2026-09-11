@@ -165,10 +165,10 @@
       <% } %>
     </div>
   </div>
-  <div id="site-page-shell" class="min-h-screen flex flex-col">
+  <div class="min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
 
-  <main class="flex-1">
+  <main id="site-page-shell" data-seamless-navigation="true" class="flex-1">
     <% if (messages.success && messages.success.length) { %>
       <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-4">
         <% messages.success.forEach(m => { %>
@@ -231,10 +231,6 @@
     // Keep the outer document (and therefore the music player) alive while visitors
     // move around the storefront. Only the server-rendered page shell is replaced.
     (function () {
-      // Native navigation deliberately replaces the document. Re-executing page
-      // scripts in a persistent shell leaked document listeners and intervals on
-      // every visit, eventually making long mobile sessions lag or freeze.
-      return;
       const SHELL_ID = 'site-page-shell';
       let activeRequest = null;
 
@@ -247,7 +243,8 @@
       function canHandle(url) {
         return url.origin === window.location.origin
           && !url.pathname.startsWith('/admin')
-          && !url.pathname.startsWith('/uploads/');
+          && !url.pathname.startsWith('/uploads/')
+          && url.pathname !== '/logout';
       }
 
       function saveScrollPosition() {
@@ -333,6 +330,7 @@
           }
 
           if (options.history !== 'pop') saveScrollPosition();
+          document.dispatchEvent(new CustomEvent('lilteam:page-unloading'));
           currentShell.replaceWith(nextShell);
           document.title = nextDocument.title;
           runPageScripts(nextShell);
@@ -390,20 +388,8 @@
           loadPage(url, { history: 'push' });
           return;
         }
-        if (method === 'POST') {
-          // Normal HTML forms use application/x-www-form-urlencoded. Passing
-          // FormData here changes them to multipart/form-data, which leaves
-          // req.body empty on routes that use Express's urlencoded parser
-          // (notably login and registration). Preserve multipart only for
-          // forms that explicitly request it, such as slip uploads.
-          const body = (form.enctype || '').toLowerCase() === 'multipart/form-data'
-            ? data
-            : new URLSearchParams(Array.from(data.entries()).map(function (entry) {
-                return [entry[0], typeof entry[1] === 'string' ? entry[1] : ''];
-              }));
-          event.preventDefault();
-          loadPage(url, { history: 'push', method: 'POST', body: body });
-        }
+        // State-changing forms use native navigation so redirects, validation,
+        // uploads and one-time checkout actions retain normal browser semantics.
       });
 
       window.addEventListener('popstate', function (event) {
@@ -504,6 +490,7 @@
       let apiRequested = false;
       let isPlaying = false;
       let segmentTimer = null;
+      let recoveryTimer = null;
       const startSeconds = parseInt(widget.dataset.startSeconds, 10) || 0;
       const endSeconds = parseInt(widget.dataset.endSeconds, 10) || 0;
 
@@ -555,6 +542,15 @@
         playingRing.classList.toggle('hidden', !playing);
       }
 
+      function recoverPlayback(delay) {
+        if (!playbackWanted || document.hidden || !player || typeof player.playVideo !== 'function') return;
+        if (recoveryTimer) clearTimeout(recoveryTimer);
+        recoveryTimer = setTimeout(function () {
+          recoveryTimer = null;
+          if (playbackWanted && !document.hidden && player && player.playVideo) player.playVideo();
+        }, delay || 700);
+      }
+
       // Keep the user's intent independently from YouTube's delayed state events.
       // This also makes taps made while the iframe is still loading take effect on ready.
       function requestPlayback(wanted) {
@@ -569,6 +565,7 @@
           player.unMute();
           player.playVideo();
         } else {
+          if (recoveryTimer) clearTimeout(recoveryTimer);
           player.pauseVideo();
           setPlayingUI(false);
         }
@@ -620,6 +617,8 @@
                 if (e.data === YT.PlayerState.ENDED && playbackWanted) {
                   player.seekTo(startSeconds, true);
                   player.playVideo();
+                } else if (e.data === YT.PlayerState.PAUSED && playbackWanted) {
+                  recoverPlayback(900);
                 }
               }
             },
@@ -672,8 +671,12 @@
       // A bfcache restore keeps the existing player. Never reload here: reloading would
       // destroy the player and is exactly what makes back/forward playback jump around.
       window.addEventListener('pageshow', function (e) {
-        if (e.persisted && playbackWanted && player && player.playVideo) player.playVideo();
+        if (e.persisted) recoverPlayback(100);
       });
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) recoverPlayback(180);
+      });
+      window.addEventListener('online', function () { recoverPlayback(300); });
     })();
   </script>
   <% } %>
@@ -724,21 +727,28 @@
   <% } %>
 <script>
   (function () {
-    const animated = document.querySelectorAll('.premium-product-card,.banner-sparkle,.latest-orders-shell,.hud-bar,.mg-panel');
+    let performanceObserver = null;
+    function observePerformanceTargets() {
+      const animated = document.querySelectorAll('.premium-product-card,.banner-sparkle,.latest-orders-shell,.hud-bar,.mg-panel');
+      if (performanceObserver) performanceObserver.disconnect();
     if ('IntersectionObserver' in window) {
-      const observer = new IntersectionObserver(function (entries) {
+      performanceObserver = new IntersectionObserver(function (entries) {
         entries.forEach(function (entry) {
           entry.target.classList.toggle('perf-visible', entry.isIntersecting);
         });
       }, { rootMargin: '180px 0px', threshold: 0.01 });
-      animated.forEach(function (element) { observer.observe(element); });
+      animated.forEach(function (element) { performanceObserver.observe(element); });
     } else {
       animated.forEach(function (element) { element.classList.add('perf-visible'); });
     }
+    }
+    observePerformanceTargets();
+    document.addEventListener('lilteam:page-loaded', observePerformanceTargets);
 
-    const clocks = Array.from(document.querySelectorAll('.flash-countdown'));
-    if (!clocks.length) return;
+    let clockTimer = null;
     function render() {
+      const clocks = Array.from(document.querySelectorAll('.flash-countdown'));
+      if (!clocks.length) return;
       const now = Date.now();
       let reloadNeeded = false;
       clocks.forEach(function (clock) {
@@ -759,8 +769,13 @@
       });
       if (reloadNeeded) window.location.reload();
     }
-    render();
-    window.setInterval(render, 1000);
+    function startClocks() {
+      if (clockTimer) clearInterval(clockTimer);
+      render();
+      clockTimer = window.setInterval(render, 1000);
+    }
+    startClocks();
+    document.addEventListener('lilteam:page-loaded', startClocks);
   })();
 </script>
 </body>

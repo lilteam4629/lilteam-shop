@@ -96,7 +96,9 @@
       track.style.transform='translate3d('+(centerIndexAt(Math.floor(count/2))||0)+'px,0,0)';
     }
     seed();
-    window.addEventListener('resize',function(){if(!spinning)seed()});
+    function handleRailResize(){if(!spinning&&game.isConnected)seed()}
+    window.addEventListener('resize',handleRailResize);
+    document.addEventListener('lilteam:page-unloading',function(){window.removeEventListener('resize',handleRailResize)},{once:true});
     if(!button)return;
     button.addEventListener('click',async function(){
       spinning=true;game.classList.add('is-spinning');button.disabled=true;result.textContent='กำลังสุ่ม...';seed();

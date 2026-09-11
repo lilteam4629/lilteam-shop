@@ -144,6 +144,7 @@
     }
     if (updateCountdown()) {
       var timer = setInterval(function () { if (!updateCountdown()) clearInterval(timer); }, 1000);
+      document.addEventListener('lilteam:page-unloading', function () { clearInterval(timer); }, { once: true });
     }
   })();
   (function () {
@@ -160,6 +161,8 @@
     var statusUrl = '/account/topup/<%= request.id %>/status';
     var detailUrl = '/account/topup/<%= request.id %>';
     var attempts = 0;
+    var pageActive = true;
+    document.addEventListener('lilteam:page-unloading', function () { pageActive = false; }, { once: true });
 
     if (overlay) {
       overlay.classList.remove('hidden');
@@ -170,12 +173,14 @@
     }
 
     function checkStatus() {
+      if (!pageActive) return;
       fetch(statusUrl, { headers: { Accept: 'application/json' }, cache: 'no-store' })
         .then(function (response) {
           if (!response.ok) throw new Error('status request failed');
           return response.json();
         })
         .then(function (result) {
+          if (!pageActive) return;
           if (result.finished) {
             window.location.replace(detailUrl);
             return;
@@ -184,6 +189,7 @@
           setTimeout(checkStatus, attempts < 10 ? 1200 : 2000);
         })
         .catch(function () {
+          if (!pageActive) return;
           attempts += 1;
           setTimeout(checkStatus, attempts < 10 ? 1500 : 3000);
         });
