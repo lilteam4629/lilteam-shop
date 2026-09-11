@@ -214,7 +214,9 @@
         resultEl.textContent = '';
         const resultLine = document.createElement('div');
         resultLine.className = data.isWin ? 'text-emerald-400 font-medium' : 'text-[var(--text-3)]';
-        resultLine.textContent = data.isWin ? ('ยินดีด้วย! ได้รับ ' + data.prizeName) : ('ผลลัพธ์: ' + data.prizeName);
+        resultLine.textContent = data.isPreview
+          ? ('ตัวอย่างผลสุ่ม: ' + data.prizeName)
+          : (data.isWin ? ('ยินดีด้วย! ได้รับ ' + data.prizeName) : ('ผลลัพธ์: ' + data.prizeName));
         resultEl.appendChild(resultLine);
         if (data.isWin && data.claimCode) {
           const claimBox = document.createElement('div');
@@ -229,7 +231,7 @@
           claimBox.appendChild(claimNote);
           resultEl.appendChild(claimBox);
         }
-        if (data.isWin) {
+        if (data.isWin && !data.isPreview) {
           const contactBtn = document.createElement('a');
           contactBtn.href = '/contact';
           contactBtn.className = 'mg-contact-btn';

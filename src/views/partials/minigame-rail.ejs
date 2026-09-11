@@ -113,9 +113,9 @@
       track.style.transition='transform 3.2s cubic-bezier(.12,.72,.08,1)';track.style.transform='translate3d('+target+'px,0,0)';
       setTimeout(function(){
         spinning=false;game.classList.remove('is-spinning');
-        result.innerHTML='';const line=document.createElement('div');line.className=data.isWin?'text-emerald-400 font-medium':'text-[var(--text-3)]';line.textContent=data.isWin?'ยินดีด้วย! ได้รับ '+data.prizeName:'ผลลัพธ์: '+data.prizeName;result.appendChild(line);
+        result.innerHTML='';const line=document.createElement('div');line.className=data.isWin?'text-emerald-400 font-medium':'text-[var(--text-3)]';line.textContent=data.isPreview?'ตัวอย่างผลสุ่ม: '+data.prizeName:(data.isWin?'ยินดีด้วย! ได้รับ '+data.prizeName:'ผลลัพธ์: '+data.prizeName);result.appendChild(line);
         if(data.isWin&&data.claimCode){const claim=document.createElement('div');claim.className='rail-claim';claim.textContent=data.claimCode;result.appendChild(claim)}
-        if(data.isWin){const contactBtn=document.createElement('a');contactBtn.href='/contact';contactBtn.className='rail-contact-btn';contactBtn.textContent='💬 ติดต่อร้านเพื่อรับรางวัล';result.appendChild(contactBtn)}
+        if(data.isWin&&!data.isPreview){const contactBtn=document.createElement('a');contactBtn.href='/contact';contactBtn.className='rail-contact-btn';contactBtn.textContent='💬 ติดต่อร้านเพื่อรับรางวัล';result.appendChild(contactBtn)}
         if(balance&&typeof data.walletBalance==='number')balance.textContent=data.walletBalance.toLocaleString();button.disabled=false;
       },3300);
     });

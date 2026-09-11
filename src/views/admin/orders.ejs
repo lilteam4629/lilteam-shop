@@ -40,6 +40,7 @@
         <tr>
           <th class="py-3.5 px-4 font-semibold">รหัสสั่งซื้อ</th>
           <th class="py-3.5 px-4 font-semibold">ผู้ซื้อ / ลูกค้า</th>
+          <th class="py-3.5 px-4 font-semibold">สินค้า / ชื่อไฟล์นำเข้า</th>
           <th class="py-3.5 px-4 font-semibold">วันที่สั่งซื้อ</th>
           <th class="py-3.5 px-4 font-semibold">ยอดรวม</th>
           <th class="py-3.5 px-4 font-semibold">สถานะ</th>
@@ -72,6 +73,24 @@
                     <div class="text-[11px] text-[var(--text-4)] truncate"><%= o.buyer.email %></div>
                   <% } %>
                 </div>
+              </div>
+            </td>
+
+            <!-- Ordered products and their original imported filenames -->
+            <td class="py-3 px-4 min-w-[260px]">
+              <div class="space-y-1.5">
+                <% (o.displayItems || []).forEach(item => { %>
+                  <div class="min-w-0">
+                    <div class="font-semibold text-xs text-[var(--text)] truncate"><%= item.title %></div>
+                    <% if (item.importedFileCode) { %>
+                      <div class="text-[11px] text-[var(--gold)] font-mono break-all" title="<%= item.importedFileCode %>">
+                        🖼 <%= item.importedFileCode %>
+                      </div>
+                    <% } else { %>
+                      <div class="text-[10px] text-[var(--text-4)]">ไม่มีชื่อไฟล์ต้นฉบับ</div>
+                    <% } %>
+                  </div>
+                <% }) %>
               </div>
             </td>
 
@@ -120,7 +139,7 @@
 
         <% if (!orders.length) { %>
           <tr>
-            <td class="py-12 text-center text-[var(--text-4)]" colspan="6">
+            <td class="py-12 text-center text-[var(--text-4)]" colspan="7">
               <div class="text-3xl mb-2">🧾</div>
               <div class="text-sm font-semibold text-[var(--text-3)]">ยังไม่มีรายการสั่งซื้อ</div>
               <p class="text-xs text-[var(--text-4)] mt-1">เมื่อลูกค้าสั่งซื้อสินค้า รายการจะปรากฏที่นี่ทันที</p>
@@ -129,7 +148,7 @@
         <% } %>
 
         <tr class="table-empty-search-row" style="display: none;">
-          <td class="py-12 text-center text-[var(--text-4)]" colspan="6">
+          <td class="py-12 text-center text-[var(--text-4)]" colspan="7">
             <div class="text-2xl mb-1">🔍</div>
             <div class="text-xs">ไม่พบคำสั่งซื้อที่ตรงกับคำค้นหา</div>
           </td>

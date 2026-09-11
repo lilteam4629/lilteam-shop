@@ -935,6 +935,13 @@ router.get('/orders', (req, res) => {
       return {
         ...o,
         buyer,
+        displayItems: (o.items || []).map(item => {
+          const product = productsById.get(item.productId);
+          return {
+            title: item.title || product?.title || 'สินค้า',
+            importedFileCode: item.importedFileCode || product?.internalNote || '',
+          };
+        }),
         searchTerms: [o.id, buyer?.username, buyer?.email, ...itemSearchTerms].filter(Boolean).join(' '),
       };
     });
@@ -1702,7 +1709,8 @@ router.post('/minigame/preview', (req, res) => {
     prizeName: prize.name,
     image: prize.image || null,
     isWin: Boolean(prize.isPrize),
-    claimCode: prize.isPrize ? 'PREVIEW' : null,
+    claimCode: null,
+    isPreview: true,
   });
 });
 
