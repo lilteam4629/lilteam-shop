@@ -168,16 +168,17 @@
   <div class="min-h-screen flex flex-col">
   <%- include('../partials/navbar') %>
 
-  <main id="site-page-shell" data-seamless-navigation="true" class="flex-1">
+  <% const isAuthPage = /\/(login|register)(?:[/?#]|$)/.test(typeof currentRequestUrl === 'string' ? currentRequestUrl : ''); %>
+  <main id="site-page-shell" data-seamless-navigation="true" class="relative flex-1">
     <% if (messages.success && messages.success.length) { %>
-      <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-4">
+      <div class="<%= isAuthPage ? 'absolute inset-x-0 top-0 z-40' : '' %> w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-4">
         <% messages.success.forEach(m => { %>
           <div class="bg-emerald-900/40 border border-emerald-700 text-emerald-300 px-4 py-2 rounded-lg mb-2 text-sm"><%= m %></div>
         <% }) %>
       </div>
     <% } %>
     <% if (messages.error && messages.error.length) { %>
-      <div class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-4">
+      <div class="<%= isAuthPage ? 'absolute inset-x-0 top-0 z-40' : '' %> w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-4">
         <% messages.error.forEach(m => { %>
           <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/50 text-[var(--coral)] px-4 py-2 rounded-lg mb-2 text-sm"><%= m %></div>
         <% }) %>
