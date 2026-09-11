@@ -184,6 +184,7 @@ router.get('/', (req, res) => {
   const since30Days = now.getTime() - (30 * 86400000);
   const revenue7Days = paidOrders.filter(order => new Date(order.createdAt).getTime() >= since7Days).reduce((sum, order) => sum + order.total, 0);
   const revenue30Days = paidOrders.filter(order => new Date(order.createdAt).getTime() >= since30Days).reduce((sum, order) => sum + order.total, 0);
+  const newCustomersToday = users.filter(user => user.role === 'customer' && bangkokKey(new Date(user.createdAt)) === todayKey).length;
   const newCustomers30Days = users.filter(user => user.role === 'customer' && new Date(user.createdAt).getTime() >= since30Days).length;
   const dailySales = Array.from({ length: 7 }, (_, index) => {
     const date = new Date(now.getTime() - ((6 - index) * 86400000));
@@ -222,7 +223,7 @@ router.get('/', (req, res) => {
       revenueToday,
       revenue7Days,
       revenue30Days,
-      newCustomers30Days,
+      newCustomersToday, newCustomers30Days,
       topupSuccessRate,
       reviewedTopups: reviewedTopups.length,
     },
@@ -977,12 +978,21 @@ router.post('/orders/:id/status', async (req, res) => {
 // ---------- Users ----------
 router.get('/users', (req, res) => {
   const q = String(req.query.q || '').trim();
+  const registered = req.query.registered === 'today' ? 'today' : '';
   const needle = q.toLocaleLowerCase('th-TH');
+  const bangkokDay = date => new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(date);
+  const todayKey = bangkokDay(new Date());
   const matched = [...store.data.users]
+    .filter(user => user.role === 'customer' || !registered)
+    .filter(user => !registered || bangkokDay(new Date(user.createdAt)) === todayKey)
     .filter(user => !needle
       || String(user.username || '').toLocaleLowerCase('th-TH').includes(needle)
       || String(user.email || '').toLocaleLowerCase('th-TH').includes(needle))
-    .sort((a, b) => String(a.username || '').localeCompare(String(b.username || ''), 'th'));
+    .sort((a, b) => registered
+      ? new Date(b.createdAt) - new Date(a.createdAt)
+      : String(a.username || '').localeCompare(String(b.username || ''), 'th'));
 
   const pageSizeOptions = [10, 25, 50, 100];
   const pageSize = pageSizeOptions.includes(Number(req.query.pageSize)) ? Number(req.query.pageSize) : 10;
@@ -993,10 +1003,36 @@ router.get('/users', (req, res) => {
   const totalWalletBalance = store.data.users.reduce((sum, u) => sum + (Number(u.walletBalance) || 0), 0);
 
   res.render('admin/users', {
-    title: 'สมาชิก', active: 'users', users, q,
+    title: 'สมาชิก', active: 'users', users, q, registered,
     totalUsers: store.data.users.length,
     totalWalletBalance, matchedCount: matched.length,
     page, totalPages, pageSize, pageSizeOptions,
+  });
+});
+
+router.get('/users/:id', (req, res) => {
+  const user = store.data.users.find(item => item.id === req.params.id);
+  if (!user) {
+    req.flash('error', 'ไม่พบสมาชิก');
+    return res.redirect('/admin/users');
+  }
+
+  const orders = store.data.orders
+    .filter(order => order.userId === user.id)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const topups = store.data.topupRequests
+    .filter(request => request.userId === user.id)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const transactions = store.data.walletTransactions
+    .filter(transaction => transaction.userId === user.id)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const paidOrders = orders.filter(order => order.status !== 'cancelled');
+
+  return res.render('admin/user-detail', {
+    title: `สมาชิก ${user.username}`, active: 'users', user,
+    orders: orders.slice(0, 10), topups: topups.slice(0, 10), transactions: transactions.slice(0, 10),
+    orderCount: orders.length,
+    totalSpent: paidOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0),
   });
 });
 

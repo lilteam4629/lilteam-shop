@@ -1,0 +1,32 @@
+<div class="mb-6">
+  <a href="/admin/users" class="text-xs font-semibold text-[var(--gold)] hover:underline">← กลับหน้าสมาชิก</a>
+  <h1 class="mt-2 text-2xl font-bold text-[var(--text)]">ข้อมูลสมาชิก: <%= user.username %></h1>
+  <p class="mt-1 text-xs text-[var(--text-4)]">ตรวจสอบบัญชี ยอดเงิน และประวัติการใช้งานของลูกค้า</p>
+</div>
+
+<div class="grid gap-4 lg:grid-cols-[1fr_1.6fr]">
+  <section class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="grid h-12 w-12 place-items-center rounded-xl bg-[var(--gold)] text-xl font-black text-[var(--bg)]"><%= String(user.username || '?').charAt(0).toUpperCase() %></div>
+      <div class="min-w-0"><h2 class="truncate text-lg font-bold"><%= user.username %></h2><p class="truncate text-xs text-[var(--text-4)]"><%= user.email %></p></div>
+    </div>
+    <dl class="mt-5 space-y-3 text-xs">
+      <div class="flex justify-between gap-4"><dt class="text-[var(--text-4)]">รหัสสมาชิก</dt><dd class="font-mono"><%= user.id %></dd></div>
+      <div class="flex justify-between gap-4"><dt class="text-[var(--text-4)]">วันที่สมัคร</dt><dd><%= new Date(user.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></dd></div>
+      <div class="flex justify-between gap-4"><dt class="text-[var(--text-4)]">สถานะ</dt><dd class="font-semibold <%= user.status === 'banned' ? 'text-rose-400' : 'text-emerald-400' %>"><%= user.status === 'banned' ? 'ระงับบัญชี' : 'ปกติ' %></dd></div>
+      <div class="flex justify-between gap-4"><dt class="text-[var(--text-4)]">ยอดเครดิต</dt><dd class="font-bold text-[var(--gold)]">฿<%= Number(user.walletBalance || 0).toLocaleString() %></dd></div>
+    </dl>
+  </section>
+
+  <div class="grid grid-cols-2 gap-4">
+    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5"><div class="text-xs text-[var(--text-4)]">คำสั่งซื้อทั้งหมด</div><div class="mt-2 text-2xl font-bold"><%= orderCount %> รายการ</div></div>
+    <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5"><div class="text-xs text-[var(--text-4)]">ยอดซื้อรวม</div><div class="mt-2 text-2xl font-bold text-[var(--gold)]">฿<%= totalSpent.toLocaleString() %></div></div>
+    <section class="col-span-2 rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5">
+      <h2 class="font-bold">คำสั่งซื้อล่าสุด</h2>
+      <div class="mt-3 divide-y divide-[var(--border)]">
+        <% orders.forEach(order => { %><a href="/admin/orders/<%= order.id %>" class="flex items-center justify-between gap-3 py-3 text-xs hover:text-[var(--gold)]"><span>#<%= order.id %> · <%= new Date(order.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></span><b>฿<%= Number(order.total || 0).toLocaleString() %> →</b></a><% }) %>
+        <% if (!orders.length) { %><p class="py-5 text-center text-xs text-[var(--text-4)]">ยังไม่มีคำสั่งซื้อ</p><% } %>
+      </div>
+    </section>
+  </div>
+</div>

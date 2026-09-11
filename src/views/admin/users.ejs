@@ -98,6 +98,7 @@
       </div>
 
       <form method="get" action="/admin/users" class="flex flex-col sm:flex-row sm:items-center gap-2.5">
+        <% if (registered) { %><input type="hidden" name="registered" value="today" /><% } %>
         <label class="flex items-center gap-1.5 text-xs text-[var(--text-4)] shrink-0">
           แสดง
           <select name="pageSize" onchange="this.form.requestSubmit()" class="bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 text-xs outline-none focus:border-[var(--gold)] transition">
@@ -114,12 +115,18 @@
         <button type="submit" class="bg-[var(--gold)] text-[var(--bg)] font-bold rounded-xl px-5 py-2 text-xs shadow-md transition active:scale-95 shrink-0">
           ค้นหา
         </button>
-        <% if (q) { %>
+        <% if (q || registered) { %>
           <a href="/admin/users" class="border border-[var(--border-light)] rounded-xl px-4 py-2 text-xs text-center hover:border-[var(--gold)] transition shrink-0">
             ล้าง
           </a>
         <% } %>
       </form>
+      <% if (registered === 'today') { %>
+        <div class="flex items-center justify-between gap-3 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-3.5 py-2 text-xs">
+          <span class="font-semibold text-[var(--gold)]">กำลังแสดงลูกค้าที่สมัครวันนี้ <%= matchedCount %> คน</span>
+          <a href="/admin/users" class="text-[var(--text-3)] hover:text-[var(--text)]">ดูสมาชิกทั้งหมด</a>
+        </div>
+      <% } %>
     </div>
 
     <!-- Mobile User Cards -->
@@ -133,7 +140,7 @@
             <div class="min-w-0 flex-1">
               <div class="flex items-start justify-between gap-2">
                 <div class="min-w-0">
-                  <h3 class="truncate font-bold text-sm text-[var(--text)]"><%= u.username %></h3>
+                  <a href="/admin/users/<%= u.id %>" class="block truncate font-bold text-sm text-[var(--text)] hover:text-[var(--gold)]"><%= u.username %></a>
                   <p class="truncate text-xs text-[var(--text-4)]"><%= u.email %></p>
                 </div>
                 <span class="shrink-0 rounded-full px-2.5 py-0.5 text-[10px] font-semibold <%= u.status === 'banned' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' %>">
@@ -164,7 +171,8 @@
               </button>
             </form>
 
-            <div class="grid <%= u.role !== 'admin' ? 'grid-cols-2' : 'grid-cols-1' %> gap-2">
+            <div class="grid <%= u.role !== 'admin' ? 'grid-cols-3' : 'grid-cols-2' %> gap-2">
+              <a href="/admin/users/<%= u.id %>" class="rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-3 py-1.5 text-center text-xs font-semibold text-[var(--gold)] transition">ดูข้อมูล</a>
               <a href="/admin/topups?q=<%= encodeURIComponent(u.username) %>" class="rounded-xl border border-[var(--border-light)] bg-[var(--card)] px-3 py-1.5 text-center text-xs font-semibold text-sky-400 hover:bg-[var(--input)] transition">
                 🧾 ประวัติเติมเงิน
               </a>
@@ -215,7 +223,7 @@
                       <%= String(u.username || '?').charAt(0).toUpperCase() %>
                     </div>
                     <div class="min-w-0">
-                      <div class="font-bold text-xs sm:text-sm text-[var(--text)] truncate"><%= u.username %></div>
+                      <a href="/admin/users/<%= u.id %>" class="block font-bold text-xs sm:text-sm text-[var(--text)] hover:text-[var(--gold)] truncate"><%= u.username %></a>
                       <div class="text-[11px] text-[var(--text-4)] truncate"><%= u.email %></div>
                     </div>
                   </div>
@@ -253,6 +261,7 @@
                 <!-- Actions -->
                 <td class="py-3 px-4 text-right whitespace-nowrap">
                   <div class="inline-flex items-center gap-1.5">
+                    <a href="/admin/users/<%= u.id %>" class="rounded-lg border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-2 py-1 text-xs font-semibold text-[var(--gold)] hover:bg-[var(--gold)]/20 transition">ดูข้อมูล</a>
 
                     <!-- Adjust Balance Form -->
                     <form action="/admin/users/<%= u.id %>/wallet" method="post" class="inline-flex items-center gap-1">
@@ -298,7 +307,7 @@
         <div class="flex items-center justify-between gap-3 border-t border-[var(--border)] px-4 py-3 text-xs text-[var(--text-4)]">
           <span>หน้า <%= page %> จาก <%= totalPages %></span>
           <div class="flex items-center gap-1.5">
-            <% const qs = (p) => `?q=${encodeURIComponent(q)}&pageSize=${pageSize}&page=${p}`; %>
+            <% const qs = (p) => `?q=${encodeURIComponent(q)}&registered=${encodeURIComponent(registered)}&pageSize=${pageSize}&page=${p}`; %>
             <a href="<%= qs(Math.max(1, page - 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] <%= page <= 1 ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">‹ ก่อนหน้า</a>
             <a href="<%= qs(Math.min(totalPages, page + 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] <%= page >= totalPages ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">ถัดไป ›</a>
           </div>

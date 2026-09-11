@@ -138,18 +138,18 @@
   </div>
 
   <!-- Card 3: New Customers -->
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm hover:border-[var(--gold)]/40 transition duration-200">
+  <a href="/admin/users?registered=today" class="block bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm hover:border-[var(--gold)] hover:-translate-y-0.5 transition duration-200" aria-label="ดูลูกค้าที่สมัครวันนี้">
     <div class="flex items-center justify-between mb-3">
-      <span class="text-xs font-medium text-[var(--text-4)]">ลูกค้าใหม่ 30 วัน</span>
+      <span class="text-xs font-medium text-[var(--text-4)]">ลูกค้าใหม่วันนี้</span>
       <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-base">
         👥
       </div>
     </div>
-    <div class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight"><%= stats.newCustomers30Days %> <span class="text-sm font-normal text-[var(--text-4)]">คน</span></div>
+    <div class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight"><%= stats.newCustomersToday %> <span class="text-sm font-normal text-[var(--text-4)]">คน</span></div>
     <div class="text-[11px] text-[var(--text-4)] mt-2">
-      สมาชิกร้านทั้งหมด: <b class="text-[var(--text-2)] font-semibold"><%= stats.userCount %> คน</b>
+      30 วันล่าสุด <b class="text-[var(--text-2)] font-semibold"><%= stats.newCustomers30Days %> คน</b> · กดเพื่อดูรายชื่อ →
     </div>
-  </div>
+  </a>
 
   <!-- Card 4: Topup Success Rate -->
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm hover:border-[var(--gold)]/40 transition duration-200">
