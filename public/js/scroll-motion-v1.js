@@ -1,5 +1,5 @@
 (function(){
-  var observer=null,scheduled=false;
+  var observer=null,scheduled=false,revealFrame=0,pendingReveals=new Set();
   var selector=['.banner-hero-shell','.modern-fan-heading','.store-announcements','.latest-orders-section','.store-filter-section','.store-content-section','.premium-product-card','.admin-content > section','.admin-content > article','.admin-content > div'].join(',');
   function setup(){
     scheduled=false;
@@ -10,14 +10,17 @@
       node.dataset.scrollMotion='1';node.classList.add('scroll-reveal');
       if(node.classList.contains('premium-product-card'))node.classList.add('scroll-reveal-card');
       if(node.classList.contains('banner-hero-shell'))node.classList.add('scroll-reveal-banner');
-      var delay=node.classList.contains('premium-product-card')?Math.min(index%5,4)*42:0;
+      var delay=node.classList.contains('premium-product-card')?Math.min(index%5,4)*36:0;
       node.style.setProperty('--reveal-delay',delay+'ms');
     });
     document.documentElement.classList.add('scroll-motion-ready');
     if(!('IntersectionObserver'in window)){nodes.forEach(function(node){node.classList.add('scroll-reveal-visible')});return;}
-    observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add('scroll-reveal-visible');observer.unobserve(entry.target)}})},{rootMargin:'0px 0px -8% 0px',threshold:.06});
+    observer=new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){if(entry.isIntersecting)pendingReveals.add(entry.target)});
+      if(!pendingReveals.size||revealFrame)return;
+      revealFrame=requestAnimationFrame(function(){pendingReveals.forEach(function(node){node.classList.add('scroll-reveal-visible');observer.unobserve(node)});pendingReveals.clear();revealFrame=0});
+    },{rootMargin:'0px 0px 96px 0px',threshold:.01});
     requestAnimationFrame(function(){nodes.forEach(function(node){if(!node.classList.contains('scroll-reveal-visible'))observer.observe(node)})});
-    setTimeout(function(){nodes.forEach(function(node){var rect=node.getBoundingClientRect();if(!node.classList.contains('scroll-reveal-visible')&&rect.top<=(window.innerHeight||document.documentElement.clientHeight)+160&&rect.bottom>=-160)node.classList.add('scroll-reveal-visible')})},900);
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(setup)}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();

@@ -15,13 +15,16 @@ html.scroll-motion-ready body .premium-product-card.scroll-reveal-card.scroll-re
 .scroll-motion-ready .scroll-reveal-banner{transform:translate3d(0,34px,0) scale(.94);transition-duration:.52s}
 .scroll-motion-ready .scroll-reveal-banner.scroll-reveal-visible{transform:translate3d(0,0,0) scale(1)}
 @media(hover:hover){html.scroll-motion-ready body .premium-product-card.scroll-reveal-card.scroll-reveal-visible:hover{transform:translate3d(0,-4px,0) scale(1.015)!important}}
-@media(max-width:900px){html{scroll-padding-top:68px}.scroll-motion-ready .scroll-reveal{transform:translate3d(0,16px,0) scale(.98);transition-duration:.36s}.scroll-motion-ready .scroll-reveal.scroll-reveal-visible{transform:translate3d(0,0,0) scale(1)}html.scroll-motion-ready body .premium-product-card.scroll-reveal-card{transform:translate3d(0,34px,0) scale(.92)!important;transition-duration:.38s!important}.scroll-motion-ready .scroll-reveal-banner{transform:translate3d(0,24px,0) scale(.96);transition-duration:.44s}}
+@media(max-width:900px){html{scroll-padding-top:68px}.scroll-motion-ready .scroll-reveal{transform:translate3d(0,14px,0);transition-duration:.28s;transition-delay:0ms!important;backface-visibility:visible}.scroll-motion-ready .scroll-reveal.scroll-reveal-visible{transform:translate3d(0,0,0)}html.scroll-motion-ready body .premium-product-card.scroll-reveal-card{transform:translate3d(0,22px,0)!important;transition:opacity .22s ease-out,transform .28s cubic-bezier(.2,.82,.3,1.12)!important;transition-delay:0ms!important}.scroll-motion-ready .scroll-reveal-banner{transform:translate3d(0,14px,0);transition-duration:.28s}}
 @media(prefers-reduced-motion:reduce){::view-transition-old(site-page-shell),::view-transition-new(site-page-shell){animation:none}.scroll-motion-ready .scroll-reveal{transition:none!important}}
 @media(max-width:900px) and (pointer:coarse){
   .store-nav,.store-nav__inner,.store-nav__mobile-row,header.backdrop-blur-md{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
   .premium-product-card img,.catalog-card img{filter:none!important}
   .premium-product-card,.catalog-card{box-shadow:0 5px 14px rgba(0,0,0,.18)!important}
-  html.scroll-motion-ready body .premium-product-card.scroll-reveal-card{transform:translate3d(0,34px,0) scale(.92)!important;transition-duration:.38s!important;transition-timing-function:cubic-bezier(.34,1.56,.64,1)!important}
-  html.scroll-motion-ready body .premium-product-card.scroll-reveal-card.scroll-reveal-visible{transform:translate3d(0,0,0) scale(1)!important}
+  .scroll-motion-ready .scroll-reveal{backface-visibility:visible;transition-delay:0ms!important}
+  .scroll-motion-ready .scroll-reveal:not(.scroll-reveal-card){transform:translate3d(0,14px,0)!important;transition-duration:.28s!important}
+  .scroll-motion-ready .scroll-reveal.scroll-reveal-visible:not(.scroll-reveal-card){transform:translate3d(0,0,0)!important}
+  html.scroll-motion-ready body .premium-product-card.scroll-reveal-card{transform:translate3d(0,22px,0)!important;transition:opacity .22s ease-out,transform .28s cubic-bezier(.2,.82,.3,1.12)!important;transition-delay:0ms!important;backface-visibility:visible!important}
+  html.scroll-motion-ready body .premium-product-card.scroll-reveal-card.scroll-reveal-visible{transform:translate3d(0,0,0)!important}
   html.mobile-is-scrolling .snowflake,html.mobile-is-scrolling .latest-orders-track,html.mobile-is-scrolling .marquee-track,html.mobile-is-scrolling .product-shimmer,html.mobile-is-scrolling .ready-glow{animation-play-state:paused!important}
 }

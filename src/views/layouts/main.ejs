@@ -734,7 +734,10 @@
   (function () {
     let performanceObserver = null;
     function observePerformanceTargets() {
-      const animated = document.querySelectorAll('.premium-product-card,.banner-sparkle,.latest-orders-shell,.hud-bar,.mg-panel');
+      const mobileCoarse = window.matchMedia('(max-width: 900px) and (pointer: coarse)').matches;
+      const animated = document.querySelectorAll(mobileCoarse
+        ? '.banner-sparkle,.latest-orders-shell,.hud-bar,.mg-panel'
+        : '.premium-product-card,.banner-sparkle,.latest-orders-shell,.hud-bar,.mg-panel');
       if (performanceObserver) performanceObserver.disconnect();
     if ('IntersectionObserver' in window) {
       performanceObserver = new IntersectionObserver(function (entries) {
