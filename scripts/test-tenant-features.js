@@ -89,6 +89,16 @@ function fixture(failOnSave) {
   lab.api.platformData.shops = lab.api.platformData.shops.filter(shop => !shop.isSystemLab);
   const ensuredLab = await ensureSystemLab(lab.api);
   assert.equal(ensuredLab.shop.isSystemLab, true);
-  assert.equal(lab.dbs.get(ensuredLab.shop.id).settings.rain.enabled, true);
+  assert.equal(lab.dbs.get(ensuredLab.shop.id).settings.rain, undefined);
+
+  const existingLab = fixture();
+  existingLab.api.platformData.users = [{ id: 'admin', username: 'owner', email: 'owner@test', role: 'admin', status: 'active', passwordHash: 'hash' }];
+  existingLab.api.platformData.shops.find(shop => shop.id === 'shop-lab').slug = 'system-lab';
+  const existingLabDb = existingLab.dbs.get('shop-lab');
+  existingLabDb.settings.rain = { enabled: true, color: '#78c8ff', intensity: 'medium' };
+  existingLabDb.settings.systemModules = { rain: { name: 'ระบบฝนตกหน้าเว็บ', version: 'lab', enabled: true } };
+  await ensureSystemLab(existingLab.api);
+  assert.equal(existingLab.dbs.get('shop-lab').settings.rain, undefined);
+  assert.equal(existingLab.dbs.get('shop-lab').settings.systemModules, undefined);
   console.log('Tenant delivery checks passed: selected, all, releases, concurrent data preservation, rollback');
 })().catch(error => { console.error(error); process.exitCode = 1; });
