@@ -92,10 +92,17 @@ function selectShops(platformShops, scope, requestedIds) {
   return selected;
 }
 
+function assertExplicitScope(payload) {
+  if (payload.scope === 'all' && payload.confirmAll !== 'CONFIRM_ALL_TENANTS') {
+    throw new Error('การนำส่งทุกร้านต้องยืนยันคำสั่งอัปเดตทั้งหมดโดยตรง');
+  }
+}
+
 async function updateTenantFeatures(payload, storeApi = store) {
   const feature = String(payload.feature || '');
   if (!FEATURE_KEYS.has(feature)) throw new Error('ฟีเจอร์ที่เลือกไม่ถูกต้อง');
   if (!['enable', 'disable'].includes(payload.action)) throw new Error('คำสั่งเปิดหรือปิดฟีเจอร์ไม่ถูกต้อง');
+  assertExplicitScope(payload);
   const targets = selectShops(storeApi.platformData.shops, payload.scope, payload.shopIds);
   if (!targets.length) throw new Error('ยังไม่มีร้านเช่าในระบบ');
 
@@ -248,4 +255,4 @@ async function listTenantFeatures(shops, storeApi = store) {
   return results;
 }
 
-module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, captureFeature, restoreFeature, selectShops, updateTenantFeatures, listTenantFeatures, listReleases, createRelease, deployRelease, ensureSystemLab };
+module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, captureFeature, restoreFeature, selectShops, assertExplicitScope, updateTenantFeatures, listTenantFeatures, listReleases, createRelease, deployRelease, ensureSystemLab };

@@ -49,7 +49,9 @@ function fixture(failOnSave) {
   assert.equal(selected.dbs.get('shop-a').users[0].id, 'shop-a-user');
 
   const all = fixture();
-  const every = await updateTenantFeatures({ scope: 'all', feature: 'boxGame', action: 'enable' }, all.api);
+  await assert.rejects(() => updateTenantFeatures({ scope: 'all', feature: 'boxGame', action: 'enable' }, all.api));
+  assert.equal(all.saveCount, 0);
+  const every = await updateTenantFeatures({ scope: 'all', confirmAll: 'CONFIRM_ALL_TENANTS', feature: 'boxGame', action: 'enable' }, all.api);
   assert.equal(every.updatedCount, 2);
   assert.equal(readFeatureState(all.dbs.get('shop-a')).boxGame, true);
   assert.equal(readFeatureState(all.dbs.get('shop-b')).boxGame, true);
@@ -60,7 +62,7 @@ function fixture(failOnSave) {
   assert.equal(invalid.saveCount, 0);
 
   const rollback = fixture(2);
-  await assert.rejects(() => updateTenantFeatures({ scope: 'all', feature: 'music', action: 'enable' }, rollback.api));
+  await assert.rejects(() => updateTenantFeatures({ scope: 'all', confirmAll: 'CONFIRM_ALL_TENANTS', feature: 'music', action: 'enable' }, rollback.api));
   assert.equal(readFeatureState(rollback.dbs.get('shop-a')).music, false);
   assert.equal(readFeatureState(rollback.dbs.get('shop-b')).music, false);
   assert.equal(rollback.dbs.get('shop-a').products[0].images[0], 'shop-a.png');
