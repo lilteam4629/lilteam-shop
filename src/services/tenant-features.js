@@ -9,6 +9,7 @@ const FEATURE_CATALOG = Object.freeze([
 ]);
 
 const FEATURE_KEYS = new Set(FEATURE_CATALOG.map(feature => feature.key));
+const RELEASE_LIMIT = 100;
 function readFeatureState(db) {
   const settings = db?.settings || {};
   return {
@@ -36,6 +37,10 @@ function captureFeature(db, feature) {
     snapshot.enabledExisted = Boolean(parent && Object.prototype.hasOwnProperty.call(parent, 'enabled'));
     snapshot.enabled = parent?.enabled;
   }
+  const modules = settings.systemModules;
+  snapshot.modulesExisted = Boolean(modules && typeof modules === 'object');
+  snapshot.moduleExisted = Boolean(modules && Object.prototype.hasOwnProperty.call(modules, feature));
+  snapshot.module = snapshot.moduleExisted ? JSON.parse(JSON.stringify(modules[feature])) : undefined;
   return snapshot;
 }
 
@@ -49,6 +54,13 @@ function restoreFeature(db, snapshot) {
     else delete parent.enabled;
   }
   if (!snapshot.parentExisted && Object.keys(parent).length === 0) delete settings[snapshot.parentKey];
+  const modules = settings.systemModules ||= {};
+  if (snapshot.moduleExisted) modules[snapshot.property === 'enabled' ? snapshot.parentKey : (snapshot.property === 'boxEnabled' ? 'boxGame' : 'railGame')] = snapshot.module;
+  else {
+    const feature = snapshot.property === 'enabled' ? snapshot.parentKey : (snapshot.property === 'boxEnabled' ? 'boxGame' : 'railGame');
+    delete modules[feature];
+  }
+  if (!snapshot.modulesExisted && Object.keys(modules).length === 0) delete settings.systemModules;
 }
 
 function applyFeature(db, feature, enabled) {
@@ -99,6 +111,16 @@ async function updateTenantFeatures(payload, storeApi = store) {
       const before = await storeApi.runInTenant(shop.id, tenantDb, () => storeApi.transact(db => {
         const snapshot = captureFeature(db, feature);
         applyFeature(db, feature, enabled);
+        if (payload.releaseMeta) {
+          const modules = (db.settings ||= {}).systemModules ||= {};
+          modules[feature] = {
+            releaseId: payload.releaseMeta.id,
+            name: payload.releaseMeta.name,
+            version: payload.releaseMeta.version,
+            enabled,
+            deployedAt: new Date().toISOString(),
+          };
+        }
         return snapshot;
       }));
       saved.push({ shop, before });
@@ -114,6 +136,53 @@ async function updateTenantFeatures(payload, storeApi = store) {
     throw new Error('บันทึกฟีเจอร์ไม่ครบ ระบบคืนค่าร้านที่แก้ไปแล้ว กรุณาลองใหม่');
   }
   return { feature, enabled, updatedCount: saved.length, shopIds: saved.map(item => item.shop.id) };
+}
+
+function listReleases(storeApi = store) {
+  return [...(storeApi.platformData.tenantFeatureReleases || [])]
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+}
+
+async function createRelease(payload, storeApi = store) {
+  const name = String(payload.name || '').trim().slice(0, 100);
+  const version = String(payload.version || '').trim().slice(0, 30);
+  const feature = String(payload.feature || '');
+  const action = payload.action === 'disable' ? 'disable' : 'enable';
+  if (!name) throw new Error('กรุณาตั้งชื่อระบบ');
+  if (!version) throw new Error('กรุณาระบุเวอร์ชัน');
+  if (!FEATURE_KEYS.has(feature)) throw new Error('ระบบต้นแบบที่เลือกไม่ถูกต้อง');
+  const release = {
+    id: storeApi.genId(10), name, version, feature, action,
+    createdAt: new Date().toISOString(), deployments: [],
+  };
+  await storeApi.transact(data => {
+    data.tenantFeatureReleases ||= [];
+    if (data.tenantFeatureReleases.some(item => item.name.toLowerCase() === name.toLowerCase() && item.version === version)) {
+      throw new Error('ชื่อระบบและเวอร์ชันนี้มีอยู่แล้ว');
+    }
+    data.tenantFeatureReleases.unshift(release);
+    if (data.tenantFeatureReleases.length > RELEASE_LIMIT) data.tenantFeatureReleases.length = RELEASE_LIMIT;
+  });
+  return release;
+}
+
+async function deployRelease(payload, storeApi = store) {
+  const release = (storeApi.platformData.tenantFeatureReleases || []).find(item => item.id === String(payload.releaseId || ''));
+  if (!release) throw new Error('ไม่พบแพ็กเกจระบบ กรุณาโหลดหน้าใหม่');
+  const result = await updateTenantFeatures({ ...payload, feature: release.feature, action: release.action, releaseMeta: release }, storeApi);
+  const deployment = {
+    id: storeApi.genId(10), releaseId: release.id, releaseName: release.name, version: release.version,
+    shopIds: result.shopIds, scope: payload.scope, createdAt: new Date().toISOString(),
+  };
+  await storeApi.transact(data => {
+    const current = (data.tenantFeatureReleases || []).find(item => item.id === release.id);
+    if (current) {
+      current.deployments ||= [];
+      current.deployments.unshift(deployment);
+      current.deployments = current.deployments.slice(0, 30);
+    }
+  });
+  return { ...result, releaseName: release.name, version: release.version };
 }
 
 async function listTenantFeatures(shops, storeApi = store) {
@@ -135,4 +204,4 @@ async function listTenantFeatures(shops, storeApi = store) {
   return results;
 }
 
-module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, captureFeature, restoreFeature, selectShops, updateTenantFeatures, listTenantFeatures };
+module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, captureFeature, restoreFeature, selectShops, updateTenantFeatures, listTenantFeatures, listReleases, createRelease, deployRelease };

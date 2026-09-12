@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { updateTenantFeatures, readFeatureState } = require('../src/services/tenant-features');
+const { updateTenantFeatures, readFeatureState, createRelease, deployRelease } = require('../src/services/tenant-features');
 
 function fixture(failOnSave) {
   const shops = [{ id: 'shop-a', name: 'A' }, { id: 'shop-b', name: 'B' }];
@@ -10,14 +10,15 @@ function fixture(failOnSave) {
   }]));
   let current = null;
   let saveCount = 0;
-  return {
-    api: {
-      platformData: { shops },
+  const platformData = { shops };
+  const api = {
+      platformData,
       loadTenantDb: async id => dbs.get(id) || null,
       runInTenant: async (id, db, fn) => { const before = current; current = { id, db }; try { return await fn(); } finally { current = before; } },
       transact: async mutator => {
         saveCount += 1;
         if (failOnSave && saveCount === failOnSave) throw new Error('simulated save failure');
+        if (!current) return mutator(platformData);
         // Simulate a customer order arriving after the control page loaded.
         const latest = JSON.parse(JSON.stringify(dbs.get(current.id)));
         if (saveCount === 1) latest.orders.push({ id: 'concurrent-order' });
@@ -26,7 +27,10 @@ function fixture(failOnSave) {
         current.db = latest;
         return result;
       },
-    }, dbs, get saveCount() { return saveCount; },
+      genId: () => `id-${saveCount + 1}`,
+  };
+  return {
+    api, dbs, get saveCount() { return saveCount; },
   };
 }
 
@@ -56,5 +60,16 @@ function fixture(failOnSave) {
   assert.equal(readFeatureState(rollback.dbs.get('shop-b')).music, false);
   assert.equal(rollback.dbs.get('shop-a').products[0].images[0], 'shop-a.png');
   assert.equal(rollback.dbs.get('shop-a').orders.some(order => order.id === 'concurrent-order'), true);
-  console.log('Tenant feature checks passed: selected, all, validation, concurrent data preservation, rollback');
+
+  const releases = fixture();
+  releases.api.platformData.tenantFeatureReleases = [];
+  const release = await createRelease({ name: 'ระบบหิมะใหม่', version: '1.0.0', feature: 'snow', action: 'enable' }, releases.api);
+  assert.equal(releases.api.platformData.tenantFeatureReleases[0].id, release.id);
+  const deployed = await deployRelease({ releaseId: release.id, scope: 'selected', shopIds: ['shop-b'] }, releases.api);
+  assert.equal(deployed.updatedCount, 1);
+  assert.equal(readFeatureState(releases.dbs.get('shop-a')).snow, false);
+  assert.equal(readFeatureState(releases.dbs.get('shop-b')).snow, true);
+  assert.equal(releases.dbs.get('shop-b').settings.systemModules.snow.version, '1.0.0');
+  assert.equal(releases.api.platformData.tenantFeatureReleases[0].deployments[0].shopIds[0], 'shop-b');
+  console.log('Tenant delivery checks passed: selected, all, releases, concurrent data preservation, rollback');
 })().catch(error => { console.error(error); process.exitCode = 1; });

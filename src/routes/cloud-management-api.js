@@ -58,6 +58,7 @@ router.get('/admin/rentals', async (req, res, next) => {
       ok: true,
       rentedShops: shops.map(shop => ({ ...shop, managementUrl: `${getShopUrl(shop.slug, req)}/admin`, features: featureStates.get(String(shop.id)) })),
       featureCatalog: tenantFeatures.FEATURE_CATALOG,
+      featureReleases: tenantFeatures.listReleases(),
       sales: [...store.data.licenseSales].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(verifiedSale),
       transactions: store.data.walletTransactions.filter(t => ['shop_purchase', 'shop_renewal', 'shop_purchase_refund'].includes(t.type))
         .map(t => ({ ...t, username: store.data.users.find(u => u.id === t.userId)?.username || t.userId }))
@@ -74,6 +75,16 @@ router.post('/admin/rentals/features', async (req, res, next) => {
     const status = /กรุณา|ไม่ถูกต้อง|ไม่มีอยู่|ยังไม่มี/.test(error.message) ? 400 : 500;
     res.status(status).json({ ok: false, error: error.message || 'แก้ไขฟีเจอร์ไม่สำเร็จ' });
   }
+});
+
+router.post('/admin/rentals/releases', async (req, res) => {
+  try { res.json({ ok: true, release: await tenantFeatures.createRelease(req.body) }); }
+  catch (error) { res.status(400).json({ error: error.message }); }
+});
+
+router.post('/admin/rentals/releases/deploy', async (req, res) => {
+  try { res.json({ ok: true, ...(await tenantFeatures.deployRelease(req.body)) }); }
+  catch (error) { res.status(400).json({ error: error.message }); }
 });
 router.post('/admin/rentals/:id/delete', async (req, res, next) => {
   try {
