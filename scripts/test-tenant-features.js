@@ -3,7 +3,11 @@ const { updateTenantFeatures, readFeatureState } = require('../src/services/tena
 
 function fixture(failOnSave) {
   const shops = [{ id: 'shop-a', name: 'A' }, { id: 'shop-b', name: 'B' }];
-  const dbs = new Map(shops.map(shop => [shop.id, { settings: { miniGame: { boxEnabled: false, railEnabled: false }, music: { enabled: false }, snow: { enabled: false }, welcomePopup: { enabled: false } } }]));
+  const dbs = new Map(shops.map(shop => [shop.id, {
+    settings: { miniGame: { boxEnabled: false, railEnabled: false }, music: { enabled: false }, snow: { enabled: false }, welcomePopup: { enabled: false } },
+    products: [{ id: `${shop.id}-product`, images: [`${shop.id}.png`] }],
+    orders: [{ id: `${shop.id}-order` }], users: [{ id: `${shop.id}-user` }],
+  }]));
   let current = null;
   let saveCount = 0;
   return {
@@ -11,10 +15,16 @@ function fixture(failOnSave) {
       platformData: { shops },
       loadTenantDb: async id => dbs.get(id) || null,
       runInTenant: async (id, db, fn) => { const before = current; current = { id, db }; try { return await fn(); } finally { current = before; } },
-      save: async () => {
+      transact: async mutator => {
         saveCount += 1;
         if (failOnSave && saveCount === failOnSave) throw new Error('simulated save failure');
-        dbs.set(current.id, JSON.parse(JSON.stringify(current.db)));
+        // Simulate a customer order arriving after the control page loaded.
+        const latest = JSON.parse(JSON.stringify(dbs.get(current.id)));
+        if (saveCount === 1) latest.orders.push({ id: 'concurrent-order' });
+        const result = await mutator(latest);
+        dbs.set(current.id, latest);
+        current.db = latest;
+        return result;
       },
     }, dbs, get saveCount() { return saveCount; },
   };
@@ -26,6 +36,9 @@ function fixture(failOnSave) {
   assert.equal(one.updatedCount, 1);
   assert.equal(readFeatureState(selected.dbs.get('shop-a')).snow, true);
   assert.equal(readFeatureState(selected.dbs.get('shop-b')).snow, false);
+  assert.equal(selected.dbs.get('shop-a').products[0].images[0], 'shop-a.png');
+  assert.equal(selected.dbs.get('shop-a').orders.some(order => order.id === 'concurrent-order'), true);
+  assert.equal(selected.dbs.get('shop-a').users[0].id, 'shop-a-user');
 
   const all = fixture();
   const every = await updateTenantFeatures({ scope: 'all', feature: 'boxGame', action: 'enable' }, all.api);
@@ -41,5 +54,7 @@ function fixture(failOnSave) {
   await assert.rejects(() => updateTenantFeatures({ scope: 'all', feature: 'music', action: 'enable' }, rollback.api));
   assert.equal(readFeatureState(rollback.dbs.get('shop-a')).music, false);
   assert.equal(readFeatureState(rollback.dbs.get('shop-b')).music, false);
-  console.log('Tenant feature checks passed: selected, all, validation, rollback');
+  assert.equal(rollback.dbs.get('shop-a').products[0].images[0], 'shop-a.png');
+  assert.equal(rollback.dbs.get('shop-a').orders.some(order => order.id === 'concurrent-order'), true);
+  console.log('Tenant feature checks passed: selected, all, validation, concurrent data preservation, rollback');
 })().catch(error => { console.error(error); process.exitCode = 1; });

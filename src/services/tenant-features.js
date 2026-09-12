@@ -9,8 +9,6 @@ const FEATURE_CATALOG = Object.freeze([
 ]);
 
 const FEATURE_KEYS = new Set(FEATURE_CATALOG.map(feature => feature.key));
-const clone = value => JSON.parse(JSON.stringify(value));
-
 function readFeatureState(db) {
   const settings = db?.settings || {};
   return {
@@ -20,6 +18,37 @@ function readFeatureState(db) {
     snow: settings.snow?.enabled === true,
     welcomePopup: settings.welcomePopup?.enabled === true,
   };
+}
+
+function captureFeature(db, feature) {
+  const settings = db?.settings || {};
+  const parentKey = feature === 'boxGame' || feature === 'railGame' ? 'miniGame' : feature;
+  const property = feature === 'boxGame' ? 'boxEnabled' : feature === 'railGame' ? 'railEnabled' : 'enabled';
+  const parent = settings[parentKey];
+  const snapshot = {
+    parentKey,
+    property,
+    parentExisted: Boolean(parent && typeof parent === 'object'),
+    propertyExisted: Boolean(parent && Object.prototype.hasOwnProperty.call(parent, property)),
+    value: parent?.[property],
+  };
+  if (parentKey === 'miniGame') {
+    snapshot.enabledExisted = Boolean(parent && Object.prototype.hasOwnProperty.call(parent, 'enabled'));
+    snapshot.enabled = parent?.enabled;
+  }
+  return snapshot;
+}
+
+function restoreFeature(db, snapshot) {
+  const settings = db.settings ||= {};
+  const parent = settings[snapshot.parentKey] ||= {};
+  if (snapshot.propertyExisted) parent[snapshot.property] = snapshot.value;
+  else delete parent[snapshot.property];
+  if (snapshot.parentKey === 'miniGame') {
+    if (snapshot.enabledExisted) parent.enabled = snapshot.enabled;
+    else delete parent.enabled;
+  }
+  if (!snapshot.parentExisted && Object.keys(parent).length === 0) delete settings[snapshot.parentKey];
 }
 
 function applyFeature(db, feature, enabled) {
@@ -53,24 +82,33 @@ async function updateTenantFeatures(payload, storeApi = store) {
   const targets = selectShops(storeApi.platformData.shops, payload.scope, payload.shopIds);
   if (!targets.length) throw new Error('ยังไม่มีร้านเช่าในระบบ');
 
-  const loaded = [];
+  // Validate every target before writing anything. The actual write below uses
+  // store.transact so a concurrent order/product/customer update is merged
+  // against the latest stored tenant document instead of being overwritten by
+  // an older full-document snapshot.
   for (const shop of targets) {
     const db = await storeApi.loadTenantDb(shop.id);
     if (!db) throw new Error(`โหลดข้อมูลร้าน "${shop.name}" ไม่สำเร็จ`);
-    loaded.push({ shop, original: clone(db), updated: clone(db) });
   }
 
   const enabled = payload.action === 'enable';
-  loaded.forEach(item => applyFeature(item.updated, feature, enabled));
   const saved = [];
   try {
-    for (const item of loaded) {
-      await storeApi.runInTenant(item.shop.id, item.updated, () => storeApi.save());
-      saved.push(item);
+    for (const shop of targets) {
+      const tenantDb = await storeApi.loadTenantDb(shop.id);
+      const before = await storeApi.runInTenant(shop.id, tenantDb, () => storeApi.transact(db => {
+        const snapshot = captureFeature(db, feature);
+        applyFeature(db, feature, enabled);
+        return snapshot;
+      }));
+      saved.push({ shop, before });
     }
   } catch (error) {
     for (const item of saved.reverse()) {
-      try { await storeApi.runInTenant(item.shop.id, item.original, () => storeApi.save()); }
+      try {
+        const tenantDb = await storeApi.loadTenantDb(item.shop.id);
+        await storeApi.runInTenant(item.shop.id, tenantDb, () => storeApi.transact(db => restoreFeature(db, item.before)));
+      }
       catch (rollbackError) { console.error('[tenant-features] rollback failed:', item.shop.id, rollbackError.message); }
     }
     throw new Error('บันทึกฟีเจอร์ไม่ครบ ระบบคืนค่าร้านที่แก้ไปแล้ว กรุณาลองใหม่');
@@ -97,4 +135,4 @@ async function listTenantFeatures(shops, storeApi = store) {
   return results;
 }
 
-module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, selectShops, updateTenantFeatures, listTenantFeatures };
+module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, captureFeature, restoreFeature, selectShops, updateTenantFeatures, listTenantFeatures };
