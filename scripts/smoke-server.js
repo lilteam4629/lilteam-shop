@@ -53,6 +53,32 @@ async function loginAsAdmin() {
   return cookie.split(';')[0];
 }
 
+async function loginAsCustomer() {
+  const body = 'username=demo&password=demo1234';
+  const response = await request('/login', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
+  const cookie = (response.headers['set-cookie'] || [])[0];
+  if (response.statusCode !== 302 || !cookie) throw new Error(`customer login returned HTTP ${response.statusCode}`);
+  return cookie.split(';')[0];
+}
+
+async function checkCustomerOrderDetail() {
+  const cookie = await loginAsCustomer();
+  const productPage = await fetchOk('/game/shadow-realm-chronicles', 'text/html', { cookie });
+  const productId = productPage.body.match(/\/cart\/add\/([^"']+)/)?.[1];
+  if (!productId) throw new Error('customer product page does not expose an add-to-cart action');
+  const add = await request(`/cart/add/${productId}`, { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'qty=1' });
+  if (add.statusCode !== 302) throw new Error(`add to cart returned HTTP ${add.statusCode}`);
+  const checkout = await request('/cart/checkout', { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' } });
+  if (checkout.statusCode !== 302) throw new Error(`checkout returned HTTP ${checkout.statusCode}`);
+  const orders = await fetchOk('/account/orders', 'text/html', { cookie });
+  const detailPath = orders.body.match(/href="(\/account\/orders\/[^"]+)"/)?.[1];
+  if (!detailPath) throw new Error('customer order history does not link to its order detail');
+  const detail = await fetchOk(detailPath, 'text/html', { cookie });
+  if (!detail.body.includes('alt="รูปสินค้า Shadow Realm Chronicles"') || !detail.body.includes('Shadow Realm Chronicles')) {
+    throw new Error('customer order detail does not show the purchased product image and title');
+  }
+}
+
 async function crawlAdmin(cookie) {
   const queue = ['/admin'];
   const checked = new Set();
@@ -112,6 +138,7 @@ async function run() {
     if (home.body.includes('cdn.tailwindcss.com')) throw new Error('home still loads the Tailwind browser compiler');
     if (!home.body.includes('data-seamless-navigation="true"')) throw new Error('home is missing persistent navigation for uninterrupted music');
     if (!home.body.includes('/js/interaction-performance-v1.js')) throw new Error('home is missing shared interaction performance helpers');
+    if (!home.body.includes("menu.addEventListener('click'")) throw new Error('mobile navigation does not close when a menu link is selected');
     await fetchOk('/products', 'text/html');
     const productDetail = await fetchOk('/game/shadow-realm-chronicles', 'text/html');
     if (!productDetail.body.includes('ตัวที่มีในไอดีนี้') || !productDetail.body.includes('แนะนำ')) {
@@ -129,6 +156,7 @@ async function run() {
     if (scrollMotionJs.body.includes('getBoundingClientRect')) throw new Error('scroll reveal performs a forced layout sweep');
     if (!scrollMotionJs.body.includes("rootMargin:'0px 0px 96px 0px'")) throw new Error('scroll reveal is not pre-triggered ahead of the viewport');
     await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
+    await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);

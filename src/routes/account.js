@@ -558,8 +558,14 @@ router.get('/orders/:id', (req, res) => {
   const order = store.data.orders.find(o => o.id === req.params.id && o.userId === user.id);
   if (!order) return res.status(404).render('shop/404', { title: 'ไม่พบคำสั่งซื้อ' });
   const itemsWithCreds = order.items.map(oi => {
+    const product = store.data.products.find(p => p.id === oi.productId);
     const stockItem = store.data.stockItems.find(s => s.id === oi.stockItemId);
-    return { ...oi, credentials: stockItem };
+    return {
+      ...oi,
+      credentials: stockItem,
+      productTitle: oi.title || product?.title || 'สินค้า',
+      productImage: oi.productImage || product?.images?.[0] || '',
+    };
   });
   res.render('shop/order-detail', { title: `คำสั่งซื้อ #${order.id}`, order, itemsWithCreds });
 });

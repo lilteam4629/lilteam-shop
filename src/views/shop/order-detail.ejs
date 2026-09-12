@@ -6,9 +6,15 @@
   <div class="space-y-3 mb-6">
     <% itemsWithCreds.forEach(i => { %>
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-        <div class="flex items-center justify-between mb-2">
-          <span class="font-medium"><%= i.title %></span>
-          <span class="text-[var(--gold)]">฿<%= i.price.toLocaleString() %>.00</span>
+        <div class="flex items-start gap-3 sm:gap-4 mb-4">
+          <div class="relative w-28 sm:w-36 aspect-video shrink-0 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--input)] grid place-items-center">
+            <span class="absolute inset-0 grid place-items-center text-2xl text-[var(--text-4)]" aria-hidden="true">▧</span>
+            <% if (i.productImage) { %><img src="<%= i.productImage %>" alt="รูปสินค้า <%= i.productTitle %>" width="960" height="540" loading="eager" decoding="async" class="relative z-[1] block w-full h-full object-contain bg-[var(--input)]" onerror="this.hidden=true" /><% } %>
+          </div>
+          <div class="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5">
+            <div class="min-w-0"><div class="text-[10px] text-[var(--text-4)] mb-0.5">สินค้า</div><h2 class="font-bold text-base sm:text-lg leading-snug break-words"><%= i.productTitle %></h2></div>
+            <span class="text-[var(--gold)] font-bold whitespace-nowrap">฿<%= i.price.toLocaleString() %>.00</span>
+          </div>
         </div>
         <% if (i.fulfillmentMode === 'contact') { %>
           <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm">
@@ -16,7 +22,7 @@
             <% if (i.fulfillmentInstructions) { %><div class="text-[var(--text-2)] whitespace-pre-line mb-3"><%= i.fulfillmentInstructions %></div><% } %>
             <textarea class="contact-order-message hidden"><%= i.contactMessageIntro || 'สวัสดีครับ ต้องการติดต่อรับสินค้า' %>
 หมายเลขคำสั่งซื้อ: #<%= order.id %>
-สินค้า: <%= i.title %>
+สินค้า: <%= i.productTitle %>
 ชื่อลูกค้า: <%= currentUser.username %>
 <% if (i.fulfillmentInstructions) { %>ข้อมูลที่ร้านขอให้เตรียม: <%= i.fulfillmentInstructions %>
 <% } %><%= i.contactMessageOutro || 'กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ' %></textarea>
