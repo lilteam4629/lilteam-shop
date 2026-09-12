@@ -17,6 +17,7 @@
     if(!('IntersectionObserver'in window)){nodes.forEach(function(node){node.classList.add('scroll-reveal-visible')});return;}
     observer=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(entry.isIntersecting){entry.target.classList.add('scroll-reveal-visible');observer.unobserve(entry.target)}})},{rootMargin:'0px 0px -8% 0px',threshold:.06});
     requestAnimationFrame(function(){nodes.forEach(function(node){if(!node.classList.contains('scroll-reveal-visible'))observer.observe(node)})});
+    setTimeout(function(){nodes.forEach(function(node){if(!node.classList.contains('scroll-reveal-visible'))node.classList.add('scroll-reveal-visible')})},900);
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(setup)}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();

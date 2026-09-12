@@ -111,12 +111,14 @@ async function run() {
     if (!home.body.includes('/css/tailwind.generated.css')) throw new Error('home is missing the precompiled Tailwind stylesheet');
     if (home.body.includes('cdn.tailwindcss.com')) throw new Error('home still loads the Tailwind browser compiler');
     if (!home.body.includes('data-seamless-navigation="true"')) throw new Error('home is missing persistent navigation for uninterrupted music');
+    if (!home.body.includes('/js/interaction-performance-v1.js')) throw new Error('home is missing shared interaction performance helpers');
     await fetchOk('/products', 'text/html');
     const productDetail = await fetchOk('/game/shadow-realm-chronicles', 'text/html');
     if (!productDetail.body.includes('ตัวที่มีในไอดีนี้') || !productDetail.body.includes('แนะนำ')) {
       throw new Error('product detail is missing its assigned filter information');
     }
     await fetchOk('/css/storefront-mobile-v1.css', 'text/css');
+    await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     const cookie = await loginAsAdmin();
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);

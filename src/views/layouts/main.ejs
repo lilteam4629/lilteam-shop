@@ -333,9 +333,16 @@
 
           if (options.history !== 'pop') saveScrollPosition();
           document.dispatchEvent(new CustomEvent('lilteam:page-unloading'));
-          currentShell.replaceWith(nextShell);
-          document.title = nextDocument.title;
-          runPageScripts(nextShell);
+          const swapPage = function () {
+            currentShell.replaceWith(nextShell);
+            document.title = nextDocument.title;
+            runPageScripts(nextShell);
+          };
+          if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            await document.startViewTransition(swapPage).updateCallbackDone;
+          } else {
+            swapPage();
+          }
 
           if (options.history === 'push') {
             history.pushState({ lilteamNavigation: true, scrollX: 0, scrollY: 0 }, '', finalUrl.href);
@@ -693,17 +700,14 @@
       text-shadow: 0 0 4px rgba(255,255,255,0.6);
       user-select: none;
       will-change: transform;
-      animation-name: snow-fall, snow-sway;
-      animation-timing-function: linear, ease-in-out;
-      animation-iteration-count: infinite, infinite;
+      animation-name: snow-fall;
+      animation-timing-function: linear;
+      animation-iteration-count: infinite;
     }
     @keyframes snow-fall {
-      from { transform: translateY(-5vh); }
-      to { transform: translateY(105vh); }
-    }
-    @keyframes snow-sway {
-      0%, 100% { margin-left: 0; }
-      50% { margin-left: 25px; }
+      0% { transform: translate3d(0,-5vh,0) rotate(0deg); }
+      50% { transform: translate3d(18px,50vh,0) rotate(90deg); }
+      100% { transform: translate3d(-10px,105vh,0) rotate(180deg); }
     }
   </style>
   <script>
@@ -719,9 +723,8 @@
         flake.style.fontSize = (8 + Math.random() * 14) + 'px';
         flake.style.opacity = 0.35 + Math.random() * 0.55;
         const fallDuration = 8 + Math.random() * 10;
-        const swayDuration = 3 + Math.random() * 4;
-        flake.style.animationDuration = fallDuration + 's, ' + swayDuration + 's';
-        flake.style.animationDelay = (-Math.random() * fallDuration) + 's, ' + (-Math.random() * swayDuration) + 's';
+        flake.style.animationDuration = fallDuration + 's';
+        flake.style.animationDelay = (-Math.random() * fallDuration) + 's';
         container.appendChild(flake);
       }
     })();
@@ -781,5 +784,6 @@
   })();
 </script>
   <script src="<%= asset('js/scroll-motion-v1.js') %>" defer></script>
+  <script src="<%= asset('js/interaction-performance-v1.js') %>" defer></script>
 </body>
 </html>
