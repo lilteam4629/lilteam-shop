@@ -714,7 +714,7 @@
     (function () {
       const container = document.getElementById('snow-container');
       if (!container) return;
-      const count = window.innerWidth < 768 ? 7 : 14;
+      const count = window.innerWidth < 768 ? 3 : 14;
       for (let i = 0; i < count; i++) {
         const flake = document.createElement('span');
         flake.className = 'snowflake';

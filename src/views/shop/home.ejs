@@ -271,7 +271,7 @@
   <div class="grid lg:grid-cols-2 gap-3">
     <% scheduledProducts.forEach(product => { %>
       <article class="event-card" data-event-start="<%= product.publishAt %>">
-        <div class="event-image-wrap"><img src="<%= product.images[0] %>" alt="<%= product.title %>" class="event-image" /></div>
+        <div class="event-image-wrap"><img src="<%= product.images[0] %>" alt="<%= product.title %>" width="160" height="176" loading="lazy" decoding="async" class="event-image" /></div>
         <div class="event-copy min-w-0 flex-1">
           <span class="event-badge">⏱ <%= product.eventBadge || 'COMING SOON' %></span>
           <h3 class="event-title"><%= product.title %></h3>

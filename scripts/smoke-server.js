@@ -122,6 +122,7 @@ async function run() {
     if (scrollMotionCss.body.includes('content-visibility:auto')) {
       throw new Error('product cards still use content-visibility with native lazy-loaded images');
     }
+    if (!scrollMotionCss.body.includes('mobile-is-scrolling')) throw new Error('mobile scroll performance guard is missing');
     await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     const cookie = await loginAsAdmin();
     const adminPageCount = await crawlAdmin(cookie);

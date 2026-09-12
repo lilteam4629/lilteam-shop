@@ -27,4 +27,12 @@
     document.querySelectorAll('.ui-submitting').forEach(function(form){form.classList.remove('ui-submitting')});
     document.querySelectorAll('.ui-submit-pending').forEach(function(button){button.classList.remove('ui-submit-pending');button.removeAttribute('aria-busy')});
   });
+  var mobileQuery=window.matchMedia('(max-width: 900px) and (pointer: coarse)');
+  var scrollTimer=0;
+  window.addEventListener('scroll',function(){
+    if(!mobileQuery.matches)return;
+    document.documentElement.classList.add('mobile-is-scrolling');
+    clearTimeout(scrollTimer);
+    scrollTimer=setTimeout(function(){document.documentElement.classList.remove('mobile-is-scrolling')},140);
+  },{passive:true});
 })();

@@ -18,7 +18,7 @@
          transition duration-300 hover:border-[var(--gold)]">
 
   <div class="relative w-full <%= isFan ? 'h-full' : '' %> overflow-hidden">
-    <img src="<%= p.images[0] %>" alt="<%= p.title %>" loading="<%= isFan ? 'eager' : 'lazy' %>" decoding="async" fetchpriority="<%= isFan ? 'high' : 'low' %>"
+    <img src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="<%= isFan ? 'eager' : 'lazy' %>" decoding="async" fetchpriority="<%= isFan ? 'high' : 'low' %>"
       class="<%= isFan ? 'absolute inset-0 w-full h-full object-cover' : 'block w-full h-auto' %> transition duration-500
              <%= soldOut
                ? 'grayscale-[45%] brightness-[0.7] contrast-[1.05] group-hover:brightness-[0.8]'
