@@ -180,6 +180,10 @@ router.get('/contact', (req, res) => {
   res.render('shop/contact', { title: 'ติดต่อร้าน' });
 });
 
+router.get('/cookie-policy', (req, res) => {
+  res.render('shop/cookie-policy', { title: 'นโยบายคุกกี้' });
+});
+
 router.get('/game/:slug', (req, res) => {
   const product = store.data.products.find(p => p.slug === req.params.slug);
   if (!product || !isProductVisible(product)) return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });

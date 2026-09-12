@@ -1,0 +1,129 @@
+<!-- Cookie consent bar: a slim full-width strip pinned to the bottom edge,
+     never a full-screen overlay, so it never covers product photos or the
+     rest of the page. Remembers the visitor's choice in localStorage —
+     nothing is sent to a server, no third-party tracking/ad cookies exist
+     on this site to begin with (see the copy below), this is purely a
+     transparency + first-party-cookie-preference UI. -->
+<div id="cookie-consent" class="cookie-consent-bar hidden" role="dialog" aria-live="polite" aria-label="การตั้งค่าคุกกี้">
+  <div class="cookie-consent-inner">
+    <div class="cookie-consent-main">
+      <span class="cookie-consent-icon" aria-hidden="true">🍪</span>
+      <div class="cookie-consent-copy">
+        <h2>คุกกี้บนเว็บไซต์นี้</h2>
+        <p>
+          เราใช้คุกกี้ที่จำเป็นสำหรับการเข้าสู่ระบบ ความปลอดภัย และการชำระเงิน
+          พร้อมหน่วยความจำชั่วคราวที่ช่วยให้เว็บโหลดเร็วขึ้น ไม่มีคุกกี้โฆษณาหรือการติดตามใดๆ
+          <a href="/cookie-policy" target="_blank" rel="noopener">นโยบายคุกกี้</a>
+        </p>
+      </div>
+    </div>
+    <div class="cookie-consent-actions">
+      <button type="button" id="cookie-accept-all" class="cookie-btn cookie-btn-primary">ยอมรับทั้งหมด</button>
+      <button type="button" id="cookie-necessary-only" class="cookie-btn cookie-btn-outline">จำเป็นเท่านั้น</button>
+      <button type="button" id="cookie-settings-toggle" class="cookie-btn cookie-btn-text">ตั้งค่า</button>
+    </div>
+  </div>
+
+  <div id="cookie-consent-settings" class="cookie-consent-settings hidden">
+    <label class="cookie-setting-row">
+      <div>
+        <b>คุกกี้ที่จำเป็น</b>
+        <span>สำหรับเข้าสู่ระบบ ความปลอดภัย และการชำระเงิน — ปิดไม่ได้เพราะเว็บจะใช้งานไม่ได้</span>
+      </div>
+      <input type="checkbox" checked disabled />
+    </label>
+    <label class="cookie-setting-row">
+      <div>
+        <b>คุกกี้เพื่อความสะดวก</b>
+        <span>จดจำธีมและการตั้งค่าที่คุณเลือกไว้ ช่วยให้เว็บโหลดเร็วขึ้น</span>
+      </div>
+      <input type="checkbox" id="cookie-pref-convenience" checked />
+    </label>
+    <div class="cookie-consent-settings-actions">
+      <button type="button" id="cookie-save-settings" class="cookie-btn cookie-btn-primary">บันทึกการตั้งค่า</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.cookie-consent-bar{position:fixed;left:0;right:0;bottom:0;z-index:900;background:color-mix(in srgb,var(--card) 96%,transparent);backdrop-filter:blur(14px);border-top:1px solid var(--border);box-shadow:0 -12px 40px rgba(0,0,0,.25)}
+.cookie-consent-inner{max-width:1320px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px}
+.cookie-consent-main{display:flex;align-items:flex-start;gap:12px;min-width:0;flex:1 1 380px}
+.cookie-consent-icon{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:color-mix(in srgb,var(--gold) 14%,transparent);font-size:17px}
+.cookie-consent-copy h2{margin:0 0 3px;font-size:13px;font-weight:800;color:var(--text)}
+.cookie-consent-copy p{margin:0;font-size:11.5px;line-height:1.6;color:var(--text-3)}
+.cookie-consent-copy a{color:var(--gold-text);text-decoration:underline;text-underline-offset:2px}
+.cookie-consent-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:0 0 auto}
+.cookie-btn{border-radius:10px;font-size:12px;font-weight:700;padding:9px 16px;white-space:nowrap;transition:.15s;cursor:pointer}
+.cookie-btn-primary{background:var(--gold);color:var(--gold-contrast);border:1px solid var(--gold)}
+.cookie-btn-primary:hover{background:var(--gold-hover)}
+.cookie-btn-outline{background:transparent;border:1px solid var(--border-light);color:var(--text-2)}
+.cookie-btn-outline:hover{border-color:var(--gold);color:var(--gold-text)}
+.cookie-btn-text{background:transparent;border:0;color:var(--text-3);text-decoration:underline;text-underline-offset:2px;padding:9px 4px}
+.cookie-consent-settings{max-width:1320px;margin:0 auto;padding:0 20px 16px;display:flex;flex-direction:column;gap:10px}
+.cookie-setting-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 13px;border:1px solid var(--border-light);border-radius:12px;background:color-mix(in srgb,var(--input) 70%,transparent)}
+.cookie-setting-row div{min-width:0}
+.cookie-setting-row b{display:block;font-size:12px;color:var(--text)}
+.cookie-setting-row span{display:block;margin-top:2px;font-size:10.5px;color:var(--text-4);line-height:1.5}
+.cookie-setting-row input{flex:none;margin-top:2px;width:18px;height:18px;accent-color:var(--gold)}
+.cookie-consent-settings-actions{display:flex;justify-content:flex-end}
+@media(max-width:640px){
+  .cookie-consent-inner{flex-direction:column;align-items:stretch}
+  .cookie-consent-actions{justify-content:stretch}
+  .cookie-btn{flex:1 1 auto;text-align:center}
+  .cookie-btn-text{flex:0 0 auto}
+}
+/* Keep the bottom-right music widget from overlapping this bar while it's shown. */
+body:has(#cookie-consent:not(.hidden)) #music-widget{bottom:calc(1rem + var(--cookie-bar-height,64px))}
+</style>
+
+<script>
+(function () {
+  const STORAGE_KEY = 'lilteam_cookie_consent';
+  const bar = document.getElementById('cookie-consent');
+  if (!bar) return;
+
+  function readConsent() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch (e) { return null; }
+  }
+  function writeConsent(consent) {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...consent, decidedAt: Date.now() })); } catch (e) {}
+  }
+
+  function syncHeight() {
+    document.documentElement.style.setProperty('--cookie-bar-height', bar.offsetHeight + 'px');
+  }
+
+  if (!readConsent()) {
+    bar.classList.remove('hidden');
+    syncHeight();
+    window.addEventListener('resize', syncHeight);
+  }
+
+  const settingsPanel = document.getElementById('cookie-consent-settings');
+  const settingsToggle = document.getElementById('cookie-settings-toggle');
+  const convenienceCheckbox = document.getElementById('cookie-pref-convenience');
+
+  function closeBar() { bar.classList.add('hidden'); }
+
+  settingsToggle.addEventListener('click', function () {
+    settingsPanel.classList.toggle('hidden');
+    syncHeight();
+  });
+
+  document.getElementById('cookie-accept-all').addEventListener('click', function () {
+    writeConsent({ necessary: true, convenience: true });
+    closeBar();
+  });
+
+  document.getElementById('cookie-necessary-only').addEventListener('click', function () {
+    writeConsent({ necessary: true, convenience: false });
+    closeBar();
+  });
+
+  document.getElementById('cookie-save-settings').addEventListener('click', function () {
+    writeConsent({ necessary: true, convenience: !!(convenienceCheckbox && convenienceCheckbox.checked) });
+    closeBar();
+  });
+})();
+</script>
