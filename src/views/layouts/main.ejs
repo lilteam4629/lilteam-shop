@@ -742,9 +742,9 @@
       const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
       const limits={light:coarse?18:36,medium:coarse?30:62,heavy:coarse?44:92};
       let drops=[],frame=0,last=0,w=0,h=0,dpr=1;
-      function reset(drop,randomY){drop.x=Math.random()*w;drop.y=randomY?Math.random()*h:-30;drop.len=8+Math.random()*16;drop.speed=(coarse?7:9)+Math.random()*7;drop.alpha=.22+Math.random()*.42;return drop}
+      function reset(drop,randomY){drop.x=Math.random()*w;drop.y=randomY?Math.random()*h:-30;drop.len=14+Math.random()*18;drop.speed=(coarse?8:10)+Math.random()*8;drop.alpha=.48+Math.random()*.34;return drop}
       function resize(){dpr=Math.min(devicePixelRatio||1,1.5);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);drops=Array.from({length:reduced?0:limits[level]},()=>reset({},true))}
-      function draw(now){frame=requestAnimationFrame(draw);if(document.hidden||now-last<16)return;last=now;ctx.clearRect(0,0,w,h);ctx.lineWidth=1.15;ctx.lineCap='round';for(const d of drops){ctx.globalAlpha=d.alpha;ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-2,d.y+d.len);ctx.stroke();d.x-=.65;d.y+=d.speed;if(d.y>h+30)reset(d,false)}ctx.globalAlpha=1}
+      function draw(now){frame=requestAnimationFrame(draw);if(document.hidden||now-last<16)return;last=now;ctx.clearRect(0,0,w,h);ctx.lineWidth=coarse?1.45:1.75;ctx.lineCap='round';ctx.shadowColor=color;ctx.shadowBlur=3;for(const d of drops){ctx.globalAlpha=d.alpha;ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-3,d.y+d.len);ctx.stroke();d.x-=.8;d.y+=d.speed;if(d.y>h+30)reset(d,false)}ctx.globalAlpha=1;ctx.shadowBlur=0}
       let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(resize,160)},{passive:true});
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)last=performance.now()});resize();frame=requestAnimationFrame(draw);
       addEventListener('pagehide',()=>cancelAnimationFrame(frame),{once:true});
