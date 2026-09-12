@@ -222,13 +222,21 @@ app.use('/minigame', minigameRoutes);
 app.use('/admin', adminRoutes);
 
 app.use((req, res) => {
-  res.status(404).render('shop/404', { layout: 'layouts/main', title: 'ไม่พบหน้านี้' });
+  res.status(404).render('shop/404', {
+    layout: 'layouts/main', title: 'ไม่พบหน้านี้', statusCode: 404,
+    message: 'ไม่พบหน้าที่คุณต้องการ', backPath: '/', backLabel: 'กลับหน้าแรก',
+  });
 });
 
 app.use((err, req, res, next) => {
   console.error('[Unhandled Server Error]', err);
   if (res.headersSent) return next(err);
-  res.status(500).render('shop/404', { layout: 'layouts/main', title: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' });
+  res.status(500).render('shop/404', {
+    layout: 'layouts/main', title: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', statusCode: 500,
+    message: 'ระบบขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง',
+    backPath: req.path.startsWith('/admin') ? '/admin' : '/',
+    backLabel: req.path.startsWith('/admin') ? 'กลับหน้าหลังบ้าน' : 'กลับหน้าแรก',
+  });
 });
 
 const PORT = process.env.PORT || 3000;

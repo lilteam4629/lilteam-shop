@@ -1,46 +1,96 @@
 const { spawn } = require('child_process');
+const fs = require('fs');
 const http = require('http');
+const os = require('os');
+const path = require('path');
 
 const port = 3199;
 const baseUrl = `http://127.0.0.1:${port}`;
+const testDbPath = path.join(os.tmpdir(), `lilteam-smoke-${process.pid}.json`);
 const child = spawn(process.execPath, ['src/app.js'], {
-  cwd: require('path').join(__dirname, '..'),
-  env: {
-    ...process.env,
-    PORT: String(port),
-    NODE_ENV: 'test',
-    MONGODB_URI: '',
-    DISCORD_BOT_TOKEN: '',
-    LICENSE_GATE: 'off',
-  },
+  cwd: path.join(__dirname, '..'),
+  env: { ...process.env, PORT: String(port), NODE_ENV: 'test', TEST_DB_PATH: testDbPath, MONGODB_URI: '', DISCORD_BOT_TOKEN: '', LICENSE_GATE: 'off' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
-
 let output = '';
 child.stdout.on('data', chunk => { output += chunk; });
 child.stderr.on('data', chunk => { output += chunk; });
-
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const cleanup = () => { child.kill('SIGTERM'); try { fs.unlinkSync(testDbPath); } catch (_) {} };
 
-function request(path, timeout = 10000) {
+function request(requestPath, options = {}) {
   return new Promise((resolve, reject) => {
-    const req = http.get(`${baseUrl}${path}`, response => {
-      let body = '';
+    const url = new URL(requestPath, baseUrl);
+    const body = options.body || '';
+    const headers = { ...(options.headers || {}) };
+    if (body && headers['content-length'] === undefined) headers['content-length'] = Buffer.byteLength(body);
+    const req = http.request({ hostname: url.hostname, port: url.port, path: url.pathname + url.search, method: options.method || 'GET', headers }, response => {
+      let responseBody = '';
       response.setEncoding('utf8');
-      response.on('data', chunk => { body += chunk; });
-      response.on('end', () => { response.body = body; resolve(response); });
+      response.on('data', chunk => { responseBody += chunk; });
+      response.on('end', () => { response.body = responseBody; resolve(response); });
     });
-    req.setTimeout(timeout, () => req.destroy(new Error('request timeout')));
+    req.setTimeout(options.timeout || 10000, () => req.destroy(new Error('request timeout')));
     req.on('error', reject);
+    if (body) req.write(body);
+    req.end();
   });
 }
 
-async function fetchOk(path, expectedType) {
-  const response = await request(path);
-  if (response.statusCode < 200 || response.statusCode >= 300) throw new Error(`${path} returned HTTP ${response.statusCode}`);
+async function fetchOk(requestPath, expectedType, headers = {}) {
+  const response = await request(requestPath, { headers });
+  if (response.statusCode < 200 || response.statusCode >= 300) throw new Error(`${requestPath} returned HTTP ${response.statusCode}`);
   const type = response.headers['content-type'] || '';
-  if (!type.includes(expectedType)) throw new Error(`${path} returned ${type || 'no content type'}`);
+  if (!type.includes(expectedType)) throw new Error(`${requestPath} returned ${type || 'no content type'}`);
   return response;
+}
+
+async function loginAsAdmin() {
+  const body = 'username=admin&password=admin1234';
+  const response = await request('/login', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
+  const cookie = (response.headers['set-cookie'] || [])[0];
+  if (response.statusCode !== 302 || !cookie) throw new Error(`admin login returned HTTP ${response.statusCode}`);
+  return cookie.split(';')[0];
+}
+
+async function crawlAdmin(cookie) {
+  const queue = ['/admin'];
+  const checked = new Set();
+  while (queue.length) {
+    const requestPath = queue.shift();
+    if (checked.has(requestPath)) continue;
+    checked.add(requestPath);
+    if (checked.size > 160) throw new Error('admin crawl exceeded the safety limit');
+    const page = await fetchOk(requestPath, 'text/html', { cookie });
+    for (const match of page.body.matchAll(/href=["']([^"'#]+)["']/g)) {
+      if (!match[1].startsWith('/admin')) continue;
+      const url = new URL(match[1], baseUrl);
+      const nextPath = url.pathname + url.search;
+      if (!checked.has(nextPath)) queue.push(nextPath);
+    }
+  }
+  if (checked.size < 15) throw new Error(`admin crawl covered only ${checked.size} pages`);
+  return checked.size;
+}
+
+async function checkBulkPrice(cookie) {
+  const productsPage = await fetchOk('/admin/products', 'text/html', { cookie });
+  const product = productsPage.body.match(/class="[^"]*product-select[^"]*"[^>]*value="([^"]+)"[\s\S]*?data-price="([^"]+)"/);
+  if (!product) throw new Error('admin products page does not expose selectable products for bulk pricing');
+  const invalid = await request('/admin/products/bulk-price', {
+    method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'operation=discount&scope=all&percentage=0',
+  });
+  if (invalid.statusCode !== 302 || invalid.headers.location !== '/admin/products') throw new Error(`invalid bulk price returned HTTP ${invalid.statusCode}`);
+  const originalPrice = Number(product[2]);
+  const validBody = new URLSearchParams({ operation: 'increase', scope: 'selected', percentage: '10', productIds: product[1] }).toString();
+  const valid = await request('/admin/products/bulk-price', {
+    method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: validBody,
+  });
+  if (valid.statusCode !== 302 || valid.headers.location !== '/admin/products') throw new Error(`valid bulk price returned HTTP ${valid.statusCode}`);
+  const updatedPage = await fetchOk('/admin/products', 'text/html', { cookie });
+  const updatedProduct = updatedPage.body.match(new RegExp(`class="[^"]*product-select[^"]*"[^>]*value="${product[1]}"[\\s\\S]*?data-price="([^"]+)"`));
+  const expected = Math.round(originalPrice * 1.1);
+  if (!updatedProduct || Number(updatedProduct[1]) !== expected) throw new Error(`bulk price did not update ${originalPrice} to ${expected}`);
 }
 
 async function run() {
@@ -49,7 +99,7 @@ async function run() {
     let lastError = null;
     for (let attempt = 0; attempt < 60; attempt += 1) {
       try {
-        const response = await request('/health', 1000);
+        const response = await request('/health', { timeout: 1000 });
         if (response.statusCode >= 200 && response.statusCode < 300) { ready = true; break; }
         lastError = new Error(`/health returned HTTP ${response.statusCode}`);
       } catch (error) { lastError = error; }
@@ -63,14 +113,13 @@ async function run() {
     if (!home.body.includes('data-seamless-navigation="true"')) throw new Error('home is missing persistent navigation for uninterrupted music');
     await fetchOk('/products', 'text/html');
     await fetchOk('/css/storefront-mobile-v1.css', 'text/css');
-    console.log('Smoke checks passed: health, home, products, static assets');
-  } finally {
-    child.kill('SIGTERM');
-  }
+    const cookie = await loginAsAdmin();
+    const adminPageCount = await crawlAdmin(cookie);
+    await checkBulkPrice(cookie);
+    const missing = await request('/definitely-missing');
+    if (missing.statusCode !== 404 || !missing.body.includes('>404<')) throw new Error('404 page does not identify HTTP 404');
+    console.log(`Smoke checks passed: storefront, assets, ${adminPageCount} admin pages, bulk pricing, error page`);
+  } finally { cleanup(); }
 }
 
-run().catch(error => {
-  console.error(error.message);
-  child.kill('SIGKILL');
-  process.exitCode = 1;
-});
+run().catch(error => { console.error(`${error.message}\n${output}`); cleanup(); process.exitCode = 1; });

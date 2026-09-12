@@ -30,7 +30,11 @@ const TENANT_CACHE_TTL_MS = Math.max(1000, Number(process.env.TENANT_CACHE_TTL_M
 const tenantDbCache = new Map();
 const tenantDbLoads = new Map();
 
-const DB_PATH = path.join(__dirname, 'db.json');
+// Smoke/integration checks need an isolated datastore so exercising admin
+// mutations can never alter a developer's real local data file.
+const DB_PATH = process.env.NODE_ENV === 'test' && process.env.TEST_DB_PATH
+  ? path.resolve(process.env.TEST_DB_PATH)
+  : path.join(__dirname, 'db.json');
 const MONGODB_URI = process.env.MONGODB_URI;
 const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'lilteam_shop';
 
