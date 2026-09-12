@@ -20,7 +20,7 @@ function readFeatureState(db) {
     music: settings.music?.enabled === true,
     snow: settings.snow?.enabled === true,
     welcomePopup: settings.welcomePopup?.enabled === true,
-    rain: settings.rain?.enabled === true,
+    rain: settings.systemModules?.rain ? settings.rain?.enabled === true : null,
   };
 }
 

@@ -45,6 +45,7 @@ function fixture(failOnSave) {
   assert.equal(one.updatedCount, 1);
   assert.equal(readFeatureState(selected.dbs.get('shop-a')).snow, true);
   assert.equal(readFeatureState(selected.dbs.get('shop-b')).snow, false);
+  assert.equal(readFeatureState(selected.dbs.get('shop-b')).rain, null);
   assert.equal(selected.dbs.get('shop-a').products[0].images[0], 'shop-a.png');
   assert.equal(selected.dbs.get('shop-a').orders.some(order => order.id === 'concurrent-order'), true);
   assert.equal(selected.dbs.get('shop-a').users[0].id, 'shop-a-user');
@@ -84,6 +85,7 @@ function fixture(failOnSave) {
   await updateTenantFeatures({ scope: 'selected', shopIds: ['shop-a'], feature: 'rain', action: 'enable' }, rain.api);
   assert.deepEqual(rain.dbs.get('shop-a').settings.rain, { color: '#78c8ff', intensity: 'medium', enabled: true });
   assert.equal(rain.dbs.get('shop-b').settings.rain, undefined);
+  assert.equal(readFeatureState(rain.dbs.get('shop-b')).rain, null);
 
   const lab = fixture();
   lab.api.platformData.users = [{ id: 'admin', username: 'owner', email: 'owner@test', role: 'admin', status: 'active', passwordHash: 'hash' }];
