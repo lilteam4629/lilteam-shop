@@ -583,7 +583,27 @@
     // Public admin images upload straight from the browser to Cloudflare R2.
     // The VPS only receives the resulting URLs, so large batches cannot fill RAM.
     (function () {
+      async function optimizeImage(file) {
+        if (!file || !/^image\/(?:jpe?g|png|webp)$/i.test(file.type) || file.size < 450000 || !window.createImageBitmap) return file;
+        let bitmap;
+        try {
+          bitmap = await createImageBitmap(file);
+          const scale = Math.min(1, 1920 / bitmap.width, 1920 / bitmap.height);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+          canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+          canvas.getContext('2d', { alpha: true }).drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+          const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/webp', 0.84));
+          if (!blob || blob.size >= file.size) return file;
+          return new File([blob], file.name.replace(/\.[^.]+$/, '') + '.webp', { type: 'image/webp', lastModified: file.lastModified });
+        } catch (error) {
+          return file;
+        } finally {
+          if (bitmap && bitmap.close) bitmap.close();
+        }
+      }
       async function uploadFile(file) {
+        file = await optimizeImage(file);
         const response = await fetch('/admin/media/direct-upload', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ filename: file.name, contentType: file.type }),

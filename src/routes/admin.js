@@ -179,17 +179,28 @@ router.get('/', (req, res) => {
     timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit',
   }).format(date);
   const todayKey = bangkokKey(now);
-  const revenueToday = paidOrders.filter(order => bangkokKey(new Date(order.createdAt)) === todayKey).reduce((sum, order) => sum + order.total, 0);
   const since7Days = now.getTime() - (7 * 86400000);
   const since30Days = now.getTime() - (30 * 86400000);
-  const revenue7Days = paidOrders.filter(order => new Date(order.createdAt).getTime() >= since7Days).reduce((sum, order) => sum + order.total, 0);
-  const revenue30Days = paidOrders.filter(order => new Date(order.createdAt).getTime() >= since30Days).reduce((sum, order) => sum + order.total, 0);
+  let revenueToday = 0;
+  let revenue7Days = 0;
+  let revenue30Days = 0;
+  const revenueByDay = new Map();
+  paidOrders.forEach(order => {
+    const createdAt = new Date(order.createdAt);
+    const createdMs = createdAt.getTime();
+    const amount = Number(order.total) || 0;
+    const dayKey = bangkokKey(createdAt);
+    revenueByDay.set(dayKey, (revenueByDay.get(dayKey) || 0) + amount);
+    if (dayKey === todayKey) revenueToday += amount;
+    if (createdMs >= since7Days) revenue7Days += amount;
+    if (createdMs >= since30Days) revenue30Days += amount;
+  });
   const newCustomersToday = users.filter(user => user.role === 'customer' && bangkokKey(new Date(user.createdAt)) === todayKey).length;
   const newCustomers30Days = users.filter(user => user.role === 'customer' && new Date(user.createdAt).getTime() >= since30Days).length;
   const dailySales = Array.from({ length: 7 }, (_, index) => {
     const date = new Date(now.getTime() - ((6 - index) * 86400000));
     const key = bangkokKey(date);
-    const amount = paidOrders.filter(order => bangkokKey(new Date(order.createdAt)) === key).reduce((sum, order) => sum + order.total, 0);
+    const amount = revenueByDay.get(key) || 0;
     return { key, label: date.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', weekday: 'short' }), amount };
   });
   const maxDailyRevenue = Math.max(1, ...dailySales.map(day => day.amount));
@@ -204,9 +215,13 @@ router.get('/', (req, res) => {
   const reviewedTopups = store.data.topupRequests.filter(request => request.status === 'approved' || request.status === 'rejected');
   const approvedTopups = reviewedTopups.filter(request => request.status === 'approved').length;
   const topupSuccessRate = reviewedTopups.length ? Math.round((approvedTopups / reviewedTopups.length) * 100) : 0;
-  const availableStock = stockItems.filter(s => s.status === 'available').length;
+  const availableStockByProduct = new Map();
+  stockItems.forEach(item => {
+    if (item.status === 'available') availableStockByProduct.set(item.productId, (availableStockByProduct.get(item.productId) || 0) + 1);
+  });
+  const availableStock = [...availableStockByProduct.values()].reduce((sum, count) => sum + count, 0);
   const lowStockProducts = store.data.products.filter(p => {
-    const count = stockItems.filter(s => s.productId === p.id && s.status === 'available').length;
+    const count = availableStockByProduct.get(p.id) || 0;
     return count <= 1;
   });
   const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);

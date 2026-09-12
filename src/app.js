@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 require('express-async-errors');
 const express = require('express');
+const compression = require('compression');
 const session = require('express-session');
 const MongoStore = require('connect-mongo').default;
 const flash = require('connect-flash');
@@ -25,6 +26,7 @@ const packageInfo = require('../package.json');
 const app = express();
 
 app.disable('x-powered-by');
+app.use(compression({ threshold: 1024 }));
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');

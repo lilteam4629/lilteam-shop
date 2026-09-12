@@ -86,12 +86,13 @@ function homeViewData(heroPreviewV2 = false) {
     .filter(product => product.status === 'active' && product.publishAt && publishTime(product) > Date.now())
     .sort((a, b) => publishTime(a) - publishTime(b))
     .slice(0, 8);
-  const newest = [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+  const newestProducts = [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const newest = newestProducts.slice(0, 5);
   const byId = new Map(active.map(p => [p.id, p]));
   const homeSections = (store.data.homeSections || []).map(section => {
     const products = section.mode === 'manual'
       ? (section.productIds || []).map(id => byId.get(id)).filter(Boolean)
-      : [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, section.limit || 5);
+      : newestProducts.slice(0, section.limit || 5);
     return { id: section.id, title: section.title, products };
   }).filter(section => section.products.length);
   return {

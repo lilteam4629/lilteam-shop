@@ -24,7 +24,9 @@ const tenantContext = new AsyncLocalStorage();
 // process-local copy and share an in-flight read between simultaneous requests.
 // Writes below refresh the cache, so changes made by this process are visible
 // immediately; the short TTL still picks up changes made by another instance.
-const TENANT_CACHE_TTL_MS = Math.max(1000, Number(process.env.TENANT_CACHE_TTL_MS) || 10000);
+// Writes refresh this cache immediately, so a longer read TTL removes repeated
+// full tenant-document reads without making changes appear stale in this process.
+const TENANT_CACHE_TTL_MS = Math.max(1000, Number(process.env.TENANT_CACHE_TTL_MS) || 120000);
 const tenantDbCache = new Map();
 const tenantDbLoads = new Map();
 
