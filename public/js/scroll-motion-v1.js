@@ -7,10 +7,12 @@
     if(observer)observer.disconnect();
     var nodes=Array.from(document.querySelectorAll(selector)).filter(function(node){return !node.closest('#page-loading-overlay,[role="dialog"]')});
     nodes.forEach(function(node,index){
-      if(node.dataset.scrollMotion)return;
-      node.dataset.scrollMotion='1';node.classList.add('scroll-reveal');
-      var delay=node.classList.contains('premium-product-card')?Math.min(index%5,4)*45:Math.min(index%6,5)*24;
-      node.style.setProperty('--reveal-delay',delay+'ms');
+      if(!node.dataset.scrollMotion){
+        node.dataset.scrollMotion='1';node.classList.add('scroll-reveal');
+        var delay=node.classList.contains('premium-product-card')?Math.min(index%5,4)*45:Math.min(index%6,5)*24;
+        node.style.setProperty('--reveal-delay',delay+'ms');
+      }
+      if(document.readyState==='complete'&&node.classList.contains('premium-product-card')&&node.getBoundingClientRect().top>window.innerHeight*1.05)node.classList.remove('scroll-reveal-visible');
       if(reduced||node.getBoundingClientRect().top<window.innerHeight*.96)node.classList.add('scroll-reveal-visible');
     });
     document.documentElement.classList.add('scroll-motion-ready');
@@ -20,5 +22,6 @@
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(reveal)}}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',reveal,{once:true});else reveal();
+  window.addEventListener('load',schedule,{once:true});
   document.addEventListener('lilteam:page-loaded',schedule);
 })();
