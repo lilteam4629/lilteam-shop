@@ -1,9 +1,10 @@
-<!-- Cookie consent bar: a slim full-width strip pinned to the bottom edge,
-     never a full-screen overlay, so it never covers product photos or the
-     rest of the page. Remembers the visitor's choice in localStorage —
-     nothing is sent to a server, no third-party tracking/ad cookies exist
-     on this site to begin with (see the copy below), this is purely a
-     transparency + first-party-cookie-preference UI. -->
+<!-- Cookie consent: a small card pinned to the bottom-left corner (both
+     desktop and mobile), never a full-width bar or full-screen overlay, so
+     it never covers product photos or the rest of the page. Remembers the
+     visitor's choice in localStorage — nothing is sent to a server, no
+     third-party tracking/ad cookies exist on this site to begin with (see
+     the copy below), this is purely a transparency + first-party-cookie-
+     preference UI. -->
 <div id="cookie-consent" class="cookie-consent-bar hidden" role="dialog" aria-live="polite" aria-label="การตั้งค่าคุกกี้">
   <div class="cookie-consent-inner">
     <div class="cookie-consent-main">
@@ -46,35 +47,27 @@
 </div>
 
 <style>
-.cookie-consent-bar{position:fixed;left:0;right:0;bottom:0;z-index:900;background:color-mix(in srgb,var(--card) 96%,transparent);backdrop-filter:blur(14px);border-top:1px solid var(--border);box-shadow:0 -12px 40px rgba(0,0,0,.25)}
-.cookie-consent-inner{max-width:1320px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:14px 20px}
-.cookie-consent-main{display:flex;align-items:flex-start;gap:12px;min-width:0;flex:1 1 380px}
-.cookie-consent-icon{flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:color-mix(in srgb,var(--gold) 14%,transparent);font-size:17px}
-.cookie-consent-copy h2{margin:0 0 3px;font-size:13px;font-weight:800;color:var(--text)}
-.cookie-consent-copy p{margin:0;font-size:11.5px;line-height:1.6;color:var(--text-3)}
+.cookie-consent-bar{position:fixed;left:12px;bottom:12px;z-index:900;width:min(300px,calc(100vw - 24px));border-radius:16px;background:color-mix(in srgb,var(--card) 97%,transparent);backdrop-filter:blur(14px);border:1px solid var(--border);box-shadow:0 16px 40px rgba(0,0,0,.3);overflow:hidden}
+.cookie-consent-inner{display:flex;flex-direction:column;gap:10px;padding:14px}
+.cookie-consent-main{display:flex;align-items:flex-start;gap:9px;min-width:0}
+.cookie-consent-icon{flex:none;display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:color-mix(in srgb,var(--gold) 14%,transparent);font-size:15px}
+.cookie-consent-copy h2{margin:0 0 3px;font-size:12px;font-weight:800;color:var(--text)}
+.cookie-consent-copy p{margin:0;font-size:10.5px;line-height:1.55;color:var(--text-3)}
 .cookie-consent-copy a{color:var(--gold-text);text-decoration:underline;text-underline-offset:2px}
-.cookie-consent-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;flex:0 0 auto}
-.cookie-btn{border-radius:10px;font-size:12px;font-weight:700;padding:9px 16px;white-space:nowrap;transition:.15s;cursor:pointer}
-.cookie-btn-primary{background:var(--gold);color:var(--gold-contrast);border:1px solid var(--gold)}
+.cookie-consent-actions{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.cookie-btn{border-radius:9px;font-size:11px;font-weight:700;padding:7px 12px;white-space:nowrap;transition:.15s;cursor:pointer}
+.cookie-btn-primary{flex:1 1 auto;text-align:center;background:var(--gold);color:var(--gold-contrast);border:1px solid var(--gold)}
 .cookie-btn-primary:hover{background:var(--gold-hover)}
-.cookie-btn-outline{background:transparent;border:1px solid var(--border-light);color:var(--text-2)}
+.cookie-btn-outline{flex:1 1 auto;text-align:center;background:transparent;border:1px solid var(--border-light);color:var(--text-2)}
 .cookie-btn-outline:hover{border-color:var(--gold);color:var(--gold-text)}
-.cookie-btn-text{background:transparent;border:0;color:var(--text-3);text-decoration:underline;text-underline-offset:2px;padding:9px 4px}
-.cookie-consent-settings{max-width:1320px;margin:0 auto;padding:0 20px 16px;display:flex;flex-direction:column;gap:10px}
-.cookie-setting-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:11px 13px;border:1px solid var(--border-light);border-radius:12px;background:color-mix(in srgb,var(--input) 70%,transparent)}
+.cookie-btn-text{background:transparent;border:0;color:var(--text-3);text-decoration:underline;text-underline-offset:2px;padding:7px 2px}
+.cookie-consent-settings{padding:0 14px 14px;display:flex;flex-direction:column;gap:8px}
+.cookie-setting-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid var(--border-light);border-radius:10px;background:color-mix(in srgb,var(--input) 70%,transparent)}
 .cookie-setting-row div{min-width:0}
-.cookie-setting-row b{display:block;font-size:12px;color:var(--text)}
-.cookie-setting-row span{display:block;margin-top:2px;font-size:10.5px;color:var(--text-4);line-height:1.5}
-.cookie-setting-row input{flex:none;margin-top:2px;width:18px;height:18px;accent-color:var(--gold)}
+.cookie-setting-row b{display:block;font-size:11px;color:var(--text)}
+.cookie-setting-row span{display:block;margin-top:2px;font-size:9.5px;color:var(--text-4);line-height:1.5}
+.cookie-setting-row input{flex:none;margin-top:2px;width:16px;height:16px;accent-color:var(--gold)}
 .cookie-consent-settings-actions{display:flex;justify-content:flex-end}
-@media(max-width:640px){
-  .cookie-consent-inner{flex-direction:column;align-items:stretch}
-  .cookie-consent-actions{justify-content:stretch}
-  .cookie-btn{flex:1 1 auto;text-align:center}
-  .cookie-btn-text{flex:0 0 auto}
-}
-/* Keep the bottom-right music widget from overlapping this bar while it's shown. */
-body:has(#cookie-consent:not(.hidden)) #music-widget{bottom:calc(1rem + var(--cookie-bar-height,64px))}
 </style>
 
 <script>
@@ -90,15 +83,7 @@ body:has(#cookie-consent:not(.hidden)) #music-widget{bottom:calc(1rem + var(--co
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...consent, decidedAt: Date.now() })); } catch (e) {}
   }
 
-  function syncHeight() {
-    document.documentElement.style.setProperty('--cookie-bar-height', bar.offsetHeight + 'px');
-  }
-
-  if (!readConsent()) {
-    bar.classList.remove('hidden');
-    syncHeight();
-    window.addEventListener('resize', syncHeight);
-  }
+  if (!readConsent()) bar.classList.remove('hidden');
 
   const settingsPanel = document.getElementById('cookie-consent-settings');
   const settingsToggle = document.getElementById('cookie-settings-toggle');
@@ -108,7 +93,6 @@ body:has(#cookie-consent:not(.hidden)) #music-widget{bottom:calc(1rem + var(--co
 
   settingsToggle.addEventListener('click', function () {
     settingsPanel.classList.toggle('hidden');
-    syncHeight();
   });
 
   document.getElementById('cookie-accept-all').addEventListener('click', function () {
