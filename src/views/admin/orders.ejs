@@ -8,7 +8,7 @@
   <div class="flex items-center gap-3">
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3.5 py-1.5 text-xs text-[var(--text-3)] flex items-center gap-2 shadow-sm">
       <span>ยอดขายสะสม:</span>
-      <b class="text-[var(--gold)] font-bold">฿<%= orders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + (o.total || 0), 0).toLocaleString() %></b>
+      <b class="text-[var(--gold-text)] font-bold">฿<%= orders.filter(o => o.status !== 'cancelled').reduce((sum, o) => sum + (o.total || 0), 0).toLocaleString() %></b>
     </div>
   </div>
 </div>
@@ -54,7 +54,7 @@
 
             <!-- Order ID -->
             <td class="py-3 px-4 whitespace-nowrap">
-              <a href="/admin/orders/<%= o.id %>" class="font-mono font-bold text-sm text-[var(--gold)] hover:underline inline-flex items-center gap-1">
+              <a href="/admin/orders/<%= o.id %>" class="font-mono font-bold text-sm text-[var(--gold-text)] hover:underline inline-flex items-center gap-1">
                 <span>#<%= o.id %></span>
               </a>
             </td>
@@ -83,7 +83,7 @@
                   <div class="min-w-0">
                     <div class="font-semibold text-xs text-[var(--text)] truncate"><%= item.title %></div>
                     <% if (item.importedFileCode) { %>
-                      <div class="text-[11px] text-[var(--gold)] font-mono break-all" title="<%= item.importedFileCode %>">
+                      <div class="text-[11px] text-[var(--gold-text)] font-mono break-all" title="<%= item.importedFileCode %>">
                         🖼 <%= item.importedFileCode %>
                       </div>
                     <% } else { %>
@@ -128,7 +128,7 @@
 
             <!-- Action -->
             <td class="py-3 px-4 text-right whitespace-nowrap">
-              <a href="/admin/orders/<%= o.id %>" class="inline-flex items-center gap-1 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--gold)] text-xs font-semibold px-3 py-1.5 rounded-xl transition">
+              <a href="/admin/orders/<%= o.id %>" class="inline-flex items-center gap-1 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--gold-text)] text-xs font-semibold px-3 py-1.5 rounded-xl transition">
                 <span>รายละเอียด</span>
                 <span>→</span>
               </a>

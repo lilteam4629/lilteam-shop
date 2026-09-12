@@ -49,7 +49,7 @@
   </div>
 
   <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.flashSalePrice != null) ? 'open' : '' %>>
-    <summary class="font-medium text-[var(--gold)] cursor-pointer select-none">⚡ Flash Sale</summary>
+    <summary class="font-medium text-[var(--gold-text)] cursor-pointer select-none">⚡ Flash Sale</summary>
     <div class="space-y-4 mt-4">
     <p class="text-xs text-[var(--text-4)]">ตั้งราคาพิเศษและเวลาไทยล่วงหน้า ระบบจะเริ่มลดราคาและคืนราคาขายเดิมให้อัตโนมัติเมื่อหมดเวลา เว้นว่างทั้งหมดหากไม่ใช้</p>
     <div class="grid sm:grid-cols-3 gap-3">
@@ -71,7 +71,7 @@
   </details>
 
   <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.priceOptions && product.priceOptions.length) ? 'open' : '' %>>
-    <summary class="font-medium text-[var(--gold)] cursor-pointer select-none">💰 ราคาลดตามจำนวนซื้อ (ยิ่งซื้อเยอะยิ่งถูก)</summary>
+    <summary class="font-medium text-[var(--gold-text)] cursor-pointer select-none">💰 ราคาลดตามจำนวนซื้อ (ยิ่งซื้อเยอะยิ่งถูก)</summary>
     <div class="space-y-3 mt-4">
       <p class="text-xs text-[var(--text-4)]">พิมพ์แค่ "ซื้อกี่ชิ้น ราคารวมเท่าไหร่" ระบบคิดราคาต่อชิ้นและราคาตามจำนวนที่ลูกค้าซื้อให้อัตโนมัติ เช่น ซื้อ 5 ชิ้น ราคารวม 200 บาท เว้นว่างไว้ทั้งหมดถ้าไม่ต้องการใช้ (ใช้ราคาขายด้านบนตามปกติ)</p>
       <div id="price-options-list" class="space-y-2">
@@ -86,7 +86,7 @@
           </div>
         <% }) %>
       </div>
-      <button type="button" id="add-price-option" class="text-xs text-[var(--gold)] border border-[var(--gold)]/40 rounded-lg px-3 py-1.5">+ เพิ่มระดับราคา</button>
+      <button type="button" id="add-price-option" class="text-xs text-[var(--gold-text)] border border-[var(--gold)]/40 rounded-lg px-3 py-1.5">+ เพิ่มระดับราคา</button>
     </div>
   </details>
   <script>
@@ -146,9 +146,9 @@
       <h3 class="font-medium">เลือกโฟลเดอร์รูป</h3>
       <p class="text-xs text-[var(--text-4)]">เลือกทั้งโฟลเดอร์ได้เลย ระบบจะดึงเฉพาะไฟล์รูปในนั้นมาสร้างสินค้าให้อัตโนมัติ (สูงสุด 60 รูปต่อครั้ง)</p>
     </div>
-    <input id="bulkFolderInput" type="file" name="productImages" webkitdirectory directory multiple accept="image/*" class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
+    <input id="bulkFolderInput" type="file" name="productImages" webkitdirectory directory multiple accept="image/*" class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold-text)] file:text-sm" />
     <div id="bulkFileList" class="hidden">
-      <p class="text-xs text-[var(--text-3)] mb-2">พบ <span id="bulkFileCount" class="font-bold text-[var(--gold)]">0</span> รูป — จะสร้างเป็นสินค้าตามรายการนี้:</p>
+      <p class="text-xs text-[var(--text-3)] mb-2">พบ <span id="bulkFileCount" class="font-bold text-[var(--gold-text)]">0</span> รูป — จะสร้างเป็นสินค้าตามรายการนี้:</p>
       <ul id="bulkFileNames" class="text-xs text-[var(--text-2)] space-y-0.5 max-h-48 overflow-y-auto bg-[var(--card)] border border-[var(--border-light)] rounded-lg p-3"></ul>
     </div>
   </div>
@@ -236,7 +236,7 @@
 
     <div>
       <label class="block text-sm mb-2 text-[var(--text-3)]">เพิ่มรูปจากเครื่องหรือโทรศัพท์</label>
-      <input id="productImagesInput" type="file" name="productImages" accept="image/png,image/jpeg,image/webp,image/gif" multiple class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
+      <input id="productImagesInput" type="file" name="productImages" accept="image/png,image/jpeg,image/webp,image/gif" multiple class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold-text)] file:text-sm" />
       <div id="newImagePreview" class="hidden grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3"></div>
     </div>
 
@@ -358,7 +358,7 @@
   <% } %>
 
   <% if (isBulkImport) { %>
-    <p id="bulkImportProgress" class="hidden text-sm text-[var(--gold)]">⏳ กำลังอัปโหลดรูปและสร้างสินค้า — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...</p>
+    <p id="bulkImportProgress" class="hidden text-sm text-[var(--gold-text)]">⏳ กำลังอัปโหลดรูปและสร้างสินค้า — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...</p>
   <% } %>
   <div class="flex gap-3">
     <button id="productFormSubmit" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium px-6 py-2 rounded-lg text-sm"><%= isBulkImport ? '📁 นำเข้าและสร้างสินค้าทั้งหมด' : (product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า') %></button>

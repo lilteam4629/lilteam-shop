@@ -2,7 +2,7 @@
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
     <div class="flex items-center gap-2 text-xs text-[var(--text-4)] mb-1">
-      <a href="/admin/products" class="text-[var(--gold)] hover:underline inline-flex items-center gap-1 font-semibold">
+      <a href="/admin/products" class="text-[var(--gold-text)] hover:underline inline-flex items-center gap-1 font-semibold">
         <span>← กลับไปหน้ารายการสินค้า</span>
       </a>
     </div>
@@ -122,7 +122,7 @@
   <!-- Right Column: Add Stock Form Card -->
   <div id="add-stock" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm sticky top-20">
     <div class="flex items-center gap-2.5 mb-3">
-      <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center font-bold text-sm">
+      <div class="w-8 h-8 rounded-xl bg-[var(--gold)]/10 text-[var(--gold-text)] flex items-center justify-center font-bold text-sm">
         ➕
       </div>
       <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เพิ่มจำนวนสต็อก</h3>
@@ -138,7 +138,7 @@
       <% } else { %>
         <p class="text-[11px] text-[var(--text-4)] leading-relaxed">
           เพิ่มแบบหลายรายการได้พร้อมกัน โดยใส่ <b>1 บรรทัดต่อ 1 สินค้า</b><br />
-          รูปแบบ: <code class="bg-[var(--input)] px-1.5 py-0.5 rounded font-mono text-[10px] text-[var(--gold)]">ข้อมูลบน:ข้อมูลล่าง:หมายเหตุ</code>
+          รูปแบบ: <code class="bg-[var(--input)] px-1.5 py-0.5 rounded font-mono text-[10px] text-[var(--gold-text)]">ข้อมูลบน:ข้อมูลล่าง:หมายเหตุ</code>
         </p>
         <textarea name="bulk" rows="8" placeholder="user01:pass01:หมายเหตุ&#10;user02:pass02:หมายเหตุ&#10;user03:pass03" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition"></textarea>
       <% } %>

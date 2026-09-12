@@ -1,6 +1,6 @@
 <section class="contact-page max-w-2xl mx-auto px-4 py-8 sm:py-12">
   <div class="mb-6">
-    <p class="text-xs font-semibold text-[var(--gold)] mb-1">SUPPORT CENTER</p>
+    <p class="text-xs font-semibold text-[var(--gold-text)] mb-1">SUPPORT CENTER</p>
     <h1 class="text-2xl sm:text-3xl font-extrabold">ติดต่อร้าน</h1>
     <p class="text-sm text-[var(--text-3)] mt-1">สอบถามสินค้า แจ้งปัญหา หรือติดต่อรับสินค้าได้ที่นี่</p>
   </div>
@@ -13,7 +13,7 @@
     <a href="<%= settings.contactFacebook %>" target="_blank" rel="noopener" class="contact-row group">
       <span class="contact-icon contact-icon-facebook"><svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M13.5 22v-9h3l.5-3.5h-3.5V7.25c0-1 .28-1.75 1.8-1.75H17V2.15A23 23 0 0 0 14.4 2C11.75 2 10 3.62 10 6.6v2.9H7V13h3v9h3.5Z"/></svg></span>
       <span class="min-w-0 flex-1"><span class="block font-bold">Facebook Page</span><span class="block text-xs text-[var(--text-3)] mt-0.5 truncate"><%= settings.contactFacebookName || settings.shopName %></span></span>
-      <span class="text-xl text-[var(--text-4)] group-hover:text-[var(--gold)]">›</span>
+      <span class="text-xl text-[var(--text-4)] group-hover:text-[var(--gold-text)]">›</span>
     </a>
     <div class="contact-row">
       <span class="contact-icon contact-icon-hours"><svg viewBox="0 0 24 24" class="w-6 h-6 fill-none stroke-current" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
@@ -27,7 +27,7 @@
 <style>
   .contact-primary,.contact-row{display:flex;align-items:center;gap:1rem;border-radius:1.15rem}.contact-primary{padding:1rem 1.1rem;color:#171207;background:linear-gradient(120deg,var(--gold-light),var(--gold) 58%,var(--gold-dark));border:1px solid color-mix(in srgb, var(--gold-light) 58%, transparent);box-shadow:0 16px 34px -18px color-mix(in srgb, var(--gold) 95%, transparent),inset 0 1px 0 rgba(255,255,255,.45);transition:transform .2s,box-shadow .2s}.contact-primary:hover{transform:translateY(-2px);box-shadow:0 20px 40px -18px var(--gold),inset 0 1px 0 rgba(255,255,255,.55)}.contact-primary-subtitle{color:rgba(23,18,7,.72)}
   .contact-row{padding:.9rem 1rem;color:var(--text);background:linear-gradient(135deg,var(--card),var(--input));border:1px solid var(--border);box-shadow:0 10px 28px -24px rgba(0,0,0,.9)}a.contact-row{transition:transform .2s,border-color .2s}a.contact-row:hover{transform:translateY(-1px);border-color:var(--gold)}
-  .contact-icon{width:3rem;height:3rem;flex:0 0 auto;display:grid;place-items:center;border-radius:.85rem}.contact-icon-primary{color:#171207;background:rgba(255,248,213,.3);border:1px solid rgba(255,255,255,.28)}.contact-icon-facebook{color:var(--gold);background:color-mix(in srgb, var(--gold) 12%, transparent);border:1px solid color-mix(in srgb, var(--gold) 18%, transparent)}.contact-icon-hours{color:var(--gold);background:var(--bg);border:1px solid var(--border-light)}
+  .contact-icon{width:3rem;height:3rem;flex:0 0 auto;display:grid;place-items:center;border-radius:.85rem}.contact-icon-primary{color:#171207;background:rgba(255,248,213,.3);border:1px solid rgba(255,255,255,.28)}.contact-icon-facebook{color:var(--gold-text);background:color-mix(in srgb, var(--gold) 12%, transparent);border:1px solid color-mix(in srgb, var(--gold) 18%, transparent)}.contact-icon-hours{color:var(--gold-text);background:var(--bg);border:1px solid var(--border-light)}
   .contact-open{flex:0 0 auto;padding:.55rem .85rem;border-radius:.7rem;background:rgba(23,18,7,.14);border:1px solid rgba(23,18,7,.1);font-size:.8rem;font-weight:800}.contact-online{display:inline-flex;align-items:center;gap:.35rem;color:#34d399;font-size:.65rem;white-space:nowrap}.contact-online i{width:.45rem;height:.45rem;border-radius:99px;background:#34d399;box-shadow:0 0 10px rgba(52,211,153,.75)}
   @media(max-width:639px){.contact-primary,.contact-row{gap:.7rem;border-radius:.9rem}.contact-primary{padding:.85rem}.contact-row{padding:.75rem .8rem}.contact-icon{width:2.65rem;height:2.65rem;border-radius:.7rem}.contact-open{padding:.45rem .65rem}.contact-online{display:none}}
 </style>

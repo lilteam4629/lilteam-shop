@@ -17,7 +17,7 @@
           </div>
           <p class="text-sm text-[var(--text-3)] mb-3"><%= a.body %></p>
           <div class="space-x-2">
-            <form action="/admin/announcements/<%= a.id %>/toggle" method="post" class="inline"><button class="text-[var(--gold)] text-xs"><%= a.active ? 'ซ่อน' : 'แสดง' %></button></form>
+            <form action="/admin/announcements/<%= a.id %>/toggle" method="post" class="inline"><button class="text-[var(--gold-text)] text-xs"><%= a.active ? 'ซ่อน' : 'แสดง' %></button></form>
             <form action="/admin/announcements/<%= a.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบประกาศนี้?')"><button class="text-rose-400 text-xs">ลบ</button></form>
           </div>
         </div>

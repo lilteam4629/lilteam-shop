@@ -12,7 +12,7 @@
           </div>
           <div class="text-[var(--text-3)] text-sm flex items-center justify-between">
             <span><%= new Date(o.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %> &middot; <%= o.items.length %> รายการ</span>
-            <span class="text-[var(--gold)] font-medium">฿<%= o.total.toLocaleString() %>.00</span>
+            <span class="text-[var(--gold-text)] font-medium">฿<%= o.total.toLocaleString() %>.00</span>
           </div>
         </a>
       <% }) %>

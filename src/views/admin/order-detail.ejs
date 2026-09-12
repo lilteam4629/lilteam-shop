@@ -2,7 +2,7 @@
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
     <div class="flex items-center gap-2 text-xs text-[var(--text-4)] mb-1">
-      <a href="/admin/orders" class="text-[var(--gold)] hover:underline inline-flex items-center gap-1 font-semibold">
+      <a href="/admin/orders" class="text-[var(--gold-text)] hover:underline inline-flex items-center gap-1 font-semibold">
         <span>← กลับไปหน้ารวมคำสั่งซื้อ</span>
       </a>
     </div>
@@ -56,24 +56,24 @@
                 <% } %>
                 <div class="min-w-0 pt-0.5">
                   <div class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
-                    <span class="w-6 h-6 rounded-lg bg-[var(--gold)]/10 text-[var(--gold)] flex items-center justify-center text-xs font-bold shrink-0"><%= idx + 1 %></span>
+                    <span class="w-6 h-6 rounded-lg bg-[var(--gold)]/10 text-[var(--gold-text)] flex items-center justify-center text-xs font-bold shrink-0"><%= idx + 1 %></span>
                     <span><%= i.title %></span>
                   </div>
                   <div class="text-[11px] text-[var(--text-4)] mt-1">รหัสสินค้า: <span class="font-mono text-[var(--text-2)]"><%= i.productId %></span></div>
                   <% if (i.importedFileCode) { %>
-                    <div class="text-[11px] text-[var(--text-4)] mt-1 break-all">รหัสไฟล์นำเข้า: <span class="font-mono font-semibold text-[var(--gold)]"><%= i.importedFileCode %></span></div>
+                    <div class="text-[11px] text-[var(--text-4)] mt-1 break-all">รหัสไฟล์นำเข้า: <span class="font-mono font-semibold text-[var(--gold-text)]"><%= i.importedFileCode %></span></div>
                   <% } %>
                   <% if (i.productImage) { %>
                     <div class="text-[10px] text-[var(--text-4)] mt-1">กดรูปเพื่อดูขนาดเต็ม</div>
                   <% } %>
                 </div>
               </div>
-              <span class="font-bold text-sm text-[var(--gold)] shrink-0">฿<%= i.price.toLocaleString() %></span>
+              <span class="font-bold text-sm text-[var(--gold-text)] shrink-0">฿<%= i.price.toLocaleString() %></span>
             </div>
 
             <% if (i.fulfillmentMode === 'contact') { %>
               <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-3 text-xs text-[var(--text-2)] mt-2">
-                <div class="font-bold text-[var(--gold)] flex items-center gap-1.5">
+                <div class="font-bold text-[var(--gold-text)] flex items-center gap-1.5">
                   <span>💬</span>
                   <span>ลูกค้ารายนี้ต้องติดต่อร้านเพื่อรับมอบสินค้า</span>
                 </div>
@@ -85,12 +85,12 @@
               <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-3 mt-2 flex items-center justify-between gap-3">
                 <div class="font-mono text-xs text-[var(--text)] min-w-0 truncate">
                   <span class="text-[var(--text-4)] text-[10px] block">ข้อมูลเข้าสู่ระบบ / คีย์:</span>
-                  <span class="font-bold text-[var(--gold)]"><%= i.credentials.username %></span>
+                  <span class="font-bold text-[var(--gold-text)]"><%= i.credentials.username %></span>
                   <% if (i.credentials.password) { %>
                     <span class="text-[var(--text-3)]"> / <%= i.credentials.password %></span>
                   <% } %>
                 </div>
-                <button type="button" onclick="navigator.clipboard.writeText('<%= i.credentials.username %><%= i.credentials.password ? ` / ${i.credentials.password}` : '' %>'); window.showToast('คัดลอกข้อมูลสินค้าแล้ว!', 'success');" class="bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-xs font-semibold px-2.5 py-1.5 rounded-lg text-[var(--text-2)] hover:text-[var(--gold)] transition shrink-0">
+                <button type="button" onclick="navigator.clipboard.writeText('<%= i.credentials.username %><%= i.credentials.password ? ` / ${i.credentials.password}` : '' %>'); window.showToast('คัดลอกข้อมูลสินค้าแล้ว!', 'success');" class="bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-xs font-semibold px-2.5 py-1.5 rounded-lg text-[var(--text-2)] hover:text-[var(--gold-text)] transition shrink-0">
                   📋 คัดลอก
                 </button>
               </div>
@@ -113,7 +113,7 @@
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
       <h3 class="font-bold text-xs text-[var(--text-4)] uppercase tracking-wider mb-3">ข้อมูลผู้ซื้อ</h3>
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-[var(--input)] border border-[var(--border-light)] flex items-center justify-center font-black text-sm text-[var(--gold)]">
+        <div class="w-10 h-10 rounded-xl bg-[var(--input)] border border-[var(--border-light)] flex items-center justify-center font-black text-sm text-[var(--gold-text)]">
           <%= ((buyer && buyer.username) || 'U')[0].toUpperCase() %>
         </div>
         <div class="min-w-0 flex-1">
@@ -141,7 +141,7 @@
 
       <div class="flex justify-between items-center text-sm font-bold pt-3 border-t border-[var(--border)]">
         <span>ยอดชำระสุทธิ</span>
-        <span class="text-base text-[var(--gold)]">฿<%= order.total.toLocaleString() %></span>
+        <span class="text-base text-[var(--gold-text)]">฿<%= order.total.toLocaleString() %></span>
       </div>
 
       <!-- Update Status Form -->

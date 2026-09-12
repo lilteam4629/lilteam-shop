@@ -1,5 +1,5 @@
 <section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
-  <a href="javascript:history.back()" class="text-sm text-[var(--gold)]">← กลับหน้าร้าน</a>
+  <a href="javascript:history.back()" class="text-sm text-[var(--gold-text)]">← กลับหน้าร้าน</a>
 
   <div class="grid md:grid-cols-2 gap-8 mt-4">
     <div>
@@ -19,14 +19,14 @@
 
     <div>
       <div class="flex items-center gap-2 mb-3">
-        <span class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-[var(--gold)] text-xs px-2 py-1 rounded">สินค้าเกม</span>
+        <span class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-[var(--gold-text)] text-xs px-2 py-1 rounded">สินค้าเกม</span>
         <% if (product.stockCount > 0) { %>
           <span class="text-emerald-400 text-xs">พร้อมส่งทันที</span>
         <% } else { %>
           <span class="text-[var(--coral)] text-xs">สินค้าหมด</span>
         <% } %>
         <button onclick="navigator.clipboard && navigator.clipboard.writeText(window.location.href); this.textContent='คัดลอกแล้ว'"
-          class="ml-auto text-xs text-[var(--text-3)] hover:text-[var(--gold)] border border-[var(--border-light)] rounded-lg px-2 py-1">คัดลอกลิงก์</button>
+          class="ml-auto text-xs text-[var(--text-3)] hover:text-[var(--gold-text)] border border-[var(--border-light)] rounded-lg px-2 py-1">คัดลอกลิงก์</button>
       </div>
 
       <h1 class="text-2xl font-bold mb-2"><%= product.title %></h1>
@@ -48,7 +48,7 @@
         <style>
           .product-detail-filters{padding:1rem;border:1px solid color-mix(in srgb,var(--gold) 32%,var(--border));border-radius:1rem;background:linear-gradient(145deg,color-mix(in srgb,var(--gold) 7%,var(--card)),var(--card));box-shadow:0 14px 34px -28px rgba(0,0,0,.75)}
           .product-detail-filter-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.8rem}
-          .product-detail-filter-head span{display:block;margin-bottom:.1rem;color:var(--gold);font-size:.65rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+          .product-detail-filter-head span{display:block;margin-bottom:.1rem;color:var(--gold-text);font-size:.65rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
           .product-detail-filter-head h2{font-size:1rem;font-weight:850;color:var(--text)}
           .product-detail-filter-head strong{color:var(--text-3);font-size:.7rem;white-space:nowrap}
           .product-detail-filter-list{display:flex;gap:.65rem;overflow-x:auto;padding:.15rem .1rem .45rem;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
@@ -62,8 +62,8 @@
       <% if (product.flashSaleActive || product.flashSaleUpcoming) { %>
         <% const detailFlashTarget = product.flashSaleActive ? product.flashSaleEndsAt : product.flashSaleStartsAt; const detailFlashSeconds = Math.max(0, Math.floor((detailFlashTarget - Date.now()) / 1000)); const detailFlashInitial = (Math.floor(detailFlashSeconds / 86400) ? Math.floor(detailFlashSeconds / 86400) + ' วัน ' : '') + [Math.floor((detailFlashSeconds % 86400) / 3600), Math.floor((detailFlashSeconds % 3600) / 60), detailFlashSeconds % 60].map(n => String(n).padStart(2, '0')).join(':'); %>
         <div class="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--gold)]/55 bg-gradient-to-r from-[var(--input)] to-[var(--card)] px-4 py-3">
-          <div><div class="font-black text-[var(--gold)]">⚡ FLASH SALE</div><div class="text-xs text-[var(--text-3)]"><%= product.flashSaleActive ? 'ราคาพิเศษกำลังเปิดขาย' : 'เตรียมพบราคาพิเศษ' %></div></div>
-          <div class="min-w-[7.5rem] rounded-lg border border-[var(--gold)]/45 bg-black/35 px-3 py-2 text-center"><div class="text-[10px] font-medium text-[var(--gold)]"><%= product.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></div><div class="flash-countdown mt-0.5 whitespace-nowrap font-mono text-xl sm:text-2xl font-black tracking-wide text-[var(--gold-light)]" <% if (product.flashSaleActive) { %>data-flash-end="<%= product.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= product.flashSaleStartsAt %>"<% } %>><%= detailFlashInitial %></div></div>
+          <div><div class="font-black text-[var(--gold-text)]">⚡ FLASH SALE</div><div class="text-xs text-[var(--text-3)]"><%= product.flashSaleActive ? 'ราคาพิเศษกำลังเปิดขาย' : 'เตรียมพบราคาพิเศษ' %></div></div>
+          <div class="min-w-[7.5rem] rounded-lg border border-[var(--gold)]/45 bg-black/35 px-3 py-2 text-center"><div class="text-[10px] font-medium text-[var(--gold-text)]"><%= product.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></div><div class="flash-countdown mt-0.5 whitespace-nowrap font-mono text-xl sm:text-2xl font-black tracking-wide text-[var(--gold-light)]" <% if (product.flashSaleActive) { %>data-flash-end="<%= product.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= product.flashSaleStartsAt %>"<% } %>><%= detailFlashInitial %></div></div>
         </div>
       <% } %>
       <div class="flex flex-wrap gap-2 mb-3">
@@ -75,11 +75,11 @@
       <% if (qtyTiers.length) { %>
         <div class="mb-1 text-xs text-[var(--text-3)]">ราคา</div>
         <div class="flex items-baseline gap-2 mb-3">
-          <span class="text-3xl font-bold text-[var(--gold)]">฿<span data-unit-price><%= product.price.toLocaleString() %></span></span>
+          <span class="text-3xl font-bold text-[var(--gold-text)]">฿<span data-unit-price><%= product.price.toLocaleString() %></span></span>
           <span class="text-sm text-[var(--text-3)]">/ ชิ้น</span>
         </div>
         <div class="mb-5">
-          <div class="text-xs font-semibold text-[var(--gold)] flex items-center gap-1.5 mb-2">
+          <div class="text-xs font-semibold text-[var(--gold-text)] flex items-center gap-1.5 mb-2">
             <% if (settings.branding && settings.branding.logoImage) { %>
               <img src="<%= settings.branding.logoImage %>" alt="" class="w-4 h-4 rounded object-contain" />
             <% } else { %>📦<% } %>
@@ -106,8 +106,8 @@
           .qty-tier-btn:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--gold) 60%,var(--border-light))}
           .qty-tier-btn.is-active{border-color:var(--gold);background:linear-gradient(160deg,color-mix(in srgb,var(--gold) 18%,var(--card)),color-mix(in srgb,var(--gold) 10%,var(--input)));box-shadow:0 0 0 1px var(--gold),0 10px 24px -14px color-mix(in srgb,var(--gold) 70%,transparent)}
           .qty-tier-btn-qty{font-size:.78rem;font-weight:700;color:var(--text-2)}
-          .qty-tier-btn.is-active .qty-tier-btn-qty{color:var(--gold)}
-          .qty-tier-btn-price{font-size:1.05rem;font-weight:900;color:var(--gold)}
+          .qty-tier-btn.is-active .qty-tier-btn-qty{color:var(--gold-text)}
+          .qty-tier-btn-price{font-size:1.05rem;font-weight:900;color:var(--gold-text)}
           .qty-tier-btn-unit{font-size:.65rem;color:var(--text-4)}
           .qty-tier-badge{position:absolute;top:-.55rem;left:50%;transform:translateX(-50%);font-size:.6rem;font-weight:800;background:var(--gold);color:var(--gold-contrast);border-radius:999px;padding:.1rem .5rem;white-space:nowrap;box-shadow:0 4px 10px -4px rgba(0,0,0,.5)}
           .qty-stepper-btn{width:2.5rem;height:2.5rem;display:grid;place-items:center;font-weight:800;font-size:1.1rem;border:1px solid var(--border-light);background:var(--input);color:var(--text-2);transition:background .15s,color .15s}
@@ -120,7 +120,7 @@
       <% } else { %>
         <div class="mb-1 text-xs text-[var(--text-3)]">ราคา</div>
         <div class="flex items-baseline gap-2 mb-5">
-          <span class="text-3xl font-bold text-[var(--gold)]">฿<%= product.price.toLocaleString() %>.00</span>
+          <span class="text-3xl font-bold text-[var(--gold-text)]">฿<%= product.price.toLocaleString() %>.00</span>
           <% const crossedPrice = product.flashSaleActive ? product.regularPrice : product.originalPrice; %>
           <% if (crossedPrice > product.price) { %>
             <span class="text-[var(--coral)] line-through text-sm">฿<%= crossedPrice.toLocaleString() %>.00</span>
@@ -142,7 +142,7 @@
               </div>
               <div>
                 <div class="text-xs text-[var(--text-3)] mb-1">ยอดรวม</div>
-                <div class="text-xl font-black text-[var(--gold)]" data-subtotal>฿<%= product.price.toLocaleString() %></div>
+                <div class="text-xl font-black text-[var(--gold-text)]" data-subtotal>฿<%= product.price.toLocaleString() %></div>
               </div>
             </div>
             <script>
@@ -193,7 +193,7 @@
           <% if (product.purchaseApprovalEnabled) { %>
             <div class="relative flex items-center gap-3 mb-4">
               <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-[var(--gold)] text-[var(--gold-contrast)] font-black">1</span>
-              <div><div class="font-semibold text-[var(--gold)]">เตรียมให้พร้อมก่อนซื้อ</div><div class="text-xs text-[var(--text-4)]">ทำตามขั้นตอน แล้วติ๊กเพื่อยืนยัน</div></div>
+              <div><div class="font-semibold text-[var(--gold-text)]">เตรียมให้พร้อมก่อนซื้อ</div><div class="text-xs text-[var(--text-4)]">ทำตามขั้นตอน แล้วติ๊กเพื่อยืนยัน</div></div>
             </div>
             <label class="relative flex items-start gap-3 rounded-xl border border-[var(--border-light)] bg-[var(--bg)]/55 p-4 cursor-pointer transition hover:border-[var(--gold)]/60">
               <input data-purchase-confirm type="checkbox" name="purchaseConfirmed" value="yes" required class="peer mt-0.5 h-6 w-6 shrink-0 accent-[var(--gold)]" />
@@ -201,7 +201,7 @@
             </label>
             <div class="relative mt-4 grid gap-2 sm:grid-cols-2">
               <% if (product.purchaseActionUrl) { %>
-                <a href="<%= product.purchaseActionUrl %>" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)]/50 bg-[var(--input)] px-5 py-3 text-center text-sm font-semibold text-[var(--gold)] transition hover:-translate-y-0.5 hover:border-[var(--gold)] hover:bg-[var(--gold)]/10">↗ <%= product.purchaseActionLabel || 'ไปทำขั้นตอนนี้ก่อน' %></a>
+                <a href="<%= product.purchaseActionUrl %>" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)]/50 bg-[var(--input)] px-5 py-3 text-center text-sm font-semibold text-[var(--gold-text)] transition hover:-translate-y-0.5 hover:border-[var(--gold)] hover:bg-[var(--gold)]/10">↗ <%= product.purchaseActionLabel || 'ไปทำขั้นตอนนี้ก่อน' %></a>
               <% } %>
               <button data-purchase-submit disabled class="min-h-12 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[var(--gold-contrast)] opacity-50 transition enabled:hover:-translate-y-0.5 enabled:hover:bg-[var(--gold-hover)] disabled:cursor-not-allowed <%= product.purchaseActionUrl ? '' : 'sm:col-span-2' %>">✓ ยืนยันและเพิ่มลงตะกร้า</button>
             </div>
@@ -212,19 +212,19 @@
         <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมด กรุณาเลือกสินค้าอื่น</div>
       <% } %>
       <div class="mt-3 grid grid-cols-2 gap-2 sm:flex">
-        <a href="/account/topup" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)] bg-[var(--gold)]/10 px-6 py-3 text-sm font-bold text-[var(--gold)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--gold)] hover:text-[var(--gold-contrast)]">
+        <a href="/account/topup" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)] bg-[var(--gold)]/10 px-6 py-3 text-sm font-bold text-[var(--gold-text)] shadow-sm transition hover:-translate-y-0.5 hover:bg-[var(--gold)] hover:text-[var(--gold-contrast)]">
           <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 7.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a3 3 0 0 1-3-3v-10a3 3 0 0 1 3-3h12v4" />
             <path d="M16 12h4v4h-4a2 2 0 0 1 0-4Z" />
           </svg>
           <span>เติมเงิน</span>
         </a>
-        <a href="/contact" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-6 py-3 text-sm font-medium transition hover:border-[var(--gold)] hover:text-[var(--gold)]">💬 ติดต่อร้าน</a>
+        <a href="/contact" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-6 py-3 text-sm font-medium transition hover:border-[var(--gold)] hover:text-[var(--gold-text)]">💬 ติดต่อร้าน</a>
       </div>
 
       <% if (product.fulfillmentMode === 'contact' && product.fulfillmentInstructions) { %>
         <div class="mt-4 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm">
-          <div class="font-medium text-[var(--gold)] mb-1">ข้อมูลที่ต้องเตรียมสำหรับรับสินค้า</div>
+          <div class="font-medium text-[var(--gold-text)] mb-1">ข้อมูลที่ต้องเตรียมสำหรับรับสินค้า</div>
           <div class="text-[var(--text-2)] whitespace-pre-line"><%= product.fulfillmentInstructions %></div>
         </div>
       <% } %>
@@ -252,7 +252,7 @@
 
   <div class="mt-10">
     <div class="flex gap-1 border-b border-[var(--border)] text-sm overflow-x-auto" id="tabbar">
-      <button data-tab="terms" class="tab-btn px-4 py-2 border-b-2 border-[var(--gold)] text-[var(--gold)] whitespace-nowrap">เงื่อนไข</button>
+      <button data-tab="terms" class="tab-btn px-4 py-2 border-b-2 border-[var(--gold)] text-[var(--gold-text)] whitespace-nowrap">เงื่อนไข</button>
       <button data-tab="gallery" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">ภาพเกม</button>
       <button data-tab="about" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">รายละเอียด</button>
     </div>
@@ -311,10 +311,10 @@
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('border-[var(--gold)]', 'text-[var(--gold)]');
+        b.classList.remove('border-[var(--gold)]', 'text-[var(--gold-text)]');
         b.classList.add('border-transparent', 'text-[var(--text-3)]');
       });
-      btn.classList.add('border-[var(--gold)]', 'text-[var(--gold)]');
+      btn.classList.add('border-[var(--gold)]', 'text-[var(--gold-text)]');
       btn.classList.remove('border-transparent', 'text-[var(--text-3)]');
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.add('hidden'));
       document.getElementById('tab-' + btn.dataset.tab).classList.remove('hidden');

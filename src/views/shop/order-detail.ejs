@@ -1,5 +1,5 @@
 <section class="max-w-3xl mx-auto px-4 py-8">
-  <a href="/account/orders" class="text-sm text-[var(--gold)]">← กลับไปหน้าคำสั่งซื้อ</a>
+  <a href="/account/orders" class="text-sm text-[var(--gold-text)]">← กลับไปหน้าคำสั่งซื้อ</a>
   <h1 class="text-2xl font-bold mt-2 mb-1">คำสั่งซื้อ #<%= order.id %></h1>
   <p class="text-[var(--text-3)] text-sm mb-6"><%= new Date(order.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %> &middot; สถานะ: <span class="text-emerald-400"><%= order.status %></span></p>
 
@@ -13,12 +13,12 @@
           </div>
           <div class="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5">
             <div class="min-w-0"><div class="text-[10px] text-[var(--text-4)] mb-0.5">สินค้า</div><h2 class="font-bold text-base sm:text-lg leading-snug break-words"><%= i.productTitle %></h2></div>
-            <span class="text-[var(--gold)] font-bold whitespace-nowrap">฿<%= i.price.toLocaleString() %>.00</span>
+            <span class="text-[var(--gold-text)] font-bold whitespace-nowrap">฿<%= i.price.toLocaleString() %>.00</span>
           </div>
         </div>
         <% if (i.fulfillmentMode === 'contact') { %>
           <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm">
-            <div class="font-semibold text-[var(--gold)] mb-1">กรุณาติดต่อร้านเพื่อรับสินค้า</div>
+            <div class="font-semibold text-[var(--gold-text)] mb-1">กรุณาติดต่อร้านเพื่อรับสินค้า</div>
             <% if (i.fulfillmentInstructions) { %><div class="text-[var(--text-2)] whitespace-pre-line mb-3"><%= i.fulfillmentInstructions %></div><% } %>
             <textarea class="contact-order-message hidden"><%= i.contactMessageIntro || 'สวัสดีครับ ต้องการติดต่อรับสินค้า' %>
 หมายเลขคำสั่งซื้อ: #<%= order.id %>
@@ -45,7 +45,7 @@
     <% if (order.discount > 0) { %>
       <div class="flex justify-between text-emerald-400"><span>ส่วนลด <%= order.couponCode ? '('+order.couponCode+')' : '' %></span><span>-฿<%= order.discount.toLocaleString() %>.00</span></div>
     <% } %>
-    <div class="flex justify-between text-lg font-bold pt-2 border-t border-[var(--border)] mt-2"><span>ยอดชำระ</span><span class="text-[var(--gold)]">฿<%= order.total.toLocaleString() %>.00</span></div>
+    <div class="flex justify-between text-lg font-bold pt-2 border-t border-[var(--border)] mt-2"><span>ยอดชำระ</span><span class="text-[var(--gold-text)]">฿<%= order.total.toLocaleString() %>.00</span></div>
   </div>
 </section>
 

@@ -149,6 +149,38 @@ function contrastTextFor(hex) {
   return contrastWithBlack >= contrastWithWhite ? '#111111' : '#f5f5f5';
 }
 
+function contrastRatio(hexA, hexB) {
+  const a = relativeLuminance(hexA), b = relativeLuminance(hexB);
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+}
+
+// The accent is also used directly AS TEXT everywhere (prices, labels,
+// highlighted titles, icons) sitting straight on the page's own --bg/--card —
+// a fine brand color for FILLS (paired with --gold-contrast) can still be
+// unreadable as bare text if a shop picks a dark accent in dark mode (or a
+// very light one in light mode), since then accent and page background are
+// both near the same end of the lightness scale. Nudges the accent's
+// lightness (keeping its hue) just enough to clear a readable contrast
+// ratio against this mode's own background, instead of silently rendering
+// invisible text — falls back to plain white/black only if hue-preserving
+// adjustment still can't clear the bar.
+function readableAccentOn(accentHex, bgHex, minRatio = 3.0) {
+  if (contrastRatio(accentHex, bgHex) >= minRatio) return accentHex;
+  const { h, s } = hexToHsl(accentHex);
+  const bgIsDark = relativeLuminance(bgHex) < 0.4;
+  // A near-neutral accent (grays/black/silver/white presets) has no real
+  // hue to preserve — forcing saturation back in would tint it an arbitrary
+  // color instead of just lightening/darkening the same gray.
+  const sat = s < 0.05 ? 0 : Math.max(s, 0.35);
+  for (let step = 1; step <= 16; step += 1) {
+    const l = bgIsDark ? 0.5 + step * 0.03 : 0.5 - step * 0.03;
+    if (l < 0.05 || l > 0.95) break;
+    const candidate = hslToHex(h, sat, l);
+    if (contrastRatio(candidate, bgHex) >= minRatio) return candidate;
+  }
+  return bgIsDark ? '#f5f5f5' : '#111111';
+}
+
 function hslToHex(h, s, l) {
   h = ((h % 360) + 360) % 360;
   const c = (1 - Math.abs(2 * l - 1)) * s;
@@ -213,6 +245,7 @@ function renderCss(theme) {
       --gold-light: ${accentLight};
       --gold-dark: ${accentDark};
       --gold-contrast: ${accentContrast};
+      --gold-text: ${readableAccentOn(accent, vars.bg)};
       --text: ${vars.text};
       --text-2: ${vars.text2};
       --text-3: ${vars.text3};

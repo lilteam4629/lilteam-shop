@@ -1,5 +1,5 @@
 <section class="max-w-lg mx-auto px-4 py-10">
-  <a href="/account" class="text-sm text-[var(--gold)] hover:text-[var(--gold-hover)]">← กลับไปหน้าบัญชี</a>
+  <a href="/account" class="text-sm text-[var(--gold-text)] hover:text-[var(--gold-hover)]">← กลับไปหน้าบัญชี</a>
 
   <div class="flex items-center gap-3 mt-3 mb-6">
     <span class="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[var(--gold-contrast)] flex items-center justify-center text-2xl shadow-[0_6px_18px_-6px_color-mix(in_srgb,var(--gold)_70%,transparent)]">💰</span>
@@ -11,7 +11,7 @@
 
   <!-- Channel Select Tabs -->
   <div class="grid grid-cols-2 gap-2 mb-4">
-    <button type="button" id="tabTruemoney" onclick="switchTab('truemoney')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]">
+    <button type="button" id="tabTruemoney" onclick="switchTab('truemoney')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold-text)]">
       <img src="/images/truemoney-wallet.jpg" alt="TrueMoney Wallet" class="w-7 h-7 rounded-lg object-cover" /> <span>ซองของขวัญ TrueMoney</span>
     </button>
     <button type="button" id="tabBank" onclick="switchTab('bank')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--border-light)] bg-[var(--card)] text-[var(--text-3)] hover:border-[var(--gold)]/50">
@@ -21,7 +21,7 @@
 
   <!-- Form 1: TrueMoney Angpao (Instant & Automatic) -->
   <div id="sectionTruemoney" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-5 shadow-[0_18px_40px_-24px_rgba(0,0,0,.5)]">
-    <div class="flex items-center gap-2 text-sm font-semibold text-[var(--gold)]">
+    <div class="flex items-center gap-2 text-sm font-semibold text-[var(--gold-text)]">
       <img src="/images/truemoney-wallet.jpg" alt="TrueMoney Wallet" class="w-8 h-8 rounded-lg object-cover" /> <span>เติมเงินด้วยซองของขวัญ TrueMoney (เข้าทันที)</span>
     </div>
 
@@ -119,12 +119,12 @@
     const secBk = document.getElementById('sectionBank');
 
     if (tab === 'truemoney') {
-      tabTm.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]';
+      tabTm.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold-text)]';
       tabBk.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--border-light)] bg-[var(--card)] text-[var(--text-3)] hover:border-[var(--gold)]/50';
       secTm.classList.remove('hidden');
       secBk.classList.add('hidden');
     } else {
-      tabBk.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold)]';
+      tabBk.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold-text)]';
       tabTm.className = 'flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--border-light)] bg-[var(--card)] text-[var(--text-3)] hover:border-[var(--gold)]/50';
       secBk.classList.remove('hidden');
       secTm.classList.add('hidden');

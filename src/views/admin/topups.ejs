@@ -6,7 +6,7 @@
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <div class="flex items-center gap-2 text-xs text-[var(--text-4)] mb-1">
-        <a href="/admin" class="text-[var(--gold)] hover:underline font-semibold">แอดมิน</a>
+        <a href="/admin" class="text-[var(--gold-text)] hover:underline font-semibold">แอดมิน</a>
         <span>/</span>
         <span>การเงิน</span>
       </div>
@@ -35,7 +35,7 @@
 
   <!-- Subsystem Navigation Tabs -->
   <div class="flex border-b border-[var(--border)] gap-2 overflow-x-auto pb-px">
-    <button type="button" onclick="switchTopupTab('requests')" id="topup-tab-btn-requests" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-sm transition border-[var(--gold)] text-[var(--gold)] bg-[var(--gold)]/5 rounded-t-xl">
+    <button type="button" onclick="switchTopupTab('requests')" id="topup-tab-btn-requests" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-sm transition border-[var(--gold)] text-[var(--gold-text)] bg-[var(--gold)]/5 rounded-t-xl">
       <span class="text-base">📋</span>
       <span>รายการเติมเงิน & สลิป</span>
       <% if (pendingCount > 0) { %>
@@ -150,7 +150,7 @@
 
               <!-- Amount & Action Buttons -->
               <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-[var(--border)]">
-                <div class="text-2xl font-black text-[var(--gold)] tracking-tight">
+                <div class="text-2xl font-black text-[var(--gold-text)] tracking-tight">
                   ฿<%= Number(r.amount || 0).toLocaleString() %>.00
                 </div>
 
@@ -216,7 +216,7 @@
               </div>
 
               <div class="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-[var(--border)]">
-                <div class="text-lg font-bold text-[var(--gold)]">
+                <div class="text-lg font-bold text-[var(--gold-text)]">
                   ฿<%= Number(r.amount || 0).toLocaleString() %>.00
                 </div>
 
@@ -273,7 +273,7 @@
             <h3 class="font-bold text-sm">ค่ายที่ใช้ตรวจสลิป</h3>
             <p class="text-[11px] text-[var(--text-4)]">บัญชีรับเงินด้านล่างเป็นของร้านนี้ ใช้กับค่ายที่เลือกได้โดยไม่ปนกับร้านอื่น</p>
           </div>
-          <a href="/admin/easyslip-usage" class="text-xs font-bold text-[var(--gold)]">กรอก API ของค่าย →</a>
+          <a href="/admin/easyslip-usage" class="text-xs font-bold text-[var(--gold-text)]">กรอก API ของค่าย →</a>
         </div>
         <% const receiverProviders = [['easyslip','⚡','EasySlip'],['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go']].filter(item => availableReceiverProviders.includes(item[0])); %>
         <div class="flex flex-col gap-2">
@@ -289,7 +289,7 @@
 
       <% if (receiverProvider) { %>
       <div class="flex items-center justify-between gap-3">
-        <a href="/admin/topups?tab=bank" class="text-xs font-bold text-[var(--gold)]">← กลับไปเลือกค่าย</a>
+        <a href="/admin/topups?tab=bank" class="text-xs font-bold text-[var(--gold-text)]">← กลับไปเลือกค่าย</a>
         <span class="text-xs text-[var(--text-4)]">กำลังกรอกข้อมูลสำหรับ <b class="text-[var(--text)]"><%= ({easyslip:'EasySlip',slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go'})[receiverProvider] %></b></span>
       </div>
 
@@ -344,7 +344,7 @@
               </label>
             </div>
           <% } %>
-          <input type="file" name="promptpayQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--card)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
+          <input type="file" name="promptpayQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--card)] file:text-[var(--gold-text)] file:font-semibold file:text-xs" />
         </div>
       </div>
       <% } %>
@@ -405,7 +405,7 @@
               </label>
             </div>
           <% } %>
-          <input type="file" name="bankQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--card)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
+          <input type="file" name="bankQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--card)] file:text-[var(--gold-text)] file:font-semibold file:text-xs" />
         </div>
       </div>
 
@@ -510,7 +510,7 @@
            the platform EasySlip key and only enter their own receiving account. -->
       <div class="bg-gradient-to-r from-[var(--gold)]/10 via-[var(--card)] to-[var(--card)] border border-[var(--gold)]/30 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
+          <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold-text)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
             <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>⚡
             <% } else if (payment.slipProvider === 'slipok') { %>🛡️
             <% } else if (payment.slipProvider === 'easyslip') { %>⚡
@@ -570,7 +570,7 @@
 <script>
   function switchTopupTab(tabId) {
     document.querySelectorAll('.topup-tab-btn').forEach(btn => {
-      btn.classList.remove('border-[var(--gold)]', 'text-[var(--gold)]', 'bg-[var(--gold)]/5', 'font-bold');
+      btn.classList.remove('border-[var(--gold)]', 'text-[var(--gold-text)]', 'bg-[var(--gold)]/5', 'font-bold');
       btn.classList.add('border-transparent', 'text-[var(--text-3)]', 'font-semibold');
     });
     document.querySelectorAll('.topup-tab-content').forEach(content => {
@@ -582,7 +582,7 @@
 
     if (activeBtn) {
       activeBtn.classList.remove('border-transparent', 'text-[var(--text-3)]', 'font-semibold');
-      activeBtn.classList.add('border-[var(--gold)]', 'text-[var(--gold)]', 'bg-[var(--gold)]/5', 'font-bold');
+      activeBtn.classList.add('border-[var(--gold)]', 'text-[var(--gold-text)]', 'bg-[var(--gold)]/5', 'font-bold');
     }
     if (activeContent) {
       activeContent.classList.remove('hidden');

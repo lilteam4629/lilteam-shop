@@ -34,7 +34,7 @@
               <%= waiting ? 'รอเวลาเปิดขาย' : 'เปิดขายแล้ว' %>
             </span>
             <% if (product.eventBadge) { %>
-              <span class="text-[10px] font-semibold text-[var(--gold)] bg-[var(--gold)]/10 px-2 py-0.5 rounded-full">
+              <span class="text-[10px] font-semibold text-[var(--gold-text)] bg-[var(--gold)]/10 px-2 py-0.5 rounded-full">
                 <%= product.eventBadge %>
               </span>
             <% } %>
@@ -48,8 +48,8 @@
         </div>
 
         <div class="pt-2 flex items-center justify-between border-t border-[var(--border)] mt-2">
-          <span class="text-xs font-bold text-[var(--gold)]">฿<%= product.price.toLocaleString() %></span>
-          <a href="/admin/products/<%= product.id %>/edit" class="text-xs font-semibold text-[var(--gold)] hover:underline inline-flex items-center gap-1">
+          <span class="text-xs font-bold text-[var(--gold-text)]">฿<%= product.price.toLocaleString() %></span>
+          <a href="/admin/products/<%= product.id %>/edit" class="text-xs font-semibold text-[var(--gold-text)] hover:underline inline-flex items-center gap-1">
             <span>แก้ไขสินค้าและเวลา</span>
             <span>→</span>
           </a>

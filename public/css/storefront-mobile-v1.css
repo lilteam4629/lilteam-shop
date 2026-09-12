@@ -33,7 +33,7 @@
     border-color: color-mix(in srgb,var(--gold) 22%,var(--border)) !important;
     font-size: 12px !important; font-weight: 600;
   }
-  .store-nav__mobile-row nav a:active { border-color: var(--gold) !important; color: var(--gold); }
+  .store-nav__mobile-row nav a:active { border-color:var(--gold) !important; color:var(--gold-text); }
   .store-nav__account-menu { position: fixed; top: 60px; right: 10px; width: min(320px,calc(100vw - 20px)); max-height: calc(100dvh - 72px); overflow-y: auto; overscroll-behavior: contain; }
 
   /* All common page surfaces fit the viewport and retain useful spacing. */
@@ -452,7 +452,7 @@
     white-space: nowrap !important;
   }
   .store-filter-section .filter-chip.active > span:first-child {
-    border-color: var(--gold) !important;
+    border-color:var(--gold) !important;
     box-shadow: 0 0 0 2px color-mix(in srgb,var(--gold) 18%,transparent) !important;
   }
   .store-filter-section #scrollLeftBtn,

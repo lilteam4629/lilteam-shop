@@ -27,7 +27,7 @@
         <label class="bg-preset-card relative flex flex-col gap-1 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer">
           <input type="radio" name="bgPreset" value="<%= p.key %>" class="bg-preset-input sr-only" <%= (!currentTheme.bgColor && currentTheme.bgPreset === p.key) ? 'checked' : '' %> />
           <span class="text-xs font-medium"><%= p.label %></span>
-          <span class="bg-preset-check hidden absolute top-2 right-2 text-[var(--gold)] text-xs">✓</span>
+          <span class="bg-preset-check hidden absolute top-2 right-2 text-[var(--gold-text)] text-xs">✓</span>
         </label>
       <% }) %>
     </div>
@@ -47,13 +47,13 @@
         <label class="style-card relative flex flex-col items-center gap-1 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer text-center">
           <input type="radio" name="style" value="<%= s.key %>" class="style-input sr-only" <%= currentTheme.style === s.key ? 'checked' : '' %> />
           <span class="text-xs font-medium"><%= s.label %></span>
-          <span class="style-check hidden absolute top-2 right-2 text-[var(--gold)] text-xs">✓</span>
+          <span class="style-check hidden absolute top-2 right-2 text-[var(--gold-text)] text-xs">✓</span>
         </label>
       <% }) %>
     </div>
   </div>
 
-  <p class="text-xs text-[var(--text-4)]">💡 อยากเปลี่ยนรูปแบบการ์ดสินค้า (คลาสสิก/เต็มรูป) ไปตั้งได้ที่หน้า <a href="/admin/products" class="text-[var(--gold)] underline">สินค้า</a> ด้านบนตารางเลยครับ</p>
+  <p class="text-xs text-[var(--text-4)]">💡 อยากเปลี่ยนรูปแบบการ์ดสินค้า (คลาสสิก/เต็มรูป) ไปตั้งได้ที่หน้า <a href="/admin/products" class="text-[var(--gold-text)] underline">สินค้า</a> ด้านบนตารางเลยครับ</p>
 
   <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium rounded-lg py-2.5 text-sm">บันทึกธีมสี</button>
 </form>

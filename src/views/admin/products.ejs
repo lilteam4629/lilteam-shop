@@ -25,11 +25,11 @@
       </button>
       <div id="bulk-actions-menu" role="menu" class="admin-action-menu hidden absolute left-0 mt-2 w-64 max-w-[calc(100vw-2rem)] bg-[var(--card)] border border-[var(--border)] rounded-xl shadow-2xl z-30 overflow-hidden py-1.5">
         <div class="admin-action-menu__head"><span>คำสั่งสินค้า</span><small><%= products.length %> รายการ</small></div>
-        <a href="/admin/products/bulk-import" class="admin-action-item flex items-center gap-2 px-4 py-2.5 text-xs text-[var(--text-2)] hover:bg-[var(--input)] hover:text-[var(--gold)] transition">
+        <a href="/admin/products/bulk-import" class="admin-action-item flex items-center gap-2 px-4 py-2.5 text-xs text-[var(--text-2)] hover:bg-[var(--input)] hover:text-[var(--gold-text)] transition">
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
           <span>นำเข้าจากโฟลเดอร์</span>
         </a>
-        <button type="button" id="bulk-price-open" class="admin-action-item w-full flex items-center gap-2 px-4 py-2.5 text-xs text-[var(--gold)] hover:bg-[var(--input)] transition text-left">
+        <button type="button" id="bulk-price-open" class="admin-action-item w-full flex items-center gap-2 px-4 py-2.5 text-xs text-[var(--gold-text)] hover:bg-[var(--input)] transition text-left">
           <span class="w-4 text-center shrink-0">%</span>
           <span>ลดหรือเพิ่มราคาเป็นเปอร์เซ็นต์</span>
         </button>
@@ -80,7 +80,7 @@
       })();
     </script>
     <% } else { %>
-    <a href="/admin/products/bulk-import" class="inline-flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] hover:text-[var(--gold)] font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
+    <a href="/admin/products/bulk-import" class="inline-flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] hover:text-[var(--gold-text)] font-medium px-3.5 py-2 rounded-xl text-xs transition active:scale-95">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
       <span>นำเข้าโฟลเดอร์</span>
     </a>
@@ -181,7 +181,7 @@
                   <% } %>
                 </div>
                 <div class="min-w-0">
-                  <div class="font-bold text-sm text-[var(--text)] hover:text-[var(--gold)] transition truncate">
+                  <div class="font-bold text-sm text-[var(--text)] hover:text-[var(--gold-text)] transition truncate">
                     <a href="/admin/products/<%= p.id %>/edit"><%= p.title %></a>
                   </div>
                   <div class="text-[11px] text-[var(--text-4)] font-mono truncate">slug: <%= p.slug %></div>
@@ -204,7 +204,7 @@
 
             <!-- Price -->
             <td class="py-3 px-4 whitespace-nowrap">
-              <button type="button" data-price-edit data-product-id="<%= p.id %>" data-product-title="<%= p.title %>" data-price="<%= p.price %>" class="font-bold text-sm text-[var(--gold)] hover:underline decoration-dashed underline-offset-4" title="กดเพื่อแก้ราคา">฿<%= p.price.toLocaleString() %></button>
+              <button type="button" data-price-edit data-product-id="<%= p.id %>" data-product-title="<%= p.title %>" data-price="<%= p.price %>" class="font-bold text-sm text-[var(--gold-text)] hover:underline decoration-dashed underline-offset-4" title="กดเพื่อแก้ราคา">฿<%= p.price.toLocaleString() %></button>
               <% if (p.originalPrice > p.price) { %>
                 <div class="text-[11px] text-[var(--coral)] line-through">฿<%= p.originalPrice.toLocaleString() %></div>
               <% } %>
@@ -237,7 +237,7 @@
             <td class="py-3 px-4 text-right whitespace-nowrap">
               <div class="inline-flex items-center gap-1">
                 <!-- Stock Button -->
-                <a href="/admin/products/<%= p.id %>/stock" class="p-1.5 rounded-lg text-[var(--text-3)] hover:text-[var(--gold)] hover:bg-[var(--input)] transition" title="จัดการสต็อกสินค้า">
+                <a href="/admin/products/<%= p.id %>/stock" class="p-1.5 rounded-lg text-[var(--text-3)] hover:text-[var(--gold-text)] hover:bg-[var(--input)] transition" title="จัดการสต็อกสินค้า">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                 </a>
 
@@ -321,7 +321,7 @@
 
 <aside id="product-price-total" data-total="<%= totalProductPrice %>" class="fixed bottom-5 right-5 z-40 min-w-[210px] rounded-2xl border border-[var(--gold)]/35 bg-[var(--card)]/95 px-4 py-3 text-right shadow-xl backdrop-blur-xl" aria-live="polite">
   <span class="block text-[10px] font-semibold text-[var(--text-3)]">ราคารวมสินค้าทั้งหมด <%= products.length.toLocaleString() %> รายการ</span>
-  <strong class="mt-1 block text-xl font-extrabold text-[var(--gold)]">฿<%= totalProductPrice.toLocaleString() %></strong>
+  <strong class="mt-1 block text-xl font-extrabold text-[var(--gold-text)]">฿<%= totalProductPrice.toLocaleString() %></strong>
 </aside>
 
 <script>

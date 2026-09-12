@@ -51,13 +51,13 @@
     <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1 min-w-0 bg-gradient-to-t from-black via-black/55 to-transparent">
       <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
         <div class="mb-0.5 flex min-h-7 min-w-0 items-center justify-between gap-1.5 rounded-md border border-[var(--gold)]/45 bg-[#17140c]/90 px-2">
-          <span class="truncate text-[8px] font-bold tracking-wide text-[var(--gold)]"><%= p.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></span>
+          <span class="truncate text-[8px] font-bold tracking-wide text-[var(--gold-text)]"><%= p.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></span>
           <span class="flash-countdown shrink-0 font-mono text-[12px] font-black tracking-wide text-[var(--gold-light)] [text-shadow:0_0_8px_color-mix(in_srgb,var(--gold)_50%,transparent)]" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>><%= flashInitial %></span>
         </div>
       <% } %>
       <h3 class="font-semibold text-sm line-clamp-2 text-white [text-shadow:0_2px_8px_rgba(0,0,0,.95)] group-hover:text-[var(--gold-light)] transition-colors"><%= p.title %></h3>
       <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 min-w-0">
-        <span class="text-[var(--gold)] font-bold text-[15px] whitespace-nowrap [text-shadow:0_0_12px_color-mix(in_srgb,var(--gold)_50%,transparent)]">฿<%= p.price.toLocaleString() %>.00</span>
+        <span class="text-[var(--gold-text)] font-bold text-[15px] whitespace-nowrap [text-shadow:0_0_12px_color-mix(in_srgb,var(--gold)_50%,transparent)]">฿<%= p.price.toLocaleString() %>.00</span>
         <% if (crossedPrice > p.price) { %>
           <span class="text-[var(--coral)] text-[11px] line-through whitespace-nowrap">฿<%= crossedPrice.toLocaleString() %>.00</span>
         <% } %>
@@ -109,14 +109,14 @@
   <div class="p-3 flex flex-col gap-1.5 min-w-0">
     <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
       <div class="mb-0.5 flex min-h-7 min-w-0 items-center justify-between gap-1.5 rounded-md border border-[var(--gold)]/45 bg-[var(--input)] px-2">
-        <span class="truncate text-[8px] font-bold tracking-wide text-[var(--gold)]"><%= p.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></span>
-        <span class="flash-countdown shrink-0 font-mono text-[12px] font-black tracking-wide text-[var(--gold)]" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>><%= flashInitial %></span>
+        <span class="truncate text-[8px] font-bold tracking-wide text-[var(--gold-text)]"><%= p.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></span>
+        <span class="flash-countdown shrink-0 font-mono text-[12px] font-black tracking-wide text-[var(--gold-text)]" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>><%= flashInitial %></span>
       </div>
     <% } %>
-    <h3 class="font-semibold text-sm line-clamp-2 text-[var(--text)] group-hover:text-[var(--gold)] transition-colors min-w-0"><%= p.title %></h3>
+    <h3 class="font-semibold text-sm line-clamp-2 text-[var(--text)] group-hover:text-[var(--gold-text)] transition-colors min-w-0"><%= p.title %></h3>
     <div class="flex flex-wrap items-center justify-between gap-1.5 min-w-0">
       <div class="flex flex-wrap items-baseline gap-x-1.5 gap-y-0 min-w-0">
-        <span class="text-[var(--gold)] font-bold text-[15px] whitespace-nowrap">฿<%= p.price.toLocaleString() %>.00</span>
+        <span class="text-[var(--gold-text)] font-bold text-[15px] whitespace-nowrap">฿<%= p.price.toLocaleString() %>.00</span>
         <% if (crossedPrice > p.price) { %>
           <span class="text-[var(--coral)] text-[11px] line-through whitespace-nowrap">฿<%= crossedPrice.toLocaleString() %>.00</span>
         <% } %>

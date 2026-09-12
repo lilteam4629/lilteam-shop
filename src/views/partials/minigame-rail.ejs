@@ -30,7 +30,7 @@
   .rail-window:before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
   .rail-window:after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
 
-  .rail-pointer{position:absolute;z-index:6;left:50%;transform:translateX(-50%);color:var(--gold);font-size:1.15rem;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.85));animation:rail-blink 1.6s ease-in-out infinite}
+  .rail-pointer{position:absolute;z-index:6;left:50%;transform:translateX(-50%);color:var(--gold-text);font-size:1.15rem;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.85));animation:rail-blink 1.6s ease-in-out infinite}
   .rail-pointer-top{top:2px}
   .rail-pointer-bottom{bottom:2px}
   @keyframes rail-blink{0%,100%{opacity:1}50%{opacity:.55}}
@@ -50,9 +50,9 @@
   .rail-game.is-spinning .rail-pointer,.rail-game.is-spinning .rail-center{animation:none}
   .rail-game.is-spinning .rail-item img{filter:none}
   .rail-result{margin-top:.85rem;min-height:1.5rem}
-  .rail-claim{margin-top:.5rem;padding:.55rem;border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:.65rem;background:color-mix(in srgb,var(--gold) 12%,transparent);color:var(--gold);font-size:1.25rem;font-weight:800;letter-spacing:.1em}
+  .rail-claim{margin-top:.5rem;padding:.55rem;border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:.65rem;background:color-mix(in srgb,var(--gold) 12%,transparent);color:var(--gold-text);font-size:1.25rem;font-weight:800;letter-spacing:.1em}
   .rail-contact-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;margin-top:.65rem;padding:.65rem .85rem;border-radius:.7rem;color:var(--text);background:var(--input);border:1px solid var(--border-light);font-size:.8rem;font-weight:700;transition:border-color .2s,color .2s,transform .15s}
-  .rail-contact-btn:hover{color:var(--gold);border-color:var(--gold);transform:translateY(-1px)}
+  .rail-contact-btn:hover{color:var(--gold-text);border-color:var(--gold);transform:translateY(-1px)}
 
   @media (max-width: 639px){
     .rail-window{height:140px}

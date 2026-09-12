@@ -4,7 +4,7 @@
   <% if (!items.length) { %>
     <div class="text-center py-16 text-[var(--text-3)]">
       <p class="mb-4">ตะกร้าของคุณว่างเปล่า</p>
-      <a href="/products" class="text-[var(--gold)]">เลือกซื้อสินค้า →</a>
+      <a href="/products" class="text-[var(--gold-text)]">เลือกซื้อสินค้า →</a>
     </div>
   <% } else { %>
     <div class="space-y-3 mb-6">
@@ -15,9 +15,9 @@
           </a>
           <div class="flex-1 min-w-0 flex flex-col gap-2">
             <div>
-              <a href="/game/<%= i.product.slug %>" class="font-medium hover:text-[var(--gold)] line-clamp-2"><%= i.product.title %></a>
+              <a href="/game/<%= i.product.slug %>" class="font-medium hover:text-[var(--gold-text)] line-clamp-2"><%= i.product.title %></a>
               <div class="text-sm text-[var(--text-3)] mt-0.5">
-                <% if (i.product.flashSaleActive) { %><span class="font-bold text-[var(--gold)]">⚡ Flash Sale</span> · <% } %>
+                <% if (i.product.flashSaleActive) { %><span class="font-bold text-[var(--gold-text)]">⚡ Flash Sale</span> · <% } %>
                 ฿<%= i.unitPrice.toLocaleString() %>.00 / รายการ &middot; คงเหลือ <%= i.stock %>
                 <% if (i.product.priceOptions && i.product.priceOptions.length) { %><span class="text-[10px]">(ราคาลดตามจำนวน — อัปเดตจำนวนเพื่อดูราคาที่ถูกลง)</span><% } %>
               </div>
@@ -25,10 +25,10 @@
             <div class="flex flex-wrap items-center justify-between gap-3 mt-auto">
               <form action="/cart/update/<%= i.product.id %>" method="post" class="flex items-center gap-2">
                 <input type="number" name="qty" value="<%= i.qty %>" min="1" max="<%= i.stock %>" class="w-16 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 text-sm" />
-                <button class="text-xs text-[var(--gold)] hover:text-[var(--gold-hover)]">อัปเดต</button>
+                <button class="text-xs text-[var(--gold-text)] hover:text-[var(--gold-hover)]">อัปเดต</button>
               </form>
               <div class="flex items-center gap-4">
-                <span class="font-semibold text-[var(--gold)]">฿<%= i.subtotal.toLocaleString() %>.00</span>
+                <span class="font-semibold text-[var(--gold-text)]">฿<%= i.subtotal.toLocaleString() %>.00</span>
                 <form action="/cart/remove/<%= i.product.id %>" method="post">
                   <button class="text-[var(--coral)] text-sm hover:underline">ลบ</button>
                 </form>
@@ -53,7 +53,7 @@
       <% } %>
       <div class="flex items-center justify-between text-lg font-bold pt-2 border-t border-[var(--border)]">
         <span>ยอดรวม</span>
-        <span class="text-[var(--gold)]">฿<%= total.toLocaleString() %>.00</span>
+        <span class="text-[var(--gold-text)]">฿<%= total.toLocaleString() %>.00</span>
       </div>
       <form action="/cart/checkout" method="post">
         <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] rounded-lg py-3 font-medium">ชำระเงินด้วยกระเป๋าเงิน (Demo)</button>
