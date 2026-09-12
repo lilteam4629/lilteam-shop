@@ -6,6 +6,7 @@ const FEATURE_CATALOG = Object.freeze([
   { key: 'music', label: 'เพลงหน้าเว็บ', description: 'เครื่องเล่นเพลงที่ตั้งค่าไว้ในร้าน' },
   { key: 'snow', label: 'เอฟเฟกต์หิมะ', description: 'หิมะตกบนหน้าร้าน' },
   { key: 'welcomePopup', label: 'ป๊อปอัปต้อนรับ', description: 'ป๊อปอัปภาพหรือข้อความเมื่อเข้าหน้าร้าน' },
+  { key: 'rain', label: 'ฝนตกหน้าเว็บ', description: 'ฝนแบบ Canvas ปรับสีและความเข้ม รองรับมือถือ' },
 ]);
 
 const FEATURE_KEYS = new Set(FEATURE_CATALOG.map(feature => feature.key));
@@ -18,6 +19,7 @@ function readFeatureState(db) {
     music: settings.music?.enabled === true,
     snow: settings.snow?.enabled === true,
     welcomePopup: settings.welcomePopup?.enabled === true,
+    rain: settings.rain?.enabled === true,
   };
 }
 
@@ -74,6 +76,7 @@ function applyFeature(db, feature, enabled) {
   if (feature === 'music') (settings.music ||= {}).enabled = enabled;
   if (feature === 'snow') (settings.snow ||= {}).enabled = enabled;
   if (feature === 'welcomePopup') (settings.welcomePopup ||= {}).enabled = enabled;
+  if (feature === 'rain') (settings.rain ||= { color: '#78c8ff', intensity: 'medium' }).enabled = enabled;
 }
 
 function selectShops(platformShops, scope, requestedIds) {

@@ -730,6 +730,27 @@
     })();
   </script>
   <% } %>
+  <% if (typeof settings !== 'undefined' && settings.rain && settings.rain.enabled) { const rain = settings.rain; %>
+  <canvas id="store-rain" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20"></canvas>
+  <script>
+    (function(){
+      const canvas=document.getElementById('store-rain'); if(!canvas||!canvas.getContext)return;
+      const ctx=canvas.getContext('2d',{alpha:true});
+      const color=<%- JSON.stringify(/^#[0-9a-fA-F]{6}$/.test(rain.color||'')?rain.color:'#78c8ff') %>;
+      const level=<%- JSON.stringify(['light','medium','heavy'].includes(rain.intensity)?rain.intensity:'medium') %>;
+      const coarse=matchMedia('(max-width:900px), (pointer:coarse)').matches;
+      const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
+      const limits={light:coarse?18:36,medium:coarse?30:62,heavy:coarse?44:92};
+      let drops=[],frame=0,last=0,w=0,h=0,dpr=1;
+      function reset(drop,randomY){drop.x=Math.random()*w;drop.y=randomY?Math.random()*h:-30;drop.len=8+Math.random()*16;drop.speed=(coarse?7:9)+Math.random()*7;drop.alpha=.22+Math.random()*.42;return drop}
+      function resize(){dpr=Math.min(devicePixelRatio||1,1.5);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);drops=Array.from({length:reduced?0:limits[level]},()=>reset({},true))}
+      function draw(now){frame=requestAnimationFrame(draw);if(document.hidden||now-last<16)return;last=now;ctx.clearRect(0,0,w,h);ctx.lineWidth=1.15;ctx.lineCap='round';for(const d of drops){ctx.globalAlpha=d.alpha;ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-2,d.y+d.len);ctx.stroke();d.x-=.65;d.y+=d.speed;if(d.y>h+30)reset(d,false)}ctx.globalAlpha=1}
+      let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(resize,160)},{passive:true});
+      document.addEventListener('visibilitychange',()=>{if(!document.hidden)last=performance.now()});resize();frame=requestAnimationFrame(draw);
+      addEventListener('pagehide',()=>cancelAnimationFrame(frame),{once:true});
+    })();
+  </script>
+  <% } %>
 <script>
   (function () {
     let performanceObserver = null;

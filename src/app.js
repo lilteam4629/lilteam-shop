@@ -16,6 +16,7 @@ const cartRoutes = require('./routes/cart');
 const accountRoutes = require('./routes/account');
 const minigameRoutes = require('./routes/minigame');
 const adminRoutes = require('./routes/admin');
+const customSystemsAdminRoutes = require('./routes/custom-systems-admin');
 const licenseRoutes = require('./routes/license');
 const internalApiRoutes = require('./routes/internal-api');
 const { tenantResolver, MAIN_DOMAIN } = require('./middleware/tenant');
@@ -219,6 +220,7 @@ app.use('/', authRoutes);
 app.use('/cart', cartRoutes);
 app.use('/account', accountRoutes);
 app.use('/minigame', minigameRoutes);
+app.use('/admin', customSystemsAdminRoutes);
 app.use('/admin', adminRoutes);
 
 app.use((req, res) => {

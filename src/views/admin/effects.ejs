@@ -80,5 +80,16 @@
     </div>
   </div>
 
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+    <div class="flex items-center gap-3 mb-4"><div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">🌧️</div><div><h3 class="font-bold text-sm sm:text-base">ระบบฝนตกหน้าเว็บ</h3><p class="text-[11px] text-[var(--text-4)]">ฝน Canvas ลื่นบนมือถือ ปรับสีและจำนวนหยดได้ ไม่รบกวนการกดใช้งาน</p></div></div>
+    <% const rain = settings.rain || { enabled:false, color:'#78c8ff', intensity:'medium' }; %>
+    <form action="/admin/effects/rain" method="post" class="grid sm:grid-cols-3 gap-3 items-end">
+      <label class="text-xs font-semibold">สีของฝน<input type="color" name="color" value="<%= rain.color || '#78c8ff' %>" class="mt-1.5 block w-full h-11 bg-[var(--input)] border border-[var(--border-light)] rounded-xl p-1"></label>
+      <label class="text-xs font-semibold">ความเข้ม<select name="intensity" class="mt-1.5 block w-full h-11 bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3"><option value="light" <%= rain.intensity==='light'?'selected':'' %>>เบา</option><option value="medium" <%= rain.intensity==='medium'?'selected':'' %>>กำลังสวย</option><option value="heavy" <%= rain.intensity==='heavy'?'selected':'' %>>ฝนหนัก</option></select></label>
+      <label class="flex h-11 items-center gap-2 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-3 text-xs font-semibold"><input type="checkbox" name="enabled" <%= rain.enabled?'checked':'' %>> เปิดใช้งานฝนตก</label>
+      <button class="sm:col-span-3 rounded-xl bg-[var(--gold)] text-[var(--bg)] font-bold py-3">บันทึกระบบฝนตก</button>
+    </form>
+  </div>
+
 </div>
 

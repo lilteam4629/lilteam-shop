@@ -71,5 +71,10 @@ function fixture(failOnSave) {
   assert.equal(readFeatureState(releases.dbs.get('shop-b')).snow, true);
   assert.equal(releases.dbs.get('shop-b').settings.systemModules.snow.version, '1.0.0');
   assert.equal(releases.api.platformData.tenantFeatureReleases[0].deployments[0].shopIds[0], 'shop-b');
+
+  const rain = fixture();
+  await updateTenantFeatures({ scope: 'selected', shopIds: ['shop-a'], feature: 'rain', action: 'enable' }, rain.api);
+  assert.deepEqual(rain.dbs.get('shop-a').settings.rain, { color: '#78c8ff', intensity: 'medium', enabled: true });
+  assert.equal(rain.dbs.get('shop-b').settings.rain, undefined);
   console.log('Tenant delivery checks passed: selected, all, releases, concurrent data preservation, rollback');
 })().catch(error => { console.error(error); process.exitCode = 1; });
