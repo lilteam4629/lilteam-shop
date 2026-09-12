@@ -28,7 +28,7 @@
     <% } %>
 
     <% if (p.flashSaleActive) { %>
-      <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center bg-[var(--gold)] pl-4 pr-2 text-[9px] font-black tracking-wider text-[var(--bg)]">
+      <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center bg-[var(--gold)] pl-4 pr-2 text-[9px] font-black tracking-wider text-[var(--gold-contrast)]">
         ⚡ <span class="hidden min-[380px]:inline">ลดพิเศษ</span><span class="min-[380px]:hidden">SALE</span>
       </div>
     <% } else if (p.flashSaleUpcoming) { %>
@@ -92,7 +92,7 @@
       <% } %>
 
       <% if (p.flashSaleActive) { %>
-        <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center bg-[var(--gold)] pl-4 pr-2 text-[9px] font-black tracking-wider text-[var(--bg)]">
+        <div class="flash-corner-tag absolute right-0 top-0 z-20 flex h-8 items-center bg-[var(--gold)] pl-4 pr-2 text-[9px] font-black tracking-wider text-[var(--gold-contrast)]">
           ⚡ <span class="hidden min-[380px]:inline">ลดพิเศษ</span><span class="min-[380px]:hidden">SALE</span>
         </div>
       <% } else if (p.flashSaleUpcoming) { %>
@@ -127,7 +127,7 @@
         <span class="shrink-0 inline-flex items-center gap-1 bg-emerald-500/15 border border-emerald-500/50 text-emerald-400 font-bold text-[9px] px-2 py-1 rounded-full">● พร้อมขาย</span>
       <% } %>
     </div>
-    <span class="mt-1 block w-full text-center rounded-lg py-1.5 text-xs font-bold transition-colors <%= soldOut ? 'bg-gray-500/15 border border-gray-500/30 text-gray-500' : 'bg-[var(--gold)] text-[var(--bg)] group-hover:bg-[var(--gold-hover)]' %>"><%= soldOut ? 'สินค้าหมด' : 'สั่งซื้อสินค้า' %></span>
+    <span class="mt-1 block w-full text-center rounded-lg py-1.5 text-xs font-bold transition-colors <%= soldOut ? 'bg-gray-500/15 border border-gray-500/30 text-gray-500' : 'bg-[var(--gold)] text-[var(--gold-contrast)] group-hover:bg-[var(--gold-hover)]' %>"><%= soldOut ? 'สินค้าหมด' : 'สั่งซื้อสินค้า' %></span>
     <span class="text-[10px] text-[var(--text-4)] text-center truncate"><%= soldOut ? 'รอสินค้าเข้าใหม่' : `สินค้าคงเหลือ ${p.stockCount.toLocaleString()} ชิ้น` %></span>
   </div>
 </a>

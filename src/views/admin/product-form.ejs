@@ -222,7 +222,7 @@
           <% product.images.forEach((image, index) => { %>
             <label class="group relative rounded-xl overflow-hidden border border-[var(--border-light)] bg-[var(--card)] cursor-pointer">
               <img src="<%= image %>" alt="รูปสินค้า <%= index + 1 %>" class="w-full aspect-[4/3] object-contain" />
-              <% if (index === 0) { %><span class="absolute top-2 left-2 bg-[var(--gold)] text-[var(--bg)] rounded-full px-2 py-0.5 text-[10px] font-bold">ภาพหน้าปก</span><% } %>
+              <% if (index === 0) { %><span class="absolute top-2 left-2 bg-[var(--gold)] text-[var(--gold-contrast)] rounded-full px-2 py-0.5 text-[10px] font-bold">ภาพหน้าปก</span><% } %>
               <span class="flex items-center justify-center gap-1.5 p-2 text-xs text-rose-400 group-hover:bg-rose-500/10">
                 <input type="checkbox" name="removeImages" value="<%= image %>" class="accent-rose-500" /> ลบรูปนี้
               </span>
@@ -361,7 +361,7 @@
     <p id="bulkImportProgress" class="hidden text-sm text-[var(--gold)]">⏳ กำลังอัปโหลดรูปและสร้างสินค้า — กรุณาอย่าปิดหรือรีเฟรชหน้านี้จนกว่าจะเสร็จ...</p>
   <% } %>
   <div class="flex gap-3">
-    <button id="productFormSubmit" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2 rounded-lg text-sm"><%= isBulkImport ? '📁 นำเข้าและสร้างสินค้าทั้งหมด' : (product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า') %></button>
+    <button id="productFormSubmit" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium px-6 py-2 rounded-lg text-sm"><%= isBulkImport ? '📁 นำเข้าและสร้างสินค้าทั้งหมด' : (product ? 'บันทึกการแก้ไข' : 'เพิ่มสินค้า') %></button>
     <a href="/admin/products" class="px-6 py-2 rounded-lg text-sm border border-[var(--border-light)] hover:bg-[var(--input)]">ยกเลิก</a>
   </div>
 </form>

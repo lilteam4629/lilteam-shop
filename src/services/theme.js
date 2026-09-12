@@ -126,6 +126,29 @@ function hexToHsl(hex) {
   return { h, s, l };
 }
 
+// WCAG relative luminance, used to pick a readable label color for anything
+// filled with the shop's own accent — a shop can pick ANY accent (including
+// dark ones like the "ดำ"/"เทาน้ำเงิน" presets), and always pairing gold-filled
+// buttons/badges with the dark-mode --bg text color silently produces
+// near-invisible text whenever the chosen accent itself is dark.
+function relativeLuminance(hex) {
+  const clean = String(hex || '').replace('#', '');
+  const channel = (v) => { const c = v / 255; return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+  const r = channel(parseInt(clean.slice(0, 2), 16));
+  const g = channel(parseInt(clean.slice(2, 4), 16));
+  const b = channel(parseInt(clean.slice(4, 6), 16));
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrastTextFor(hex) {
+  // Contrast ratio against near-black (#111) vs near-white (#f5f5f5) — pick
+  // whichever side actually reads clearly on this specific accent color.
+  const luminance = relativeLuminance(hex);
+  const contrastWithWhite = 1.05 / (luminance + 0.05);
+  const contrastWithBlack = (luminance + 0.05) / 0.05;
+  return contrastWithBlack >= contrastWithWhite ? '#111111' : '#f5f5f5';
+}
+
 function hslToHex(h, s, l) {
   h = ((h % 360) + 360) % 360;
   const c = (1 - Math.abs(2 * l - 1)) * s;
@@ -174,6 +197,7 @@ function renderCss(theme) {
   const accentHover = lighten(accent);
   const accentLight = lighten(accent, 0.45);
   const accentDark = darken(accent, 0.42);
+  const accentContrast = contrastTextFor(accent);
   const style = (theme && STYLE_LABELS[theme.style]) ? theme.style : 'normal';
   const { h: accentHue } = hexToHsl(accent);
   const gradA = accent, gradB = hslToHex(accentHue + 40, 0.75, 0.55), gradC = hslToHex(accentHue - 40, 0.75, 0.5);
@@ -188,6 +212,7 @@ function renderCss(theme) {
       --gold-hover: ${accentHover};
       --gold-light: ${accentLight};
       --gold-dark: ${accentDark};
+      --gold-contrast: ${accentContrast};
       --text: ${vars.text};
       --text-2: ${vars.text2};
       --text-3: ${vars.text3};

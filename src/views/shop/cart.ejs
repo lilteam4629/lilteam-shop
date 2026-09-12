@@ -48,7 +48,7 @@
       <% } else { %>
         <form action="/cart/coupon" method="post" class="flex gap-2">
           <input name="code" placeholder="โค้ดส่วนลด" class="flex-1 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-          <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 rounded-lg text-sm">ใช้โค้ด</button>
+          <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium px-4 rounded-lg text-sm">ใช้โค้ด</button>
         </form>
       <% } %>
       <div class="flex items-center justify-between text-lg font-bold pt-2 border-t border-[var(--border)]">
@@ -56,7 +56,7 @@
         <span class="text-[var(--gold)]">฿<%= total.toLocaleString() %>.00</span>
       </div>
       <form action="/cart/checkout" method="post">
-        <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] rounded-lg py-3 font-medium">ชำระเงินด้วยกระเป๋าเงิน (Demo)</button>
+        <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] rounded-lg py-3 font-medium">ชำระเงินด้วยกระเป๋าเงิน (Demo)</button>
       </form>
     </div>
   <% } %>

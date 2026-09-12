@@ -21,7 +21,7 @@
         <img src="<%= settings.branding.logoImage %>" class="max-w-full max-h-40 object-contain" alt="โลโก้เว็บไซต์ปัจจุบัน" />
       <% } else { %>
         <div class="text-center text-[var(--text-4)]">
-          <div class="w-20 h-20 mx-auto mb-3 rounded-2xl bg-[var(--gold)] text-[var(--bg)] flex items-center justify-center text-4xl font-bold">L</div>
+          <div class="w-20 h-20 mx-auto mb-3 rounded-2xl bg-[var(--gold)] text-[var(--gold-contrast)] flex items-center justify-center text-4xl font-bold">L</div>
           <p class="text-sm">ยังไม่ได้อัปโหลดโลโก้</p>
           <p class="text-[var(--gold)]/70 text-[10px] font-mono mt-1">ขนาดแนะนำ: 512 x 512</p>
         </div>
@@ -31,7 +31,7 @@
     <form action="/admin/site-logo/upload" method="post" enctype="multipart/form-data" class="space-y-3">
       <label class="block text-sm text-[var(--text-3)]">เลือกรูปโลโก้ (แนะนำ PNG พื้นหลังโปร่งใส หรือรูปสี่เหลี่ยมจัตุรัส)</label>
       <input type="file" name="logoImage" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
-      <button class="w-full sm:w-auto bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2.5 rounded-lg text-sm">อัปโหลดโลโก้</button>
+      <button class="w-full sm:w-auto bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium px-6 py-2.5 rounded-lg text-sm">อัปโหลดโลโก้</button>
     </form>
   </section>
 
@@ -71,7 +71,7 @@
           ใช้ภาพแบนเนอร์
         </label>
       </div>
-      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-6 py-2.5 rounded-lg text-sm">บันทึกรูปแบบหน้าแรก</button>
+      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium px-6 py-2.5 rounded-lg text-sm">บันทึกรูปแบบหน้าแรก</button>
     </form>
   </section>
 
@@ -80,7 +80,7 @@
     <% const storefrontBackground = settings.storefrontAppearance && settings.storefrontAppearance.backgroundImage; %>
     <% if (storefrontBackground) { %><div class="w-full min-h-56 max-h-[440px] flex items-center justify-center overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--input)] p-3 mb-4"><img src="<%= storefrontBackground %>" class="block max-w-full max-h-[410px] object-contain" alt="ภาพพื้นหลังหน้าร้าน" /></div><% } else { %><div class="auth-background-empty mb-4"><strong>ยังไม่ได้เลือกภาพพื้นหลังหน้าร้าน</strong><span>เลือกรูปแนวตั้ง แนวนอน หรือจัตุรัสได้ ภาพจะแสดงครบทั้งใบ</span></div><% } %>
     <div class="flex flex-col sm:flex-row gap-3">
-      <form action="/admin/storefront-background/upload" method="post" enctype="multipart/form-data" class="flex-1 space-y-3"><label class="block"><span class="block text-sm font-semibold text-[var(--text-2)] mb-1">เลือกรูปพื้นหลังหน้าร้าน</span><span class="block text-[11px] text-[var(--gold)] mb-2">ขนาดแนะนำ 1920 × 1080 px (16:9) · JPG หรือ WEBP · ไม่เกิน 10 MB</span><input type="file" name="storefrontBackgroundImage" accept="image/png,image/jpeg,image/webp" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" /></label><button class="w-full sm:w-auto bg-[var(--gold)] text-[var(--bg)] font-medium px-6 py-2.5 rounded-lg text-sm">อัปโหลดพื้นหลังหน้าร้าน</button></form>
+      <form action="/admin/storefront-background/upload" method="post" enctype="multipart/form-data" class="flex-1 space-y-3"><label class="block"><span class="block text-sm font-semibold text-[var(--text-2)] mb-1">เลือกรูปพื้นหลังหน้าร้าน</span><span class="block text-[11px] text-[var(--gold)] mb-2">ขนาดแนะนำ 1920 × 1080 px (16:9) · JPG หรือ WEBP · ไม่เกิน 10 MB</span><input type="file" name="storefrontBackgroundImage" accept="image/png,image/jpeg,image/webp" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" /></label><button class="w-full sm:w-auto bg-[var(--gold)] text-[var(--gold-contrast)] font-medium px-6 py-2.5 rounded-lg text-sm">อัปโหลดพื้นหลังหน้าร้าน</button></form>
       <% if (storefrontBackground) { %><form action="/admin/storefront-background/remove" method="post" data-confirm="ลบภาพพื้นหลังหน้าร้านและกลับไปใช้พื้นธีมปกติใช่หรือไม่?"><button class="border border-[var(--coral)]/40 text-[var(--coral)] px-5 py-2.5 rounded-lg text-sm">ลบภาพพื้นหลัง</button></form><% } %>
     </div>
   </section>
@@ -102,7 +102,7 @@
     <div class="flex flex-col sm:flex-row gap-3">
       <form action="/admin/auth-background/upload" method="post" enctype="multipart/form-data" class="flex-1 space-y-3">
         <input type="file" name="authBackgroundImage" accept="image/png,image/jpeg,image/webp" required class="block w-full text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
-        <button class="w-full sm:w-auto bg-[var(--gold)] text-[var(--bg)] font-medium px-6 py-2.5 rounded-lg text-sm">อัปโหลดพื้นหลัง</button>
+        <button class="w-full sm:w-auto bg-[var(--gold)] text-[var(--gold-contrast)] font-medium px-6 py-2.5 rounded-lg text-sm">อัปโหลดพื้นหลัง</button>
       </form>
       <% if (authBackground) { %><form action="/admin/auth-background/remove" method="post" data-confirm="ลบรูปพื้นหลังเข้าสู่ระบบและกลับไปใช้พื้นธีมปกติใช่หรือไม่?"><button class="border border-[var(--coral)]/40 text-[var(--coral)] px-5 py-2.5 rounded-lg text-sm">ลบรูปพื้นหลัง</button></form><% } %>
     </div>

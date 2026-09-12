@@ -2,7 +2,7 @@
   <a href="/account" class="text-sm text-[var(--gold)] hover:text-[var(--gold-hover)]">← กลับไปหน้าบัญชี</a>
 
   <div class="flex items-center gap-3 mt-3 mb-6">
-    <span class="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[var(--bg)] flex items-center justify-center text-2xl shadow-[0_6px_18px_-6px_color-mix(in_srgb,var(--gold)_70%,transparent)]">💰</span>
+    <span class="w-12 h-12 shrink-0 rounded-2xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[var(--gold-contrast)] flex items-center justify-center text-2xl shadow-[0_6px_18px_-6px_color-mix(in_srgb,var(--gold)_70%,transparent)]">💰</span>
     <div>
       <h1 class="text-2xl font-bold leading-tight">เติมเงินเข้ากระเป๋า</h1>
       <p class="text-xs text-[var(--text-4)]">เติมปุ๊บ ใช้ซื้อสินค้าได้ทันที</p>
@@ -40,7 +40,7 @@
           </p>
         </div>
 
-        <button class="group relative w-full overflow-hidden bg-gradient-to-r from-amber-500 via-[var(--gold)] to-amber-600 hover:brightness-110 text-[var(--bg)] font-semibold rounded-xl py-3.5 text-sm transition-all shadow-[0_6px_20px_-6px_rgba(200,166,63,.4)]">
+        <button class="group relative w-full overflow-hidden bg-gradient-to-r from-amber-500 via-[var(--gold)] to-amber-600 hover:brightness-110 text-[var(--gold-contrast)] font-semibold rounded-xl py-3.5 text-sm transition-all shadow-[0_6px_20px_-6px_rgba(200,166,63,.4)]">
           <span class="inline-flex items-center justify-center gap-2"><img src="/images/truemoney-wallet.jpg" alt="" class="w-7 h-7 rounded-lg object-cover" /> ยืนยันรับเงินจากซองของขวัญ</span>
         </button>
       </form>
@@ -84,14 +84,14 @@
           <% if (promptpayEnabled) { %>
           <label class="method-option relative flex flex-col items-center gap-1.5 bg-[var(--input)] border-2 border-[var(--gold)] rounded-xl px-3 py-4 cursor-pointer text-center transition-colors">
             <input type="radio" name="method" value="promptpay" checked class="peer sr-only" />
-            <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[10px] items-center justify-center">✓</span>
+            <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--gold-contrast)] text-[10px] items-center justify-center">✓</span>
             <span class="text-2xl">📱</span>
             <span class="text-sm font-medium leading-tight">พร้อมเพย์<br />(PromptPay)</span>
           </label>
           <% } %>
           <label class="method-option relative flex flex-col items-center gap-1.5 bg-[var(--input)] border-2 <%= promptpayEnabled ? 'border-[var(--border-light)]' : 'border-[var(--gold)] bg-[var(--gold)]/10' %> rounded-xl px-3 py-4 cursor-pointer text-center transition-colors">
             <input type="radio" name="method" value="bank_transfer" <%= promptpayEnabled ? '' : 'checked' %> class="peer sr-only" />
-            <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--bg)] text-[10px] items-center justify-center">✓</span>
+            <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--gold-contrast)] text-[10px] items-center justify-center">✓</span>
             <span class="text-2xl">🏦</span>
             <span class="text-sm font-medium leading-tight">โอนผ่าน<br />ธนาคาร</span>
           </label>
@@ -99,7 +99,7 @@
         <% if (!promptpayEnabled) { %><p class="mt-2 text-[11px] text-[var(--text-4)]">ค่ายตรวจสลิปที่ร้านเลือกใช้รองรับการตั้งค่าบัญชีธนาคารเท่านั้น</p><% } %>
       </div>
 
-      <button class="group relative w-full overflow-hidden bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-xl py-3.5 text-sm transition-colors">
+      <button class="group relative w-full overflow-hidden bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-semibold rounded-xl py-3.5 text-sm transition-colors">
         <span class="relative">ดำเนินการต่อ →</span>
       </button>
     </form>

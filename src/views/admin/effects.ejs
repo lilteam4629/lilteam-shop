@@ -52,7 +52,7 @@
         </label>
       </div>
 
-      <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+      <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
         💾 บันทึกการตั้งค่าเพลง
       </button>
     </form>
@@ -87,7 +87,7 @@
       <label class="text-xs font-semibold">สีของฝน<input type="color" name="color" value="<%= rain.color || '#78c8ff' %>" class="mt-1.5 block w-full h-11 bg-[var(--input)] border border-[var(--border-light)] rounded-xl p-1"></label>
       <label class="text-xs font-semibold">ความเข้ม<select name="intensity" class="mt-1.5 block w-full h-11 bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3"><option value="light" <%= rain.intensity==='light'?'selected':'' %>>เบา</option><option value="medium" <%= rain.intensity==='medium'?'selected':'' %>>กำลังสวย</option><option value="heavy" <%= rain.intensity==='heavy'?'selected':'' %>>ฝนหนัก</option></select></label>
       <label class="flex h-11 items-center gap-2 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-3 text-xs font-semibold"><input type="checkbox" name="enabled" <%= rain.enabled?'checked':'' %>> เปิดใช้งานฝนตก</label>
-      <button class="sm:col-span-3 rounded-xl bg-[var(--gold)] text-[var(--bg)] font-bold py-3">บันทึกระบบฝนตก</button>
+      <button class="sm:col-span-3 rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] font-bold py-3">บันทึกระบบฝนตก</button>
     </form>
   </div>
   <% } %>

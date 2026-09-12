@@ -39,7 +39,7 @@
       <span class="text-base">📋</span>
       <span>รายการเติมเงิน & สลิป</span>
       <% if (pendingCount > 0) { %>
-        <span class="text-[10px] bg-[var(--gold)] text-[var(--bg)] font-bold px-1.5 py-0.2 rounded-full"><%= pendingCount %></span>
+        <span class="text-[10px] bg-[var(--gold)] text-[var(--gold-contrast)] font-bold px-1.5 py-0.2 rounded-full"><%= pendingCount %></span>
       <% } %>
     </button>
     <button type="button" onclick="switchTopupTab('bank')" id="topup-tab-btn-bank" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
@@ -78,7 +78,7 @@
         <option value="rejected" <%= status === 'rejected' ? 'selected' : '' %>>✕ ปฏิเสธ</option>
       </select>
 
-      <button type="submit" class="bg-[var(--gold)] text-[var(--bg)] font-bold rounded-xl px-5 py-2 text-xs shadow-md transition active:scale-95">
+      <button type="submit" class="bg-[var(--gold)] text-[var(--gold-contrast)] font-bold rounded-xl px-5 py-2 text-xs shadow-md transition active:scale-95">
         ค้นหา
       </button>
 
@@ -99,7 +99,7 @@
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <h2 class="font-bold text-sm sm:text-base text-[var(--text)]">🕐 รายการรอตรวจสอบ / รอดำเนินการ</h2>
-          <span class="bg-[var(--gold)] text-[var(--bg)] text-[11px] font-bold rounded-full px-2 py-0.5"><%= pendingRequests.length %></span>
+          <span class="bg-[var(--gold)] text-[var(--gold-contrast)] text-[11px] font-bold rounded-full px-2 py-0.5"><%= pendingRequests.length %></span>
         </div>
       </div>
 
@@ -410,7 +410,7 @@
       </div>
 
       <div class="pt-2">
-        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
           💾 บันทึกและใช้ข้อมูลของ <%= ({easyslip:'EasySlip',slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go'})[receiverProvider] %>
         </button>
       </div>
@@ -481,7 +481,7 @@
       </div>
 
       <div class="pt-2">
-        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
           💾 บันทึกการตั้งค่า TrueMoney Wallet
         </button>
       </div>
@@ -512,7 +512,6 @@
         <div class="flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
             <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>⚡
-            <% } else if (payment.slipProvider === 'byshop') { %>🚀
             <% } else if (payment.slipProvider === 'slipok') { %>🛡️
             <% } else if (payment.slipProvider === 'easyslip') { %>⚡
             <% } else if (payment.slipProvider === 'slip2go') { %>⚠️
@@ -521,9 +520,8 @@
           <div>
             <div class="flex items-center gap-2">
               <span class="text-xs text-[var(--text-4)]">ค่ายตรวจสลิปที่ใช้อยู่:</span>
-              <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--gold)] text-[var(--bg)]">
+              <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--gold)] text-[var(--gold-contrast)]">
                 <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>EasySlip/SlipOK อัตโนมัติ
-                <% } else if (payment.slipProvider === 'byshop') { %>⭐ BYSHOP API (แนะนำ)
                 <% } else if (payment.slipProvider === 'slipok') { %>⭐ SlipOK API (แนะนำ)
                 <% } else if (payment.slipProvider === 'easyslip') { %>EasySlip API (มาตรฐาน)
                 <% } else if (payment.slipProvider === 'slip2go') { %>Slip2Go API
@@ -536,7 +534,7 @@
           </div>
         </div>
 
-        <a href="/admin/easyslip-usage" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] hover:brightness-110 active:scale-95 transition shadow-md shadow-[var(--gold)]/20 shrink-0">
+        <a href="/admin/easyslip-usage" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] hover:brightness-110 active:scale-95 transition shadow-md shadow-[var(--gold)]/20 shrink-0">
           <span>⚙️ ไปที่หน้าตั้งค่าตรวจสลิปด้วย API</span>
           <span>↗</span>
         </a>
@@ -559,7 +557,7 @@
       </div>
 
       <div class="pt-2">
-        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
           💾 บันทึกการตั้งค่าการแจ้งเตือน
         </button>
       </div>
@@ -599,43 +597,6 @@
     document.querySelectorAll('.provider-config-box').forEach(box => box.classList.add('hidden'));
     const targetBox = document.getElementById('provider-box-' + providerKey);
     if (targetBox) targetBox.classList.remove('hidden');
-  }
-
-  async function testByshopSlipConnection() {
-    const keyInput = document.getElementById('byshop_slip_api_key');
-    const statusMsg = document.getElementById('byshop-slip-status-msg');
-    const spinner = document.getElementById('test-slip-spinner');
-    const btn = document.getElementById('btn-test-slip');
-    const apiKey = keyInput ? keyInput.value.trim() : '';
-
-    if (!apiKey) {
-      alert('กรุณากรอก BYSHOP API Key ก่อนทำการทดสอบ');
-      if (keyInput) keyInput.focus();
-      return;
-    }
-
-    spinner.classList.remove('hidden');
-    btn.disabled = true;
-    statusMsg.innerHTML = '<span class="text-xs text-[var(--gold)] font-medium">กำลังทดสอบเชื่อมต่อ BYSHOP API...</span>';
-
-    try {
-      const res = await fetch('/admin/slip-verification/test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ provider: 'byshop', apiKey: apiKey })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        statusMsg.innerHTML = `<span class="text-xs text-emerald-400 font-bold">✓ ${data.message || 'เชื่อมต่อสำเร็จ'} (ยอดคงเหลือ ฿${Number(data.balance || 0).toLocaleString()})</span>`;
-      } else {
-        statusMsg.innerHTML = `<span class="text-xs text-rose-400 font-bold">✗ ${data.message || 'เชื่อมต่อล้มเหลว'}</span>`;
-      }
-    } catch (e) {
-      statusMsg.innerHTML = '<span class="text-xs text-rose-400 font-bold">✗ เกิดข้อผิดพลาดในการเชื่อมต่อ</span>';
-    } finally {
-      spinner.classList.add('hidden');
-      btn.disabled = false;
-    }
   }
 
   // Restore active tab from URL hash if present

@@ -76,7 +76,7 @@
       </div>
     </div>
 
-    <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+    <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
       💾 บันทึกการตั้งค่ามินิเกม
     </button>
   </form>
@@ -207,7 +207,7 @@
                 <td class="py-3 px-3 text-right whitespace-nowrap">
                   <div class="inline-flex items-center gap-1.5">
                     <form id="<%= formId %>" action="/admin/minigame/prizes/<%= p.id %>" method="post" class="inline"></form>
-                    <button form="<%= formId %>" type="submit" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-bold px-2.5 py-1 rounded-lg text-xs transition" title="บันทึกข้อมูล">
+                    <button form="<%= formId %>" type="submit" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-2.5 py-1 rounded-lg text-xs transition" title="บันทึกข้อมูล">
                       บันทึก
                     </button>
 
@@ -289,7 +289,7 @@
           <input type="file" name="image" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:font-semibold file:text-xs" />
         </div>
 
-        <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95 mt-2">
+        <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95 mt-2">
           + เพิ่มของรางวัลลงระบบ
         </button>
       </form>
@@ -308,7 +308,7 @@
 
     <form method="get" action="/admin/minigame" class="flex gap-2 w-full sm:w-80">
       <input type="text" name="q" value="<%= searchQuery %>" placeholder="ค้นหาชื่อผู้เล่น หรือโค้ดรับของ..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-1.5 text-xs outline-none focus:border-[var(--gold)] transition" />
-      <button type="submit" class="bg-[var(--gold)] text-[var(--bg)] font-bold px-4 py-1.5 rounded-xl text-xs transition whitespace-nowrap active:scale-95">
+      <button type="submit" class="bg-[var(--gold)] text-[var(--gold-contrast)] font-bold px-4 py-1.5 rounded-xl text-xs transition whitespace-nowrap active:scale-95">
         ค้นหา
       </button>
       <% if (searchQuery) { %>

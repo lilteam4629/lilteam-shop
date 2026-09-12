@@ -33,7 +33,7 @@
         ✓ ใช้งานอยู่<% if (label) { %> — <%= label %><% } %><br />
         หมดอายุ: <%= new Date(expiresAt).toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
       </div>
-      <a href="/" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm mb-4">กลับหน้าร้าน →</a>
+      <a href="/" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-semibold rounded-lg py-2.5 text-sm mb-4">กลับหน้าร้าน →</a>
       <p class="text-xs text-[var(--text-4)] text-center mb-2">มีคีย์ต่ออายุใหม่? กรอกที่นี่เพื่อเพิ่มเวลา (จะบวกเพิ่มจากเวลาที่เหลืออยู่ ไม่เสียเวลาเดิม)</p>
       <form action="/license" method="post" class="space-y-3">
         <input name="key" required placeholder="กรอกคีย์ต่ออายุที่นี่" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2.5 text-sm text-center font-mono" />
@@ -42,7 +42,7 @@
     <% } else { %>
       <form action="/license" method="post" class="space-y-3">
         <input name="key" required placeholder="กรอกคีย์เปิดใช้งานที่นี่" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2.5 text-sm text-center font-mono" />
-        <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">ปลดล็อก</button>
+        <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-semibold rounded-lg py-2.5 text-sm">ปลดล็อก</button>
       </form>
       <p class="text-xs text-[var(--text-4)] text-center mt-4">ไม่มีคีย์? ติดต่อผู้ให้บริการที่คุณเช่าระบบนี้มา</p>
     <% } %>

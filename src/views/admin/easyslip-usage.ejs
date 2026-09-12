@@ -25,7 +25,6 @@
   <div class="flex items-center gap-3.5">
     <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
       <% if (!activeProvider || activeProvider === 'auto') { %>⚡
-      <% } else if (payment.slipProvider === 'byshop') { %>🚀
       <% } else if (payment.slipProvider === 'slipok') { %>🛡️
       <% } else if (activeProvider === 'easyslip') { %>⚡
       <% } else if (activeProvider === 'slipcheck') { %>✅
@@ -36,9 +35,8 @@
     <div>
       <div class="flex items-center gap-2">
         <span class="text-xs text-[var(--text-4)]">ผู้ให้บริการหลักที่ใช้งานอยู่:</span>
-        <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--gold)] text-[var(--bg)]">
+        <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--gold)] text-[var(--gold-contrast)]">
           <% if (!activeProvider || activeProvider === 'auto') { %>EasySlip/SlipOK อัตโนมัติ
-          <% } else if (payment.slipProvider === 'byshop') { %>⭐ BYSHOP API (แนะนำ)
           <% } else if (payment.slipProvider === 'slipok') { %>⭐ SlipOK API (แนะนำ)
           <% } else if (activeProvider === 'easyslip') { %>EasySlip API (มาตรฐาน)
           <% } else if (activeProvider === 'slipcheck') { %>SlipCheck API
@@ -50,8 +48,6 @@
       <div class="text-sm font-semibold text-[var(--text)] mt-0.5">
         <% if (!activeProvider || activeProvider === 'auto') { %>
           ระบบเลือก EasySlip หรือ SlipOK จากการตั้งค่าที่เชื่อมต่อไว้โดยอัตโนมัติ
-        <% } else if (payment.slipProvider === 'byshop') { %>
-          ระบบตรวจสลิปอัตโนมัติผ่าน BYSHOP API (ความเร็วสูง ดักสลิปซ้ำแม่นยำ)
         <% } else if (payment.slipProvider === 'slipok') { %>
           ระบบตรวจสลิปอัตโนมัติผ่าน SlipOK API (Branch: <%= payment.slipokBranchId || 'ยังไม่ระบุ' %>)
         <% } else if (activeProvider === 'easyslip') { %>
@@ -70,7 +66,7 @@
   </div>
 
   <div class="flex items-center gap-2 shrink-0">
-    <button type="button" onclick="document.getElementById('own-slip-provider-form').scrollIntoView({ behavior: 'smooth' })" class="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--input)] text-[var(--text)] hover:bg-[var(--gold)] hover:text-[var(--bg)] transition border border-[var(--border)]">
+    <button type="button" onclick="document.getElementById('own-slip-provider-form').scrollIntoView({ behavior: 'smooth' })" class="px-4 py-2 rounded-xl text-xs font-bold bg-[var(--input)] text-[var(--text)] hover:bg-[var(--gold)] hover:text-[var(--gold-contrast)] transition border border-[var(--border)]">
       ⚙️ ปรับเปลี่ยนค่าย API
     </button>
   </div>
@@ -180,7 +176,7 @@
       </div>
       <div class="sm:col-span-2 flex items-center justify-between gap-3">
         <p class="text-[10px] text-[var(--text-4)]">วันจ่ายจำกัดวันที่ 1–28 เพื่อให้มีวันดังกล่าวทุกเดือน</p>
-        <button class="px-4 py-2 rounded-xl bg-[var(--gold)] text-[var(--bg)] text-xs font-bold">บันทึก</button>
+        <button class="px-4 py-2 rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] text-xs font-bold">บันทึก</button>
       </div>
     </form>
   </details>
@@ -226,14 +222,14 @@
       <% ownProviders.forEach(provider => { %>
         <label data-provider-card="<%= provider[0] %>" class="relative cursor-pointer rounded-xl border-2 p-4 transition <%= selectedOwnProvider === provider[0] ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--input)]/30' %>">
           <input type="radio" name="slipProvider" value="<%= provider[0] %>" class="sr-only" <%= selectedOwnProvider === provider[0] ? 'checked' : '' %> onchange="selectOwnProvider(this)">
-          <span data-provider-check class="absolute right-3 top-3 w-5 h-5 rounded-full items-center justify-center text-[11px] font-bold bg-[var(--gold)] text-[var(--bg)] <%= selectedOwnProvider === provider[0] ? 'flex' : 'hidden' %>">✓</span>
+          <span data-provider-check class="absolute right-3 top-3 w-5 h-5 rounded-full items-center justify-center text-[11px] font-bold bg-[var(--gold)] text-[var(--gold-contrast)] <%= selectedOwnProvider === provider[0] ? 'flex' : 'hidden' %>">✓</span>
           <div class="text-2xl"><%= provider[1] %></div>
           <div class="font-bold text-sm mt-2"><%= provider[2] %></div>
           <div class="text-[10px] text-[var(--text-4)] mt-1"><%= provider[3] %></div>
         </label>
       <% }) %>
     </div>
-    <button type="submit" class="mt-4 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[var(--gold)] text-[var(--bg)] font-bold text-sm">บันทึกค่ายที่เลือก</button>
+    <button type="submit" class="mt-4 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] font-bold text-sm">บันทึกค่ายที่เลือก</button>
   </div>
 
   <div class="grid lg:grid-cols-2 gap-4">
@@ -290,7 +286,7 @@
     </div>
   </div>
 
-  <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-[var(--gold)] text-[var(--bg)] font-bold text-sm">บันทึกการตั้งค่าตรวจสลิป</button>
+  <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] font-bold text-sm">บันทึกการตั้งค่าตรวจสลิป</button>
 </form>
 
 <script>
@@ -367,26 +363,6 @@ async function testOwnProvider(provider) {
 
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
 
-      <!-- Option 1: BYSHOP (⭐ Recommended 1) -->
-      <label class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none <%= payment.slipProvider === 'byshop' ? 'bg-[var(--gold)]/10 border-[var(--gold)] shadow-md' : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--border-hover)]' %>">
-        <input type="radio" name="slipProvider" value="byshop" disabled title="ระบบนี้ใช้ EasySlip/SlipOK สำหรับตรวจสลิป" class="sr-only" <%= payment.slipProvider === 'byshop' ? 'checked' : '' %> onchange="onProviderChanged('byshop')">
-        <div class="flex items-start justify-between gap-2 mb-2">
-          <div class="flex items-center gap-2.5">
-            <span class="text-2xl">🚀</span>
-            <div>
-              <div class="font-bold text-sm text-[var(--text)]">BYSHOP API</div>
-              <div class="text-[11px] text-[var(--text-4)]">api.byshop.me</div>
-            </div>
-          </div>
-          <span class="px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">⭐ แนะนำอันดับ 1</span>
-        </div>
-        <p class="text-xs text-[var(--text-3)] mb-3 leading-relaxed">ระบบตรวจสลิปรวดเร็วแม่นยำสูง ดักสลิปซ้ำ เช็คได้ทุกธนาคาร พร้อมเพย์ และทรูมันนี่</p>
-        <div class="mt-auto pt-2 border-t border-[var(--border)]/50 flex items-center justify-between text-[11px]">
-          <span class="text-emerald-400 font-semibold">● เสถียรสูง 99.9%</span>
-          <span class="text-[var(--text-4)]">ความเร็ว 0.5s</span>
-        </div>
-      </label>
-
       <!-- Option 2: SlipOK (⭐ Recommended) -->
       <label class="relative flex flex-col p-4 rounded-2xl border-2 cursor-pointer transition-all duration-200 select-none <%= payment.slipProvider === 'slipok' ? 'bg-[var(--gold)]/10 border-[var(--gold)] shadow-md' : 'bg-[var(--card)] border-[var(--border)] hover:border-[var(--border-hover)]' %>">
         <input type="radio" name="slipProvider" value="slipok" class="sr-only" <%= payment.slipProvider === 'slipok' ? 'checked' : '' %> onchange="onProviderChanged('slipok')">
@@ -440,7 +416,7 @@ async function testOwnProvider(provider) {
           </div>
           <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">ไม่ค่อยแนะนำ</span>
         </div>
-        <p class="text-xs text-[var(--text-3)] mb-3 leading-relaxed">ค่ายสำรอง (แนะนำให้เลือกใช้ BYSHOP หรือ SlipOK เป็นหลักเพื่อความเสถียร)</p>
+        <p class="text-xs text-[var(--text-3)] mb-3 leading-relaxed">ค่ายสำรองสำหรับตรวจสอบสลิปเมื่อผู้ให้บริการหลักไม่พร้อมใช้งาน</p>
         <div class="mt-auto pt-2 border-t border-[var(--border)]/50 flex items-center justify-between text-[11px]">
           <span class="text-amber-400 font-semibold">● ค่ายสำรอง</span>
           <span class="text-[var(--text-4)]">Backup API</span>
@@ -472,47 +448,6 @@ async function testOwnProvider(provider) {
 
   <!-- Detailed Settings per Provider -->
   <div class="space-y-6">
-
-    <!-- BYSHOP Settings Card -->
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-[var(--border)]">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl">
-            🚀
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h3 class="font-bold text-sm text-[var(--text)]">BYSHOP API (แนะนำอันดับ 1)</h3>
-              <span class="px-2 py-0.5 text-[10px] font-bold bg-emerald-500/20 text-emerald-400 rounded">เร็ว & เสถียร</span>
-            </div>
-            <p class="text-xs text-[var(--text-4)]">สมัครใช้งานและรับ API Key ได้ที่ <a href="https://byshop.me" target="_blank" rel="noopener" class="text-[var(--gold)] hover:underline">byshop.me</a></p>
-          </div>
-        </div>
-
-        <button type="button" onclick="testProviderConnection('byshop')" class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/20 transition active:scale-95 shadow-sm">
-          <span>⚡ ทดสอบเชื่อมต่อ BYSHOP</span>
-        </button>
-      </div>
-
-      <div class="grid sm:grid-cols-2 gap-4">
-        <div>
-          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">BYSHOP API Key</label>
-          <div class="relative">
-            <input type="password" id="byshop-key-input" name="byshopApiKey" value="<%= payment.byshopApiKey || '' %>" placeholder="ใส่ BYSHOP API Key หรือ test_key สำหรับทดสอบ" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
-            <button type="button" onclick="togglePasswordVisibility('byshop-key-input')" class="absolute right-3 top-2.5 text-xs text-[var(--text-4)] hover:text-[var(--text)]">👁️</button>
-          </div>
-          <p class="text-[11px] text-[var(--text-4)] mt-1">💡 ใส่ <code class="bg-[var(--input)] px-1 rounded text-emerald-400 font-mono">test_demo</code> เพื่อทดสอบระบบจำลองได้ทันที</p>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-[var(--text-3)] mb-1.5">BYSHOP API Endpoint</label>
-          <input type="text" name="byshopEndpoint" value="<%= payment.byshopEndpoint || 'https://api.byshop.me/api' %>" placeholder="https://api.byshop.me/api" class="w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3.5 py-2.5 text-xs text-[var(--text)] focus:outline-none focus:border-[var(--gold)] font-mono transition">
-          <p class="text-[11px] text-[var(--text-4)] mt-1">ค่าเริ่มต้นมาตรฐาน: https://api.byshop.me/api</p>
-        </div>
-      </div>
-
-      <div id="byshop-test-result" class="mt-4 hidden"></div>
-    </div>
 
     <!-- SlipOK Settings Card -->
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
@@ -653,7 +588,7 @@ async function testOwnProvider(provider) {
       อย่าลืมกด <b>"บันทึกการตั้งค่าระบบตรวจสลิป"</b> เพื่อให้ระบบเริ่มใช้ค่าย API ที่คุณเลือก
     </div>
     <div class="flex items-center gap-3 ml-auto">
-      <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] hover:brightness-110 active:scale-95 transition shadow-lg shadow-[var(--gold)]/20">
+      <button type="submit" class="px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] hover:brightness-110 active:scale-95 transition shadow-lg shadow-[var(--gold)]/20">
         💾 บันทึกการตั้งค่าระบบตรวจสลิป
       </button>
     </div>
@@ -696,10 +631,7 @@ async function testProviderConnection(provider) {
 
   let payload = { provider };
 
-  if (provider === 'byshop') {
-    payload.apiKey = document.getElementById('byshop-key-input')?.value || '';
-    payload.endpoint = document.querySelector('input[name="byshopEndpoint"]')?.value || '';
-  } else if (provider === 'slipok') {
+  if (provider === 'slipok') {
     payload.branchId = document.getElementById('slipok-branch-input')?.value || '';
     payload.apiKey = document.getElementById('slipok-key-input')?.value || '';
   } else if (provider === 'slip2go') {

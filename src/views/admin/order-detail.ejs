@@ -152,7 +152,7 @@
           <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>🟡 รอดำเนินการ (Pending)</option>
           <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>🔴 ยกเลิกคำสั่งซื้อ (Cancelled)</option>
         </select>
-        <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-bold rounded-xl py-2 text-xs shadow-md transition active:scale-95">
+        <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold rounded-xl py-2 text-xs shadow-md transition active:scale-95">
           💾 บันทึกสถานะ
         </button>
       </form>

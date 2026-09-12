@@ -17,7 +17,7 @@
     </div>
     <div class="flex items-center gap-3">
       <span id="license-countdown" class="font-mono font-bold text-base sm:text-lg text-[var(--gold)] bg-[var(--input)]/60 px-3 py-1 rounded-xl border border-[var(--border-light)]" data-exp="<%= licenseExpiresAt %>">…</span>
-      <a href="/license" class="text-xs font-semibold text-[var(--bg)] bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] hover:opacity-90 rounded-xl px-4 py-2 shadow-sm transition whitespace-nowrap">ต่ออายุเว็บ →</a>
+      <a href="/license" class="text-xs font-semibold text-[var(--gold-contrast)] bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] hover:opacity-90 rounded-xl px-4 py-2 shadow-sm transition whitespace-nowrap">ต่ออายุเว็บ →</a>
     </div>
   </div>
   <script>
@@ -55,7 +55,7 @@
     <div class="flex items-center gap-3">
       <span id="shop-countdown" class="font-mono font-bold text-base sm:text-lg text-[var(--gold)] bg-[var(--input)]/60 px-3 py-1 rounded-xl border border-[var(--border-light)]" data-exp="<%= shopExpiresAt %>">…</span>
       <% if (shopRenewUrl) { %>
-        <a href="<%= shopRenewUrl %>" class="text-xs font-semibold text-[var(--bg)] bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] hover:opacity-90 rounded-xl px-4 py-2 shadow-sm transition whitespace-nowrap">ต่ออายุร้าน →</a>
+        <a href="<%= shopRenewUrl %>" class="text-xs font-semibold text-[var(--gold-contrast)] bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] hover:opacity-90 rounded-xl px-4 py-2 shadow-sm transition whitespace-nowrap">ต่ออายุร้าน →</a>
       <% } %>
     </div>
   </div>
@@ -87,7 +87,7 @@
     <p class="text-xs text-[var(--text-4)] mt-0.5">ยินดีต้อนรับกลับ, คุณสามารถตรวจสอบสถิติและจัดการระบบได้ที่นี่</p>
   </div>
   <div class="flex items-center gap-2 flex-wrap">
-    <a href="/admin/products/new" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--bg)] font-semibold px-4 py-2 rounded-xl text-xs shadow-md hover:shadow-lg active:scale-95 transition">
+    <a href="/admin/products/new" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-semibold px-4 py-2 rounded-xl text-xs shadow-md hover:shadow-lg active:scale-95 transition">
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
       <span>เพิ่มสินค้าใหม่</span>
     </a>
@@ -191,7 +191,7 @@
 <% if (stats.pendingTopups > 0) { %>
   <div class="bg-gradient-to-r from-amber-950/70 to-[var(--card)] border border-[var(--gold)]/40 rounded-2xl p-4 sm:p-5 mb-6 flex items-center justify-between flex-wrap gap-4 shadow-lg">
     <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-[var(--gold)] text-[var(--bg)] flex items-center justify-center font-bold text-lg animate-bounce">
+      <div class="w-10 h-10 rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] flex items-center justify-center font-bold text-lg animate-bounce">
         💳
       </div>
       <div>
@@ -199,7 +199,7 @@
         <div class="text-xs text-[var(--text-4)] mt-0.5">ลูกค้าแนบสลิป/แจ้งเติมเงินเข้ามา กรุณาตรวจสอบและอนุมัติเครดิต</div>
       </div>
     </div>
-    <a href="/admin/topups" class="inline-flex items-center gap-2 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold px-4 py-2 rounded-xl text-xs shadow-md transition">
+    <a href="/admin/topups" class="inline-flex items-center gap-2 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-semibold px-4 py-2 rounded-xl text-xs shadow-md transition">
       <span>ไปหน้าตรวจสลิป</span>
       <span>→</span>
     </a>
@@ -269,7 +269,7 @@
     <div class="space-y-3">
       <% topProducts.forEach((product, index) => { %>
         <div class="flex items-center gap-3 p-2.5 rounded-xl bg-[var(--input)]/40 border border-[var(--border-light)] text-sm">
-          <span class="w-6 h-6 shrink-0 grid place-items-center rounded-lg <%= index === 0 ? 'bg-amber-500 text-[var(--bg)]' : index === 1 ? 'bg-slate-300 text-[var(--bg)]' : index === 2 ? 'bg-amber-700 text-white' : 'bg-[var(--input)] text-[var(--text-3)]' %> text-xs font-bold">
+          <span class="w-6 h-6 shrink-0 grid place-items-center rounded-lg <%= index === 0 ? 'bg-amber-500 text-black' : index === 1 ? 'bg-slate-300 text-black' : index === 2 ? 'bg-amber-700 text-white' : 'bg-[var(--input)] text-[var(--text-3)]' %> text-xs font-bold">
             <%= index + 1 %>
           </span>
           <span class="min-w-0 flex-1 truncate font-medium text-xs sm:text-sm text-[var(--text)]"><%= product.title %></span>
