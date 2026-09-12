@@ -86,6 +86,12 @@ router.post('/admin/rentals/releases/deploy', async (req, res) => {
   try { res.json({ ok: true, ...(await tenantFeatures.deployRelease(req.body)) }); }
   catch (error) { res.status(400).json({ error: error.message }); }
 });
+router.post('/admin/system-lab', async (req, res) => {
+  try {
+    const result = await tenantFeatures.ensureSystemLab();
+    res.json({ ok: true, created: result.created, shop: { id: result.shop.id, slug: result.shop.slug, name: result.shop.name } });
+  } catch (error) { res.status(400).json({ error: error.message }); }
+});
 router.post('/admin/rentals/:id/delete', async (req, res, next) => {
   try {
     const shop = store.data.shops.find(s => s.id === req.params.id);

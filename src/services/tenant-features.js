@@ -190,6 +190,44 @@ async function deployRelease(payload, storeApi = store) {
   return { ...result, releaseName: release.name, version: release.version };
 }
 
+async function ensureSystemLab(storeApi = store) {
+  const slug = 'system-lab';
+  let shop = storeApi.platformData.shops.find(item => item.slug === slug);
+  if (shop && !shop.isSystemLab) throw new Error('ชื่อ system-lab ถูกใช้งานโดยร้านอื่นแล้ว');
+  const admin = storeApi.platformData.users.find(user => user.role === 'admin' && user.status === 'active' && user.passwordHash);
+  if (!admin) throw new Error('ไม่พบบัญชีผู้ดูแลสำหรับสร้างเว็บทดลอง');
+  let created = false;
+  if (!shop) {
+    shop = {
+      id: storeApi.genId(10), slug, name: 'LILTeam System Lab', ownerId: admin.id,
+      ownerUsername: admin.username, isSystemLab: true,
+      expiresAt: Date.now() + (10 * 365 * 24 * 60 * 60 * 1000), createdAt: new Date().toISOString(),
+    };
+    await storeApi.transact(data => {
+      if (data.shops.some(item => item.slug === slug)) throw new Error('มีการสร้างเว็บทดลองพร้อมกัน กรุณาลองใหม่');
+      data.shops.push(shop);
+    });
+    try {
+      await storeApi.createTenantDb(shop.id, {
+        shopName: shop.name, adminUsername: admin.username,
+        adminEmail: admin.email || 'admin@system-lab.local', adminPasswordHash: admin.passwordHash,
+      });
+      created = true;
+    } catch (error) {
+      await storeApi.transact(data => { data.shops = data.shops.filter(item => item.id !== shop.id); });
+      throw error;
+    }
+  }
+  const labDb = await storeApi.loadTenantDb(shop.id);
+  if (!labDb) throw new Error('ฐานข้อมูลเว็บทดลองไม่พร้อมใช้งาน');
+  await storeApi.runInTenant(shop.id, labDb, () => storeApi.transact(data => {
+    data.settings.rain = { enabled: true, color: '#78c8ff', intensity: 'medium' };
+    data.settings.systemModules ||= {};
+    data.settings.systemModules.rain = { name: 'ระบบฝนตกหน้าเว็บ', version: 'lab', enabled: true, deployedAt: new Date().toISOString() };
+  }));
+  return { shop, created };
+}
+
 async function listTenantFeatures(shops, storeApi = store) {
   const queue = [...(shops || [])];
   const results = new Map();
@@ -209,4 +247,4 @@ async function listTenantFeatures(shops, storeApi = store) {
   return results;
 }
 
-module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, captureFeature, restoreFeature, selectShops, updateTenantFeatures, listTenantFeatures, listReleases, createRelease, deployRelease };
+module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, captureFeature, restoreFeature, selectShops, updateTenantFeatures, listTenantFeatures, listReleases, createRelease, deployRelease, ensureSystemLab };

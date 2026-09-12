@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { updateTenantFeatures, readFeatureState, createRelease, deployRelease } = require('../src/services/tenant-features');
+const { updateTenantFeatures, readFeatureState, createRelease, deployRelease, ensureSystemLab } = require('../src/services/tenant-features');
 
 function fixture(failOnSave) {
   const shops = [{ id: 'shop-a', name: 'A' }, { id: 'shop-b', name: 'B' }, { id: 'shop-lab', name: 'LAB', isSystemLab: true }];
@@ -28,6 +28,10 @@ function fixture(failOnSave) {
         return result;
       },
       genId: () => `id-${saveCount + 1}`,
+      createTenantDb: async (id, details) => {
+        dbs.set(id, { settings: {}, products: [], orders: [], users: [{ username: details.adminUsername, passwordHash: details.adminPasswordHash }] });
+        return dbs.get(id);
+      },
   };
   return {
     api, dbs, get saveCount() { return saveCount; },
@@ -77,5 +81,12 @@ function fixture(failOnSave) {
   await updateTenantFeatures({ scope: 'selected', shopIds: ['shop-a'], feature: 'rain', action: 'enable' }, rain.api);
   assert.deepEqual(rain.dbs.get('shop-a').settings.rain, { color: '#78c8ff', intensity: 'medium', enabled: true });
   assert.equal(rain.dbs.get('shop-b').settings.rain, undefined);
+
+  const lab = fixture();
+  lab.api.platformData.users = [{ id: 'admin', username: 'owner', email: 'owner@test', role: 'admin', status: 'active', passwordHash: 'hash' }];
+  lab.api.platformData.shops = lab.api.platformData.shops.filter(shop => !shop.isSystemLab);
+  const ensuredLab = await ensureSystemLab(lab.api);
+  assert.equal(ensuredLab.shop.isSystemLab, true);
+  assert.equal(lab.dbs.get(ensuredLab.shop.id).settings.rain.enabled, true);
   console.log('Tenant delivery checks passed: selected, all, releases, concurrent data preservation, rollback');
 })().catch(error => { console.error(error); process.exitCode = 1; });
