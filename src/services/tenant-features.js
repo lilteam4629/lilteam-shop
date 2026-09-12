@@ -1,4 +1,5 @@
 const store = require('../data/store');
+const { cleanupLegacyLabRain } = require('./system-modules');
 
 const FEATURE_CATALOG = Object.freeze([
   { key: 'boxGame', label: 'กล่องสุ่ม', description: 'เกมเปิดกล่องลุ้นรางวัลบนหน้าร้าน' },
@@ -230,13 +231,7 @@ async function ensureSystemLab(storeApi = store) {
   await storeApi.runInTenant(shop.id, labDb, () => storeApi.transact(data => {
     // LAB starts clean. Older builds installed rain here automatically; remove
     // only that generated marker so explicitly deployed releases stay intact.
-    const settings = data.settings ||= {};
-    const rainModule = settings.systemModules?.rain;
-    if (rainModule?.version === 'lab' && !rainModule.releaseId) {
-      delete settings.systemModules.rain;
-      if (Object.keys(settings.systemModules).length === 0) delete settings.systemModules;
-      delete settings.rain;
-    }
+    cleanupLegacyLabRain(data);
   }));
   return { shop, created };
 }

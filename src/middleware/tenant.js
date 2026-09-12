@@ -11,6 +11,7 @@
 // it always has — safe to deploy before DNS is finished.
 const store = require('../data/store');
 const { getCloudUrl } = require('../services/cloud-url');
+const { cleanupLegacyLabRain } = require('../services/system-modules');
 
 function getMainDomain(req) {
   if (process.env.MAIN_DOMAIN && process.env.MAIN_DOMAIN.trim()) {
@@ -96,6 +97,9 @@ async function tenantResolver(req, res, next) {
     const tenantDb = await store.loadTenantDb(shop.id);
     if (!tenantDb) {
       return res.status(404).send('ร้านนี้ยังไม่พร้อมใช้งาน');
+    }
+    if (shop.isSystemLab && cleanupLegacyLabRain(tenantDb)) {
+      await store.runInTenant(shop.id, tenantDb, () => store.transact(() => {}));
     }
     req.tenantShop = shop;
     // Existing shops default to the shared platform provider, while still
