@@ -123,6 +123,8 @@ async function run() {
       throw new Error('product cards still use content-visibility with native lazy-loaded images');
     }
     if (!scrollMotionCss.body.includes('mobile-is-scrolling')) throw new Error('mobile scroll performance guard is missing');
+    const scrollMotionJs = await fetchOk('/js/scroll-motion-v1.js', 'application/javascript');
+    if (!scrollMotionJs.body.includes('getBoundingClientRect')) throw new Error('scroll reveal fallback does not preserve offscreen animations');
     await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     const cookie = await loginAsAdmin();
     const adminPageCount = await crawlAdmin(cookie);
