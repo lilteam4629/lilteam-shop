@@ -737,6 +737,8 @@
       const canvas=document.getElementById('store-rain'); if(!canvas||!canvas.getContext)return;
       const ctx=canvas.getContext('2d',{alpha:true});
       const color=<%- JSON.stringify(/^#[0-9a-fA-F]{6}$/.test(rain.color||'')?rain.color:'#78c8ff') %>;
+      const rgb=parseInt(color.slice(1),16),luma=((rgb>>16)*299+((rgb>>8)&255)*587+(rgb&255)*114)/1000;
+      const contrast=luma<128?'#ffffff':'#07111f';
       const level=<%- JSON.stringify(['light','medium','heavy'].includes(rain.intensity)?rain.intensity:'medium') %>;
       const coarse=matchMedia('(max-width:900px), (pointer:coarse)').matches;
       const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
@@ -744,7 +746,7 @@
       let drops=[],frame=0,last=0,w=0,h=0,dpr=1;
       function reset(drop,randomY){drop.x=Math.random()*w;drop.y=randomY?Math.random()*h:-30;drop.len=14+Math.random()*18;drop.speed=(coarse?8:10)+Math.random()*8;drop.alpha=.48+Math.random()*.34;return drop}
       function resize(){dpr=Math.min(devicePixelRatio||1,1.5);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const count=reduced?Math.max(12,Math.round(limits[level]*.45)):limits[level];drops=Array.from({length:count},()=>reset({},true))}
-      function draw(now){frame=requestAnimationFrame(draw);if(document.hidden||now-last<16)return;last=now;ctx.clearRect(0,0,w,h);ctx.lineWidth=coarse?1.45:1.75;ctx.lineCap='round';ctx.shadowColor=color;ctx.shadowBlur=3;for(const d of drops){ctx.globalAlpha=d.alpha;ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-3,d.y+d.len);ctx.stroke();d.x-=.8;d.y+=d.speed;if(d.y>h+30)reset(d,false)}ctx.globalAlpha=1;ctx.shadowBlur=0}
+      function draw(now){frame=requestAnimationFrame(draw);if(document.hidden||now-last<16)return;last=now;ctx.clearRect(0,0,w,h);ctx.lineCap='round';for(const d of drops){ctx.globalAlpha=.28;ctx.lineWidth=coarse?2.5:2.9;ctx.strokeStyle=contrast;ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-3,d.y+d.len);ctx.stroke();ctx.globalAlpha=d.alpha;ctx.lineWidth=coarse?1.35:1.65;ctx.strokeStyle=color;ctx.stroke();d.x-=.8;d.y+=d.speed;if(d.y>h+30)reset(d,false)}ctx.globalAlpha=1}
       let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(resize,160)},{passive:true});
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)last=performance.now()});resize();frame=requestAnimationFrame(draw);
       addEventListener('pagehide',()=>cancelAnimationFrame(frame),{once:true});

@@ -221,7 +221,8 @@ async function ensureSystemLab(storeApi = store) {
   const labDb = await storeApi.loadTenantDb(shop.id);
   if (!labDb) throw new Error('ฐานข้อมูลเว็บทดลองไม่พร้อมใช้งาน');
   await storeApi.runInTenant(shop.id, labDb, () => storeApi.transact(data => {
-    data.settings.rain = { enabled: true, color: '#78c8ff', intensity: 'medium' };
+    data.settings.rain ||= { enabled: true, color: '#78c8ff', intensity: 'medium' };
+    data.settings.rain.enabled = true;
     data.settings.systemModules ||= {};
     data.settings.systemModules.rain = { name: 'ระบบฝนตกหน้าเว็บ', version: 'lab', enabled: true, deployedAt: new Date().toISOString() };
   }));
