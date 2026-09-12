@@ -46,7 +46,7 @@
       <% } else if (request.method === 'promptpay' && (payment.promptpayQrImage || qrDataUrl)) { %>
         <div class="bg-white rounded-lg p-4 flex flex-col items-center mb-3">
           <img src="<%= payment.promptpayQrImage || qrDataUrl %>" class="w-56 h-56 object-contain" alt="พร้อมเพย์ QR" />
-          <p class="text-[var(--bg)] text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
+          <p class="text-gray-600 text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
         </div>
         <div class="text-sm space-y-1">
           <div class="flex justify-between"><span class="text-[var(--text-3)]">พร้อมเพย์</span><span class="font-mono"><%= payment.promptpayId %></span></div>
@@ -61,7 +61,7 @@
         <% if (payment.bankQrImage) { %>
           <div class="bg-white rounded-lg p-4 flex flex-col items-center mb-3">
             <img src="<%= payment.bankQrImage %>" class="w-56 h-56 object-contain" alt="QR โอนธนาคาร" />
-            <p class="text-[var(--bg)] text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
+            <p class="text-gray-600 text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
           </div>
         <% } %>
         <div class="text-sm space-y-1">
