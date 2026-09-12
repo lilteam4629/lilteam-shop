@@ -164,19 +164,26 @@ function contrastRatio(hexA, hexB) {
 // ratio against this mode's own background, instead of silently rendering
 // invisible text — falls back to plain white/black only if hue-preserving
 // adjustment still can't clear the bar.
-function readableAccentOn(accentHex, bgHex, minRatio = 3.0) {
-  if (contrastRatio(accentHex, bgHex) >= minRatio) return accentHex;
+function readableAccentOn(accentHex, bgHexes, minRatio = 4.5) {
+  // Accepts one background or several — a color like --gold-text or --coral
+  // gets reused as bare text on more than one surface (page --bg AND card
+  // --card), so it must clear the contrast bar against all of them, not just
+  // whichever one happened to be passed in.
+  const bgs = Array.isArray(bgHexes) ? bgHexes : [bgHexes];
+  const passes = (hex) => bgs.every((bg) => contrastRatio(hex, bg) >= minRatio);
+  if (passes(accentHex)) return accentHex;
   const { h, s } = hexToHsl(accentHex);
-  const bgIsDark = relativeLuminance(bgHex) < 0.4;
+  const avgLuminance = bgs.reduce((sum, bg) => sum + relativeLuminance(bg), 0) / bgs.length;
+  const bgIsDark = avgLuminance < 0.4;
   // A near-neutral accent (grays/black/silver/white presets) has no real
   // hue to preserve — forcing saturation back in would tint it an arbitrary
   // color instead of just lightening/darkening the same gray.
   const sat = s < 0.05 ? 0 : Math.max(s, 0.35);
-  for (let step = 1; step <= 16; step += 1) {
-    const l = bgIsDark ? 0.5 + step * 0.03 : 0.5 - step * 0.03;
-    if (l < 0.05 || l > 0.95) break;
+  for (let step = 1; step <= 20; step += 1) {
+    const l = bgIsDark ? 0.5 + step * 0.025 : 0.5 - step * 0.025;
+    if (l < 0.04 || l > 0.96) break;
     const candidate = hslToHex(h, sat, l);
-    if (contrastRatio(candidate, bgHex) >= minRatio) return candidate;
+    if (passes(candidate)) return candidate;
   }
   return bgIsDark ? '#f5f5f5' : '#111111';
 }
@@ -245,12 +252,12 @@ function renderCss(theme) {
       --gold-light: ${accentLight};
       --gold-dark: ${accentDark};
       --gold-contrast: ${accentContrast};
-      --gold-text: ${readableAccentOn(accent, vars.bg)};
+      --gold-text: ${readableAccentOn(accent, [vars.bg, vars.card])};
       --text: ${vars.text};
       --text-2: ${vars.text2};
       --text-3: ${vars.text3};
       --text-4: ${vars.text4};
-      --coral: #e2836f;`;
+      --coral: ${readableAccentOn('#e2836f', [vars.bg, vars.card])};`;
 
   let extra = '';
   if (style === 'glow') {
