@@ -184,10 +184,13 @@ router.get('/game/:slug', (req, res) => {
   const product = store.data.products.find(p => p.slug === req.params.slug);
   if (!product || !isProductVisible(product)) return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });
   const reviews = store.data.reviews.filter(r => r.productId === product.id);
+  const selectedFilterTagIds = new Set((product.filterTagIds || []).map(String));
+  const productFilterTags = store.data.filterTags.filter(tag => selectedFilterTagIds.has(String(tag.id)));
   res.render('shop/product-detail', {
     title: product.title,
     product: withStock(product),
     genreNames: (product.genres || []).map(g => store.data.settings.genres[g] || g),
+    productFilterTags,
     reviews,
     ogTitle: `${product.title} | ${store.data.settings.shopName}`,
     ogDescription: `฿${product.price.toLocaleString()} — ${product.description || store.data.settings.tagline || ''}`.trim(),

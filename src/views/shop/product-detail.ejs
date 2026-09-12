@@ -30,6 +30,35 @@
       </div>
 
       <h1 class="text-2xl font-bold mb-2"><%= product.title %></h1>
+      <% if (productFilterTags && productFilterTags.length) { %>
+        <section class="product-detail-filters mb-5" aria-labelledby="product-filter-title">
+          <div class="product-detail-filter-head">
+            <div><span>ข้อมูลไอดี</span><h2 id="product-filter-title">ตัวที่มีในไอดีนี้</h2></div>
+            <strong>ทั้งหมด <%= productFilterTags.length %> ตัว</strong>
+          </div>
+          <div class="product-detail-filter-list">
+            <% productFilterTags.forEach(tag => { %>
+              <div class="product-detail-filter-item">
+                <span><img src="<%= tag.image %>" alt="<%= tag.name %>" loading="eager" decoding="async" /></span>
+                <b><%= tag.name %></b>
+              </div>
+            <% }) %>
+          </div>
+        </section>
+        <style>
+          .product-detail-filters{padding:1rem;border:1px solid color-mix(in srgb,var(--gold) 32%,var(--border));border-radius:1rem;background:linear-gradient(145deg,color-mix(in srgb,var(--gold) 7%,var(--card)),var(--card));box-shadow:0 14px 34px -28px rgba(0,0,0,.75)}
+          .product-detail-filter-head{display:flex;align-items:end;justify-content:space-between;gap:1rem;margin-bottom:.8rem}
+          .product-detail-filter-head span{display:block;margin-bottom:.1rem;color:var(--gold);font-size:.65rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+          .product-detail-filter-head h2{font-size:1rem;font-weight:850;color:var(--text)}
+          .product-detail-filter-head strong{color:var(--text-3);font-size:.7rem;white-space:nowrap}
+          .product-detail-filter-list{display:flex;gap:.65rem;overflow-x:auto;padding:.15rem .1rem .45rem;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:var(--gold) transparent}
+          .product-detail-filter-item{display:flex;flex:0 0 5rem;flex-direction:column;align-items:center;gap:.4rem;scroll-snap-align:start}
+          .product-detail-filter-item>span{display:grid;width:5rem;height:6.7rem;place-items:center;overflow:hidden;border:1px solid var(--border-light);border-radius:.75rem;background:var(--input)}
+          .product-detail-filter-item img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}
+          .product-detail-filter-item b{width:100%;overflow:hidden;color:var(--text-2);font-size:.72rem;text-align:center;text-overflow:ellipsis;white-space:nowrap}
+          @media(max-width:640px){.product-detail-filters{padding:.8rem}.product-detail-filter-list{gap:.5rem}.product-detail-filter-item{flex-basis:4.4rem}.product-detail-filter-item>span{width:4.4rem;height:5.9rem}.product-detail-filter-head h2{font-size:.9rem}}
+        </style>
+      <% } %>
       <% if (product.flashSaleActive || product.flashSaleUpcoming) { %>
         <% const detailFlashTarget = product.flashSaleActive ? product.flashSaleEndsAt : product.flashSaleStartsAt; const detailFlashSeconds = Math.max(0, Math.floor((detailFlashTarget - Date.now()) / 1000)); const detailFlashInitial = (Math.floor(detailFlashSeconds / 86400) ? Math.floor(detailFlashSeconds / 86400) + ' วัน ' : '') + [Math.floor((detailFlashSeconds % 86400) / 3600), Math.floor((detailFlashSeconds % 3600) / 60), detailFlashSeconds % 60].map(n => String(n).padStart(2, '0')).join(':'); %>
         <div class="mb-4 flex items-center justify-between gap-3 rounded-xl border border-[var(--gold)]/55 bg-gradient-to-r from-[var(--input)] to-[var(--card)] px-4 py-3">
