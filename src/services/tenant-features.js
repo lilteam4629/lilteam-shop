@@ -228,15 +228,10 @@ async function ensureSystemLab(storeApi = store) {
   const labDb = await storeApi.loadTenantDb(shop.id);
   if (!labDb) throw new Error('ฐานข้อมูลเว็บทดลองไม่พร้อมใช้งาน');
   await storeApi.runInTenant(shop.id, labDb, () => storeApi.transact(data => {
-    // LAB starts clean. Older builds installed rain here automatically; remove
-    // only that generated marker so explicitly deployed releases stay intact.
-    const settings = data.settings ||= {};
-    const rainModule = settings.systemModules?.rain;
-    if (rainModule?.version === 'lab' && !rainModule.releaseId) {
-      delete settings.systemModules.rain;
-      if (Object.keys(settings.systemModules).length === 0) delete settings.systemModules;
-      delete settings.rain;
-    }
+    data.settings.rain ||= { enabled: true, color: '#78c8ff', intensity: 'medium' };
+    data.settings.rain.enabled = true;
+    data.settings.systemModules ||= {};
+    data.settings.systemModules.rain = { name: 'ระบบฝนตกหน้าเว็บ', version: 'lab', enabled: true, deployedAt: new Date().toISOString() };
   }));
   return { shop, created };
 }
