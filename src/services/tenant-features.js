@@ -81,7 +81,9 @@ function applyFeature(db, feature, enabled) {
 
 function selectShops(platformShops, scope, requestedIds) {
   const shops = Array.isArray(platformShops) ? platformShops : [];
-  if (scope === 'all') return shops;
+  // The system lab is the canary used before release. "All" always means
+  // customer shops and must never change the lab or use it as customer data.
+  if (scope === 'all') return shops.filter(shop => !shop.isSystemLab);
   if (scope !== 'selected') throw new Error('ขอบเขตการแก้ไขไม่ถูกต้อง');
   const ids = [...new Set([].concat(requestedIds || []).map(String).filter(Boolean))];
   if (!ids.length) throw new Error('กรุณาเลือกร้านอย่างน้อย 1 ร้าน');

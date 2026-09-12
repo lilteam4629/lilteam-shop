@@ -2,7 +2,7 @@ const assert = require('assert');
 const { updateTenantFeatures, readFeatureState, createRelease, deployRelease } = require('../src/services/tenant-features');
 
 function fixture(failOnSave) {
-  const shops = [{ id: 'shop-a', name: 'A' }, { id: 'shop-b', name: 'B' }];
+  const shops = [{ id: 'shop-a', name: 'A' }, { id: 'shop-b', name: 'B' }, { id: 'shop-lab', name: 'LAB', isSystemLab: true }];
   const dbs = new Map(shops.map(shop => [shop.id, {
     settings: { miniGame: { boxEnabled: false, railEnabled: false }, music: { enabled: false }, snow: { enabled: false }, welcomePopup: { enabled: false } },
     products: [{ id: `${shop.id}-product`, images: [`${shop.id}.png`] }],
@@ -49,6 +49,7 @@ function fixture(failOnSave) {
   assert.equal(every.updatedCount, 2);
   assert.equal(readFeatureState(all.dbs.get('shop-a')).boxGame, true);
   assert.equal(readFeatureState(all.dbs.get('shop-b')).boxGame, true);
+  assert.equal(readFeatureState(all.dbs.get('shop-lab')).boxGame, false);
 
   const invalid = fixture();
   await assert.rejects(() => updateTenantFeatures({ scope: 'selected', shopIds: ['missing'], feature: 'snow', action: 'enable' }, invalid.api));
