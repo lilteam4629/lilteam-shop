@@ -11,6 +11,7 @@
 // it always has — safe to deploy before DNS is finished.
 const store = require('../data/store');
 const { getCloudUrl } = require('../services/cloud-url');
+const { ensureLabRainModule } = require('../services/system-modules');
 
 function getMainDomain(req) {
   if (process.env.MAIN_DOMAIN && process.env.MAIN_DOMAIN.trim()) {
@@ -96,6 +97,11 @@ async function tenantResolver(req, res, next) {
     const tenantDb = await store.loadTenantDb(shop.id);
     if (!tenantDb) {
       return res.status(404).send('ร้านนี้ยังไม่พร้อมใช้งาน');
+    }
+    // Restore a LAB-only module removed by an older migration. Once a release
+    // exists (including an explicit disabled release), its state is respected.
+    if (shop.isSystemLab && ensureLabRainModule(tenantDb)) {
+      await store.runInTenant(shop.id, tenantDb, () => store.transact(() => {}));
     }
     req.tenantShop = shop;
     // Existing shops default to the shared platform provider, while still

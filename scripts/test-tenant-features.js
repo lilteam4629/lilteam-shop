@@ -1,5 +1,6 @@
 const assert = require('assert');
 const { updateTenantFeatures, readFeatureState, createRelease, deployRelease, ensureSystemLab } = require('../src/services/tenant-features');
+const { ensureLabRainModule } = require('../src/services/system-modules');
 
 function fixture(failOnSave) {
   const shops = [{ id: 'shop-a', name: 'A' }, { id: 'shop-b', name: 'B' }, { id: 'shop-lab', name: 'LAB', isSystemLab: true }];
@@ -90,5 +91,9 @@ function fixture(failOnSave) {
   const ensuredLab = await ensureSystemLab(lab.api);
   assert.equal(ensuredLab.shop.isSystemLab, true);
   assert.equal(lab.dbs.get(ensuredLab.shop.id).settings.rain.enabled, true);
+
+  const disabledLab = { settings: { rain: { enabled: false }, systemModules: { rain: { version: '2.0.0', enabled: false, releaseId: 'release-disable' } } } };
+  assert.equal(ensureLabRainModule(disabledLab), false);
+  assert.equal(disabledLab.settings.rain.enabled, false);
   console.log('Tenant delivery checks passed: selected, all, releases, concurrent data preservation, rollback');
 })().catch(error => { console.error(error); process.exitCode = 1; });
