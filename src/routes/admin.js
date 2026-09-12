@@ -509,6 +509,40 @@ router.post('/products/:id/price', async (req, res) => {
   res.json({ ok: true, price, formattedPrice: `฿${price.toLocaleString('th-TH')}` });
 });
 
+router.post('/products/bulk-price', async (req, res) => {
+  const operation = req.body.operation === 'increase' ? 'increase' : 'discount';
+  const scope = req.body.scope === 'selected' ? 'selected' : 'all';
+  const percentage = Number(String(req.body.percentage == null ? '' : req.body.percentage).trim());
+  const selectedIds = new Set(toArr(req.body.productIds).map(String));
+  const maxPercentage = operation === 'discount' ? 100 : 1000;
+  if (!Number.isFinite(percentage) || percentage <= 0 || percentage > maxPercentage) {
+    req.flash('error', `เปอร์เซ็นต์ต้องมากกว่า 0 และไม่เกิน ${maxPercentage}%`);
+    return res.redirect('/admin/products');
+  }
+  if (scope === 'selected' && !selectedIds.size) {
+    req.flash('error', 'กรุณาเลือกสินค้าอย่างน้อย 1 รายการ');
+    return res.redirect('/admin/products');
+  }
+  const targets = store.data.products.filter(product => scope === 'all' || selectedIds.has(String(product.id)));
+  if (!targets.length) {
+    req.flash('error', 'ไม่พบสินค้าที่ต้องการปรับราคา');
+    return res.redirect('/admin/products');
+  }
+  const factor = operation === 'discount' ? 1 - (percentage / 100) : 1 + (percentage / 100);
+  targets.forEach(product => {
+    const currentPrice = Math.max(0, Number(product.price) || 0);
+    const nextPrice = Math.min(100000000, Math.max(0, Math.round(currentPrice * factor)));
+    if (operation === 'discount' && nextPrice < currentPrice) {
+      product.originalPrice = Math.max(Number(product.originalPrice) || 0, currentPrice);
+    }
+    product.price = nextPrice;
+  });
+  await store.save();
+  const actionLabel = operation === 'discount' ? 'ลด' : 'เพิ่ม';
+  req.flash('success', `${actionLabel}ราคา ${percentage}% สำเร็จ ${targets.length} รายการ`);
+  res.redirect('/admin/products');
+});
+
 router.post('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }

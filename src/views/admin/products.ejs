@@ -29,6 +29,10 @@
           <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
           <span>นำเข้าจากโฟลเดอร์</span>
         </a>
+        <button type="button" id="bulk-price-open" class="admin-action-item w-full flex items-center gap-2 px-4 py-2.5 text-xs text-[var(--gold)] hover:bg-[var(--input)] transition text-left">
+          <span class="w-4 text-center shrink-0">%</span>
+          <span>ลดหรือเพิ่มราคาเป็นเปอร์เซ็นต์</span>
+        </button>
         <% if (zeroStockCount) { %>
         <form action="/admin/products/stock/add-all" method="post" data-confirm="เพิ่มสต็อก 1 ชิ้นให้สินค้าที่สต็อกว่างทั้ง <%= zeroStockCount %> รายการ (โหมดติดต่อร้านเพื่อรับสินค้า — คุณต้องส่งไอดีให้ลูกค้าเองหลังขายผ่านแชท) ยืนยันไหม?">
           <button class="admin-action-item w-full flex items-center gap-2 px-4 py-2.5 text-xs text-sky-300 hover:bg-[var(--input)] transition text-left">
@@ -151,6 +155,7 @@
     <table id="admin-products-table" class="w-full text-left text-xs sm:text-sm">
       <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
         <tr>
+          <th class="w-10 py-3.5 pl-4"><input id="products-select-all" type="checkbox" aria-label="เลือกสินค้าทั้งหมด" class="h-4 w-4 accent-[var(--gold)]" /></th>
           <th class="py-3.5 px-4 font-semibold">สินค้า</th>
           <th class="py-3.5 px-4 font-semibold">ราคาขาย</th>
           <th class="py-3.5 px-4 font-semibold">คงเหลือในสต๊อก</th>
@@ -161,6 +166,7 @@
       <tbody class="divide-y divide-[var(--border)]">
         <% products.forEach(p => { %>
           <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+            <td class="py-3 pl-4"><input type="checkbox" class="product-select h-4 w-4 accent-[var(--gold)]" value="<%= p.id %>" aria-label="เลือก <%= p.title %>" /></td>
 
             <!-- Product Info -->
             <td class="py-3 px-4">
@@ -294,6 +300,25 @@
   <form id="price-edit-form" class="p-5"><div class="flex items-start justify-between gap-3"><div><h2 class="text-lg font-bold">แก้ไขราคาสินค้า</h2><p id="price-edit-title" class="mt-1 text-xs text-[var(--text-3)]"></p></div><button type="button" data-price-close class="grid h-8 w-8 place-items-center rounded-lg bg-[var(--input)] text-lg">×</button></div><label class="mt-5 block text-xs font-semibold">ราคาขาย (บาท)<input id="price-edit-input" name="price" type="number" min="0" max="100000000" step="1" required class="mt-2 w-full rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-4 py-3 text-lg font-bold outline-none focus:border-[var(--gold)]"></label><p id="price-edit-error" class="mt-2 hidden text-xs text-red-500"></p><div class="mt-5 flex justify-end gap-2"><button type="button" data-price-close class="rounded-xl border border-[var(--border)] px-4 py-2 text-sm">ยกเลิก</button><button type="submit" class="rounded-xl bg-[var(--gold)] px-5 py-2 text-sm font-bold text-[var(--bg)]">บันทึกราคา</button></div></form>
 </dialog>
 
+<dialog id="bulk-price-dialog" class="m-auto w-[min(94vw,520px)] rounded-2xl border border-[var(--border)] bg-[var(--card)] p-0 text-[var(--text)] shadow-2xl backdrop:bg-black/70">
+  <form action="/admin/products/bulk-price" method="post" id="bulk-price-form" class="p-5">
+    <div class="flex items-start justify-between gap-3"><div><h2 class="text-lg font-bold">ปรับราคาหลายรายการ</h2><p class="mt-1 text-xs text-[var(--text-3)]">คำนวณเปอร์เซ็นต์จากราคาขายปัจจุบันและปัดเป็นบาท</p></div><button type="button" data-bulk-price-close class="grid h-8 w-8 place-items-center rounded-lg bg-[var(--input)] text-lg">×</button></div>
+    <div class="mt-5 grid grid-cols-2 gap-2">
+      <label class="cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--input)] p-3 text-sm"><input type="radio" name="operation" value="discount" checked class="mr-2 accent-[var(--gold)]">ลดราคา</label>
+      <label class="cursor-pointer rounded-xl border border-[var(--border)] bg-[var(--input)] p-3 text-sm"><input type="radio" name="operation" value="increase" class="mr-2 accent-[var(--gold)]">เพิ่มราคา</label>
+    </div>
+    <label class="mt-4 block text-xs font-semibold">เปอร์เซ็นต์<input id="bulk-price-percent" name="percentage" type="number" min="0.01" max="100" step="0.01" value="10" required class="mt-2 w-full rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-4 py-3 text-lg font-bold outline-none focus:border-[var(--gold)]"></label>
+    <div class="mt-4 grid grid-cols-2 gap-2">
+      <label class="cursor-pointer rounded-xl border border-[var(--border)] p-3 text-sm"><input type="radio" name="scope" value="selected" checked class="mr-2 accent-[var(--gold)]">เฉพาะที่เลือก <b id="bulk-selected-count">0</b></label>
+      <label class="cursor-pointer rounded-xl border border-[var(--border)] p-3 text-sm"><input type="radio" name="scope" value="all" class="mr-2 accent-[var(--gold)]">ทั้งหมด <b><%= products.length %></b></label>
+    </div>
+    <div id="bulk-product-ids"></div>
+    <div id="bulk-price-preview" class="mt-4 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 p-3 text-sm text-[var(--text-2)]">เลือกสินค้าเพื่อดูตัวอย่างราคา</div>
+    <p id="bulk-price-error" class="mt-2 hidden text-xs text-red-500"></p>
+    <div class="mt-5 flex justify-end gap-2"><button type="button" data-bulk-price-close class="rounded-xl border border-[var(--border)] px-4 py-2 text-sm">ยกเลิก</button><button type="submit" class="rounded-xl bg-[var(--gold)] px-5 py-2 text-sm font-bold text-[var(--bg)]">ยืนยันปรับราคา</button></div>
+  </form>
+</dialog>
+
 <aside id="product-price-total" data-total="<%= totalProductPrice %>" class="fixed bottom-5 right-5 z-40 min-w-[210px] rounded-2xl border border-[var(--gold)]/35 bg-[var(--card)]/95 px-4 py-3 text-right shadow-xl backdrop-blur-xl" aria-live="polite">
   <span class="block text-[10px] font-semibold text-[var(--text-3)]">ราคารวมสินค้าทั้งหมด <%= products.length.toLocaleString() %> รายการ</span>
   <strong class="mt-1 block text-xl font-extrabold text-[var(--gold)]">฿<%= totalProductPrice.toLocaleString() %></strong>
@@ -309,6 +334,15 @@
     document.querySelectorAll('[data-price-edit]').forEach(function(button){button.addEventListener('click',function(){activePriceButton=button;priceTitle.textContent=button.dataset.productTitle||'';priceInput.value=button.dataset.price||0;priceError.classList.add('hidden');priceDialog.showModal();setTimeout(function(){priceInput.focus();priceInput.select()},0)})});
     priceDialog.querySelectorAll('[data-price-close]').forEach(function(button){button.addEventListener('click',function(){priceDialog.close()})});priceDialog.addEventListener('click',function(event){if(event.target===priceDialog)priceDialog.close()});
     priceForm.addEventListener('submit',async function(event){event.preventDefault();if(!activePriceButton)return;var submit=priceForm.querySelector('[type="submit"]');submit.disabled=true;priceError.classList.add('hidden');try{var oldPrice=Number(activePriceButton.dataset.price)||0,body=new URLSearchParams({price:priceInput.value}),response=await fetch('/admin/products/'+encodeURIComponent(activePriceButton.dataset.productId)+'/price',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded','Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:body}),data=await response.json();if(!response.ok||!data.ok)throw new Error(data.message||'บันทึกราคาไม่สำเร็จ');activePriceButton.textContent=data.formattedPrice;activePriceButton.dataset.price=String(data.price);var totalBox=document.getElementById('product-price-total');if(totalBox){var total=(Number(totalBox.dataset.total)||0)-oldPrice+data.price;totalBox.dataset.total=String(total);totalBox.querySelector('strong').textContent='฿'+total.toLocaleString('th-TH')}priceDialog.close();if(window.showToast)showToast('บันทึกราคาแล้ว','success')}catch(error){priceError.textContent=error.message;priceError.classList.remove('hidden')}finally{submit.disabled=false}});
+    var selectAll=document.getElementById('products-select-all'),checks=Array.from(document.querySelectorAll('.product-select')),bulkDialog=document.getElementById('bulk-price-dialog'),bulkForm=document.getElementById('bulk-price-form'),bulkPercent=document.getElementById('bulk-price-percent'),bulkPreview=document.getElementById('bulk-price-preview'),bulkError=document.getElementById('bulk-price-error');
+    function selected(){return checks.filter(function(c){return c.checked})}
+    function syncSelection(){var chosen=selected();document.getElementById('bulk-selected-count').textContent=chosen.length;if(selectAll)selectAll.indeterminate=chosen.length>0&&chosen.length<checks.length;if(selectAll)selectAll.checked=chosen.length===checks.length;updateBulkPreview()}
+    function updateBulkPreview(){if(!bulkDialog||!bulkDialog.open)return;var scope=bulkForm.querySelector('[name="scope"]:checked').value,operation=bulkForm.querySelector('[name="operation"]:checked').value,pct=Number(bulkPercent.value),source=scope==='all'?checks:selected();if(!source.length||!Number.isFinite(pct)||pct<=0){bulkPreview.textContent=scope==='all'?'กรอกเปอร์เซ็นต์เพื่อดูตัวอย่าง':'เลือกสินค้าเพื่อดูตัวอย่างราคา';return}var oldPrice=Number(source[0].closest('tr').querySelector('[data-price-edit]').dataset.price)||0,factor=operation==='discount'?1-pct/100:1+pct/100,next=Math.max(0,Math.round(oldPrice*factor));bulkPreview.textContent=(operation==='discount'?'ลด':'เพิ่ม')+' '+pct+'% จำนวน '+source.length+' รายการ · ตัวอย่าง ฿'+oldPrice.toLocaleString('th-TH')+' → ฿'+next.toLocaleString('th-TH')}
+    if(selectAll)selectAll.addEventListener('change',function(){checks.forEach(function(c){c.checked=selectAll.checked});syncSelection()});checks.forEach(function(c){c.addEventListener('change',syncSelection)});
+    document.getElementById('bulk-price-open').addEventListener('click',function(){document.getElementById('bulk-actions-menu').classList.add('hidden');syncSelection();bulkDialog.showModal();updateBulkPreview()});
+    bulkDialog.querySelectorAll('[data-bulk-price-close]').forEach(function(b){b.addEventListener('click',function(){bulkDialog.close()})});bulkDialog.addEventListener('click',function(e){if(e.target===bulkDialog)bulkDialog.close()});
+    bulkForm.querySelectorAll('input').forEach(function(input){input.addEventListener('input',function(){if(input.name==='operation')bulkPercent.max=input.value==='discount'?'100':'1000';updateBulkPreview()})});
+    bulkForm.addEventListener('submit',function(event){var scope=bulkForm.querySelector('[name="scope"]:checked').value,chosen=selected(),pct=Number(bulkPercent.value),operation=bulkForm.querySelector('[name="operation"]:checked').value,max=operation==='discount'?100:1000;bulkError.classList.add('hidden');if((scope==='selected'&&!chosen.length)||!Number.isFinite(pct)||pct<=0||pct>max){event.preventDefault();bulkError.textContent=scope==='selected'&&!chosen.length?'กรุณาเลือกสินค้าอย่างน้อย 1 รายการ':'เปอร์เซ็นต์ไม่ถูกต้อง';bulkError.classList.remove('hidden');return}var holder=document.getElementById('bulk-product-ids');holder.innerHTML='';chosen.forEach(function(c){var input=document.createElement('input');input.type='hidden';input.name='productIds';input.value=c.value;holder.appendChild(input)});var submit=bulkForm.querySelector('[type="submit"]');submit.disabled=true;submit.textContent='กำลังปรับราคา...'});
   })();
   (function () {
     var raw = sessionStorage.getItem('bulkImportSummary');
