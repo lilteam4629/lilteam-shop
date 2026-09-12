@@ -29,6 +29,7 @@
   <% if (workspaceEnabled) { %><link rel="stylesheet" href="<%= asset('css/admin-workspace-v5.css') %>" /><% } %>
   <% if (referenceEnabled) { %><link rel="stylesheet" href="<%= asset('css/admin-studio-v1.css') %>" /><% } %>
   <% if (referenceEnabled) { %><link rel="stylesheet" href="<%= asset('css/admin-mobile-v1.css') %>" /><% } %>
+  <link rel="stylesheet" href="<%= asset('css/scroll-motion-v1.css') %>" />
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
     html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
@@ -725,5 +726,6 @@
       });
     });
   </script>
+  <script src="<%= asset('js/scroll-motion-v1.js') %>" defer></script>
 </body>
 </html>
