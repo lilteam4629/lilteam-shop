@@ -1,7 +1,6 @@
 html{scroll-behavior:smooth;scroll-padding-top:84px;overscroll-behavior-y:none}
 body{overflow-x:clip}
 button,a[href],[role=button]{touch-action:manipulation}
-.catalog-card,.all-products-grid .premium-product-card{content-visibility:auto;contain-intrinsic-size:auto 340px}
 #site-page-shell{view-transition-name:site-page-shell}
 ::view-transition-old(site-page-shell){animation:.16s ease both page-fade-out}
 ::view-transition-new(site-page-shell){animation:.28s cubic-bezier(.2,.8,.2,1) both page-fade-in}

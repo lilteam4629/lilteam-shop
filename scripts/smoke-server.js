@@ -118,6 +118,10 @@ async function run() {
       throw new Error('product detail is missing its assigned filter information');
     }
     await fetchOk('/css/storefront-mobile-v1.css', 'text/css');
+    const scrollMotionCss = await fetchOk('/css/scroll-motion-v1.css', 'text/css');
+    if (scrollMotionCss.body.includes('content-visibility:auto')) {
+      throw new Error('product cards still use content-visibility with native lazy-loaded images');
+    }
     await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     const cookie = await loginAsAdmin();
     const adminPageCount = await crawlAdmin(cookie);
