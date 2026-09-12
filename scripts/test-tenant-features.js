@@ -86,6 +86,42 @@ function fixture(failOnSave) {
   assert.deepEqual(rain.dbs.get('shop-a').settings.rain, { color: '#78c8ff', intensity: 'medium', enabled: true });
   assert.equal(rain.dbs.get('shop-b').settings.rain, undefined);
   assert.equal(readFeatureState(rain.dbs.get('shop-b')).rain, null);
+  // Calling the raw feature toggle for 'rain' (no release attached) sets
+  // settings.rain but deliberately does NOT install settings.systemModules.rain
+  // — readFeatureState reports null (not installed), matching effects.ejs /
+  // main.ejs which both gate on systemModules.rain.enabled, not settings.rain
+  // alone. This is intentional: rain must be delivered as a real release.
+  assert.equal(rain.dbs.get('shop-a').settings.systemModules, undefined);
+  assert.equal(readFeatureState(rain.dbs.get('shop-a')).rain, null);
+
+  // The ACTUAL admin-facing delivery flow ("นำส่งระบบ" in rent-app) always
+  // goes through createRelease + deployRelease, never the raw toggle above.
+  // This must set BOTH settings.rain.enabled and settings.systemModules.rain
+  // together on the targeted shop only, so effects.ejs shows the rain
+  // settings card and main.ejs renders <canvas id="store-rain">.
+  const rainRelease = fixture();
+  rainRelease.api.platformData.tenantFeatureReleases = [];
+  const rainRel = await createRelease({ name: 'ระบบฝนตกทดสอบ', version: '1.0.0', feature: 'rain', action: 'enable' }, rainRelease.api);
+  const rainDeployed = await deployRelease({ releaseId: rainRel.id, scope: 'selected', shopIds: ['shop-a'] }, rainRelease.api);
+  assert.equal(rainDeployed.updatedCount, 1);
+  const shopA = rainRelease.dbs.get('shop-a');
+  assert.equal(shopA.settings.rain.enabled, true);
+  assert.equal(shopA.settings.systemModules.rain.enabled, true);
+  assert.equal(shopA.settings.systemModules.rain.releaseId, rainRel.id);
+  assert.equal(readFeatureState(shopA).rain, true);
+  // Untargeted shop and system-lab must be completely untouched.
+  assert.equal(rainRelease.dbs.get('shop-b').settings.rain, undefined);
+  assert.equal(rainRelease.dbs.get('shop-b').settings.systemModules, undefined);
+  assert.equal(rainRelease.dbs.get('shop-lab').settings.rain, undefined);
+
+  // Disabling the same release for the same shop must flip both fields back
+  // off, not delete them (so the module stays "installed" but off).
+  const disableRelease = await createRelease({ name: 'ระบบฝนตกทดสอบ', version: '1.0.1', feature: 'rain', action: 'disable' }, rainRelease.api);
+  await deployRelease({ releaseId: disableRelease.id, scope: 'selected', shopIds: ['shop-a'] }, rainRelease.api);
+  const shopAAfterDisable = rainRelease.dbs.get('shop-a');
+  assert.equal(shopAAfterDisable.settings.rain.enabled, false);
+  assert.equal(shopAAfterDisable.settings.systemModules.rain.enabled, false);
+  assert.equal(readFeatureState(shopAAfterDisable).rain, false);
 
   const lab = fixture();
   lab.api.platformData.users = [{ id: 'admin', username: 'owner', email: 'owner@test', role: 'admin', status: 'active', passwordHash: 'hash' }];
