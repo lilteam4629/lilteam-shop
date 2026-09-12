@@ -57,7 +57,6 @@
       </button>
     </form>
   </div>
-
   <!-- Snow Particle Effect Card -->
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
     <div class="flex items-center justify-between">
@@ -80,6 +79,7 @@
     </div>
   </div>
 
+  <% if (settings.systemModules && settings.systemModules.rain && settings.systemModules.rain.enabled) { %>
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
     <div class="flex items-center gap-3 mb-4"><div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">🌧️</div><div><h3 class="font-bold text-sm sm:text-base">ระบบฝนตกหน้าเว็บ</h3><p class="text-[11px] text-[var(--text-4)]">ฝน Canvas ลื่นบนมือถือ ปรับสีและจำนวนหยดได้ ไม่รบกวนการกดใช้งาน</p></div></div>
     <% const rain = settings.rain || { enabled:false, color:'#78c8ff', intensity:'medium' }; %>
@@ -90,6 +90,7 @@
       <button class="sm:col-span-3 rounded-xl bg-[var(--gold)] text-[var(--bg)] font-bold py-3">บันทึกระบบฝนตก</button>
     </form>
   </div>
+  <% } %>
 
 </div>
 

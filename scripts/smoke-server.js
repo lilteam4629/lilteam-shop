@@ -119,6 +119,28 @@ async function checkBulkPrice(cookie) {
   if (!updatedProduct || Number(updatedProduct[1]) !== expected) throw new Error(`bulk price did not update ${originalPrice} to ${expected}`);
 }
 
+async function checkUndeployedRainModule(cookie) {
+  const effects = await fetchOk('/admin/effects', 'text/html', { cookie });
+  if (!effects.body.includes('เพลงพื้นหลังหน้าเว็บ') || !effects.body.includes('เอฟเฟกต์หิมะตกหน้าเว็บ')) {
+    throw new Error('standard storefront effects are missing from admin');
+  }
+  if (effects.body.includes('ระบบฝนตกหน้าเว็บ')) {
+    throw new Error('undeployed rain module is visible in tenant admin');
+  }
+  const update = await request('/admin/effects/rain', {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: 'enabled=on&color=%2378c8ff&intensity=medium',
+  });
+  if (update.statusCode !== 302 || update.headers.location !== '/admin/effects') {
+    throw new Error(`undeployed rain update returned HTTP ${update.statusCode}`);
+  }
+  const home = await fetchOk('/', 'text/html');
+  if (home.body.includes('id="store-rain"')) {
+    throw new Error('undeployed rain module rendered on storefront');
+  }
+}
+
 async function run() {
   try {
     let ready = false;
@@ -158,11 +180,12 @@ async function run() {
     await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
+    await checkUndeployedRainModule(cookie);
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);
     const missing = await request('/definitely-missing');
     if (missing.statusCode !== 404 || !missing.body.includes('>404<')) throw new Error('404 page does not identify HTTP 404');
-    console.log(`Smoke checks passed: storefront, assets, ${adminPageCount} admin pages, bulk pricing, error page`);
+    console.log(`Smoke checks passed: storefront, assets, undeployed module isolation, ${adminPageCount} admin pages, bulk pricing, error page`);
   } finally { cleanup(); }
 }
 
