@@ -6,6 +6,8 @@ const store = require('../data/store');
 const license = require('../services/license');
 const discord = require('../services/discord-bot');
 const railway = require('../services/railway');
+const tenantFeatures = require('../services/tenant-features');
+const { getShopUrl } = require('../middleware/tenant');
 const router = express.Router();
 const publicUser = u => ({ id: u.id, username: u.username, email: u.email, walletBalance: u.walletBalance });
 const activeUser = id => store.data.users.find(u => u.id === id && u.status !== 'banned');
@@ -48,15 +50,31 @@ router.get('/legacy-payment-config', (req, res) => {
 function verifiedSale(sale) {
   return { ...sale, exp: license.isEnabled() ? license.verifyKey(sale.key).exp || null : null };
 }
-router.get('/admin/rentals', (req, res) => res.json({
-  ok: true,
-  rentedShops: [...store.data.shops].sort((a, b) => (a.expiresAt || 0) - (b.expiresAt || 0)),
-  sales: [...store.data.licenseSales].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(verifiedSale),
-  transactions: store.data.walletTransactions.filter(t => ['shop_purchase', 'shop_renewal', 'shop_purchase_refund'].includes(t.type))
-    .map(t => ({ ...t, username: store.data.users.find(u => u.id === t.userId)?.username || t.userId }))
-    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
-  discordSettings: store.data.settings.discord || {}, discordConfigured: discord.isConfigured(), discordReady: discord.isReady(),
-}));
+router.get('/admin/rentals', async (req, res, next) => {
+  try {
+    const shops = [...store.data.shops].sort((a, b) => (a.expiresAt || 0) - (b.expiresAt || 0));
+    const featureStates = await tenantFeatures.listTenantFeatures(shops);
+    res.json({
+      ok: true,
+      rentedShops: shops.map(shop => ({ ...shop, managementUrl: `${getShopUrl(shop.slug, req)}/admin`, features: featureStates.get(String(shop.id)) })),
+      featureCatalog: tenantFeatures.FEATURE_CATALOG,
+      sales: [...store.data.licenseSales].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).map(verifiedSale),
+      transactions: store.data.walletTransactions.filter(t => ['shop_purchase', 'shop_renewal', 'shop_purchase_refund'].includes(t.type))
+        .map(t => ({ ...t, username: store.data.users.find(u => u.id === t.userId)?.username || t.userId }))
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+      discordSettings: store.data.settings.discord || {}, discordConfigured: discord.isConfigured(), discordReady: discord.isReady(),
+    });
+  } catch (error) { next(error); }
+});
+router.post('/admin/rentals/features', async (req, res, next) => {
+  try {
+    const result = await tenantFeatures.updateTenantFeatures(req.body);
+    res.json({ ok: true, ...result });
+  } catch (error) {
+    const status = /กรุณา|ไม่ถูกต้อง|ไม่มีอยู่|ยังไม่มี/.test(error.message) ? 400 : 500;
+    res.status(status).json({ ok: false, error: error.message || 'แก้ไขฟีเจอร์ไม่สำเร็จ' });
+  }
+});
 router.post('/admin/rentals/:id/delete', async (req, res, next) => {
   try {
     const shop = store.data.shops.find(s => s.id === req.params.id);

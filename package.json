@@ -9,7 +9,7 @@
     "build:css": "tailwindcss -i ./src/styles/tailwind.css -o ./public/css/tailwind.generated.css --minify",
     "build": "npm run build:css",
     "migrate:r2": "node scripts/migrate-gridfs-to-r2.js",
-    "test": "node scripts/smoke-server.js",
+    "test": "node scripts/test-tenant-features.js && node scripts/smoke-server.js",
     "test:smoke": "node scripts/smoke-server.js"
   },
   "engines": {
