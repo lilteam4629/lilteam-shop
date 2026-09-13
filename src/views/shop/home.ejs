@@ -422,7 +422,23 @@
     <% } %>
   </div>
   <% if (products.length) { %>
-    <p class="text-center text-[var(--text-4)] text-xs mt-6">แสดง <%= products.length %> จาก <%= productTotal %> รายการ</p>
+    <p class="text-center text-[var(--text-4)] text-xs mt-6">
+      หน้า <%= productPage %> จาก <%= productTotalPages %> &nbsp;•&nbsp; แสดง <%= products.length %> จากทั้งหมด <%= productTotal %> รายการ
+    </p>
+    <% if (productTotalPages > 1) { %>
+      <div class="flex items-center justify-center gap-1.5 mt-3 flex-wrap">
+        <% const pageHref = (p) => '/?page=' + p; %>
+        <a href="<%= pageHref(Math.max(1, productPage - 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] text-xs <%= productPage <= 1 ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">‹ ก่อนหน้า</a>
+        <% for (let p = 1; p <= productTotalPages; p++) { %>
+          <% if (p === 1 || p === productTotalPages || Math.abs(p - productPage) <= 1) { %>
+            <a href="<%= pageHref(p) %>" class="w-8 h-8 grid place-items-center rounded-lg border text-xs transition <%= p === productPage ? 'border-[var(--gold)] bg-[var(--gold)] text-[var(--gold-contrast)] font-bold' : 'border-[var(--border-light)] hover:border-[var(--gold)]' %>"><%= p %></a>
+          <% } else if (p === 2 || p === productTotalPages - 1) { %>
+            <span class="text-[var(--text-4)] text-xs px-1">…</span>
+          <% } %>
+        <% } %>
+        <a href="<%= pageHref(Math.min(productTotalPages, productPage + 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] text-xs <%= productPage >= productTotalPages ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">ถัดไป ›</a>
+      </div>
+    <% } %>
   <% } else { %>
     <p class="text-center text-[var(--text-4)] text-xs mt-6">ยังไม่มีสินค้า — เพิ่มสินค้าได้ที่หน้าแอดมิน (รูปด้านบนเป็นแค่ตัวอย่าง)</p>
   <% } %>

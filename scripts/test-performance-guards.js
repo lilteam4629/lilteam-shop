@@ -10,6 +10,8 @@ const layout = read('src/views/layouts/main.ejs');
 const adminLayout = read('src/views/layouts/admin.ejs');
 const adminMotionCss = read('public/css/admin-scroll-motion-v1.css');
 const adminMotionJs = read('public/js/admin-mobile-motion.js');
+const shopRoutes = read('src/routes/shop.js');
+const homeView = read('src/views/shop/home.ejs');
 
 assert.match(hero, /locker-hero-v1\.css/, 'large hero styles must be a cacheable asset');
 assert.doesNotMatch(hero, /<style>/, 'large hero CSS must not be repeated in every home response');
@@ -30,10 +32,15 @@ assert.match(adminMotionCss, /translate3d\(0,34px,0\) scale\(\.94\).*\.42s cubic
 assert.match(adminMotionCss, /max-width:800px.*translate3d\(0,24px,0\) scale\(\.96\).*\.38s/, 'mobile admin must preserve the rental console mobile motion');
 assert.doesNotMatch(adminMotionCss, /admin-page-surface[^\n]*animation/, 'the full desktop work surface must never animate');
 assert.doesNotMatch(adminMotionJs, /page\.animate|getBoundingClientRect/, 'admin motion must not animate or synchronously measure the full page');
+assert.match(adminMotionCss, /prefers-reduced-motion:reduce\)\{body\.admin-main-site\.admin-reference-ui \.scroll-reveal\{transition-duration:\.42s!important/, 'owner-enabled desktop motion must override the studio 0.01ms reset only on the main site');
+assert.match(adminMotionJs, /classList\.contains\('hidden'\)/, 'hidden dialogs must not be registered as page panels');
 assert.match(adminMotionJs, /IntersectionObserver/, 'restored motion must reveal without blocking navigation');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
 assert.doesNotMatch(adminLayout, /closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/, 'ordinary admin links must navigate directly like rent-app');
 assert.match(adminLayout, /<main class="admin-page-surface/, 'admin must mark the complete right-hand page surface');
+assert.match(shopRoutes, /const HOME_PAGE_SIZE = 24/, 'home must cap the initial product DOM to 24 items');
+assert.match(shopRoutes, /active\.slice\(\(page - 1\) \* HOME_PAGE_SIZE, page \* HOME_PAGE_SIZE\)/, 'home must paginate without dropping catalog products');
+assert.match(homeView, /productTotalPages > 1/, 'home must expose navigation to every product page');
 
 console.log('Performance guards passed: storefront layers and matching mobile/desktop admin motion');

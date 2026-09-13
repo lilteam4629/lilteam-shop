@@ -79,7 +79,9 @@ function latestOrderCards() {
     });
 }
 
-function homeViewData(heroPreviewV2 = false) {
+const HOME_PAGE_SIZE = 24;
+
+function homeViewData(heroPreviewV2 = false, requestedPage = 1) {
   const stockCounts = availableStockCounts();
   const active = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
   const scheduledProducts = store.data.products
@@ -95,16 +97,21 @@ function homeViewData(heroPreviewV2 = false) {
       : newestProducts.slice(0, section.limit || 5);
     return { id: section.id, title: section.title, products };
   }).filter(section => section.products.length);
+  // Every product is still reachable (nothing is silently capped) — just
+  // paginated instead of rendering the entire catalog in one page load,
+  // which was ballooning page weight/DOM size once a shop had 50+ products.
+  const totalPages = Math.max(1, Math.ceil(active.length / HOME_PAGE_SIZE));
+  const page = Math.min(totalPages, Math.max(1, Number(requestedPage) || 1));
+  const pageProducts = active.slice((page - 1) * HOME_PAGE_SIZE, page * HOME_PAGE_SIZE);
   return {
     title: 'หน้าแรก',
     stats: shopStats(),
     newest,
     homeSections,
-    // Show every currently published product. This view-data builder is shared
-    // by the main shop and every tenant shop, so rented sites are not silently
-    // capped at 24 products either.
-    products: active,
+    products: pageProducts,
     productTotal: active.length,
+    productPage: page,
+    productTotalPages: totalPages,
     announcements: store.data.announcements.filter(a => a.active),
     latestOrders: latestOrderCards(),
     scheduledProducts,
@@ -117,16 +124,16 @@ function homeViewData(heroPreviewV2 = false) {
 }
 
 router.get('/', (req, res) => {
-  res.render('shop/home', homeViewData(false));
+  res.render('shop/home', homeViewData(false, req.query.page));
 });
 
 router.get('/preview/locker-home', requireAdmin, (req, res) => {
-  res.render('shop/home', { ...homeViewData(false), title: 'หน้าแรกแบบเดิม' });
+  res.render('shop/home', { ...homeViewData(false, req.query.page), title: 'หน้าแรกแบบเดิม' });
 });
 
 router.get('/preview/mobile-cinematic-7f4c2a', (req, res) => {
   res.render('shop/home', {
-    ...homeViewData(false),
+    ...homeViewData(false, req.query.page),
     title: 'หน้าแรกแบบเดิม',
     publicPreview: true,
   });
