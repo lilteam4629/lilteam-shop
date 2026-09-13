@@ -2121,6 +2121,27 @@ router.post('/hero-banner/mode', async (req, res) => {
   res.redirect('/admin/appearance');
 });
 
+router.post('/hero-text-style', async (req, res) => {
+  const normalizeHex = (value, fallback) => {
+    const color = String(value || '').trim().toLowerCase();
+    return /^#[0-9a-f]{6}$/.test(color) ? color : fallback;
+  };
+  const requestedWidth = Number.parseFloat(req.body.outlineWidth);
+  const outlineWidth = Number.isFinite(requestedWidth)
+    ? Math.round(Math.max(0, Math.min(4, requestedWidth)) * 4) / 4
+    : 1.5;
+
+  store.data.settings.hero ||= { mode: 'default', bannerImage: null, bannerLink: '' };
+  store.data.settings.hero.textStyle = {
+    textColor: normalizeHex(req.body.textColor, '#ffffff'),
+    outlineColor: normalizeHex(req.body.outlineColor, '#000000'),
+    outlineWidth,
+  };
+  await store.save();
+  req.flash('success', 'บันทึกสีและขอบข้อความหน้าหลักแล้ว');
+  res.redirect('/admin/appearance#hero-text-style');
+});
+
 // ---------- API Providers (Redirected to Unified Slip Verification Hub) ----------
 router.get('/api-providers', (req, res) => res.redirect('/admin/easyslip-usage'));
 router.post('/api-providers/byshop', (req, res) => res.redirect('/admin/easyslip-usage'));
