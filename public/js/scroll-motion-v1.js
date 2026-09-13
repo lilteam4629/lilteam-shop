@@ -22,7 +22,11 @@
       if(!pendingReveals.size||revealFrame)return;
       revealFrame=requestAnimationFrame(function(){pendingReveals.forEach(function(node){
         node.classList.add('scroll-reveal-visible');observer.unobserve(node);
-        if(node.classList.contains('scroll-reveal-card'))node.addEventListener('animationend',function(){node.classList.add('scroll-reveal-complete')},{once:true});
+        if(node.classList.contains('scroll-reveal-card')){
+          var complete=function(event){if(event&&event.target!==node)return;node.classList.add('scroll-reveal-complete')};
+          node.addEventListener('transitionend',complete,{once:true});
+          setTimeout(complete,700);
+        }
       });pendingReveals.clear();revealFrame=0});
     },{rootMargin:'0px 0px -7% 0px',threshold:.02});
     requestAnimationFrame(function(){nodes.forEach(function(node){if(!node.classList.contains('scroll-reveal-visible'))observer.observe(node)})});
