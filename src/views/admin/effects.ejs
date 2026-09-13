@@ -80,8 +80,8 @@
   </div>
 
   <% if (settings.systemModules && settings.systemModules.rain && settings.systemModules.rain.enabled) { %>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
-    <div class="flex items-center gap-3 mb-4"><div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">🌧️</div><div><h3 class="font-bold text-sm sm:text-base">ระบบฝนตกหน้าเว็บ</h3><p class="text-[11px] text-[var(--text-4)]">ฝน Canvas ลื่นบนมือถือ ปรับสีและจำนวนหยดได้ ไม่รบกวนการกดใช้งาน</p></div></div>
+  <div id="rain-settings" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm scroll-mt-6">
+    <div class="flex items-center gap-3 mb-4"><div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">🌧️</div><div><h3 class="font-bold text-sm sm:text-base">ระบบฝนตกหน้าเว็บ</h3><p class="text-[11px] text-emerald-500 font-semibold">ติดตั้งในร้านนี้แล้ว · ปรับสี ความเข้ม และเปิดหรือปิดได้ด้านล่าง</p></div></div>
     <% const rain = settings.rain || { enabled:false, color:'#78c8ff', intensity:'medium' }; %>
     <form action="/admin/effects/rain" method="post" class="grid sm:grid-cols-3 gap-3 items-end">
       <label class="text-xs font-semibold">สีของฝน<input type="color" name="color" value="<%= rain.color || '#78c8ff' %>" class="mt-1.5 block w-full h-11 bg-[var(--input)] border border-[var(--border-light)] rounded-xl p-1"></label>
@@ -93,4 +93,3 @@
   <% } %>
 
 </div>
-

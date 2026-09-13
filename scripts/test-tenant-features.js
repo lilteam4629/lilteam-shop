@@ -76,6 +76,7 @@ function fixture(failOnSave) {
   assert.equal(releases.api.platformData.tenantFeatureReleases[0].id, release.id);
   const deployed = await deployRelease({ releaseId: release.id, scope: 'selected', shopIds: ['shop-b'] }, releases.api);
   assert.equal(deployed.updatedCount, 1);
+  assert.equal(deployed.verifiedCount, 1);
   assert.equal(readFeatureState(releases.dbs.get('shop-a')).snow, false);
   assert.equal(readFeatureState(releases.dbs.get('shop-b')).snow, true);
   assert.equal(releases.dbs.get('shop-b').settings.systemModules.snow.version, '1.0.0');

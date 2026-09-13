@@ -183,6 +183,14 @@ async function deployRelease(payload, storeApi = store) {
   const release = (storeApi.platformData.tenantFeatureReleases || []).find(item => item.id === String(payload.releaseId || ''));
   if (!release) throw new Error('ไม่พบแพ็กเกจระบบ กรุณาโหลดหน้าใหม่');
   const result = await updateTenantFeatures({ ...payload, feature: release.feature, action: release.action, releaseMeta: release }, storeApi);
+  for (const shopId of result.shopIds) {
+    const tenantDb = await storeApi.loadTenantDb(shopId);
+    const moduleState = tenantDb?.settings?.systemModules?.[release.feature];
+    const expectedEnabled = release.action === 'enable';
+    if (!tenantDb || moduleState?.releaseId !== release.id || moduleState.enabled !== expectedEnabled || readFeatureState(tenantDb)[release.feature] !== expectedEnabled) {
+      throw new Error(`ตรวจสอบการติดตั้งร้าน ${shopId} ไม่ผ่าน ระบบจะไม่รายงานว่านำส่งสำเร็จ`);
+    }
+  }
   const deployment = {
     id: storeApi.genId(10), releaseId: release.id, releaseName: release.name, version: release.version,
     shopIds: result.shopIds, scope: payload.scope, createdAt: new Date().toISOString(),
@@ -195,7 +203,7 @@ async function deployRelease(payload, storeApi = store) {
       current.deployments = current.deployments.slice(0, 30);
     }
   });
-  return { ...result, releaseName: release.name, version: release.version };
+  return { ...result, verifiedCount: result.shopIds.length, releaseName: release.name, version: release.version };
 }
 
 async function ensureSystemLab(storeApi = store) {
