@@ -172,6 +172,7 @@ async function run() {
       throw new Error('product cards still use content-visibility with native lazy-loaded images');
     }
     if (!scrollMotionCss.body.includes('mobile-is-scrolling')) throw new Error('mobile scroll performance guard is missing');
+    if (!scrollMotionCss.body.includes('.premium-product-card,.catalog-card{box-shadow:none!important;filter:none!important}')) throw new Error('product cards still gain a shadow/filter while scrolling');
     if (scrollMotionCss.body.includes('translate3d(0,34px,0) scale(.92)')) throw new Error('mobile product reveal still performs expensive image scaling');
     if (!scrollMotionCss.body.includes('transition-delay:0ms!important')) throw new Error('mobile product reveals still use staggered delays');
     const scrollMotionJs = await fetchOk('/js/scroll-motion-v1.js', 'application/javascript');
@@ -185,6 +186,7 @@ async function run() {
     if (mainLayoutSource.includes("now-last<(coarse?34:25)")) throw new Error('rain is still throttled below the display refresh rate');
     if (!mainLayoutSource.includes("coarse&&w&&Math.abs(nextW-w)<2")) throw new Error('mobile browser chrome resize guard is missing');
     if (mainLayoutSource.includes('drops.filter(')) throw new Error('rain allocates filtered drop arrays during animation');
+    if (!mainLayoutSource.includes('sprites=[makeSprite(0),makeSprite(1),makeSprite(2)]')) throw new Error('rain does not use cached gradient sprites');
     if (!mainLayoutSource.includes("addEventListener('pageshow'")) throw new Error('rain does not resume after a back-forward cache restore');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
