@@ -196,6 +196,19 @@ function readableAccentOn(accentHex, bgHexes, minRatio = 4.5) {
   return bgIsDark ? '#f5f5f5' : '#111111';
 }
 
+// Accent fills need to be visibly distinct from the surrounding card as well
+// as have readable label text. For neutral extremes the user's expected rule
+// is literal: white becomes black in light mode, black becomes white in dark
+// mode. Coloured accents retain their hue and are shifted only as far as needed.
+function visibleAccentOn(accentHex, surfaces, minRatio = 3) {
+  const bgs = Array.isArray(surfaces) ? surfaces : [surfaces];
+  if (bgs.every((bg) => contrastRatio(accentHex, bg) >= minRatio)) return accentHex;
+  const { s } = hexToHsl(accentHex);
+  const average = bgs.reduce((sum, bg) => sum + relativeLuminance(bg), 0) / bgs.length;
+  if (s < 0.05) return average < 0.4 ? '#ffffff' : '#000000';
+  return readableAccentOn(accentHex, bgs, minRatio);
+}
+
 function hslToHex(h, s, l) {
   h = ((h % 360) + 360) % 360;
   const c = (1 - Math.abs(2 * l - 1)) * s;
@@ -241,25 +254,25 @@ function renderCss(theme) {
   const customBg = theme && /^#[0-9a-fA-F]{6}$/.test(theme.bgColor) ? theme.bgColor : null;
   const preset = customBg ? generateBgFromColor(customBg) : (BG_PRESETS[theme && theme.bgPreset] || BG_PRESETS.warmDark);
   const accent = (theme && /^#[0-9a-fA-F]{6}$/.test(theme.accent)) ? theme.accent : ACCENT_PRESETS[0].color;
-  const accentHover = lighten(accent);
-  const accentLight = lighten(accent, 0.45);
-  const accentDark = darken(accent, 0.42);
-  const accentContrast = contrastTextFor(accent);
   const style = (theme && STYLE_LABELS[theme.style]) ? theme.style : 'normal';
-  const { h: accentHue } = hexToHsl(accent);
-  const gradA = accent, gradB = hslToHex(accentHue + 40, 0.75, 0.55), gradC = hslToHex(accentHue - 40, 0.75, 0.5);
 
-  const block = (vars) => `
+  const block = (vars) => {
+    const accentFill = visibleAccentOn(accent, [vars.bg, vars.card, vars.input]);
+    const accentHover = relativeLuminance(accentFill) < 0.5 ? lighten(accentFill, 0.14) : darken(accentFill, 0.12);
+    const accentLight = lighten(accentFill, 0.45);
+    const accentDark = darken(accentFill, 0.42);
+    return `
       --bg: ${vars.bg};
       --card: ${vars.card};
       --border: ${vars.border};
       --border-light: ${vars.borderLight};
       --input: ${vars.input};
-      --gold: ${accent};
+      --brand: ${accent};
+      --gold: ${accentFill};
       --gold-hover: ${accentHover};
       --gold-light: ${accentLight};
       --gold-dark: ${accentDark};
-      --gold-contrast: ${accentContrast};
+      --gold-contrast: ${contrastTextFor(accentFill)};
       --gold-text: ${readableAccentOn(accent, [vars.bg, vars.card])};
       --gold-hover-text: ${contrastTextFor(accentHover)};
       --on-image: #ffffff;
@@ -271,6 +284,7 @@ function renderCss(theme) {
       --text-3: ${vars.text3};
       --text-4: ${vars.text4};
       --coral: ${readableAccentOn('#e2836f', [vars.bg, vars.card])};`;
+  };
 
   let extra = '';
   if (style === 'glow') {
@@ -289,7 +303,7 @@ function renderCss(theme) {
     extra = `
     @keyframes theme-gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
     a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"], [data-theme-fill="accent"] {
-      background: linear-gradient(120deg, ${gradA}, ${gradB}, ${gradC}, ${gradA}) !important;
+      background: linear-gradient(120deg, var(--gold), var(--gold-hover), var(--gold-dark), var(--gold)) !important;
       background-size: 300% 300%;
       animation: theme-gradient-flow 6s ease infinite;
     }`;
@@ -313,5 +327,6 @@ module.exports = {
   contrastRatio,
   contrastTextFor,
   readableAccentOn,
+  visibleAccentOn,
   generateBgFromColor,
 };

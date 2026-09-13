@@ -32,6 +32,9 @@ for (const background of backgrounds) {
       }
       assert(theme.contrastRatio(vars['gold-contrast'], vars.gold) >= 4.5, `accent button failed: ${accent}`);
       assert(theme.contrastRatio(vars['gold-hover-text'], vars['gold-hover']) >= 4.5, `accent hover failed: ${accent}`);
+      for (const surface of ['bg', 'card', 'input']) {
+        assert(theme.contrastRatio(vars.gold, vars[surface]) >= 3, `accent fill blends into ${surface}: ${accent}`);
+      }
       for (const status of ['success', 'danger', 'warning']) {
         for (const surface of ['bg', 'card', 'input']) {
           assert(theme.contrastRatio(vars[status], vars[surface]) >= 4.5, `${status} failed on ${surface}: ${accent}`);
