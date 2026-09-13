@@ -27,13 +27,15 @@ assert.match(layout, /coarse&&document\.documentElement\.classList\.contains\('m
 assert.match(adminLayout, /admin-scroll-motion-v1\.css/, 'admin must use the restored motion stylesheet on every viewport');
 assert.match(adminLayout, /admin-mobile-motion\.js/, 'admin must use the restored motion controller on every viewport');
 assert.doesNotMatch(adminLayout, /admin-motion\.js/, 'desktop must not load a different motion controller');
-assert.doesNotMatch(adminMotionJs, /max-width: 800px/, 'restored motion must not be restricted to mobile');
+assert.match(adminMotionJs, /document\.documentElement\.classList\.add\('scroll-motion-ready'\)/, 'desktop admin must retain its panel reveal motion');
 assert.match(adminMotionCss, /translate3d\(0,34px,0\) scale\(\.94\).*\.42s cubic-bezier\(\.34,1\.56,\.64,1\)/, 'desktop admin must use the rental console panel motion');
-assert.match(adminMotionCss, /max-width:800px.*translate3d\(0,24px,0\) scale\(\.96\).*\.38s/, 'mobile admin must preserve the rental console mobile motion');
+assert.match(adminMotionCss, /max-width:800px.*opacity:1!important;transform:none!important;transition:none!important/, 'mobile admin content must never remain hidden behind reveal motion');
 assert.doesNotMatch(adminMotionCss, /admin-page-surface[^\n]*animation/, 'the full desktop work surface must never animate');
 assert.doesNotMatch(adminMotionJs, /page\.animate|getBoundingClientRect/, 'admin motion must not animate or synchronously measure the full page');
 assert.match(adminMotionCss, /prefers-reduced-motion:reduce\)\{body\.admin-main-site\.admin-reference-ui \.scroll-reveal\{transition-duration:\.42s!important/, 'owner-enabled desktop motion must override the studio 0.01ms reset only on the main site');
 assert.match(adminMotionJs, /classList\.contains\('hidden'\)/, 'hidden dialogs must not be registered as page panels');
+assert.match(adminMotionJs, /matchMedia\('\(max-width: 800px\)'\).*scroll-reveal-visible/s, 'mobile admin must bypass observer-dependent page hiding');
+assert.match(adminMotionJs, /requestAnimationFrame\(function\(\)\{requestAnimationFrame/, 'admin reveal must preserve a painted start frame on fast pages');
 assert.match(adminMotionJs, /IntersectionObserver/, 'restored motion must reveal without blocking navigation');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');

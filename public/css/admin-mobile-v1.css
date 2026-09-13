@@ -104,18 +104,21 @@
   body.admin-reference-ui.admin-page-minigame main details summary > div { min-width: 0; }
   body.admin-reference-ui.admin-page-minigame main details summary span { overflow-wrap: anywhere; }
   body.admin-reference-ui.admin-page-minigame .mg-play-panel { padding: 10px !important; gap: 9px !important; }
-  body.admin-reference-ui.admin-page-minigame .mg-stage { height: 130px !important; }
+  body.admin-reference-ui.admin-page-minigame .mg-play-panel,
+  body.admin-reference-ui.admin-page-minigame .rail-game { width: 100%; max-width: 100%; min-width: 0; overflow: hidden; }
+  body.admin-reference-ui.admin-page-minigame .mg-stage { width: 100% !important; height: 118px !important; min-height: 0 !important; }
   body.admin-reference-ui.admin-page-minigame .mg-box { font-size: 3rem !important; }
   body.admin-reference-ui.admin-page-minigame .mg-card-icon { font-size: 2.4rem !important; }
   body.admin-reference-ui.admin-page-minigame .mg-card-image { max-width: 8.5rem !important; max-height: 7rem !important; }
   body.admin-reference-ui.admin-page-minigame .rail-game { padding: 9px !important; }
-  body.admin-reference-ui.admin-page-minigame .rail-window { height: 112px !important; }
+  body.admin-reference-ui.admin-page-minigame .rail-window { width: 100% !important; height: 104px !important; }
   body.admin-reference-ui.admin-page-minigame .rail-center { width: 82px !important; }
   body.admin-reference-ui.admin-page-minigame .rail-track { gap: 7px !important; padding-block: 8px !important; }
   body.admin-reference-ui.admin-page-minigame .rail-item { width: 74px !important; height: 90px !important; flex-basis: 74px !important; padding: 5px !important; }
   body.admin-reference-ui.admin-page-minigame .rail-item img { width: 48px !important; height: 48px !important; }
   body.admin-reference-ui.admin-page-minigame .rail-item-icon { font-size: 1.7rem !important; }
   body.admin-reference-ui.admin-page-minigame .rail-button { margin-top: 9px !important; }
+  body.admin-reference-ui.admin-page-minigame main table { min-width: 620px; }
 }
 
 @media (max-width: 380px) {
