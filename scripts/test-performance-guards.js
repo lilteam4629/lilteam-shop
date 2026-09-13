@@ -8,8 +8,8 @@ const motionCss = read('public/css/scroll-motion-v1.css');
 const motionJs = read('public/js/scroll-motion-v1.js');
 const layout = read('src/views/layouts/main.ejs');
 const adminLayout = read('src/views/layouts/admin.ejs');
-const adminMotionCss = read('public/css/admin-scroll-motion-v1.css');
-const adminMotionJs = read('public/js/admin-scroll-motion-v1.js');
+const adminMotionCss = read('public/css/admin-motion.css');
+const adminMotionJs = read('public/js/admin-motion.js');
 
 assert.match(hero, /locker-hero-v1\.css/, 'large hero styles must be a cacheable asset');
 assert.doesNotMatch(hero, /<style>/, 'large hero CSS must not be repeated in every home response');
@@ -22,15 +22,41 @@ assert.match(motionCss, /scroll-reveal-admin\{transform:translate3d\(0,24px,0\) 
 assert.match(motionCss, /:not\(\.scroll-reveal-admin\)/, 'mobile performance overrides must not flatten the admin bounce');
 assert.match(layout, /coarse&&document\.documentElement\.classList\.contains\('mobile-is-scrolling'\)/,
   'full-screen rain rendering must yield while a touch device scrolls');
-assert.match(adminLayout, /admin-scroll-motion-v1\.css/, 'admin must use the rental console stylesheet directly');
-assert.match(adminLayout, /admin-scroll-motion-v1\.js/, 'admin must use the rental console observer directly');
+assert.match(adminLayout, /admin-motion\.css/, 'admin must use the rental console stylesheet directly');
+assert.match(adminLayout, /admin-motion\.js/, 'admin must use the rental console observer directly');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
 assert.doesNotMatch(adminLayout, /closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/, 'ordinary admin links must navigate directly like rent-app');
 assert.match(adminLayout, /<main class="admin-page-surface/, 'admin must mark the complete right-hand page surface');
-assert.match(adminMotionCss, /main\.admin-page-surface\{animation:admin-page-surface-in \.42s cubic-bezier\(\.34,1\.56,\.64,1\)/, 'complete admin page must use rent-app motion timing');
-assert.match(adminMotionCss, /translate3d\(0,34px,0\) scale\(\.94\)/, 'desktop admin motion must match rent-app');
-assert.match(adminMotionCss, /translate3d\(0,24px,0\) scale\(\.96\)/, 'mobile admin motion must match rent-app');
-assert.match(adminMotionJs, /rootMargin:'0px 0px -8% 0px',threshold:\.06/, 'admin observer timing must match rent-app');
 
 console.log('Performance guards passed: cacheable hero CSS, finite card reveal layers, touch-scroll rain yielding');
+
+// Exercise lifecycle behavior, including interaction during entrance.
+const vm = require('node:vm');
+for (const event of ['pointerdown', 'keydown', 'scroll', 'pagehide', 'visibilitychange']) {
+  const events = {};
+  let calls = 0, cancelled = 0;
+  const preference = { matches: false, addEventListener: () => {} };
+  const context = {
+    window: { matchMedia: () => preference, addEventListener: (name, handler) => { events[name] = handler; } },
+    document: { hidden: false, addEventListener: (name, handler) => { events[name] = handler; }, querySelector: () => ({
+      animate: (frames, options) => {
+        calls++;
+        assert(frames.every(frame => !('opacity' in frame)), 'content must remain visible');
+        assert.equal(options.fill, 'none', 'finished motion must release the transform');
+        return { cancel: () => { cancelled++; } };
+      }
+    }) }
+  };
+  vm.runInNewContext(adminMotionJs, context);
+  assert.equal(calls, 1);
+  if (event === 'visibilitychange') context.document.hidden = true;
+  events[event]();
+  assert.equal(cancelled, 1, `${event} must stop motion`);
+  events.pageshow({ persisted: true });
+  assert.equal(calls, 1, 'history restore must not replay motion');
+  preference.matches = true;
+  vm.runInNewContext(adminMotionJs, context);
+  assert.equal(calls, 1, 'reduced motion must prevent entrance');
+}
+console.log('Admin motion lifecycle checks passed');

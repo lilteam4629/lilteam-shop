@@ -1,0 +1,4 @@
+/* Content stays readable before, during and after entrance. */
+body.admin-site main.admin-page-surface { transform-origin: 50% 100px; }
+body.admin-site .sidebar-link { transition: background-color 160ms ease, color 160ms ease; }
+body.admin-site .sidebar-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
