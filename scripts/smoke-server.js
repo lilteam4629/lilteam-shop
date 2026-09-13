@@ -88,7 +88,7 @@ async function crawlAdmin(cookie) {
     checked.add(requestPath);
     if (checked.size > 160) throw new Error('admin crawl exceeded the safety limit');
     const page = await fetchOk(requestPath, 'text/html', { cookie });
-    if (!page.body.includes('admin-motion.js') || !page.body.includes('admin-page-surface')) throw new Error(`missing admin motion layout: ${requestPath}`);
+    if (!page.body.includes('admin-mobile-motion.js') || !page.body.includes('admin-page-surface')) throw new Error(`missing restored admin motion layout: ${requestPath}`);
     if (page.body.includes('admin-scroll-motion-v1.js')) throw new Error(`competing admin motion: ${requestPath}`);
     for (const match of page.body.matchAll(/href=["']([^"'#]+)["']/g)) {
       if (!match[1].startsWith('/admin')) continue;
@@ -179,8 +179,8 @@ async function run() {
     if (!scrollMotionCss.body.includes('transition-delay:0ms!important')) throw new Error('mobile product reveals still use staggered delays');
     const scrollMotionJs = await fetchOk('/js/scroll-motion-v1.js', 'application/javascript');
     if (scrollMotionJs.body.includes('getBoundingClientRect')) throw new Error('scroll reveal performs a forced layout sweep');
-    const adminMotionCss = await fetchOk('/css/admin-motion.css', 'text/css');
-    const adminMotionJs = await fetchOk('/js/admin-motion.js', 'application/javascript');
+    const adminMotionCss = await fetchOk('/css/admin-scroll-motion-v1.css', 'text/css');
+    const adminMotionJs = await fetchOk('/js/admin-mobile-motion.js', 'application/javascript');
     const interactionPerformanceJs = await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     if (!interactionPerformanceJs.body.includes('page-is-scrolling')) throw new Error('desktop scroll performance guard is missing');
     const mainLayoutSource = fs.readFileSync(path.join(__dirname, '..', 'src/views/layouts/main.ejs'), 'utf8');
@@ -200,7 +200,7 @@ async function run() {
     const cookie = await loginAsAdmin();
     const mainAdmin = await fetchOk('/admin', 'text/html', { cookie });
     if (!mainAdmin.body.includes('admin-site')) throw new Error('admin is missing its motion scope');
-    if (!mainAdmin.body.includes('admin-motion.css') || !mainAdmin.body.includes('admin-motion.js')) throw new Error('admin is not loading its dedicated rental motion assets');
+    if (!mainAdmin.body.includes('admin-scroll-motion-v1.css') || !mainAdmin.body.includes('admin-mobile-motion.js')) throw new Error('admin is not loading the restored motion on every viewport');
     if (mainAdmin.body.includes('backdrop-filter: blur(4px)')) throw new Error('admin navigation overlay still forces full-screen blur compositing');
     if (/closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/.test(mainAdmin.body)) throw new Error('ordinary admin links still trigger a blocking navigation spinner');
     if (!mainAdmin.body.includes('<main class="admin-page-surface')) throw new Error('admin right-hand page surface is missing entrance motion');

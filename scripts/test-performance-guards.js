@@ -8,8 +8,8 @@ const motionCss = read('public/css/scroll-motion-v1.css');
 const motionJs = read('public/js/scroll-motion-v1.js');
 const layout = read('src/views/layouts/main.ejs');
 const adminLayout = read('src/views/layouts/admin.ejs');
-const adminMotionCss = read('public/css/admin-motion.css');
-const adminMotionJs = read('public/js/admin-motion.js');
+const adminMotionCss = read('public/css/admin-scroll-motion-v1.css');
+const adminMotionJs = read('public/js/admin-mobile-motion.js');
 
 assert.match(hero, /locker-hero-v1\.css/, 'large hero styles must be a cacheable asset');
 assert.doesNotMatch(hero, /<style>/, 'large hero CSS must not be repeated in every home response');
@@ -22,41 +22,16 @@ assert.match(motionCss, /scroll-reveal-admin\{transform:translate3d\(0,24px,0\) 
 assert.match(motionCss, /:not\(\.scroll-reveal-admin\)/, 'mobile performance overrides must not flatten the admin bounce');
 assert.match(layout, /coarse&&document\.documentElement\.classList\.contains\('mobile-is-scrolling'\)/,
   'full-screen rain rendering must yield while a touch device scrolls');
-assert.match(adminLayout, /admin-motion\.css/, 'admin must use the rental console stylesheet directly');
-assert.match(adminLayout, /admin-motion\.js/, 'admin must use the rental console observer directly');
+assert.match(adminLayout, /admin-scroll-motion-v1\.css/, 'admin must use the restored motion stylesheet on every viewport');
+assert.match(adminLayout, /admin-mobile-motion\.js/, 'admin must use the restored motion controller on every viewport');
+assert.doesNotMatch(adminLayout, /admin-motion\.js/, 'desktop must not load a different motion controller');
+assert.doesNotMatch(adminMotionJs, /max-width: 800px/, 'restored motion must not be restricted to mobile');
+assert.match(adminMotionCss, /translate3d\(0,34px,0\) scale\(\.94\)/, 'desktop must use the same restored bounce');
+assert.match(adminMotionCss, /translate3d\(0,24px,0\) scale\(\.96\)/, 'mobile must keep its approved bounce');
+assert.match(adminMotionJs, /IntersectionObserver/, 'restored motion must reveal without blocking navigation');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
 assert.doesNotMatch(adminLayout, /closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/, 'ordinary admin links must navigate directly like rent-app');
 assert.match(adminLayout, /<main class="admin-page-surface/, 'admin must mark the complete right-hand page surface');
 
-console.log('Performance guards passed: cacheable hero CSS, finite card reveal layers, touch-scroll rain yielding');
-
-// Exercise lifecycle behavior, including interaction during entrance.
-const vm = require('node:vm');
-for (const event of ['pointerdown', 'keydown', 'scroll', 'pagehide', 'visibilitychange']) {
-  const events = {};
-  let calls = 0, cancelled = 0;
-  const preference = { matches: false, addEventListener: () => {} };
-  const context = {
-    window: { matchMedia: () => preference, addEventListener: (name, handler) => { events[name] = handler; } },
-    document: { hidden: false, addEventListener: (name, handler) => { events[name] = handler; }, querySelector: () => ({
-      animate: (frames, options) => {
-        calls++;
-        assert(frames.every(frame => !('opacity' in frame)), 'content must remain visible');
-        assert.equal(options.fill, 'none', 'finished motion must release the transform');
-        return { cancel: () => { cancelled++; } };
-      }
-    }) }
-  };
-  vm.runInNewContext(adminMotionJs, context);
-  assert.equal(calls, 1);
-  if (event === 'visibilitychange') context.document.hidden = true;
-  events[event]();
-  assert.equal(cancelled, 1, `${event} must stop motion`);
-  events.pageshow({ persisted: true });
-  assert.equal(calls, 1, 'history restore must not replay motion');
-  preference.matches = true;
-  vm.runInNewContext(adminMotionJs, context);
-  assert.equal(calls, 1, 'reduced motion must prevent entrance');
-}
-console.log('Admin motion lifecycle checks passed');
+console.log('Performance guards passed: storefront layers and matching mobile/desktop admin motion');

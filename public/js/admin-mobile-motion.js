@@ -1,5 +1,4 @@
 (function(){
-  if (!window.matchMedia('(max-width: 800px)').matches) return;
   var observer=null;
   function init(){
     var nodes=Array.from(document.querySelectorAll('main > section,main > article,main > div,.admin-content > section,.admin-content > article,.admin-content > div')).filter(function(node){return !node.closest('[role="dialog"]')});
