@@ -177,7 +177,8 @@ async function run() {
     const scrollMotionJs = await fetchOk('/js/scroll-motion-v1.js', 'application/javascript');
     if (scrollMotionJs.body.includes('getBoundingClientRect')) throw new Error('scroll reveal performs a forced layout sweep');
     if (!scrollMotionJs.body.includes("rootMargin:'160px 0px 120px 0px'")) throw new Error('scroll reveal is not pre-triggered ahead of the viewport');
-    await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
+    const interactionPerformanceJs = await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
+    if (!interactionPerformanceJs.body.includes('page-is-scrolling')) throw new Error('desktop scroll performance guard is missing');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
     await checkInstalledDisabledRainModule(cookie);

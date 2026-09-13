@@ -30,13 +30,16 @@
   var mobileQuery=window.matchMedia('(max-width: 900px) and (pointer: coarse)');
   var scrollTimer=0,scrollFrame=0;
   window.addEventListener('scroll',function(){
-    if(!mobileQuery.matches)return;
     clearTimeout(scrollTimer);
     if(!scrollFrame)scrollFrame=requestAnimationFrame(function(){
       scrollFrame=0;
-      document.documentElement.classList.add('mobile-is-scrolling');
+      document.documentElement.classList.add('page-is-scrolling');
+      if(mobileQuery.matches)document.documentElement.classList.add('mobile-is-scrolling');
     });
-    scrollTimer=setTimeout(function(){document.documentElement.classList.remove('mobile-is-scrolling')},140);
+    scrollTimer=setTimeout(function(){
+      document.documentElement.classList.remove('page-is-scrolling');
+      document.documentElement.classList.remove('mobile-is-scrolling');
+    },120);
   },{passive:true});
   mobileQuery.addEventListener&&mobileQuery.addEventListener('change',function(event){
     if(!event.matches)document.documentElement.classList.remove('mobile-is-scrolling');
