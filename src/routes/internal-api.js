@@ -136,6 +136,11 @@ router.get('/config', (req, res) => {
   res.json({ ok: true, recaptchaSiteKey: recaptcha.siteKey() });
 });
 
+router.post('/captcha/verify', async (req, res) => {
+  const valid = await recaptcha.verify(req.body && req.body.token, req.body && req.body.remoteip);
+  res.status(valid ? 200 : 400).json({ ok: valid, error: valid ? undefined : 'กรุณายืนยันแคปช่าให้ถูกต้อง' });
+});
+
 // ---------- Plans ----------
 router.get('/plans', (req, res) => {
   const plans = store.data.licensePlans.filter(provisioning.isPlanAvailable).sort((a, b) => a.days - b.days);
