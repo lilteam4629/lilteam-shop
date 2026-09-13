@@ -63,10 +63,29 @@ async function loginAsCustomer() {
 
 async function checkCustomerOrderDetail() {
   const cookie = await loginAsCustomer();
-  const productPage = await fetchOk('/game/shadow-realm-chronicles', 'text/html', { cookie });
-  const productId = productPage.body.match(/\/cart\/add\/([^"']+)/)?.[1];
-  if (!productId) throw new Error('customer product page does not expose an add-to-cart action');
-  const add = await request(`/cart/add/${productId}`, { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'qty=1' });
+  const catalog = await fetchOk('/products', 'text/html', { cookie });
+  const productPaths = [...new Set([...catalog.body.matchAll(/href=["'](\/game\/[^"'#?]+)["']/g)].map(match => match[1]))];
+  if (!productPaths.length) throw new Error('customer catalog does not link to any product detail pages');
+
+  let purchasable = null;
+  let soldOutChecked = false;
+  for (const productPath of productPaths) {
+    const page = await fetchOk(productPath, 'text/html', { cookie });
+    const addAction = page.body.match(/action=["'](\/cart\/add\/[^"']+)["']/)?.[1];
+    if (addAction && !purchasable) {
+      const title = page.body.match(/<h1\b[^>]*>([^<]+)<\/h1>/)?.[1]?.trim();
+      if (!title) throw new Error(`${productPath} exposes an add-to-cart action without a product title`);
+      purchasable = { action: addAction, title };
+    }
+    if (page.body.includes('สินค้าหมด')) {
+      if (addAction) throw new Error(`${productPath} exposes an add-to-cart action while sold out`);
+      soldOutChecked = true;
+    }
+  }
+  if (!purchasable) throw new Error('customer catalog has no in-stock product available for the checkout smoke test');
+  if (!soldOutChecked) throw new Error('customer catalog has no sold-out product available for the sold-out smoke test');
+
+  const add = await request(purchasable.action, { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'qty=1&purchaseConfirmed=yes' });
   if (add.statusCode !== 302) throw new Error(`add to cart returned HTTP ${add.statusCode}`);
   const checkout = await request('/cart/checkout', { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' } });
   if (checkout.statusCode !== 302) throw new Error(`checkout returned HTTP ${checkout.statusCode}`);
@@ -74,7 +93,7 @@ async function checkCustomerOrderDetail() {
   const detailPath = orders.body.match(/href="(\/account\/orders\/[^"]+)"/)?.[1];
   if (!detailPath) throw new Error('customer order history does not link to its order detail');
   const detail = await fetchOk(detailPath, 'text/html', { cookie });
-  if (!detail.body.includes('alt="รูปสินค้า Shadow Realm Chronicles"') || !detail.body.includes('Shadow Realm Chronicles')) {
+  if (!detail.body.includes(`alt="รูปสินค้า ${purchasable.title}"`) || !detail.body.includes(purchasable.title)) {
     throw new Error('customer order detail does not show the purchased product image and title');
   }
 }
