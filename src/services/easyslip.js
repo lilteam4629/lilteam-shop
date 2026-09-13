@@ -1,5 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
+const { isQuotaExhausted, quotaMessage } = require('./provider-errors');
 
 // EasySlip API v2 — one central platform API key (yours) can register bank
 // accounts for many different tenants; each account created via
@@ -170,7 +171,8 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
 
     const body = res.data;
     if (!body || !body.success) {
-      return { checked: true, verified: false, message: (body && body.message) || 'ตรวจสอบสลิปไม่สำเร็จ', raw: body };
+      const quotaExhausted = isQuotaExhausted(body, res.status);
+      return { checked: true, verified: false, quotaExhausted, message: quotaExhausted ? quotaMessage('EasySlip') : ((body && body.message) || 'ตรวจสอบสลิปไม่สำเร็จ'), raw: body };
     }
     const data = body.data;
     if (data.isDuplicate) {
@@ -206,10 +208,12 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
     // here. So every path through this catch is "couldn't check", not
     // "checked and failed" — fall back to manual admin review instead of
     // telling the customer their slip was rejected.
+    const body = (err.response && err.response.data) || null;
+    const quotaExhausted = isQuotaExhausted(body, err.response && err.response.status);
     return {
-      checked: false, verified: false,
-      message: 'ระบบเติมเงินมีปัญหาจาก ESL ชั่วคราว — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้',
-      raw: (err.response && err.response.data) || null,
+      checked: quotaExhausted, verified: false, quotaExhausted,
+      message: quotaExhausted ? quotaMessage('EasySlip') : 'ระบบเติมเงินมีปัญหาจาก ESL ชั่วคราว — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้',
+      raw: body,
     };
   }
 }

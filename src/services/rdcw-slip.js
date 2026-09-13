@@ -2,6 +2,7 @@ const axios = require('axios');
 const FormData = require('form-data');
 const { receiverMatches, textValues, extractReceiverEvidence } = require('./receiver-match');
 const { numberValue, officialEndpoint } = require('./slip-fields');
+const { isQuotaExhausted, quotaMessage } = require('./provider-errors');
 
 const DEFAULT_ENDPOINT = 'https://suba.rdcw.co.th/v2/inquiry';
 async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credentials = {}) {
@@ -26,7 +27,8 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     const responseCode = Number(body.code ?? body.statusCode);
     if (body.success === false || (Number.isFinite(responseCode) && responseCode >= 1000)) {
       const messages = { 1003: 'IP ของเซิร์ฟเวอร์ยังไม่ได้รับอนุญาตใน SlipRDCW', 1007: 'โควตา SlipRDCW หมดแล้ว', 1008: 'แพ็กเกจ SlipRDCW หมดอายุแล้ว' };
-      return { checked: [1004, 1005, 1006, 1007, 1008].includes(responseCode), verified: false, message: messages[responseCode] || body.message || 'ตรวจสลิปผ่าน SlipRDCW ไม่สำเร็จ', raw: body };
+      const quotaExhausted = responseCode === 1007 || isQuotaExhausted(body, response.status);
+      return { checked: [1004, 1005, 1006, 1007, 1008].includes(responseCode) || quotaExhausted, verified: false, quotaExhausted, message: quotaExhausted ? quotaMessage('SlipRDCW') : (messages[responseCode] || body.message || 'ตรวจสลิปผ่าน SlipRDCW ไม่สำเร็จ'), raw: body };
     }
     const transRef = data.transRef || data.trans_ref || data.ref || data.reference || null;
     const normalizedRaw = { ...data, transRef, transDate: data.transDate, transTime: data.transTime, providerResponse: body };
@@ -65,9 +67,10 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
       1007: 'โควตา SlipRDCW หมดแล้ว',
       1008: 'แพ็กเกจ SlipRDCW หมดอายุแล้ว',
     };
+    const quotaExhausted = code === 1007 || isQuotaExhausted(body, error.response?.status);
     return {
-      checked: definitive, verified: false,
-      message: messages[code] || body?.message || error.message || 'เชื่อมต่อ SlipRDCW ไม่สำเร็จ', raw: body || null,
+      checked: definitive || quotaExhausted, verified: false, quotaExhausted,
+      message: quotaExhausted ? quotaMessage('SlipRDCW') : (messages[code] || body?.message || error.message || 'เชื่อมต่อ SlipRDCW ไม่สำเร็จ'), raw: body || null,
     };
   }
 }

@@ -1,6 +1,7 @@
 const fs = require('fs');
 const axios = require('axios');
 const FormData = require('form-data');
+const { isQuotaExhausted, quotaMessage } = require('./provider-errors');
 
 const DEFAULT_BRANCH_ID = process.env.SLIPOK_BRANCH_ID;
 const DEFAULT_API_KEY = process.env.SLIPOK_API_KEY;
@@ -82,10 +83,12 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
     }
 
     const code = body && (body.code || (body.data && body.data.code));
+    const quotaExhausted = isQuotaExhausted(body, res.status);
     return {
       checked: true,
       verified: false,
-      message: ERROR_MESSAGES[code] || (body && body.message) || 'ไม่สามารถยืนยันสลิปนี้ได้',
+      quotaExhausted,
+      message: quotaExhausted ? quotaMessage('SlipOK') : (ERROR_MESSAGES[code] || (body && body.message) || 'ไม่สามารถยืนยันสลิปนี้ได้'),
       raw: body,
     };
   } catch (err) {
@@ -93,11 +96,14 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
     // failed (timeout, DNS/network failure, a non-2xx status) — SlipOK
     // never actually reached a real success/fail determination on the
     // slip. A genuine "your slip is wrong" result comes back as a normal
+    const body = (err.response && err.response.data) || null;
+    const quotaExhausted = isQuotaExhausted(body, err.response && err.response.status);
     return {
-      checked: false,
+      checked: quotaExhausted,
       verified: false,
-      message: 'ระบบเติมเงินมีปัญหาชั่วคราว — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้',
-      raw: (err.response && err.response.data) || null,
+      quotaExhausted,
+      message: quotaExhausted ? quotaMessage('SlipOK') : 'ระบบเติมเงินมีปัญหาชั่วคราว — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้',
+      raw: body,
     };
   }
 }

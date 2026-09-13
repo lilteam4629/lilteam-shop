@@ -3,6 +3,7 @@ const FormData = require('form-data');
 const fs = require('fs');
 const { receiverMatches, textValues, extractReceiverEvidence } = require('./receiver-match');
 const { numberValue, officialEndpoint } = require('./slip-fields');
+const { isQuotaExhausted, quotaMessage } = require('./provider-errors');
 
 /**
  * Slip2Go API Integration Service (slip2go.com)
@@ -121,19 +122,24 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, credentia
       };
     }
 
+    const quotaExhausted = isQuotaExhausted(data, res.status);
     return {
       checked: true,
       verified: false,
-      message: data.message || 'สลิปไม่ถูกต้อง หรือยอดเงินไม่ตรง',
+      quotaExhausted,
+      message: quotaExhausted ? quotaMessage('Slip2Go') : (data.message || 'สลิปไม่ถูกต้อง หรือยอดเงินไม่ตรง'),
       raw: data
     };
   } catch (err) {
-    const errMsg = err.response?.data?.message || err.message;
+    const body = err.response?.data || null;
+    const quotaExhausted = isQuotaExhausted(body, err.response?.status);
+    const errMsg = body?.message || err.message;
     return {
-      checked: false,
+      checked: quotaExhausted,
       verified: false,
-      message: `ไม่สามารถเชื่อมต่อ Slip2Go API: ${errMsg}`,
-      raw: null
+      quotaExhausted,
+      message: quotaExhausted ? quotaMessage('Slip2Go') : `ไม่สามารถเชื่อมต่อ Slip2Go API: ${errMsg}`,
+      raw: body
     };
   }
 }
