@@ -26,14 +26,10 @@ assert.match(adminLayout, /admin-scroll-motion-v1\.css/, 'admin must use the res
 assert.match(adminLayout, /admin-mobile-motion\.js/, 'admin must use the restored motion controller on every viewport');
 assert.doesNotMatch(adminLayout, /admin-motion\.js/, 'desktop must not load a different motion controller');
 assert.doesNotMatch(adminMotionJs, /max-width: 800px/, 'restored motion must not be restricted to mobile');
-assert.doesNotMatch(adminMotionCss, /34px|scale\(\.94\)|\.42s/, 'desktop must not retain stronger motion values than mobile');
-assert.match(adminMotionCss, /admin-page-surface\{animation:admin-page-surface-mobile-in \.38s/, 'mobile admin must preserve the approved bounce');
-assert.match(adminMotionJs, /page\.animate\(\[/, 'desktop admin must use a deterministic Web Animation');
-assert.match(adminMotionJs, /translate3d\(0,-2px,0\)/, 'desktop spring must use a restrained overshoot');
-assert.match(adminMotionJs, /duration:460/, 'desktop spring duration must remain visible without feeling slow');
-assert.doesNotMatch(adminMotionJs, /scale\(/, 'desktop page motion must not scale the full work surface');
-assert.match(adminMotionJs, /desktopMotion='played'/, 'desktop motion must expose a runtime verification marker');
-assert.match(adminMotionJs, /getBoundingClientRect\(\)\.top<window\.innerHeight\*\.94/, 'desktop must not double-animate initially visible panels');
+assert.match(adminMotionCss, /translate3d\(0,34px,0\) scale\(\.94\).*\.42s cubic-bezier\(\.34,1\.56,\.64,1\)/, 'desktop admin must use the rental console panel motion');
+assert.match(adminMotionCss, /max-width:800px.*translate3d\(0,24px,0\) scale\(\.96\).*\.38s/, 'mobile admin must preserve the rental console mobile motion');
+assert.doesNotMatch(adminMotionCss, /admin-page-surface[^\n]*animation/, 'the full desktop work surface must never animate');
+assert.doesNotMatch(adminMotionJs, /page\.animate|getBoundingClientRect/, 'admin motion must not animate or synchronously measure the full page');
 assert.match(adminMotionJs, /IntersectionObserver/, 'restored motion must reveal without blocking navigation');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
