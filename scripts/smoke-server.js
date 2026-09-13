@@ -186,9 +186,10 @@ async function run() {
     if (mainLayoutSource.includes("now-last<(coarse?34:25)")) throw new Error('rain is still throttled below the display refresh rate');
     if (!mainLayoutSource.includes("coarse&&w&&Math.abs(nextW-w)<2")) throw new Error('mobile browser chrome resize guard is missing');
     if (mainLayoutSource.includes('drops.filter(')) throw new Error('rain allocates filtered drop arrays during animation');
-    if (!mainLayoutSource.includes('sprites=[makeSprite(0),makeSprite(1),makeSprite(2)]')) throw new Error('rain does not use cached gradient sprites');
     if (mainLayoutSource.includes('Math.sin(d.phase)') || mainLayoutSource.includes('g.arc(sw*.28')) throw new Error('rain still twinkles or renders star-like heads');
-    if (!mainLayoutSource.includes('500+Math.random()*420')) throw new Error('rain velocity is too slow to resemble rainfall');
+    if (mainLayoutSource.includes('createLinearGradient') || mainLayoutSource.includes('drawImage(sprite')) throw new Error('rain still renders meteor-like gradient tails');
+    if (!mainLayoutSource.includes('function rainPath(bucket)')) throw new Error('rain is not batched into lightweight depth layers');
+    if (!mainLayoutSource.includes('430+Math.random()*300')) throw new Error('rain velocity is outside the natural rainfall range');
     if (!mainLayoutSource.includes("addEventListener('pageshow'")) throw new Error('rain does not resume after a back-forward cache restore');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
