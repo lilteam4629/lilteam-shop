@@ -106,10 +106,10 @@
       <% if (pendingRequests.length) { %>
         <div class="space-y-3">
           <% pendingRequests.forEach(r => { %>
-            <div class="bg-[var(--card)] border border-[var(--gold)]/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+            <div class="topup-request-card bg-[var(--card)] border border-[var(--gold)]/40 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
 
               <!-- Slip Preview & Info -->
-              <div class="flex items-start gap-4">
+              <div class="topup-request-info flex items-start gap-4">
                 <% if (r.slipPath) { %>
                   <a href="<%= r.slipPath %>" target="_blank" rel="noopener" class="group relative shrink-0">
                     <img src="<%= r.slipPath %>" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-[var(--border)] shadow-sm group-hover:brightness-110 transition" alt="สลิปโอนเงิน" />
@@ -122,7 +122,7 @@
                   </div>
                 <% } %>
 
-                <div class="text-xs space-y-1">
+                <div class="topup-request-copy text-xs space-y-1">
                   <div class="font-bold text-sm text-[var(--text)]">
                     <%= r.buyer ? r.buyer.username : 'ไม่พบชื่อผู้ใช้' %>
                     <span class="text-[11px] font-normal text-[var(--text-4)]">(<%= r.buyer ? r.buyer.email : '-' %>)</span>
@@ -149,12 +149,12 @@
               </div>
 
               <!-- Amount & Action Buttons -->
-              <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-[var(--border)]">
+              <div class="topup-request-actions flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-3 border-t sm:border-t-0 pt-3 sm:pt-0 border-[var(--border)]">
                 <div class="text-2xl font-black text-[var(--gold-text)] tracking-tight">
                   ฿<%= Number(r.amount || 0).toLocaleString() %>.00
                 </div>
 
-                <div class="flex items-center gap-2">
+                <div class="topup-request-buttons flex items-center gap-2">
                   <!-- Approve Form -->
                   <form action="/admin/topups/<%= r.id %>/approve" method="post" data-confirm="ยืนยันว่าตรวจสอบสลิปแล้ว ยอดเงิน ฿<%= r.amount %> ถูกต้อง และต้องการเติมเงินเข้ากระเป๋าผู้ใช้ทันทีใช่ไหม?">
                     <button type="submit" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl px-4 py-2 text-xs shadow-md transition active:scale-95 whitespace-nowrap">
