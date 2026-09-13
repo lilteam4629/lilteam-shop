@@ -745,16 +745,16 @@
       const level=<%- JSON.stringify(['light','medium','heavy'].includes(rain.intensity)?rain.intensity:'medium') %>;
       const coarse=matchMedia('(max-width:900px), (pointer:coarse)').matches;
       const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
-      const limits={light:coarse?22:28,medium:coarse?36:46,heavy:coarse?50:64};
+      const limits={light:coarse?24:30,medium:coarse?42:52,heavy:coarse?60:72};
       let drops=[],sprites=[],frame=0,last=0,w=0,h=0,dpr=1;
-      function makeSprite(bucket){const sw=18+bucket*4,sh=38+bucket*10,s=document.createElement('canvas');s.width=sw;s.height=sh;const g=s.getContext('2d',{alpha:true});const grad=g.createLinearGradient(sw*.72,2,sw*.28,sh-3);grad.addColorStop(0,'rgba('+red+','+green+','+blue+',0)');grad.addColorStop(.72,'rgba('+red+','+green+','+blue+','+(.34+bucket*.14)+')');grad.addColorStop(1,'rgba(255,255,255,'+(.68+bucket*.1)+')');g.strokeStyle=grad;g.lineWidth=.8+bucket*.38;g.lineCap='round';g.beginPath();g.moveTo(sw*.72,2);g.lineTo(sw*.28,sh-5);g.stroke();g.fillStyle='rgba(255,255,255,'+(.72+bucket*.1)+')';g.beginPath();g.arc(sw*.28,sh-5,.7+bucket*.3,0,Math.PI*2);g.fill();return s}
-      function reset(drop,randomY){const depth=.28+Math.random()*.72;drop.bucket=Math.min(2,Math.floor(depth*3));drop.x=-30+Math.random()*(w+60);drop.y=randomY?Math.random()*h:-70-Math.random()*100;drop.speed=(58+Math.random()*92)*(.78+depth*.28);drop.wind=18+Math.random()*34;drop.phase=Math.random()*Math.PI*2;return drop}
+      function makeSprite(bucket){const sw=12+bucket*3,sh=28+bucket*10,s=document.createElement('canvas');s.width=sw;s.height=sh;const g=s.getContext('2d',{alpha:true});const grad=g.createLinearGradient(2,1,sw-3,sh-2);grad.addColorStop(0,'rgba('+red+','+green+','+blue+',0)');grad.addColorStop(.58,'rgba('+red+','+green+','+blue+','+(.2+bucket*.1)+')');grad.addColorStop(1,'rgba('+red+','+green+','+blue+','+(.58+bucket*.15)+')');g.strokeStyle=grad;g.lineWidth=.55+bucket*.34;g.lineCap='round';g.beginPath();g.moveTo(2,1);g.lineTo(sw-3,sh-2);g.stroke();return s}
+      function reset(drop,randomY){const depth=.22+Math.random()*.78;drop.bucket=Math.min(2,Math.floor(depth*3));drop.x=-50+Math.random()*(w+100);drop.y=randomY?Math.random()*h:-80-Math.random()*140;drop.speed=(500+Math.random()*420)*(.65+depth*.45);drop.wind=drop.speed*(.1+Math.random()*.035);drop.alpha=.5+depth*.38;return drop}
       function resize(force){const nextW=innerWidth,nextH=innerHeight;if(!force&&coarse&&w&&Math.abs(nextW-w)<2)return;dpr=Math.min(devicePixelRatio||1,coarse?1:1.25);w=nextW;h=nextH;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const areaScale=coarse?1:Math.min(1,Math.max(.55,(w*h)/(1440*900)));const count=reduced?Math.max(7,Math.round(limits[level]*.4)):Math.max(9,Math.round(limits[level]*areaScale));drops=Array.from({length:count},()=>reset({},true))}
       function draw(now){
         frame=requestAnimationFrame(draw);
         if(document.hidden)return;
         const elapsed=last?Math.min(.032,(now-last)/1000):.016;last=now;ctx.clearRect(0,0,w,h);
-        for(const d of drops){d.phase+=elapsed*2.2;ctx.globalAlpha=.62+Math.sin(d.phase)*.2;const sprite=sprites[d.bucket];ctx.drawImage(sprite,d.x-sprite.width*.28,d.y-sprite.height+5);d.x+=d.wind*elapsed;d.y+=d.speed*elapsed;if(d.y>h+80||d.x>w+80)reset(d,false)}ctx.globalAlpha=1;
+        for(const d of drops){ctx.globalAlpha=d.alpha;const sprite=sprites[d.bucket];ctx.drawImage(sprite,d.x-sprite.width+3,d.y-sprite.height+2);d.x+=d.wind*elapsed;d.y+=d.speed*elapsed;if(d.y>h+80||d.x>w+80)reset(d,false)}ctx.globalAlpha=1;
       }
       let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(()=>resize(false),180)},{passive:true});
       addEventListener('orientationchange',()=>{clearTimeout(timer);timer=setTimeout(()=>resize(true),220)},{passive:true});
