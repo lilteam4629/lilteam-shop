@@ -176,7 +176,7 @@ async function run() {
     if (!scrollMotionCss.body.includes('transition-delay:0ms!important')) throw new Error('mobile product reveals still use staggered delays');
     const scrollMotionJs = await fetchOk('/js/scroll-motion-v1.js', 'application/javascript');
     if (scrollMotionJs.body.includes('getBoundingClientRect')) throw new Error('scroll reveal performs a forced layout sweep');
-    if (!scrollMotionJs.body.includes("rootMargin:'0px 0px 96px 0px'")) throw new Error('scroll reveal is not pre-triggered ahead of the viewport');
+    if (!scrollMotionJs.body.includes("rootMargin:'160px 0px 120px 0px'")) throw new Error('scroll reveal is not pre-triggered ahead of the viewport');
     await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();

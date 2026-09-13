@@ -28,11 +28,17 @@
     document.querySelectorAll('.ui-submit-pending').forEach(function(button){button.classList.remove('ui-submit-pending');button.removeAttribute('aria-busy')});
   });
   var mobileQuery=window.matchMedia('(max-width: 900px) and (pointer: coarse)');
-  var scrollTimer=0;
+  var scrollTimer=0,scrollFrame=0;
   window.addEventListener('scroll',function(){
     if(!mobileQuery.matches)return;
-    document.documentElement.classList.add('mobile-is-scrolling');
     clearTimeout(scrollTimer);
+    if(!scrollFrame)scrollFrame=requestAnimationFrame(function(){
+      scrollFrame=0;
+      document.documentElement.classList.add('mobile-is-scrolling');
+    });
     scrollTimer=setTimeout(function(){document.documentElement.classList.remove('mobile-is-scrolling')},140);
   },{passive:true});
+  mobileQuery.addEventListener&&mobileQuery.addEventListener('change',function(event){
+    if(!event.matches)document.documentElement.classList.remove('mobile-is-scrolling');
+  });
 })();

@@ -1,6 +1,6 @@
 (function(){
   var observer=null,scheduled=false,revealFrame=0,pendingReveals=new Set();
-  var selector=['.banner-hero-shell','.modern-fan-heading','.store-announcements','.latest-orders-section','.store-filter-section','.store-content-section','.premium-product-card','.admin-content > section','.admin-content > article','.admin-content > div'].join(',');
+  var selector=['.banner-hero-shell','.modern-fan-heading','.store-announcements','.latest-orders-section','.store-filter-section','.store-content-section','.premium-product-card','.catalog-card','.admin-content > section','.admin-content > article'].join(',');
   function setup(){
     scheduled=false;
     if(observer)observer.disconnect();
@@ -8,9 +8,9 @@
     nodes.forEach(function(node,index){
       if(node.dataset.scrollMotion)return;
       node.dataset.scrollMotion='1';node.classList.add('scroll-reveal');
-      if(node.classList.contains('premium-product-card'))node.classList.add('scroll-reveal-card');
+      if(node.classList.contains('premium-product-card')||node.classList.contains('catalog-card'))node.classList.add('scroll-reveal-card');
       if(node.classList.contains('banner-hero-shell'))node.classList.add('scroll-reveal-banner');
-      var delay=node.classList.contains('premium-product-card')?Math.min(index%5,4)*36:0;
+      var delay=node.classList.contains('scroll-reveal-card')?Math.min(index%5,4)*28:0;
       node.style.setProperty('--reveal-delay',delay+'ms');
     });
     document.documentElement.classList.add('scroll-motion-ready');
@@ -19,7 +19,7 @@
       entries.forEach(function(entry){if(entry.isIntersecting)pendingReveals.add(entry.target)});
       if(!pendingReveals.size||revealFrame)return;
       revealFrame=requestAnimationFrame(function(){pendingReveals.forEach(function(node){node.classList.add('scroll-reveal-visible');observer.unobserve(node)});pendingReveals.clear();revealFrame=0});
-    },{rootMargin:'0px 0px 96px 0px',threshold:.01});
+    },{rootMargin:'160px 0px 120px 0px',threshold:.001});
     requestAnimationFrame(function(){nodes.forEach(function(node){if(!node.classList.contains('scroll-reveal-visible'))observer.observe(node)})});
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(setup)}}

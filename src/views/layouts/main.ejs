@@ -341,7 +341,8 @@
             document.title = nextDocument.title;
             runPageScripts(nextShell);
           };
-          if (document.startViewTransition && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          const lightweightNavigation = window.matchMedia('(max-width: 900px) and (pointer: coarse)').matches;
+          if (document.startViewTransition && !lightweightNavigation && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             await document.startViewTransition(swapPage).updateCallbackDone;
           } else {
             swapPage();
@@ -749,7 +750,7 @@
       let drops=[],frame=0,last=0,w=0,h=0,dpr=1;
       function reset(drop,randomY){drop.x=Math.random()*w;drop.y=randomY?Math.random()*h:-30;drop.len=14+Math.random()*18;drop.speed=(coarse?8:10)+Math.random()*8;drop.alpha=.48+Math.random()*.34;return drop}
       function resize(){dpr=Math.min(devicePixelRatio||1,1.5);w=innerWidth;h=innerHeight;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const count=reduced?Math.max(12,Math.round(limits[level]*.45)):limits[level];drops=Array.from({length:count},()=>reset({},true))}
-      function draw(now){frame=requestAnimationFrame(draw);if(document.hidden||now-last<16)return;last=now;ctx.clearRect(0,0,w,h);ctx.lineCap='round';for(const d of drops){ctx.globalAlpha=.28;ctx.lineWidth=coarse?2.5:2.9;ctx.strokeStyle=contrast;ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-3,d.y+d.len);ctx.stroke();ctx.globalAlpha=d.alpha;ctx.lineWidth=coarse?1.35:1.65;ctx.strokeStyle=color;ctx.stroke();d.x-=.8;d.y+=d.speed;if(d.y>h+30)reset(d,false)}ctx.globalAlpha=1}
+      function draw(now){frame=requestAnimationFrame(draw);if(document.hidden||(coarse&&document.documentElement.classList.contains('mobile-is-scrolling'))||now-last<16)return;last=now;ctx.clearRect(0,0,w,h);ctx.lineCap='round';for(const d of drops){ctx.globalAlpha=.28;ctx.lineWidth=coarse?2.5:2.9;ctx.strokeStyle=contrast;ctx.beginPath();ctx.moveTo(d.x,d.y);ctx.lineTo(d.x-3,d.y+d.len);ctx.stroke();ctx.globalAlpha=d.alpha;ctx.lineWidth=coarse?1.35:1.65;ctx.strokeStyle=color;ctx.stroke();d.x-=.8;d.y+=d.speed;if(d.y>h+30)reset(d,false)}ctx.globalAlpha=1}
       let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(resize,160)},{passive:true});
       document.addEventListener('visibilitychange',()=>{if(!document.hidden)last=performance.now()});resize();frame=requestAnimationFrame(draw);
       addEventListener('pagehide',()=>cancelAnimationFrame(frame),{once:true});
