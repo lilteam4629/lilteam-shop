@@ -744,9 +744,9 @@
       const level=<%- JSON.stringify(['light','medium','heavy'].includes(rain.intensity)?rain.intensity:'medium') %>;
       const coarse=matchMedia('(max-width:900px), (pointer:coarse)').matches;
       const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
-      const limits={light:coarse?24:30,medium:coarse?42:52,heavy:coarse?60:72};
+      const limits={light:coarse?14:30,medium:coarse?24:52,heavy:coarse?34:72};
       let drops=[],frame=0,last=0,w=0,h=0,dpr=1;
-      function reset(drop,randomY){const depth=.22+Math.random()*.78;drop.bucket=Math.min(2,Math.floor(depth*3));drop.x=-20+Math.random()*(w+40);drop.y=randomY?Math.random()*h:-35-Math.random()*90;drop.len=(7+Math.random()*11)*(.72+depth*.45);drop.speed=(430+Math.random()*300)*(.72+depth*.38);drop.wind=8+Math.random()*18;drop.slant=-.8+Math.random()*1.6;return drop}
+      function reset(drop,randomY){const depth=.22+Math.random()*.78;drop.bucket=Math.min(2,Math.floor(depth*3));drop.x=-20+Math.random()*(w+40);drop.y=randomY?Math.random()*h:-35-Math.random()*90;drop.len=(7+Math.random()*11)*(.72+depth*.45);drop.speed=(430+Math.random()*300)*(.72+depth*.38);drop.wind=-12+Math.random()*30;drop.slant=(drop.wind/drop.speed)*drop.len+(-.55+Math.random()*1.1);return drop}
       function resize(force){const nextW=innerWidth,nextH=innerHeight;if(!force&&coarse&&w&&Math.abs(nextW-w)<2)return;dpr=Math.min(devicePixelRatio||1,coarse?1:1.25);w=nextW;h=nextH;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const areaScale=coarse?1:Math.min(1,Math.max(.55,(w*h)/(1440*900)));const count=reduced?Math.max(7,Math.round(limits[level]*.4)):Math.max(9,Math.round(limits[level]*areaScale));drops=Array.from({length:count},()=>reset({},true))}
       function rainPath(bucket){ctx.beginPath();for(const d of drops){if(d.bucket!==bucket)continue;ctx.moveTo(d.x,d.y);ctx.lineTo(d.x+d.slant+(d.wind*.025),d.y+d.len)}}
       function draw(now){
@@ -754,7 +754,7 @@
         if(document.hidden)return;
         const elapsed=last?Math.min(.032,(now-last)/1000):.016;last=now;ctx.clearRect(0,0,w,h);ctx.strokeStyle=color;ctx.lineCap='round';
         for(let bucket=0;bucket<3;bucket++){rainPath(bucket);ctx.globalAlpha=.2+(bucket*.13);ctx.lineWidth=.55+(bucket*.32);ctx.stroke()}
-        for(const d of drops){d.x+=d.wind*elapsed;d.y+=d.speed*elapsed;if(d.y>h+35||d.x>w+35)reset(d,false)}ctx.globalAlpha=1;
+        for(const d of drops){d.x+=d.wind*elapsed;d.y+=d.speed*elapsed;if(d.y>h+35||d.x>w+35||d.x<-35)reset(d,false)}ctx.globalAlpha=1;
       }
       let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(()=>resize(false),180)},{passive:true});
       addEventListener('orientationchange',()=>{clearTimeout(timer);timer=setTimeout(()=>resize(true),220)},{passive:true});

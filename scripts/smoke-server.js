@@ -190,6 +190,8 @@ async function run() {
     if (mainLayoutSource.includes('createLinearGradient') || mainLayoutSource.includes('drawImage(sprite')) throw new Error('rain still renders meteor-like gradient tails');
     if (!mainLayoutSource.includes('function rainPath(bucket)')) throw new Error('rain is not batched into lightweight depth layers');
     if (!mainLayoutSource.includes('430+Math.random()*300')) throw new Error('rain velocity is outside the natural rainfall range');
+    if (!mainLayoutSource.includes('light:coarse?14:30,medium:coarse?24:52,heavy:coarse?34:72')) throw new Error('mobile rain density is too high');
+    if (!mainLayoutSource.includes('drop.wind=-12+Math.random()*30')) throw new Error('rain still falls in one horizontal direction');
     if (!mainLayoutSource.includes("addEventListener('pageshow'")) throw new Error('rain does not resume after a back-forward cache restore');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
