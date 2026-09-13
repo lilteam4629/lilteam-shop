@@ -179,6 +179,10 @@ async function run() {
     if (!scrollMotionJs.body.includes("rootMargin:'160px 0px 120px 0px'")) throw new Error('scroll reveal is not pre-triggered ahead of the viewport');
     const interactionPerformanceJs = await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     if (!interactionPerformanceJs.body.includes('page-is-scrolling')) throw new Error('desktop scroll performance guard is missing');
+    const mainLayoutSource = fs.readFileSync(path.join(__dirname, '..', 'src/views/layouts/main.ejs'), 'utf8');
+    if (mainLayoutSource.includes("getContext('2d',{alpha:true,desynchronized:true})")) throw new Error('rain canvas still uses unsafe desynchronized compositing');
+    if (mainLayoutSource.includes("contains('page-is-scrolling')||now-last")) throw new Error('rain still freezes while the user scrolls');
+    if (!mainLayoutSource.includes("addEventListener('pageshow'")) throw new Error('rain does not resume after a back-forward cache restore');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
     await checkInstalledDisabledRainModule(cookie);
