@@ -28,7 +28,7 @@ assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigati
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
 assert.doesNotMatch(adminLayout, /closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/, 'ordinary admin links must navigate directly like rent-app');
 assert.match(adminLayout, /<main class="admin-page-surface/, 'admin must mark the complete right-hand page surface');
-assert.match(adminMotionJs, /pageSurface\?\[pageSurface\]/, 'complete admin page must run through the rental console reveal engine');
+assert.match(adminMotionCss, /main\.admin-page-surface\{animation:admin-page-surface-in \.42s cubic-bezier\(\.34,1\.56,\.64,1\)/, 'complete admin page must use rent-app motion timing');
 assert.match(adminMotionCss, /translate3d\(0,34px,0\) scale\(\.94\)/, 'desktop admin motion must match rent-app');
 assert.match(adminMotionCss, /translate3d\(0,24px,0\) scale\(\.96\)/, 'mobile admin motion must match rent-app');
 assert.match(adminMotionJs, /rootMargin:'0px 0px -8% 0px',threshold:\.06/, 'admin observer timing must match rent-app');
