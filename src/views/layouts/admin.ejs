@@ -37,6 +37,34 @@
       transition: none !important;
       animation: none !important;
     }
+    /* Keep financial alerts stable. These elements previously inherited pulse,
+       scale and transform utilities which made the desktop admin appear to
+       blink or shake. Colour feedback remains available on hover. */
+    .admin-static-finance,
+    .admin-static-finance * {
+      animation: none !important;
+      transform: none !important;
+    }
+    .admin-static-finance {
+      transition-property: color, background-color, border-color, box-shadow !important;
+    }
+    .admin-static-finance svg,
+    .admin-static-finance .sidebar-badge {
+      transition: none !important;
+    }
+    @media (min-width: 1024px) {
+      /* Desktop admin is a work surface: alerts and controls must not move on
+         their own or jump under the pointer. Keep the minigame page animated. */
+      body.admin-reference-ui:not(.admin-page-minigame) #admin-sidebar *,
+      body.admin-reference-ui:not(.admin-page-minigame) main * {
+        animation: none !important;
+      }
+      body.admin-reference-ui:not(.admin-page-minigame) #admin-sidebar a,
+      body.admin-reference-ui:not(.admin-page-minigame) main a,
+      body.admin-reference-ui:not(.admin-page-minigame) main button {
+        transform: none !important;
+      }
+    }
     body { font-family: 'Kanit', sans-serif; }
     code, kbd, samp, pre, .font-mono { font-family: 'JetBrains Mono', monospace; }
 
@@ -211,9 +239,9 @@
             <span class="sidebar-text">คำสั่งซื้อ</span>
           </a>
 
-          <a href="/admin/topups" class="sidebar-link flex items-center justify-between px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='topups'?'bg-[var(--gold)]/10 text-[var(--gold-text)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="จัดการเติมเงิน">
+          <a href="/admin/topups" class="admin-static-finance sidebar-link flex items-center justify-between px-3 py-2.5 rounded-xl transition-colors duration-150 group <%= active==='topups'?'bg-[var(--gold)]/10 text-[var(--gold-text)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="จัดการเติมเงิน">
             <div class="flex items-center gap-3 min-w-0">
-              <svg class="w-5 h-5 shrink-0 transition group-hover:scale-110 <%= active==='topups'?'text-[var(--gold-text)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+              <svg class="w-5 h-5 shrink-0 <%= active==='topups'?'text-[var(--gold-text)]':'text-[var(--text-4)] group-hover:text-[var(--text)]' %>" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
               <span class="sidebar-text">เติมเงิน & ตรวจสลิป</span>
             </div>
             <% if (typeof pendingTopupCount !== 'undefined' && pendingTopupCount > 0) { %>
@@ -349,7 +377,7 @@
         <!-- Live Store Status Badge -->
         <% if (typeof persistentStorageEnabled !== 'undefined' && !persistentStorageEnabled) { %>
           <div class="flex items-center gap-1.5 text-xs text-amber-300 bg-amber-950/60 border border-amber-500/40 px-3 py-1 rounded-full">
-            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
             <span>Local DB (ยังไม่ต่อ MongoDB)</span>
           </div>
         <% } else { %>

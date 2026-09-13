@@ -91,7 +91,7 @@
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
       <span>เพิ่มสินค้าใหม่</span>
     </a>
-    <a href="/admin/topups" class="inline-flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text)] font-medium px-3.5 py-2 rounded-xl text-xs active:scale-95 transition">
+    <a href="/admin/topups" class="admin-static-finance inline-flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text)] font-medium px-3.5 py-2 rounded-xl text-xs transition-colors">
       <svg class="w-4 h-4 text-[var(--gold-text)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
       <span>ตรวจสลิปเติมเงิน</span>
       <% if (stats.pendingTopups > 0) { %>
@@ -189,7 +189,7 @@
 
 <!-- Pending Topups Alert Banner -->
 <% if (stats.pendingTopups > 0) { %>
-  <div class="bg-gradient-to-r from-amber-950/70 to-[var(--card)] border border-[var(--gold)]/40 rounded-2xl p-4 sm:p-5 mb-6 flex items-center justify-between flex-wrap gap-4 shadow-lg">
+  <div class="admin-static-finance bg-gradient-to-r from-amber-950/70 to-[var(--card)] border border-[var(--gold)]/40 rounded-2xl p-4 sm:p-5 mb-6 flex items-center justify-between flex-wrap gap-4 shadow-lg">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] flex items-center justify-center font-bold text-lg shadow-sm">
         💳
@@ -199,7 +199,7 @@
         <div class="text-xs text-[var(--text-4)] mt-0.5">ลูกค้าแนบสลิป/แจ้งเติมเงินเข้ามา กรุณาตรวจสอบและอนุมัติเครดิต</div>
       </div>
     </div>
-    <a href="/admin/topups" class="inline-flex items-center gap-2 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-semibold px-4 py-2 rounded-xl text-xs shadow-md transition">
+    <a href="/admin/topups" class="admin-static-finance inline-flex items-center gap-2 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-semibold px-4 py-2 rounded-xl text-xs shadow-md transition-colors">
       <span>ไปหน้าตรวจสลิป</span>
       <span>→</span>
     </a>
