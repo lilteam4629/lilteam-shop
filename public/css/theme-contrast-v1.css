@@ -24,3 +24,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   outline:2px solid var(--gold-text);outline-offset:2px
 }
 button:disabled,[aria-disabled="true"]{cursor:not-allowed;opacity:.55}
+
+/* Product actions remain readable when a light theme makes the disabled
+   accent button pale. */
+.product-action-primary{color:var(--gold-contrast)!important;background:linear-gradient(135deg,var(--gold),var(--gold-hover))!important}
+.product-action-primary:disabled{color:var(--text-2)!important;background:color-mix(in srgb,var(--gold) 18%,var(--card))!important;border:1px solid var(--border-light);opacity:1!important;box-shadow:none!important}
+.product-action-secondary{color:var(--gold-text)!important;background:var(--input)!important}

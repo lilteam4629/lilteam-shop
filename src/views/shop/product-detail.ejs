@@ -201,9 +201,9 @@
             </label>
             <div class="relative mt-4 grid gap-2 sm:grid-cols-2">
               <% if (product.purchaseActionUrl) { %>
-                <a href="<%= product.purchaseActionUrl %>" target="_blank" rel="noopener noreferrer" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)]/50 bg-[var(--input)] px-5 py-3 text-center text-sm font-semibold text-[var(--gold-text)] transition hover:-translate-y-0.5 hover:border-[var(--gold)] hover:bg-[var(--gold)]/10">↗ <%= product.purchaseActionLabel || 'ไปทำขั้นตอนนี้ก่อน' %></a>
+                <a href="<%= product.purchaseActionUrl %>" target="_blank" rel="noopener noreferrer" class="product-action-secondary inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)]/50 bg-[var(--input)] px-5 py-3 text-center text-sm font-semibold text-[var(--gold-text)] transition hover:-translate-y-0.5 hover:border-[var(--gold)] hover:bg-[var(--gold)]/10">↗ <%= product.purchaseActionLabel || 'ไปทำขั้นตอนนี้ก่อน' %></a>
               <% } %>
-              <button data-purchase-submit disabled class="min-h-12 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[var(--gold-contrast)] opacity-50 transition enabled:hover:-translate-y-0.5 enabled:hover:bg-[var(--gold-hover)] disabled:cursor-not-allowed <%= product.purchaseActionUrl ? '' : 'sm:col-span-2' %>">✓ ยืนยันและเพิ่มลงตะกร้า</button>
+              <button data-purchase-submit disabled class="product-action-primary min-h-12 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[var(--gold-contrast)] opacity-50 transition enabled:hover:-translate-y-0.5 enabled:hover:bg-[var(--gold-hover)] disabled:cursor-not-allowed <%= product.purchaseActionUrl ? '' : 'sm:col-span-2' %>">✓ ยืนยันและเพิ่มลงตะกร้า</button>
             </div>
           <% } %>
           <% if (!product.purchaseApprovalEnabled) { %><button class="w-full sm:w-auto px-8 py-3 rounded-lg font-medium bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)]">เพิ่มลงตะกร้า</button><% } %>
