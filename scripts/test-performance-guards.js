@@ -14,6 +14,7 @@ const adminMobileCss = read('public/css/admin-mobile-v1.css');
 const minigameWidget = read('src/views/partials/minigame-widget.ejs');
 const minigameRail = read('src/views/partials/minigame-rail.ejs');
 const filterPanel = read('src/views/partials/filter-panel.ejs');
+const productDetail = read('src/views/shop/product-detail.ejs');
 
 assert.match(hero, /locker-hero-v1\.css/, 'large hero styles must be a cacheable asset');
 assert.doesNotMatch(hero, /<style>/, 'large hero CSS must not be repeated in every home response');
@@ -40,4 +41,6 @@ assert.match(minigameRail, /\.rail-window{[^}]*overflow:hidden/, 'rail preview m
 
 assert.match(filterPanel, /window\.location\.assign\(query\?['"]\/products\?tags=/, 'filter selection must navigate to a server-filtered listing');
 assert.doesNotMatch(filterPanel, /if\(cards\.length\)\{apply\(\);return\}/, 'filter selection must not remain client-only');
+assert.match(productDetail, /product-action-secondary/, 'purchase action must use a theme-independent readable class');
+assert.match(productDetail, /product-topup-action/, 'top-up action must use a theme-independent readable class');
 console.log('Performance guards passed: storefront layers and matching mobile/desktop admin motion');

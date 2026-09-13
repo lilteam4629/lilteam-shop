@@ -29,6 +29,6 @@ button:disabled,[aria-disabled="true"]{cursor:not-allowed;opacity:.55}
    accent button pale. */
 .product-action-primary{color:var(--gold-contrast)!important;background:linear-gradient(135deg,var(--gold),var(--gold-hover))!important}
 .product-action-primary:disabled{color:var(--text-2)!important;background:color-mix(in srgb,var(--gold) 18%,var(--card))!important;border:1px solid var(--border-light);opacity:1!important;box-shadow:none!important}
-.product-action-secondary{color:var(--gold-text)!important;background:var(--input)!important}
-.product-topup-action{color:var(--gold-text)!important;background:color-mix(in srgb,var(--gold) 12%,var(--card))!important}
+.product-action-secondary,.product-topup-action{color:#111!important;background:#f4f4f5!important;border-color:#a1a1aa!important;text-shadow:none!important}
+.product-action-secondary:hover,.product-topup-action:hover{color:#000!important;background:#e4e4e7!important;border-color:#52525b!important}
 .product-contact-action{color:var(--text-2)!important;background:var(--input)!important}
