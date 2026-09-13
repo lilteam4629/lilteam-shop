@@ -8,8 +8,8 @@ const motionCss = read('public/css/scroll-motion-v1.css');
 const motionJs = read('public/js/scroll-motion-v1.js');
 const layout = read('src/views/layouts/main.ejs');
 const adminLayout = read('src/views/layouts/admin.ejs');
-const adminMotionCss = read('public/css/admin-scroll-motion-v2.css');
-const adminMotionJs = read('public/js/admin-scroll-motion-v2.js');
+const adminMotionCss = read('public/css/admin-scroll-motion-v1.css');
+const adminMotionJs = read('public/js/admin-scroll-motion-v1.js');
 
 assert.match(hero, /locker-hero-v1\.css/, 'large hero styles must be a cacheable asset');
 assert.doesNotMatch(hero, /<style>/, 'large hero CSS must not be repeated in every home response');
@@ -22,13 +22,13 @@ assert.match(motionCss, /scroll-reveal-admin\{transform:translate3d\(0,24px,0\) 
 assert.match(motionCss, /:not\(\.scroll-reveal-admin\)/, 'mobile performance overrides must not flatten the admin bounce');
 assert.match(layout, /coarse&&document\.documentElement\.classList\.contains\('mobile-is-scrolling'\)/,
   'full-screen rain rendering must yield while a touch device scrolls');
-assert.match(adminLayout, /admin-scroll-motion-v2\.css/, 'admin must use the cache-busted rental console stylesheet directly');
-assert.match(adminLayout, /admin-scroll-motion-v2\.js/, 'admin must use the cache-busted rental console observer directly');
+assert.match(adminLayout, /admin-scroll-motion-v1\.css/, 'admin must use the rental console stylesheet directly');
+assert.match(adminLayout, /admin-scroll-motion-v1\.js/, 'admin must use the rental console observer directly');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
 assert.doesNotMatch(adminLayout, /closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/, 'ordinary admin links must navigate directly like rent-app');
-assert.doesNotMatch(adminLayout, /admin-page-surface/, 'admin must reveal top-level panels like rent-app instead of moving the whole page');
-assert.match(adminMotionJs, /main > section,main > article,main > div/, 'admin must reveal the same top-level panel set as rent-app');
+assert.match(adminLayout, /<main class="admin-page-surface/, 'admin must mark the complete right-hand page surface');
+assert.match(adminMotionJs, /pageSurface\?\[pageSurface\]/, 'complete admin page must run through the rental console reveal engine');
 assert.match(adminMotionCss, /translate3d\(0,34px,0\) scale\(\.94\)/, 'desktop admin motion must match rent-app');
 assert.match(adminMotionCss, /translate3d\(0,24px,0\) scale\(\.96\)/, 'mobile admin motion must match rent-app');
 assert.match(adminMotionJs, /rootMargin:'0px 0px -8% 0px',threshold:\.06/, 'admin observer timing must match rent-app');
