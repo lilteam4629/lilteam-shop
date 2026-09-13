@@ -15,6 +15,8 @@ assert.match(motionCss, /scroll-reveal-visible\{opacity:1!important;transform:no
 assert.match(motionCss, /scroll-reveal-complete[^}]*transform:none!important/, 'finished reveals must release compositor transforms');
 assert.match(motionJs, /scroll-reveal-complete/, 'cards must mark completed reveals');
 assert.match(motionJs, /transitionend/, 'cards must leave their transition layer after revealing');
+assert.match(motionCss, /scroll-reveal-admin\{transform:translate3d\(0,24px,0\) scale\(\.96\);transition-duration:\.38s/, 'mobile admin reveal must match the rental console');
+assert.match(motionCss, /:not\(\.scroll-reveal-admin\)/, 'mobile performance overrides must not flatten the admin bounce');
 assert.match(layout, /coarse&&document\.documentElement\.classList\.contains\('mobile-is-scrolling'\)/,
   'full-screen rain rendering must yield while a touch device scrolls');
 

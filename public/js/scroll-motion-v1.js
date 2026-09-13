@@ -1,6 +1,6 @@
 (function(){
   var observer=null,scheduled=false,revealFrame=0,pendingReveals=new Set();
-  var storefrontSelector=['.banner-hero-shell','.modern-fan-heading','.store-announcements','.latest-orders-section','.store-filter-section','.store-content-section','.premium-product-card','.catalog-card','.admin-content > section','.admin-content > article'];
+  var storefrontSelector=['.banner-hero-shell','.modern-fan-heading','.store-announcements','.latest-orders-section','.store-filter-section','.store-content-section','.premium-product-card','.catalog-card','.admin-content > section','.admin-content > article','.admin-content > div'];
   var adminSelector=['body.admin-site main > section','body.admin-site main > article','body.admin-site main > div'];
   function setup(){
     scheduled=false;
@@ -28,7 +28,7 @@
           setTimeout(complete,700);
         }
       });pendingReveals.clear();revealFrame=0});
-    },{rootMargin:'0px 0px -7% 0px',threshold:.02});
+    },{rootMargin:'0px 0px -8% 0px',threshold:.06});
     requestAnimationFrame(function(){nodes.forEach(function(node){if(!node.classList.contains('scroll-reveal-visible'))observer.observe(node)})});
   }
   function schedule(){if(!scheduled){scheduled=true;requestAnimationFrame(setup)}}

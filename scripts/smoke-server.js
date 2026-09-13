@@ -177,7 +177,7 @@ async function run() {
     if (!scrollMotionCss.body.includes('transition-delay:0ms!important')) throw new Error('mobile product reveals still use staggered delays');
     const scrollMotionJs = await fetchOk('/js/scroll-motion-v1.js', 'application/javascript');
     if (scrollMotionJs.body.includes('getBoundingClientRect')) throw new Error('scroll reveal performs a forced layout sweep');
-    if (!scrollMotionJs.body.includes("rootMargin:'0px 0px -7% 0px'")) throw new Error('scroll reveal is not aligned with the visible viewport');
+    if (!scrollMotionJs.body.includes("rootMargin:'0px 0px -8% 0px'")) throw new Error('scroll reveal does not match the rental console viewport timing');
     if (!scrollMotionJs.body.includes('body.admin-site main > div')) throw new Error('admin top-level cards do not receive scroll reveal motion');
     const interactionPerformanceJs = await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     if (!interactionPerformanceJs.body.includes('page-is-scrolling')) throw new Error('desktop scroll performance guard is missing');
