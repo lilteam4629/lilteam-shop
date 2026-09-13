@@ -1,5 +1,6 @@
 (function () {
   'use strict';
+  if (window.matchMedia('(max-width: 800px)').matches) return;
   var page = document.querySelector('main.admin-page-surface');
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   var animation;
