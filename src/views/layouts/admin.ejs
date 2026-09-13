@@ -30,7 +30,7 @@
   <% if (workspaceEnabled) { %><link rel="stylesheet" href="<%= asset('css/admin-workspace-v5.css') %>" /><% } %>
   <% if (referenceEnabled) { %><link rel="stylesheet" href="<%= asset('css/admin-studio-v1.css') %>" /><% } %>
   <% if (referenceEnabled) { %><link rel="stylesheet" href="<%= asset('css/admin-mobile-v1.css') %>" /><% } %>
-  <link rel="stylesheet" href="<%= asset('css/scroll-motion-v1.css') %>" />
+  <link rel="stylesheet" href="<%= asset('css/admin-scroll-motion-v1.css') %>" />
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
     html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
@@ -98,13 +98,12 @@
       position: fixed; inset: 0; z-index: 9999;
       display: flex; align-items: center; justify-content: center;
       background: color-mix(in srgb, var(--bg) 80%, transparent);
-      backdrop-filter: blur(4px);
       opacity: 0; visibility: hidden; pointer-events: none;
-      transition: opacity .15s ease;
+      transition: opacity .12s ease;
     }
     html.lilteam-navigating #page-loading-overlay {
       opacity: 1; visibility: visible; pointer-events: auto;
-      transition: opacity .15s ease .15s;
+      transition: opacity .12s ease;
     }
     #page-loading-overlay .loading-ring {
       position: relative; width: 64px; height: 64px;
@@ -692,14 +691,21 @@
     // Page Navigation Spinner Handler
     (function () {
       let navigationTimer = null;
+      let navigationShowTimer = null;
       function clearNavigating() {
         document.documentElement.classList.remove('lilteam-navigating');
         if (navigationTimer) clearTimeout(navigationTimer);
+        if (navigationShowTimer) clearTimeout(navigationShowTimer);
         navigationTimer = null;
+        navigationShowTimer = null;
       }
       function markNavigating(submitBtn) {
-        document.documentElement.classList.add('lilteam-navigating');
-        if (navigationTimer) clearTimeout(navigationTimer);
+        clearNavigating();
+        // Fast admin navigations should feel instant. Only cover the page when
+        // the next response actually takes long enough to need feedback.
+        navigationShowTimer = setTimeout(function () {
+          document.documentElement.classList.add('lilteam-navigating');
+        }, 180);
         // A failed request must never leave the whole admin unusable. This
         // only removes the visual blocker; it does not cancel a form submit.
         navigationTimer = setTimeout(function () {
@@ -761,7 +767,7 @@
       });
     });
   </script>
-  <script src="<%= asset('js/scroll-motion-v1.js') %>" defer></script>
+  <script src="<%= asset('js/admin-scroll-motion-v1.js') %>" defer></script>
   <script src="<%= asset('js/interaction-performance-v1.js') %>" defer></script>
 </body>
 </html>

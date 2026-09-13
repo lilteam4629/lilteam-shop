@@ -177,8 +177,10 @@ async function run() {
     if (!scrollMotionCss.body.includes('transition-delay:0ms!important')) throw new Error('mobile product reveals still use staggered delays');
     const scrollMotionJs = await fetchOk('/js/scroll-motion-v1.js', 'application/javascript');
     if (scrollMotionJs.body.includes('getBoundingClientRect')) throw new Error('scroll reveal performs a forced layout sweep');
-    if (!scrollMotionJs.body.includes("rootMargin:'0px 0px -8% 0px'")) throw new Error('scroll reveal does not match the rental console viewport timing');
-    if (!scrollMotionJs.body.includes('body.admin-site main > div')) throw new Error('admin top-level cards do not receive scroll reveal motion');
+    const adminMotionCss = await fetchOk('/css/admin-scroll-motion-v1.css', 'text/css');
+    const adminMotionJs = await fetchOk('/js/admin-scroll-motion-v1.js', 'application/javascript');
+    if (!adminMotionCss.body.includes('translate3d(0,34px,0) scale(.94)') || !adminMotionCss.body.includes('translate3d(0,24px,0) scale(.96)')) throw new Error('admin does not use the rental console reveal motion');
+    if (!adminMotionJs.body.includes("rootMargin:'0px 0px -8% 0px'") || !adminMotionJs.body.includes('.admin-content > div')) throw new Error('admin does not use the rental console reveal observer');
     const interactionPerformanceJs = await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     if (!interactionPerformanceJs.body.includes('page-is-scrolling')) throw new Error('desktop scroll performance guard is missing');
     const mainLayoutSource = fs.readFileSync(path.join(__dirname, '..', 'src/views/layouts/main.ejs'), 'utf8');
@@ -198,6 +200,8 @@ async function run() {
     const cookie = await loginAsAdmin();
     const mainAdmin = await fetchOk('/admin', 'text/html', { cookie });
     if (!mainAdmin.body.includes('admin-site')) throw new Error('admin is missing its motion scope');
+    if (!mainAdmin.body.includes('admin-scroll-motion-v1.css') || !mainAdmin.body.includes('admin-scroll-motion-v1.js')) throw new Error('admin is not loading its dedicated rental motion assets');
+    if (mainAdmin.body.includes('backdrop-filter: blur(4px)')) throw new Error('admin navigation overlay still forces full-screen blur compositing');
     await checkInstalledDisabledRainModule(cookie);
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);
