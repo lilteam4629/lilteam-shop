@@ -26,6 +26,7 @@ assert.match(adminLayout, /admin-scroll-motion-v1\.css/, 'admin must use the ren
 assert.match(adminLayout, /admin-scroll-motion-v1\.js/, 'admin must use the rental console observer directly');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
+assert.doesNotMatch(adminLayout, /closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/, 'ordinary admin links must navigate directly like rent-app');
 assert.match(adminMotionCss, /translate3d\(0,34px,0\) scale\(\.94\)/, 'desktop admin motion must match rent-app');
 assert.match(adminMotionCss, /translate3d\(0,24px,0\) scale\(\.96\)/, 'mobile admin motion must match rent-app');
 assert.match(adminMotionJs, /rootMargin:'0px 0px -8% 0px',threshold:\.06/, 'admin observer timing must match rent-app');

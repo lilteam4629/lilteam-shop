@@ -717,14 +717,9 @@
           }
         }, 12000);
       }
-      document.addEventListener('click', function (event) {
-        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-        const link = event.target.closest('a[href]');
-        if (!link || (link.target && link.target !== '_self') || link.hasAttribute('download')) return;
-        const rawHref = link.getAttribute('href') || '';
-        if (!rawHref || rawHref.startsWith('#') || rawHref.startsWith('javascript:') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:')) return;
-        markNavigating();
-      });
+      // rent-app lets ordinary links navigate immediately. Do the same here:
+      // the newly loaded page owns the reveal motion, while a blocking spinner
+      // on every sidebar click only adds a costly paint and perceived delay.
       document.addEventListener('submit', function (event) {
         if (event.defaultPrevented) return;
         // Add loading state to the submit button
