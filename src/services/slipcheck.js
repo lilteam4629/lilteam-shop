@@ -6,6 +6,25 @@ const { numberValue, officialEndpoint } = require('./slip-fields');
 const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 
 const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
+
+// SlipCheck has returned quota exhaustion in a few different shapes over time
+// (HTTP 429, a provider code, or a message containing quota/limit wording).
+// Keep this detection in one place so customers see the actionable cause
+// instead of a generic receiver or network error.
+function isQuotaExhausted(errorOrBody, status) {
+  const body = errorOrBody && typeof errorOrBody === 'object' ? errorOrBody : {};
+  const values = [
+    status,
+    body.code, body.errorCode, body.error_code, body.reason,
+    body.message, body.error, body.detail,
+    body.data && body.data.message, body.data && body.data.error,
+  ].filter(value => value !== undefined && value !== null).map(value => String(value).toLowerCase());
+  if (Number(status) === 429) return true;
+  if (values.some(value => /quota|rate.?limit|too many|limit.?exceed|เครดิต|โควตา|จำกัดการใช้งาน/.test(value))) return true;
+  const quota = body.quota || (body.data && body.data.quota);
+  if (quota && quota.remaining !== undefined && Number(quota.remaining) <= 0) return true;
+  return false;
+}
 async function getAccountInfo(apiKey, endpoint = DEFAULT_ENDPOINT) {
   const key = String(apiKey || '').trim();
   if (!key) return { ok: false, message: 'กรุณากรอก SlipCheck API Key' };
@@ -39,7 +58,14 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     });
     const body = response.data || {};
     const data = body.data || {};
-    if (!body.success) return { checked: true, verified: false, message: body.message || 'SlipCheck ไม่สามารถยืนยันสลิปนี้ได้', raw: body };
+    if (!body.success) {
+      const quotaExhausted = isQuotaExhausted(body);
+      return {
+        checked: true, verified: false, quotaExhausted,
+        message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (body.message || 'SlipCheck ไม่สามารถยืนยันสลิปนี้ได้'),
+        raw: body,
+      };
+    }
     const normalizedRaw = { ...data, transRef: data.ref_no || data.transRef || data.trans_ref || data.reference, date: data.transferred_at || data.date || data.transDateTime, providerResponse: body };
     if (body.duplicate || data.duplicate || data.isDuplicate || data.is_duplicate) return { checked: true, verified: false, message: 'สลิปนี้เคยถูกใช้แล้ว (สลิปซ้ำ)', raw: normalizedRaw };
     const amount = numberValue(data.amount ?? data.transferAmount ?? data.transAmount);
@@ -65,10 +91,11 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     };
   } catch (error) {
     const body = error.response?.data;
-    const definitive = [401, 403, 422, 429].includes(error.response?.status);
+    const status = error.response?.status;
+    const quotaExhausted = isQuotaExhausted(body, status);
     return {
-      checked: definitive, verified: false,
-      message: body?.message || error.message || 'เชื่อมต่อ SlipCheck ไม่สำเร็จ', raw: body || null,
+      checked: [401, 403, 422, 429].includes(status) || quotaExhausted, verified: false, quotaExhausted,
+      message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (body?.message || error.message || 'เชื่อมต่อ SlipCheck ไม่สำเร็จ'), raw: body || null,
     };
   }
 }

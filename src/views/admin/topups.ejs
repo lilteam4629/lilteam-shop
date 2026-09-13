@@ -141,8 +141,8 @@
                     เวลาแจ้ง: <%= new Date(r.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
                   </div>
                   <% if (r.slipCheck && r.slipCheck.message) { %>
-                    <div class="inline-block bg-[var(--input)] border border-[var(--border-light)] text-[11px] text-[var(--text-3)] px-2.5 py-1 rounded-lg mt-1">
-                      🤖 ผลตรวจอัตโนมัติ: <%= r.slipCheck.message %>
+                    <div class="inline-block <%= r.slipCheck.quotaExhausted ? 'bg-amber-500/15 border-amber-500/50 text-amber-300' : 'bg-[var(--input)] border-[var(--border-light)] text-[var(--text-3)]' %> border text-[11px] px-2.5 py-1 rounded-lg mt-1">
+                      <%= r.slipCheck.quotaExhausted ? '⚠️ โควตาตรวจสลิปหมดแล้ว: ' : '🤖 ผลตรวจอัตโนมัติ: ' %><%= r.slipCheck.message %>
                     </div>
                   <% } %>
                 </div>

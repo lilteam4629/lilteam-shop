@@ -397,7 +397,14 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       const freshRequest = data.topupRequests.find(t => t.id === requestId);
       const freshUser = data.users.find(u => u.id === userId);
       if (!freshRequest || !freshUser || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
-      freshRequest.slipCheck = { checked: result.checked, verified: result.verified, message: result.message, provider, transRef };
+      freshRequest.slipCheck = {
+        checked: result.checked,
+        verified: result.verified,
+        quotaExhausted: Boolean(result.quotaExhausted),
+        message: result.message,
+        provider,
+        transRef,
+      };
       freshRequest.slipCheck.verified = verified;
       if (verified) {
         freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + freshRequest.amount) * 100) / 100;
