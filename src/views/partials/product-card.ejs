@@ -122,12 +122,12 @@
         <% } %>
       </div>
       <% if (soldOut) { %>
-        <span class="shrink-0 inline-flex items-center gap-1 bg-gray-500/20 border border-gray-500/50 text-gray-500 font-bold text-[9px] px-2 py-1 rounded-full">หมด</span>
+        <span class="theme-danger shrink-0 inline-flex items-center gap-1 border bg-[var(--input)] font-bold text-[9px] px-2 py-1 rounded-full">หมด</span>
       <% } else { %>
-        <span class="shrink-0 inline-flex items-center gap-1 bg-emerald-500/15 border border-emerald-500/50 text-emerald-400 font-bold text-[9px] px-2 py-1 rounded-full">● พร้อมขาย</span>
+        <span class="theme-success shrink-0 inline-flex items-center gap-1 border bg-[var(--input)] font-bold text-[9px] px-2 py-1 rounded-full">● พร้อมขาย</span>
       <% } %>
     </div>
-    <span class="mt-1 block w-full text-center rounded-lg py-1.5 text-xs font-bold transition-colors <%= soldOut ? 'bg-gray-500/15 border border-gray-500/30 text-gray-500' : 'bg-[var(--gold)] text-[var(--gold-contrast)] group-hover:bg-[var(--gold-hover)]' %>"><%= soldOut ? 'สินค้าหมด' : 'สั่งซื้อสินค้า' %></span>
+    <span <%= soldOut ? '' : 'data-theme-fill="accent"' %> class="mt-1 block w-full text-center rounded-lg py-1.5 text-xs font-bold transition-colors <%= soldOut ? 'theme-danger bg-[var(--input)] border' : 'bg-[var(--gold)] text-[var(--gold-contrast)] group-hover:bg-[var(--gold-hover)]' %>"><%= soldOut ? 'สินค้าหมด' : 'สั่งซื้อสินค้า' %></span>
     <span class="text-[10px] text-[var(--text-4)] text-center truncate"><%= soldOut ? 'รอสินค้าเข้าใหม่' : `สินค้าคงเหลือ ${p.stockCount.toLocaleString()} ชิ้น` %></span>
   </div>
 </a>

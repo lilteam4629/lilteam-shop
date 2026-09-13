@@ -1,0 +1,26 @@
+/* Shared theme guardrails for storefront and admin. Component CSS may choose
+   layout, but readable foreground/background pairs always come from here. */
+:root{color-scheme:dark}
+html.light{color-scheme:light}
+body,input,select,textarea,button{color:var(--text)}
+input::placeholder,textarea::placeholder{color:var(--text-4);opacity:1}
+
+/* Accent-filled controls must never inherit page text (white, black, or a
+   stale utility) when a merchant chooses an extreme custom accent. */
+a[class*="bg-[var(--gold)]"],button[class*="bg-[var(--gold)]"],
+[data-theme-fill="accent"]{color:var(--gold-contrast)!important}
+a[class*="hover:bg-[var(--gold-hover)]"]:hover,
+button[class*="hover:bg-[var(--gold-hover)]"]:hover{color:var(--gold-hover-text)!important}
+
+/* Reusable semantic states. Their text colours are recalculated per surface
+   in services/theme.js instead of assuming one fixed colour works everywhere. */
+.theme-success{color:var(--success)!important;border-color:currentColor}
+.theme-danger{color:var(--danger)!important;border-color:currentColor}
+.theme-warning{color:var(--warning)!important;border-color:currentColor}
+.theme-on-image{color:var(--on-image)!important;text-shadow:0 1px 4px rgba(0,0,0,.9)}
+.theme-divide>:not([hidden])~:not([hidden]){border-color:var(--border)}
+
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--gold-text);outline-offset:2px
+}
+button:disabled,[aria-disabled="true"]{cursor:not-allowed;opacity:.55}

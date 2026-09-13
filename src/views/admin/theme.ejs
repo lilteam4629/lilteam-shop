@@ -1,4 +1,7 @@
-<p class="text-sm text-[var(--text-3)] mb-4">ปรับสีของหน้าร้าน (ไม่กระทบหน้าแอดมิน) — เลือก <b>สีหลัก</b> ที่ใช้กับปุ่ม, ราคา, กรอบการ์ดสินค้า และจุดเด่นทั้งหมด กับ <b>โทนพื้นหลัง</b> ที่คุมพื้นหลัง/ตัวหนังสือให้เข้ากันแบบสำเร็จรูป</p>
+<div class="mb-5 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+  <h2 class="font-semibold text-[var(--text)]">ธีมเดียว อ่านชัดทั้งหน้าร้านและหลังบ้าน</h2>
+  <p class="mt-1 text-sm text-[var(--text-3)]">เลือก <b>สีหลัก</b> สำหรับปุ่มและจุดเด่น แล้วเลือก <b>โทนพื้นหลัง</b> ระบบจะสร้างคู่สีข้อความที่อ่านง่ายให้ทั้งโหมดมืดและสว่างอัตโนมัติ การตั้งค่านี้มีผลกับทุกหน้า</p>
+</div>
 
 <form action="/admin/theme" method="post" class="space-y-6 w-full">
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
@@ -24,9 +27,13 @@
     <p class="text-xs text-[var(--text-4)] mb-4">คุมพื้นหลัง/การ์ด/ตัวหนังสือให้เข้ากันเป็นชุด (มีทั้งโหมดมืดและสว่างในตัว สลับได้ด้วยปุ่ม 🌙 บนเว็บ)</p>
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
       <% bgPresets.forEach(p => { %>
-        <label class="bg-preset-card relative flex flex-col gap-1 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer">
+        <label class="bg-preset-card relative flex flex-col gap-2 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer">
           <input type="radio" name="bgPreset" value="<%= p.key %>" class="bg-preset-input sr-only" <%= (!currentTheme.bgColor && currentTheme.bgPreset === p.key) ? 'checked' : '' %> />
           <span class="text-xs font-medium"><%= p.label %></span>
+          <span class="grid grid-cols-2 gap-1" aria-hidden="true">
+            <span class="rounded-md border p-2 text-center text-[9px]" style="background:<%= p.preview.dark.card %>;border-color:<%= p.preview.dark.text %>55;color:<%= p.preview.dark.text %>">มืด</span>
+            <span class="rounded-md border p-2 text-center text-[9px]" style="background:<%= p.preview.light.card %>;border-color:<%= p.preview.light.text %>55;color:<%= p.preview.light.text %>">สว่าง</span>
+          </span>
           <span class="bg-preset-check hidden absolute top-2 right-2 text-[var(--gold-text)] text-xs">✓</span>
         </label>
       <% }) %>
@@ -53,6 +60,31 @@
     </div>
   </div>
 
+  <div class="theme-live-preview rounded-xl border border-[var(--border)] bg-[var(--input)] p-5">
+    <div class="flex items-center justify-between gap-3">
+      <div>
+        <h3 class="font-semibold">ตัวอย่างสีที่ใช้งานจริง</h3>
+        <p class="text-xs text-[var(--text-4)]">ลองสลับ 🌙 / ☀️ ด้านบนเพื่อตรวจทั้งสองโหมดก่อนบันทึก</p>
+      </div>
+      <span class="rounded-full border border-[var(--border-light)] px-2 py-1 text-[10px] text-[var(--text-3)]">Light + Dark</span>
+    </div>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2">
+      <div class="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
+        <div class="font-semibold text-[var(--text)]">ข้อความหลัก</div>
+        <div class="mt-1 text-xs text-[var(--text-3)]">ข้อความรองยังอ่านได้ชัดบนการ์ด</div>
+        <div class="mt-3 flex flex-wrap gap-2">
+          <span data-theme-fill="accent" class="rounded-lg bg-[var(--gold)] px-3 py-2 text-xs font-bold">ปุ่มสีหลัก</span>
+          <span class="rounded-lg border border-[var(--border-light)] bg-[var(--input)] px-3 py-2 text-xs text-[var(--text)]">ปุ่มรอง</span>
+        </div>
+      </div>
+      <div class="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-xs">
+        <div class="theme-success font-semibold">● สำเร็จ / พร้อมขาย</div>
+        <div class="theme-warning mt-2 font-semibold">● รอตรวจสอบ</div>
+        <div class="theme-danger mt-2 font-semibold">● ผิดพลาด / สินค้าหมด</div>
+      </div>
+    </div>
+  </div>
+
   <p class="text-xs text-[var(--text-4)]">💡 อยากเปลี่ยนรูปแบบการ์ดสินค้า (คลาสสิก/เต็มรูป) ไปตั้งได้ที่หน้า <a href="/admin/products" class="text-[var(--gold-text)] underline">สินค้า</a> ด้านบนตารางเลยครับ</p>
 
   <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium rounded-lg py-2.5 text-sm">บันทึกธีมสี</button>
@@ -62,6 +94,7 @@
   .accent-swatch-input:checked + .accent-swatch { border-color: var(--text); box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--gold); }
   .bg-preset-input:checked ~ .bg-preset-check { display: block; }
   .style-input:checked ~ .style-check { display: block; }
+  .bg-preset-card:focus-within,.style-card:focus-within,label:has(.accent-swatch-input:focus-visible) .accent-swatch { outline: 2px solid var(--gold-text); outline-offset: 2px; }
 </style>
 <script>
   (function () {

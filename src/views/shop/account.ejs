@@ -33,7 +33,7 @@
     <h2 class="text-lg font-semibold">คำสั่งซื้อล่าสุด</h2>
     <a href="/account/orders" class="text-xs text-[var(--gold-text)]">ดูทั้งหมด →</a>
   </div>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl divide-y divide-[#241f13] mb-8 overflow-hidden">
+  <div class="theme-divide bg-[var(--card)] border border-[var(--border)] rounded-2xl divide-y mb-8 overflow-hidden">
     <% if (!orders.length) { %><div class="p-4 text-[var(--text-3)] text-sm">ยังไม่มีคำสั่งซื้อ</div><% } %>
     <% orders.forEach(o => { %>
       <a href="/account/orders/<%= o.id %>" class="p-4 flex items-center justify-between gap-3 hover:bg-[var(--input)]/50">
@@ -45,7 +45,7 @@
 
   <% if (topupRequests && topupRequests.length) { %>
   <h2 class="text-lg font-semibold mb-3">คำขอเติมเงิน</h2>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[#241f13] mb-8">
+  <div class="theme-divide bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y mb-8">
     <% topupRequests.forEach(t => { %>
       <a href="/account/topup/<%= t.id %>" class="p-4 flex items-center justify-between text-sm hover:bg-[var(--input)]/50">
         <div>
@@ -68,7 +68,7 @@
   <% } %>
 
   <h2 class="text-lg font-semibold mb-3">ประวัติการทำรายการล่าสุด</h2>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y divide-[#241f13]">
+  <div class="theme-divide bg-[var(--card)] border border-[var(--border)] rounded-xl divide-y">
     <% if (!transactions.length) { %>
       <div class="p-4 text-[var(--text-3)] text-sm">ยังไม่มีรายการ</div>
     <% } %>

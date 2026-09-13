@@ -74,7 +74,14 @@ function getStyles() {
 }
 
 function getBgPresets() {
-  return Object.entries(BG_PRESETS).map(([key, p]) => ({ key, label: p.label }));
+  return Object.entries(BG_PRESETS).map(([key, p]) => ({
+    key,
+    label: p.label,
+    preview: {
+      dark: { bg: p.dark.bg, card: p.dark.card, text: p.dark.text },
+      light: { bg: p.light.bg, card: p.light.card, text: p.light.text },
+    },
+  }));
 }
 
 function getAccentPresets() {
@@ -141,12 +148,13 @@ function relativeLuminance(hex) {
 }
 
 function contrastTextFor(hex) {
-  // Contrast ratio against near-black (#111) vs near-white (#f5f5f5) — pick
-  // whichever side actually reads clearly on this specific accent color.
+  // Pure black/white guarantee that at least one side clears WCAG AA for
+  // normal text on any solid colour. Near-black/near-white can both miss the
+  // threshold around mid-luminance colours (notably crimson hover states).
   const luminance = relativeLuminance(hex);
   const contrastWithWhite = 1.05 / (luminance + 0.05);
   const contrastWithBlack = (luminance + 0.05) / 0.05;
-  return contrastWithBlack >= contrastWithWhite ? '#111111' : '#f5f5f5';
+  return contrastWithBlack >= contrastWithWhite ? '#000000' : '#ffffff';
 }
 
 function contrastRatio(hexA, hexB) {
@@ -253,6 +261,11 @@ function renderCss(theme) {
       --gold-dark: ${accentDark};
       --gold-contrast: ${accentContrast};
       --gold-text: ${readableAccentOn(accent, [vars.bg, vars.card])};
+      --gold-hover-text: ${contrastTextFor(accentHover)};
+      --on-image: #ffffff;
+      --success: ${readableAccentOn('#16a36f', [vars.bg, vars.card, vars.input], 4.5)};
+      --danger: ${readableAccentOn('#e5485f', [vars.bg, vars.card, vars.input], 4.5)};
+      --warning: ${readableAccentOn('#c77a12', [vars.bg, vars.card, vars.input], 4.5)};
       --text: ${vars.text};
       --text-2: ${vars.text2};
       --text-3: ${vars.text3};
@@ -266,7 +279,7 @@ function renderCss(theme) {
     // a CSS class selector, so Tailwind's bracket syntax needs no escaping)
     // — adds a soft glow to every gold-filled button/badge across the site.
     extra = `
-    a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"] {
+    a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"], [data-theme-fill="accent"] {
       box-shadow: 0 0 16px 1px color-mix(in srgb, var(--gold) 55%, transparent), 0 0 32px color-mix(in srgb, var(--gold) 25%, transparent);
     }
     .premium-product-card, .ready-glow {
@@ -275,7 +288,7 @@ function renderCss(theme) {
   } else if (style === 'gradient') {
     extra = `
     @keyframes theme-gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"] {
+    a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"], [data-theme-fill="accent"] {
       background: linear-gradient(120deg, ${gradA}, ${gradB}, ${gradC}, ${gradA}) !important;
       background-size: 300% 300%;
       animation: theme-gradient-flow 6s ease infinite;
@@ -290,4 +303,15 @@ function renderCss(theme) {
     ${extra}`;
 }
 
-module.exports = { getBgPresets, getAccentPresets, getStyles, renderCss };
+module.exports = {
+  getBgPresets,
+  getAccentPresets,
+  getStyles,
+  renderCss,
+  // Exported for the theme regression checks. Keeping the colour maths in one
+  // place prevents tests and production CSS from drifting apart.
+  contrastRatio,
+  contrastTextFor,
+  readableAccentOn,
+  generateBgFromColor,
+};
