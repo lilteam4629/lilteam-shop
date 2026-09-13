@@ -1,6 +1,11 @@
 <% const storefrontBackground = settings.storefrontAppearance && settings.storefrontAppearance.backgroundImage; %>
+<% const heroTextStyle = (settings.hero && settings.hero.textStyle) || {}; %>
+<% const heroTextColor = /^#[0-9a-f]{6}$/i.test(heroTextStyle.textColor || '') ? heroTextStyle.textColor : '#ffffff'; %>
+<% const heroOutlineColor = /^#[0-9a-f]{6}$/i.test(heroTextStyle.outlineColor || '') ? heroTextStyle.outlineColor : '#000000'; %>
+<% const heroOutlineWidth = Math.max(0, Math.min(4, Number(heroTextStyle.outlineWidth) || 0)); %>
 <% if (storefrontBackground) { %>
 <style>
+  .storefront-hero-banner{--hero-text-color:<%= heroTextColor %>;--hero-outline-color:<%= heroOutlineColor %>;--hero-outline-width:<%= heroOutlineWidth %>px}
   body {
     background-color:var(--bg)!important;
     background-image:url('<%= storefrontBackground %>')!important;
@@ -20,10 +25,10 @@
     .storefront-hero-banner .lilteam-hero-command::before{display:none!important;content:none!important}
     .storefront-hero-banner .lilteam-hero-command__copy{position:relative!important;z-index:1!important;max-width:1100px!important;padding:24px 18px 28px!important;background:none!important}
     .storefront-hero-banner .lilteam-hero-command__copy:before,.storefront-hero-banner .lilteam-hero-command__copy:after{display:none!important;content:none!important}
-    .storefront-hero-banner .lilteam-hero-command h1{max-width:1080px;color:#fff!important;white-space:normal!important;font-size:clamp(38px,4vw,58px)!important;font-weight:950!important;line-height:1.08!important;letter-spacing:-.035em!important;-webkit-text-stroke:0!important;paint-order:normal!important;text-shadow:none!important;filter:none!important}
-    .storefront-hero-banner .lilteam-hero-command__copy>p{max-width:850px!important;color:#fff!important;font-size:16px!important;font-weight:800!important;line-height:1.5!important;text-shadow:none!important;filter:none!important}
-    .storefront-hero-banner .lilteam-hero-command__copy>p span{color:#fff!important;text-shadow:none!important;filter:none!important}
-    .storefront-hero-banner .lilteam-hero-command__eyebrow{color:#fff!important;font-size:12px!important;font-weight:950!important;text-shadow:none!important;filter:none!important}.storefront-hero-banner .lilteam-hero-command h1 em{color:#fff!important;-webkit-text-stroke:0!important;text-shadow:none!important;filter:none!important}
+    .storefront-hero-banner .lilteam-hero-command h1{max-width:1080px;color:var(--hero-text-color)!important;white-space:normal!important;font-size:clamp(38px,4vw,58px)!important;font-weight:950!important;line-height:1.08!important;letter-spacing:-.035em!important;-webkit-text-stroke:var(--hero-outline-width) var(--hero-outline-color)!important;paint-order:stroke fill!important;text-shadow:none!important;filter:none!important}
+    .storefront-hero-banner .lilteam-hero-command__copy>p{max-width:850px!important;color:var(--hero-text-color)!important;font-size:16px!important;font-weight:800!important;line-height:1.5!important;-webkit-text-stroke:calc(var(--hero-outline-width) * .55) var(--hero-outline-color)!important;paint-order:stroke fill!important;text-shadow:none!important;filter:none!important}
+    .storefront-hero-banner .lilteam-hero-command__copy>p span{color:var(--hero-text-color)!important;text-shadow:none!important;filter:none!important}
+    .storefront-hero-banner .lilteam-hero-command__eyebrow{color:var(--hero-text-color)!important;font-size:12px!important;font-weight:950!important;-webkit-text-stroke:calc(var(--hero-outline-width) * .45) var(--hero-outline-color)!important;paint-order:stroke fill!important;text-shadow:none!important;filter:none!important}.storefront-hero-banner .lilteam-hero-command h1 em{color:var(--hero-text-color)!important;-webkit-text-stroke:var(--hero-outline-width) var(--hero-outline-color)!important;text-shadow:none!important;filter:none!important}
     .latest-orders-heading h2,.latest-orders-heading p,.home-catalog-title h2,.home-catalog-title p{color:var(--text)!important;text-shadow:0 2px 5px color-mix(in srgb,var(--gold-dark) 75%,transparent)!important}
   }
   @media(max-width:900px){body{background-image:none!important;background-color:var(--bg)!important;background-attachment:scroll!important}}

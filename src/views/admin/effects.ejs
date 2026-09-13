@@ -79,7 +79,7 @@
     </div>
   </div>
 
-  <% if (settings.systemModules && settings.systemModules.rain && settings.systemModules.rain.enabled) { %>
+  <% if (settings.systemModules && settings.systemModules.rain) { %>
   <div id="rain-settings" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm scroll-mt-6">
     <div class="flex items-center gap-3 mb-4"><div class="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center">🌧️</div><div><h3 class="font-bold text-sm sm:text-base">ระบบฝนตกหน้าเว็บ</h3><p class="text-[11px] text-emerald-500 font-semibold">ติดตั้งในร้านนี้แล้ว · ปรับสี ความเข้ม และเปิดหรือปิดได้ด้านล่าง</p></div></div>
     <% const rain = settings.rain || { enabled:false, color:'#78c8ff', intensity:'medium' }; %>

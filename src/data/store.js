@@ -161,6 +161,7 @@ function defaultData() {
         mode: 'default', // 'default' = fanned card-stack hero, 'banner' = custom image
         bannerImage: null,
         bannerLink: '',
+        textStyle: { textColor: '#ffffff', outlineColor: '#000000', outlineWidth: 1.5 },
       },
       branding: {
         logoImage: null,
@@ -504,7 +505,11 @@ function migrateAdminRecovery(db) {
 function migrateSchema(db) {
   let changed = false;
   if (!db.settings.hero) {
-    db.settings.hero = { mode: 'default', bannerImage: null, bannerLink: '' };
+    db.settings.hero = { mode: 'default', bannerImage: null, bannerLink: '', textStyle: { textColor: '#ffffff', outlineColor: '#000000', outlineWidth: 1.5 } };
+    changed = true;
+  }
+  if (!db.settings.hero.textStyle) {
+    db.settings.hero.textStyle = { textColor: '#ffffff', outlineColor: '#000000', outlineWidth: 1.5 };
     changed = true;
   }
   if (!db.settings.branding) {

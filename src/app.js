@@ -17,6 +17,7 @@ const accountRoutes = require('./routes/account');
 const minigameRoutes = require('./routes/minigame');
 const adminRoutes = require('./routes/admin');
 const customSystemsAdminRoutes = require('./routes/custom-systems-admin');
+const { installRainDisabledEverywhere } = require('./services/tenant-features');
 const licenseRoutes = require('./routes/license');
 const internalApiRoutes = require('./routes/internal-api');
 const { tenantResolver, MAIN_DOMAIN } = require('./middleware/tenant');
@@ -259,6 +260,7 @@ async function initializeStore() {
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       await store.init();
+      await installRainDisabledEverywhere();
       return;
     } catch (error) {
       console.error(`[store] initialization attempt ${attempt}/${attempts} failed:`, error.message);

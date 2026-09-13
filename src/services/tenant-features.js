@@ -259,6 +259,32 @@ async function ensureSystemLab(storeApi = store) {
   return { shop, created };
 }
 
+async function installRainDisabledEverywhere(storeApi = store) {
+  const rolloutId = 'rain-installed-disabled-2026-09-13';
+  if (storeApi.platformData.settings?.platformRollouts?.[rolloutId]) return { skipped: true, updatedCount: 0 };
+  const releaseMeta = { id: rolloutId, name: 'ระบบฝนตกหน้าเว็บ', version: '1.0.0' };
+
+  await storeApi.transact(data => {
+    const settings = data.settings ||= {};
+    settings.rain ||= { color: '#78c8ff', intensity: 'medium' };
+    settings.rain.enabled = false;
+    const modules = settings.systemModules ||= {};
+    modules.rain = { releaseId: rolloutId, name: releaseMeta.name, version: releaseMeta.version, enabled: false, installed: true, deployedAt: new Date().toISOString() };
+  });
+
+  const customerShops = (storeApi.platformData.shops || []).filter(shop => !shop.isSystemLab);
+  const result = customerShops.length
+    ? await updateTenantFeatures({ scope: 'all', confirmAll: 'CONFIRM_ALL_TENANTS', feature: 'rain', action: 'disable', releaseMeta }, storeApi)
+    : { updatedCount: 0, shopIds: [] };
+
+  await storeApi.transact(data => {
+    const settings = data.settings ||= {};
+    const rollouts = settings.platformRollouts ||= {};
+    rollouts[rolloutId] = { completedAt: new Date().toISOString(), shopIds: result.shopIds };
+  });
+  return { skipped: false, ...result };
+}
+
 async function listTenantFeatures(shops, storeApi = store) {
   const queue = [...(shops || [])];
   const results = new Map();
@@ -278,4 +304,4 @@ async function listTenantFeatures(shops, storeApi = store) {
   return results;
 }
 
-module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, uninstallFeature, captureFeature, restoreFeature, selectShops, assertExplicitScope, updateTenantFeatures, listTenantFeatures, listReleases, createRelease, deployRelease, ensureSystemLab };
+module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, uninstallFeature, captureFeature, restoreFeature, selectShops, assertExplicitScope, updateTenantFeatures, listTenantFeatures, listReleases, createRelease, deployRelease, ensureSystemLab, installRainDisabledEverywhere };

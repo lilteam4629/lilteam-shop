@@ -85,6 +85,26 @@
     </div>
   </section>
 
+  <% const heroTextStyle = (settings.hero && settings.hero.textStyle) || { textColor: '#ffffff', outlineColor: '#000000', outlineWidth: 1.5 }; %>
+  <section id="hero-text-style" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 md:p-6 xl:col-span-2">
+    <div class="flex items-start gap-3 mb-5">
+      <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 text-[var(--gold-text)] flex items-center justify-center text-xl">Aa</span>
+      <div><h2 class="font-semibold text-lg">สีและขอบข้อความหน้าหลัก</h2><p class="text-xs text-[var(--text-4)]">ปรับข้อความบนภาพพื้นหลังให้อ่านชัด ค่าแนะนำคืออักษรขาว ขอบดำ 1.5 px</p></div>
+    </div>
+    <form action="/admin/hero-text-style" method="post" class="space-y-5">
+      <div id="hero-text-preview" class="rounded-xl border border-[var(--border)] p-5 sm:p-7 overflow-hidden" style="background:linear-gradient(120deg,#eaf3fa 0 50%,#253448 50%);color:<%= heroTextStyle.textColor %>;">
+        <strong class="block text-2xl sm:text-4xl leading-tight" style="-webkit-text-stroke:<%= heroTextStyle.outlineWidth %>px <%= heroTextStyle.outlineColor %>;paint-order:stroke fill;">ยินดีต้อนรับสู่ <%= settings.shopName %></strong>
+        <span class="block mt-2 text-sm font-bold" style="-webkit-text-stroke:<%= Number(heroTextStyle.outlineWidth) * .55 %>px <%= heroTextStyle.outlineColor %>;paint-order:stroke fill;"><%= settings.tagline %></span>
+      </div>
+      <div class="grid sm:grid-cols-3 gap-4">
+        <label class="block"><span class="block text-sm font-semibold text-[var(--text-2)] mb-2">สีตัวอักษร</span><input id="hero-text-color" type="color" name="textColor" value="<%= heroTextStyle.textColor %>" class="w-full h-11 rounded-lg border border-[var(--border-light)] bg-[var(--input)] p-1 cursor-pointer" /></label>
+        <label class="block"><span class="block text-sm font-semibold text-[var(--text-2)] mb-2">สีขอบ</span><input id="hero-outline-color" type="color" name="outlineColor" value="<%= heroTextStyle.outlineColor %>" class="w-full h-11 rounded-lg border border-[var(--border-light)] bg-[var(--input)] p-1 cursor-pointer" /></label>
+        <label class="block"><span class="flex justify-between text-sm font-semibold text-[var(--text-2)] mb-2"><span>ความหนาขอบ</span><span id="hero-outline-value"><%= heroTextStyle.outlineWidth %> px</span></span><input id="hero-outline-width" type="range" name="outlineWidth" min="0" max="4" step="0.25" value="<%= heroTextStyle.outlineWidth %>" class="w-full h-11 accent-[var(--gold)] cursor-pointer" /><span class="block text-[11px] text-[var(--text-4)]">เลือก 0 หากไม่ต้องการขอบ</span></label>
+      </div>
+      <button class="w-full sm:w-auto bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium px-6 py-2.5 rounded-lg text-sm">บันทึกสีและขอบข้อความ</button>
+    </form>
+  </section>
+
   <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 md:p-6 xl:col-span-2">
     <div class="flex items-start gap-3 mb-5">
       <span class="w-10 h-10 rounded-xl bg-[var(--gold)]/15 text-[var(--gold-text)] flex items-center justify-center text-xl">▣</span>
@@ -109,3 +129,22 @@
   </section>
 
 </div>
+<script>
+(() => {
+  const preview = document.getElementById('hero-text-preview');
+  const textColor = document.getElementById('hero-text-color');
+  const outlineColor = document.getElementById('hero-outline-color');
+  const outlineWidth = document.getElementById('hero-outline-width');
+  const value = document.getElementById('hero-outline-value');
+  if (!preview || !textColor || !outlineColor || !outlineWidth) return;
+  const update = () => {
+    const width = Number(outlineWidth.value);
+    preview.style.color = textColor.value;
+    preview.querySelector('strong').style.webkitTextStroke = `${width}px ${outlineColor.value}`;
+    preview.querySelector('span').style.webkitTextStroke = `${width * .55}px ${outlineColor.value}`;
+    value.textContent = `${width} px`;
+  };
+  [textColor, outlineColor, outlineWidth].forEach(input => input.addEventListener('input', update));
+  update();
+})();
+</script>

@@ -6,7 +6,7 @@ const router = express.Router();
 router.use(requireAdmin);
 
 router.post('/effects/rain', async (req, res) => {
-  const installed = store.data.settings.systemModules?.rain?.enabled === true;
+  const installed = Boolean(store.data.settings.systemModules?.rain);
   if (!installed) {
     req.flash('error', 'ร้านนี้ยังไม่ได้รับแพ็กเกจระบบฝนตก');
     return res.redirect('/admin/effects');

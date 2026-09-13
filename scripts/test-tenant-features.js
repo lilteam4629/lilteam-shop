@@ -1,5 +1,5 @@
 const assert = require('assert');
-const { updateTenantFeatures, readFeatureState, createRelease, deployRelease, ensureSystemLab } = require('../src/services/tenant-features');
+const { updateTenantFeatures, readFeatureState, createRelease, deployRelease, ensureSystemLab, installRainDisabledEverywhere } = require('../src/services/tenant-features');
 const { ensureLabRainModule } = require('../src/services/system-modules');
 
 function fixture(failOnSave) {
@@ -141,5 +141,17 @@ function fixture(failOnSave) {
   const disabledLab = { settings: { rain: { enabled: false }, systemModules: { rain: { version: '2.0.0', enabled: false, releaseId: 'release-disable' } } } };
   assert.equal(ensureLabRainModule(disabledLab), false);
   assert.equal(disabledLab.settings.rain.enabled, false);
+
+  const rollout = fixture();
+  const installed = await installRainDisabledEverywhere(rollout.api);
+  assert.equal(installed.updatedCount, 2);
+  assert.equal(rollout.api.platformData.settings.rain.enabled, false);
+  assert.equal(rollout.api.platformData.settings.systemModules.rain.installed, true);
+  assert.equal(readFeatureState(rollout.dbs.get('shop-a')).rain, false);
+  assert.equal(readFeatureState(rollout.dbs.get('shop-b')).rain, false);
+  assert.equal(rollout.dbs.get('shop-lab').settings.rain, undefined);
+  assert.equal(rollout.dbs.get('shop-a').products[0].images[0], 'shop-a.png');
+  const repeated = await installRainDisabledEverywhere(rollout.api);
+  assert.equal(repeated.skipped, true);
   console.log('Tenant delivery checks passed: selected, all, releases, concurrent data preservation, rollback');
 })().catch(error => { console.error(error); process.exitCode = 1; });

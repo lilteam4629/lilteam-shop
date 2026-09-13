@@ -119,25 +119,25 @@ async function checkBulkPrice(cookie) {
   if (!updatedProduct || Number(updatedProduct[1]) !== expected) throw new Error(`bulk price did not update ${originalPrice} to ${expected}`);
 }
 
-async function checkUndeployedRainModule(cookie) {
+async function checkInstalledDisabledRainModule(cookie) {
   const effects = await fetchOk('/admin/effects', 'text/html', { cookie });
   if (!effects.body.includes('เพลงพื้นหลังหน้าเว็บ') || !effects.body.includes('เอฟเฟกต์หิมะตกหน้าเว็บ')) {
     throw new Error('standard storefront effects are missing from admin');
   }
-  if (effects.body.includes('ระบบฝนตกหน้าเว็บ')) {
-    throw new Error('undeployed rain module is visible in tenant admin');
+  if (!effects.body.includes('ระบบฝนตกหน้าเว็บ')) {
+    throw new Error('installed rain controls are missing from admin');
   }
   const update = await request('/admin/effects/rain', {
     method: 'POST',
     headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: 'enabled=on&color=%2378c8ff&intensity=medium',
+    body: 'color=%2378c8ff&intensity=medium',
   });
   if (update.statusCode !== 302 || update.headers.location !== '/admin/effects') {
-    throw new Error(`undeployed rain update returned HTTP ${update.statusCode}`);
+    throw new Error(`installed rain update returned HTTP ${update.statusCode}`);
   }
   const home = await fetchOk('/', 'text/html');
   if (home.body.includes('id="store-rain"')) {
-    throw new Error('undeployed rain module rendered on storefront');
+    throw new Error('disabled rain module rendered on storefront');
   }
 }
 
@@ -180,7 +180,7 @@ async function run() {
     await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
-    await checkUndeployedRainModule(cookie);
+    await checkInstalledDisabledRainModule(cookie);
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);
     const missing = await request('/definitely-missing');
