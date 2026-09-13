@@ -11,13 +11,7 @@ body{overflow-x:clip}
   @keyframes admin-page-surface-mobile-in{from{opacity:0;transform:translate3d(0,24px,0) scale(.96)}to{opacity:1;transform:translate3d(0,0,0) scale(1)}}
 }
 @media(min-width:801px){
-  body.admin-site main.admin-page-surface{animation:admin-page-surface-desktop-in .54s both;transform-origin:50% 104px}
-  @keyframes admin-page-surface-desktop-in{
-    0%{opacity:.78;transform:translate3d(0,26px,0) scale(.968)}
-    62%{opacity:1;transform:translate3d(0,-3px,0) scale(1.006)}
-    82%{transform:translate3d(0,1px,0) scale(.998)}
-    100%{opacity:1;transform:none}
-  }
+  body.admin-site main.admin-page-surface{transform-origin:50% 104px}
   .scroll-motion-ready .scroll-reveal{transform:translate3d(0,20px,0) scale(.978);transition-duration:.44s;transition-timing-function:cubic-bezier(.2,.82,.3,1.12);transition-delay:0ms}
 }
-@media(prefers-reduced-motion:reduce){body.admin-site main.admin-page-surface{animation:none}}
+@media(prefers-reduced-motion:reduce) and (max-width:800px){body.admin-site main.admin-page-surface{animation:none}}

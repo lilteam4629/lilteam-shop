@@ -2,6 +2,19 @@
   var observer=null;
   function init(){
     var desktop=window.matchMedia('(min-width:801px)').matches;
+    var page=document.querySelector('main.admin-page-surface');
+    /* CSS motion can be reduced to 0.01ms by OS/browser accessibility rules.
+       The owner explicitly enables this admin transition, so desktop uses the
+       Web Animations API and is no longer silently cancelled by that cascade. */
+    if(desktop&&page&&page.animate){
+      page.animate([
+        {opacity:.9,transform:'translate3d(0,34px,0) scale(.95)',offset:0},
+        {opacity:1,transform:'translate3d(0,-5px,0) scale(1.008)',offset:.6},
+        {opacity:1,transform:'translate3d(0,2px,0) scale(.997)',offset:.82},
+        {opacity:1,transform:'none',offset:1}
+      ],{duration:580,easing:'cubic-bezier(.2,.78,.24,1)',fill:'none'});
+      page.dataset.desktopMotion='played';
+    }
     var nodes=Array.from(document.querySelectorAll('main > section,main > article,main > div,.admin-content > section,.admin-content > article,.admin-content > div')).filter(function(node){return !node.closest('[role="dialog"]')});
     nodes.forEach(function(node,index){
       node.classList.add('scroll-reveal');
