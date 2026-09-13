@@ -1,8 +1,8 @@
 const normalizeName = value => String(value || '').toLocaleLowerCase('th-TH')
-  .replace(/(นาย|นางสาว|นาง|คุณ)/g, '').replace(/[^a-z0-9ก-๙]/g, '');
+  .replace(/^\s*(นาย|นางสาว|นาง|คุณ)\s*/, '').replace(/[^a-z0-9ก-๙]/g, '');
 const digits = value => String(value || '').replace(/\D/g, '');
 const nameTokens = value => String(value || '').toLocaleLowerCase('th-TH')
-  .replace(/(นาย|นางสาว|นาง|คุณ)/g, ' ').replace(/[^a-z0-9ก-๙]+/g, ' ').trim().split(/\s+/).filter(Boolean);
+  .replace(/^\s*(นาย|นางสาว|นาง|คุณ)\s*/, '').replace(/[^a-z0-9ก-๙]+/g, ' ').trim().split(/\s+/).filter(Boolean);
 
 function oneEditApart(left, right) {
   if (left === right) return true;

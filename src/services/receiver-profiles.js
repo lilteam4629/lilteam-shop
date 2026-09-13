@@ -53,4 +53,21 @@ function save(payment, provider, profile) {
   return saved;
 }
 
-module.exports = { PROVIDERS, FIELDS, blankProfile, snapshot, view, save, saveAndActivate };
+function credentials(method = 'promptpay', ...paymentSources) {
+  const sources = paymentSources.filter(Boolean);
+  const names = sources.flatMap(source => [
+    method === 'promptpay' ? source.promptpayName : source.bankAccountName,
+    method === 'promptpay' ? source.promptpayNameEn : source.bankAccountNameEn,
+    method === 'promptpay' ? source.bankAccountName : source.promptpayName,
+    method === 'promptpay' ? source.bankAccountNameEn : source.promptpayNameEn,
+  ]).map(value => String(value || '').trim()).filter(Boolean);
+  const numbers = sources.flatMap(source => method === 'promptpay'
+    ? [source.promptpayId, source.bankAccountNumber]
+    : [source.bankAccountNumber]);
+  return {
+    expectedReceiverNames: [...new Set(names)],
+    expectedReceiverNumbers: [...new Set(numbers.map(value => String(value || '').trim()).filter(Boolean))],
+  };
+}
+
+module.exports = { PROVIDERS, FIELDS, blankProfile, snapshot, view, save, saveAndActivate, credentials };

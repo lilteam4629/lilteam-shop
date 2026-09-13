@@ -1,6 +1,7 @@
 const assert = require('node:assert/strict');
 const axios = require('axios');
 const { extractReceiverEvidence, receiverMatches } = require('../src/services/receiver-match');
+const receiverProfiles = require('../src/services/receiver-profiles');
 
 const standardPayload = {
   sender: { account: { value: 'xxx-x-x1111-x' } },
@@ -28,6 +29,18 @@ assert.equal(receiverMatches({
   expectedNames: ['สมชาย ใจดี', 'SOMCHAI JAIDEE'],
   expectedNumbers: ['0812345678'],
 }).matched, true, 'English receiver aliases must be usable when the provider returns English');
+
+// Regression guard: the account shown on the storefront must remain a
+// verification candidate when a provider-specific receiver snapshot exists.
+const candidates = receiverProfiles.credentials('bank',
+  { bankAccountName: 'บัญชีเก่า', bankAccountNumber: '000-0-00000-0' },
+  { bankAccountName: 'นาย อุรพงค์ สงทิม', bankAccountNumber: '123-4-56804-4' });
+assert.equal(receiverMatches({
+  actualNames: ['นาย อุรพงค์ สงทิม'],
+  actualNumbers: ['XXX-X-XX804-4'],
+  expectedNames: candidates.expectedReceiverNames,
+  expectedNumbers: candidates.expectedReceiverNumbers,
+}).matched, true, 'the account currently shown on the storefront must remain a verification candidate');
 
 async function verifyProviderIntegration() {
   const originalPost = axios.post;
