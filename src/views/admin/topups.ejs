@@ -20,7 +20,7 @@
     <div class="flex items-center gap-2.5">
       <% const pendingCount = requests.filter(r => r.status === 'pending').length; %>
       <% if (pendingCount > 0) { %>
-        <div class="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 animate-pulse">
+        <div class="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full bg-amber-400"></span>
           <span>รอตรวจสอบ <%= pendingCount %> รายการ</span>
         </div>
