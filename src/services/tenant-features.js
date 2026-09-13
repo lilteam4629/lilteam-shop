@@ -80,6 +80,16 @@ function applyFeature(db, feature, enabled) {
   if (feature === 'rain') (settings.rain ||= { color: '#78c8ff', intensity: 'medium' }).enabled = enabled;
 }
 
+function uninstallFeature(db, feature) {
+  applyFeature(db, feature, false);
+  const settings = db.settings ||= {};
+  if (feature === 'rain') delete settings.rain;
+  if (settings.systemModules) {
+    delete settings.systemModules[feature];
+    if (Object.keys(settings.systemModules).length === 0) delete settings.systemModules;
+  }
+}
+
 function selectShops(platformShops, scope, requestedIds) {
   const shops = Array.isArray(platformShops) ? platformShops : [];
   // The system lab is the canary used before release. "All" always means
@@ -102,7 +112,7 @@ function assertExplicitScope(payload) {
 async function updateTenantFeatures(payload, storeApi = store) {
   const feature = String(payload.feature || '');
   if (!FEATURE_KEYS.has(feature)) throw new Error('ฟีเจอร์ที่เลือกไม่ถูกต้อง');
-  if (!['enable', 'disable'].includes(payload.action)) throw new Error('คำสั่งเปิดหรือปิดฟีเจอร์ไม่ถูกต้อง');
+  if (!['enable', 'disable', 'uninstall'].includes(payload.action)) throw new Error('คำสั่งติดตั้งหรือถอนระบบไม่ถูกต้อง');
   assertExplicitScope(payload);
   const targets = selectShops(storeApi.platformData.shops, payload.scope, payload.shopIds);
   if (!targets.length) throw new Error('ยังไม่มีร้านเช่าในระบบ');
@@ -117,14 +127,16 @@ async function updateTenantFeatures(payload, storeApi = store) {
   }
 
   const enabled = payload.action === 'enable';
+  const uninstall = payload.action === 'uninstall';
   const saved = [];
   try {
     for (const shop of targets) {
       const tenantDb = await storeApi.loadTenantDb(shop.id);
       const before = await storeApi.runInTenant(shop.id, tenantDb, () => storeApi.transact(db => {
         const snapshot = captureFeature(db, feature);
-        applyFeature(db, feature, enabled);
-        if (payload.releaseMeta) {
+        if (uninstall) uninstallFeature(db, feature);
+        else applyFeature(db, feature, enabled);
+        if (payload.releaseMeta && !uninstall) {
           const modules = (db.settings ||= {}).systemModules ||= {};
           modules[feature] = {
             releaseId: payload.releaseMeta.id,
@@ -148,7 +160,7 @@ async function updateTenantFeatures(payload, storeApi = store) {
     }
     throw new Error('บันทึกฟีเจอร์ไม่ครบ ระบบคืนค่าร้านที่แก้ไปแล้ว กรุณาลองใหม่');
   }
-  return { feature, enabled, updatedCount: saved.length, shopIds: saved.map(item => item.shop.id) };
+  return { feature, enabled, uninstalled: uninstall, updatedCount: saved.length, shopIds: saved.map(item => item.shop.id) };
 }
 
 function listReleases(storeApi = store) {
@@ -160,7 +172,7 @@ async function createRelease(payload, storeApi = store) {
   const name = String(payload.name || '').trim().slice(0, 100);
   const version = String(payload.version || '').trim().slice(0, 30);
   const feature = String(payload.feature || '');
-  const action = payload.action === 'disable' ? 'disable' : 'enable';
+  const action = ['disable', 'uninstall'].includes(payload.action) ? payload.action : 'enable';
   if (!name) throw new Error('กรุณาตั้งชื่อระบบ');
   if (!version) throw new Error('กรุณาระบุเวอร์ชัน');
   if (!FEATURE_KEYS.has(feature)) throw new Error('ระบบต้นแบบที่เลือกไม่ถูกต้อง');
@@ -187,7 +199,12 @@ async function deployRelease(payload, storeApi = store) {
     const tenantDb = await storeApi.loadTenantDb(shopId);
     const moduleState = tenantDb?.settings?.systemModules?.[release.feature];
     const expectedEnabled = release.action === 'enable';
-    if (!tenantDb || moduleState?.releaseId !== release.id || moduleState.enabled !== expectedEnabled || readFeatureState(tenantDb)[release.feature] !== expectedEnabled) {
+    const removed = release.action === 'uninstall';
+    const state = readFeatureState(tenantDb)[release.feature];
+    const verified = removed
+      ? !moduleState && (release.feature === 'rain' ? state === null : state === false)
+      : moduleState?.releaseId === release.id && moduleState.enabled === expectedEnabled && state === expectedEnabled;
+    if (!tenantDb || !verified) {
       throw new Error(`ตรวจสอบการติดตั้งร้าน ${shopId} ไม่ผ่าน ระบบจะไม่รายงานว่านำส่งสำเร็จ`);
     }
   }
@@ -261,4 +278,4 @@ async function listTenantFeatures(shops, storeApi = store) {
   return results;
 }
 
-module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, captureFeature, restoreFeature, selectShops, assertExplicitScope, updateTenantFeatures, listTenantFeatures, listReleases, createRelease, deployRelease, ensureSystemLab };
+module.exports = { FEATURE_CATALOG, readFeatureState, applyFeature, uninstallFeature, captureFeature, restoreFeature, selectShops, assertExplicitScope, updateTenantFeatures, listTenantFeatures, listReleases, createRelease, deployRelease, ensureSystemLab };

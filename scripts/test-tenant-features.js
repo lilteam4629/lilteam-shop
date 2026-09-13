@@ -81,6 +81,13 @@ function fixture(failOnSave) {
   assert.equal(readFeatureState(releases.dbs.get('shop-b')).snow, true);
   assert.equal(releases.dbs.get('shop-b').settings.systemModules.snow.version, '1.0.0');
   assert.equal(releases.api.platformData.tenantFeatureReleases[0].deployments[0].shopIds[0], 'shop-b');
+  const uninstallRelease = await createRelease({ name: 'ถอนระบบหิมะ', version: '1.0.1', feature: 'snow', action: 'uninstall' }, releases.api);
+  const removed = await deployRelease({ releaseId: uninstallRelease.id, scope: 'selected', shopIds: ['shop-b'] }, releases.api);
+  assert.equal(removed.uninstalled, true);
+  assert.equal(removed.verifiedCount, 1);
+  assert.equal(readFeatureState(releases.dbs.get('shop-b')).snow, false);
+  assert.equal(releases.dbs.get('shop-b').settings.systemModules?.snow, undefined);
+  assert.equal(releases.dbs.get('shop-b').products[0].images[0], 'shop-b.png');
 
   const rain = fixture();
   await updateTenantFeatures({ scope: 'selected', shopIds: ['shop-a'], feature: 'rain', action: 'enable' }, rain.api);
