@@ -6,7 +6,6 @@ const store = require('../data/store');
 const { pickPrize } = require('../services/minigame');
 const license = require('../services/license');
 const easyslip = require('../services/easyslip');
-const byshop = require('../services/byshop');
 const slipok = require('../services/slipok');
 const slip2go = require('../services/slip2go');
 const slipcheck = require('../services/slipcheck');
@@ -331,7 +330,7 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     purchaseConfirmationText: (body.purchaseConfirmationText || '').trim(),
     purchaseActionLabel: (body.purchaseActionLabel || '').trim().slice(0, 80),
     purchaseActionUrl: safeExternalUrl(body.purchaseActionUrl),
-    apiProvider: body.apiProvider === 'byshop' ? 'byshop' : (body.apiProvider === 'custom' ? 'custom' : 'none'),
+    apiProvider: body.apiProvider === 'custom' ? 'custom' : 'none',
     apiProductId: (body.apiProductId || '').trim(),
     // Admin-only — never rendered on any customer-facing page. Useful for
     // things like the original filename behind a renamed product code.
@@ -1201,15 +1200,6 @@ async function renderSlipVerificationHub(req, res) {
     }
   }
 
-  let byshopInfo = null;
-  if (payment.byshopApiKey) {
-    try {
-      byshopInfo = await byshop.checkBalance(payment.byshopApiKey, payment.byshopEndpoint);
-    } catch (e) {
-      byshopInfo = { ok: false, message: e.message };
-    }
-  }
-
   let slipokInfo = null;
   if (payment.slipokBranchId && payment.slipokApiKey) {
     try {
@@ -1272,7 +1262,6 @@ async function renderSlipVerificationHub(req, res) {
     active: 'easyslip-usage',
     info: easyslipInfo,
     payment,
-    byshopInfo,
     slipokInfo,
     slip2goInfo,
     slipcheckInfo,
@@ -1320,8 +1309,6 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
     req.flash('error', 'กรุณาเลือกผู้ให้บริการตรวจสลิปที่รองรับ');
     return res.redirect('/admin/easyslip-usage');
   }
-  const byshopApiKey = (req.body.byshopApiKey !== undefined ? req.body.byshopApiKey : (payment.byshopApiKey || '')).trim();
-  const byshopEndpoint = (req.body.byshopEndpoint !== undefined ? req.body.byshopEndpoint : (payment.byshopEndpoint || 'https://api.byshop.me/api')).trim();
   const slipokBranchId = (req.body.slipokBranchId !== undefined ? req.body.slipokBranchId : (payment.slipokBranchId || '')).trim();
   const slipokApiKey = (req.body.slipokApiKey !== undefined ? req.body.slipokApiKey : (payment.slipokApiKey || '')).trim();
   const slip2goApiKey = (req.body.slip2goApiKey !== undefined ? req.body.slip2goApiKey : (payment.slip2goApiKey || '')).trim();
@@ -1347,8 +1334,6 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   Object.assign(payment, {
     slipProvider,
     slipApiMode,
-    byshopApiKey,
-    byshopEndpoint,
     slipokBranchId,
     slipokApiKey,
     slip2goApiKey,
@@ -1380,8 +1365,8 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   res.redirect('/admin/easyslip-usage');
 });
 
-router.post(['/slip-verification/test', '/easyslip-usage/test', '/api-providers/byshop/test'], async (req, res) => {
-  const provider = (req.body.provider || 'byshop').toLowerCase();
+router.post(['/slip-verification/test', '/easyslip-usage/test'], async (req, res) => {
+  const provider = (req.body.provider || '').toLowerCase();
   const apiKey = (req.body.apiKey || '').trim();
   const endpoint = (req.body.endpoint || '').trim();
   const branchId = (req.body.branchId || '').trim();
@@ -1389,12 +1374,6 @@ router.post(['/slip-verification/test', '/easyslip-usage/test', '/api-providers/
   const clientSecret = (req.body.clientSecret || '').trim();
 
   try {
-    if (provider === 'byshop') {
-      if (!apiKey) return res.json({ ok: false, message: 'กรุณากรอก BYSHOP API Key ก่อนทดสอบ' });
-      const result = await byshop.checkBalance(apiKey, endpoint || 'https://api.byshop.me/api');
-      return res.json(result);
-    }
-
     if (provider === 'slipok') {
       if (!branchId || !apiKey) return res.json({ ok: false, message: 'กรุณากรอก Branch ID และ API Key ก่อนทดสอบ' });
       const result = await slipok.testConnection({ branchId, apiKey });
@@ -1495,8 +1474,6 @@ router.post('/topups/payment-settings', (req, res) => {
       req.flash('error', 'ผู้ให้บริการตรวจสลิปนี้ยังไม่พร้อมใช้งาน');
       return res.redirect('/admin/topups');
     }
-    const byshopApiKey = (req.body.byshopApiKey !== undefined ? req.body.byshopApiKey : (payment.byshopApiKey || '')).trim();
-    const byshopEndpoint = (req.body.byshopEndpoint !== undefined ? req.body.byshopEndpoint : (payment.byshopEndpoint || 'https://api.byshop.me/api')).trim();
     const slipokBranchId = (req.body.slipokBranchId !== undefined ? req.body.slipokBranchId : (payment.slipokBranchId || '')).trim();
     const slipokApiKey = (req.body.slipokApiKey !== undefined ? req.body.slipokApiKey : (payment.slipokApiKey || '')).trim();
     const slip2goApiKey = (req.body.slip2goApiKey !== undefined ? req.body.slip2goApiKey : (payment.slip2goApiKey || '')).trim();
@@ -1515,7 +1492,7 @@ router.post('/topups/payment-settings', (req, res) => {
       bankAccountType, bankExtraVerify,
       bankName: primaryBank ? primaryBank.nameTh : payment.bankName,
       truemoneyPhone, truemoneyEnabled,
-      slipProvider, byshopApiKey, byshopEndpoint, slipokBranchId, slipokApiKey,
+      slipProvider, slipokBranchId, slipokApiKey,
       slip2goApiKey, slip2goEndpoint, customSlipEndpoint, customSlipApiKey,
       easyslipApiKey, slipcheckApiKey, slipcheckEndpoint,
       rdcwClientId, rdcwClientSecret, rdcwEndpoint,
@@ -1523,6 +1500,10 @@ router.post('/topups/payment-settings', (req, res) => {
       topupWebhookUrl: (req.body.topupWebhookUrl || '').trim(),
     });
     if (!sharedTenant) payment.slipProvider = slipProvider;
+    // Refresh the selected provider snapshot after applying the submitted
+    // account fields. Saving the snapshot before Object.assign left SlipCheck
+    // comparing against the previous account name/number after a bank change.
+    receiverProfiles.save(payment, slipProvider, receiverProfiles.snapshot(payment));
 
     // Registered as its own bank (matches a normal transfer) AND, if
     // opted in, again under the PromptPay channel — an interbank
@@ -2151,7 +2132,6 @@ router.post('/hero-text-style', async (req, res) => {
 
 // ---------- API Providers (Redirected to Unified Slip Verification Hub) ----------
 router.get('/api-providers', (req, res) => res.redirect('/admin/easyslip-usage'));
-router.post('/api-providers/byshop', (req, res) => res.redirect('/admin/easyslip-usage'));
 router.post('/api-providers/custom', (req, res) => res.redirect('/admin/easyslip-usage'));
 
 module.exports = router;
