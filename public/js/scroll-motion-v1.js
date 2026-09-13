@@ -20,7 +20,10 @@
     observer=new IntersectionObserver(function(entries){
       entries.forEach(function(entry){if(entry.isIntersecting)pendingReveals.add(entry.target)});
       if(!pendingReveals.size||revealFrame)return;
-      revealFrame=requestAnimationFrame(function(){pendingReveals.forEach(function(node){node.classList.add('scroll-reveal-visible');observer.unobserve(node)});pendingReveals.clear();revealFrame=0});
+      revealFrame=requestAnimationFrame(function(){pendingReveals.forEach(function(node){
+        node.classList.add('scroll-reveal-visible');observer.unobserve(node);
+        if(node.classList.contains('scroll-reveal-card'))node.addEventListener('animationend',function(){node.classList.add('scroll-reveal-complete')},{once:true});
+      });pendingReveals.clear();revealFrame=0});
     },{rootMargin:'160px 0px 120px 0px',threshold:.001});
     requestAnimationFrame(function(){nodes.forEach(function(node){if(!node.classList.contains('scroll-reveal-visible'))observer.observe(node)})});
   }

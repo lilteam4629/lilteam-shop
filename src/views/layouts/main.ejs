@@ -752,6 +752,10 @@
       function draw(now){
         frame=requestAnimationFrame(draw);
         if(document.hidden)return;
+        // A fixed full-screen canvas competes with the browser compositor
+        // during touch scrolling. Freeze it only while the finger/page is
+        // moving; the rain resumes immediately when scrolling settles.
+        if(coarse&&document.documentElement.classList.contains('mobile-is-scrolling')){last=now;return}
         const elapsed=last?Math.min(.032,(now-last)/1000):.016;last=now;ctx.clearRect(0,0,w,h);ctx.strokeStyle=color;ctx.lineCap='round';
         for(let bucket=0;bucket<3;bucket++){rainPath(bucket);ctx.globalAlpha=.2+(bucket*.13);ctx.lineWidth=.55+(bucket*.32);ctx.stroke()}
         for(const d of drops){d.x+=d.wind*elapsed;d.y+=d.speed*elapsed;if(d.y>h+35||d.x>w+35||d.x<-35)reset(d,false)}ctx.globalAlpha=1;
