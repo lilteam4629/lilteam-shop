@@ -25,7 +25,7 @@ function textValues(...values) {
   }).filter(value => typeof value === 'string' || typeof value === 'number');
 }
 
-function receiverMatches({ actualNames = [], actualNumbers = [], expectedNames = [], expectedNumbers = [] } = {}) {
+function receiverMatches({ actualNames = [], actualNumbers = [], expectedNames = [], expectedNumbers = [], allowMaskedNumber = false } = {}) {
   const actualNameValues = textValues(actualNames);
   const expectedNameValues = textValues(expectedNames);
   const names = actualNameValues.map(normalizeName).filter(Boolean);
@@ -56,8 +56,16 @@ function receiverMatches({ actualNames = [], actualNumbers = [], expectedNames =
     return oneEditApart(left[1], right[1]);
   }));
   const lastFourMatched = allNumbers.some(actual => allWantedNumbers.some(expected => actual.slice(-4) === expected.slice(-4)));
+  // Banks commonly expose only the last four digits of the destination
+  // account. `actualNumbers` is populated exclusively from receiver/payee
+  // branches, so this remains isolated from the sender account while allowing
+  // a provider-confirmed masked destination to match the account shown by the
+  // shop. Amount, freshness, transaction reference and duplicate checks are
+  // enforced by the caller before any wallet credit is applied.
+  const maskedNumberMatched = allowMaskedNumber && allNumbers.some(actual => actual.length >= 4 && actual.length < 6)
+    && lastFourMatched;
   const combinedMaskedMatch = (partialNameMatched || nearNameMatched) && lastFourMatched;
-  return { matched: nameMatched || numberMatched || combinedMaskedMatch, hasEvidence: Boolean(names.length || allNumbers.length), nameMatched, numberMatched, combinedMaskedMatch };
+  return { matched: nameMatched || numberMatched || maskedNumberMatched || combinedMaskedMatch, hasEvidence: Boolean(names.length || allNumbers.length), nameMatched, numberMatched, maskedNumberMatched, combinedMaskedMatch };
 }
 
 function extractReceiverEvidence(payload) {

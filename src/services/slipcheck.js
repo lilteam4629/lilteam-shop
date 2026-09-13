@@ -54,6 +54,7 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
       actualNumbers: textValues(data.receiver_account_number, data.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, discovered.numbers),
       expectedNames: credentials.expectedReceiverNames,
       expectedNumbers: credentials.expectedReceiverNumbers,
+      allowMaskedNumber: true,
     });
     if (!receiverCheck.matched) {
       return { checked: true, verified: false, message: 'SlipCheck: ผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw: normalizedRaw };

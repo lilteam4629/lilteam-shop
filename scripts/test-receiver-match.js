@@ -42,6 +42,21 @@ assert.equal(receiverMatches({
   expectedNumbers: candidates.expectedReceiverNumbers,
 }).matched, true, 'the account currently shown on the storefront must remain a verification candidate');
 
+assert.equal(receiverMatches({
+  actualNames: [],
+  actualNumbers: ['XXX-X-XX804-4'],
+  expectedNames: ['นาย อุรพงค์ สงทิม'],
+  expectedNumbers: ['123-4-56804-4'],
+  allowMaskedNumber: true,
+}).matched, true, 'provider-confirmed masked receiver suffix must match the displayed destination account');
+assert.equal(receiverMatches({
+  actualNames: [],
+  actualNumbers: ['XXX-X-XX999-9'],
+  expectedNames: ['นาย อุรพงค์ สงทิม'],
+  expectedNumbers: ['123-4-56804-4'],
+  allowMaskedNumber: true,
+}).matched, false, 'a different masked receiver suffix must be rejected');
+
 async function verifyProviderIntegration() {
   const originalPost = axios.post;
   axios.post = async () => ({ data: {
