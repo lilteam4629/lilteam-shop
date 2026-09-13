@@ -62,16 +62,17 @@ function receiverMatches({ actualNames = [], actualNumbers = [], expectedNames =
 
 function extractReceiverEvidence(payload) {
   const names = [], numbers = [], seen = new Set();
-  function walk(value, inReceiver = false, depth = 0) {
+  function walk(value, inReceiver = false, inReceiverIdentifier = false, depth = 0) {
     if (!value || depth > 7 || seen.has(value)) return;
     if (typeof value !== 'object') return;
     seen.add(value);
     for (const [key, child] of Object.entries(value)) {
       const normalizedKey = key.toLowerCase().replace(/[^a-z]/g, '');
       const receiverBranch = inReceiver || /(receiver|recipient|receiving|payee|destination|toaccount)/.test(normalizedKey);
+      const identifierBranch = inReceiverIdentifier || (receiverBranch && /(account|number|proxy|phone|mobile|wallet|id)/.test(normalizedKey));
       if (receiverBranch && /(name|display|holder|owner)/.test(normalizedKey)) names.push(child);
-      if (receiverBranch && /(account|number|proxy|phone|mobile|wallet|id)/.test(normalizedKey)) numbers.push(child);
-      if (child && typeof child === 'object') walk(child, receiverBranch, depth + 1);
+      if (identifierBranch && (/(account|number|proxy|phone|mobile|wallet|id)/.test(normalizedKey) || normalizedKey === 'value')) numbers.push(child);
+      if (child && typeof child === 'object') walk(child, receiverBranch, identifierBranch, depth + 1);
     }
   }
   walk(payload);

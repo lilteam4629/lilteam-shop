@@ -1,0 +1,55 @@
+const assert = require('node:assert/strict');
+const axios = require('axios');
+const { extractReceiverEvidence, receiverMatches } = require('../src/services/receiver-match');
+
+const standardPayload = {
+  sender: { account: { value: 'xxx-x-x1111-x' } },
+  receiver: {
+    displayName: 'นาย สมชาย ใจดี',
+    account: { type: 'BANKAC', value: 'xxx-x-x5678-x' },
+    proxy: { type: 'MSISDN', value: '08xxxx5678' },
+  },
+};
+
+const evidence = extractReceiverEvidence(standardPayload);
+assert.equal(evidence.numbers.includes('xxx-x-x5678-x'), true, 'receiver.account.value must be extracted');
+assert.equal(evidence.numbers.includes('08xxxx5678'), true, 'receiver.proxy.value must be extracted');
+assert.equal(evidence.numbers.includes('xxx-x-x1111-x'), false, 'sender identifiers must never be accepted');
+assert.equal(receiverMatches({
+  actualNames: evidence.names,
+  actualNumbers: evidence.numbers,
+  expectedNames: ['สมชาย ใจดี'],
+  expectedNumbers: ['0812345678'],
+}).matched, true, 'masked receiver evidence should match the configured recipient');
+
+assert.equal(receiverMatches({
+  actualNames: ['SOMCHAI JAIDEE'],
+  actualNumbers: ['xxx-x-x5678-x'],
+  expectedNames: ['สมชาย ใจดี', 'SOMCHAI JAIDEE'],
+  expectedNumbers: ['0812345678'],
+}).matched, true, 'English receiver aliases must be usable when the provider returns English');
+
+async function verifyProviderIntegration() {
+  const originalPost = axios.post;
+  axios.post = async () => ({ data: {
+    success: true,
+    data: { ...standardPayload, amount: 100, ref_no: 'fixture-slipcheck-ref', transferred_at: new Date().toISOString() },
+  } });
+  try {
+    delete require.cache[require.resolve('../src/services/slipcheck')];
+    const slipcheck = require('../src/services/slipcheck');
+    const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, {
+      apiKey: 'fixture-key',
+      expectedReceiverNames: ['สมชาย ใจดี', 'SOMCHAI JAIDEE'],
+      expectedReceiverNumbers: ['0812345678'],
+    });
+    assert.equal(result.verified, true, 'SlipCheck standard receiver.account.value response must verify');
+  } finally {
+    axios.post = originalPost;
+    delete require.cache[require.resolve('../src/services/slipcheck')];
+  }
+}
+
+verifyProviderIntegration()
+  .then(() => console.log('Receiver matching checks passed: provider response, account/proxy values, sender isolation, Thai/English names'))
+  .catch(error => { console.error(error); process.exitCode = 1; });

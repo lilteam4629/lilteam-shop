@@ -274,7 +274,9 @@ const activeVerifications = new Set();
 function receiverCredentials(payment = {}, method = 'promptpay') {
   const names = [
     method === 'promptpay' ? payment.promptpayName : payment.bankAccountName,
+    method === 'promptpay' ? payment.promptpayNameEn : payment.bankAccountNameEn,
     method === 'promptpay' ? payment.bankAccountName : payment.promptpayName,
+    method === 'promptpay' ? payment.bankAccountNameEn : payment.promptpayNameEn,
   ].map(value => String(value || '').trim()).filter(Boolean);
   const numbers = method === 'promptpay'
     ? [payment.promptpayId, payment.bankAccountNumber]
