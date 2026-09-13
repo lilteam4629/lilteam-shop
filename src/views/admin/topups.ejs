@@ -168,6 +168,12 @@
                       ✕ ปฏิเสธ
                     </button>
                   </form>
+
+                  <form action="/admin/topups/<%= r.id %>/delete" method="post" data-confirm="ลบคำขอ #<%= r.refCode %> ของ <%= r.buyer ? r.buyer.username : 'ผู้ใช้รายนี้' %> ออกจากรายการถาวรใช่หรือไม่? การลบนี้ไม่กระทบบัญชีหรือยอดเงินลูกค้า">
+                    <button type="submit" class="border border-[var(--border-light)] text-[var(--text-4)] hover:border-rose-500/50 hover:text-rose-400 hover:bg-rose-500/10 font-semibold rounded-xl px-3 py-2 text-xs transition active:scale-95 whitespace-nowrap" aria-label="ลบคำขอเติมเงิน #<%= r.refCode %>">
+                      🗑 ลบ
+                    </button>
+                  </form>
                 </div>
               </div>
 
@@ -226,10 +232,12 @@
                     <span>อนุมัติแล้ว</span>
                   </span>
                 <% } else { %>
-                  <span class="inline-flex items-center gap-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-semibold px-3 py-1 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span>
-                    <span>ปฏิเสธ</span>
-                  </span>
+                  <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-semibold px-3 py-1 rounded-full"><span class="w-1.5 h-1.5 rounded-full bg-rose-400"></span><span>ปฏิเสธ</span></span>
+                    <form action="/admin/topups/<%= r.id %>/delete" method="post" data-confirm="ลบประวัติคำขอที่ถูกปฏิเสธ #<%= r.refCode %> ถาวรใช่หรือไม่?">
+                      <button type="submit" class="text-[var(--text-4)] hover:text-rose-400 text-xs p-1.5" aria-label="ลบประวัติคำขอ #<%= r.refCode %>">🗑 ลบ</button>
+                    </form>
+                  </div>
                 <% } %>
               </div>
 

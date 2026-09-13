@@ -1645,6 +1645,13 @@ router.post('/topups/:id/reject', async (req, res) => {
   res.redirect('/admin/topups');
 });
 
+router.post('/topups/:id/delete', async (req, res) => {
+  const result = await topupsService.deleteTopup(req.params.id);
+  if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/topups'); }
+  req.flash('success', `ลบคำขอเติมเงิน #${result.request.refCode || result.request.id} แล้ว โดยไม่กระทบบัญชีและยอดเงินลูกค้า`);
+  res.redirect('/admin/topups');
+});
+
 // ---------- Coupons ----------
 router.get('/coupons', (req, res) => {
   res.render('admin/coupons', { title: 'คูปองส่วนลด', active: 'coupons', coupons: store.data.coupons });

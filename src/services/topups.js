@@ -49,4 +49,19 @@ async function rejectTopup(requestId, reviewNote) {
   return { ok: true };
 }
 
-module.exports = { approveTopup, rejectTopup };
+async function deleteTopup(requestId) {
+  const request = store.data.topupRequests.find(t => t.id === requestId);
+  if (!request) return { ok: false, error: 'ไม่พบคำขอเติมเงิน' };
+  if (request.status === 'approved') {
+    return { ok: false, error: 'ลบรายการที่อนุมัติแล้วไม่ได้ เพราะต้องเก็บประวัติยอดเงินของลูกค้า' };
+  }
+  const deleted = await store.transact((data) => {
+    const index = data.topupRequests.findIndex(t => t.id === requestId);
+    if (index < 0 || data.topupRequests[index].status === 'approved') return false;
+    data.topupRequests.splice(index, 1);
+    return true;
+  });
+  return deleted ? { ok: true, request } : { ok: false, error: 'ลบรายการนี้ไม่ได้ กรุณาลองใหม่' };
+}
+
+module.exports = { approveTopup, rejectTopup, deleteTopup };
