@@ -129,7 +129,7 @@
     }
   </style>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--gold-contrast)] <%= referenceEnabled ? `admin-reference-ui admin-page-${active || 'page'}` : '' %>">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--gold-contrast)] <%= referenceEnabled ? `admin-reference-ui admin-page-${active || 'page'}` : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 
   <!-- Navigation spinner overlay -->
   <div id="page-loading-overlay" aria-hidden="true">

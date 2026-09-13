@@ -178,6 +178,7 @@ async function run() {
     const scrollMotionJs = await fetchOk('/js/scroll-motion-v1.js', 'application/javascript');
     if (scrollMotionJs.body.includes('getBoundingClientRect')) throw new Error('scroll reveal performs a forced layout sweep');
     if (!scrollMotionJs.body.includes("rootMargin:'160px 0px 120px 0px'")) throw new Error('scroll reveal is not pre-triggered ahead of the viewport');
+    if (!scrollMotionJs.body.includes('body.admin-main-site main > div')) throw new Error('main admin top-level cards do not receive scroll reveal motion');
     const interactionPerformanceJs = await fetchOk('/js/interaction-performance-v1.js', 'application/javascript');
     if (!interactionPerformanceJs.body.includes('page-is-scrolling')) throw new Error('desktop scroll performance guard is missing');
     const mainLayoutSource = fs.readFileSync(path.join(__dirname, '..', 'src/views/layouts/main.ejs'), 'utf8');
@@ -195,6 +196,8 @@ async function run() {
     if (!mainLayoutSource.includes("addEventListener('pageshow'")) throw new Error('rain does not resume after a back-forward cache restore');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
+    const mainAdmin = await fetchOk('/admin', 'text/html', { cookie });
+    if (!mainAdmin.body.includes('admin-main-site')) throw new Error('main admin is missing its dedicated motion scope');
     await checkInstalledDisabledRainModule(cookie);
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);
