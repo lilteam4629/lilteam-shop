@@ -200,10 +200,10 @@ async function run() {
     const cookie = await loginAsAdmin();
     const mainAdmin = await fetchOk('/admin', 'text/html', { cookie });
     if (!mainAdmin.body.includes('admin-site')) throw new Error('admin is missing its motion scope');
-    if (!mainAdmin.body.includes('admin-page-motion-v3.css') || !mainAdmin.body.includes('admin-page-motion-v3.js')) throw new Error('admin is not loading its non-flashing page motion assets');
+    if (!mainAdmin.body.includes('admin-page-motion-v4.css') || !mainAdmin.body.includes('admin-page-motion-v4.js')) throw new Error('admin is not loading its smooth page-surface motion assets');
     if (mainAdmin.body.includes('backdrop-filter: blur(4px)')) throw new Error('admin navigation overlay still forces full-screen blur compositing');
     if (/closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/.test(mainAdmin.body)) throw new Error('ordinary admin links still trigger a blocking navigation spinner');
-    if (mainAdmin.body.includes('admin-page-surface')) throw new Error('admin still moves the whole page instead of rent-app top-level panels');
+    if (!mainAdmin.body.includes('<main class="admin-page-surface admin-page-entering')) throw new Error('admin right-hand page is missing its pre-paint entrance surface');
     await checkInstalledDisabledRainModule(cookie);
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);

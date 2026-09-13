@@ -1,0 +1,10 @@
+html{scroll-padding-top:76px;overscroll-behavior-y:none}
+body{overflow-x:clip}
+.admin-page-surface.admin-page-entering{transform-origin:50% 16%;will-change:transform;animation:admin-page-spring-in .56s both}
+@keyframes admin-page-spring-in{
+  0%{transform:translate3d(0,14px,0) scale(.982)}
+  62%{transform:translate3d(0,-1px,0) scale(1.004)}
+  82%{transform:translate3d(0,0,0) scale(.999)}
+  100%{transform:translate3d(0,0,0) scale(1)}
+}
+@media(max-width:800px){html{scroll-padding-top:60px}.admin-page-surface.admin-page-entering{animation-duration:.48s}@keyframes admin-page-spring-in{0%{transform:translate3d(0,10px,0) scale(.987)}62%{transform:translate3d(0,-.5px,0) scale(1.003)}82%{transform:translate3d(0,0,0) scale(.999)}100%{transform:translate3d(0,0,0) scale(1)}}}

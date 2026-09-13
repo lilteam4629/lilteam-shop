@@ -8,8 +8,8 @@ const motionCss = read('public/css/scroll-motion-v1.css');
 const motionJs = read('public/js/scroll-motion-v1.js');
 const layout = read('src/views/layouts/main.ejs');
 const adminLayout = read('src/views/layouts/admin.ejs');
-const adminMotionCss = read('public/css/admin-page-motion-v3.css');
-const adminMotionJs = read('public/js/admin-page-motion-v3.js');
+const adminMotionCss = read('public/css/admin-page-motion-v4.css');
+const adminMotionJs = read('public/js/admin-page-motion-v4.js');
 
 assert.match(hero, /locker-hero-v1\.css/, 'large hero styles must be a cacheable asset');
 assert.doesNotMatch(hero, /<style>/, 'large hero CSS must not be repeated in every home response');
@@ -22,16 +22,15 @@ assert.match(motionCss, /scroll-reveal-admin\{transform:translate3d\(0,24px,0\) 
 assert.match(motionCss, /:not\(\.scroll-reveal-admin\)/, 'mobile performance overrides must not flatten the admin bounce');
 assert.match(layout, /coarse&&document\.documentElement\.classList\.contains\('mobile-is-scrolling'\)/,
   'full-screen rain rendering must yield while a touch device scrolls');
-assert.match(adminLayout, /admin-page-motion-v3\.css/, 'admin must use the non-flashing page motion stylesheet');
-assert.match(adminLayout, /admin-page-motion-v3\.js/, 'admin must use the non-flashing page motion observer');
+assert.match(adminLayout, /admin-page-motion-v4\.css/, 'admin must use the smooth page-surface motion stylesheet');
+assert.match(adminLayout, /admin-page-motion-v4\.js/, 'admin must use the smooth page-surface motion controller');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
 assert.doesNotMatch(adminLayout, /closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/, 'ordinary admin links must navigate directly like rent-app');
-assert.doesNotMatch(adminLayout, /admin-page-surface/, 'admin must reveal top-level panels like rent-app instead of moving the whole page');
-assert.match(adminMotionJs, /main > section,main > article,main > div/, 'admin must reveal the same top-level panel set as rent-app');
+assert.match(adminLayout, /<main class="admin-page-surface admin-page-entering/, 'admin must start the complete right-hand page motion before first paint');
 assert.doesNotMatch(adminMotionCss, /opacity\s*:\s*0/, 'admin page motion must never hide panels or flash the page');
-assert.match(adminMotionCss, /translate3d\(0,30px,0\) scale\(\.94\)/, 'desktop admin motion must preserve the rental-style bounce without flashing');
-assert.match(adminMotionCss, /translate3d\(0,20px,0\) scale\(\.96\)/, 'mobile admin motion must preserve a lighter bounce without flashing');
-assert.match(adminMotionJs, /rootMargin:'0px 0px -8% 0px',threshold:\.06/, 'admin observer timing must match rent-app');
+assert.match(adminMotionCss, /scale\(\.982\)/, 'admin entrance must start with a subtle scale instead of a harsh zoom');
+assert.match(adminMotionCss, /scale\(1\.004\)/, 'admin entrance must use a restrained spring overshoot');
+assert.match(adminMotionJs, /animationend/, 'admin motion must release its compositor layer after entrance');
 
 console.log('Performance guards passed: cacheable hero CSS, finite card reveal layers, touch-scroll rain yielding');
