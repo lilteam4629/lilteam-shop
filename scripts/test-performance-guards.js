@@ -27,8 +27,10 @@ assert.match(adminLayout, /admin-mobile-motion\.js/, 'admin must use the restore
 assert.doesNotMatch(adminLayout, /admin-motion\.js/, 'desktop must not load a different motion controller');
 assert.doesNotMatch(adminMotionJs, /max-width: 800px/, 'restored motion must not be restricted to mobile');
 assert.doesNotMatch(adminMotionCss, /34px|scale\(\.94\)|\.42s/, 'desktop must not retain stronger motion values than mobile');
-assert.match(adminMotionCss, /admin-page-surface\{animation:admin-page-surface-in \.38s/, 'whole-page desktop motion must use the approved mobile duration');
-assert.match(adminMotionCss, /scroll-reveal\{opacity:0;transform:translate3d\(0,24px,0\) scale\(\.96\);transition:opacity \.38s/, 'desktop panels must use the exact approved mobile motion');
+assert.match(adminMotionCss, /admin-page-surface\{animation:admin-page-surface-mobile-in \.38s/, 'mobile admin must preserve the approved bounce');
+assert.match(adminMotionCss, /admin-page-surface\{animation:admin-page-surface-desktop-in \.54s/, 'desktop admin must use its dedicated spring');
+assert.match(adminMotionCss, /62%\{opacity:1;transform:translate3d\(0,-3px,0\) scale\(1\.006\)\}/, 'desktop spring must visibly overshoot before settling');
+assert.match(adminMotionJs, /getBoundingClientRect\(\)\.top<window\.innerHeight\*\.94/, 'desktop must not double-animate initially visible panels');
 assert.match(adminMotionJs, /IntersectionObserver/, 'restored motion must reveal without blocking navigation');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
