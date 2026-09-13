@@ -18,7 +18,9 @@
     /* Give the browser one real painted frame in the hidden position before
        observing. On fast pages the observer previously revealed nodes in the
        same frame, so Products and a few small admin pages appeared static. */
-    requestAnimationFrame(function(){requestAnimationFrame(function(){nodes.forEach(function(node){observer.observe(node)})})});
+    var observeNodes=function(){nodes.forEach(function(node){observer.observe(node)})};
+    if(document.body.classList.contains('admin-main-site'))requestAnimationFrame(function(){requestAnimationFrame(observeNodes)});
+    else requestAnimationFrame(observeNodes);
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();

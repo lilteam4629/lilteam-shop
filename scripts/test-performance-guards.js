@@ -35,7 +35,7 @@ assert.doesNotMatch(adminMotionJs, /page\.animate|getBoundingClientRect/, 'admin
 assert.match(adminMotionCss, /prefers-reduced-motion:reduce\)\{body\.admin-main-site\.admin-reference-ui \.scroll-reveal\{transition-duration:\.42s!important/, 'owner-enabled desktop motion must override the studio 0.01ms reset only on the main site');
 assert.match(adminMotionJs, /classList\.contains\('hidden'\)/, 'hidden dialogs must not be registered as page panels');
 assert.match(adminMotionJs, /matchMedia\('\(max-width: 800px\)'\).*scroll-reveal-visible/s, 'mobile admin must bypass observer-dependent page hiding');
-assert.match(adminMotionJs, /requestAnimationFrame\(function\(\)\{requestAnimationFrame/, 'admin reveal must preserve a painted start frame on fast pages');
+assert.match(adminMotionJs, /admin-main-site'\)\)requestAnimationFrame\(function\(\)\{requestAnimationFrame\(observeNodes\)/, 'main-site admin reveal must preserve a painted start frame on fast pages');
 assert.match(adminMotionJs, /IntersectionObserver/, 'restored motion must reveal without blocking navigation');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
