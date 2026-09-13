@@ -29,8 +29,9 @@ assert.doesNotMatch(adminMotionJs, /max-width: 800px/, 'restored motion must not
 assert.doesNotMatch(adminMotionCss, /34px|scale\(\.94\)|\.42s/, 'desktop must not retain stronger motion values than mobile');
 assert.match(adminMotionCss, /admin-page-surface\{animation:admin-page-surface-mobile-in \.38s/, 'mobile admin must preserve the approved bounce');
 assert.match(adminMotionJs, /page\.animate\(\[/, 'desktop admin must use a deterministic Web Animation');
-assert.match(adminMotionJs, /translate3d\(0,-5px,0\) scale\(1\.008\)/, 'desktop spring must visibly overshoot before settling');
-assert.match(adminMotionJs, /duration:580/, 'desktop spring duration must remain visible without feeling slow');
+assert.match(adminMotionJs, /translate3d\(0,-2px,0\)/, 'desktop spring must use a restrained overshoot');
+assert.match(adminMotionJs, /duration:460/, 'desktop spring duration must remain visible without feeling slow');
+assert.doesNotMatch(adminMotionJs, /scale\(/, 'desktop page motion must not scale the full work surface');
 assert.match(adminMotionJs, /desktopMotion='played'/, 'desktop motion must expose a runtime verification marker');
 assert.match(adminMotionJs, /getBoundingClientRect\(\)\.top<window\.innerHeight\*\.94/, 'desktop must not double-animate initially visible panels');
 assert.match(adminMotionJs, /IntersectionObserver/, 'restored motion must reveal without blocking navigation');

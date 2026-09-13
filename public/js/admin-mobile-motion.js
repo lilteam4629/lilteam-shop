@@ -8,11 +8,10 @@
        Web Animations API and is no longer silently cancelled by that cascade. */
     if(desktop&&page&&page.animate){
       page.animate([
-        {opacity:.9,transform:'translate3d(0,34px,0) scale(.95)',offset:0},
-        {opacity:1,transform:'translate3d(0,-5px,0) scale(1.008)',offset:.6},
-        {opacity:1,transform:'translate3d(0,2px,0) scale(.997)',offset:.82},
-        {opacity:1,transform:'none',offset:1}
-      ],{duration:580,easing:'cubic-bezier(.2,.78,.24,1)',fill:'none'});
+        {transform:'translate3d(0,18px,0)',offset:0,easing:'cubic-bezier(.16,1,.3,1)'},
+        {transform:'translate3d(0,-2px,0)',offset:.72,easing:'cubic-bezier(.2,.75,.3,1)'},
+        {transform:'translate3d(0,0,0)',offset:1}
+      ],{duration:460,fill:'none'});
       page.dataset.desktopMotion='played';
     }
     var nodes=Array.from(document.querySelectorAll('main > section,main > article,main > div,.admin-content > section,.admin-content > article,.admin-content > div')).filter(function(node){return !node.closest('[role="dialog"]')});

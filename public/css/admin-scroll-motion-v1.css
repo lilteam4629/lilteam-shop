@@ -12,6 +12,6 @@ body{overflow-x:clip}
 }
 @media(min-width:801px){
   body.admin-site main.admin-page-surface{transform-origin:50% 104px}
-  .scroll-motion-ready .scroll-reveal{transform:translate3d(0,20px,0) scale(.978);transition-duration:.44s;transition-timing-function:cubic-bezier(.2,.82,.3,1.12);transition-delay:0ms}
+  .scroll-motion-ready .scroll-reveal{transform:translate3d(0,14px,0);transition-property:opacity,transform;transition-duration:.34s;transition-timing-function:cubic-bezier(.16,1,.3,1);transition-delay:0ms}
 }
 @media(prefers-reduced-motion:reduce) and (max-width:800px){body.admin-site main.admin-page-surface{animation:none}}
