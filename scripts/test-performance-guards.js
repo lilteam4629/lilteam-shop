@@ -16,6 +16,7 @@ const minigameRail = read('src/views/partials/minigame-rail.ejs');
 const filterPanel = read('src/views/partials/filter-panel.ejs');
 const productDetail = read('src/views/shop/product-detail.ejs');
 const productForm = read('src/views/admin/product-form.ejs');
+const adminProducts = read('src/views/admin/products.ejs');
 
 assert.match(hero, /locker-hero-v1\.css/, 'large hero styles must be a cacheable asset');
 assert.doesNotMatch(hero, /<style>/, 'large hero CSS must not be repeated in every home response');
@@ -57,4 +58,12 @@ assert.match(productDetail, /product-action-secondary/, 'purchase action must us
 assert.match(productDetail, /product-topup-action/, 'top-up action must use a theme-independent readable class');
 assert.match(productForm, /fallbackData\.append\('productImages'/, 'folder import must fall back to the server uploader when direct R2 upload fails');
 assert.match(productForm, /return submitData\(fallbackData\)/, 'folder import fallback must submit and create products');
+[
+  '/admin/products/bulk-import',
+  'id="bulk-price-open"',
+  '/admin/products/stock/add-all',
+  '/admin/products/set-status-all',
+  'id="delete-all-products-btn"',
+].forEach(marker => assert.match(adminProducts, new RegExp(marker.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')), `rental shop product admin is missing ${marker}`));
+assert.doesNotMatch(adminProducts, /isMainSite[\s\S]{0,300}(bulk-actions|bulk-import|bulk-price|stock\/add-all)/, 'rental shop bulk actions must not be gated to the main site');
 console.log('Performance guards passed: storefront layers and matching mobile/desktop admin motion');
