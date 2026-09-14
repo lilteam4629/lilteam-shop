@@ -956,6 +956,18 @@ const rangerImageUrl = rangerId => {
 };
 const rangersSource = require('../services/rangers-catalog');
 
+router.get('/rangers-model', requireSystemLab, (req, res) => {
+  const catalog = store.data.settings.rangersCatalog || { enabled: false, items: [], productAssignments: {} };
+  const assignments = catalog.productAssignments || {};
+  res.render('admin/rangers-model', {
+    title: 'LINE Rangers Studio', active: 'rangers-model',
+    currentModel: store.data.settings.storefrontModel || 'classic',
+    catalog, sourceCount: rangersSource.sourceCount,
+    productCount: store.data.products.length,
+    assignedProductCount: Object.keys(assignments).filter(id => (assignments[id] || []).length).length,
+  });
+});
+
 router.get('/rangers-catalog', requireSystemLab, (req, res) => {
   res.render('admin/rangers-catalog', {
     title: 'คลังตัวละคร LINE Rangers', active: 'rangers-catalog',
