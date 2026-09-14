@@ -267,6 +267,7 @@ function defaultData() {
     homeSections: [
       { id: nanoid(8), title: 'เกมมาใหม่', mode: 'newest', limit: 5, productIds: [] },
     ],
+    recommendedCategories: [],
     stockItems,
     orders: [],
     coupons: [

@@ -877,14 +877,23 @@ router.post('/home-sections/:id/move', async (req, res) => {
 });
 
 router.get('/recommended-categories', (req, res) => {
-  res.render('admin/recommended-categories', { title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories: store.data.recommendedCategories || [] });
+  res.render('admin/recommended-categories', { title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories: store.data.recommendedCategories || [], products: store.data.products.filter(p => p.status === 'active') });
 });
-router.post('/recommended-categories', async (req, res) => {
+router.post('/recommended-categories', (req, res) => bannerUpload.single('image')(req, res, store.bindTenantContext(async err => {
   const title = String(req.body.title || '').trim();
-  if (!title) { req.flash('error', 'กรุณากรอกชื่อหมวดหมู่'); return res.redirect('/admin/recommended-categories'); }
+  if (err || !title) { req.flash('error', err ? 'อัปโหลดรูปไม่สำเร็จ' : 'กรุณากรอกชื่อหมวดหมู่'); return res.redirect('/admin/recommended-categories'); }
   store.data.recommendedCategories ||= [];
-  store.data.recommendedCategories.push({ id: store.genId(8), title, imageUrl: String(req.body.imageUrl || '').trim(), count: Math.max(0, parseInt(req.body.count, 10) || 0), enabled: true });
+  const imageUrl = req.file ? await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype) : String(req.body.imageUrl || '').trim();
+  store.data.recommendedCategories.push({ id: store.genId(8), title, imageUrl, productIds: [], count: 0, enabled: true });
   await store.save(); req.flash('success', 'เพิ่มหมวดหมู่แนะนำแล้ว'); res.redirect('/admin/recommended-categories');
+})));
+router.post('/recommended-categories/:id/products', async (req, res) => {
+  const category = (store.data.recommendedCategories || []).find(item => item.id === req.params.id);
+  if (!category) return res.status(404).send('ไม่พบหมวดหมู่');
+  const valid = new Set(store.data.products.map(product => String(product.id)));
+  category.productIds = [...new Set([].concat(req.body.productIds || []).map(String).filter(id => valid.has(id)))];
+  category.count = category.productIds.length;
+  await store.save(); req.flash('success', 'บันทึกสินค้าในหมวดแล้ว'); res.redirect('/admin/recommended-categories');
 });
 router.post('/recommended-categories/:id/delete', async (req, res) => {
   store.data.recommendedCategories = (store.data.recommendedCategories || []).filter(category => category.id !== req.params.id);
