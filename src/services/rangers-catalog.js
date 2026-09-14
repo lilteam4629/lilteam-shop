@@ -1,7 +1,7 @@
 const fallbackRangers = require('../catalog/rangers-source.json');
 const https = require('https');
 const API_ROOT = 'https://rangers.lerico.net';
-let rangers = fallbackRangers, gears = [], updatedAt = null, refreshPromise = null, lastError = '';
+let rangers = fallbackRangers, gears = [], pvpTop = [], updatedAt = null, pvpUpdatedAt = null, refreshPromise = null, lastError = '';
 let byCode = new Map(rangers.map(item => [item.code, item]));
 
 const rangerImageUrl = code => `${API_ROOT}/res/${encodeURIComponent(code)}/${encodeURIComponent(code)}-thum.png`;
@@ -43,14 +43,33 @@ async function refresh() {
       })).sort((a, b) => b.grade - a.grade || b.code.localeCompare(a.code));
       if (nextRangers.length < 100 || nextGears.length < 10) throw new Error('ข้อมูลสดไม่ครบ');
       rangers = nextRangers; gears = nextGears; updatedAt = new Date().toISOString(); lastError = ''; rebuildIndex();
+      try { await refreshPvp(); } catch (error) { lastError = `PvP: ${error.message || error}`; }
       return status();
     } catch (error) { lastError = error.message || String(error); throw error; }
     finally { refreshPromise = null; }
   })();
   return refreshPromise;
 }
+async function refreshPvp() {
+  const payload = await getJson('/api/v2/pvp/league/rank/LEGEND');
+  const players = Array.isArray(payload.top100) ? payload.top100.slice(0, 100) : [];
+  const details = new Map((payload.playerInfo || []).map(item => [item.mid, item]));
+  const counts = new Map();
+  for (const player of players) {
+    const detail = details.get(player.mid), groups = detail?.playerUnitTeamGroupMap?.pvpteam;
+    if (!groups) continue;
+    const selected = groups[String(detail.player?.usePvPTeamNo || 1)] || groups['1'] || [];
+    for (const unit of selected) counts.set(unit.unitCode, (counts.get(unit.unitCode) || 0) + 1);
+  }
+  const rangerMap = new Map(rangers.map(item => [item.code, item]));
+  pvpTop = [...counts.entries()].map(([code, usageCount]) => rangerMap.has(code) ? ({ ...rangerMap.get(code), usageCount }) : null)
+    .filter(Boolean).sort((a, b) => b.usageCount - a.usageCount || b.score - a.score)
+    .map((item, index) => ({ ...item, rank: index + 1 }));
+  if (pvpTop.length) pvpUpdatedAt = new Date().toISOString();
+  return { playerCount: players.length, characterCount: pvpTop.length, updatedAt: pvpUpdatedAt };
+}
 function rowsForView(view) {
-  if (view === 'top100') return rangers.slice(0, 100).map((item, index) => ({ ...item, rank: index + 1 }));
+  if (view === 'top100') return (pvpTop.length ? pvpTop : rangers.slice(0, 100).map((item, index) => ({ ...item, rank: index + 1 }))).slice(0, 100);
   if (view === 'new') return [...rangers].sort((a, b) => b.code.localeCompare(a.code)).slice(0, 100);
   if (view === 'gear' || ['WEAPON', 'ARMOR', 'ACC'].includes(view)) return view === 'gear' ? gears : gears.filter(x => x.gearType === view);
   return rangers;
@@ -60,11 +79,11 @@ function queryCatalog({ q = '', view = 'all', page = 1, limit = 60 } = {}) {
   let rows = rowsForView(view);
   if (normalized) rows = rows.filter(item => `${item.name} ${item.code}`.toLowerCase().includes(normalized));
   const total = rows.length, start = (safePage - 1) * safeLimit;
-  return { items: rows.slice(start, start + safeLimit).map(item => ({ ...item, imageUrl: imageUrl(item) })), total, page: safePage, pages: Math.max(1, Math.ceil(total / safeLimit)), updatedAt, view };
+  return { items: rows.slice(start, start + safeLimit).map(item => ({ ...item, imageUrl: imageUrl(item) })), total, page: safePage, pages: Math.max(1, Math.ceil(total / safeLimit)), updatedAt, pvpUpdatedAt, view };
 }
 function validCodes(values, max = 20) { return [...new Set([].concat(values || []).map(String))].filter(code => byCode.has(code)).slice(0, max); }
 function resolveCodes(values) { return validCodes(values).map(code => ({ ...byCode.get(code), imageUrl: imageUrl(byCode.get(code)) })); }
-function status() { return { rangerCount: rangers.length, gearCount: gears.length, updatedAt, lastError }; }
+function status() { return { rangerCount: rangers.length, gearCount: gears.length, pvpTopCount: pvpTop.length, updatedAt, pvpUpdatedAt, lastError }; }
 function msUntilBangkokMidnight() {
   const now = new Date(), parts = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(now).reduce((o, p) => (o[p.type] = p.value, o), {});
   return Math.max(1000, Date.UTC(+parts.year, +parts.month - 1, +parts.day + 1, -7, 0, 3) - now.getTime());
@@ -72,4 +91,4 @@ function msUntilBangkokMidnight() {
 function scheduleRefresh() { const timer = setTimeout(() => refresh().catch(() => {}).finally(scheduleRefresh), msUntilBangkokMidnight()); timer.unref?.(); }
 setImmediate(() => refresh().catch(() => {})); scheduleRefresh();
 
-module.exports = { get sourceCount() { return rangers.length; }, queryCatalog, validCodes, resolveCodes, refresh, status };
+module.exports = { get sourceCount() { return rangers.length; }, queryCatalog, validCodes, resolveCodes, refresh, refreshPvp, status };
