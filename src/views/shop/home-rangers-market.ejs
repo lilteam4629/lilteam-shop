@@ -1,10 +1,8 @@
 <% const available = products.filter(p => p.stockCount > 0); %>
 <% const soldOut = products.filter(p => p.stockCount <= 0); %>
-<% const spotlight = [
-  { id:'u1535e-brown', name:'Wild Ginseng Brown', stars:9 },
-  { id:'u1534h-brown', name:'Big Carrot Brown', stars:8 },
-  { id:'u1534e-brown', name:'Radish Brown', stars:8 }
-]; %>
+<% const spotlight = rangersCatalog && rangersCatalog.enabled
+  ? (rangersCatalog.items || []).slice(0, 5)
+  : []; %>
 <div class="rm-page" data-rangers-market>
   <section class="rm-match">
     <div><small>FIND YOUR PERFECT MATCH</small><h2>ยังเลือกไม่ถูก? หาไอดีที่เหมาะกับคุณ</h2><p>เลือกตัวที่ชอบ แล้วระบบจะแสดงไอดีที่ตรงกับความต้องการ</p></div>
@@ -13,7 +11,9 @@
   <section class="rm-hero">
     <div class="rm-hero-copy"><small>LINE RANGERS / FIND YOUR MATCH</small><h1>BUILD YOUR<br><em>ULTIMATE ✦ TEAM.</em></h1><p>ร้านไอดี LINE Rangers</p><div class="rm-stats"><b><%= productTotal %></b> ไอดีในร้าน <i></i><b><%= available.length %></b> พร้อมขาย</div></div>
     <div class="rm-lineup" aria-label="ตัวละครเด่นจาก LINE Rangers Handbook">
-      <% spotlight.forEach((r, index) => { %><article style="--i:<%= index %>"><img loading="eager" src="https://rangers.lerico.net/res/<%= r.id %>/<%= r.id %>-thum.png" alt="<%= r.name %>" onerror="this.closest('article').hidden=true"><b><%= r.stars %>★</b><span><%= r.name %></span></article><% }) %>
+      <% if (spotlight.length) { spotlight.forEach((r, index) => { %><article style="--i:<%= index %>"><img loading="eager" src="<%= r.imageUrl %>" alt="<%= r.name %>" onerror="this.closest('article').hidden=true"><b><%= r.stars %>★</b><span><%= r.name %></span></article><% }) } else { %>
+        <div class="rm-catalog-off"><b>LINE RANGERS</b><span>คลังตัวละครยังปิดอยู่</span></div>
+      <% } %>
     </div>
   </section>
   <section class="rm-finder" id="rm-finder">

@@ -1,0 +1,21 @@
+<div class="studio-page-head mb-6">
+  <div><span class="studio-page-kicker">SYSTEM LAB · LINE RANGERS</span><h1>คลังตัวละคร LINE Rangers</h1><p>ระบบทดลองสำหรับเพิ่มตัวละครและรูปจาก Rangers Handbook เริ่มต้นเป็นปิด</p></div>
+  <a href="https://rangers.lerico.net/en/rangers-book" target="_blank" rel="noopener" class="studio-secondary-action">เปิด Handbook ↗</a>
+</div>
+<section class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 mb-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <div><h2 class="text-xl font-bold">สถานะระบบ</h2><p class="text-sm text-[var(--text-4)]">เมื่อปิด หน้าร้านจะไม่ใช้ข้อมูลตัวละครในคลัง</p></div>
+  <form action="/admin/rangers-catalog/toggle" method="post" class="flex items-center gap-3"><span class="font-bold <%= catalog.enabled ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= catalog.enabled ? '● เปิดใช้งาน' : '● ปิดอยู่' %></span><input type="hidden" name="enabled" value="<%= catalog.enabled ? '0' : '1' %>"><button class="rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] px-5 py-2.5 font-bold"><%= catalog.enabled ? 'ปิดระบบ' : 'เปิดระบบ' %></button></form>
+</section>
+<div class="grid xl:grid-cols-[360px_1fr] gap-5">
+  <form action="/admin/rangers-catalog/items" method="post" class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-4 h-fit">
+    <div><h2 class="text-xl font-bold">เพิ่มตัวละครหรือเกียร์</h2><p class="text-sm text-[var(--text-4)]">ใช้รหัส เช่น u1535e-brown เพื่อดึงรูปอัตโนมัติ</p></div>
+    <label class="block text-sm font-semibold">รหัส Rangers<input name="rangerId" required pattern="[A-Za-z0-9_-]{3,80}" placeholder="u1535e-brown" class="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--input)] px-4 py-3"></label>
+    <label class="block text-sm font-semibold">ชื่อที่แสดง<input name="name" required placeholder="Wild Ginseng Brown" class="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--input)] px-4 py-3"></label>
+    <div class="grid grid-cols-3 gap-2"><label class="text-sm font-semibold">ดาว<input name="stars" type="number" min="1" max="9" value="8" class="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--input)] px-3 py-3"></label><label class="text-sm font-semibold">ร่าง<select name="form" class="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--input)] px-2 py-3"><option value="normal">ธรรมดา</option><option value="ultra">อัลตร้า</option><option value="hyper">ไฮเปอร์</option></select></label><label class="text-sm font-semibold">ประเภท<select name="type" class="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--input)] px-2 py-3"><option value="ranger">ตัวละคร</option><option value="gear">เกียร์</option></select></label></div>
+    <button class="w-full rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] py-3 font-bold">+ เพิ่มเข้าคลัง</button>
+  </form>
+  <section class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5"><h2 class="text-xl font-bold">รายการในคลัง <span class="text-[var(--text-4)]">(<%= (catalog.items || []).length %>)</span></h2>
+    <% if (!(catalog.items || []).length) { %><div class="mt-4 rounded-xl bg-[var(--input)] p-10 text-center text-[var(--text-4)]">ยังไม่มีรายการ</div><% } %>
+    <div class="mt-4 grid sm:grid-cols-2 2xl:grid-cols-3 gap-3"><% (catalog.items || []).forEach(item => { %><article class="rounded-xl border border-[var(--border)] bg-[var(--input)] p-3 flex gap-3"><div class="w-20 h-20 rounded-lg bg-white shrink-0 overflow-hidden"><img src="<%= item.imageUrl || rangerImageUrl(item.rangerId) %>" alt="<%= item.name %>" loading="lazy" class="w-full h-full object-contain" onerror="this.hidden=true"></div><div class="min-w-0 flex-1"><b class="block truncate"><%= item.name %></b><code class="text-xs text-[var(--text-4)]"><%= item.rangerId %></code><p class="text-sm"><%= item.stars %>★ · <%= item.type === 'gear' ? 'เกียร์' : ({normal:'ธรรมดา',ultra:'อัลตร้า',hyper:'ไฮเปอร์'}[item.form] || item.form) %></p><form action="/admin/rangers-catalog/items/<%= item.id %>/delete" method="post"><button class="mt-2 text-sm font-semibold text-red-500">ลบ</button></form></div></article><% }) %></div>
+  </section>
+</div>

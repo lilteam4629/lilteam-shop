@@ -902,6 +902,64 @@ router.post('/storefront-models', async (req, res) => {
   res.redirect('/admin/storefront-models');
 });
 
+// ---------- LINE Rangers catalog (System Lab trial only) ----------
+const requireSystemLab = (req, res, next) => req.tenantShop?.isSystemLab
+  ? next()
+  : res.status(404).render('shop/404', {
+    layout: 'layouts/main', title: 'ไม่พบหน้านี้', statusCode: 404,
+    message: 'ไม่พบหน้าที่คุณต้องการ', backPath: '/admin', backLabel: 'กลับหลังบ้าน',
+  });
+const rangerImageUrl = rangerId => {
+  const id = String(rangerId || '').trim().toLowerCase();
+  return `https://rangers.lerico.net/res/${id}/${id}-thum.png`;
+};
+
+router.get('/rangers-catalog', requireSystemLab, (req, res) => {
+  res.render('admin/rangers-catalog', {
+    title: 'คลังตัวละคร LINE Rangers', active: 'rangers-catalog',
+    catalog: store.data.settings.rangersCatalog || { enabled: false, items: [] }, rangerImageUrl,
+  });
+});
+
+router.post('/rangers-catalog/toggle', requireSystemLab, async (req, res) => {
+  store.data.settings.rangersCatalog ||= { enabled: false, items: [] };
+  store.data.settings.rangersCatalog.enabled = req.body.enabled === '1';
+  await store.save();
+  req.flash('success', store.data.settings.rangersCatalog.enabled ? 'เปิดใช้คลังตัวละครแล้ว' : 'ปิดคลังตัวละครแล้ว');
+  res.redirect('/admin/rangers-catalog');
+});
+
+router.post('/rangers-catalog/items', requireSystemLab, async (req, res) => {
+  const rangerId = String(req.body.rangerId || '').trim().toLowerCase();
+  const name = String(req.body.name || '').trim();
+  if (!/^[a-z0-9_-]{3,80}$/.test(rangerId) || !name) {
+    req.flash('error', 'กรุณากรอกรหัสและชื่อตัวละครให้ถูกต้อง');
+    return res.redirect('/admin/rangers-catalog');
+  }
+  store.data.settings.rangersCatalog ||= { enabled: false, items: [] };
+  const items = store.data.settings.rangersCatalog.items ||= [];
+  if (items.some(item => item.rangerId === rangerId)) {
+    req.flash('error', 'มีรหัสนี้อยู่ในคลังแล้ว');
+    return res.redirect('/admin/rangers-catalog');
+  }
+  items.push({ id: store.genId(8), rangerId, name,
+    stars: Math.min(9, Math.max(1, Number(req.body.stars) || 8)),
+    form: ['normal', 'ultra', 'hyper'].includes(req.body.form) ? req.body.form : 'normal',
+    type: req.body.type === 'gear' ? 'gear' : 'ranger', imageUrl: rangerImageUrl(rangerId),
+    createdAt: new Date().toISOString() });
+  await store.save();
+  req.flash('success', `เพิ่ม ${name} แล้ว`);
+  res.redirect('/admin/rangers-catalog');
+});
+
+router.post('/rangers-catalog/items/:id/delete', requireSystemLab, async (req, res) => {
+  store.data.settings.rangersCatalog ||= { enabled: false, items: [] };
+  store.data.settings.rangersCatalog.items = (store.data.settings.rangersCatalog.items || []).filter(item => item.id !== req.params.id);
+  await store.save();
+  req.flash('success', 'ลบรายการแล้ว');
+  res.redirect('/admin/rangers-catalog');
+});
+
 // ---------- Storefront color theme ----------
 router.get('/theme', (req, res) => {
   res.render('admin/theme', {

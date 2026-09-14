@@ -120,6 +120,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1) {
     filterProductCount: active.length,
     miniGamePrizes: store.data.miniGamePrizes.filter(p => p.active),
     heroPreviewV2,
+    rangersCatalog: store.data.settings.rangersCatalog || { enabled: false, items: [] },
   };
 }
 

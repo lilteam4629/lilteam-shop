@@ -183,7 +183,8 @@ async function checkStorefrontModels(cookie) {
   const page = await fetchOk('/admin/storefront-models', 'text/html', { cookie });
   if (!page.body.includes('โมเดลหน้าร้าน LINE Rangers') || !page.body.includes('value="line-rangers"') || !page.body.includes('value="rangers-market"')) throw new Error('storefront model admin is incomplete');
   const preview = await fetchOk('/preview/rangers-market', 'text/html', { cookie });
-  if (!preview.body.includes('data-rangers-market') || !preview.body.includes('storefront-rangers-market-v1.css') || !preview.body.includes('rangers.lerico.net/res/')) throw new Error('Rangers Market preview is incomplete');
+  if (!preview.body.includes('data-rangers-market') || !preview.body.includes('storefront-rangers-market-v1.css') || !preview.body.includes('คลังตัวละครยังปิดอยู่')) throw new Error('Rangers Market preview is incomplete');
+  if (preview.body.includes('rangers.lerico.net/res/')) throw new Error('disabled Rangers catalog still loads third-party character images');
   const marketUpdate = await request('/admin/storefront-models', { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'model=rangers-market' });
   if (marketUpdate.statusCode !== 302 || marketUpdate.headers.location !== '/admin/storefront-models') throw new Error('Rangers Market model update failed');
   const marketHome = await fetchOk('/', 'text/html');
@@ -266,6 +267,9 @@ async function run() {
     if (mainAdmin.body.includes('backdrop-filter: blur(4px)')) throw new Error('admin navigation overlay still forces full-screen blur compositing');
     if (/closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/.test(mainAdmin.body)) throw new Error('ordinary admin links still trigger a blocking navigation spinner');
     if (mainAdmin.body.includes('admin-page-surface')) throw new Error('admin still exposes the removed animated page surface');
+    if (mainAdmin.body.includes('/admin/rangers-catalog')) throw new Error('System Lab catalog leaked into the main admin menu');
+    const protectedCatalog = await request('/admin/rangers-catalog', { headers: { cookie } });
+    if (protectedCatalog.statusCode !== 404) throw new Error(`main admin can access System Lab catalog (HTTP ${protectedCatalog.statusCode})`);
     await checkInstalledDisabledRainModule(cookie);
     await checkStorefrontModels(cookie);
     await checkHomeSectionDelete(cookie);
