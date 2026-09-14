@@ -78,7 +78,7 @@
       else{const icon=document.createElement('div');icon.className='rail-item-icon';icon.textContent=p.isPrize?'🎁':'💨';el.appendChild(icon)}
       const name=document.createElement('div');name.className='rail-item-name';name.textContent=p.name;el.appendChild(name);return el;
     }
-    let spinning=false;
+    let spinning=false,activeController=null,requestTimer=0,spinTimer=0;
     function centerIndexAt(index){
       const el=track.children[index];
       if(!el)return;
@@ -95,29 +95,43 @@
       track.style.transition='none';
       track.style.transform='translate3d('+(centerIndexAt(Math.floor(count/2))||0)+'px,0,0)';
     }
+    function releaseSpin(message,resetTrack){
+      clearTimeout(requestTimer);clearTimeout(spinTimer);requestTimer=0;spinTimer=0;
+      if(activeController)activeController.abort();activeController=null;
+      spinning=false;game.classList.remove('is-spinning');
+      if(button){button.disabled=false;button.removeAttribute('aria-busy')}
+      if(resetTrack)seed();
+      if(message)result.textContent=message;
+    }
     seed();
     function handleRailResize(){if(!spinning&&game.isConnected)seed()}
     window.addEventListener('resize',handleRailResize);
-    document.addEventListener('lilteam:page-unloading',function(){window.removeEventListener('resize',handleRailResize)},{once:true});
+    window.addEventListener('pageshow',function(event){if(event.persisted||(button&&button.disabled))releaseSpin('พร้อมเริ่มเลื่อนอีกครั้ง',true)});
+    document.addEventListener('lilteam:page-unloading',function(){window.removeEventListener('resize',handleRailResize);releaseSpin()},{once:true});
     if(!button)return;
     button.addEventListener('click',async function(){
-      spinning=true;game.classList.add('is-spinning');button.disabled=true;result.textContent='กำลังสุ่ม...';seed();
-      const controller=new AbortController(),requestTimeout=setTimeout(function(){controller.abort()},10000);
-      let response,data;try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:controller.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimeout)}
-      if(!response||!response.ok||!data){result.textContent=(data&&data.error)||'ระบบตอบช้า กรุณากดลองใหม่';button.disabled=false;spinning=false;game.classList.remove('is-spinning');return}
+      if(spinning||button.disabled)return;
+      spinning=true;game.classList.add('is-spinning');button.disabled=true;button.setAttribute('aria-busy','true');result.textContent='กำลังสุ่ม...';seed();
+      activeController=new AbortController();requestTimer=setTimeout(function(){activeController&&activeController.abort()},10000);
+      let response,data;try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:activeController.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimer);requestTimer=0;activeController=null}
+      if(!response||!response.ok||!data){releaseSpin((data&&data.error)||'ระบบตอบช้า กรุณากดลองใหม่',false);return}
       const winner={name:data.prizeName,image:data.image||null,isPrize:data.isWin};
       const winnerIndex=20;const total=24;
       const sequence=[];for(let i=0;i<total;i++)sequence.push(i===winnerIndex?winner:(prizes[Math.floor(Math.random()*prizes.length)]||winner));
       track.innerHTML='';sequence.forEach(p=>track.appendChild(item(p)));
       const target=centerIndexAt(winnerIndex);
       track.style.transition='transform 3.2s cubic-bezier(.12,.72,.08,1)';track.style.transform='translate3d('+target+'px,0,0)';
-      setTimeout(function(){
+      let completed=false;
+      function completeSpin(){
+        if(completed)return;completed=true;clearTimeout(spinTimer);spinTimer=0;
         spinning=false;game.classList.remove('is-spinning');
         result.innerHTML='';const line=document.createElement('div');line.className=data.isWin?'text-emerald-400 font-medium':'text-[var(--text-3)]';line.textContent=data.isPreview?'ตัวอย่างผลสุ่ม: '+data.prizeName:(data.isWin?'ยินดีด้วย! ได้รับ '+data.prizeName:'ผลลัพธ์: '+data.prizeName);result.appendChild(line);
         if(data.isWin&&data.claimCode){const claim=document.createElement('div');claim.className='rail-claim';claim.textContent=data.claimCode;result.appendChild(claim)}
         if(data.isWin&&!data.isPreview){const contactBtn=document.createElement('a');contactBtn.href='/contact';contactBtn.className='rail-contact-btn';contactBtn.textContent='💬 ติดต่อร้านเพื่อรับรางวัล';result.appendChild(contactBtn)}
-        if(balance&&typeof data.walletBalance==='number')balance.textContent=data.walletBalance.toLocaleString();button.disabled=false;
-      },3300);
+        if(balance&&typeof data.walletBalance==='number')balance.textContent=data.walletBalance.toLocaleString();button.disabled=false;button.removeAttribute('aria-busy');
+      }
+      track.addEventListener('transitionend',completeSpin,{once:true});
+      spinTimer=setTimeout(completeSpin,3800);
     });
   });
 </script>

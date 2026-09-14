@@ -43,7 +43,12 @@ assert.match(homeView, /productTotalPages > 1/, 'home must expose navigation to 
 assert.match(adminMobileCss, /main > \.grid\[class~="md:grid-cols-2"\][\s\S]{0,300}min-width: 0/, 'mobile minigame preview grid must be allowed to shrink');
 assert.match(adminMobileCss, /admin-page-minigame \.mg-stage[^}]*height: 168px/, 'mobile box preview must keep a readable stage');
 assert.match(minigameWidget, /\.mg-box {/, 'box preview must render its initial gift');
+assert.match(minigameWidget, /new AbortController\(\)[\s\S]{0,180}10000/, 'box preview must time out a stalled request');
+assert.match(minigameWidget, /pageshow[\s\S]{0,180}releaseBusyState/, 'box preview must recover from browser cache with an enabled button');
 assert.match(minigameRail, /\.rail-window{[^}]*overflow:hidden/, 'rail preview must clip its track inside the viewport');
+assert.match(minigameRail, /new AbortController\(\)[\s\S]{0,180}10000/, 'rail preview must time out a stalled request');
+assert.match(minigameRail, /transitionend['"],completeSpin/, 'rail preview must finish from the real transition event');
+assert.match(minigameRail, /pageshow[\s\S]{0,180}releaseSpin/, 'rail preview must recover from browser cache with an enabled button');
 
 assert.match(filterPanel, /window\.location\.assign\(query\?['"]\/products\?tags=/, 'filter selection must navigate to a server-filtered listing');
 assert.doesNotMatch(filterPanel, /if\(cards\.length\)\{apply\(\);return\}/, 'filter selection must not remain client-only');

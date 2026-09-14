@@ -144,6 +144,9 @@
     const resultEl = panel.querySelector('.mg-result-el');
     const balanceEl = panel.querySelector('.mg-balance-el');
     const confettiColors = ['#c8a63f', '#e2836f', '#93bfff', '#8fe3a3', '#f3ecd8'];
+    let activeController = null;
+    let requestTimer = 0;
+    let revealTimer = 0;
 
     function tierIconFor(isWin) {
       return isWin ? '🎁' : '💨';
@@ -171,8 +174,30 @@
       box.classList.remove('mg-hidden');
     }
 
+    function releaseBusyState(message) {
+      clearTimeout(requestTimer);
+      clearTimeout(revealTimer);
+      requestTimer = 0;
+      revealTimer = 0;
+      if (activeController) activeController.abort();
+      activeController = null;
+      box.classList.remove('mg-shaking');
+      btn.disabled = false;
+      btn.removeAttribute('aria-busy');
+      if (message) resultEl.textContent = message;
+    }
+
+    window.addEventListener('pageshow', function (event) {
+      if (event.persisted || btn.disabled) releaseBusyState('พร้อมสุ่มทดสอบอีกครั้ง');
+    });
+    document.addEventListener('lilteam:page-unloading', function () {
+      releaseBusyState();
+    }, { once: true });
+
     btn.addEventListener('click', async () => {
+      if (btn.disabled) return;
       btn.disabled = true;
+      btn.setAttribute('aria-busy', 'true');
       resultEl.textContent = '';
       resetStage();
       box.classList.add('mg-shaking');
@@ -181,19 +206,25 @@
       const started = Date.now();
 
       let response, data;
+      activeController = new AbortController();
+      requestTimer = setTimeout(function () { activeController && activeController.abort(); }, 10000);
       try {
-        response = await fetch(btn.dataset.endpoint, { method: 'POST', credentials: 'same-origin' });
+        response = await fetch(btn.dataset.endpoint, { method: 'POST', credentials: 'same-origin', signal: activeController.signal });
         data = await response.json();
       } catch (err) {
         data = null;
+      } finally {
+        clearTimeout(requestTimer);
+        requestTimer = 0;
+        activeController = null;
       }
 
       const elapsed = Date.now() - started;
-      setTimeout(() => {
+      revealTimer = setTimeout(() => {
+        revealTimer = 0;
         box.classList.remove('mg-shaking');
         if (!response || !response.ok || !data) {
-          resultEl.textContent = (data && data.error) || 'เกิดข้อผิดพลาด กรุณาลองใหม่';
-          btn.disabled = false;
+          releaseBusyState((data && data.error) || 'ระบบตอบช้า กรุณากดลองใหม่');
           return;
         }
 
@@ -240,6 +271,7 @@
         }
         if (balanceEl && typeof data.walletBalance === 'number') balanceEl.textContent = data.walletBalance.toLocaleString();
         btn.disabled = false;
+        btn.removeAttribute('aria-busy');
       }, Math.max(0, minShakeMs - elapsed));
     });
   });
