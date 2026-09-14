@@ -833,7 +833,7 @@ router.post('/home-sections', async (req, res) => {
   }
   const limit = Math.min(30, Math.max(1, parseInt(req.body.limit, 10) || 5));
   const productIds = mode === 'manual' ? [].concat(req.body.productIds || []).filter(Boolean) : [];
-  store.data.homeSections.push({ id: store.genId(8), title, mode, limit, productIds, enabled: true });
+  store.data.homeSections.push({ id: store.genId(8), title, mode, limit, productIds, imageUrl: String(req.body.imageUrl || '').trim(), enabled: true });
   await store.save();
   req.flash('success', 'เพิ่มหมวดหมู่แล้ว');
   res.redirect('/admin/home-sections');
@@ -851,6 +851,7 @@ router.post('/home-sections/:id/edit', async (req, res) => {
   section.mode = req.body.mode === 'manual' ? 'manual' : 'newest';
   section.limit = Math.min(30, Math.max(1, parseInt(req.body.limit, 10) || 5));
   section.productIds = section.mode === 'manual' ? [].concat(req.body.productIds || []).filter(Boolean) : [];
+  section.imageUrl = String(req.body.imageUrl || '').trim();
   await store.save();
   req.flash('success', 'บันทึกหมวดหมู่แล้ว');
   res.redirect('/admin/home-sections');

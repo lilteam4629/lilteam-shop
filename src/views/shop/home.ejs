@@ -33,6 +33,14 @@
   }
   @media(max-width:900px){body{background-image:none!important;background-color:var(--bg)!important;background-attachment:scroll!important}}
 </style>
+<style>
+/* Category banners mirror the storefront reference: wide 600x200 artwork with metadata below. */
+.home-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:14px!important}
+.home-category-card{display:block!important;padding:0!important;overflow:hidden!important}
+.home-category-image{width:100%!important;height:auto!important;aspect-ratio:3/1!important}
+.home-category-copy{padding:9px 12px 11px!important}
+@media(max-width:640px){.home-category-grid{grid-template-columns:1fr!important;gap:10px!important}.home-category-image{aspect-ratio:3/1!important}}
+</style>
 <% } %>
 
 <% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2) { %>
@@ -152,8 +160,8 @@
   <div class="home-category-grid">
     <% homeSections.forEach(section => { const cover = section.products[0]; %>
       <a class="home-category-card" href="#home-section-<%= section.id %>">
-        <span class="home-category-image"><% if (cover && cover.images && cover.images[0]) { %><img src="<%= cover.images[0] %>" alt="" loading="lazy" decoding="async" /><% } else { %><span>✦</span><% } %></span>
-        <span class="home-category-copy"><b><%= section.title %></b><small><%= section.products.length %> สินค้า</small></span><span class="home-category-arrow">↗</span>
+        <span class="home-category-image"><% if (section.imageUrl || (cover && cover.images && cover.images[0])) { %><img src="<%= section.imageUrl || cover.images[0] %>" alt="" loading="lazy" decoding="async" /><% } else { %><span>✦</span><% } %></span>
+        <span class="home-category-copy"><b><%= section.title %></b><small>สินค้าที่แสดง <%= section.products.length %> รายการ</small></span><span class="home-category-arrow">↗</span>
       </a>
     <% }) %>
   </div>
