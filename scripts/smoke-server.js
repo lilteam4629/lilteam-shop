@@ -203,6 +203,8 @@ async function run() {
     if (mainLayoutSource.includes("getContext('2d',{alpha:true,desynchronized:true})")) throw new Error('rain canvas still uses unsafe desynchronized compositing');
     if (mainLayoutSource.includes("contains('page-is-scrolling')||now-last")) throw new Error('rain still freezes while the user scrolls');
     if (/mobile-is-scrolling[^\n]{0,120}(return|continue)/.test(mainLayoutSource)) throw new Error('rain still pauses during touch scrolling');
+    if (!mainLayoutSource.includes("Math.min(.08,Math.max(.001,(now-last)/1000))")) throw new Error('rain does not recover its velocity after dropped frames');
+    if (!mainLayoutSource.includes("addEventListener('pageshow',start)")) throw new Error('rain lifecycle does not restart reliably');
     if (mainLayoutSource.includes("now-last<(coarse?34:25)")) throw new Error('rain is still throttled below the display refresh rate');
     if (!mainLayoutSource.includes("coarse&&w&&Math.abs(nextW-w)<2")) throw new Error('mobile browser chrome resize guard is missing');
     if (mainLayoutSource.includes('drops.filter(')) throw new Error('rain allocates filtered drop arrays during animation');

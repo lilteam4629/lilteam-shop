@@ -27,8 +27,12 @@ assert.match(motionCss, /scroll-reveal-admin\{transform:translate3d\(0,24px,0\) 
 assert.match(motionCss, /:not\(\.scroll-reveal-admin\)/, 'mobile performance overrides must not flatten the admin bounce');
 assert.doesNotMatch(layout, /mobile-is-scrolling[^\n]{0,120}(return|continue)/,
   'rain must not freeze while a touch device scrolls');
-assert.match(layout, /contain:strict;will-change:contents/,
+assert.match(layout, /contain:layout paint size;transform:translateZ\(0\);will-change:transform/,
   'rain canvas must stay isolated from page layout and paint');
+assert.match(layout, /Math\.min\(\.08,Math\.max\(\.001,\(now-last\)\/1000\)\)/,
+  'rain must preserve its velocity after a dropped frame');
+assert.match(layout, /function start\(\).*function stop\(\)/s,
+  'rain must restart reliably after browser lifecycle suspension');
 assert.doesNotMatch(adminLayout, /admin-scroll-motion-v1\.css|admin-mobile-motion\.js|admin-motion\.js|admin-page-surface/, 'admin must not load or expose the removed bounce system');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
