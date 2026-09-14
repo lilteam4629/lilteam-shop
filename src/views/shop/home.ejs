@@ -176,6 +176,10 @@
 @media(max-width:640px){.home-category-grid{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;overflow:visible!important;padding-bottom:0}.home-category-card{display:block!important;width:100%!important;flex:none!important;scroll-snap-align:none}.home-category-image{width:100%!important}}
 </style>
 <% } %>
+<style>
+/* Keep recommended category banners full-width on phones, regardless of background setting. */
+@media(max-width:640px){.home-category-grid{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;overflow:visible!important;padding-bottom:0}.home-category-card{display:block!important;width:100%!important;flex:none!important;scroll-snap-align:none}.home-category-image{width:100%!important}}
+</style>
 
 <% if (settings.showOpenHoursBar !== false) { %>
 <section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6">
