@@ -933,6 +933,16 @@ router.get('/rangers-catalog/source', requireSystemLab, (req, res) => {
   res.json(rangersSource.queryCatalog(req.query));
 });
 
+router.post('/rangers-catalog/refresh', requireSystemLab, async (req, res) => {
+  try {
+    const result = await rangersSource.refresh();
+    req.flash('success', `อัปเดตข้อมูลแล้ว ${result.rangerCount} ตัวละคร และ ${result.gearCount} เกียร์`);
+  } catch (error) {
+    req.flash('error', `อัปเดตไม่สำเร็จ ระบบยังใช้ข้อมูลเดิม: ${error.message}`);
+  }
+  res.redirect('/admin/rangers-catalog');
+});
+
 router.post('/rangers-catalog/assign', requireSystemLab, async (req, res) => {
   const productId = String(req.body.productId || '');
   if (!store.data.products.some(product => product.id === productId)) {
