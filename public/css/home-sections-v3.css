@@ -7,3 +7,5 @@
 @media(max-width:700px){.hs-picker label>span{min-height:0}.hs-picker label img{width:100%;height:auto}}
 
 .product-pick-card img{width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important}.product-pick-card{height:auto!important;background:#080808}
+.hs-controls>form{display:flex}.hs-controls .hs-delete-button{border-color:color-mix(in srgb,#ef4444 45%,var(--border));background:color-mix(in srgb,#ef4444 10%,var(--card));color:#ef4444;font-weight:700}.hs-controls .hs-delete-button:hover{border-color:#ef4444;background:color-mix(in srgb,#ef4444 18%,var(--card))}
+@media(max-width:700px){.hs-controls{flex-wrap:wrap}.hs-controls>form{margin-left:auto}.hs-controls .hs-delete-button{min-width:54px}}

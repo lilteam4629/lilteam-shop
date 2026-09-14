@@ -170,6 +170,16 @@ async function checkStorefrontModels(cookie) {
   if (!home.body.includes('storefront-model-line-rangers') || !home.body.includes('storefront-line-rangers-v1.css')) throw new Error('LINE Rangers model is not active on storefront');
 }
 
+async function checkHomeSectionDelete(cookie) {
+  const page = await fetchOk('/admin/home-sections', 'text/html', { cookie });
+  const action = page.body.match(/action="(\/admin\/home-sections\/[^"/]+\/delete)"/)?.[1];
+  if (!action || !page.body.includes('hs-delete-button')) throw new Error('home section does not expose its delete action');
+  const deleted = await request(action, { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' } });
+  if (deleted.statusCode !== 302 || deleted.headers.location !== '/admin/home-sections') throw new Error('home section delete failed');
+  const after = await fetchOk('/admin/home-sections', 'text/html', { cookie });
+  if (after.body.includes(`action="${action}"`)) throw new Error('deleted home section is still present');
+}
+
 async function run() {
   try {
     let ready = false;
@@ -234,6 +244,7 @@ async function run() {
     if (mainAdmin.body.includes('admin-page-surface')) throw new Error('admin still exposes the removed animated page surface');
     await checkInstalledDisabledRainModule(cookie);
     await checkStorefrontModels(cookie);
+    await checkHomeSectionDelete(cookie);
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);
     const missing = await request('/definitely-missing');
