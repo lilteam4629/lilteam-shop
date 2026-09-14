@@ -73,9 +73,10 @@ function rowsForView(view) {
   if (view === 'gear' || ['WEAPON', 'ARMOR', 'ACC'].includes(view)) return view === 'gear' ? gears : gears.filter(x => x.gearType === view);
   return rangers;
 }
-function queryCatalog({ q = '', view = 'all', page = 1, limit = 60 } = {}) {
+function queryCatalog({ q = '', view = 'all', page = 1, limit = 60, codes = [] } = {}) {
   const normalized = String(q).trim().toLowerCase().slice(0, 80), safeLimit = Math.min(100, Math.max(12, Number(limit) || 60)), safePage = Math.max(1, Number(page) || 1);
   let rows = rowsForView(view);
+  if (Array.isArray(codes) && codes.length) { const allowed = new Set(codes.map(String)); rows = rows.filter(item => allowed.has(String(item.code))); }
   if (normalized) rows = rows.filter(item => `${item.name} ${item.code}`.toLowerCase().includes(normalized));
   const total = rows.length, start = (safePage - 1) * safeLimit;
   return { items: rows.slice(start, start + safeLimit).map(item => ({ ...item, imageUrl: imageUrl(item) })), total, page: safePage, pages: Math.max(1, Math.ceil(total / safeLimit)), updatedAt, pvpUpdatedAt, view };

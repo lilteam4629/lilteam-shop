@@ -144,7 +144,14 @@ router.get('/api/rangers-catalog', (req, res) => {
   if (!req.tenantShop?.isSystemLab || !store.data.settings.rangersCatalog?.enabled) {
     return res.status(404).json({ error: 'not_found' });
   }
-  res.json(rangersSource.queryCatalog(req.query));
+  const query = { ...req.query };
+  if (query.view === 'available') {
+    query.view = 'all';
+    query.codes = Object.values(store.data.settings.rangersCatalog.productAssignments || {}).flat().map(String);
+  }
+  const result = rangersSource.queryCatalog(query);
+  result.view = req.query.view || 'all';
+  res.json(result);
 });
 
 router.get('/preview/rangers-market', requireAdmin, (req, res) => {
