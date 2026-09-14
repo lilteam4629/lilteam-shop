@@ -41,6 +41,8 @@ assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin naviga
 assert.doesNotMatch(adminLayout, /closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/, 'ordinary admin links must navigate directly like rent-app');
 assert.match(shopRoutes, /const HOME_PAGE_SIZE = 24/, 'home must cap the initial product DOM to 24 items');
 assert.match(shopRoutes, /active\.slice\(\(page - 1\) \* HOME_PAGE_SIZE, page \* HOME_PAGE_SIZE\)/, 'home must paginate without dropping catalog products');
+assert.match(shopRoutes, /UNPAGINATED_HOME_TENANTS = new Set\(\['moopee-shop'\]\)/, 'Moopee Shop must be the only tenant with an unpaginated home catalog');
+assert.match(shopRoutes, /showAllProducts\s*\? active\s*:\s*active\.slice/, 'the selected tenant must receive every visible product on its home page');
 assert.match(homeView, /productTotalPages > 1/, 'home must expose navigation to every product page');
 assert.match(adminMobileCss, /main > \.grid\[class~="md:grid-cols-2"\][\s\S]{0,300}min-width: 0/, 'mobile minigame preview grid must be allowed to shrink');
 assert.match(adminMobileCss, /admin-page-minigame \.mg-stage[^}]*height: 168px/, 'mobile box preview must keep a readable stage');

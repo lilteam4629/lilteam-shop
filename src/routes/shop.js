@@ -81,8 +81,9 @@ function latestOrderCards() {
 }
 
 const HOME_PAGE_SIZE = 24;
+const UNPAGINATED_HOME_TENANTS = new Set(['moopee-shop']);
 
-function homeViewData(heroPreviewV2 = false, requestedPage = 1) {
+function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts = false) {
   const stockCounts = availableStockCounts();
   const active = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
   const scheduledProducts = store.data.products
@@ -101,9 +102,11 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1) {
   // Every product is still reachable (nothing is silently capped) — just
   // paginated instead of rendering the entire catalog in one page load,
   // which was ballooning page weight/DOM size once a shop had 50+ products.
-  const totalPages = Math.max(1, Math.ceil(active.length / HOME_PAGE_SIZE));
-  const page = Math.min(totalPages, Math.max(1, Number(requestedPage) || 1));
-  const pageProducts = active.slice((page - 1) * HOME_PAGE_SIZE, page * HOME_PAGE_SIZE);
+  const totalPages = showAllProducts ? 1 : Math.max(1, Math.ceil(active.length / HOME_PAGE_SIZE));
+  const page = showAllProducts ? 1 : Math.min(totalPages, Math.max(1, Number(requestedPage) || 1));
+  const pageProducts = showAllProducts
+    ? active
+    : active.slice((page - 1) * HOME_PAGE_SIZE, page * HOME_PAGE_SIZE);
   return {
     title: 'หน้าแรก',
     stats: shopStats(),
@@ -132,7 +135,9 @@ router.get('/', (req, res) => {
   const view = req.tenantShop?.isSystemLab && store.data.settings.storefrontModel === 'rangers-market'
     ? 'shop/home-rangers-market'
     : 'shop/home';
-  res.render(view, homeViewData(false, req.query.page));
+  const tenantSlug = String(req.tenantShop?.slug || '').toLowerCase();
+  const showAllProducts = UNPAGINATED_HOME_TENANTS.has(tenantSlug);
+  res.render(view, homeViewData(false, req.query.page, showAllProducts));
 });
 
 router.get('/api/rangers-catalog', (req, res) => {
