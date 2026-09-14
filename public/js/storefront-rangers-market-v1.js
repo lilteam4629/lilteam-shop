@@ -6,12 +6,12 @@
     const tokens=search.value.trim().toLocaleLowerCase('th').split(/\s+/).filter(Boolean),mode=stock.value;
     const selectedFilter=selectedCodes.length
       ? c=>selectedCodes.some(code=>(c.dataset.rangerCodes||'').split(',').includes(code))
-      : ()=>true;
+      : ()=>false;
     let visible=cards.filter(c=>selectedFilter(c)&&(!tokens.length||tokens.every(t=>c.dataset.title.includes(t)))&&(mode==='all'||c.dataset.stock===mode)&&(!hideSold?.checked||c.dataset.stock!=='sold'));
     visible.sort((a,b)=>sort.value==='low'?+a.dataset.price-+b.dataset.price:sort.value==='high'?+b.dataset.price-+a.dataset.price:sort.value==='new'?+b.dataset.index-+a.dataset.index:+a.dataset.index-+b.dataset.index);
     const max=Number(limit?.value||visible.length); cards.forEach(c=>c.hidden=true);
     visible.slice(0,max).forEach(c=>{c.hidden=false;grid.appendChild(c)});
-    count.textContent=visible.length; if(filterCount)filterCount.textContent=visible.length; empty.hidden=visible.length!==0;
+    count.textContent=visible.length; if(filterCount)filterCount.textContent=visible.length; empty.textContent=selectedCodes.length?'ไม่พบสินค้าที่มีรายการที่เลือก':'เลือกตัวละครหรือเกียร์เพื่อแสดงสินค้า'; empty.hidden=visible.length!==0;
   }
   search.addEventListener('input',render,{passive:true}); stock.addEventListener('change',render); sort.addEventListener('change',render); limit?.addEventListener('change',render); hideSold?.addEventListener('change',render);
   root.addEventListener('ranger-selection',e=>{selectedCodes=e.detail?.codes||[];render()});
