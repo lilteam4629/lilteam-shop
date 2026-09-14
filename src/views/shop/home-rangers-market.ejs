@@ -5,11 +5,11 @@
   : []; %>
 <div class="rm-page" data-rangers-market>
   <section class="rm-match">
-    <div><small>FIND YOUR PERFECT MATCH</small><h2>ยังเลือกไม่ถูก? หาไอดีที่เหมาะกับคุณ</h2><p>เลือกตัวที่ชอบ แล้วระบบจะแสดงไอดีที่ตรงกับความต้องการ</p></div>
+    <div><small>CURATED FOR YOUR PLAYSTYLE</small><h2>จับคู่ไอดีที่ตรงกับสไตล์คุณ</h2><p>เลือกตัวที่ชอบ แล้วระบบจะแสดงไอดีที่ตรงกับความต้องการ</p></div>
     <a href="#rm-finder">ค้นหาไอดีแนะนำ <span>↗</span></a>
   </section>
   <section class="rm-hero">
-    <div class="rm-hero-copy"><small>LINE RANGERS / FIND YOUR MATCH</small><h1>BUILD YOUR<br><em>ULTIMATE ✦ TEAM.</em></h1><p>ร้านไอดี LINE Rangers</p><div class="rm-stats"><b><%= productTotal %></b> ไอดีในร้าน <i></i><b><%= available.length %></b> พร้อมขาย</div></div>
+    <div class="rm-hero-copy"><small>SYSTEM LAB / CURATED TEAMS</small><h1>เลือกทีมที่ใช่<br><em>แล้วออกไปลุย</em></h1><p>ร้านไอดี LINE Rangers ที่คัดมาให้เลือกง่าย</p><div class="rm-stats"><b><%= productTotal %></b> ไอดีในร้าน <i></i><b><%= available.length %></b> พร้อมขาย</div></div>
     <div class="rm-lineup" aria-label="ตัวละครเด่นจาก LINE Rangers Handbook">
       <% if (spotlight.length) { spotlight.forEach((r, index) => { %><article style="--i:<%= index %>"><img loading="eager" src="<%= r.imageUrl %>" alt="<%= r.name %>" onerror="this.closest('article').hidden=true"><b><%= r.stars %>★</b><span><%= r.name %></span></article><% }) } else { %>
         <div class="rm-catalog-off"><b>LINE RANGERS</b><span>คลังตัวละครยังปิดอยู่</span></div>
@@ -18,7 +18,7 @@
   </section>
   <% if (rangersCatalog && rangersCatalog.enabled) { %>
   <section class="rm-ranger-vault" data-public-ranger-catalog>
-    <header><div><small>RANGER VAULT</small><h2>เลือกตัวละครที่คุณกำลังหา</h2><p>ค้นหาจากคลังทั้งหมด หรือดูอันดับ Top 100 แล้วเลือกซื้อไอดีที่มีตัวละครนั้น</p></div><div class="rm-vault-tabs"><button type="button" data-rv-view="all" class="is-active">ทั้งหมด</button><button type="button" data-rv-view="top100">Top 100</button></div></header>
+    <header><div><small>CHARACTER INDEX</small><h2>ค้นหาตัวละครจากคลัง</h2><p>ค้นหาจากคลังทั้งหมด หรือดูอันดับ Top 100 แล้วเลือกซื้อไอดีที่มีตัวละครนั้น</p></div><div class="rm-vault-tabs"><button type="button" data-rv-view="all" class="is-active">ทั้งหมด</button><button type="button" data-rv-view="top100">Top 100</button></div></header>
     <div class="rm-vault-search"><input type="search" placeholder="ค้นหาชื่อตัวละครหรือรหัส"><span data-rv-count>กำลังโหลด…</span></div>
     <div class="rm-vault-grid" data-rv-grid></div><button type="button" class="rm-vault-more" data-rv-more>ดูเพิ่ม</button>
   </section>
@@ -39,7 +39,7 @@
   .rm-filter-summary{display:flex;justify-content:space-between;gap:12px;margin-top:14px;padding:10px 12px;border-radius:9px;background:#203555;color:#9fb4d6;font-size:12px}.rm-filter-summary strong{color:var(--rm-lime);font-size:14px}.rm-filter-check{display:flex;align-items:center;gap:8px;height:48px;border:1px solid #7890b544;border-radius:12px;background:#0f192d;padding:0 12px;color:#dce8fb}.rm-filter-check input{width:16px!important;height:16px!important}.rm-filter-check span{margin:0!important;white-space:nowrap}@media(max-width:800px){.rm-filter-summary{align-items:flex-start;flex-direction:column}}
   </style>
   <section class="rm-results">
-    <header><span>02</span><div><h2>ไอดีในร้าน <strong id="rm-count"><%= products.length %></strong></h2><p>กดดูรายละเอียดและสั่งซื้อผ่านระบบร้านได้ตามปกติ</p></div></header>
+    <header><span>02</span><div><h2>รายการในร้าน <strong id="rm-count"><%= products.length %></strong></h2><p>กดดูรายละเอียดและสั่งซื้อผ่านระบบร้านได้ตามปกติ</p></div></header>
     <div class="rm-grid" id="rm-grid">
       <% products.forEach((p, index) => { %><article class="rm-card rm-card-row <%= p.stockCount ? '' : 'is-sold' %>" data-title="<%= (p.title+' '+(p.description||'')).toLowerCase() %>" data-stock="<%= p.stockCount ? 'ready' : 'sold' %>" data-price="<%= p.price %>" data-index="<%= index %>">
         <div class="rm-row-info"><h3><%= p.id || p.title %></h3><a href="/game/<%= p.slug %>" class="rm-detail-link">ดูรายละเอียด ↗</a><div class="rm-row-badges"><span><%= p.stockCount ? '● พร้อมขาย' : '● สินค้าหมด' %></span><small><%= p.title %></small></div></div>
@@ -54,6 +54,39 @@
 </div>
 <style>
 .rm-grid{display:flex;flex-direction:column;gap:10px}.rm-card.rm-card-row{display:grid;grid-template-columns:minmax(170px,220px) minmax(100px,140px) minmax(0,1fr) auto;align-items:center;gap:18px;padding:16px 18px;min-height:132px}.rm-card-row .rm-row-info h3{font-size:23px;line-height:1;font-weight:950;color:#f4f7ff}.rm-detail-link{display:block;color:#b9c8e3!important;font-size:12px;margin-top:9px}.rm-row-badges{display:flex;align-items:center;gap:8px;margin-top:10px}.rm-row-badges span{color:#78e7b1;font-size:11px;font-weight:800}.rm-card-row.is-sold .rm-row-badges span{color:#f2a3a3}.rm-row-badges small{color:#8296b8;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rm-row-price small{display:block;color:#8fa1bf;font-size:11px}.rm-row-price del{display:block;color:#7384a2;font-size:12px}.rm-row-price b{display:block;color:var(--rm-lime);font-size:27px;line-height:1.1}.rm-row-rangers>small{display:block;color:#b1c1dc;font-size:10px;margin-bottom:6px}.rm-row-rangers>div{display:flex;gap:6px;align-items:stretch;overflow:hidden}.rm-row-rangers figure{flex:0 0 70px;width:70px;margin:0;border-radius:8px;background:#f5f3ff;color:#202a40;overflow:hidden;text-align:center}.rm-row-rangers img{display:block;width:70px;height:62px;object-fit:contain}.rm-row-rangers figcaption{height:17px;padding:2px;background:#ffd9e8;color:#7e3561;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rm-row-rangers>b{align-self:center;color:var(--rm-lime);font-size:12px}.rm-row-buy{border-radius:10px;background:var(--rm-lime);padding:11px 17px;color:#111a29!important;font-weight:900;text-align:center;white-space:nowrap}.rm-card-row.is-sold .rm-row-buy{background:#3d4b63;color:#d6e0ef!important}@media(max-width:900px){.rm-card.rm-card-row{grid-template-columns:140px 100px minmax(0,1fr);gap:10px;padding:13px}.rm-row-buy{grid-column:1/-1}.rm-row-rangers figure{flex-basis:60px;width:60px}.rm-row-rangers img{width:60px;height:54px}}@media(max-width:560px){.rm-card.rm-card-row{grid-template-columns:1fr 85px;gap:8px}.rm-row-rangers{grid-column:1/-1}.rm-row-price{text-align:right}.rm-row-price b{font-size:21px}.rm-row-rangers figure{flex-basis:52px;width:52px}.rm-row-rangers img{width:52px;height:48px}.rm-row-buy{padding:9px 12px}}
+</style>
+<style id="system-lab-editorial-theme">
+/* System Lab storefront: a deliberately separate editorial direction from the default Rangers template. */
+body.storefront-model-rangers-market{--rm-ink:#182127;--rm-muted:#687278;--rm-paper:#fffdf8;--rm-canvas:#f1eee8;--rm-coral:#d95f43;--rm-teal:#287873;--rm-line:#18212724;background:var(--rm-canvas)!important;color:var(--rm-ink)!important}
+body.storefront-model-rangers-market #site-page-shell{background:radial-gradient(circle at 88% 4%,#f7d9b2 0,transparent 25%),var(--rm-canvas)!important}
+body.storefront-model-rangers-market .rm-page{max-width:1240px;padding:28px 20px 72px;color:var(--rm-ink);font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+body.storefront-model-rangers-market .rm-match,body.storefront-model-rangers-market .rm-hero,body.storefront-model-rangers-market .rm-ranger-vault,body.storefront-model-rangers-market .rm-finder,body.storefront-model-rangers-market .rm-results{border:1px solid var(--rm-line)!important;border-radius:14px!important;background:var(--rm-paper)!important;box-shadow:0 12px 30px #18212712!important}
+body.storefront-model-rangers-market .rm-match{background:#182127!important;color:#fff!important;border:0!important;box-shadow:none!important}
+body.storefront-model-rangers-market .rm-match small{color:#f7c48b!important;letter-spacing:.14em}
+body.storefront-model-rangers-market .rm-match h2{color:#fff!important}
+body.storefront-model-rangers-market .rm-match p{color:#cbd4d1!important}
+body.storefront-model-rangers-market .rm-match>a{background:var(--rm-coral)!important;color:#fff!important;border-radius:8px!important}
+body.storefront-model-rangers-market .rm-hero{overflow:hidden;grid-template-columns:1.05fr .95fr!important;background:linear-gradient(120deg,#d95f43 0%,#e78658 55%,#f4bf7b 100%)!important;min-height:300px}
+body.storefront-model-rangers-market .rm-hero-copy{padding:36px!important}
+body.storefront-model-rangers-market .rm-hero-copy small{color:#fff2d5!important;letter-spacing:.14em}
+body.storefront-model-rangers-market .rm-hero-copy h1{color:#fff!important;font-size:clamp(42px,6vw,78px)!important;letter-spacing:-.06em!important;line-height:.95!important}
+body.storefront-model-rangers-market .rm-hero-copy h1 em{color:#fff2d5!important;font-style:normal}
+body.storefront-model-rangers-market .rm-hero-copy p{color:#fff8ed!important}
+body.storefront-model-rangers-market .rm-stats{color:#fff8ed!important}.storefront-model-rangers-market .rm-stats b{color:#fff!important}
+body.storefront-model-rangers-market .rm-lineup{background:#18212726!important;border-left:1px solid #ffffff44!important}
+body.storefront-model-rangers-market .rm-lineup article{background:#fffdf8!important;border:1px solid #18212722!important;border-radius:8px!important;box-shadow:0 8px 18px #18212720!important;color:var(--rm-ink)!important}
+body.storefront-model-rangers-market .rm-ranger-vault header h2,body.storefront-model-rangers-market .rm-finder h2,body.storefront-model-rangers-market .rm-results h2{color:var(--rm-ink)!important}
+body.storefront-model-rangers-market .rm-ranger-vault header small{color:var(--rm-coral)!important;letter-spacing:.16em}
+body.storefront-model-rangers-market .rm-ranger-vault p,body.storefront-model-rangers-market .rm-finder p,body.storefront-model-rangers-market .rm-results p{color:var(--rm-muted)!important}
+body.storefront-model-rangers-market .rm-vault-tabs button{border-radius:8px!important;border-color:var(--rm-line)!important;background:#fff!important;color:var(--rm-ink)!important}
+body.storefront-model-rangers-market .rm-vault-tabs button.is-active,body.storefront-model-rangers-market .rm-vault-more{background:var(--rm-coral)!important;color:#fff!important;border-color:var(--rm-coral)!important}
+body.storefront-model-rangers-market .rm-vault-search input,body.storefront-model-rangers-market .rm-controls input,body.storefront-model-rangers-market .rm-controls select,body.storefront-model-rangers-market #rm-reset{background:#fff!important;color:var(--rm-ink)!important;border:1px solid var(--rm-line)!important;border-radius:8px!important}
+body.storefront-model-rangers-market .rm-filter-summary{background:#e6f0ed!important;color:#28635d!important}.storefront-model-rangers-market .rm-filter-summary strong{color:var(--rm-coral)!important}
+body.storefront-model-rangers-market .rm-filter-check{background:#fff!important;border-color:var(--rm-line)!important;color:var(--rm-ink)!important;border-radius:8px!important}
+body.storefront-model-rangers-market .rm-card.rm-card-row{background:#fff!important;border:1px solid var(--rm-line)!important;border-left:5px solid var(--rm-teal)!important;border-radius:10px!important;box-shadow:0 6px 18px #1821270f!important}
+body.storefront-model-rangers-market .rm-card-row .rm-row-info h3{color:var(--rm-ink)!important}.storefront-model-rangers-market .rm-detail-link,.storefront-model-rangers-market .rm-row-badges small{color:var(--rm-muted)!important}.storefront-model-rangers-market .rm-row-badges span{color:var(--rm-teal)!important}.storefront-model-rangers-market .rm-row-price small,.storefront-model-rangers-market .rm-row-rangers>small{color:var(--rm-muted)!important}.storefront-model-rangers-market .rm-row-price b{color:var(--rm-coral)!important}.storefront-model-rangers-market .rm-row-rangers figure{background:#f5eee4!important}.storefront-model-rangers-market .rm-row-rangers figcaption{background:#e6f0ed!important;color:#28635d!important}.storefront-model-rangers-market .rm-row-buy{background:#182127!important;color:#fff!important;border-radius:8px!important}.storefront-model-rangers-market .rm-card-row.is-sold{opacity:.65}.storefront-model-rangers-market .rm-card-row.is-sold .rm-row-buy{background:#a9aaa4!important;color:#fff!important}
+body.storefront-model-rangers-market .rm-credit{color:var(--rm-muted)!important}body.storefront-model-rangers-market .rm-credit a{color:var(--rm-coral)!important}
+@media(max-width:700px){body.storefront-model-rangers-market .rm-page{padding:14px 10px 48px}body.storefront-model-rangers-market .rm-hero{display:block!important}.storefront-model-rangers-market .rm-hero-copy{padding:26px 22px!important}.storefront-model-rangers-market .rm-hero-copy h1{font-size:48px!important}.storefront-model-rangers-market .rm-lineup{min-height:180px!important;border-left:0!important;border-top:1px solid #ffffff44}.storefront-model-rangers-market .rm-match{display:block!important}.storefront-model-rangers-market .rm-match>a{display:inline-block;margin-top:12px}}
 </style>
 <script src="<%= asset('js/storefront-rangers-market-v1.js') %>" defer></script>
 <% if (rangersCatalog && rangersCatalog.enabled) { %><script src="<%= asset('js/rangers-catalog-v1.js') %>" defer></script><% } %>
