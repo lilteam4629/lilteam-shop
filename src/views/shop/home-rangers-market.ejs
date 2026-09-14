@@ -24,14 +24,20 @@
   </section>
   <% } %>
   <section class="rm-finder" id="rm-finder">
-    <header><span>01</span><div><h2>เลือกไอดีที่เหมาะกับคุณ</h2><p>ค้นหา กรองสถานะ และเรียงราคาได้ทันที</p></div></header>
+    <header><span>01</span><div><h2>เลือกตัวละครและเกียร์</h2><p>ค้นหาไอดีที่มีตัวละครหรือเกียร์ที่คุณต้องการ</p></div></header>
     <div class="rm-controls">
-      <label><span>ค้นหาไอดี</span><input id="rm-search" type="search" placeholder="ชื่อสินค้า รหัส หรือรายละเอียด"></label>
-      <label><span>สถานะ</span><select id="rm-stock"><option value="all">ทั้งหมด (<%= products.length %>)</option><option value="ready">พร้อมขาย (<%= available.length %>)</option><option value="sold">สินค้าหมด (<%= soldOut.length %>)</option></select></label>
+      <label><span>ค้นหาไอดี ตัวละคร หรือเกียร์</span><input id="rm-search" type="search" placeholder="ค้นหาชื่อหรือรหัส"></label>
       <label><span>เรียงลำดับ</span><select id="rm-sort"><option value="default">สินค้าแนะนำ</option><option value="low">ราคาน้อย → มาก</option><option value="high">ราคามาก → น้อย</option><option value="new">ล่าสุด</option></select></label>
+      <label><span>จำนวนต่อหน้า</span><select id="rm-limit"><option value="10">10 ต่อหน้า</option><option value="20" selected>20 ต่อหน้า</option><option value="50">50 ต่อหน้า</option></select></label>
+      <label><span>สถานะสินค้า</span><select id="rm-stock"><option value="all">ทั้งหมด (<%= products.length %>)</option><option value="ready">พร้อมขาย (<%= available.length %>)</option><option value="sold">สินค้าหมด (<%= soldOut.length %>)</option></select></label>
+      <label class="rm-filter-check"><input id="rm-hide-sold" type="checkbox"><span>ซ่อนสินค้าหมด</span></label>
       <button type="button" id="rm-reset">ล้างตัวกรอง</button>
     </div>
+    <div class="rm-filter-summary"><span>พบ <strong id="rm-filter-count"><%= products.length %></strong> รายการ</span><span>ข้อมูลตัวละครจาก LINE Rangers Handbook</span></div>
   </section>
+  <style>
+  .rm-filter-summary{display:flex;justify-content:space-between;gap:12px;margin-top:14px;padding:10px 12px;border-radius:9px;background:#203555;color:#9fb4d6;font-size:12px}.rm-filter-summary strong{color:var(--rm-lime);font-size:14px}.rm-filter-check{display:flex;align-items:center;gap:8px;height:48px;border:1px solid #7890b544;border-radius:12px;background:#0f192d;padding:0 12px;color:#dce8fb}.rm-filter-check input{width:16px!important;height:16px!important}.rm-filter-check span{margin:0!important;white-space:nowrap}@media(max-width:800px){.rm-filter-summary{align-items:flex-start;flex-direction:column}}
+  </style>
   <section class="rm-results">
     <header><span>02</span><div><h2>ไอดีในร้าน <strong id="rm-count"><%= products.length %></strong></h2><p>กดดูรายละเอียดและสั่งซื้อผ่านระบบร้านได้ตามปกติ</p></div></header>
     <div class="rm-grid" id="rm-grid">
