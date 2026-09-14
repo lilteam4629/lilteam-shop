@@ -180,6 +180,15 @@ router.get('/preview/mobile-cinematic-7f4c2a', (req, res) => {
 router.get('/products', (req, res) => {
   const stockCounts = availableStockCounts();
   let products = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
+  const recommendedId = String(req.query.recommended || '').trim();
+  const recommendedCategory = recommendedId
+    ? (store.data.recommendedCategories || []).find(category => String(category.id) === recommendedId)
+    : null;
+  if (recommendedId && !recommendedCategory) return res.status(404).render('shop/404', { title: 'ไม่พบหมวดหมู่' });
+  if (recommendedCategory) {
+    const productIds = new Set((recommendedCategory.productIds || []).map(String));
+    products = products.filter(product => productIds.has(String(product.id)));
+  }
   const requestedIds = String(req.query.tags || req.query.tag || '').split(',').map(s => s.trim()).filter(Boolean);
   const activeFilterTags = requestedIds
     .map(id => store.data.filterTags.find(tag => tag.id === id))
@@ -195,7 +204,9 @@ router.get('/products', (req, res) => {
   }
   products = sortProducts(products, req.query.sort);
   res.render('shop/listing', {
-    title: activeFilterTags.length ? `สินค้า: ${activeFilterTags.map(t => t.name).join(' + ')}` : 'สินค้าเกมทั้งหมด',
+    title: recommendedCategory
+      ? `หมวดหมู่: ${recommendedCategory.title}`
+      : (activeFilterTags.length ? `สินค้า: ${activeFilterTags.map(t => t.name).join(' + ')}` : 'สินค้าเกมทั้งหมด'),
     products,
     listType: 'products',
     sort: req.query.sort || '',

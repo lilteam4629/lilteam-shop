@@ -43,7 +43,10 @@ assert.match(shopRoutes, /const HOME_PAGE_SIZE = 24/, 'home must cap the initial
 assert.match(shopRoutes, /active\.slice\(\(page - 1\) \* HOME_PAGE_SIZE, page \* HOME_PAGE_SIZE\)/, 'home must paginate without dropping catalog products');
 assert.match(shopRoutes, /UNPAGINATED_HOME_TENANTS = new Set\(\['moopee-shop'\]\)/, 'Moopee Shop must be the only tenant with an unpaginated home catalog');
 assert.match(shopRoutes, /showAllProducts\s*\? active\s*:\s*active\.slice/, 'the selected tenant must receive every visible product on its home page');
+assert.match(shopRoutes, /req\.query\.recommended/, 'recommended category links must be handled by the products route');
+assert.match(shopRoutes, /recommendedCategory\.productIds/, 'recommended category listings must filter by assigned product ids');
 assert.match(homeView, /productTotalPages > 1/, 'home must expose navigation to every product page');
+assert.match(homeView, /recommended=<%=?\s*encodeURIComponent\(category\.id\)/, 'recommended category cards must link to their filtered listing');
 assert.match(adminMobileCss, /main > \.grid\[class~="md:grid-cols-2"\][\s\S]{0,300}min-width: 0/, 'mobile minigame preview grid must be allowed to shrink');
 assert.match(adminMobileCss, /admin-page-minigame \.mg-stage[^}]*height: 168px/, 'mobile box preview must keep a readable stage');
 assert.match(minigameWidget, /\.mg-box {/, 'box preview must render its initial gift');

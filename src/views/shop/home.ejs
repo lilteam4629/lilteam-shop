@@ -162,7 +162,7 @@
   <div class="home-category-head"><div class="home-category-heading"><span class="home-category-icon">◇</span><span><b>หมวดหมู่แนะนำ</b><small>Recommended Categories</small></span></div><a href="<%= (typeof isAdmin !== 'undefined' && isAdmin) ? '/admin/home-sections' : '/products' %>"><%= (typeof isAdmin !== 'undefined' && isAdmin) ? 'เพิ่มหมวด ›' : 'ดูทั้งหมด ›' %></a></div>
   <div class="home-category-grid">
     <% recommendedCategories.forEach(category => { %>
-      <a class="home-category-card" href="/products">
+      <a class="home-category-card" href="/products?recommended=<%= encodeURIComponent(category.id) %>">
         <span class="home-category-image"><% if (category.imageUrl) { %><img src="<%= category.imageUrl %>" alt="<%= category.title %>" loading="lazy" decoding="async" /><% } else { %><span>600 × 200</span><% } %></span>
         <span class="home-category-copy"><b><%= category.title %></b><small>สินค้าทั้งหมด <%= category.count %> รายการ</small></span><span class="home-category-arrow">↗</span>
       </a>
