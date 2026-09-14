@@ -176,7 +176,7 @@ function defaultData() {
         style: 'normal',
       },
       productCardStyle: 'natural', // 'natural' = full uncropped image, price below; 'classic' = cropped cover photo with price overlaid
-      storefrontModel: 'classic', // 'classic' | 'line-rangers'
+      storefrontModel: 'classic', // 'classic' | 'line-rangers' | 'rangers-market'
       music: {
         enabled: false,
         youtubeUrl: '',
@@ -634,7 +634,7 @@ function migrateSchema(db) {
     };
     changed = true;
   }
-  if (!['classic', 'line-rangers'].includes(db.settings.storefrontModel)) {
+  if (!['classic', 'line-rangers', 'rangers-market'].includes(db.settings.storefrontModel)) {
     db.settings.storefrontModel = 'classic';
     changed = true;
   }
