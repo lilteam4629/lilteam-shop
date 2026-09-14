@@ -1,0 +1,42 @@
+<% const available = products.filter(p => p.stockCount > 0); %>
+<% const soldOut = products.filter(p => p.stockCount <= 0); %>
+<% const spotlight = [
+  { id:'u1535e-brown', name:'Wild Ginseng Brown', stars:9 },
+  { id:'u1534h-brown', name:'Big Carrot Brown', stars:8 },
+  { id:'u1534e-brown', name:'Radish Brown', stars:8 }
+]; %>
+<div class="rm-page" data-rangers-market>
+  <section class="rm-match">
+    <div><small>FIND YOUR PERFECT MATCH</small><h2>ยังเลือกไม่ถูก? หาไอดีที่เหมาะกับคุณ</h2><p>เลือกตัวที่ชอบ แล้วระบบจะแสดงไอดีที่ตรงกับความต้องการ</p></div>
+    <a href="#rm-finder">ค้นหาไอดีแนะนำ <span>↗</span></a>
+  </section>
+  <section class="rm-hero">
+    <div class="rm-hero-copy"><small>LINE RANGERS / FIND YOUR MATCH</small><h1>BUILD YOUR<br><em>ULTIMATE ✦ TEAM.</em></h1><p>ร้านไอดี LINE Rangers</p><div class="rm-stats"><b><%= productTotal %></b> ไอดีในร้าน <i></i><b><%= available.length %></b> พร้อมขาย</div></div>
+    <div class="rm-lineup" aria-label="ตัวละครเด่นจาก LINE Rangers Handbook">
+      <% spotlight.forEach((r, index) => { %><article style="--i:<%= index %>"><img loading="eager" src="https://rangers.lerico.net/res/<%= r.id %>/<%= r.id %>-thum.png" alt="<%= r.name %>" onerror="this.closest('article').hidden=true"><b><%= r.stars %>★</b><span><%= r.name %></span></article><% }) %>
+    </div>
+  </section>
+  <section class="rm-finder" id="rm-finder">
+    <header><span>01</span><div><h2>เลือกไอดีที่เหมาะกับคุณ</h2><p>ค้นหา กรองสถานะ และเรียงราคาได้ทันที</p></div></header>
+    <div class="rm-controls">
+      <label><span>ค้นหาไอดี</span><input id="rm-search" type="search" placeholder="ชื่อสินค้า รหัส หรือรายละเอียด"></label>
+      <label><span>สถานะ</span><select id="rm-stock"><option value="all">ทั้งหมด (<%= products.length %>)</option><option value="ready">พร้อมขาย (<%= available.length %>)</option><option value="sold">สินค้าหมด (<%= soldOut.length %>)</option></select></label>
+      <label><span>เรียงลำดับ</span><select id="rm-sort"><option value="default">สินค้าแนะนำ</option><option value="low">ราคาน้อย → มาก</option><option value="high">ราคามาก → น้อย</option><option value="new">ล่าสุด</option></select></label>
+      <button type="button" id="rm-reset">ล้างตัวกรอง</button>
+    </div>
+  </section>
+  <section class="rm-results">
+    <header><span>02</span><div><h2>ไอดีในร้าน <strong id="rm-count"><%= products.length %></strong></h2><p>กดดูรายละเอียดและสั่งซื้อผ่านระบบร้านได้ตามปกติ</p></div></header>
+    <div class="rm-grid" id="rm-grid">
+      <% products.forEach((p, index) => { %><article class="rm-card <%= p.stockCount ? '' : 'is-sold' %>" data-title="<%= (p.title+' '+(p.description||'')).toLowerCase() %>" data-stock="<%= p.stockCount ? 'ready' : 'sold' %>" data-price="<%= p.price %>" data-index="<%= index %>">
+        <a class="rm-image" href="/game/<%= p.slug %>"><% if (p.images && p.images[0]) { %><img loading="lazy" src="<%= p.images[0] %>" alt="<%= p.title %>"><% } else { %><span>LINE<br>RANGERS</span><% } %></a>
+        <div class="rm-card-body"><div class="rm-card-top"><h3><%= p.title %></h3><span class="rm-status"><%= p.stockCount ? 'พร้อมขาย' : 'สินค้าหมด' %></span></div>
+        <p><%= p.description || 'ไอดี LINE Rangers พร้อมตรวจสอบรายละเอียดก่อนซื้อ' %></p>
+        <div class="rm-card-foot"><div><small>ราคา</small><b>฿<%= Number(p.price).toLocaleString() %></b></div><a href="/game/<%= p.slug %>"><%= p.stockCount ? 'ดูไอดีนี้' : 'ดูรายละเอียด' %> ↗</a></div></div>
+      </article><% }) %>
+    </div>
+    <div class="rm-empty" id="rm-empty" hidden>ไม่พบไอดีที่ตรงกับตัวกรอง</div>
+  </section>
+  <footer class="rm-credit">ข้อมูลตัวละครและรูปจาก <a href="https://rangers.lerico.net/en/rangers-book" target="_blank" rel="noopener">LINE Rangers Handbook ↗</a> · สินค้า ราคา และสต็อกมาจากร้านนี้</footer>
+</div>
+<script src="<%= asset('js/storefront-rangers-market-v1.js') %>" defer></script>

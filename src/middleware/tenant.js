@@ -103,6 +103,21 @@ async function tenantResolver(req, res, next) {
     if (shop.isSystemLab && ensureLabRainModule(tenantDb)) {
       await store.runInTenant(shop.id, tenantDb, () => store.transact(() => {}));
     }
+    // New storefront models are trialled on the isolated System Lab first.
+    // The marker makes this a one-time activation: after the owner changes the
+    // model manually, later requests will respect that choice.
+    if (shop.isSystemLab && !tenantDb.settings?.systemModules?.rangersMarketPreview) {
+      tenantDb.settings ||= {};
+      tenantDb.settings.storefrontModel = 'rangers-market';
+      tenantDb.settings.systemModules ||= {};
+      tenantDb.settings.systemModules.rangersMarketPreview = {
+        installed: true,
+        enabled: true,
+        version: '1.0.0',
+        installedAt: new Date().toISOString(),
+      };
+      await store.runInTenant(shop.id, tenantDb, () => store.transact(() => {}));
+    }
     req.tenantShop = shop;
     // Existing shops default to the shared platform provider, while still
     // being able to opt into their own provider account from the admin UI.

@@ -885,7 +885,7 @@ router.get('/storefront-models', (req, res) => {
 });
 
 router.post('/storefront-models', async (req, res) => {
-  const allowed = new Set(['classic', 'line-rangers']);
+  const allowed = new Set(['classic', 'line-rangers', 'rangers-market']);
   const model = String(req.body.model || '');
   if (!allowed.has(model)) {
     req.flash('error', 'ไม่พบโมเดลหน้าร้านที่เลือก');
@@ -893,7 +893,12 @@ router.post('/storefront-models', async (req, res) => {
   }
   store.data.settings.storefrontModel = model;
   await store.save();
-  req.flash('success', model === 'line-rangers' ? 'เปิดใช้โมเดลหน้าร้าน LINE Rangers แล้ว' : 'กลับไปใช้โมเดลหน้าร้านมาตรฐานแล้ว');
+  const modelNames = {
+    classic: 'โมเดลหน้าร้านมาตรฐาน',
+    'line-rangers': 'โมเดล LINE Rangers เดิม',
+    'rangers-market': 'โมเดล Rangers Market',
+  };
+  req.flash('success', `เปิดใช้${modelNames[model]}แล้ว`);
   res.redirect('/admin/storefront-models');
 });
 

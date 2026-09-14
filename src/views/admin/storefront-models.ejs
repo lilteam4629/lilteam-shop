@@ -3,7 +3,7 @@
   <a href="/" target="_blank" rel="noopener" class="studio-secondary-action">ดูหน้าร้าน ↗</a>
 </div>
 
-<form action="/admin/storefront-models" method="post" class="grid lg:grid-cols-2 gap-5 max-w-6xl">
+<form action="/admin/storefront-models" method="post" class="grid lg:grid-cols-3 gap-5 max-w-7xl">
   <label class="model-option block rounded-2xl border-2 <%= currentModel === 'classic' ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> bg-[var(--card)] p-4 cursor-pointer">
     <input type="radio" name="model" value="classic" class="sr-only" <%= currentModel === 'classic' ? 'checked' : '' %>>
     <div class="aspect-[16/10] rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4 overflow-hidden">
@@ -11,6 +11,15 @@
       <div class="grid grid-cols-3 gap-2"><i class="h-20 rounded-lg bg-[var(--card)] border border-[var(--border)]"></i><i class="h-20 rounded-lg bg-[var(--card)] border border-[var(--border)]"></i><i class="h-20 rounded-lg bg-[var(--card)] border border-[var(--border)]"></i></div>
     </div>
     <div class="flex items-center justify-between gap-3 mt-4"><div><b class="block">โมเดลมาตรฐาน</b><small class="text-[var(--text-4)]">รูปแบบเดิมของร้าน ใช้สีตามธีมที่ตั้งไว้</small></div><span class="text-[var(--gold-text)] font-bold"><%= currentModel === 'classic' ? '✓ ใช้อยู่' : 'เลือก' %></span></div>
+  </label>
+  <label class="model-option block rounded-2xl border-2 <%= currentModel === 'rangers-market' ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> bg-[var(--card)] p-4 cursor-pointer">
+    <input type="radio" name="model" value="rangers-market" class="sr-only" <%= currentModel === 'rangers-market' ? 'checked' : '' %>>
+    <div class="rangers-market-preview aspect-[16/10] rounded-xl border border-blue-400/40 p-4 overflow-hidden">
+      <div class="h-6 rounded-lg bg-[#121d35] mb-3"></div><div class="h-14 rounded-xl bg-gradient-to-r from-[#24559a] to-[#293a85] mb-3"></div>
+      <div class="flex gap-2"><i class="h-16 flex-1 rounded-lg bg-[#f7f8fc]"></i><i class="h-16 flex-1 rounded-lg bg-[#f7f8fc]"></i><i class="h-16 flex-1 rounded-lg bg-[#f7f8fc]"></i></div>
+    </div>
+    <div class="flex items-start justify-between gap-3 mt-4"><div><b class="block">Rangers Market</b><small class="text-[var(--text-4)]">หน้าเลือกทีม ตัวกรอง และรายการไอดีรูปแบบใหม่</small></div><span class="text-[var(--gold-text)] font-bold shrink-0"><%= currentModel === 'rangers-market' ? '✓ ใช้อยู่' : 'เลือก' %></span></div>
+    <a href="/preview/rangers-market" target="_blank" rel="noopener" class="model-preview-link mt-3 inline-flex text-sm font-semibold text-[var(--gold-text)]">ดูตัวอย่างก่อนใช้ ↗</a>
   </label>
 
   <label class="model-option block rounded-2xl border-2 <%= currentModel === 'line-rangers' ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> bg-[var(--card)] p-4 cursor-pointer">
@@ -26,6 +35,7 @@
 
 <style>
 .line-rangers-preview{background:radial-gradient(circle at 50% 20%,#145ca8 0,#071a38 42%,#030916 100%)}
+.rangers-market-preview{background:linear-gradient(145deg,#0f1930,#203d75)}
 .model-option{transition:border-color .2s,transform .2s,box-shadow .2s}.model-option:has(input:checked){box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 18%,transparent)}.model-option:hover{transform:translateY(-2px)}
 @media(prefers-reduced-motion:reduce){.model-option{transition:none}.model-option:hover{transform:none}}
 </style>
@@ -34,4 +44,5 @@ document.querySelectorAll('.model-option input').forEach(input=>input.addEventLi
   document.querySelectorAll('.model-option').forEach(label=>label.style.borderColor='var(--border)');
   input.closest('.model-option').style.borderColor='var(--gold)';
 }));
+document.querySelectorAll('.model-preview-link').forEach(link=>link.addEventListener('click',event=>event.stopPropagation()));
 </script>

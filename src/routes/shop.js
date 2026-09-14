@@ -124,7 +124,18 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1) {
 }
 
 router.get('/', (req, res) => {
-  res.render('shop/home', homeViewData(false, req.query.page));
+  const view = store.data.settings.storefrontModel === 'rangers-market'
+    ? 'shop/home-rangers-market'
+    : 'shop/home';
+  res.render(view, homeViewData(false, req.query.page));
+});
+
+router.get('/preview/rangers-market', (req, res) => {
+  res.render('shop/home-rangers-market', {
+    ...homeViewData(false, req.query.page),
+    title: 'ตัวอย่างโมเดล Rangers Market',
+    publicPreview: true,
+  });
 });
 
 router.get('/preview/locker-home', requireAdmin, (req, res) => {
