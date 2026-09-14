@@ -146,6 +146,23 @@
 .modern-fan-desktop .modern-fan-card:nth-child(n):hover,.modern-fan-desktop .modern-fan-card:nth-child(n):focus-within{transform:translateY(calc(var(--fan-y) - 20px)) rotate(0) scale(1.035)!important}
 </style>
 
+<% if (homeSections && homeSections.length) { %>
+<section class="home-category-rail" aria-label="หมวดหมู่สินค้า">
+  <div class="home-category-head"><div><span>SHOP COLLECTIONS</span><h2>เลือกดูสินค้าตามหมวด</h2></div><a href="/products">ดูทั้งหมด →</a></div>
+  <div class="home-category-grid">
+    <% homeSections.forEach(section => { const cover = section.products[0]; %>
+      <a class="home-category-card" href="#home-section-<%= section.id %>">
+        <span class="home-category-image"><% if (cover && cover.images && cover.images[0]) { %><img src="<%= cover.images[0] %>" alt="" loading="lazy" decoding="async" /><% } else { %><span>✦</span><% } %></span>
+        <span class="home-category-copy"><b><%= section.title %></b><small><%= section.products.length %> สินค้า</small></span><span class="home-category-arrow">↗</span>
+      </a>
+    <% }) %>
+  </div>
+</section>
+<style>
+.home-category-rail{width:min(1320px,calc(100% - 48px));margin:0 auto;padding:18px 0 4px}.home-category-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin-bottom:12px}.home-category-head span{color:var(--gold-text);font:700 9px/1 'JetBrains Mono',monospace;letter-spacing:.18em}.home-category-head h2{margin-top:5px;color:var(--text);font-size:18px;font-weight:850}.home-category-head a{color:var(--gold-text);font-size:11px;font-weight:700}.home-category-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.home-category-card{position:relative;display:flex;align-items:center;gap:12px;min-width:0;padding:9px;border:1px solid var(--border);border-radius:14px;background:var(--card);color:var(--text);transition:border-color .18s,transform .18s}.home-category-card:hover{border-color:var(--gold);transform:translateY(-2px)}.home-category-image{display:grid;place-items:center;width:72px;height:54px;flex:none;overflow:hidden;border-radius:9px;background:var(--input);color:var(--gold);font-size:22px}.home-category-image img{width:100%;height:100%;object-fit:cover}.home-category-copy{min-width:0}.home-category-copy b,.home-category-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.home-category-copy b{font-size:12px}.home-category-copy small{margin-top:3px;color:var(--text-4);font-size:10px}.home-category-arrow{margin-left:auto;color:var(--gold-text);font-size:16px}@media(max-width:640px){.home-category-rail{width:calc(100% - 24px);padding-top:12px}.home-category-grid{display:flex;overflow-x:auto;gap:8px;padding-bottom:4px;scroll-snap-type:x proximity}.home-category-card{flex:0 0 190px;scroll-snap-align:start}.home-category-head h2{font-size:15px}.home-category-head a{font-size:10px}}
+</style>
+<% } %>
+
 <% if (settings.showOpenHoursBar !== false) { %>
 <section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6">
   <div class="hud-bar relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">

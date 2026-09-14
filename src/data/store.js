@@ -723,9 +723,12 @@ function migrateSchema(db) {
     // homepage-sections system, seeded with one section that reproduces
     // the old hardcoded "เกมมาใหม่" behavior (newest 5 products) so nothing
     // visibly changes until the admin edits/adds sections.
-    db.homeSections = [{ id: nanoid(8), title: 'เกมมาใหม่', mode: 'newest', limit: 5, productIds: [] }];
+    db.homeSections = [{ id: nanoid(8), title: 'เกมมาใหม่', mode: 'newest', limit: 5, productIds: [], enabled: true }];
     changed = true;
   }
+  db.homeSections.forEach(section => {
+    if (section.enabled === undefined) { section.enabled = true; changed = true; }
+  });
   db.products.forEach(product => {
     if (product.purchaseApprovalEnabled === undefined) {
       product.purchaseApprovalEnabled = false;

@@ -93,7 +93,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
   const newestProducts = [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const newest = newestProducts.slice(0, 5);
   const byId = new Map(active.map(p => [p.id, p]));
-  const homeSections = (store.data.homeSections || []).map(section => {
+  const homeSections = (store.data.homeSections || []).filter(section => section.enabled !== false).map(section => {
     const products = section.mode === 'manual'
       ? (section.productIds || []).map(id => byId.get(id)).filter(Boolean)
       : newestProducts.slice(0, section.limit || 5);

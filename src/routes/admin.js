@@ -833,7 +833,7 @@ router.post('/home-sections', async (req, res) => {
   }
   const limit = Math.min(30, Math.max(1, parseInt(req.body.limit, 10) || 5));
   const productIds = mode === 'manual' ? [].concat(req.body.productIds || []).filter(Boolean) : [];
-  store.data.homeSections.push({ id: store.genId(8), title, mode, limit, productIds });
+  store.data.homeSections.push({ id: store.genId(8), title, mode, limit, productIds, enabled: true });
   await store.save();
   req.flash('success', 'เพิ่มหมวดหมู่แล้ว');
   res.redirect('/admin/home-sections');
@@ -872,6 +872,15 @@ router.post('/home-sections/:id/move', async (req, res) => {
   if (target < 0 || target >= list.length) return res.redirect('/admin/home-sections');
   [list[index], list[target]] = [list[target], list[index]];
   await store.save();
+  res.redirect('/admin/home-sections');
+});
+
+router.post('/home-sections/:id/toggle', async (req, res) => {
+  const section = store.data.homeSections.find(s => s.id === req.params.id);
+  if (!section) { req.flash('error', 'ไม่พบหมวดหมู่นี้'); return res.redirect('/admin/home-sections'); }
+  section.enabled = section.enabled === false;
+  await store.save();
+  req.flash('success', section.enabled ? 'เปิดแสดงหมวดหมู่แล้ว' : 'ปิดการแสดงหมวดหมู่แล้ว');
   res.redirect('/admin/home-sections');
 });
 
