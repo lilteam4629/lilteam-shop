@@ -45,6 +45,15 @@
             <% }) %>
           </div>
         </section>
+        <style>
+          /* Rangers assignments are a compact horizontal strip, independent of legacy filter-tag styles. */
+          .product-rangers-list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(4.25rem,1fr));gap:.5rem!important;overflow:visible!important;padding:.15rem 0 .3rem!important}
+          .product-ranger-item{display:flex!important;width:auto!important;min-width:0!important;flex:initial!important;gap:.3rem!important}
+          .product-ranger-item>span{display:grid!important;width:4.25rem!important;height:5.35rem!important;min-height:5.35rem!important;place-items:center;overflow:hidden;border-radius:.65rem!important}
+          .product-ranger-item img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important}
+          .product-ranger-item b{font-size:.6rem!important;line-height:1.1;white-space:nowrap}
+          @media(max-width:640px){.product-rangers-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:.4rem!important}.product-ranger-item>span{width:3.7rem!important;height:4.7rem!important;min-height:4.7rem!important}.product-ranger-item b{font-size:.52rem!important}}
+        </style>
       <% } %>
       <% if (productFilterTags && productFilterTags.length) { %>
         <section class="product-detail-filters mb-5" aria-labelledby="product-filter-title">
