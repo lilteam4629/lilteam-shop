@@ -429,12 +429,9 @@
       const allFailed = [];
 
       function finish() {
-        const summary = totalCreated + ' จาก ' + files.length + ' รายการ';
-        if (allFailed.length) {
-          sessionStorage.setItem('bulkImportSummary', JSON.stringify({
-            createdCount: totalCreated, total: files.length, failed: allFailed,
-          }));
-        }
+        sessionStorage.setItem('bulkImportSummary', JSON.stringify({
+          createdCount: totalCreated, total: files.length, failed: allFailed,
+        }));
         window.location.href = '/admin/products';
       }
 
@@ -442,20 +439,34 @@
       // retry it a couple of times before giving up on just that chunk and
       // moving on, so one bad patch of the folder can't stall everything else.
       function sendChunk(chunk, attemptsLeft) {
-        const data = new FormData();
-        baseEntries.forEach(function (entry) { data.append(entry[0], entry[1]); });
-        data.append('ajax', '1');
+        function createData() {
+          const data = new FormData();
+          baseEntries.forEach(function (entry) { data.append(entry[0], entry[1]); });
+          data.append('ajax', '1');
+          chunk.forEach(function (item) { data.append('productTitles', item.title); });
+          return data;
+        }
+        function submitData(data) {
+          return fetch('/admin/products/bulk-import', { method: 'POST', body: data })
+            .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง' }; }); })
+            .then(function (result) {
+              if (!result.ok) throw new Error(result.error || 'นำเข้าไม่สำเร็จ');
+              return result;
+            });
+        }
+        // If direct R2 upload is unavailable, use the existing server upload
+        // for this bounded chunk so selected products are never skipped.
         return window.lilteamDirectUploadFiles(chunk.map(function (item) { return item.file; }))
           .then(function (urls) {
+            const data = createData();
             data.append('productImagesR2Urls', JSON.stringify(urls));
             data.append('productImagesR2Names', JSON.stringify(chunk.map(function (item) { return item.file.name; })));
-            chunk.forEach(function (item) { data.append('productTitles', item.title); });
-            return fetch('/admin/products/bulk-import', { method: 'POST', body: data });
+            return submitData(data);
           })
-          .then(function (r) { return r.json().catch(function () { return { ok: false, error: 'เซิร์ฟเวอร์ตอบกลับไม่ถูกต้อง' }; }); })
-          .then(function (result) {
-            if (!result.ok) throw new Error(result.error || 'นำเข้าไม่สำเร็จ');
-            return result;
+          .catch(function () {
+            const fallbackData = createData();
+            chunk.forEach(function (item) { fallbackData.append('productImages', item.file, item.file.name); });
+            return submitData(fallbackData);
           })
           .catch(function (error) {
             if (attemptsLeft > 1) {

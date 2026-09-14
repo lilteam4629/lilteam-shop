@@ -161,6 +161,24 @@ async function checkInstalledDisabledRainModule(cookie) {
   }
 }
 
+async function checkBulkFolderImportFallback(cookie) {
+  const boundary = `----lilteam-${process.pid}`;
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64');
+  const parts = [
+    `--${boundary}\r\nContent-Disposition: form-data; name="ajax"\r\n\r\n1\r\n`,
+    `--${boundary}\r\nContent-Disposition: form-data; name="productTitles"\r\n\r\nfolder-import-smoke\r\n`,
+    `--${boundary}\r\nContent-Disposition: form-data; name="price"\r\n\r\n10\r\n`,
+    `--${boundary}\r\nContent-Disposition: form-data; name="productImages"; filename="folder-smoke.png"\r\nContent-Type: image/png\r\n\r\n`,
+  ];
+  const body = Buffer.concat([Buffer.from(parts.join('')), png, Buffer.from(`\r\n--${boundary}--\r\n`)]);
+  const response = await request('/admin/products/bulk-import', { method: 'POST', headers: { cookie, 'content-type': `multipart/form-data; boundary=${boundary}` }, body });
+  if (response.statusCode !== 200) throw new Error(`folder import fallback returned HTTP ${response.statusCode}`);
+  const result = JSON.parse(response.body);
+  if (!result.ok || result.created !== 1) throw new Error('folder import fallback did not create its product');
+  const products = await fetchOk('/admin/products', 'text/html', { cookie });
+  if (!products.body.includes('folder-import-smoke')) throw new Error('folder-imported product is missing from admin products');
+}
+
 async function checkStorefrontModels(cookie) {
   const page = await fetchOk('/admin/storefront-models', 'text/html', { cookie });
   if (!page.body.includes('โมเดลหน้าร้าน LINE Rangers') || !page.body.includes('value="line-rangers"')) throw new Error('storefront model admin is incomplete');
@@ -247,6 +265,7 @@ async function run() {
     await checkHomeSectionDelete(cookie);
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);
+    await checkBulkFolderImportFallback(cookie);
     const missing = await request('/definitely-missing');
     if (missing.statusCode !== 404 || !missing.body.includes('>404<')) throw new Error('404 page does not identify HTTP 404');
     console.log(`Smoke checks passed: storefront, assets, undeployed module isolation, ${adminPageCount} admin pages, bulk pricing, error page`);

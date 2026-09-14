@@ -351,11 +351,13 @@
     try {
       var summary = JSON.parse(raw);
       var names = summary.failed.map(function (f) { return f.filename; }).join(', ');
-      if (window.showToast) {
-        showToast('นำเข้าสำเร็จ ' + summary.createdCount + '/' + summary.total + ' รายการ — ล้มเหลว: ' + names, 'warning', 10000);
-      } else {
-        alert('นำเข้าสำเร็จ ' + summary.createdCount + '/' + summary.total + ' รายการ — ล้มเหลว: ' + names);
-      }
+      var complete = summary.createdCount === summary.total;
+      var message = complete
+        ? 'นำเข้าสินค้าสำเร็จครบ ' + summary.createdCount + ' รายการ'
+        : (summary.createdCount ? 'นำเข้าสำเร็จ ' + summary.createdCount + '/' + summary.total + ' รายการ' : 'นำเข้าไม่สำเร็จ — ยังไม่มีสินค้าถูกสร้าง');
+      if (names) message += ' — ไฟล์ที่มีปัญหา: ' + names;
+      if (window.showToast) showToast(message, complete ? 'success' : 'warning', 10000);
+      else alert(message);
     } catch (e) {}
   })();
 </script>
