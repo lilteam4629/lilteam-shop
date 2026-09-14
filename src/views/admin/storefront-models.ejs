@@ -3,6 +3,7 @@
   <a href="/" target="_blank" rel="noopener" class="studio-secondary-action">ดูหน้าร้าน ↗</a>
 </div>
 
+<p class="mb-5 rounded-xl border border-[var(--border)] bg-[var(--card)] p-3 text-sm text-[var(--text-3)]">โมเดล LINE Rangers ใช้โครงหน้าเดียวกันทั้งร้าน แต่สีหลักและพื้นหลังยังปรับได้จาก <a href="/admin/theme" class="font-bold text-[var(--gold-text)] underline">ตั้งค่าธีมสี</a></p>
 <form action="/admin/storefront-models" method="post" class="grid lg:grid-cols-3 gap-5 max-w-7xl">
   <label class="model-option block rounded-2xl border-2 <%= currentModel === 'classic' ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> bg-[var(--card)] p-4 cursor-pointer">
     <input type="radio" name="model" value="classic" class="sr-only" <%= currentModel === 'classic' ? 'checked' : '' %>>
