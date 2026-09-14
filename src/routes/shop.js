@@ -3,6 +3,7 @@ const router = express.Router();
 const store = require('../data/store');
 const { withEffectivePrice } = require('../services/pricing');
 const { requireAdmin } = require('../middleware/auth');
+const rangersSource = require('../services/rangers-catalog');
 
 function publishTime(product) {
   if (!product.publishAt) return 0;
@@ -121,6 +122,8 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1) {
     miniGamePrizes: store.data.miniGamePrizes.filter(p => p.active),
     heroPreviewV2,
     rangersCatalog: store.data.settings.rangersCatalog || { enabled: false, items: [] },
+    rangersProductAssignments: Object.fromEntries(Object.entries(store.data.settings.rangersCatalog?.productAssignments || {})
+      .map(([productId, codes]) => [productId, rangersSource.resolveCodes(codes)])),
   };
 }
 
@@ -129,6 +132,13 @@ router.get('/', (req, res) => {
     ? 'shop/home-rangers-market'
     : 'shop/home';
   res.render(view, homeViewData(false, req.query.page));
+});
+
+router.get('/api/rangers-catalog', (req, res) => {
+  if (!req.tenantShop?.isSystemLab || !store.data.settings.rangersCatalog?.enabled) {
+    return res.status(404).json({ error: 'not_found' });
+  }
+  res.json(rangersSource.queryCatalog(req.query));
 });
 
 router.get('/preview/rangers-market', requireAdmin, (req, res) => {

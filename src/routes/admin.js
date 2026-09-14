@@ -915,12 +915,38 @@ const rangerImageUrl = rangerId => {
   const id = String(rangerId || '').trim().toLowerCase();
   return `https://rangers.lerico.net/res/${id}/${id}-thum.png`;
 };
+const rangersSource = require('../services/rangers-catalog');
 
 router.get('/rangers-catalog', requireSystemLab, (req, res) => {
   res.render('admin/rangers-catalog', {
     title: 'คลังตัวละคร LINE Rangers', active: 'rangers-catalog',
     catalog: store.data.settings.rangersCatalog || { enabled: false, items: [] }, rangerImageUrl,
+    products: store.data.products.map(product => ({ id: product.id, title: product.title })),
+    sourceCount: rangersSource.sourceCount,
+    selectedProductId: String(req.query.product || ''),
+    productAssignments: Object.fromEntries(Object.entries(store.data.settings.rangersCatalog?.productAssignments || {})
+      .map(([productId, codes]) => [productId, rangersSource.resolveCodes(codes)])),
   });
+});
+
+router.get('/rangers-catalog/source', requireSystemLab, (req, res) => {
+  res.json(rangersSource.queryCatalog(req.query));
+});
+
+router.post('/rangers-catalog/assign', requireSystemLab, async (req, res) => {
+  const productId = String(req.body.productId || '');
+  if (!store.data.products.some(product => product.id === productId)) {
+    req.flash('error', 'ไม่พบสินค้าที่เลือก');
+    return res.redirect('/admin/rangers-catalog');
+  }
+  let submitted = [];
+  try { submitted = JSON.parse(req.body.rangerCodes || '[]'); } catch { submitted = []; }
+  store.data.settings.rangersCatalog ||= { enabled: false, items: [] };
+  store.data.settings.rangersCatalog.productAssignments ||= {};
+  store.data.settings.rangersCatalog.productAssignments[productId] = rangersSource.validCodes(submitted);
+  await store.save();
+  req.flash('success', `บันทึกตัวละครให้สินค้าแล้ว ${store.data.settings.rangersCatalog.productAssignments[productId].length} รายการ`);
+  res.redirect(`/admin/rangers-catalog?product=${encodeURIComponent(productId)}`);
 });
 
 router.post('/rangers-catalog/toggle', requireSystemLab, async (req, res) => {

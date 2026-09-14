@@ -16,6 +16,13 @@
       <% } %>
     </div>
   </section>
+  <% if (rangersCatalog && rangersCatalog.enabled) { %>
+  <section class="rm-ranger-vault" data-public-ranger-catalog>
+    <header><div><small>RANGER VAULT</small><h2>เลือกตัวละครที่คุณกำลังหา</h2><p>ค้นหาจากคลังทั้งหมด หรือดูอันดับ Top 100 แล้วเลือกซื้อไอดีที่มีตัวละครนั้น</p></div><div class="rm-vault-tabs"><button type="button" data-rv-view="all" class="is-active">ทั้งหมด</button><button type="button" data-rv-view="top100">Top 100</button></div></header>
+    <div class="rm-vault-search"><input type="search" placeholder="ค้นหาชื่อตัวละครหรือรหัส"><span data-rv-count>กำลังโหลด…</span></div>
+    <div class="rm-vault-grid" data-rv-grid></div><button type="button" class="rm-vault-more" data-rv-more>ดูเพิ่ม</button>
+  </section>
+  <% } %>
   <section class="rm-finder" id="rm-finder">
     <header><span>01</span><div><h2>เลือกไอดีที่เหมาะกับคุณ</h2><p>ค้นหา กรองสถานะ และเรียงราคาได้ทันที</p></div></header>
     <div class="rm-controls">
@@ -32,6 +39,7 @@
         <a class="rm-image" href="/game/<%= p.slug %>"><% if (p.images && p.images[0]) { %><img loading="lazy" src="<%= p.images[0] %>" alt="<%= p.title %>"><% } else { %><span>LINE<br>RANGERS</span><% } %></a>
         <div class="rm-card-body"><div class="rm-card-top"><h3><%= p.title %></h3><span class="rm-status"><%= p.stockCount ? 'พร้อมขาย' : 'สินค้าหมด' %></span></div>
         <p><%= p.description || 'ไอดี LINE Rangers พร้อมตรวจสอบรายละเอียดก่อนซื้อ' %></p>
+        <% const assigned = rangersProductAssignments[p.id] || []; if (assigned.length) { %><div class="rm-product-rangers" aria-label="ตัวละครในไอดี"><% assigned.slice(0,8).forEach(r => { %><img src="<%= r.imageUrl %>" alt="<%= r.name %>" title="<%= r.name %>" loading="lazy"><% }) %><% if (assigned.length > 8) { %><b>+<%= assigned.length-8 %></b><% } %></div><% } %>
         <div class="rm-card-foot"><div><small>ราคา</small><b>฿<%= Number(p.price).toLocaleString() %></b></div><a href="/game/<%= p.slug %>"><%= p.stockCount ? 'ดูไอดีนี้' : 'ดูรายละเอียด' %> ↗</a></div></div>
       </article><% }) %>
     </div>
@@ -40,3 +48,4 @@
   <footer class="rm-credit">ข้อมูลตัวละครและรูปจาก <a href="https://rangers.lerico.net/en/rangers-book" target="_blank" rel="noopener">LINE Rangers Handbook ↗</a> · สินค้า ราคา และสต็อกมาจากร้านนี้</footer>
 </div>
 <script src="<%= asset('js/storefront-rangers-market-v1.js') %>" defer></script>
+<% if (rangersCatalog && rangersCatalog.enabled) { %><script src="<%= asset('js/rangers-catalog-v1.js') %>" defer></script><% } %>
