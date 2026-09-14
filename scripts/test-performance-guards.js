@@ -49,6 +49,7 @@ assert.match(shopRoutes, /recommendedCategory\.productIds/, 'recommended categor
 assert.match(shopRoutes, /rangersFeatured:[\s\S]{0,260}slice\(0, 5\)/, 'Rangers hero must expose the refreshed Top 1–5 lineup');
 assert.match(homeView, /productTotalPages > 1/, 'home must expose navigation to every product page');
 assert.match(homeView, /recommended=<%=?\s*encodeURIComponent\(category\.id\)/, 'recommended category cards must link to their filtered listing');
+assert.match(homeView, /home-category-grid\{display:grid!important;grid-template-columns:1fr!important/, 'mobile recommended categories must use full-width banner rows');
 assert.match(adminMobileCss, /main > \.grid\[class~="md:grid-cols-2"\][\s\S]{0,300}min-width: 0/, 'mobile minigame preview grid must be allowed to shrink');
 assert.match(adminMobileCss, /admin-page-minigame \.mg-stage[^}]*height: 168px/, 'mobile box preview must keep a readable stage');
 assert.match(minigameWidget, /\.mg-box {/, 'box preview must render its initial gift');
