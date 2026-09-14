@@ -12,7 +12,7 @@
     </div>
     <div class="flex items-center justify-between gap-3 mt-4"><div><b class="block">โมเดลมาตรฐาน</b><small class="text-[var(--text-4)]">รูปแบบเดิมของร้าน ใช้สีตามธีมที่ตั้งไว้</small></div><span class="text-[var(--gold-text)] font-bold"><%= currentModel === 'classic' ? '✓ ใช้อยู่' : 'เลือก' %></span></div>
   </label>
-  <label class="model-option block rounded-2xl border-2 <%= currentModel === 'rangers-market' ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> bg-[var(--card)] p-4 cursor-pointer">
+  <% if (allowRangersMarket) { %><label class="model-option block rounded-2xl border-2 <%= currentModel === 'rangers-market' ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> bg-[var(--card)] p-4 cursor-pointer">
     <input type="radio" name="model" value="rangers-market" class="sr-only" <%= currentModel === 'rangers-market' ? 'checked' : '' %>>
     <div class="rangers-market-preview aspect-[16/10] rounded-xl border border-blue-400/40 p-4 overflow-hidden">
       <div class="h-6 rounded-lg bg-[#121d35] mb-3"></div><div class="h-14 rounded-xl bg-gradient-to-r from-[#24559a] to-[#293a85] mb-3"></div>
@@ -20,7 +20,7 @@
     </div>
     <div class="flex items-start justify-between gap-3 mt-4"><div><b class="block">Rangers Market</b><small class="text-[var(--text-4)]">หน้าเลือกทีม ตัวกรอง และรายการไอดีรูปแบบใหม่</small></div><span class="text-[var(--gold-text)] font-bold shrink-0"><%= currentModel === 'rangers-market' ? '✓ ใช้อยู่' : 'เลือก' %></span></div>
     <a href="/preview/rangers-market" target="_blank" rel="noopener" class="model-preview-link mt-3 inline-flex text-sm font-semibold text-[var(--gold-text)]">ดูตัวอย่างก่อนใช้ ↗</a>
-  </label>
+  </label><% } %>
 
   <label class="model-option block rounded-2xl border-2 <%= currentModel === 'line-rangers' ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> bg-[var(--card)] p-4 cursor-pointer">
     <input type="radio" name="model" value="line-rangers" class="sr-only" <%= currentModel === 'line-rangers' ? 'checked' : '' %>>

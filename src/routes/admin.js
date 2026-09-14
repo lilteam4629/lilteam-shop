@@ -881,11 +881,13 @@ router.get('/storefront-models', (req, res) => {
     title: 'โมเดลหน้าร้าน LINE Rangers',
     active: 'storefront-models',
     currentModel: store.data.settings.storefrontModel || 'classic',
+    allowRangersMarket: !!req.tenantShop?.isSystemLab,
   });
 });
 
 router.post('/storefront-models', async (req, res) => {
-  const allowed = new Set(['classic', 'line-rangers', 'rangers-market']);
+  const allowed = new Set(['classic', 'line-rangers']);
+  if (req.tenantShop?.isSystemLab) allowed.add('rangers-market');
   const model = String(req.body.model || '');
   if (!allowed.has(model)) {
     req.flash('error', 'ไม่พบโมเดลหน้าร้านที่เลือก');

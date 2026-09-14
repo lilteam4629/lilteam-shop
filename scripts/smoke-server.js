@@ -181,14 +181,14 @@ async function checkBulkFolderImportFallback(cookie) {
 
 async function checkStorefrontModels(cookie) {
   const page = await fetchOk('/admin/storefront-models', 'text/html', { cookie });
-  if (!page.body.includes('โมเดลหน้าร้าน LINE Rangers') || !page.body.includes('value="line-rangers"') || !page.body.includes('value="rangers-market"')) throw new Error('storefront model admin is incomplete');
-  const preview = await fetchOk('/preview/rangers-market', 'text/html', { cookie });
-  if (!preview.body.includes('data-rangers-market') || !preview.body.includes('storefront-rangers-market-v1.css') || !preview.body.includes('คลังตัวละครยังปิดอยู่')) throw new Error('Rangers Market preview is incomplete');
-  if (preview.body.includes('rangers.lerico.net/res/')) throw new Error('disabled Rangers catalog still loads third-party character images');
+  if (!page.body.includes('โมเดลหน้าร้าน LINE Rangers') || !page.body.includes('value="line-rangers"')) throw new Error('storefront model admin is incomplete');
+  if (page.body.includes('value="rangers-market"') || page.body.includes('/preview/rangers-market')) throw new Error('System Lab Rangers Market model leaked into main admin');
+  const preview = await request('/preview/rangers-market', { headers: { cookie } });
+  if (preview.statusCode !== 404) throw new Error(`main admin can preview System Lab Rangers Market (HTTP ${preview.statusCode})`);
   const marketUpdate = await request('/admin/storefront-models', { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'model=rangers-market' });
-  if (marketUpdate.statusCode !== 302 || marketUpdate.headers.location !== '/admin/storefront-models') throw new Error('Rangers Market model update failed');
+  if (marketUpdate.statusCode !== 302 || marketUpdate.headers.location !== '/admin/storefront-models') throw new Error('Rangers Market rejection failed');
   const marketHome = await fetchOk('/', 'text/html');
-  if (!marketHome.body.includes('data-rangers-market') || !marketHome.body.includes('storefront-model-rangers-market')) throw new Error('Rangers Market model is not active on storefront');
+  if (marketHome.body.includes('data-rangers-market') || marketHome.body.includes('storefront-model-rangers-market')) throw new Error('rejected Rangers Market model activated on main storefront');
   const update = await request('/admin/storefront-models', { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'model=line-rangers' });
   if (update.statusCode !== 302 || update.headers.location !== '/admin/storefront-models') throw new Error('LINE Rangers model update failed');
   const home = await fetchOk('/', 'text/html');

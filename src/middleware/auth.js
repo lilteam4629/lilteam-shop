@@ -27,6 +27,11 @@ function attachUser(req, res, next) {
   res.locals.cartCount = (req.session.cart || []).length;
   res.locals.settings = {
     ...store.data.settings,
+    // Rangers Market is an isolated System Lab experiment. A stale value
+    // previously saved on another shop must never activate the trial UI.
+    storefrontModel: req.tenantShop?.isSystemLab
+      ? store.data.settings.storefrontModel
+      : (store.data.settings.storefrontModel === 'rangers-market' ? 'classic' : store.data.settings.storefrontModel),
     contactFacebook: normalizeExternalLink(store.data.settings.contactFacebook),
     contactMessenger: normalizeExternalLink(store.data.settings.contactMessenger),
   };

@@ -125,13 +125,14 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1) {
 }
 
 router.get('/', (req, res) => {
-  const view = store.data.settings.storefrontModel === 'rangers-market'
+  const view = req.tenantShop?.isSystemLab && store.data.settings.storefrontModel === 'rangers-market'
     ? 'shop/home-rangers-market'
     : 'shop/home';
   res.render(view, homeViewData(false, req.query.page));
 });
 
-router.get('/preview/rangers-market', (req, res) => {
+router.get('/preview/rangers-market', requireAdmin, (req, res) => {
+  if (!req.tenantShop?.isSystemLab) return res.status(404).send('ไม่พบหน้าที่คุณต้องการ');
   res.render('shop/home-rangers-market', {
     ...homeViewData(false, req.query.page),
     title: 'ตัวอย่างโมเดล Rangers Market',
