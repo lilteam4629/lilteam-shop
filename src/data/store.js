@@ -250,12 +250,6 @@ function defaultData() {
         expiresAt: null,
       },
       apiProviders: {
-        byshop: {
-          enabled: false,
-          apiKey: '',
-          endpoint: 'https://api.byshop.me/api',
-          autoFulfill: true,
-        },
         custom: {
           enabled: false,
           endpoint: '',
@@ -726,6 +720,12 @@ function migrateSchema(db) {
     db.homeSections = [{ id: nanoid(8), title: 'เกมมาใหม่', mode: 'newest', limit: 5, productIds: [], imageUrl: '', enabled: true }];
     changed = true;
   }
+  if (!db.recommendedCategories) { db.recommendedCategories = []; changed = true; }
+  db.recommendedCategories.forEach(category => {
+    if (category.enabled === undefined) { category.enabled = true; changed = true; }
+    if (category.imageUrl === undefined) { category.imageUrl = ''; changed = true; }
+    if (category.count === undefined) { category.count = 0; changed = true; }
+  });
   db.homeSections.forEach(section => {
     if (section.enabled === undefined) { section.enabled = true; changed = true; }
     if (section.imageUrl === undefined) { section.imageUrl = ''; changed = true; }

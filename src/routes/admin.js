@@ -876,6 +876,26 @@ router.post('/home-sections/:id/move', async (req, res) => {
   res.redirect('/admin/home-sections');
 });
 
+router.get('/recommended-categories', (req, res) => {
+  res.render('admin/recommended-categories', { title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories: store.data.recommendedCategories || [] });
+});
+router.post('/recommended-categories', async (req, res) => {
+  const title = String(req.body.title || '').trim();
+  if (!title) { req.flash('error', 'กรุณากรอกชื่อหมวดหมู่'); return res.redirect('/admin/recommended-categories'); }
+  store.data.recommendedCategories ||= [];
+  store.data.recommendedCategories.push({ id: store.genId(8), title, imageUrl: String(req.body.imageUrl || '').trim(), count: Math.max(0, parseInt(req.body.count, 10) || 0), enabled: true });
+  await store.save(); req.flash('success', 'เพิ่มหมวดหมู่แนะนำแล้ว'); res.redirect('/admin/recommended-categories');
+});
+router.post('/recommended-categories/:id/delete', async (req, res) => {
+  store.data.recommendedCategories = (store.data.recommendedCategories || []).filter(category => category.id !== req.params.id);
+  await store.save(); req.flash('success', 'ลบหมวดหมู่แนะนำแล้ว'); res.redirect('/admin/recommended-categories');
+});
+router.post('/recommended-categories/:id/toggle', async (req, res) => {
+  const category = (store.data.recommendedCategories || []).find(item => item.id === req.params.id);
+  if (category) category.enabled = category.enabled === false;
+  await store.save(); res.redirect('/admin/recommended-categories');
+});
+
 router.post('/home-sections/:id/toggle', async (req, res) => {
   const section = store.data.homeSections.find(s => s.id === req.params.id);
   if (!section) { req.flash('error', 'ไม่พบหมวดหมู่นี้'); return res.redirect('/admin/home-sections'); }

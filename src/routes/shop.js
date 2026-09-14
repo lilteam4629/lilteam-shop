@@ -99,6 +99,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
       : newestProducts.slice(0, section.limit || 5);
     return { id: section.id, title: section.title, products };
   }).filter(section => section.products.length);
+  const recommendedCategories = (store.data.recommendedCategories || []).filter(category => category.enabled !== false);
   // Every product is still reachable (nothing is silently capped) — just
   // paginated instead of rendering the entire catalog in one page load,
   // which was ballooning page weight/DOM size once a shop had 50+ products.
@@ -112,6 +113,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     stats: shopStats(),
     newest,
     homeSections,
+    recommendedCategories,
     products: pageProducts,
     productTotal: active.length,
     productPage: page,
