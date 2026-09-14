@@ -1,7 +1,7 @@
 <% const available = products.filter(p => p.stockCount > 0); %>
 <% const soldOut = products.filter(p => p.stockCount <= 0); %>
 <% const spotlight = rangersCatalog && rangersCatalog.enabled
-  ? (rangersCatalog.items || []).slice(0, 5)
+  ? rangersFeatured
   : []; %>
 <div class="rm-page" data-rangers-market>
   <section class="rm-match">

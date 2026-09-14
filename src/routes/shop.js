@@ -124,6 +124,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1) {
     rangersCatalog: store.data.settings.rangersCatalog || { enabled: false, items: [] },
     rangersProductAssignments: Object.fromEntries(Object.entries(store.data.settings.rangersCatalog?.productAssignments || {})
       .map(([productId, codes]) => [productId, rangersSource.resolveCodes(codes)])),
+    rangersFeatured: rangersSource.queryCatalog({ view: 'top100', limit: 12 }).items.slice(0, 5),
   };
 }
 
