@@ -1,4 +1,4 @@
-<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
+<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8 system-lab-product-detail">
   <a href="javascript:history.back()" class="text-sm text-[var(--gold-text)]">← กลับหน้าร้าน</a>
 
   <div class="grid md:grid-cols-2 gap-8 mt-4">
@@ -293,6 +293,30 @@
     <div id="tab-about" class="tab-panel py-6 hidden text-sm text-[var(--text-2)] leading-relaxed whitespace-pre-line"><%= product.aboutText %></div>
   </div>
 </section>
+
+<style id="system-lab-product-detail-theme">
+/* Purchase view for the Rangers Market model only. Other storefront models retain the standard detail page. */
+body.storefront-model-rangers-market .system-lab-product-detail{max-width:1120px!important;padding:24px 18px 56px!important;color:#19252a}
+body.storefront-model-rangers-market .system-lab-product-detail>a:first-child{display:inline-flex;align-items:center;gap:6px;margin-bottom:12px;padding:7px 11px;border:1px solid #19252a2e;border-radius:8px;background:#fffdf8;color:#287873!important;font-size:12px;font-weight:800}
+body.storefront-model-rangers-market .system-lab-product-detail>div.grid{gap:18px!important;padding:18px;border:1px solid #19252a25;border-radius:14px;background:#fffdf8;box-shadow:0 14px 32px #19252a12}
+body.storefront-model-rangers-market .system-lab-product-detail>div.grid>div:first-child{padding:12px;border-radius:10px;background:#eef1ec;border:1px solid #19252a1b}
+body.storefront-model-rangers-market .system-lab-product-detail>div.grid>div:first-child>div:first-child{height:300px!important;margin:0 auto 10px!important;border-radius:8px!important;background:#18252b!important}
+body.storefront-model-rangers-market .system-lab-product-detail>div.grid>div:first-child>div:first-child img{width:100%!important;height:100%!important;object-fit:contain!important}
+body.storefront-model-rangers-market .system-lab-product-detail h1{font-size:clamp(24px,3vw,36px)!important;letter-spacing:-.04em;color:#18252b}
+body.storefront-model-rangers-market .system-lab-product-detail .product-detail-filters{border:1px solid #28787345;background:#e6f0ed;box-shadow:none;border-radius:10px}
+body.storefront-model-rangers-market .system-lab-product-detail .product-detail-filter-head span{color:#d95f43}
+body.storefront-model-rangers-market .system-lab-product-detail .product-detail-filter-item>span{background:#fffdf8;border-color:#19252a25}
+body.storefront-model-rangers-market .system-lab-product-detail [data-unit-price],body.storefront-model-rangers-market .system-lab-product-detail [data-subtotal]{color:#d95f43!important}
+body.storefront-model-rangers-market .system-lab-product-detail .qty-tier-btn{border-color:#19252a25;background:#f1eee8;border-radius:9px}
+body.storefront-model-rangers-market .system-lab-product-detail .qty-tier-btn.is-active{border-color:#287873;background:#e6f0ed;box-shadow:0 0 0 1px #287873}
+body.storefront-model-rangers-market .system-lab-product-detail .qty-tier-btn-price,body.storefront-model-rangers-market .system-lab-product-detail .qty-tier-btn.is-active .qty-tier-btn-qty{color:#287873}
+body.storefront-model-rangers-market .system-lab-product-detail .product-action-primary,body.storefront-model-rangers-market .system-lab-product-detail form>button{background:#18252b!important;color:#fff!important;border-radius:9px!important}
+body.storefront-model-rangers-market .system-lab-product-detail .product-topup-action{background:#d95f43!important;color:#fff!important;border:0!important;border-radius:9px!important}
+body.storefront-model-rangers-market .system-lab-product-detail .product-contact-action{background:#e6f0ed!important;color:#28635d!important;border-color:#28787345!important;border-radius:9px!important}
+body.storefront-model-rangers-market .system-lab-product-detail .receive-highlight{background:#fff3e4!important;border-color:#d95f4345!important}
+body.storefront-model-rangers-market .system-lab-product-detail .receive-highlight-title{background:none;color:#d95f43}
+@media(max-width:700px){body.storefront-model-rangers-market .system-lab-product-detail{padding:14px 10px 42px!important}body.storefront-model-rangers-market .system-lab-product-detail>div.grid{display:flex!important;flex-direction:column;gap:12px!important;padding:10px}.storefront-model-rangers-market .system-lab-product-detail>div.grid>div:first-child>div:first-child{height:230px!important}.storefront-model-rangers-market .system-lab-product-detail h1{font-size:28px!important}}
+</style>
 
 <script>
   (function () {
