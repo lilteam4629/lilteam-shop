@@ -36,9 +36,9 @@
             <div><span>ข้อมูลไอดี</span><h2 id="product-ranger-title">ตัวที่มีในไอดีนี้</h2></div>
             <strong>ทั้งหมด <%= productRangers.length %> ตัว</strong>
           </div>
-          <div class="product-detail-filter-list">
+          <div class="product-detail-filter-list product-rangers-list">
             <% productRangers.forEach(ranger => { %>
-              <div class="product-detail-filter-item">
+              <div class="product-detail-filter-item product-ranger-item">
                 <span><img src="<%= ranger.imageUrl %>" alt="<%= ranger.name %>" loading="eager" decoding="async" /></span>
                 <b title="<%= ranger.name %>"><%= ranger.name %></b>
               </div>
@@ -72,6 +72,12 @@
           .product-detail-filter-item>span{display:grid;width:5rem;height:6.7rem;place-items:center;overflow:hidden;border:1px solid var(--border-light);border-radius:.75rem;background:var(--input)}
           .product-detail-filter-item img{display:block;width:100%;height:100%;object-fit:contain;object-position:center}
           .product-detail-filter-item b{width:100%;overflow:hidden;color:var(--text-2);font-size:.72rem;text-align:center;text-overflow:ellipsis;white-space:nowrap}
+          .product-rangers-list{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(4.25rem,1fr));gap:.5rem!important;overflow:visible!important;padding:.15rem 0 .3rem!important}
+          .product-ranger-item{display:flex!important;width:auto!important;min-width:0!important;flex:initial!important;gap:.3rem!important}
+          .product-ranger-item>span{display:grid!important;width:4.25rem!important;height:5.35rem!important;min-height:5.35rem!important;place-items:center;overflow:hidden;border-radius:.65rem!important}
+          .product-ranger-item img{display:block!important;width:100%!important;height:100%!important;max-width:100%!important;max-height:100%!important;object-fit:contain!important;object-position:center!important}
+          .product-ranger-item b{font-size:.6rem!important;line-height:1.1;white-space:nowrap}
+          @media(max-width:640px){.product-rangers-list{grid-template-columns:repeat(4,minmax(0,1fr));gap:.4rem!important}.product-ranger-item>span{width:3.7rem!important;height:4.7rem!important;min-height:4.7rem!important}.product-ranger-item b{font-size:.52rem!important}}
           @media(max-width:640px){.product-detail-filters{padding:.8rem}.product-detail-filter-list{gap:.5rem}.product-detail-filter-item{flex-basis:4.4rem}.product-detail-filter-item>span{width:4.4rem;height:5.9rem}.product-detail-filter-head h2{font-size:.9rem}}
         </style>
       <% } %>
