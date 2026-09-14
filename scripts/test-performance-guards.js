@@ -62,6 +62,8 @@ assert.match(filterPanel, /window\.location\.assign\(query\?['"]\/products\?tags
 assert.doesNotMatch(filterPanel, /if\(cards\.length\)\{apply\(\);return\}/, 'filter selection must not remain client-only');
 assert.match(productDetail, /product-action-secondary/, 'purchase action must use a theme-independent readable class');
 assert.match(productDetail, /product-topup-action/, 'top-up action must use a theme-independent readable class');
+assert.match(shopRoutes, /productRangers/, 'product details must resolve assigned Rangers');
+assert.match(productDetail, /product-ranger-title/, 'product details must show assigned Rangers');
 assert.match(productForm, /fallbackData\.append\('productImages'/, 'folder import must fall back to the server uploader when direct R2 upload fails');
 assert.match(productForm, /return submitData\(fallbackData\)/, 'folder import fallback must submit and create products');
 [

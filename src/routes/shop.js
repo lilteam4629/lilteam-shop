@@ -250,11 +250,15 @@ router.get('/game/:slug', (req, res) => {
   const reviews = store.data.reviews.filter(r => r.productId === product.id);
   const selectedFilterTagIds = new Set((product.filterTagIds || []).map(String));
   const productFilterTags = store.data.filterTags.filter(tag => selectedFilterTagIds.has(String(tag.id)));
+  const productRangers = rangersSource.resolveCodes(
+    store.data.settings.rangersCatalog?.productAssignments?.[product.id] || [],
+  );
   res.render('shop/product-detail', {
     title: product.title,
     product: withStock(product),
     genreNames: (product.genres || []).map(g => store.data.settings.genres[g] || g),
     productFilterTags,
+    productRangers,
     reviews,
     ogTitle: `${product.title} | ${store.data.settings.shopName}`,
     ogDescription: `฿${product.price.toLocaleString()} — ${product.description || store.data.settings.tagline || ''}`.trim(),

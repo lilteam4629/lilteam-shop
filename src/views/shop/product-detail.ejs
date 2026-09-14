@@ -30,6 +30,22 @@
       </div>
 
       <h1 class="text-2xl font-bold mb-2"><%= product.title %></h1>
+      <% if (productRangers && productRangers.length) { %>
+        <section class="product-detail-filters mb-5" aria-labelledby="product-ranger-title">
+          <div class="product-detail-filter-head">
+            <div><span>ข้อมูลไอดี</span><h2 id="product-ranger-title">ตัวที่มีในไอดีนี้</h2></div>
+            <strong>ทั้งหมด <%= productRangers.length %> ตัว</strong>
+          </div>
+          <div class="product-detail-filter-list">
+            <% productRangers.forEach(ranger => { %>
+              <div class="product-detail-filter-item">
+                <span><img src="<%= ranger.imageUrl %>" alt="<%= ranger.name %>" loading="eager" decoding="async" /></span>
+                <b title="<%= ranger.name %>"><%= ranger.name %></b>
+              </div>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
       <% if (productFilterTags && productFilterTags.length) { %>
         <section class="product-detail-filters mb-5" aria-labelledby="product-filter-title">
           <div class="product-detail-filter-head">
