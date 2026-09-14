@@ -129,7 +129,11 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     rangersCatalog: store.data.settings.rangersCatalog || { enabled: false, items: [] },
     rangersProductAssignments: Object.fromEntries(Object.entries(store.data.settings.rangersCatalog?.productAssignments || {})
       .map(([productId, codes]) => [productId, rangersSource.resolveCodes(codes)])),
-    rangersFeatured: rangersSource.queryCatalog({ view: 'top100', limit: 12 }).items.slice(0, 5),
+    // Keep the hero lineup in sync with the refreshed Top 100 source. The
+    // first five records are always labelled Top 1–5 for a predictable card
+    // layout, even while the source is using its local fallback data.
+    rangersFeatured: rangersSource.queryCatalog({ view: 'top100', limit: 12 }).items.slice(0, 5)
+      .map((item, index) => ({ ...item, rank: Number(item.rank) || index + 1 })),
   };
 }
 

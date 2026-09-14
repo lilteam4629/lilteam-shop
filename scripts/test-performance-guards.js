@@ -45,6 +45,7 @@ assert.match(shopRoutes, /UNPAGINATED_HOME_TENANTS = new Set\(\['moopee-shop'\]\
 assert.match(shopRoutes, /showAllProducts\s*\? active\s*:\s*active\.slice/, 'the selected tenant must receive every visible product on its home page');
 assert.match(shopRoutes, /req\.query\.recommended/, 'recommended category links must be handled by the products route');
 assert.match(shopRoutes, /recommendedCategory\.productIds/, 'recommended category listings must filter by assigned product ids');
+assert.match(shopRoutes, /rangersFeatured:[\s\S]{0,260}slice\(0, 5\)/, 'Rangers hero must expose the refreshed Top 1–5 lineup');
 assert.match(homeView, /productTotalPages > 1/, 'home must expose navigation to every product page');
 assert.match(homeView, /recommended=<%=?\s*encodeURIComponent\(category\.id\)/, 'recommended category cards must link to their filtered listing');
 assert.match(adminMobileCss, /main > \.grid\[class~="md:grid-cols-2"\][\s\S]{0,300}min-width: 0/, 'mobile minigame preview grid must be allowed to shrink');

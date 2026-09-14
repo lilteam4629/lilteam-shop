@@ -7,7 +7,7 @@
   <section class="rm-hero">
     <div class="rm-hero-copy"><small>SYSTEM LAB / CURATED TEAMS</small><h1>เลือกทีมที่ใช่<br><em>แล้วออกไปลุย</em></h1><p>ร้านไอดี LINE Rangers ที่คัดมาให้เลือกง่าย</p><div class="rm-stats"><b><%= productTotal %></b> ไอดีในร้าน <i></i><b><%= available.length %></b> พร้อมขาย</div></div>
     <div class="rm-lineup" aria-label="ตัวละครเด่นจาก LINE Rangers Handbook">
-      <% if (spotlight.length) { spotlight.forEach((r, index) => { %><article style="--i:<%= index %>"><img loading="eager" src="<%= r.imageUrl %>" alt="<%= r.name %>" onerror="this.closest('article').hidden=true"><b><%= r.stars %>★</b><span><%= r.name %></span></article><% }) } else { %>
+      <% if (spotlight.length) { spotlight.forEach((r, index) => { %><article style="--i:<%= index %>" aria-label="Top <%= r.rank %> <%= r.name %>"><i class="rm-rank">TOP <%= r.rank %></i><img loading="eager" src="<%= r.imageUrl %>" alt="<%= r.name %>" onerror="this.closest('article').hidden=true"><b><%= r.stars || 'RANGER' %><%= r.stars ? '★' : '' %></b><span><%= r.name %></span></article><% }) } else { %>
         <div class="rm-catalog-off"><b>LINE RANGERS</b><span>คลังตัวละครยังปิดอยู่</span></div>
       <% } %>
     </div>
@@ -71,6 +71,10 @@ body.storefront-model-rangers-market .rm-hero-copy p{color:#fff8ed!important}
 body.storefront-model-rangers-market .rm-stats{color:#fff8ed!important}.storefront-model-rangers-market .rm-stats b{color:#fff!important}
 body.storefront-model-rangers-market .rm-lineup{background:#18212726!important;border-left:1px solid #ffffff44!important}
 body.storefront-model-rangers-market .rm-lineup article{background:#fffdf8!important;border:1px solid #18212722!important;border-radius:8px!important;box-shadow:0 8px 18px #18212720!important;color:var(--rm-ink)!important}
+body.storefront-model-rangers-market .rm-lineup article{position:relative;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease!important}
+body.storefront-model-rangers-market .rm-lineup article:hover{transform:translateY(-5px)!important;box-shadow:0 14px 24px #18212730!important}
+body.storefront-model-rangers-market .rm-lineup .rm-rank{display:inline-flex;position:absolute;top:7px;left:7px;z-index:2;padding:3px 5px;border-radius:999px;background:var(--rm-coral);color:#fff!important;font-size:8px;font-style:normal;font-weight:900;letter-spacing:.08em;line-height:1}
+body.storefront-model-rangers-market .rm-lineup article>b{display:block;margin-top:2px;color:var(--rm-coral)!important;font-size:10px}
 body.storefront-model-rangers-market .rm-ranger-vault header h2,body.storefront-model-rangers-market .rm-finder h2,body.storefront-model-rangers-market .rm-results h2{color:var(--rm-ink)!important}
 body.storefront-model-rangers-market .rm-ranger-vault header small{color:var(--rm-coral)!important;letter-spacing:.16em}
 body.storefront-model-rangers-market .rm-ranger-vault p,body.storefront-model-rangers-market .rm-finder p,body.storefront-model-rangers-market .rm-results p{color:var(--rm-muted)!important}
