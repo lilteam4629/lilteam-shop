@@ -1,10 +1,11 @@
 (()=>{
   const root=document.querySelector('[data-public-ranger-catalog]');
   if(!root)return;
-  const grid=root.querySelector('[data-rv-grid]'),input=root.querySelector('input'),count=root.querySelector('[data-rv-count]'),more=root.querySelector('[data-rv-more]');
+  const grid=root.querySelector('[data-rv-grid]'),input=root.querySelector('input'),count=root.querySelector('[data-rv-count]'),more=root.querySelector('[data-rv-more]'),clear=root.querySelector('#rm-clear-selection');
   let view='all',page=1,pages=1,timer,busy=false;const selected=new Map();
   const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  function choose(name,code,card){const search=document.querySelector('#rm-search');if(!search)return;if(selected.has(code)){selected.delete(code)}else{selected.set(code,name)};card?.classList.toggle('is-selected',selected.has(code));card?.setAttribute('aria-pressed',selected.has(code)?'true':'false');search.value=[...selected.values()].join(' ');search.dispatchEvent(new Event('input',{bubbles:true}));const market=document.querySelector('[data-rangers-market]');if(market){market.dataset.rangerSelection=[...selected.keys()].join('|');market.dispatchEvent(new CustomEvent('ranger-selection',{detail:{codes:[...selected.keys()]}}));}if(selected.size)document.querySelector('#rm-finder')?.scrollIntoView({behavior:'smooth',block:'start'});}
+  function syncSelection(){const search=document.querySelector('#rm-search');if(search){search.value=[...selected.values()].join(' ');search.dispatchEvent(new Event('input',{bubbles:true}))}if(clear)clear.hidden=!selected.size;const market=document.querySelector('[data-rangers-market]');if(market){market.dataset.rangerSelection=[...selected.keys()].join('|');market.dispatchEvent(new CustomEvent('ranger-selection',{detail:{codes:[...selected.keys()]}}))}}
+  function choose(name,code,card){if(selected.has(code)){selected.delete(code)}else{selected.set(code,name)};card?.classList.toggle('is-selected',selected.has(code));card?.setAttribute('aria-pressed',selected.has(code)?'true':'false');syncSelection();if(selected.size)document.querySelector('#rm-finder')?.scrollIntoView({behavior:'smooth',block:'start'});}
   async function load(reset=false){
     if(busy)return;
     if(reset){page=1;pages=1;grid.innerHTML=''}
@@ -19,7 +20,8 @@
   grid.addEventListener('scroll',loadNextWhenNeeded,{passive:true});
   grid.addEventListener('click',e=>{const card=e.target.closest('[data-ranger-name]');if(card)choose(card.dataset.rangerName,card.dataset.rangerCode,card)});
   grid.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){const card=e.target.closest('[data-ranger-name]');if(card){e.preventDefault();choose(card.dataset.rangerName,card.dataset.rangerCode,card)}}});
-  root.querySelectorAll('[data-rv-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.rvView;selected.clear();const market=document.querySelector('[data-rangers-market]');if(market){market.dataset.rangerSelection='';market.dispatchEvent(new CustomEvent('ranger-selection',{detail:{codes:[]}}));}grid.querySelectorAll('.is-selected').forEach(x=>{x.classList.remove('is-selected');x.setAttribute('aria-pressed','false')});root.querySelectorAll('[data-rv-view]').forEach(x=>x.classList.toggle('is-active',x===button));load(true)}));
+  root.querySelectorAll('[data-rv-view]').forEach(button=>button.addEventListener('click',()=>{view=button.dataset.rvView;selected.clear();syncSelection();grid.querySelectorAll('.is-selected').forEach(x=>{x.classList.remove('is-selected');x.setAttribute('aria-pressed','false')});root.querySelectorAll('[data-rv-view]').forEach(x=>x.classList.toggle('is-active',x===button));load(true)}));
+  clear?.addEventListener('click',()=>{selected.clear();grid.querySelectorAll('.is-selected').forEach(x=>{x.classList.remove('is-selected');x.setAttribute('aria-pressed','false')});syncSelection()});
   input.addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(()=>load(true),250)});
   more?.addEventListener('click',()=>{if(page<pages){page++;load()}});
   load(true);
