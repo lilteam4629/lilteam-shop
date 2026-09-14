@@ -1,0 +1,37 @@
+<div class="studio-page-head mb-6">
+  <div><span class="studio-page-kicker">STOREFRONT MODEL</span><h1>โมเดลหน้าร้าน LINE Rangers</h1><p>เลือกหน้าตาของร้านโดยไม่เปลี่ยนสินค้า รูป ราคา สต็อก หรือข้อมูลลูกค้า</p></div>
+  <a href="/" target="_blank" rel="noopener" class="studio-secondary-action">ดูหน้าร้าน ↗</a>
+</div>
+
+<form action="/admin/storefront-models" method="post" class="grid lg:grid-cols-2 gap-5 max-w-6xl">
+  <label class="model-option block rounded-2xl border-2 <%= currentModel === 'classic' ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> bg-[var(--card)] p-4 cursor-pointer">
+    <input type="radio" name="model" value="classic" class="sr-only" <%= currentModel === 'classic' ? 'checked' : '' %>>
+    <div class="aspect-[16/10] rounded-xl border border-[var(--border)] bg-[var(--bg)] p-4 overflow-hidden">
+      <div class="h-6 rounded-lg bg-[var(--card)] mb-4"></div><div class="h-16 rounded-xl bg-[var(--input)] mb-4"></div>
+      <div class="grid grid-cols-3 gap-2"><i class="h-20 rounded-lg bg-[var(--card)] border border-[var(--border)]"></i><i class="h-20 rounded-lg bg-[var(--card)] border border-[var(--border)]"></i><i class="h-20 rounded-lg bg-[var(--card)] border border-[var(--border)]"></i></div>
+    </div>
+    <div class="flex items-center justify-between gap-3 mt-4"><div><b class="block">โมเดลมาตรฐาน</b><small class="text-[var(--text-4)]">รูปแบบเดิมของร้าน ใช้สีตามธีมที่ตั้งไว้</small></div><span class="text-[var(--gold-text)] font-bold"><%= currentModel === 'classic' ? '✓ ใช้อยู่' : 'เลือก' %></span></div>
+  </label>
+
+  <label class="model-option block rounded-2xl border-2 <%= currentModel === 'line-rangers' ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> bg-[var(--card)] p-4 cursor-pointer">
+    <input type="radio" name="model" value="line-rangers" class="sr-only" <%= currentModel === 'line-rangers' ? 'checked' : '' %>>
+    <div class="line-rangers-preview aspect-[16/10] rounded-xl border border-sky-400/40 p-4 overflow-hidden">
+      <div class="h-7 rounded-lg bg-slate-950/80 border border-sky-400/30 mb-4"></div><div class="h-16 rounded-xl bg-gradient-to-r from-blue-950 to-sky-900 border border-cyan-400/40 mb-4"></div>
+      <div class="grid grid-cols-3 gap-2"><i class="h-20 rounded-lg bg-slate-950 border border-cyan-400/40"></i><i class="h-20 rounded-lg bg-slate-950 border border-cyan-400/40"></i><i class="h-20 rounded-lg bg-slate-950 border border-cyan-400/40"></i></div>
+    </div>
+    <div class="flex items-center justify-between gap-3 mt-4"><div><b class="block">LINE Rangers</b><small class="text-[var(--text-4)]">บรรยากาศเกม สีฟ้าเข้ม การ์ดและแถบข้อมูลแบบเกม</small></div><span class="text-[var(--gold-text)] font-bold"><%= currentModel === 'line-rangers' ? '✓ ใช้อยู่' : 'เลือก' %></span></div>
+  </label>
+  <button data-theme-fill="accent" class="lg:col-span-2 rounded-xl bg-[var(--gold)] px-6 py-3 font-bold text-[var(--gold-contrast)]">บันทึกและใช้โมเดลที่เลือก</button>
+</form>
+
+<style>
+.line-rangers-preview{background:radial-gradient(circle at 50% 20%,#145ca8 0,#071a38 42%,#030916 100%)}
+.model-option{transition:border-color .2s,transform .2s,box-shadow .2s}.model-option:has(input:checked){box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 18%,transparent)}.model-option:hover{transform:translateY(-2px)}
+@media(prefers-reduced-motion:reduce){.model-option{transition:none}.model-option:hover{transform:none}}
+</style>
+<script>
+document.querySelectorAll('.model-option input').forEach(input=>input.addEventListener('change',()=>{
+  document.querySelectorAll('.model-option').forEach(label=>label.style.borderColor='var(--border)');
+  input.closest('.model-option').style.borderColor='var(--gold)';
+}));
+</script>

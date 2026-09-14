@@ -37,6 +37,7 @@
   </script>
   <link rel="stylesheet" href="<%= asset('css/tailwind.generated.css') %>" />
   <link rel="stylesheet" href="<%= asset('css/theme-contrast-v1.css') %>" />
+  <% if (settings.storefrontModel === 'line-rangers') { %><link rel="stylesheet" href="<%= asset('css/storefront-line-rangers-v1.css') %>" /><% } %>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -157,7 +158,7 @@
     }
   </style>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= settings.storefrontModel === 'line-rangers' ? 'line-rangers' : 'classic' %>">
   <div id="page-loading-overlay" aria-hidden="true">
     <div class="loading-ring">
       <% if (settings.branding && settings.branding.logoImage) { %>

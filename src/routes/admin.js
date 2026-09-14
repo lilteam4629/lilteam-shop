@@ -875,6 +875,28 @@ router.post('/home-sections/:id/move', async (req, res) => {
   res.redirect('/admin/home-sections');
 });
 
+// ---------- Storefront models ----------
+router.get('/storefront-models', (req, res) => {
+  res.render('admin/storefront-models', {
+    title: 'โมเดลหน้าร้าน LINE Rangers',
+    active: 'storefront-models',
+    currentModel: store.data.settings.storefrontModel || 'classic',
+  });
+});
+
+router.post('/storefront-models', async (req, res) => {
+  const allowed = new Set(['classic', 'line-rangers']);
+  const model = String(req.body.model || '');
+  if (!allowed.has(model)) {
+    req.flash('error', 'ไม่พบโมเดลหน้าร้านที่เลือก');
+    return res.redirect('/admin/storefront-models');
+  }
+  store.data.settings.storefrontModel = model;
+  await store.save();
+  req.flash('success', model === 'line-rangers' ? 'เปิดใช้โมเดลหน้าร้าน LINE Rangers แล้ว' : 'กลับไปใช้โมเดลหน้าร้านมาตรฐานแล้ว');
+  res.redirect('/admin/storefront-models');
+});
+
 // ---------- Storefront color theme ----------
 router.get('/theme', (req, res) => {
   res.render('admin/theme', {

@@ -161,6 +161,15 @@ async function checkInstalledDisabledRainModule(cookie) {
   }
 }
 
+async function checkStorefrontModels(cookie) {
+  const page = await fetchOk('/admin/storefront-models', 'text/html', { cookie });
+  if (!page.body.includes('โมเดลหน้าร้าน LINE Rangers') || !page.body.includes('value="line-rangers"')) throw new Error('storefront model admin is incomplete');
+  const update = await request('/admin/storefront-models', { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'model=line-rangers' });
+  if (update.statusCode !== 302 || update.headers.location !== '/admin/storefront-models') throw new Error('LINE Rangers model update failed');
+  const home = await fetchOk('/', 'text/html');
+  if (!home.body.includes('storefront-model-line-rangers') || !home.body.includes('storefront-line-rangers-v1.css')) throw new Error('LINE Rangers model is not active on storefront');
+}
+
 async function run() {
   try {
     let ready = false;
@@ -224,6 +233,7 @@ async function run() {
     if (/closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/.test(mainAdmin.body)) throw new Error('ordinary admin links still trigger a blocking navigation spinner');
     if (mainAdmin.body.includes('admin-page-surface')) throw new Error('admin still exposes the removed animated page surface');
     await checkInstalledDisabledRainModule(cookie);
+    await checkStorefrontModels(cookie);
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);
     const missing = await request('/definitely-missing');

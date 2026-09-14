@@ -176,6 +176,7 @@ function defaultData() {
         style: 'normal',
       },
       productCardStyle: 'natural', // 'natural' = full uncropped image, price below; 'classic' = cropped cover photo with price overlaid
+      storefrontModel: 'classic', // 'classic' | 'line-rangers'
       music: {
         enabled: false,
         youtubeUrl: '',
@@ -631,6 +632,10 @@ function migrateSchema(db) {
       description: 'เสี่ยงดวงลุ้นรับเครดิตร้านค้าฟรี! เปิดเผยอัตราการออกรางวัลของทุกรายการอย่างโปร่งใส',
       costPerPlay: 20,
     };
+    changed = true;
+  }
+  if (!['classic', 'line-rangers'].includes(db.settings.storefrontModel)) {
+    db.settings.storefrontModel = 'classic';
     changed = true;
   }
   if (db.settings.miniGame.boxEnabled === undefined) {
