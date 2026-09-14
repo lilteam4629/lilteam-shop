@@ -70,7 +70,6 @@ async function refreshPvp() {
 }
 function rowsForView(view) {
   if (view === 'top100') return (pvpTop.length ? pvpTop : rangers.slice(0, 100).map((item, index) => ({ ...item, rank: index + 1 }))).slice(0, 100);
-  if (view === 'new') return [...rangers].sort((a, b) => b.code.localeCompare(a.code)).slice(0, 100);
   if (view === 'gear' || ['WEAPON', 'ARMOR', 'ACC'].includes(view)) return view === 'gear' ? gears : gears.filter(x => x.gearType === view);
   return rangers;
 }

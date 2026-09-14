@@ -30,5 +30,6 @@ assert(serviceSource.includes("getJson('/api/v2/equipments')"));
 assert(serviceSource.includes("timeZone: 'Asia/Bangkok'"));
 assert(serviceSource.includes('scheduleRefresh()'));
 assert(adminTemplate.includes('data-view="WEAPON"') && adminTemplate.includes('data-view="ARMOR"') && adminTemplate.includes('data-view="ACC"'));
+assert(!adminTemplate.includes('data-view="new"') && !adminTemplate.includes('มาใหม่'));
 assert(adminTemplate.includes("grid.addEventListener('pointermove'"));
 console.log('Rangers catalog checks passed: live refresh, Top 100 ranks, new items, gear filters, pointer drag, assignments, templates, tenant guards');
