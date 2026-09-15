@@ -15,7 +15,7 @@ function resolveApiKeys(primary, values) {
   else if (values) raw.push(values);
   const keys = raw.flatMap(value => String(value || '').split(/[\r\n,]+/))
     .map(value => value.trim()).filter(Boolean);
-  return [...new Set(keys)].slice(0, 50);
+  return [...new Set(keys)].slice(0, 5);
 }
 
 const maskedKey = key => `••••${String(key || '').slice(-4)}`;

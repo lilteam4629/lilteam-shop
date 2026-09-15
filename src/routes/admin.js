@@ -1494,7 +1494,7 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const slip2goEndpoint = (req.body.slip2goEndpoint !== undefined ? req.body.slip2goEndpoint : (payment.slip2goEndpoint || slip2go.DEFAULT_ENDPOINT)).trim();
   const easyslipApiKey = (req.body.easyslipApiKey !== undefined ? req.body.easyslipApiKey : (payment.easyslipApiKey || '')).trim();
   const slipcheckApiKey = (req.body.slipcheckApiKey !== undefined ? req.body.slipcheckApiKey : (payment.slipcheckApiKey || '')).trim();
-  const parseKeys = value => [...new Set([].concat(value || []).flatMap(item => String(item).split(/[\r\n,]+/)).map(item => item.trim()).filter(Boolean))].slice(0, 50);
+  const parseKeys = value => [...new Set([].concat(value || []).flatMap(item => String(item).split(/[\r\n,]+/)).map(item => item.trim()).filter(Boolean))].slice(0, 5);
   const slipcheckApiKeys = req.tenantShop
     ? (Array.isArray(payment.slipcheckApiKeys) ? payment.slipcheckApiKeys : [])
     : parseKeys(req.body.slipcheckApiKeys !== undefined ? req.body.slipcheckApiKeys : (payment.slipcheckApiKeys || []));
