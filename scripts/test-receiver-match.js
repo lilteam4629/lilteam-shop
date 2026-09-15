@@ -78,6 +78,33 @@ async function verifyProviderIntegration() {
   }
 }
 
+async function verifySlipCheckKeyOrder() {
+  const originalPost = axios.post;
+  const usedKeys = [];
+  let firstKeySuccesses = 0;
+  axios.post = async (url, form, options) => {
+    const key = options.headers['x-api-key'];
+    usedKeys.push(key);
+    if (key === 'key-one' && firstKeySuccesses >= 2) return { data: { success: false, code: 429, message: 'quota exceeded' } };
+    if (key === 'key-one') firstKeySuccesses++;
+    return { data: { success: true, data: { ...standardPayload, amount: 100, ref_no: `fixture-${usedKeys.length}`, transferred_at: new Date().toISOString() } } };
+  };
+  try {
+    delete require.cache[require.resolve('../src/services/slipcheck')];
+    const slipcheck = require('../src/services/slipcheck');
+    const credentials = { apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] };
+    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
+    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
+    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
+    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
+    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-one', 'key-two', 'key-two'], 'must keep one key until exhausted, then keep the next key');
+  } finally {
+    axios.post = originalPost;
+    delete require.cache[require.resolve('../src/services/slipcheck')];
+  }
+}
+
 verifyProviderIntegration()
+  .then(verifySlipCheckKeyOrder)
   .then(() => console.log('Receiver matching checks passed: provider response, account/proxy values, sender isolation, Thai/English names'))
   .catch(error => { console.error(error); process.exitCode = 1; });

@@ -268,7 +268,7 @@
         <span class="block mt-1 text-[10px] text-[var(--text-4)]">คีย์หลักด้านบนจะถูกรวมให้อัตโนมัติ และไม่แสดงคีย์เต็มในหน้าโควตา</span>
       </label>
       <% } %>
-      <% if (isMainSite) { %><label class="flex items-start gap-2 text-xs text-[var(--text-3)]"><input type="checkbox" name="slipcheckIndependentQuota" <%= payment.slipcheckIndependentQuota ? 'checked' : '' %> class="mt-0.5" /><span><b>คีย์มาจากคนละบัญชี</b><span class="block text-[10px] text-[var(--text-4)] mt-1">รวมโควตาของแต่ละคีย์เข้าด้วยกัน เช่น 2 คีย์ = 1,000 ครั้ง</span></span></label><% } %>
+      <% if (isMainSite) { %><label class="flex items-start gap-2 text-xs text-[var(--text-3)]"><input id="own-slipcheck-independent" type="checkbox" name="slipcheckIndependentQuota" <%= payment.slipcheckIndependentQuota ? 'checked' : '' %> class="mt-0.5" /><span><b>คีย์มาจากคนละบัญชี</b><span class="block text-[10px] text-[var(--text-4)] mt-1">ใส่หนึ่งคีย์ต่อหนึ่งบัญชีเพื่อรวมโควตา เช่น 2 บัญชี = 1,000 ครั้ง</span></span></label><% } %>
       <input id="own-slipcheck-endpoint" type="hidden" name="slipcheckEndpoint" value="<%= payment.slipcheckEndpoint || 'https://mxrslip.lovable.app/api/public/v1' %>" />
       <button type="button" onclick="testOwnProvider('slipcheck')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ทดสอบ SlipCheck</button>
       <div id="own-slipcheck-result" class="text-xs text-[var(--text-4)]"><%= slipcheckInfo && slipcheckInfo.ok ? 'เชื่อมต่อแล้ว' : '' %></div>
@@ -349,14 +349,15 @@ async function testOwnProvider(provider) {
   result.textContent = 'กำลังตรวจสอบ...';
   const payload = { provider };
   if (provider === 'easyslip') payload.apiKey = document.getElementById('own-easyslip-key').value;
-  if (provider === 'slipcheck') { payload.apiKey = document.getElementById('own-slipcheck-key').value; payload.apiKeys = document.getElementById('own-slipcheck-keys')?.value || ''; payload.endpoint = document.getElementById('own-slipcheck-endpoint').value; }
+  if (provider === 'slipcheck') { payload.apiKey = document.getElementById('own-slipcheck-key').value; payload.apiKeys = document.getElementById('own-slipcheck-keys')?.value || ''; payload.independent = Boolean(document.getElementById('own-slipcheck-independent')?.checked); payload.endpoint = document.getElementById('own-slipcheck-endpoint').value; }
   if (provider === 'rdcw') { payload.clientId = document.getElementById('own-rdcw-id').value; payload.clientSecret = document.getElementById('own-rdcw-secret').value; }
   if (provider === 'slip2go') { payload.apiKey = document.getElementById('own-slip2go-key').value; payload.endpoint = document.getElementById('own-slip2go-endpoint').value; }
   try {
     const response = await fetch('/admin/slip-verification/test', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
     const data = await response.json();
     result.className = `text-xs ${data.ok ? 'text-emerald-400' : 'text-rose-400'}`;
-    result.textContent = `${data.ok ? '✓' : '✕'} ${data.message || (data.ok ? 'เชื่อมต่อสำเร็จ' : 'เชื่อมต่อไม่สำเร็จ')}`;
+    const poolSummary = provider === 'slipcheck' && data.keyCount ? ` • ใช้ได้ ${data.accounts.filter(account => account.ok).length}/${data.keyCount} คีย์ • เหลือ ${Number(data.totalRemaining || 0).toLocaleString()} ครั้ง` : '';
+    result.textContent = `${data.ok ? '✓' : '✕'} ${data.message || (data.ok ? 'เชื่อมต่อสำเร็จ' : 'เชื่อมต่อไม่สำเร็จ')}${poolSummary}`;
   } catch (error) {
     result.className = 'text-xs text-rose-400';
     result.textContent = '✕ ติดต่อผู้ให้บริการไม่ได้';
