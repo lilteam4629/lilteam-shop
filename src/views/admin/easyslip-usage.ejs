@@ -263,10 +263,11 @@
       <label class="block text-xs text-[var(--text-3)]">API Key <% if (payment.slipcheckApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %>
         <input id="own-slipcheck-key" type="password" name="slipcheckApiKey" value="<%= payment.slipcheckApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" />
       </label>
-      <label class="block text-xs text-[var(--text-3)]">API Keys เพิ่มเติม (ใส่ทีละบรรทัด)
+      <% if (isMainSite) { %><label class="block text-xs text-[var(--text-3)]">API Keys เพิ่มเติม (ใส่ทีละบรรทัด)
         <textarea id="own-slipcheck-keys" name="slipcheckApiKeys" rows="3" placeholder="คีย์ที่ 2\nคีย์ที่ 3" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs"><%= (Array.isArray(payment.slipcheckApiKeys) ? payment.slipcheckApiKeys : String(payment.slipcheckApiKeys || '').split(/[\r\n,]+/)).filter(key => key && key !== payment.slipcheckApiKey).join('\n') %></textarea>
         <span class="block mt-1 text-[10px] text-[var(--text-4)]">คีย์หลักด้านบนจะถูกรวมให้อัตโนมัติ และไม่แสดงคีย์เต็มในหน้าโควตา</span>
       </label>
+      <% } %>
       <input id="own-slipcheck-endpoint" type="hidden" name="slipcheckEndpoint" value="<%= payment.slipcheckEndpoint || 'https://mxrslip.lovable.app/api/public/v1' %>" />
       <button type="button" onclick="testOwnProvider('slipcheck')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ทดสอบ SlipCheck</button>
       <div id="own-slipcheck-result" class="text-xs text-[var(--text-4)]"><%= slipcheckInfo && slipcheckInfo.ok ? 'เชื่อมต่อแล้ว' : '' %></div>

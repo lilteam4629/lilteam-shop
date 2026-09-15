@@ -1495,7 +1495,9 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const easyslipApiKey = (req.body.easyslipApiKey !== undefined ? req.body.easyslipApiKey : (payment.easyslipApiKey || '')).trim();
   const slipcheckApiKey = (req.body.slipcheckApiKey !== undefined ? req.body.slipcheckApiKey : (payment.slipcheckApiKey || '')).trim();
   const parseKeys = value => [...new Set([].concat(value || []).flatMap(item => String(item).split(/[\r\n,]+/)).map(item => item.trim()).filter(Boolean))].slice(0, 50);
-  const slipcheckApiKeys = parseKeys(req.body.slipcheckApiKeys !== undefined ? req.body.slipcheckApiKeys : (payment.slipcheckApiKeys || []));
+  const slipcheckApiKeys = req.tenantShop
+    ? (Array.isArray(payment.slipcheckApiKeys) ? payment.slipcheckApiKeys : [])
+    : parseKeys(req.body.slipcheckApiKeys !== undefined ? req.body.slipcheckApiKeys : (payment.slipcheckApiKeys || []));
   if (slipcheckApiKey && !slipcheckApiKeys.includes(slipcheckApiKey)) slipcheckApiKeys.unshift(slipcheckApiKey);
   const slipcheckEndpoint = (req.body.slipcheckEndpoint !== undefined ? req.body.slipcheckEndpoint : (payment.slipcheckEndpoint || slipcheck.DEFAULT_ENDPOINT)).trim();
   const rdcwClientId = (req.body.rdcwClientId !== undefined ? req.body.rdcwClientId : (payment.rdcwClientId || '')).trim();
