@@ -158,8 +158,15 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     const index = (start + offset) % apiKeys.length;
     const result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
     lastResult = result;
-    keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
-    if (!(result.quotaExhausted || result.keyUnavailable) || offset === apiKeys.length - 1) return result;
+    if (result.quotaExhausted || result.keyUnavailable) {
+      keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
+      if (offset < apiKeys.length - 1) continue;
+      return result;
+    }
+    // Keep using the same working key. Advance only after that key runs out
+    // of quota or becomes unavailable, so usage follows the configured order.
+    keyCursor.set(cursorKey, index);
+    return result;
   }
   return lastResult;
 }
