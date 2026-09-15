@@ -1814,6 +1814,16 @@ router.post('/topups/:id/reject', async (req, res) => {
   res.redirect('/admin/topups');
 });
 
+router.post('/topups/:id/retry-slip', async (req, res) => {
+  const accountRoutes = require('./account');
+  const result = await accountRoutes.retryTopupSlipVerification({
+    requestId: req.params.id,
+    origin: `${req.protocol}://${req.get('host')}`,
+  });
+  req.flash(result.ok ? 'success' : 'error', result.ok ? 'ตรวจสลิปใหม่ด้วยชุด API Key ปัจจุบันแล้ว' : result.error);
+  res.redirect('/admin/topups');
+});
+
 router.post('/topups/:id/delete', async (req, res) => {
   const result = await topupsService.deleteTopup(req.params.id);
   if (!result.ok) { req.flash('error', result.error); return res.redirect('/admin/topups'); }

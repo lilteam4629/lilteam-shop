@@ -38,6 +38,13 @@ function isQuotaExhausted(errorOrBody, status) {
   if (quota && quota.remaining !== undefined && Number(quota.remaining) <= 0) return true;
   return false;
 }
+
+function isKeyUnavailable(errorOrBody, status) {
+  const body = errorOrBody && typeof errorOrBody === 'object' ? errorOrBody : {};
+  if ([401, 403, 429].includes(Number(status)) || [401, 403, 429].includes(Number(body.code))) return true;
+  const message = [body.message, body.error, body.detail, body.reason].filter(Boolean).join(' ').toLowerCase();
+  return /invalid.*key|api.?key.*invalid|unauthori[sz]ed|forbidden|inactive|disabled|ปิดใช้งาน|คีย์.*ไม่ถูกต้อง/.test(message);
+}
 async function getAccountInfo(apiKey, endpoint = DEFAULT_ENDPOINT) {
   const key = String(apiKey || '').trim();
   if (!key) return { ok: false, message: 'กรุณากรอก SlipCheck API Key' };
@@ -99,8 +106,9 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
     const data = body.data || {};
     if (!body.success) {
       const quotaExhausted = isQuotaExhausted(body);
+      const keyUnavailable = isKeyUnavailable(body);
       return {
-        checked: true, verified: false, quotaExhausted,
+        checked: true, verified: false, quotaExhausted, keyUnavailable,
         message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (body.message || 'SlipCheck ไม่สามารถยืนยันสลิปนี้ได้'),
         raw: body,
       };
@@ -132,8 +140,9 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
     const body = error.response?.data;
     const status = error.response?.status;
     const quotaExhausted = isQuotaExhausted(body, status);
+    const keyUnavailable = isKeyUnavailable(body, status);
     return {
-      checked: [401, 403, 422, 429].includes(status) || quotaExhausted, verified: false, quotaExhausted,
+      checked: [401, 403, 422, 429].includes(status) || quotaExhausted, verified: false, quotaExhausted, keyUnavailable,
       message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (body?.message || error.message || 'เชื่อมต่อ SlipCheck ไม่สำเร็จ'), raw: body || null,
     };
   }
@@ -150,7 +159,7 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     const result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
     lastResult = result;
     keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
-    if (!result.quotaExhausted || offset === apiKeys.length - 1) return result;
+    if (!(result.quotaExhausted || result.keyUnavailable) || offset === apiKeys.length - 1) return result;
   }
   return lastResult;
 }

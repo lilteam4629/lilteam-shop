@@ -296,7 +296,7 @@ function canCheckSlipAutomatically(payment = {}) {
   return false;
 }
 
-async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptions, origin }) {
+async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptions, origin, retryStored = false }) {
   if (activeVerifications.has(requestId)) return;
   activeVerifications.add(requestId);
 
@@ -382,7 +382,10 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
 
     if (verified) {
       const slipAge = transTime && !Number.isNaN(transTime.getTime()) ? Date.now() - transTime.getTime() : null;
-      if (slipAge === null || slipAge > 5 * 60 * 1000 || slipAge < -2 * 60 * 1000) {
+      const requestCreatedAt = new Date(request.createdAt).getTime();
+      const retryTimeInvalid = retryStored && (slipAge === null || transTime.getTime() < requestCreatedAt - (5 * 60 * 1000) || slipAge < -2 * 60 * 1000);
+      const initialTimeInvalid = !retryStored && (slipAge === null || slipAge > 5 * 60 * 1000 || slipAge < -2 * 60 * 1000);
+      if (retryTimeInvalid || initialTimeInvalid) {
         verified = false;
         result.message = 'เวลาในสลิปไม่อยู่ในช่วงที่ยอมรับได้ กรุณาแนบสลิปล่าสุด';
       } else if (!transRef) {
@@ -406,6 +409,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         message: result.message,
         provider,
         transRef,
+        checkedAt: new Date().toISOString(),
       };
       freshRequest.slipCheck.verified = verified;
       if (verified) {
@@ -512,6 +516,31 @@ async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptio
   return { ok: true, request, automatic: true };
 }
 
+async function retryTopupSlipVerification({ requestId, origin }) {
+  const request = store.data.topupRequests.find(t => t.id === requestId);
+  const user = request && store.data.users.find(u => u.id === request.userId);
+  if (!request || !user || !request.slipStorageId) return { ok: false, error: 'ไม่พบสลิปของรายการนี้' };
+  if (request.status === 'approved' || request.status === 'rejected') return { ok: false, error: 'รายการนี้ถูกดำเนินการแล้ว' };
+  if (activeVerifications.has(request.id)) return { ok: false, error: 'รายการนี้กำลังตรวจสอบอยู่' };
+  const media = await store.getPrivateMedia(request.slipStorageId);
+  if (!media) return { ok: false, error: 'ไม่พบไฟล์สลิปที่บันทึกไว้' };
+  const chunks = [];
+  for await (const chunk of media.stream) chunks.push(Buffer.from(chunk));
+  await store.transact((data) => {
+    const fresh = data.topupRequests.find(t => t.id === requestId);
+    if (fresh && fresh.status === 'pending') fresh.status = 'verifying';
+  });
+  await verifySlipInBackground({
+    requestId: request.id,
+    userId: user.id,
+    fileBuffer: Buffer.concat(chunks),
+    fileOptions: { filename: media.file.filename || media.file.metadata?.filename || 'slip.jpg', contentType: media.file.metadata?.contentType || 'image/jpeg' },
+    origin,
+    retryStored: true,
+  });
+  return { ok: true };
+}
+
 router.post('/topup/:id/slip', (req, res) => {
   const user = currentUser(req);
   const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
@@ -578,3 +607,4 @@ module.exports = router;
 // the internal API can reuse this exact logic without a second import path.
 router.createTopupRequest = createTopupRequest;
 router.attachSlipToTopupRequest = attachSlipToTopupRequest;
+router.retryTopupSlipVerification = retryTopupSlipVerification;
