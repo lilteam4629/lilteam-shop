@@ -70,11 +70,15 @@ async function getPoolAccountInfo(apiKeys, endpoint = DEFAULT_ENDPOINT) {
     return { ...info, index: index + 1, key: maskedKey(key), quota: { used: Number.isFinite(used) ? used : 0, max: Number.isFinite(max) ? max : null, remaining } };
   }));
   const quotaAccounts = accounts.filter(account => Number.isFinite(account.quota.remaining));
+  // SlipCheck's dashboard exposes one monthly quota per account. Multiple API
+  // keys are failover credentials for that account, so do not multiply the
+  // account quota by the number of keys.
+  const accountQuota = quotaAccounts[0]?.quota || { used: 0, max: null, remaining: null };
   return {
     ok: accounts.some(account => account.ok), keyCount: keys.length, accounts,
-    totalUsed: quotaAccounts.reduce((sum, account) => sum + account.quota.used, 0),
-    totalMax: quotaAccounts.reduce((sum, account) => sum + account.quota.max, 0),
-    totalRemaining: quotaAccounts.reduce((sum, account) => sum + account.quota.remaining, 0),
+    totalUsed: accountQuota.used,
+    totalMax: accountQuota.max,
+    totalRemaining: accountQuota.remaining,
     message: accounts.filter(account => !account.ok).map(account => account.message).filter(Boolean).join(' • ') || 'เชื่อมต่อ SlipCheck สำเร็จ',
   };
 }
