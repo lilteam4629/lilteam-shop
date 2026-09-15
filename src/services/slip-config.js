@@ -1,5 +1,5 @@
 const CREDENTIAL_FIELDS = [
-  'easyslipApiKey', 'slipcheckApiKey', 'slipcheckEndpoint',
+  'easyslipApiKey', 'slipcheckApiKey', 'slipcheckApiKeys', 'slipcheckEndpoint',
   'rdcwClientId', 'rdcwClientSecret', 'rdcwEndpoint',
   'slip2goApiKey', 'slip2goEndpoint', 'slipokBranchId', 'slipokApiKey',
 ];

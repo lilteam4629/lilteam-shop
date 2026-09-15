@@ -76,7 +76,7 @@
 <% if (!usesSharedProvider) { %>
 <% const providerStatuses = [
   { id: 'easyslip', name: 'EasySlip', info, used: info?.quota?.used, max: info?.quota?.max, remaining: info?.quota?.remaining, note: info?.ok ? ('แพ็กเกจ ' + (info.planName || '-')) : (info?.message || 'ยังไม่เชื่อมต่อ') },
-  { id: 'slipcheck', name: 'SlipCheck', info: slipcheckInfo, used: slipcheckInfo?.quota?.used, max: slipcheckInfo?.quota?.max, remaining: slipcheckInfo?.quota?.max == null ? null : Math.max(0, Number(slipcheckInfo.quota.max) - Number(slipcheckInfo.quota.used || 0)), note: slipcheckInfo?.message || 'ยังไม่ได้กรอก API Key' },
+  { id: 'slipcheck', name: 'SlipCheck', info: slipcheckInfo, used: slipcheckPoolInfo?.totalUsed ?? slipcheckInfo?.quota?.used, max: slipcheckPoolInfo?.totalMax ?? slipcheckInfo?.quota?.max, remaining: slipcheckPoolInfo ? slipcheckPoolInfo.totalRemaining : (slipcheckInfo?.quota?.max == null ? null : Math.max(0, Number(slipcheckInfo.quota.max) - Number(slipcheckInfo.quota.used || 0))), note: slipcheckPoolInfo ? `${slipcheckPoolInfo.keyCount} คีย์ • รวมโควตาทุกคีย์` : (slipcheckInfo?.message || 'ยังไม่ได้กรอก API Key') },
   { id: 'rdcw', name: 'SlipRDCW', info: rdcwInfo, used: null, max: null, remaining: null, note: rdcwInfo?.ok ? 'เชื่อมข้อมูลแล้ว • ค่ายนี้ไม่มี API สำหรับอ่านโควตา' : (rdcwInfo?.message || 'ยังไม่ได้กรอก Client ID / Secret') },
   { id: 'slip2go', name: 'Slip2Go', info: slip2goInfo, used: slip2goInfo?.used, max: slip2goInfo?.quota, remaining: slip2goInfo?.quota == null ? null : Math.max(0, Number(slip2goInfo.quota) - Number(slip2goInfo.used || 0)), note: slip2goInfo?.message || 'ยังไม่ได้กรอก API Key' },
 ]; %>
@@ -97,6 +97,19 @@
     </div>
   <% }) %>
 </div>
+<% if (slipcheckPoolInfo && slipcheckPoolInfo.accounts && slipcheckPoolInfo.accounts.length) { %>
+<div class="mb-6 rounded-2xl border border-[var(--gold)]/30 bg-[var(--card)] p-5 shadow-sm">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+    <div><h3 class="font-bold">SlipCheck • โควตาราย API Key</h3><p class="text-xs text-[var(--text-4)] mt-1">ระบบจะสลับไปใช้คีย์ถัดไปอัตโนมัติเมื่อคีย์ใดหมดโควตา</p></div>
+    <div class="text-right"><div class="text-xs text-[var(--text-4)]">คงเหลือรวม</div><div class="text-2xl font-extrabold text-[var(--gold-text)]"><%= Number(slipcheckPoolInfo.totalRemaining || 0).toLocaleString('th-TH') %> ครั้ง</div></div>
+  </div>
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+    <% slipcheckPoolInfo.accounts.forEach(account => { const quota = account.quota || {}; %>
+      <div class="rounded-xl border border-[var(--border)] bg-[var(--input)]/30 p-3 text-xs"><div class="flex justify-between gap-2"><span class="font-mono"><%= account.key %></span><span class="<%= account.ok ? 'text-emerald-500' : 'text-rose-500' %>"><%= account.ok ? 'พร้อมใช้' : 'มีปัญหา' %></span></div><div class="mt-2 font-bold"><%= quota.remaining == null ? '-' : Number(quota.remaining).toLocaleString('th-TH') + ' ครั้งเหลือ' %></div><div class="text-[var(--text-4)]">ใช้ไป <%= Number(quota.used || 0).toLocaleString('th-TH') %> / <%= quota.max == null ? '-' : Number(quota.max).toLocaleString('th-TH') %></div></div>
+    <% }) %>
+  </div>
+</div>
+<% } %>
 <% } else { %>
   <div class="mb-6 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-5">
     <div class="font-bold text-sm text-emerald-600">✓ ระบบตรวจสลิปกลางพร้อมใช้งาน</div>
@@ -250,6 +263,10 @@
       <label class="block text-xs text-[var(--text-3)]">API Key <% if (payment.slipcheckApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %>
         <input id="own-slipcheck-key" type="password" name="slipcheckApiKey" value="<%= payment.slipcheckApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" />
       </label>
+      <label class="block text-xs text-[var(--text-3)]">API Keys เพิ่มเติม (ใส่ทีละบรรทัด)
+        <textarea id="own-slipcheck-keys" name="slipcheckApiKeys" rows="3" placeholder="คีย์ที่ 2\nคีย์ที่ 3" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs"><%= (Array.isArray(payment.slipcheckApiKeys) ? payment.slipcheckApiKeys : String(payment.slipcheckApiKeys || '').split(/[\r\n,]+/)).filter(key => key && key !== payment.slipcheckApiKey).join('\n') %></textarea>
+        <span class="block mt-1 text-[10px] text-[var(--text-4)]">คีย์หลักด้านบนจะถูกรวมให้อัตโนมัติ และไม่แสดงคีย์เต็มในหน้าโควตา</span>
+      </label>
       <input id="own-slipcheck-endpoint" type="hidden" name="slipcheckEndpoint" value="<%= payment.slipcheckEndpoint || 'https://mxrslip.lovable.app/api/public/v1' %>" />
       <button type="button" onclick="testOwnProvider('slipcheck')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ทดสอบ SlipCheck</button>
       <div id="own-slipcheck-result" class="text-xs text-[var(--text-4)]"><%= slipcheckInfo && slipcheckInfo.ok ? 'เชื่อมต่อแล้ว' : '' %></div>
@@ -330,7 +347,7 @@ async function testOwnProvider(provider) {
   result.textContent = 'กำลังตรวจสอบ...';
   const payload = { provider };
   if (provider === 'easyslip') payload.apiKey = document.getElementById('own-easyslip-key').value;
-  if (provider === 'slipcheck') { payload.apiKey = document.getElementById('own-slipcheck-key').value; payload.endpoint = document.getElementById('own-slipcheck-endpoint').value; }
+  if (provider === 'slipcheck') { payload.apiKey = document.getElementById('own-slipcheck-key').value; payload.apiKeys = document.getElementById('own-slipcheck-keys')?.value || ''; payload.endpoint = document.getElementById('own-slipcheck-endpoint').value; }
   if (provider === 'rdcw') { payload.clientId = document.getElementById('own-rdcw-id').value; payload.clientSecret = document.getElementById('own-rdcw-secret').value; }
   if (provider === 'slip2go') { payload.apiKey = document.getElementById('own-slip2go-key').value; payload.endpoint = document.getElementById('own-slip2go-endpoint').value; }
   try {

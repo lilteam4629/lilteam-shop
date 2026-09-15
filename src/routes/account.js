@@ -290,7 +290,7 @@ function canCheckSlipAutomatically(payment = {}) {
     return easyslip.isConfigured(easyKey) && receiverPayment.easyslipAccounts && Object.values(receiverPayment.easyslipAccounts).some(a => a && a.bankNumber);
   }
   if (selected === 'slipok') return Boolean(effective.slipokBranchId && effective.slipokApiKey);
-  if (selected === 'slipcheck') return Boolean(effective.slipcheckApiKey && hasReceiver);
+  if (selected === 'slipcheck') return Boolean((effective.slipcheckApiKey || (effective.slipcheckApiKeys || []).length) && hasReceiver);
   if (selected === 'rdcw') return Boolean(effective.rdcwClientId && effective.rdcwClientSecret && hasReceiver);
   if (selected === 'slip2go') return Boolean(effective.slip2goApiKey && hasReceiver);
   return false;
@@ -344,6 +344,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       provider = 'slipcheck';
       result = await slipcheck.verifySlip(fileBuffer, request.amount, fileOptions, {
         apiKey: effective.slipcheckApiKey,
+        apiKeys: effective.slipcheckApiKeys,
         endpoint: effective.slipcheckEndpoint,
         ...receiverCredentials(receiverPayment, request.method, payment),
       });

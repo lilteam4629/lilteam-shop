@@ -1393,11 +1393,15 @@ async function renderSlipVerificationHub(req, res) {
   }
 
   let slipcheckInfo = null;
-  if (!usesSharedProvider && effective.slipcheckApiKey) {
+  let slipcheckPoolInfo = null;
+  const slipcheckKeys = slipcheck.resolveApiKeys(effective.slipcheckApiKey, effective.slipcheckApiKeys);
+  if (!usesSharedProvider && slipcheckKeys.length) {
     try {
-      slipcheckInfo = await slipcheck.getAccountInfo(effective.slipcheckApiKey, effective.slipcheckEndpoint);
+      slipcheckPoolInfo = await slipcheck.getPoolAccountInfo(slipcheckKeys, effective.slipcheckEndpoint);
+      slipcheckInfo = slipcheckPoolInfo.accounts[0] || null;
     } catch (e) {
       slipcheckInfo = { ok: false, message: e.message };
+      slipcheckPoolInfo = { ok: false, keyCount: slipcheckKeys.length, accounts: [], totalRemaining: 0, message: e.message };
     }
   }
 
@@ -1439,6 +1443,7 @@ async function renderSlipVerificationHub(req, res) {
     slipokInfo,
     slip2goInfo,
     slipcheckInfo,
+    slipcheckPoolInfo,
     rdcwInfo,
     effectiveProvider: effective.slipProvider,
     usesSharedProvider,
@@ -1489,6 +1494,9 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const slip2goEndpoint = (req.body.slip2goEndpoint !== undefined ? req.body.slip2goEndpoint : (payment.slip2goEndpoint || slip2go.DEFAULT_ENDPOINT)).trim();
   const easyslipApiKey = (req.body.easyslipApiKey !== undefined ? req.body.easyslipApiKey : (payment.easyslipApiKey || '')).trim();
   const slipcheckApiKey = (req.body.slipcheckApiKey !== undefined ? req.body.slipcheckApiKey : (payment.slipcheckApiKey || '')).trim();
+  const parseKeys = value => [...new Set([].concat(value || []).flatMap(item => String(item).split(/[\r\n,]+/)).map(item => item.trim()).filter(Boolean))].slice(0, 50);
+  const slipcheckApiKeys = parseKeys(req.body.slipcheckApiKeys !== undefined ? req.body.slipcheckApiKeys : (payment.slipcheckApiKeys || []));
+  if (slipcheckApiKey && !slipcheckApiKeys.includes(slipcheckApiKey)) slipcheckApiKeys.unshift(slipcheckApiKey);
   const slipcheckEndpoint = (req.body.slipcheckEndpoint !== undefined ? req.body.slipcheckEndpoint : (payment.slipcheckEndpoint || slipcheck.DEFAULT_ENDPOINT)).trim();
   const rdcwClientId = (req.body.rdcwClientId !== undefined ? req.body.rdcwClientId : (payment.rdcwClientId || '')).trim();
   const rdcwClientSecret = (req.body.rdcwClientSecret !== undefined ? req.body.rdcwClientSecret : (payment.rdcwClientSecret || '')).trim();
@@ -1497,7 +1505,7 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
 
   const missingCredentials = slipApiMode === 'own' && ((slipProvider === 'easyslip' && !easyslipApiKey)
-    || (slipProvider === 'slipcheck' && !slipcheckApiKey)
+    || (slipProvider === 'slipcheck' && !slipcheckApiKeys.length)
     || (slipProvider === 'rdcw' && (!rdcwClientId || !rdcwClientSecret))
     || (slipProvider === 'slip2go' && !slip2goApiKey));
   if (missingCredentials) {
@@ -1514,6 +1522,7 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
     slip2goEndpoint,
     easyslipApiKey,
     slipcheckApiKey,
+    slipcheckApiKeys,
     slipcheckEndpoint,
     rdcwClientId,
     rdcwClientSecret,
@@ -1561,7 +1570,8 @@ router.post(['/slip-verification/test', '/easyslip-usage/test'], async (req, res
     }
 
     if (provider === 'slipcheck') {
-      return res.json(await slipcheck.getAccountInfo(apiKey, endpoint || slipcheck.DEFAULT_ENDPOINT));
+      const keys = slipcheck.resolveApiKeys(apiKey, req.body.apiKeys);
+      return res.json(await slipcheck.getPoolAccountInfo(keys, endpoint || slipcheck.DEFAULT_ENDPOINT));
     }
 
     if (provider === 'rdcw') {

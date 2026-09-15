@@ -6,6 +6,19 @@ const { numberValue, officialEndpoint } = require('./slip-fields');
 const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 
 const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
+const keyCursor = new Map();
+
+function resolveApiKeys(primary, values) {
+  const raw = [];
+  if (primary) raw.push(primary);
+  if (Array.isArray(values)) raw.push(...values);
+  else if (values) raw.push(values);
+  const keys = raw.flatMap(value => String(value || '').split(/[\r\n,]+/))
+    .map(value => value.trim()).filter(Boolean);
+  return [...new Set(keys)].slice(0, 50);
+}
+
+const maskedKey = key => `••••${String(key || '').slice(-4)}`;
 
 // SlipCheck has returned quota exhaustion in a few different shapes over time
 // (HTTP 429, a provider code, or a message containing quota/limit wording).
@@ -19,7 +32,7 @@ function isQuotaExhausted(errorOrBody, status) {
     body.message, body.error, body.detail,
     body.data && body.data.message, body.data && body.data.error,
   ].filter(value => value !== undefined && value !== null).map(value => String(value).toLowerCase());
-  if (Number(status) === 429) return true;
+  if (Number(status) === 429 || Number(body.code) === 429 || Number(body.errorCode) === 429 || Number(body.error_code) === 429) return true;
   if (values.some(value => /quota|rate.?limit|too many|limit.?exceed|เครดิต|โควตา|จำกัดการใช้งาน/.test(value))) return true;
   const quota = body.quota || (body.data && body.data.quota);
   if (quota && quota.remaining !== undefined && Number(quota.remaining) <= 0) return true;
@@ -34,9 +47,11 @@ async function getAccountInfo(apiKey, endpoint = DEFAULT_ENDPOINT) {
     });
     const body = response.data || {};
     const quota = body.quota || body.data?.quota || {};
+    const used = Number(quota.used || 0);
+    const max = Number(quota.limit || quota.max || 0) || null;
     return {
       ok: body.success !== false,
-      quota: { used: Number(quota.used || 0), max: Number(quota.limit || quota.max || 0) || null },
+      quota: { used, max, remaining: max === null ? null : Math.max(0, max - used) },
       message: body.message || 'เชื่อมต่อ SlipCheck สำเร็จ',
     };
   } catch (error) {
@@ -44,8 +59,27 @@ async function getAccountInfo(apiKey, endpoint = DEFAULT_ENDPOINT) {
   }
 }
 
-async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credentials = {}) {
-  const apiKey = String(credentials.apiKey || '').trim();
+async function getPoolAccountInfo(apiKeys, endpoint = DEFAULT_ENDPOINT) {
+  const keys = resolveApiKeys('', apiKeys);
+  if (!keys.length) return { ok: false, keyCount: 0, accounts: [], totalUsed: 0, totalMax: 0, totalRemaining: 0, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key' };
+  const accounts = await Promise.all(keys.map(async (key, index) => {
+    const info = await getAccountInfo(key, endpoint);
+    const used = Number(info.quota?.used);
+    const max = Number(info.quota?.max);
+    const remaining = Number.isFinite(max) ? Math.max(0, max - (Number.isFinite(used) ? used : 0)) : null;
+    return { ...info, index: index + 1, key: maskedKey(key), quota: { used: Number.isFinite(used) ? used : 0, max: Number.isFinite(max) ? max : null, remaining } };
+  }));
+  const quotaAccounts = accounts.filter(account => Number.isFinite(account.quota.remaining));
+  return {
+    ok: accounts.some(account => account.ok), keyCount: keys.length, accounts,
+    totalUsed: quotaAccounts.reduce((sum, account) => sum + account.quota.used, 0),
+    totalMax: quotaAccounts.reduce((sum, account) => sum + account.quota.max, 0),
+    totalRemaining: quotaAccounts.reduce((sum, account) => sum + account.quota.remaining, 0),
+    message: accounts.filter(account => !account.ok).map(account => account.message).filter(Boolean).join(' • ') || 'เชื่อมต่อ SlipCheck สำเร็จ',
+  };
+}
+
+async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKey) {
   if (!apiKey) return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key', raw: null };
   try {
     const form = new FormData();
@@ -100,4 +134,20 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
   }
 }
 
-module.exports = { DEFAULT_ENDPOINT, getAccountInfo, verifySlip };
+async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credentials = {}) {
+  const apiKeys = resolveApiKeys(credentials.apiKey, credentials.apiKeys);
+  if (!apiKeys.length) return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key', raw: null };
+  const cursorKey = `${cleanEndpoint(credentials.endpoint)}|${apiKeys.join('|')}`;
+  const start = (keyCursor.get(cursorKey) || 0) % apiKeys.length;
+  let lastResult = null;
+  for (let offset = 0; offset < apiKeys.length; offset += 1) {
+    const index = (start + offset) % apiKeys.length;
+    const result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
+    lastResult = result;
+    keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
+    if (!result.quotaExhausted || offset === apiKeys.length - 1) return result;
+  }
+  return lastResult;
+}
+
+module.exports = { DEFAULT_ENDPOINT, getAccountInfo, getPoolAccountInfo, resolveApiKeys, verifySlip };
