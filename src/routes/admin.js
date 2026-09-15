@@ -1394,7 +1394,7 @@ async function renderSlipVerificationHub(req, res) {
 
   let slipcheckInfo = null;
   let slipcheckPoolInfo = null;
-  const slipcheckKeys = slipcheck.resolveApiKeys(effective.slipcheckApiKey, effective.slipcheckApiKeys);
+  const slipcheckKeys = slipcheck.resolveApiKeys(effective.slipcheckApiKey, effective.slipcheckApiKeys, effective.slipcheckIndependentQuota ? 50 : 5);
   if (!usesSharedProvider && slipcheckKeys.length) {
     try {
       slipcheckPoolInfo = await slipcheck.getPoolAccountInfo(slipcheckKeys, effective.slipcheckEndpoint, { independent: Boolean(effective.slipcheckIndependentQuota) });
@@ -1494,13 +1494,13 @@ router.post(['/slip-verification', '/easyslip-usage'], async (req, res) => {
   const slip2goEndpoint = (req.body.slip2goEndpoint !== undefined ? req.body.slip2goEndpoint : (payment.slip2goEndpoint || slip2go.DEFAULT_ENDPOINT)).trim();
   const easyslipApiKey = (req.body.easyslipApiKey !== undefined ? req.body.easyslipApiKey : (payment.easyslipApiKey || '')).trim();
   const slipcheckApiKey = (req.body.slipcheckApiKey !== undefined ? req.body.slipcheckApiKey : (payment.slipcheckApiKey || '')).trim();
-  const parseKeys = value => [...new Set([].concat(value || []).flatMap(item => String(item).split(/[\r\n,]+/)).map(item => item.trim()).filter(Boolean))].slice(0, 5);
+  const slipcheckIndependentQuota = !req.tenantShop && (req.body.slipcheckIndependentQuota === 'on' || req.body.slipcheckIndependentQuota === 'true');
+  const parseKeys = (value, max = 5) => [...new Set([].concat(value || []).flatMap(item => String(item).split(/[\r\n,]+/)).map(item => item.trim()).filter(Boolean))].slice(0, max);
   const slipcheckApiKeys = req.tenantShop
     ? (Array.isArray(payment.slipcheckApiKeys) ? payment.slipcheckApiKeys : [])
-    : parseKeys(req.body.slipcheckApiKeys !== undefined ? req.body.slipcheckApiKeys : (payment.slipcheckApiKeys || []));
+    : parseKeys(req.body.slipcheckApiKeys !== undefined ? req.body.slipcheckApiKeys : (payment.slipcheckApiKeys || []), slipcheckIndependentQuota ? 50 : 5);
   if (slipcheckApiKey && !slipcheckApiKeys.includes(slipcheckApiKey)) slipcheckApiKeys.unshift(slipcheckApiKey);
   const slipcheckEndpoint = (req.body.slipcheckEndpoint !== undefined ? req.body.slipcheckEndpoint : (payment.slipcheckEndpoint || slipcheck.DEFAULT_ENDPOINT)).trim();
-  const slipcheckIndependentQuota = !req.tenantShop && (req.body.slipcheckIndependentQuota === 'on' || req.body.slipcheckIndependentQuota === 'true');
   const rdcwClientId = (req.body.rdcwClientId !== undefined ? req.body.rdcwClientId : (payment.rdcwClientId || '')).trim();
   const rdcwClientSecret = (req.body.rdcwClientSecret !== undefined ? req.body.rdcwClientSecret : (payment.rdcwClientSecret || '')).trim();
   const rdcwEndpoint = (req.body.rdcwEndpoint !== undefined ? req.body.rdcwEndpoint : (payment.rdcwEndpoint || rdcwSlip.DEFAULT_ENDPOINT)).trim();

@@ -8,14 +8,14 @@ const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
 const keyCursor = new Map();
 
-function resolveApiKeys(primary, values) {
+function resolveApiKeys(primary, values, maxKeys = 5) {
   const raw = [];
   if (primary) raw.push(primary);
   if (Array.isArray(values)) raw.push(...values);
   else if (values) raw.push(values);
   const keys = raw.flatMap(value => String(value || '').split(/[\r\n,]+/))
     .map(value => value.trim()).filter(Boolean);
-  return [...new Set(keys)].slice(0, 5);
+  return [...new Set(keys)].slice(0, maxKeys);
 }
 
 const maskedKey = key => `••••${String(key || '').slice(-4)}`;
@@ -60,7 +60,7 @@ async function getAccountInfo(apiKey, endpoint = DEFAULT_ENDPOINT) {
 }
 
 async function getPoolAccountInfo(apiKeys, endpoint = DEFAULT_ENDPOINT, options = {}) {
-  const keys = resolveApiKeys('', apiKeys);
+  const keys = resolveApiKeys('', apiKeys, options.independent ? 50 : 5);
   if (!keys.length) return { ok: false, keyCount: 0, accounts: [], totalUsed: 0, totalMax: 0, totalRemaining: 0, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key' };
   const accounts = await Promise.all(keys.map(async (key, index) => {
     const info = await getAccountInfo(key, endpoint);
@@ -140,7 +140,7 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
 }
 
 async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credentials = {}) {
-  const apiKeys = resolveApiKeys(credentials.apiKey, credentials.apiKeys);
+  const apiKeys = resolveApiKeys(credentials.apiKey, credentials.apiKeys, credentials.independentQuota ? 50 : 5);
   if (!apiKeys.length) return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key', raw: null };
   const cursorKey = `${cleanEndpoint(credentials.endpoint)}|${apiKeys.join('|')}`;
   const start = (keyCursor.get(cursorKey) || 0) % apiKeys.length;

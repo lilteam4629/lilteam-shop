@@ -345,6 +345,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       result = await slipcheck.verifySlip(fileBuffer, request.amount, fileOptions, {
         apiKey: effective.slipcheckApiKey,
         apiKeys: store.isTenantContext() ? undefined : effective.slipcheckApiKeys,
+        independentQuota: !store.isTenantContext() && effective.slipcheckIndependentQuota,
         endpoint: effective.slipcheckEndpoint,
         ...receiverCredentials(receiverPayment, request.method, payment),
       });
