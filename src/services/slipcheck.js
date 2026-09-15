@@ -59,7 +59,7 @@ async function getAccountInfo(apiKey, endpoint = DEFAULT_ENDPOINT) {
   }
 }
 
-async function getPoolAccountInfo(apiKeys, endpoint = DEFAULT_ENDPOINT) {
+async function getPoolAccountInfo(apiKeys, endpoint = DEFAULT_ENDPOINT, options = {}) {
   const keys = resolveApiKeys('', apiKeys);
   if (!keys.length) return { ok: false, keyCount: 0, accounts: [], totalUsed: 0, totalMax: 0, totalRemaining: 0, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key' };
   const accounts = await Promise.all(keys.map(async (key, index) => {
@@ -70,10 +70,11 @@ async function getPoolAccountInfo(apiKeys, endpoint = DEFAULT_ENDPOINT) {
     return { ...info, index: index + 1, key: maskedKey(key), quota: { used: Number.isFinite(used) ? used : 0, max: Number.isFinite(max) ? max : null, remaining } };
   }));
   const quotaAccounts = accounts.filter(account => Number.isFinite(account.quota.remaining));
-  // SlipCheck's dashboard exposes one monthly quota per account. Multiple API
-  // keys are failover credentials for that account, so do not multiply the
-  // account quota by the number of keys.
-  const accountQuota = quotaAccounts[0]?.quota || { used: 0, max: null, remaining: null };
+  // Keys from one account share a quota; keys from separate accounts can be
+  // explicitly aggregated by the owner.
+  const accountQuota = options.independent
+    ? { used: quotaAccounts.reduce((sum, account) => sum + account.quota.used, 0), max: quotaAccounts.reduce((sum, account) => sum + account.quota.max, 0), remaining: quotaAccounts.reduce((sum, account) => sum + account.quota.remaining, 0) }
+    : (quotaAccounts[0]?.quota || { used: 0, max: null, remaining: null });
   return {
     ok: accounts.some(account => account.ok), keyCount: keys.length, accounts,
     totalUsed: accountQuota.used,
