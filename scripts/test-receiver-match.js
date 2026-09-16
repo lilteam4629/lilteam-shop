@@ -133,29 +133,7 @@ async function verifySlipCheckAdvancesOnQuotaResponse() {
   }
 }
 
-async function verifySlipCheckRetriesProviderFailureWithJson() {
-  const originalPost = axios.post;
-  const calls = [];
-  axios.post = async (url, payload, options) => {
-    calls.push({ key: options.headers['x-api-key'], contentType: options.headers['Content-Type'] || options.headers['content-type'] || '' });
-    if (calls.length === 1) return { data: { success: false, code: 'verify_failed', message: 'เกิดการตรวจสลิปไม่ผ่าน' } };
-    assert.match(payload.image, /^data:image\/jpeg;base64,/, 'fallback must send the same image as a data URL');
-    return { data: { success: true, data: { ...standardPayload, amount: 100, ref_no: 'json-fallback', transferred_at: new Date().toISOString() } } };
-  };
-  try {
-    delete require.cache[require.resolve('../src/services/slipcheck')];
-    const slipcheck = require('../src/services/slipcheck');
-    const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, { contentType: 'image/jpeg' }, { apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] });
-    assert.equal(result.verified, true, 'verify_failed must retry through JSON and credit a valid slip');
-    assert.deepEqual(calls.map(call => call.key), ['key-one', 'key-one'], 'alternate transport must keep the current key');
-    assert.match(calls[1].contentType, /application\/json/i);
-  } finally {
-    axios.post = originalPost;
-    delete require.cache[require.resolve('../src/services/slipcheck')];
-  }
-}
-
-async function verifySlipCheckKeepsFailedImageRetryable() {
+async function verifySlipCheckKeepsProcessingFailureOnCurrentKey() {
   const originalPost = axios.post;
   const usedKeys = [];
   axios.post = async (url, payload, options) => {
@@ -166,8 +144,8 @@ async function verifySlipCheckKeepsFailedImageRetryable() {
     delete require.cache[require.resolve('../src/services/slipcheck')];
     const slipcheck = require('../src/services/slipcheck');
     const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, { apiKeys: ['key-one', 'key-two'], independentQuota: true });
-    assert.equal(result.retryable, true, 'a persistent provider processing failure must allow retrying the saved image');
-    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-one'], 'all verify_failed transports must keep the same API key');
+    assert.equal(result.providerCode, 'verify_failed');
+    assert.deepEqual(usedKeys, ['key-one'], 'a processing failure must not rotate or modify the working key order');
   } finally {
     axios.post = originalPost;
     delete require.cache[require.resolve('../src/services/slipcheck')];
@@ -188,8 +166,7 @@ function verifyTenantSharedSlipCheckPool() {
 verifyProviderIntegration()
   .then(verifySlipCheckKeyOrder)
   .then(verifySlipCheckAdvancesOnQuotaResponse)
-  .then(verifySlipCheckRetriesProviderFailureWithJson)
-  .then(verifySlipCheckKeepsFailedImageRetryable)
+  .then(verifySlipCheckKeepsProcessingFailureOnCurrentKey)
   .then(verifyTenantSharedSlipCheckPool)
   .then(() => console.log('Receiver matching checks passed: provider response, account/proxy values, sender isolation, Thai/English names'))
   .catch(error => { console.error(error); process.exitCode = 1; });

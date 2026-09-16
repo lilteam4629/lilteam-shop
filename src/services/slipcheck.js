@@ -1,6 +1,5 @@
 const axios = require('axios');
 const FormData = require('form-data');
-const sharp = require('sharp');
 const { receiverMatches, textValues, extractReceiverEvidence } = require('./receiver-match');
 const { numberValue, officialEndpoint } = require('./slip-fields');
 
@@ -8,20 +7,6 @@ const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 
 const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
 const keyCursor = new Map();
-
-async function normalizeSlipImage(fileBuffer) {
-  try {
-    return await sharp(fileBuffer, { failOn: 'none' })
-      .rotate()
-      .flatten({ background: '#ffffff' })
-      .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
-      .sharpen()
-      .jpeg({ quality: 92, mozjpeg: true })
-      .toBuffer();
-  } catch (_) {
-    return fileBuffer;
-  }
-}
 
 function providerCode(body = {}) {
   const values = [
@@ -130,27 +115,16 @@ async function getPoolAccountInfo(apiKeys, endpoint = DEFAULT_ENDPOINT, options 
   };
 }
 
-async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKey, transport = 'multipart') {
+async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKey) {
   if (!apiKey) return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key', raw: null };
   try {
-    let payload;
-    let headers = { 'x-api-key': apiKey, Accept: 'application/json' };
-    if (transport === 'json' || transport === 'json-raw') {
-      const contentType = /^image\//.test(fileOptions.contentType || '') ? fileOptions.contentType : 'image/jpeg';
-      const encoded = fileBuffer.toString('base64');
-      payload = { image: transport === 'json-raw' ? encoded : `data:${contentType};base64,${encoded}` };
-      headers = { ...headers, 'Content-Type': 'application/json' };
-    } else {
-      const form = new FormData();
-      form.append('file', fileBuffer, {
-        filename: fileOptions.filename || 'slip.jpg',
-        contentType: fileOptions.contentType || 'image/jpeg',
-      });
-      payload = form;
-      headers = { ...headers, ...form.getHeaders() };
-    }
-    const response = await axios.post(`${cleanEndpoint(credentials.endpoint)}/slip/verify`, payload, {
-      headers, timeout: 15000,
+    const form = new FormData();
+    form.append('file', fileBuffer, {
+      filename: fileOptions.filename || 'slip.jpg',
+      contentType: fileOptions.contentType || 'image/jpeg',
+    });
+    const response = await axios.post(`${cleanEndpoint(credentials.endpoint)}/slip/verify`, form, {
+      headers: { ...form.getHeaders(), 'x-api-key': apiKey, Accept: 'application/json' }, timeout: 60000,
     });
     const body = response.data || {};
     const data = body.data || {};
@@ -211,24 +185,7 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
   let lastResult = null;
   for (let offset = 0; offset < apiKeys.length; offset += 1) {
     const index = (start + offset) % apiKeys.length;
-    let result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
-    if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
-      // Retry through SlipCheck's alternate JSON transport after rotating,
-      // flattening and normalizing the image. This recovers phone screenshots
-      // and bank slips that the multipart/OCR path cannot decode directly.
-      const normalizedImage = await normalizeSlipImage(fileBuffer);
-      result = await verifySlipWithKey(normalizedImage, expectedAmount, { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' }, credentials, apiKeys[index], 'json');
-      if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
-        result = await verifySlipWithKey(normalizedImage, expectedAmount, { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' }, credentials, apiKeys[index], 'json-raw');
-      }
-      if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
-        result = {
-          ...result,
-          retryable: true,
-          message: 'SlipCheck ยังประมวลผลรูปสลิปไม่สำเร็จ ระบบเก็บรูปไว้แล้วและจะตรวจซ้ำอัตโนมัติ',
-        };
-      }
-    }
+    const result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
     lastResult = result;
 
     if (result.quotaExhausted) {

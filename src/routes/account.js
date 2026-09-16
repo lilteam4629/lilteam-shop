@@ -211,20 +211,6 @@ router.get('/topup/:id', async (req, res) => {
   const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
   if (!request) return res.redirect('/account/topup');
 
-  // Recover records created before automatic retries were introduced. Opening
-  // the detail page queues the saved image once; subsequent failures carry a
-  // retryAttempts value and are handled by the normal 5s/15s retry schedule.
-  const legacyVerifyFailure = request.status === 'pending'
-    && request.slipStorageId
-    && (request.slipCheck?.retryable || request.slipCheck?.providerCode === 'verify_failed')
-    && (Number(request.slipCheck?.retryAttempts) || 0) === 0
-    && !activeVerifications.has(request.id);
-  if (legacyVerifyFailure) {
-    const retryInTenant = store.bindTenantContext(retryTopupSlipVerification);
-    setImmediate(() => retryInTenant({ requestId: request.id, origin: `${req.protocol}://${req.get('host')}` })
-      .catch(error => console.error('[topup] legacy SlipCheck retry failed:', error.message)));
-  }
-
   const payment = store.data.settings.payment;
   let qrDataUrl = null;
   if (request.method === 'promptpay' && payment.promptpayId) {
@@ -284,7 +270,6 @@ router.get('/topup/:id/slip-file', async (req, res, next) => {
 // bound tenant context — nothing here can rely on the original request's
 // context still being current.
 const activeVerifications = new Set();
-const SLIPCHECK_AUTO_RETRY_DELAYS = [5000, 15000];
 
 function receiverCredentials(payment = {}, method = 'promptpay', ...fallbackPayments) {
   // The storefront renders the active flat payment settings, while provider
@@ -314,13 +299,11 @@ function canCheckSlipAutomatically(payment = {}) {
 async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptions, origin, retryStored = false }) {
   if (activeVerifications.has(requestId)) return;
   activeVerifications.add(requestId);
-  let scheduledRetryDelay = null;
 
   try {
     const request = store.data.topupRequests.find(t => t.id === requestId);
     const user = store.data.users.find(u => u.id === userId);
     if (!request || !user || request.status === 'approved' || request.status === 'rejected') return;
-    const previousRetryAttempts = Math.max(0, Number(request.slipCheck?.retryAttempts) || 0);
 
     const payment = store.data.settings.payment;
     const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
@@ -364,44 +347,6 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         ...slipcheckCredentials(effective),
         ...expectedReceiver,
       });
-      if (result.retryable) {
-        const fallbackChecks = [];
-        if (easyslip.isConfigured(easyKey) && expectedReceiver.expectedReceiverNumbers.length) {
-          fallbackChecks.push({
-            provider: 'easyslip-fallback',
-            run: () => easyslip.verifySlip(fileBuffer, request.amount, fileOptions, expectedReceiver.expectedReceiverNumbers, easyKey),
-          });
-        }
-        if (effective.slip2goApiKey) {
-          fallbackChecks.push({
-            provider: 'slip2go-fallback',
-            run: () => slip2go.verifySlip(fileBuffer, request.amount, fileOptions, {
-              apiKey: effective.slip2goApiKey,
-              endpoint: effective.slip2goEndpoint,
-              ...expectedReceiver,
-            }),
-          });
-        }
-        if (effective.rdcwClientId && effective.rdcwClientSecret) {
-          fallbackChecks.push({
-            provider: 'rdcw-fallback',
-            run: () => rdcwSlip.verifySlip(fileBuffer, request.amount, fileOptions, {
-              clientId: effective.rdcwClientId,
-              clientSecret: effective.rdcwClientSecret,
-              endpoint: effective.rdcwEndpoint,
-              ...expectedReceiver,
-            }),
-          });
-        }
-        for (const fallback of fallbackChecks) {
-          const fallbackResult = await fallback.run();
-          if (fallbackResult.verified || /สลิปซ้ำ|เคยถูกใช้/.test(String(fallbackResult.message || ''))) {
-            result = fallbackResult;
-            provider = fallback.provider;
-            break;
-          }
-        }
-      }
     } else if (selectedProvider === 'rdcw') {
       provider = 'rdcw';
       result = await rdcwSlip.verifySlip(fileBuffer, request.amount, fileOptions, {
@@ -462,7 +407,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         rateLimited: Boolean(result.rateLimited),
         quotaMismatch: Boolean(result.quotaMismatch),
         retryable: Boolean(result.retryable),
-        retryAttempts: result.retryable ? previousRetryAttempts + 1 : 0,
+        retryAttempts: 0,
         providerCode: result.providerCode || null,
         httpStatus: result.httpStatus || null,
         message: result.message,
@@ -487,10 +432,6 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       return true;
     });
     if (!applied) return;
-
-    if (!verified && result.retryable && previousRetryAttempts < SLIPCHECK_AUTO_RETRY_DELAYS.length) {
-      scheduledRetryDelay = SLIPCHECK_AUTO_RETRY_DELAYS[previousRetryAttempts];
-    }
 
     // Links to the normal (login-required) admin approve page for now — a
     // no-login-needed one-click link is a separate, deliberately-held-back
@@ -518,12 +459,6 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       if (request && request.status === 'verifying') request.status = 'pending';
     }).catch(saveErr => console.error('[topup] could not finalize verification:', saveErr.message));
     activeVerifications.delete(requestId);
-  }
-  if (scheduledRetryDelay !== null) {
-    const retryInTenant = store.bindTenantContext(retryTopupSlipVerification);
-    setTimeout(() => {
-      retryInTenant({ requestId, origin }).catch(error => console.error('[topup] automatic SlipCheck retry failed:', error.message));
-    }, scheduledRetryDelay);
   }
 }
 
