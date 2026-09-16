@@ -1,6 +1,5 @@
 const axios = require('axios');
 const FormData = require('form-data');
-const sharp = require('sharp');
 const { receiverMatches, textValues, extractReceiverEvidence } = require('./receiver-match');
 const { numberValue, officialEndpoint } = require('./slip-fields');
 
@@ -9,19 +8,6 @@ const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
 const keyCursor = new Map();
 
-async function normalizeSlipImage(fileBuffer) {
-  try {
-    return await sharp(fileBuffer, { failOn: 'none' })
-      .rotate()
-      .flatten({ background: '#ffffff' })
-      .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
-      .sharpen()
-      .jpeg({ quality: 92, mozjpeg: true })
-      .toBuffer();
-  } catch (_) {
-    return fileBuffer;
-  }
-}
 
 function providerCode(body = {}) {
   const values = [
@@ -213,82 +199,6 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     const index = (start + offset) % apiKeys.length;
     const result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
     lastResult = result;
-
-    // SlipCheck can reject an otherwise valid mobile screenshot when its
-    // original orientation/encoding is difficult for the OCR service. Retry
-    // the same key with a normalized JPEG before probing another account.
-    if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
-      const normalizedImage = await normalizeSlipImage(fileBuffer);
-      const normalizedResult = await verifySlipWithKey(
-        normalizedImage,
-        expectedAmount,
-        { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' },
-        credentials,
-        apiKeys[index],
-      );
-      if (normalizedResult.verified || (!normalizedResult.quotaExhausted && !normalizedResult.keyUnavailable
-        && String(normalizedResult.providerCode || '').toLowerCase() !== 'verify_failed')) {
-        keyCursor.set(cursorKey, index);
-        return normalizedResult;
-      }
-      lastResult = normalizedResult;
-
-      const jsonResult = await verifySlipWithKey(
-        normalizedImage,
-        expectedAmount,
-        { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' },
-        credentials,
-        apiKeys[index],
-        'json',
-      );
-      if (jsonResult.verified || (!jsonResult.quotaExhausted && !jsonResult.keyUnavailable
-        && String(jsonResult.providerCode || '').toLowerCase() !== 'verify_failed')) {
-        keyCursor.set(cursorKey, index);
-        return jsonResult;
-      }
-      lastResult = jsonResult;
-
-      const rawJsonResult = await verifySlipWithKey(
-        normalizedImage,
-        expectedAmount,
-        { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' },
-        credentials,
-        apiKeys[index],
-        'json-raw',
-      );
-      if (rawJsonResult.verified || (!rawJsonResult.quotaExhausted && !rawJsonResult.keyUnavailable
-        && String(rawJsonResult.providerCode || '').toLowerCase() !== 'verify_failed')) {
-        keyCursor.set(cursorKey, index);
-        return rawJsonResult;
-      }
-      lastResult = rawJsonResult;
-    }
-
-    if (String(result.providerCode || '').toLowerCase() === 'verify_failed' && apiKeys.length > 1) {
-      // A key can pass /me yet its account-side verifier can still return
-      // verify_failed. Probe the remaining configured accounts for this slip
-      // only, while keeping the normal cursor on the first key. This restores
-      // service without turning normal traffic into round-robin usage.
-      for (let probeOffset = 1; probeOffset < apiKeys.length; probeOffset += 1) {
-        const probeIndex = (index + probeOffset) % apiKeys.length;
-        const probeResult = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[probeIndex]);
-        if (probeResult.verified) {
-          keyCursor.set(cursorKey, index);
-          return { ...probeResult, fallbackKeyUsed: true };
-        }
-        if (probeResult.quotaExhausted || probeResult.keyUnavailable) {
-          lastResult = probeResult;
-          continue;
-        }
-        if (String(probeResult.providerCode || '').toLowerCase() !== 'verify_failed') {
-          keyCursor.set(cursorKey, index);
-          return { ...probeResult, fallbackKeyUsed: true };
-        }
-        lastResult = probeResult;
-      }
-      keyCursor.set(cursorKey, index);
-      return { ...lastResult, fallbackKeysTried: apiKeys.length };
-    }
 
     if (result.quotaExhausted) {
       // SlipCheck documents 429 as quota_exceeded. Advance once, in order,
