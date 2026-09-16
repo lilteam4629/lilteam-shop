@@ -1,5 +1,5 @@
 const CREDENTIAL_FIELDS = [
-  'easyslipApiKey', 'slipcheckApiKey', 'slipcheckApiKeys', 'slipcheckEndpoint', 'slipcheckIndependentQuota',
+  'slipcheckApiKey', 'slipcheckApiKeys', 'slipcheckEndpoint', 'slipcheckIndependentQuota',
   'rdcwClientId', 'rdcwClientSecret', 'rdcwEndpoint',
   'slip2goApiKey', 'slip2goEndpoint', 'slipokBranchId', 'slipokApiKey',
 ];
@@ -10,7 +10,7 @@ function isSharedMode(payment = {}, isTenant = false) {
 
 function effectiveSlipConfig(payment = {}, platformPayment = {}, isTenant = false) {
   if (!isSharedMode(payment, isTenant)) return { ...payment, tenantOwnedSlipApi: Boolean(isTenant) };
-  const effective = { ...payment, slipProvider: platformPayment.slipProvider || 'easyslip', tenantOwnedSlipApi: false };
+  const effective = { ...payment, slipProvider: platformPayment.slipProvider || 'slipok', tenantOwnedSlipApi: false };
   for (const field of CREDENTIAL_FIELDS) effective[field] = platformPayment[field];
   return effective;
 }

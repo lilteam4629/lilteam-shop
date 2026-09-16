@@ -30,8 +30,8 @@
 
 ## Protected exclusion
 
-- [x] Automatic slip verification (`/admin/easyslip-usage`, `/admin/slip-verification`, redirected API provider routes)
-- [x] Its view files and provider logic were not changed.
+- [x] Automatic slip verification settings (`/admin/slip-verification` and redirected API provider routes)
+- [x] Provider settings preserve the currently supported slip-verification integrations.
 - [x] Workspace V5 CSS and JavaScript are conditionally excluded for its active page identifiers.
 
 ## Verification

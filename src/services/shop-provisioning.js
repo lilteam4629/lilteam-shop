@@ -33,7 +33,7 @@ const RESERVED_SLUGS = new Set([
   'pop', 'imap', 'ftp', 'ssh', 'cpanel', 'webmail', 'media', 'cdn',
   'static', 'assets', 'public', 'cart', 'account', 'login', 'register',
   'auth', 'start', 'shop', 'tenant', 'license', 'system', 'root', 'bot',
-  'discord', 'webhook', 'easyslip', 'slipok', 'promptpay', 'preview', 'my-shops',
+  'discord', 'webhook', 'slipok', 'promptpay', 'preview', 'my-shops',
   'rent', 'rent-website',
 ]);
 

@@ -286,9 +286,9 @@
             <h3 class="font-bold text-sm">ค่ายที่ใช้ตรวจสลิป</h3>
             <p class="text-[11px] text-[var(--text-4)]">บัญชีรับเงินด้านล่างเป็นของร้านนี้ ใช้กับค่ายที่เลือกได้โดยไม่ปนกับร้านอื่น</p>
           </div>
-          <a href="/admin/easyslip-usage" class="text-xs font-bold text-[var(--gold-text)]">กรอก API ของค่าย →</a>
+          <a href="/admin/slip-verification" class="text-xs font-bold text-[var(--gold-text)]">ตั้งค่าค่ายตรวจสลิป →</a>
         </div>
-        <% const receiverProviders = [['easyslip','⚡','EasySlip'],['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go']].filter(item => availableReceiverProviders.includes(item[0])); %>
+        <% const receiverProviders = [['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go']].filter(item => availableReceiverProviders.includes(item[0])); %>
         <div class="flex flex-col gap-2">
           <% receiverProviders.forEach(item => { const isActiveReceiverProvider = activeReceiverProvider === item[0]; const editingProvider = receiverProvider === item[0]; %>
             <a href="/admin/topups?tab=bank&receiverProvider=<%= item[0] %>" class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition hover:border-[var(--gold)] <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
@@ -303,47 +303,32 @@
       <% if (receiverProvider) { %>
       <div class="flex items-center justify-between gap-3">
         <a href="/admin/topups?tab=bank" class="text-xs font-bold text-[var(--gold-text)]">← กลับไปเลือกค่าย</a>
-        <span class="text-xs text-[var(--text-4)]">กำลังกรอกข้อมูลสำหรับ <b class="text-[var(--text)]"><%= ({easyslip:'EasySlip',slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go'})[receiverProvider] %></b></span>
+        <span class="text-xs text-[var(--text-4)]">กำลังกรอกข้อมูลสำหรับ <b class="text-[var(--text)]"><%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go'})[receiverProvider] %></b></span>
       </div>
 
       <div class="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-[var(--text-3)]">
-        <% if (receiverProvider === 'easyslip') { %>EasySlip ลงทะเบียนบัญชีผ่าน API จึงต้องกรอกธนาคาร เลขบัญชี ชื่อไทย/อังกฤษ ประเภทบัญชี และวิธีตรวจที่ธนาคารรองรับให้ครบ
-        <% } else if (receiverProvider === 'slipcheck') { %>SlipCheck ส่งชื่อผู้รับและธนาคารกลับมา ระบบจะตรวจจากชื่อผู้รับ ส่วนเบอร์/เลขบัญชีและ QR ใช้แสดงให้ลูกค้าโอน
+        <% if (receiverProvider === 'slipcheck') { %>SlipCheck ส่งชื่อผู้รับและธนาคารกลับมา ระบบจะตรวจจากชื่อผู้รับ ส่วนเบอร์/เลขบัญชีและ QR ใช้แสดงให้ลูกค้าโอน
         <% } else if (receiverProvider === 'rdcw') { %>SlipRDCW ไม่มีหน้าลงทะเบียนบัญชีผ่าน API ระบบจะใช้ชื่อและเลขผู้รับที่กรอกหน้านี้เทียบกับผลตรวจ
         <% } else { %>Slip2Go รองรับชื่อ เลขผู้รับ และประเภทบัญชี ระบบจะใช้ข้อมูลหน้านี้สร้างเงื่อนไขตรวจของค่ายนี้
         <% } %>
       </div>
 
-      <% if (receiverProvider === 'easyslip') { %>
-      <!-- Section 1: PromptPay (EasySlip only) -->
+      <!-- PromptPay settings are independent of the verification provider. -->
       <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
         <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
           <span>🔵 ช่องทาง พร้อมเพย์ (PromptPay)</span>
         </h3>
 
-        <div class="grid sm:grid-cols-3 gap-4">
+        <div class="grid sm:grid-cols-2 gap-4">
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เบอร์โทรศัพท์ หรือ เลขประจำตัวประชาชนพร้อมเพย์</label>
             <input name="promptpayId" value="<%= receiverPayment.promptpayId %>" placeholder="เช่น 0812345678 หรือ 1234567890123" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลือกพร้อมเพย์ *</label>
-            <% if (receiverProvider === 'easyslip') { %><select name="promptpayBankCode" <%= receiverPayment.promptpayId ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
-              <option value="">-- เลือกธนาคารพร้อมเพย์ --</option>
-              <% banks.forEach(bank => { %>
-                <option value="<%= bank.code %>" <%= receiverPayment.promptpayBankCode === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
-              <% }) %>
-            </select><% } else { %><input type="hidden" name="promptpayBankCode" value="" /><div class="px-3.5 py-2.5 rounded-xl border border-[var(--border-light)] text-xs text-[var(--text-4)]">ค่ายนี้ไม่ต้องลงทะเบียนธนาคารพร้อมเพย์</div><% } %>
           </div>
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์</label>
             <input name="promptpayName" value="<%= receiverPayment.promptpayName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
           </div>
         </div>
-
-        <% if (receiverProvider === 'easyslip') { %>
-          <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์ภาษาอังกฤษ *</label><input name="promptpayNameEn" value="<%= receiverPayment.promptpayNameEn || '' %>" placeholder="เช่น AURAPONG SONGTIM" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs" /></div>
-        <% } %>
 
         <div>
           <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code พร้อมเพย์ (ทางเลือก)</label>
@@ -360,8 +345,6 @@
           <input type="file" name="promptpayQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--card)] file:text-[var(--gold-text)] file:font-semibold file:text-xs" />
         </div>
       </div>
-      <% } %>
-
       <!-- Section 2: Bank Transfer -->
       <%
         const otherBanks = banks;
@@ -376,7 +359,7 @@
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคารที่บัญชี/พร้อมเพย์ผูกอยู่ *</label>
             <% if (otherBanks.length) { %>
-              <select name="easyslipBankCode" <%= receiverPayment.bankAccountNumber ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
+              <select name="bankCode" <%= receiverPayment.bankAccountNumber ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
                 <option value="">-- เลือกธนาคาร --</option>
                 <% otherBanks.forEach(bank => { %>
                   <option value="<%= bank.code %>" <%= primaryBank && primaryBank.code === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
@@ -398,13 +381,10 @@
           </div>
         </div>
 
-        <% if (receiverProvider === 'easyslip') { const bankVerifyOptions = (primaryBank && primaryBank.extraVerify) || []; %>
-          <div class="grid sm:grid-cols-3 gap-4">
-            <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีภาษาอังกฤษ *</label><input name="bankAccountNameEn" value="<%= receiverPayment.bankAccountNameEn || '' %>" placeholder="เช่น AURAPONG SONGTIM" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs" /></div>
-            <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ประเภทบัญชี *</label><select name="bankAccountType" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs"><option value="NATURAL" <%= receiverPayment.bankAccountType !== 'JURISTIC' ? 'selected' : '' %>>บุคคลธรรมดา</option><option value="JURISTIC" <%= receiverPayment.bankAccountType === 'JURISTIC' ? 'selected' : '' %>>นิติบุคคล</option></select></div>
-            <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">วิธีตรวจสอบที่ธนาคารรองรับ</label><select name="bankExtraVerify" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs"><option value="">ค่าเริ่มต้นของ EasySlip</option><% bankVerifyOptions.forEach(option => { %><option value="<%= option.value %>" <%= receiverPayment.bankExtraVerify === option.value ? 'selected' : '' %>><%= option.label %></option><% }) %></select></div>
-          </div>
-        <% } %>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีภาษาอังกฤษ (ถ้ามี)</label><input name="bankAccountNameEn" value="<%= receiverPayment.bankAccountNameEn || '' %>" placeholder="เช่น AURAPONG SONGTIM" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs" /></div>
+          <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ประเภทบัญชี</label><select name="bankAccountType" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs"><option value="NATURAL" <%= receiverPayment.bankAccountType !== 'JURISTIC' ? 'selected' : '' %>>บุคคลธรรมดา</option><option value="JURISTIC" <%= receiverPayment.bankAccountType === 'JURISTIC' ? 'selected' : '' %>>นิติบุคคล</option></select></div>
+        </div>
 
         <div>
           <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code บัญชีธนาคาร (ทางเลือก)</label>
@@ -424,7 +404,7 @@
 
       <div class="pt-2">
         <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
-          💾 บันทึกและใช้ข้อมูลของ <%= ({easyslip:'EasySlip',slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go'})[receiverProvider] %>
+          💾 บันทึกและใช้ข้อมูลของ <%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go'})[receiverProvider] %>
         </button>
       </div>
       <% } %>
@@ -441,8 +421,7 @@
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
       <input type="hidden" name="promptpayId" value="<%= payment.promptpayId || '' %>" />
       <input type="hidden" name="promptpayName" value="<%= payment.promptpayName || '' %>" />
-      <input type="hidden" name="promptpayBankCode" value="<%= payment.promptpayBankCode || '' %>" />
-      <input type="hidden" name="easyslipBankCode" value="<%= (banks.find(b => b.nameTh === payment.bankName) || {}).code || '' %>" />
+      <input type="hidden" name="bankCode" value="<%= (banks.find(b => b.nameTh === payment.bankName) || {}).code || '' %>" />
       <input type="hidden" name="bankAccountNumber" value="<%= payment.bankAccountNumber || '' %>" />
       <input type="hidden" name="bankAccountName" value="<%= payment.bankAccountName || '' %>" />
       <input type="hidden" name="topupWebhookUrl" value="<%= payment.topupWebhookUrl || '' %>" />
@@ -511,22 +490,19 @@
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
       <input type="hidden" name="promptpayId" value="<%= payment.promptpayId || '' %>" />
       <input type="hidden" name="promptpayName" value="<%= payment.promptpayName || '' %>" />
-      <input type="hidden" name="promptpayBankCode" value="<%= payment.promptpayBankCode || '' %>" />
-      <input type="hidden" name="easyslipBankCode" value="<%= (banks.find(b => b.nameTh === payment.bankName) || {}).code || '' %>" />
+      <input type="hidden" name="bankCode" value="<%= (banks.find(b => b.nameTh === payment.bankName) || {}).code || '' %>" />
       <input type="hidden" name="bankAccountNumber" value="<%= payment.bankAccountNumber || '' %>" />
       <input type="hidden" name="bankAccountName" value="<%= payment.bankAccountName || '' %>" />
       <input type="hidden" name="truemoneyPhone" value="<%= payment.truemoneyPhone || '' %>" />
       <input type="hidden" name="truemoneyEnabled" value="<%= payment.truemoneyEnabled !== false ? 'on' : 'off' %>" />
 
       <% if (isMainSite) { %>
-      <!-- API provider configuration is platform-only. Tenant shops share
-           the platform EasySlip key and only enter their own receiving account. -->
+      <!-- Platform provider configuration is managed from the slip settings page. -->
       <div class="bg-gradient-to-r from-[var(--gold)]/10 via-[var(--card)] to-[var(--card)] border border-[var(--gold)]/30 rounded-2xl p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div class="flex items-center gap-3.5">
           <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold-text)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
             <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>⚡
             <% } else if (payment.slipProvider === 'slipok') { %>🛡️
-            <% } else if (payment.slipProvider === 'easyslip') { %>⚡
             <% } else if (payment.slipProvider === 'slip2go') { %>⚠️
             <% } else { %>🔌<% } %>
           </div>
@@ -534,9 +510,8 @@
             <div class="flex items-center gap-2">
               <span class="text-xs text-[var(--text-4)]">ค่ายตรวจสลิปที่ใช้อยู่:</span>
               <span class="text-xs font-bold px-2 py-0.5 rounded-md bg-[var(--gold)] text-[var(--gold-contrast)]">
-                <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>EasySlip/SlipOK อัตโนมัติ
+                <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>SlipOK อัตโนมัติ
                 <% } else if (payment.slipProvider === 'slipok') { %>⭐ SlipOK API (แนะนำ)
-                <% } else if (payment.slipProvider === 'easyslip') { %>EasySlip API (มาตรฐาน)
                 <% } else if (payment.slipProvider === 'slip2go') { %>Slip2Go API
                 <% } else { %>Custom Slip API<% } %>
               </span>
@@ -547,7 +522,7 @@
           </div>
         </div>
 
-        <a href="/admin/easyslip-usage" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] hover:brightness-110 active:scale-95 transition shadow-md shadow-[var(--gold)]/20 shrink-0">
+        <a href="/admin/slip-verification" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] hover:brightness-110 active:scale-95 transition shadow-md shadow-[var(--gold)]/20 shrink-0">
           <span>⚙️ ไปที่หน้าตั้งค่าตรวจสลิปด้วย API</span>
           <span>↗</span>
         </a>

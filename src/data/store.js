@@ -204,7 +204,6 @@ function defaultData() {
         byshopEndpoint: 'https://api.byshop.me/api',
         slip2goApiKey: '',
         slip2goEndpoint: 'https://api.slip2go.com/api',
-        easyslipApiKey: '',
         slipcheckApiKey: '',
         slipcheckEndpoint: 'https://mxrslip.lovable.app/api/public/v1',
         rdcwClientId: '',
@@ -218,19 +217,6 @@ function defaultData() {
         // auto-verify against its own bank account.
         slipokBranchId: '',
         slipokApiKey: '',
-        // EasySlip: this shop's own receiving bank account, auto-registered
-        // with the PLATFORM's single central EasySlip API key (see
-        // src/services/easyslip.js) when saved at /admin/topups — the shop
-        // owner never touches EasySlip directly. Registered under EVERY bank
-        // code the shop selects (its own bank AND/OR PromptPay etc) because
-        // an interbank PromptPay transfer's slip can report the receiver's
-        // bank as the generic "PromptPay" entry rather than the shop's real
-        // bank — matching only the real bank would miss those slips.
-        // easyslipAccounts: { [bankCode]: { accountId, status, bankNumber } }
-        // — bankNumber is per-channel because PromptPay identifies by
-        // phone/ID number, not the underlying bank account number.
-        easyslipAccounts: {},
-        easyslipStatus: '',
         receivingAccountResetVersion: 1,
       },
       miniGame: {
@@ -411,8 +397,7 @@ async function init() {
       { $set: {
         'settings.payment.promptpayId': '', 'settings.payment.promptpayName': '', 'settings.payment.promptpayBankCode': '',
         'settings.payment.bankName': '', 'settings.payment.bankAccountNumber': '',
-        'settings.payment.bankAccountName': '', 'settings.payment.easyslipAccounts': {},
-        'settings.payment.easyslipStatus': '', 'settings.payment.receivingAccountResetVersion': 1,
+        'settings.payment.bankAccountName': '', 'settings.payment.receivingAccountResetVersion': 1,
       } }
     );
 
@@ -555,10 +540,6 @@ function migrateSchema(db) {
     db.settings.payment.promptpayQrImage = db.settings.payment.qrImage || null;
     changed = true;
   }
-  if (db.settings.payment.promptpayBankCode === undefined) {
-    db.settings.payment.promptpayBankCode = '';
-    changed = true;
-  }
   if (db.settings.payment.bankQrImage === undefined) {
     db.settings.payment.bankQrImage = db.settings.payment.qrImage || null;
     changed = true;
@@ -581,27 +562,40 @@ function migrateSchema(db) {
     db.settings.payment.topupWebhookUrl = '';
     changed = true;
   }
-  if (db.settings.payment.easyslipAccounts === undefined) {
-    // Migrate the old single-bank shape (easyslipBankCode/easyslipAccountId)
-    // into the new multi-select map, if it was ever set.
-    const oldCode = db.settings.payment.easyslipBankCode;
-    const oldId = db.settings.payment.easyslipAccountId;
-    db.settings.payment.easyslipAccounts = (oldCode && oldId) ? { [oldCode]: { accountId: oldId, status: 'ok' } } : {};
-    delete db.settings.payment.easyslipBankCode;
-    delete db.settings.payment.easyslipAccountId;
-    delete db.settings.payment.easyslipAccountType;
-    if (db.settings.payment.easyslipStatus === undefined) db.settings.payment.easyslipStatus = '';
-    if (db.settings.payment.truemoneyPhone === undefined) db.settings.payment.truemoneyPhone = '';
-    if (db.settings.payment.truemoneyEnabled === undefined) db.settings.payment.truemoneyEnabled = true;
+  for (const field of ['easyslipApiKey', 'easyslipAccounts', 'easyslipStatus', 'easyslipBankCode', 'easyslipAccountId', 'easyslipAccountType', 'promptpayBankCode', 'bankExtraVerify']) {
+    if (Object.hasOwn(db.settings.payment, field)) {
+      delete db.settings.payment[field];
+      changed = true;
+    }
+  }
+  if (db.settings.payment.slipProvider === 'easyslip') {
+    db.settings.payment.slipProvider = 'slipcheck';
     changed = true;
+  }
+  if (db.settings.payment.receiverProfiles && db.settings.payment.receiverProfiles.easyslip) {
+    delete db.settings.payment.receiverProfiles.easyslip;
+    changed = true;
+  }
+  if (db.settings.payment.truemoneyPhone === undefined) {
+    db.settings.payment.truemoneyPhone = '';
+    db.settings.payment.truemoneyEnabled = true;
+    changed = true;
+  }
+  if (db.settings.ownerOperatingCosts) {
+    for (const field of ['easyslipAmount', 'easyslipBillingDay']) {
+      if (Object.hasOwn(db.settings.ownerOperatingCosts, field)) {
+        delete db.settings.ownerOperatingCosts[field];
+        changed = true;
+      }
+    }
   }
   // One-time platform-wide reset requested by the owner. It runs for the
   // main document at startup and for every tenant document on first load,
   // then the marker prevents later restarts from clearing newly entered data.
   if ((Number(db.settings.payment.receivingAccountResetVersion) || 0) < 1) {
     Object.assign(db.settings.payment, {
-      promptpayId: '', promptpayName: '', promptpayBankCode: '', bankName: '', bankAccountNumber: '', bankAccountName: '',
-      easyslipAccounts: {}, easyslipStatus: '', receivingAccountResetVersion: 1,
+      promptpayId: '', promptpayName: '', bankName: '', bankAccountNumber: '', bankAccountName: '',
+      receivingAccountResetVersion: 1,
     });
     changed = true;
   }

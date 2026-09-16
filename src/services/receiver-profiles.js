@@ -1,17 +1,15 @@
-const PROVIDERS = ['easyslip', 'slipcheck', 'rdcw', 'slip2go'];
+const PROVIDERS = ['slipcheck', 'rdcw', 'slip2go'];
 const FIELDS = [
-  'promptpayId', 'promptpayName', 'promptpayBankCode', 'promptpayQrImage',
+  'promptpayId', 'promptpayName', 'promptpayQrImage',
   'promptpayNameEn', 'bankName', 'bankAccountNumber', 'bankAccountName', 'bankAccountNameEn',
-  'bankAccountType', 'bankExtraVerify', 'bankQrImage',
-  'easyslipAccounts', 'easyslipStatus',
+  'bankAccountType', 'bankQrImage',
 ];
 
 function blankProfile() {
   return {
-    promptpayId: '', promptpayName: '', promptpayNameEn: '', promptpayBankCode: '', promptpayQrImage: null,
+    promptpayId: '', promptpayName: '', promptpayNameEn: '', promptpayQrImage: null,
     bankName: '', bankAccountNumber: '', bankAccountName: '', bankAccountNameEn: '',
-    bankAccountType: 'NATURAL', bankExtraVerify: '', bankQrImage: null,
-    easyslipAccounts: {}, easyslipStatus: '',
+    bankAccountType: 'NATURAL', bankQrImage: null,
   };
 }
 
@@ -20,7 +18,6 @@ function snapshot(payment = {}) {
   for (const field of FIELDS) {
     if (payment[field] !== undefined) result[field] = payment[field];
   }
-  result.easyslipAccounts = { ...(result.easyslipAccounts || {}) };
   return result;
 }
 
@@ -30,16 +27,16 @@ function profiles(payment = {}) {
 }
 
 function view(payment = {}, provider) {
-  if (!PROVIDERS.includes(provider)) provider = PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'easyslip';
+  if (!PROVIDERS.includes(provider)) provider = PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck';
   const saved = payment.receiverProfiles && payment.receiverProfiles[provider];
-  if (saved) return { ...blankProfile(), ...saved, easyslipAccounts: { ...(saved.easyslipAccounts || {}) } };
+  if (saved) return { ...blankProfile(), ...saved };
   if (provider === payment.slipProvider || !payment.receiverProfiles) return snapshot(payment);
   return blankProfile();
 }
 
 function saveAndActivate(payment, provider, profile) {
   if (!PROVIDERS.includes(provider)) throw new Error('Unsupported receiver profile');
-  const saved = { ...blankProfile(), ...profile, easyslipAccounts: { ...(profile.easyslipAccounts || {}) } };
+  const saved = { ...blankProfile(), ...profile };
   profiles(payment)[provider] = saved;
   for (const field of FIELDS) payment[field] = saved[field];
   payment.slipProvider = provider;
@@ -48,7 +45,7 @@ function saveAndActivate(payment, provider, profile) {
 
 function save(payment, provider, profile) {
   if (!PROVIDERS.includes(provider)) return null;
-  const saved = { ...blankProfile(), ...profile, easyslipAccounts: { ...(profile.easyslipAccounts || {}) } };
+  const saved = { ...blankProfile(), ...profile };
   profiles(payment)[provider] = saved;
   return saved;
 }
