@@ -23,6 +23,19 @@ const normalizeAccountNumber = (value) => String(value || '').replace(/[\s-]/g, 
 const resolveApiKey = apiKey => String(apiKey === undefined ? (API_KEY || '') : (apiKey || '')).trim();
 const isConfigured = apiKey => Boolean(resolveApiKey(apiKey));
 
+function errorDetails(err) {
+  const body = err && err.response && err.response.data;
+  const status = Number(err && err.response && err.response.status) || null;
+  const codeValue = body && typeof body === 'object'
+    ? (body.code || body.errorCode || body.error_code || (body.error && typeof body.error === 'object' && body.error.code))
+    : null;
+  const code = codeValue == null ? (err && err.code) : String(codeValue);
+  const providerCode = code ? String(code).replace(/[^a-zA-Z0-9_.:-]/g, '').slice(0, 60) || null : null;
+  const retryable = status === 408 || status === 425 || status === 429 || status >= 500
+    || ['ECONNABORTED', 'ETIMEDOUT', 'ECONNRESET', 'EAI_AGAIN'].includes(String(code || '').toUpperCase());
+  return { body: body || null, status, providerCode, retryable };
+}
+
 function authHeaders(apiKey) {
   return { Authorization: `Bearer ${resolveApiKey(apiKey)}`, 'Content-Type': 'application/json' };
 }
@@ -208,12 +221,22 @@ async function verifySlip(fileInput, expectedAmount, fileOptions = {}, expectedN
     // here. So every path through this catch is "couldn't check", not
     // "checked and failed" — fall back to manual admin review instead of
     // telling the customer their slip was rejected.
-    const body = (err.response && err.response.data) || null;
-    const quotaExhausted = isQuotaExhausted(body, err.response && err.response.status);
+    const { body, status, providerCode, retryable } = errorDetails(err);
+    const quotaExhausted = isQuotaExhausted(body, status);
+    // Keep diagnostics useful without logging response bodies, uploaded slips,
+    // authorization headers, or API keys.
+    console.warn(`[easyslip] verification request failed status=${status || 'network'} code=${providerCode || 'unknown'}`);
     return {
-      checked: quotaExhausted, verified: false, quotaExhausted,
-      message: quotaExhausted ? quotaMessage('EasySlip') : 'ระบบเติมเงินมีปัญหาจาก ESL ชั่วคราว — แนบสลิปไว้แล้ว รอแอดมินตรวจสอบให้',
-      raw: body,
+      checked: false, verified: false, quotaExhausted,
+      retryable: retryable && !quotaExhausted,
+      providerCode,
+      httpStatus: status,
+      message: quotaExhausted
+        ? quotaMessage('EasySlip')
+        : retryable
+          ? `EasySlip ขัดข้องชั่วคราว${status ? ` (HTTP ${status})` : ''} — เก็บสลิปไว้แล้ว สามารถลองตรวจใหม่ได้`
+          : `EasySlip ปฏิเสธคำขอตรวจสลิป${status ? ` (HTTP ${status})` : ''} — เก็บสลิปไว้ให้แอดมินตรวจสอบ`,
+      raw: null,
     };
   }
 }
