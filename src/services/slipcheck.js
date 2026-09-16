@@ -7,6 +7,7 @@ const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 
 const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
 const keyCursor = new Map();
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 function resolveApiKeys(primary, values, maxKeys = 5) {
   const raw = [];
@@ -156,7 +157,29 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
   let lastResult = null;
   for (let offset = 0; offset < apiKeys.length; offset += 1) {
     const index = (start + offset) % apiKeys.length;
-    const result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
+    let result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
+    if (result.quotaExhausted) {
+      const account = await getAccountInfo(apiKeys[index], credentials.endpoint);
+      if (account.ok && Number(account.quota?.remaining) > 0) {
+        // HTTP 429 can also mean a short rate limit. If /me confirms quota is
+        // still available, keep this key and retry instead of consuming the
+        // next configured account.
+        for (let attempt = 1; attempt <= 2 && result.quotaExhausted; attempt += 1) {
+          await wait(attempt * 500);
+          result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
+        }
+        if (result.quotaExhausted) {
+          keyCursor.set(cursorKey, index);
+          return {
+            ...result,
+            quotaExhausted: false,
+            keyUnavailable: false,
+            rateLimited: true,
+            message: 'SlipCheck จำกัดความถี่ชั่วคราว แต่โควตายังเหลือ กรุณากดตรวจใหม่อีกครั้ง',
+          };
+        }
+      }
+    }
     lastResult = result;
     if (result.quotaExhausted || result.keyUnavailable) {
       keyCursor.set(cursorKey, (index + 1) % apiKeys.length);

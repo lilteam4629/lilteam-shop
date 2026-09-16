@@ -406,6 +406,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         checked: result.checked,
         verified: result.verified,
         quotaExhausted: Boolean(result.quotaExhausted),
+        rateLimited: Boolean(result.rateLimited),
         message: result.message,
         provider,
         transRef,
