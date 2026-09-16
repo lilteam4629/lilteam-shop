@@ -70,6 +70,12 @@ function isKeyUnavailable(errorOrBody, status) {
   const message = [body.message, body.error, body.detail, body.reason].filter(Boolean).join(' ').toLowerCase();
   return /invalid.*key|api.?key.*invalid|unauthori[sz]ed|forbidden|inactive|disabled|ปิดใช้งาน|คีย์.*ไม่ถูกต้อง/.test(message);
 }
+
+function isAiCreditExhausted(result = {}) {
+  const text = [result.message, result.providerCode, result.raw?.message, result.raw?.detail]
+    .filter(Boolean).join(' ').toLowerCase();
+  return /เครดิต.*ai|ai.*เครดิต|ai credit|credit.*ai|เครดิตระบบ.*หมด/.test(text);
+}
 async function getAccountInfo(apiKey, endpoint = DEFAULT_ENDPOINT) {
   const key = String(apiKey || '').trim();
   if (!key) return { ok: false, message: 'กรุณากรอก SlipCheck API Key' };
@@ -190,9 +196,7 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
 }
 
 async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credentials = {}) {
-  // Temporarily keep verification on the original primary key only. Extra
-  // keys remain stored in settings for a later, separately validated rollout.
-  const apiKeys = resolveApiKeys(credentials.apiKey, undefined, 1);
+  const apiKeys = resolveApiKeys(credentials.apiKey, credentials.apiKeys, credentials.independentQuota ? 50 : 5);
   if (!apiKeys.length) return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key', raw: null };
   const cursorKey = `${cleanEndpoint(credentials.endpoint)}|${apiKeys.join('|')}`;
   const start = (keyCursor.get(cursorKey) || 0) % apiKeys.length;
@@ -205,6 +209,14 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     if (result.quotaExhausted) {
       // SlipCheck documents 429 as quota_exceeded. Advance once, in order,
       // and let this same slip continue immediately on the next account.
+      keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
+      if (offset < apiKeys.length - 1) continue;
+      return result;
+    }
+    if (isAiCreditExhausted(result)) {
+      // SlipCheck can exhaust the account's AI processing credit while the
+      // ordinary request quota is still available. Move to the next stored
+      // account only for this explicit provider condition.
       keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
       if (offset < apiKeys.length - 1) continue;
       return result;

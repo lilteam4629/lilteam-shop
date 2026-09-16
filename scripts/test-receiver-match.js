@@ -99,9 +99,9 @@ async function verifySlipCheckKeyOrder() {
     const credentials = { apiKey: 'key-one', apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] };
     assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
     assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
-    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).quotaExhausted, true);
-    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).quotaExhausted, true);
-    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-one', 'key-one'], 'temporary safe mode must keep verification on the primary key');
+    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
+    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
+    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-one', 'key-two', 'key-two'], 'must keep one key until quota is exhausted, then use the next key');
   } finally {
     axios.post = originalPost;
     axios.get = originalGet;
@@ -125,8 +125,8 @@ async function verifySlipCheckAdvancesOnQuotaResponse() {
     delete require.cache[require.resolve('../src/services/slipcheck')];
     const slipcheck = require('../src/services/slipcheck');
     const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, { apiKey: 'key-one', apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] });
-    assert.equal(result.quotaExhausted, true, 'primary key quota exhaustion must be surfaced without switching keys');
-    assert.deepEqual(usedKeys, ['key-one'], 'temporary safe mode must not switch to a secondary key');
+    assert.equal(result.verified, true, 'a documented 429 quota response must continue on the next key');
+    assert.deepEqual(usedKeys, ['key-one', 'key-two'], 'must use the next key after the current key reports quota exhaustion');
   } finally {
     axios.post = originalPost;
     delete require.cache[require.resolve('../src/services/slipcheck')];
@@ -155,6 +155,29 @@ async function verifySlipCheckKeepsProcessingFailureOnCurrentKey() {
   }
 }
 
+async function verifySlipCheckSwitchesOnAiCreditExhaustion() {
+  const originalPost = axios.post;
+  const usedKeys = [];
+  axios.post = async (url, payload, options) => {
+    usedKeys.push(options.headers['x-api-key']);
+    if (options.headers['x-api-key'] === 'key-one') return { data: { success: false, code: 'verify_failed', message: 'เครดิต AI ของระบบหมด' } };
+    return { data: { success: true, data: { ...standardPayload, amount: 100, ref_no: 'ai-fallback', transferred_at: new Date().toISOString() } } };
+  };
+  try {
+    delete require.cache[require.resolve('../src/services/slipcheck')];
+    const slipcheck = require('../src/services/slipcheck');
+    const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, {
+      apiKey: 'key-one', apiKeys: ['key-one', 'key-two'], independentQuota: true,
+      expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'],
+    });
+    assert.equal(result.verified, true, 'an exhausted provider AI credit must move to the next configured key');
+    assert.deepEqual(usedKeys, ['key-one', 'key-two']);
+  } finally {
+    axios.post = originalPost;
+    delete require.cache[require.resolve('../src/services/slipcheck')];
+  }
+}
+
 function verifyTenantSharedSlipCheckPool() {
   const { effectiveSlipConfig, slipcheckCredentials } = require('../src/services/slip-config');
   const platform = { slipProvider: 'slipcheck', slipcheckApiKey: 'key-one', slipcheckApiKeys: ['key-one', 'key-two'], slipcheckIndependentQuota: true };
@@ -170,6 +193,7 @@ verifyProviderIntegration()
   .then(verifySlipCheckKeyOrder)
   .then(verifySlipCheckAdvancesOnQuotaResponse)
   .then(verifySlipCheckKeepsProcessingFailureOnCurrentKey)
+  .then(verifySlipCheckSwitchesOnAiCreditExhaustion)
   .then(verifyTenantSharedSlipCheckPool)
   .then(() => console.log('Receiver matching checks passed: provider response, account/proxy values, sender isolation, Thai/English names'))
   .catch(error => { console.error(error); process.exitCode = 1; });
