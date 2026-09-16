@@ -70,4 +70,24 @@ function credentials(method = 'promptpay', ...paymentSources) {
   };
 }
 
-module.exports = { PROVIDERS, FIELDS, blankProfile, snapshot, view, save, saveAndActivate, credentials };
+function easyslipExpectedNumbers(payment = {}, method = 'bank_transfer', ...fallbackPayments) {
+  const accounts = payment.easyslipAccounts && typeof payment.easyslipAccounts === 'object'
+    ? Object.entries(payment.easyslipAccounts) : [];
+  const registered = accounts
+    .filter(([key]) => method === 'promptpay'
+      ? (key.endsWith(':promptpay') || key.endsWith(':account') || !key.includes(':'))
+      : (key.endsWith(':account') || !key.includes(':')))
+    .map(([, account]) => account && account.bankNumber)
+    .filter(Boolean);
+  // Use the shop's configured destination as the expected value if its
+  // EasySlip registration snapshot is missing/stale. EasySlip still must
+  // return a matched account and that account must match this exact number
+  // before any wallet credit can be applied.
+  const sources = [payment, ...fallbackPayments].filter(Boolean);
+  const configured = sources.flatMap(source => method === 'promptpay'
+    ? [source.promptpayId, source.bankAccountNumber]
+    : [source.bankAccountNumber]);
+  return [...new Set([...registered, ...configured].map(value => String(value || '').trim()).filter(Boolean))];
+}
+
+module.exports = { PROVIDERS, FIELDS, blankProfile, snapshot, view, save, saveAndActivate, credentials, easyslipExpectedNumbers };

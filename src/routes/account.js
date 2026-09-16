@@ -287,7 +287,9 @@ function canCheckSlipAutomatically(payment = {}) {
   const receiver = receiverCredentials(receiverPayment, 'promptpay', payment);
   const hasReceiver = Boolean(receiver.expectedReceiverNames.length || receiver.expectedReceiverNumbers.length);
   if (selected === 'easyslip') {
-    return easyslip.isConfigured(easyKey) && receiverPayment.easyslipAccounts && Object.values(receiverPayment.easyslipAccounts).some(a => a && a.bankNumber);
+    const hasEasySlipReceiver = receiverProfiles.easyslipExpectedNumbers(receiverPayment, 'bank_transfer', payment).length > 0
+      || receiverProfiles.easyslipExpectedNumbers(receiverPayment, 'promptpay', payment).length > 0;
+    return easyslip.isConfigured(easyKey) && hasEasySlipReceiver;
   }
   if (selected === 'slipok') return Boolean(effective.slipokBranchId && effective.slipokApiKey);
   if (selected === 'slipcheck') return Boolean((effective.slipcheckApiKey || (store.isTenantContext() ? false : (effective.slipcheckApiKeys || []).length)) && hasReceiver);
@@ -314,25 +316,15 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     const selectedProvider = resolveSlipProvider(effective, easyslip.isConfigured(easyKey));
     const receiverPayment = receiverProfiles.view(payment, selectedProvider);
 
-    if (selectedProvider === 'easyslip' && easyslip.isConfigured(easyKey) && receiverPayment.easyslipAccounts && Object.keys(receiverPayment.easyslipAccounts).length) {
+    if (selectedProvider === 'easyslip' && easyslip.isConfigured(easyKey)
+      && receiverProfiles.easyslipExpectedNumbers(receiverPayment, request.method, payment).length) {
       provider = 'easyslip';
-      const accountEntries = Object.entries(receiverPayment.easyslipAccounts);
       // PromptPay slips do not have one consistent receiver identifier:
       // some banks return the phone/National ID proxy, while others return
       // the underlying destination bank account. Both entries below belong
       // to this tenant only, so accepting either still cannot credit a slip
       // paid to a different rented shop.
-      let expectedNumbers = accountEntries
-        .filter(([key]) => request.method === 'promptpay'
-          ? (key.endsWith(':promptpay') || key.endsWith(':account') || !key.includes(':'))
-          : (key.endsWith(':account') || !key.includes(':')))
-        .map(([, account]) => account && account.bankNumber)
-        .filter(Boolean);
-      // Legacy shops may not have the new kind suffix yet. PromptPay must
-      // still compare against its own saved phone/ID, never the bank account.
-      if (!expectedNumbers.length && request.method === 'promptpay' && receiverPayment.promptpayId) {
-        expectedNumbers = [receiverPayment.promptpayId];
-      }
+      const expectedNumbers = receiverProfiles.easyslipExpectedNumbers(receiverPayment, request.method, payment);
       result = await easyslip.verifySlip(fileBuffer, request.amount, fileOptions, expectedNumbers, easyKey);
     } else if (selectedProvider === 'slipok') {
       provider = 'slipok';
