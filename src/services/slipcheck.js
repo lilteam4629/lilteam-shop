@@ -213,7 +213,7 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
       if (offset < apiKeys.length - 1) continue;
       return result;
     }
-    if (isAiCreditExhausted(result)) {
+    if (isAiCreditExhausted(result) || String(result.providerCode || '').toLowerCase() === 'verify_failed') {
       // SlipCheck can exhaust the account's AI processing credit while the
       // ordinary request quota is still available. Move to the next stored
       // account only for this explicit provider condition.

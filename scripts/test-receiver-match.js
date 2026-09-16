@@ -133,12 +133,13 @@ async function verifySlipCheckAdvancesOnQuotaResponse() {
   }
 }
 
-async function verifySlipCheckKeepsProcessingFailureOnCurrentKey() {
+async function verifySlipCheckSwitchesOnProcessingFailure() {
   const originalPost = axios.post;
   const usedKeys = [];
   axios.post = async (url, payload, options) => {
     usedKeys.push(options.headers['x-api-key']);
-    return { data: { success: false, code: 'verify_failed', message: 'เกิดการตรวจสลิปไม่ผ่าน' } };
+    if (options.headers['x-api-key'] === 'key-one') return { data: { success: false, code: 'verify_failed', message: 'เกิดการตรวจสลิปไม่ผ่าน' } };
+    return { data: { success: true, data: { ...standardPayload, amount: 100, ref_no: 'processing-fallback', transferred_at: new Date().toISOString() } } };
   };
   try {
     delete require.cache[require.resolve('../src/services/slipcheck')];
@@ -147,8 +148,8 @@ async function verifySlipCheckKeepsProcessingFailureOnCurrentKey() {
       apiKey: 'key-one', apiKeys: ['key-one', 'key-two'], independentQuota: true,
       expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'],
     });
-    assert.equal(result.providerCode, 'verify_failed');
-    assert.deepEqual(usedKeys, ['key-one'], 'a processing failure must keep the working key order unchanged');
+    assert.equal(result.verified, true);
+    assert.deepEqual(usedKeys, ['key-one', 'key-two'], 'a provider processing failure must move to the next configured key');
   } finally {
     axios.post = originalPost;
     delete require.cache[require.resolve('../src/services/slipcheck')];
@@ -192,7 +193,7 @@ function verifyTenantSharedSlipCheckPool() {
 verifyProviderIntegration()
   .then(verifySlipCheckKeyOrder)
   .then(verifySlipCheckAdvancesOnQuotaResponse)
-  .then(verifySlipCheckKeepsProcessingFailureOnCurrentKey)
+  .then(verifySlipCheckSwitchesOnProcessingFailure)
   .then(verifySlipCheckSwitchesOnAiCreditExhaustion)
   .then(verifyTenantSharedSlipCheckPool)
   .then(() => console.log('Receiver matching checks passed: provider response, account/proxy values, sender isolation, Thai/English names'))
