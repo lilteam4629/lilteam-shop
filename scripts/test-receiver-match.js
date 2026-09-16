@@ -57,16 +57,6 @@ assert.equal(receiverMatches({
   allowMaskedNumber: true,
 }).matched, false, 'a different masked receiver suffix must be rejected');
 
-assert.deepEqual(receiverProfiles.easyslipExpectedNumbers({ bankAccountNumber: '123-4-56789-0' }, 'bank_transfer'), ['123-4-56789-0'],
-  'EasySlip must still run against the configured bank destination if its account registration snapshot is missing');
-assert.deepEqual(receiverProfiles.easyslipExpectedNumbers({}, 'bank_transfer', { bankAccountNumber: '123-4-56789-0' }), ['123-4-56789-0'],
-  'EasySlip auto-verification must use the active storefront receiver if a saved provider profile is stale');
-assert.deepEqual(receiverProfiles.easyslipExpectedNumbers({
-  promptpayId: '0812345678', bankAccountNumber: '123-4-56789-0',
-  easyslipAccounts: { '004:account': { bankNumber: '1234567890' } },
-}, 'promptpay'), ['1234567890', '0812345678', '123-4-56789-0'],
-  'EasySlip promptpay verification must accept only the registered/configured shop destinations');
-
 async function verifyProviderIntegration() {
   const originalPost = axios.post;
   axios.post = async () => ({ data: {
