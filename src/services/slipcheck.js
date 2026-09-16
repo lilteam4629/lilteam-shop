@@ -130,16 +130,26 @@ async function getPoolAccountInfo(apiKeys, endpoint = DEFAULT_ENDPOINT, options 
   };
 }
 
-async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKey) {
+async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKey, transport = 'multipart') {
   if (!apiKey) return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key', raw: null };
   try {
-    const form = new FormData();
-    form.append('file', fileBuffer, {
-      filename: fileOptions.filename || 'slip.jpg',
-      contentType: fileOptions.contentType || 'image/jpeg',
-    });
-    const response = await axios.post(`${cleanEndpoint(credentials.endpoint)}/slip/verify`, form, {
-      headers: { ...form.getHeaders(), 'x-api-key': apiKey, Accept: 'application/json' }, timeout: 60000,
+    let payload;
+    let headers = { 'x-api-key': apiKey, Accept: 'application/json' };
+    if (transport === 'json') {
+      const contentType = /^image\//.test(fileOptions.contentType || '') ? fileOptions.contentType : 'image/jpeg';
+      payload = { image: `data:${contentType};base64,${fileBuffer.toString('base64')}` };
+      headers = { ...headers, 'Content-Type': 'application/json' };
+    } else {
+      const form = new FormData();
+      form.append('file', fileBuffer, {
+        filename: fileOptions.filename || 'slip.jpg',
+        contentType: fileOptions.contentType || 'image/jpeg',
+      });
+      payload = form;
+      headers = { ...headers, ...form.getHeaders() };
+    }
+    const response = await axios.post(`${cleanEndpoint(credentials.endpoint)}/slip/verify`, payload, {
+      headers, timeout: 60000,
     });
     const body = response.data || {};
     const data = body.data || {};
@@ -221,6 +231,21 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
         return normalizedResult;
       }
       lastResult = normalizedResult;
+
+      const jsonResult = await verifySlipWithKey(
+        normalizedImage,
+        expectedAmount,
+        { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' },
+        credentials,
+        apiKeys[index],
+        'json',
+      );
+      if (jsonResult.verified || (!jsonResult.quotaExhausted && !jsonResult.keyUnavailable
+        && String(jsonResult.providerCode || '').toLowerCase() !== 'verify_failed')) {
+        keyCursor.set(cursorKey, index);
+        return jsonResult;
+      }
+      lastResult = jsonResult;
     }
 
     if (String(result.providerCode || '').toLowerCase() === 'verify_failed' && apiKeys.length > 1) {
