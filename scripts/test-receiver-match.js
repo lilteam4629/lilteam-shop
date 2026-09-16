@@ -96,12 +96,12 @@ async function verifySlipCheckKeyOrder() {
   try {
     delete require.cache[require.resolve('../src/services/slipcheck')];
     const slipcheck = require('../src/services/slipcheck');
-    const credentials = { apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] };
+    const credentials = { apiKey: 'key-one', apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] };
     assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
     assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
-    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
-    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).verified, true);
-    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-one', 'key-two', 'key-two'], 'must keep one key until /me reports zero, then keep the next key');
+    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).quotaExhausted, true);
+    assert.equal((await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, credentials)).quotaExhausted, true);
+    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-one', 'key-one'], 'temporary safe mode must keep verification on the primary key');
   } finally {
     axios.post = originalPost;
     axios.get = originalGet;
@@ -124,9 +124,9 @@ async function verifySlipCheckAdvancesOnQuotaResponse() {
   try {
     delete require.cache[require.resolve('../src/services/slipcheck')];
     const slipcheck = require('../src/services/slipcheck');
-    const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, { apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] });
-    assert.equal(result.verified, true, 'a documented 429 quota response must continue on the next key');
-    assert.deepEqual(usedKeys, ['key-one', 'key-two'], 'must use the next key immediately after the current key reports quota exhaustion');
+    const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, { apiKey: 'key-one', apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] });
+    assert.equal(result.quotaExhausted, true, 'primary key quota exhaustion must be surfaced without switching keys');
+    assert.deepEqual(usedKeys, ['key-one'], 'temporary safe mode must not switch to a secondary key');
   } finally {
     axios.post = originalPost;
     delete require.cache[require.resolve('../src/services/slipcheck')];
@@ -144,7 +144,7 @@ async function verifySlipCheckKeepsProcessingFailureOnCurrentKey() {
     delete require.cache[require.resolve('../src/services/slipcheck')];
     const slipcheck = require('../src/services/slipcheck');
     const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, {
-      apiKeys: ['key-one', 'key-two'], independentQuota: true,
+      apiKey: 'key-one', apiKeys: ['key-one', 'key-two'], independentQuota: true,
       expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'],
     });
     assert.equal(result.providerCode, 'verify_failed');

@@ -190,7 +190,9 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
 }
 
 async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credentials = {}) {
-  const apiKeys = resolveApiKeys(credentials.apiKey, credentials.apiKeys, credentials.independentQuota ? 50 : 5);
+  // Temporarily keep verification on the original primary key only. Extra
+  // keys remain stored in settings for a later, separately validated rollout.
+  const apiKeys = resolveApiKeys(credentials.apiKey, undefined, 1);
   if (!apiKeys.length) return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key', raw: null };
   const cursorKey = `${cleanEndpoint(credentials.endpoint)}|${apiKeys.join('|')}`;
   const start = (keyCursor.get(cursorKey) || 0) % apiKeys.length;
