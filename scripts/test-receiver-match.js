@@ -109,32 +109,26 @@ async function verifySlipCheckKeyOrder() {
   }
 }
 
-async function verifySlipCheckDoesNotSkipKeyWithRemainingQuota() {
+async function verifySlipCheckAdvancesOnQuotaResponse() {
   const originalPost = axios.post;
-  const originalGet = axios.get;
   const usedKeys = [];
-  let calls = 0;
   axios.post = async (url, form, options) => {
     usedKeys.push(options.headers['x-api-key']);
-    calls++;
     if (options.headers['x-api-key'] === 'key-one') {
-      const error = new Error('Too Many Requests');
-      error.response = { status: 429, data: { message: 'rate limit' } };
+      const error = new Error('Quota exceeded');
+      error.response = { status: 429, data: { code: 'quota_exceeded', message: 'quota exceeded' } };
       throw error;
     }
     return { data: { success: true, data: { ...standardPayload, amount: 100, ref_no: 'rate-limit-retry', transferred_at: new Date().toISOString() } } };
   };
-  axios.get = async () => ({ data: { success: true, quota: { used: 93, limit: 500 } } });
   try {
     delete require.cache[require.resolve('../src/services/slipcheck')];
     const slipcheck = require('../src/services/slipcheck');
     const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, { apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] });
-    assert.equal(result.verified, false, 'a contradictory 429 must stay pending for retry');
-    assert.equal(result.quotaMismatch, true, '429 with remaining quota must be reported as a provider quota mismatch');
-    assert.deepEqual(usedKeys, ['key-one', 'key-one'], 'must retry the same key and never switch while /me reports remaining quota');
+    assert.equal(result.verified, true, 'a documented 429 quota response must continue on the next key');
+    assert.deepEqual(usedKeys, ['key-one', 'key-two'], 'must use the next key immediately after the current key reports quota exhaustion');
   } finally {
     axios.post = originalPost;
-    axios.get = originalGet;
     delete require.cache[require.resolve('../src/services/slipcheck')];
   }
 }
@@ -193,7 +187,7 @@ function verifyTenantSharedSlipCheckPool() {
 
 verifyProviderIntegration()
   .then(verifySlipCheckKeyOrder)
-  .then(verifySlipCheckDoesNotSkipKeyWithRemainingQuota)
+  .then(verifySlipCheckAdvancesOnQuotaResponse)
   .then(verifySlipCheckRetriesProviderFailureWithJson)
   .then(verifySlipCheckKeepsFailedImageRetryable)
   .then(verifyTenantSharedSlipCheckPool)

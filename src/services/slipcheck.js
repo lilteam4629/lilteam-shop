@@ -1,5 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
+const sharp = require('sharp');
 const { receiverMatches, textValues, extractReceiverEvidence } = require('./receiver-match');
 const { numberValue, officialEndpoint } = require('./slip-fields');
 
@@ -7,12 +8,20 @@ const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 
 const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
 const keyCursor = new Map();
-const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
-const quotaIsZero = account => account?.ok
-  && account.quota?.remaining !== null
-  && account.quota?.remaining !== undefined
-  && Number.isFinite(Number(account.quota.remaining))
-  && Number(account.quota.remaining) <= 0;
+
+async function normalizeSlipImage(fileBuffer) {
+  try {
+    return await sharp(fileBuffer, { failOn: 'none' })
+      .rotate()
+      .flatten({ background: '#ffffff' })
+      .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+      .sharpen()
+      .jpeg({ quality: 92, mozjpeg: true })
+      .toBuffer();
+  } catch (_) {
+    return fileBuffer;
+  }
+}
 
 function providerCode(body = {}) {
   const values = [
@@ -203,10 +212,11 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     const index = (start + offset) % apiKeys.length;
     let result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
     if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
-      // SlipCheck officially accepts both multipart and JSON base64. Some
-      // otherwise valid images fail in the multipart path; retry the exact
-      // same image once through the alternate transport and the same key.
-      result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index], 'json');
+      // Retry through SlipCheck's alternate JSON transport after rotating,
+      // flattening and normalizing the image. This recovers phone screenshots
+      // and bank slips that the multipart/OCR path cannot decode directly.
+      const normalizedImage = await normalizeSlipImage(fileBuffer);
+      result = await verifySlipWithKey(normalizedImage, expectedAmount, { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' }, credentials, apiKeys[index], 'json');
       if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
         result = {
           ...result,
@@ -218,34 +228,11 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     lastResult = result;
 
     if (result.quotaExhausted) {
-      const after = await getAccountInfo(apiKeys[index], credentials.endpoint);
-      if (quotaIsZero(after)) {
-        keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
-        if (offset < apiKeys.length - 1) continue;
-        return result;
-      } else if (after.ok && Number(after.quota?.remaining) > 0) {
-        // A fresh /me response says this key is usable. Retry this same key
-        // once to recover from a stale/transient 429 without touching the
-        // next configured key or leaving the customer waiting for minutes.
-        await wait(500);
-        result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
-        if (!result.quotaExhausted) {
-          keyCursor.set(cursorKey, index);
-          return result;
-        }
-      }
-      // Provider returned 429 while /me still says this exact key has quota.
-      // Keep the cursor on it; switching here violates configured key order
-      // and hides a provider inconsistency behind a misleading rate-limit UI.
-      keyCursor.set(cursorKey, index);
-      return {
-        ...result,
-        quotaExhausted: false,
-        quotaMismatch: true,
-        message: after.ok && Number(after.quota?.remaining) > 0
-          ? 'SlipCheck ตอบว่าโควตาหมด แต่คีย์ปัจจุบันยังมีโควตา ระบบยังคงใช้คีย์เดิม กรุณากดตรวจสลิปเดิมอีกครั้ง'
-          : 'SlipCheck ตอบว่าโควตาหมด แต่ยังยืนยันไม่ได้ว่าโควตาคีย์ปัจจุบันเหลือ 0 ระบบจึงยังไม่ข้ามคีย์ กรุณากดตรวจสลิปเดิมอีกครั้ง',
-      };
+      // SlipCheck documents 429 as quota_exceeded. Advance once, in order,
+      // and let this same slip continue immediately on the next account.
+      keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
+      if (offset < apiKeys.length - 1) continue;
+      return result;
     }
     if (result.keyUnavailable) {
       // A bad/disabled key is a configuration error, not permission to skip
