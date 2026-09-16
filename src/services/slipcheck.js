@@ -135,9 +135,10 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
   try {
     let payload;
     let headers = { 'x-api-key': apiKey, Accept: 'application/json' };
-    if (transport === 'json') {
+    if (transport === 'json' || transport === 'json-raw') {
       const contentType = /^image\//.test(fileOptions.contentType || '') ? fileOptions.contentType : 'image/jpeg';
-      payload = { image: `data:${contentType};base64,${fileBuffer.toString('base64')}` };
+      const encoded = fileBuffer.toString('base64');
+      payload = { image: transport === 'json-raw' ? encoded : `data:${contentType};base64,${encoded}` };
       headers = { ...headers, 'Content-Type': 'application/json' };
     } else {
       const form = new FormData();
@@ -218,10 +219,13 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
       const normalizedImage = await normalizeSlipImage(fileBuffer);
       result = await verifySlipWithKey(normalizedImage, expectedAmount, { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' }, credentials, apiKeys[index], 'json');
       if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
+        result = await verifySlipWithKey(normalizedImage, expectedAmount, { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' }, credentials, apiKeys[index], 'json-raw');
+      }
+      if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
         result = {
           ...result,
           retryable: true,
-          message: 'SlipCheck ยังประมวลผลรูปสลิปไม่สำเร็จ ระบบเก็บรูปไว้แล้ว กดตรวจใหม่ได้โดยไม่ต้องอัปโหลดซ้ำ',
+          message: 'SlipCheck ยังประมวลผลรูปสลิปไม่สำเร็จ ระบบเก็บรูปไว้แล้วและจะตรวจซ้ำอัตโนมัติ',
         };
       }
     }

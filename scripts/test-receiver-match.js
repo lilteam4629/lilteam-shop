@@ -167,7 +167,7 @@ async function verifySlipCheckKeepsFailedImageRetryable() {
     const slipcheck = require('../src/services/slipcheck');
     const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, { apiKeys: ['key-one', 'key-two'], independentQuota: true });
     assert.equal(result.retryable, true, 'a persistent provider processing failure must allow retrying the saved image');
-    assert.deepEqual(usedKeys, ['key-one', 'key-one'], 'verify_failed must not consume or switch to another API key');
+    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-one'], 'all verify_failed transports must keep the same API key');
   } finally {
     axios.post = originalPost;
     delete require.cache[require.resolve('../src/services/slipcheck')];

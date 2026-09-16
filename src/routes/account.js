@@ -270,6 +270,7 @@ router.get('/topup/:id/slip-file', async (req, res, next) => {
 // bound tenant context — nothing here can rely on the original request's
 // context still being current.
 const activeVerifications = new Set();
+const SLIPCHECK_AUTO_RETRY_DELAYS = [5000, 15000];
 
 function receiverCredentials(payment = {}, method = 'promptpay', ...fallbackPayments) {
   // The storefront renders the active flat payment settings, while provider
@@ -299,11 +300,13 @@ function canCheckSlipAutomatically(payment = {}) {
 async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptions, origin, retryStored = false }) {
   if (activeVerifications.has(requestId)) return;
   activeVerifications.add(requestId);
+  let scheduledRetryDelay = null;
 
   try {
     const request = store.data.topupRequests.find(t => t.id === requestId);
     const user = store.data.users.find(u => u.id === userId);
     if (!request || !user || request.status === 'approved' || request.status === 'rejected') return;
+    const previousRetryAttempts = Math.max(0, Number(request.slipCheck?.retryAttempts) || 0);
 
     const payment = store.data.settings.payment;
     const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
@@ -406,6 +409,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         rateLimited: Boolean(result.rateLimited),
         quotaMismatch: Boolean(result.quotaMismatch),
         retryable: Boolean(result.retryable),
+        retryAttempts: result.retryable ? previousRetryAttempts + 1 : 0,
         providerCode: result.providerCode || null,
         httpStatus: result.httpStatus || null,
         message: result.message,
@@ -430,6 +434,10 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       return true;
     });
     if (!applied) return;
+
+    if (!verified && result.retryable && previousRetryAttempts < SLIPCHECK_AUTO_RETRY_DELAYS.length) {
+      scheduledRetryDelay = SLIPCHECK_AUTO_RETRY_DELAYS[previousRetryAttempts];
+    }
 
     // Links to the normal (login-required) admin approve page for now — a
     // no-login-needed one-click link is a separate, deliberately-held-back
@@ -457,6 +465,12 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       if (request && request.status === 'verifying') request.status = 'pending';
     }).catch(saveErr => console.error('[topup] could not finalize verification:', saveErr.message));
     activeVerifications.delete(requestId);
+  }
+  if (scheduledRetryDelay !== null) {
+    const retryInTenant = store.bindTenantContext(retryTopupSlipVerification);
+    setTimeout(() => {
+      retryInTenant({ requestId, origin }).catch(error => console.error('[topup] automatic SlipCheck retry failed:', error.message));
+    }, scheduledRetryDelay);
   }
 }
 
