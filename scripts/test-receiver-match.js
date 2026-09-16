@@ -133,19 +133,24 @@ async function verifySlipCheckAdvancesOnQuotaResponse() {
   }
 }
 
-async function verifySlipCheckKeepsProcessingFailureOnCurrentKey() {
+async function verifySlipCheckProbesNextAccountOnProcessingFailure() {
   const originalPost = axios.post;
   const usedKeys = [];
   axios.post = async (url, payload, options) => {
     usedKeys.push(options.headers['x-api-key']);
-    return { data: { success: false, code: 'verify_failed', message: 'เกิดการตรวจสลิปไม่ผ่าน' } };
+    if (options.headers['x-api-key'] === 'key-one') return { data: { success: false, code: 'verify_failed', message: 'เกิดการตรวจสลิปไม่ผ่าน' } };
+    return { data: { success: true, data: { ...standardPayload, amount: 100, ref_no: 'fallback-account', transferred_at: new Date().toISOString() } } };
   };
   try {
     delete require.cache[require.resolve('../src/services/slipcheck')];
     const slipcheck = require('../src/services/slipcheck');
-    const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, { apiKeys: ['key-one', 'key-two'], independentQuota: true });
-    assert.equal(result.providerCode, 'verify_failed');
-    assert.deepEqual(usedKeys, ['key-one'], 'a processing failure must not rotate or modify the working key order');
+    const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, {
+      apiKeys: ['key-one', 'key-two'], independentQuota: true,
+      expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'],
+    });
+    assert.equal(result.verified, true, 'another configured SlipCheck account must recover a key-specific verify_failed response');
+    assert.equal(result.fallbackKeyUsed, true);
+    assert.deepEqual(usedKeys, ['key-one', 'key-two']);
   } finally {
     axios.post = originalPost;
     delete require.cache[require.resolve('../src/services/slipcheck')];
@@ -166,7 +171,7 @@ function verifyTenantSharedSlipCheckPool() {
 verifyProviderIntegration()
   .then(verifySlipCheckKeyOrder)
   .then(verifySlipCheckAdvancesOnQuotaResponse)
-  .then(verifySlipCheckKeepsProcessingFailureOnCurrentKey)
+  .then(verifySlipCheckProbesNextAccountOnProcessingFailure)
   .then(verifyTenantSharedSlipCheckPool)
   .then(() => console.log('Receiver matching checks passed: provider response, account/proxy values, sender isolation, Thai/English names'))
   .catch(error => { console.error(error); process.exitCode = 1; });

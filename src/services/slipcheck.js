@@ -188,6 +188,32 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     const result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
     lastResult = result;
 
+    if (String(result.providerCode || '').toLowerCase() === 'verify_failed' && apiKeys.length > 1) {
+      // A key can pass /me yet its account-side verifier can still return
+      // verify_failed. Probe the remaining configured accounts for this slip
+      // only, while keeping the normal cursor on the first key. This restores
+      // service without turning normal traffic into round-robin usage.
+      for (let probeOffset = 1; probeOffset < apiKeys.length; probeOffset += 1) {
+        const probeIndex = (index + probeOffset) % apiKeys.length;
+        const probeResult = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[probeIndex]);
+        if (probeResult.verified) {
+          keyCursor.set(cursorKey, index);
+          return { ...probeResult, fallbackKeyUsed: true };
+        }
+        if (probeResult.quotaExhausted || probeResult.keyUnavailable) {
+          lastResult = probeResult;
+          continue;
+        }
+        if (String(probeResult.providerCode || '').toLowerCase() !== 'verify_failed') {
+          keyCursor.set(cursorKey, index);
+          return { ...probeResult, fallbackKeyUsed: true };
+        }
+        lastResult = probeResult;
+      }
+      keyCursor.set(cursorKey, index);
+      return { ...lastResult, fallbackKeysTried: apiKeys.length };
+    }
+
     if (result.quotaExhausted) {
       // SlipCheck documents 429 as quota_exceeded. Advance once, in order,
       // and let this same slip continue immediately on the next account.
