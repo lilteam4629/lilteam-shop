@@ -101,7 +101,7 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
       contentType: fileOptions.contentType || 'image/jpeg',
     });
     const response = await axios.post(`${cleanEndpoint(credentials.endpoint)}/slip/verify`, form, {
-      headers: { ...form.getHeaders(), 'x-api-key': apiKey, Accept: 'application/json' }, timeout: 60000,
+      headers: { ...form.getHeaders(), 'x-api-key': apiKey, Accept: 'application/json' }, timeout: 15000,
     });
     const body = response.data || {};
     const data = body.data || {};
@@ -164,18 +164,17 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
         // HTTP 429 can also mean a short rate limit. If /me confirms quota is
         // still available, keep this key and retry instead of consuming the
         // next configured account.
-        for (let attempt = 1; attempt <= 2 && result.quotaExhausted; attempt += 1) {
-          await wait(attempt * 500);
+        for (let attempt = 1; attempt <= 1 && result.quotaExhausted; attempt += 1) {
+          await wait(400);
           result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
         }
         if (result.quotaExhausted) {
-          keyCursor.set(cursorKey, index);
-          return {
+          result = {
             ...result,
             quotaExhausted: false,
-            keyUnavailable: false,
+            keyUnavailable: true,
             rateLimited: true,
-            message: 'SlipCheck จำกัดความถี่ชั่วคราว แต่โควตายังเหลือ กรุณากดตรวจใหม่อีกครั้ง',
+            message: 'SlipCheck จำกัดความถี่ของคีย์นี้ชั่วคราว ระบบกำลังลองคีย์ถัดไป',
           };
         }
       }
@@ -184,6 +183,9 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     if (result.quotaExhausted || result.keyUnavailable) {
       keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
       if (offset < apiKeys.length - 1) continue;
+      if (result.rateLimited) {
+        return { ...result, message: 'SlipCheck จำกัดความถี่ของทุกคีย์ชั่วคราว กรุณากดตรวจสลิปเดิมอีกครั้งในอีกสักครู่' };
+      }
       return result;
     }
     // Keep using the same working key. Advance only after that key runs out

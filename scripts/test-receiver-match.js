@@ -107,7 +107,7 @@ async function verifySlipCheckKeyOrder() {
   }
 }
 
-async function verifySlipCheckRateLimitDoesNotConsumeNextKey() {
+async function verifySlipCheckRateLimitFallsBackToNextKey() {
   const originalPost = axios.post;
   const originalGet = axios.get;
   const usedKeys = [];
@@ -115,7 +115,7 @@ async function verifySlipCheckRateLimitDoesNotConsumeNextKey() {
   axios.post = async (url, form, options) => {
     usedKeys.push(options.headers['x-api-key']);
     calls++;
-    if (calls < 3) {
+    if (options.headers['x-api-key'] === 'key-one') {
       const error = new Error('Too Many Requests');
       error.response = { status: 429, data: { message: 'rate limit' } };
       throw error;
@@ -128,7 +128,7 @@ async function verifySlipCheckRateLimitDoesNotConsumeNextKey() {
     const slipcheck = require('../src/services/slipcheck');
     const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, { apiKeys: ['key-one', 'key-two'], independentQuota: true, expectedReceiverNames: ['สมชาย ใจดี'], expectedReceiverNumbers: ['0812345678'] });
     assert.equal(result.verified, true, 'temporary rate limit must be retried');
-    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-one'], 'temporary rate limit must not advance to the next key while quota remains');
+    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-two'], 'a persistently rate-limited key must fall back to the next key');
   } finally {
     axios.post = originalPost;
     axios.get = originalGet;
@@ -138,6 +138,6 @@ async function verifySlipCheckRateLimitDoesNotConsumeNextKey() {
 
 verifyProviderIntegration()
   .then(verifySlipCheckKeyOrder)
-  .then(verifySlipCheckRateLimitDoesNotConsumeNextKey)
+  .then(verifySlipCheckRateLimitFallsBackToNextKey)
   .then(() => console.log('Receiver matching checks passed: provider response, account/proxy values, sender isolation, Thai/English names'))
   .catch(error => { console.error(error); process.exitCode = 1; });

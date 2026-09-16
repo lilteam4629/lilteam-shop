@@ -270,7 +270,6 @@ router.get('/topup/:id/slip-file', async (req, res, next) => {
 // bound tenant context — nothing here can rely on the original request's
 // context still being current.
 const activeVerifications = new Set();
-const RATE_LIMIT_RETRY_DELAYS = [10000, 30000, 60000];
 
 function receiverCredentials(payment = {}, method = 'promptpay', ...fallbackPayments) {
   // The storefront renders the active flat payment settings, while provider
@@ -300,7 +299,6 @@ function canCheckSlipAutomatically(payment = {}) {
 async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptions, origin, retryStored = false }) {
   if (activeVerifications.has(requestId)) return;
   activeVerifications.add(requestId);
-  let keepVerifyingForRetry = false;
 
   try {
     const request = store.data.topupRequests.find(t => t.id === requestId);
@@ -404,7 +402,6 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       const freshRequest = data.topupRequests.find(t => t.id === requestId);
       const freshUser = data.users.find(u => u.id === userId);
       if (!freshRequest || !freshUser || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
-      const previousRateLimitRetries = Number(freshRequest.slipCheck?.rateLimitRetryCount || 0);
       freshRequest.slipCheck = {
         checked: result.checked,
         verified: result.verified,
@@ -414,7 +411,6 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         provider,
         transRef,
         checkedAt: new Date().toISOString(),
-        rateLimitRetryCount: result.rateLimited ? previousRateLimitRetries + 1 : 0,
       };
       freshRequest.slipCheck.verified = verified;
       if (verified) {
@@ -434,36 +430,17 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     });
     if (!applied) return;
 
-    const retryCount = Number(finalRequest.slipCheck?.rateLimitRetryCount || 0);
-    const retryDelay = result.rateLimited && retryCount <= RATE_LIMIT_RETRY_DELAYS.length
-      ? RATE_LIMIT_RETRY_DELAYS[retryCount - 1]
-      : null;
-    if (retryDelay !== null) {
-      keepVerifyingForRetry = true;
-      await store.transact((data) => {
-        const freshRequest = data.topupRequests.find(t => t.id === requestId);
-        if (freshRequest && freshRequest.status === 'pending') freshRequest.status = 'verifying';
-      });
-      finalRequest.status = 'verifying';
-    }
-
     // Links to the normal (login-required) admin approve page for now — a
     // no-login-needed one-click link is a separate, deliberately-held-back
     // change pending a decision on its security tradeoff.
-    if (retryDelay === null) {
-      webhook.notifyTopup({
-        webhookUrl: payment.topupWebhookUrl,
-        username: user.username, email: user.email,
-        amount: finalRequest.amount, refCode: finalRequest.refCode, method: finalRequest.method,
-        slipUrl: null,
-        autoApproved: verified,
-        adminUrl: verified ? null : `${origin}/admin/topups`,
-      }).catch(() => {});
-    } else {
-      const retry = store.bindTenantContext(() => retryTopupSlipVerification({ requestId, origin })
-        .catch(error => console.error('[topup] automatic SlipCheck retry failed:', error.message)));
-      setTimeout(retry, retryDelay);
-    }
+    webhook.notifyTopup({
+      webhookUrl: payment.topupWebhookUrl,
+      username: user.username, email: user.email,
+      amount: finalRequest.amount, refCode: finalRequest.refCode, method: finalRequest.method,
+      slipUrl: null,
+      autoApproved: verified,
+      adminUrl: verified ? null : `${origin}/admin/topups`,
+    }).catch(() => {});
   } catch (err) {
     console.error('[topup] background verify failed:', err.message);
     await store.transact((data) => {
@@ -476,7 +453,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
   } finally {
     await store.transact((data) => {
       const request = data.topupRequests.find(t => t.id === requestId);
-      if (!keepVerifyingForRetry && request && request.status === 'verifying') request.status = 'pending';
+      if (request && request.status === 'verifying') request.status = 'pending';
     }).catch(saveErr => console.error('[topup] could not finalize verification:', saveErr.message));
     activeVerifications.delete(requestId);
   }
@@ -564,6 +541,15 @@ async function retryTopupSlipVerification({ requestId, origin }) {
   });
   return { ok: true };
 }
+
+router.post('/topup/:id/retry-slip', async (req, res) => {
+  const user = currentUser(req);
+  const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
+  if (!request) return res.redirect('/account/topup');
+  const result = await retryTopupSlipVerification({ requestId: request.id, origin: `${req.protocol}://${req.get('host')}` });
+  req.flash(result.ok ? 'success' : 'error', result.ok ? 'ส่งสลิปเดิมไปตรวจอีกครั้งแล้ว' : result.error);
+  res.redirect(`/account/topup/${request.id}`);
+});
 
 router.post('/topup/:id/slip', (req, res) => {
   const user = currentUser(req);

@@ -18,9 +18,14 @@
       <div class="text-[var(--coral)] font-semibold mb-1">คำขอนี้ถูกปฏิเสธ</div>
       <% if (request.reviewNote) { %><p class="text-sm text-[var(--text-3)]"><%= request.reviewNote %></p><% } %>
     </div>
-  <% } else if (request.slipPath && automaticSlipCheck) { %>
-    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
-      ⏳ ระบบกำลังตรวจสอบสลิปโดยอัตโนมัติ — หน้านี้จะแสดงผลสำเร็จให้ทันที ไม่ต้องรีเฟรช
+  <% } else if (request.status === 'verifying' && request.slipPath && automaticSlipCheck) { %>
+    <div class="bg-sky-500/10 border border-sky-500/30 rounded-2xl p-4 mb-6 flex items-center gap-3 text-sm">
+      <span class="relative flex h-3 w-3 shrink-0"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-60"></span><span class="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span></span>
+      <div><div class="font-semibold text-[var(--text)]">กำลังตรวจสลิปให้คุณ</div><div class="text-xs text-[var(--text-3)] mt-0.5">ระบบกำลังเลือก API Key ที่พร้อมใช้งาน แล้วจะเติมเงินให้ทันทีเมื่อตรวจผ่าน</div></div>
+    </div>
+  <% } else if (request.slipPath && request.slipCheck && request.slipCheck.rateLimited) { %>
+    <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-6 text-sm text-amber-300">
+      SlipCheck ยังไม่พร้อมรับคำขอในขณะนี้ สลิปถูกเก็บไว้แล้วและสามารถกดตรวจใหม่ได้โดยไม่ต้องแนบรูปซ้ำ
     </div>
   <% } else if (!request.slipPath && automaticSlipCheck) { %>
     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
@@ -82,7 +87,7 @@
   <% if (request.status === 'pending' || request.status === 'verifying') { %>
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
       <h2 class="font-semibold mb-3">แนบสลิปการโอนเงิน</h2>
-      <% if (automaticSlipCheck) { %>
+      <% if (automaticSlipCheck && !request.slipPath) { %>
         <div id="slipDeadline" data-deadline="<%= new Date(request.createdAt).getTime() + (5 * 60 * 1000) %>" class="mb-4 rounded-xl border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-center">
           <p class="text-xs text-[var(--text-3)]">กรุณาโอนและแนบสลิปภายใน</p>
           <p id="slipCountdown" class="mt-1 font-mono text-3xl font-bold tabular-nums text-amber-400">05:00</p>
@@ -95,6 +100,13 @@
           <% if (request.slipCheck && request.slipCheck.checked && !request.slipCheck.verified) { %>
             <% if (request.slipCheck.quotaExhausted) { %>
               <p class="text-sm font-semibold text-amber-300 mt-2">⚠️ โควตาตรวจสลิปหมดแล้ว — ระบบยังไม่สามารถเติมเงินอัตโนมัติได้ กรุณาแจ้งแอดมินให้เติมโควตาหรือตรวจสอบยอดด้วยตนเอง</p>
+            <% } else if (request.slipCheck.rateLimited) { %>
+              <div class="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
+                <p class="text-xs text-amber-300">SlipCheck จำกัดการเรียกชั่วคราว แต่สลิปของคุณยังถูกเก็บไว้อย่างปลอดภัย</p>
+                <form action="/account/topup/<%= request.id %>/retry-slip" method="post" class="mt-2">
+                  <button type="submit" class="w-full rounded-lg bg-amber-400 px-3 py-2 text-xs font-bold text-amber-950">ลองตรวจสลิปเดิมอีกครั้ง</button>
+                </form>
+              </div>
             <% } else { %>
               <p class="text-xs text-[var(--coral)] mt-2">✕ ตรวจสอบอัตโนมัติไม่ผ่าน: <%= request.slipCheck.message %> — กรุณาตรวจสอบยอดเงิน/สลิปแล้วลองแนบใหม่อีกครั้ง</p>
             <% } %>
@@ -113,15 +125,16 @@
   <% } %>
 </section>
 
-<div id="slipUploadOverlay" class="hidden fixed inset-0 z-50 bg-[var(--bg)]/95 backdrop-blur-sm flex flex-col items-center justify-center px-6 text-center">
-  <% if (settings.branding && settings.branding.logoImage) { %>
-    <img src="<%= settings.branding.logoImage %>" alt="<%= settings.shopName %>" class="w-20 h-20 rounded-2xl object-cover mb-5 shadow-[0_10px_30px_color-mix(in_srgb,var(--gold)_25%,transparent)]" />
-  <% } else { %>
-    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[#171208] flex items-center justify-center text-3xl font-bold mb-5 shadow-[0_10px_30px_color-mix(in_srgb,var(--gold)_25%,transparent)]"><%= (settings.shopName || 'S').charAt(0).toUpperCase() %></div>
-  <% } %>
-  <div class="w-10 h-10 border-[3px] border-[var(--gold)]/25 border-t-[var(--gold)] rounded-full animate-spin mb-5"></div>
-  <div class="text-lg font-semibold mb-1"><%= automaticSlipCheck ? 'กำลังส่งสลิปเพื่อตรวจสอบ...' : 'กำลังบันทึกสลิป...' %></div>
-  <p class="text-sm text-[var(--text-3)]"><%= automaticSlipCheck ? 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอัตโนมัติ' : 'กรุณารอสักครู่ จากนั้นคำขอจะรอแอดมินร้านตรวจสอบ' %></p>
+<div id="slipUploadOverlay" class="hidden fixed inset-x-4 bottom-5 z-50 mx-auto max-w-md rounded-2xl border border-sky-500/30 bg-[var(--card)]/95 p-4 shadow-2xl backdrop-blur-md">
+  <div class="flex items-center gap-3">
+    <div class="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-500/10">
+      <div class="h-6 w-6 rounded-full border-[3px] border-sky-500/20 border-t-sky-500 animate-spin"></div>
+    </div>
+    <div class="min-w-0 text-left">
+      <div id="slipStatusTitle" class="text-sm font-bold text-[var(--text)]"><%= automaticSlipCheck ? 'กำลังตรวจสอบสลิป' : 'กำลังบันทึกสลิป' %></div>
+      <p id="slipStatusMessage" class="mt-0.5 text-xs leading-relaxed text-[var(--text-3)]"><%= automaticSlipCheck ? 'กำลังเลือกคีย์ที่พร้อมใช้งาน ปกติใช้เวลาไม่เกิน 15 วินาที' : 'บันทึกเสร็จแล้วจะแสดงสถานะให้ทันที' %></p>
+    </div>
+  </div>
 </div>
 <script>
   (function () {
@@ -170,10 +183,10 @@
 
     if (overlay) {
       overlay.classList.remove('hidden');
-      var title = overlay.querySelector('.text-lg');
-      var message = overlay.querySelector('p');
-      if (title) title.textContent = 'กำลังตรวจสอบสลิปอัตโนมัติ...';
-      if (message) message.textContent = 'ตรวจเสร็จแล้วระบบจะพาไปหน้าผลสำเร็จให้ทันที ไม่ต้องรีเฟรช';
+      var title = document.getElementById('slipStatusTitle');
+      var message = document.getElementById('slipStatusMessage');
+      if (title) title.textContent = 'กำลังตรวจสอบสลิป';
+      if (message) message.textContent = 'ระบบกำลังเลือกคีย์ที่พร้อมใช้งาน แล้วจะเติมเงินให้ทันทีเมื่อตรวจผ่าน';
     }
 
     function checkStatus() {
