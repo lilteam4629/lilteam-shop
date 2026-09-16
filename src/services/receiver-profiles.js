@@ -1,13 +1,11 @@
 const PROVIDERS = ['slipcheck', 'rdcw', 'slip2go'];
 const FIELDS = [
-  'promptpayId', 'promptpayName', 'promptpayQrImage',
-  'promptpayNameEn', 'bankName', 'bankAccountNumber', 'bankAccountName', 'bankAccountNameEn',
+  'bankName', 'bankAccountNumber', 'bankAccountName', 'bankAccountNameEn',
   'bankAccountType', 'bankQrImage',
 ];
 
 function blankProfile() {
   return {
-    promptpayId: '', promptpayName: '', promptpayNameEn: '', promptpayQrImage: null,
     bankName: '', bankAccountNumber: '', bankAccountName: '', bankAccountNameEn: '',
     bankAccountType: 'NATURAL', bankQrImage: null,
   };
@@ -29,14 +27,14 @@ function profiles(payment = {}) {
 function view(payment = {}, provider) {
   if (!PROVIDERS.includes(provider)) provider = PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck';
   const saved = payment.receiverProfiles && payment.receiverProfiles[provider];
-  if (saved) return { ...blankProfile(), ...saved };
+  if (saved) return snapshot(saved);
   if (provider === payment.slipProvider || !payment.receiverProfiles) return snapshot(payment);
   return blankProfile();
 }
 
 function saveAndActivate(payment, provider, profile) {
   if (!PROVIDERS.includes(provider)) throw new Error('Unsupported receiver profile');
-  const saved = { ...blankProfile(), ...profile };
+  const saved = snapshot(profile);
   profiles(payment)[provider] = saved;
   for (const field of FIELDS) payment[field] = saved[field];
   payment.slipProvider = provider;
@@ -45,22 +43,18 @@ function saveAndActivate(payment, provider, profile) {
 
 function save(payment, provider, profile) {
   if (!PROVIDERS.includes(provider)) return null;
-  const saved = { ...blankProfile(), ...profile };
+  const saved = snapshot(profile);
   profiles(payment)[provider] = saved;
   return saved;
 }
 
-function credentials(method = 'promptpay', ...paymentSources) {
+function credentials(_method = 'bank_transfer', ...paymentSources) {
   const sources = paymentSources.filter(Boolean);
   const names = sources.flatMap(source => [
-    method === 'promptpay' ? source.promptpayName : source.bankAccountName,
-    method === 'promptpay' ? source.promptpayNameEn : source.bankAccountNameEn,
-    method === 'promptpay' ? source.bankAccountName : source.promptpayName,
-    method === 'promptpay' ? source.bankAccountNameEn : source.promptpayNameEn,
+    source.bankAccountName,
+    source.bankAccountNameEn,
   ]).map(value => String(value || '').trim()).filter(Boolean);
-  const numbers = sources.flatMap(source => method === 'promptpay'
-    ? [source.promptpayId, source.bankAccountNumber]
-    : [source.bankAccountNumber]);
+  const numbers = sources.map(source => source.bankAccountNumber);
   return {
     expectedReceiverNames: [...new Set(names)],
     expectedReceiverNumbers: [...new Set(numbers.map(value => String(value || '').trim()).filter(Boolean))],

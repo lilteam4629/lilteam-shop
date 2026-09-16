@@ -14,7 +14,7 @@
       <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] flex items-center gap-2">
         <span>💰 จัดการเติมเงิน, บัญชีรับเงิน & ตรวจสลิป</span>
       </h1>
-      <p class="text-xs text-[var(--text-4)] mt-0.5">รวมศูนย์ระบบการเงิน: รายการตรวจสอบสลิป, บัญชีธนาคาร/พร้อมเพย์, ซองของขวัญ TrueMoney และระบบตรวจสลิปอัตโนมัติ</p>
+      <p class="text-xs text-[var(--text-4)] mt-0.5">รวมศูนย์ระบบการเงิน: รายการตรวจสอบสลิป, บัญชีธนาคาร, ซองของขวัญ TrueMoney และระบบตรวจสลิปอัตโนมัติ</p>
     </div>
 
     <div class="flex items-center gap-2.5">
@@ -44,7 +44,7 @@
     </button>
     <button type="button" onclick="switchTopupTab('bank')" id="topup-tab-btn-bank" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
       <span class="text-base">💳</span>
-      <span>พร้อมเพย์ & บัญชีธนาคาร</span>
+      <span>บัญชีธนาคารรับเงิน</span>
     </button>
     <button type="button" onclick="switchTopupTab('truemoney')" id="topup-tab-btn-truemoney" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
       <span class="text-base">🧧</span>
@@ -259,7 +259,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- TAB 2: พร้อมเพย์ & บัญชีธนาคาร (Bank & QR)  -->
+  <!-- TAB 2: บัญชีธนาคารสำหรับโอนเงิน -->
   <!-- ========================================== -->
   <div id="topup-tab-content-bank" class="topup-tab-content hidden space-y-6">
     <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
@@ -275,8 +275,8 @@
           💳
         </div>
         <div>
-          <h2 class="text-base font-bold text-[var(--text)]">ตั้งค่าบัญชีพร้อมเพย์ (PromptPay) & บัญชีธนาคาร</h2>
-          <p class="text-xs text-[var(--text-4)]">ข้อมูลและ QR Code นี้จะแสดงให้ลูกค้าสแกน/โอนเงินในหน้าเติมเงินของเว็บไซต์</p>
+          <h2 class="text-base font-bold text-[var(--text)]">ตั้งค่าบัญชีธนาคาร</h2>
+          <p class="text-xs text-[var(--text-4)]">ข้อมูลบัญชีและ QR Code นี้จะแสดงให้ลูกค้าโอนเงินในหน้าเติมเงินของเว็บไซต์</p>
         </div>
       </div>
 
@@ -313,38 +313,6 @@
         <% } %>
       </div>
 
-      <!-- PromptPay settings are independent of the verification provider. -->
-      <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
-        <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
-          <span>🔵 ช่องทาง พร้อมเพย์ (PromptPay)</span>
-        </h3>
-
-        <div class="grid sm:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เบอร์โทรศัพท์ หรือ เลขประจำตัวประชาชนพร้อมเพย์</label>
-            <input name="promptpayId" value="<%= receiverPayment.promptpayId %>" placeholder="เช่น 0812345678 หรือ 1234567890123" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
-          </div>
-          <div>
-            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีพร้อมเพย์</label>
-            <input name="promptpayName" value="<%= receiverPayment.promptpayName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code พร้อมเพย์ (ทางเลือก)</label>
-          <p class="text-[11px] text-[var(--text-4)] mb-2">หากไม่แนบรูป ระบบจะคำนวณและสร้าง QR Code พร้อมเพย์จากเบอร์ให้อัตโนมัติ</p>
-
-          <% if (receiverPayment.promptpayQrImage) { %>
-            <div class="flex items-center gap-3 mb-3 bg-[var(--card)] p-2.5 rounded-xl border border-[var(--border)] max-w-sm">
-              <img src="<%= receiverPayment.promptpayQrImage %>" class="w-20 h-20 object-contain rounded-lg bg-white p-1" alt="QR พร้อมเพย์" />
-              <label class="flex items-center gap-2 text-xs text-rose-400 cursor-pointer">
-                <input type="checkbox" name="removePromptpayQrImage" class="accent-rose-500" /> ลบรูปปัจจุบัน
-              </label>
-            </div>
-          <% } %>
-          <input type="file" name="promptpayQrImage" accept="image/*" class="w-full text-xs text-[var(--text-3)] file:mr-2 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:bg-[var(--card)] file:text-[var(--gold-text)] file:font-semibold file:text-xs" />
-        </div>
-      </div>
       <!-- Section 2: Bank Transfer -->
       <%
         const otherBanks = banks;
@@ -357,7 +325,7 @@
 
         <div class="grid sm:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคารที่บัญชี/พร้อมเพย์ผูกอยู่ *</label>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคาร *</label>
             <% if (otherBanks.length) { %>
               <select name="bankCode" <%= receiverPayment.bankAccountNumber ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
                 <option value="">-- เลือกธนาคาร --</option>
@@ -419,8 +387,6 @@
     <form action="/admin/topups/payment-settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
 
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
-      <input type="hidden" name="promptpayId" value="<%= payment.promptpayId || '' %>" />
-      <input type="hidden" name="promptpayName" value="<%= payment.promptpayName || '' %>" />
       <input type="hidden" name="bankCode" value="<%= (banks.find(b => b.nameTh === payment.bankName) || {}).code || '' %>" />
       <input type="hidden" name="bankAccountNumber" value="<%= payment.bankAccountNumber || '' %>" />
       <input type="hidden" name="bankAccountName" value="<%= payment.bankAccountName || '' %>" />
@@ -488,8 +454,6 @@
     <form action="/admin/topups/payment-settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
 
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
-      <input type="hidden" name="promptpayId" value="<%= payment.promptpayId || '' %>" />
-      <input type="hidden" name="promptpayName" value="<%= payment.promptpayName || '' %>" />
       <input type="hidden" name="bankCode" value="<%= (banks.find(b => b.nameTh === payment.bankName) || {}).code || '' %>" />
       <input type="hidden" name="bankAccountNumber" value="<%= payment.bankAccountNumber || '' %>" />
       <input type="hidden" name="bankAccountName" value="<%= payment.bankAccountName || '' %>" />

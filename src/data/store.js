@@ -188,13 +188,9 @@ function defaultData() {
         enabled: false,
       },
       payment: {
-        promptpayId: '',
-        promptpayName: '',
-        promptpayBankCode: '',
         bankName: '',
         bankAccountNumber: '',
         bankAccountName: '',
-        promptpayQrImage: null,
         bankQrImage: null,
         truemoneyPhone: '',
         truemoneyEnabled: true,
@@ -395,7 +391,6 @@ async function init() {
     await mongoCollection.updateMany(
       { 'settings.payment.receivingAccountResetVersion': { $ne: 1 } },
       { $set: {
-        'settings.payment.promptpayId': '', 'settings.payment.promptpayName': '', 'settings.payment.promptpayBankCode': '',
         'settings.payment.bankName': '', 'settings.payment.bankAccountNumber': '',
         'settings.payment.bankAccountName': '', 'settings.payment.receivingAccountResetVersion': 1,
       } }
@@ -519,8 +514,7 @@ function migrateSchema(db) {
   }
   if (!db.settings.payment) {
     db.settings.payment = {
-      promptpayId: '', promptpayName: '', bankName: '', bankAccountNumber: '', bankAccountName: '',
-      promptpayQrImage: null, bankQrImage: null,
+      bankName: '', bankAccountNumber: '', bankAccountName: '', bankQrImage: null,
     };
     changed = true;
   }
@@ -534,10 +528,6 @@ function migrateSchema(db) {
   }
   if (db.settings.contactResponseTime === undefined) {
     db.settings.contactResponseTime = '5–15 นาที';
-    changed = true;
-  }
-  if (db.settings.payment.promptpayQrImage === undefined) {
-    db.settings.payment.promptpayQrImage = db.settings.payment.qrImage || null;
     changed = true;
   }
   if (db.settings.payment.bankQrImage === undefined) {
@@ -572,6 +562,24 @@ function migrateSchema(db) {
     db.settings.payment.slipProvider = 'slipcheck';
     changed = true;
   }
+  const removedPromptPayFields = ['promptpayId', 'promptpayName', 'promptpayNameEn', 'promptpayQrImage'];
+  for (const field of removedPromptPayFields) {
+    if (Object.hasOwn(db.settings.payment, field)) {
+      delete db.settings.payment[field];
+      changed = true;
+    }
+  }
+  if (db.settings.payment.receiverProfiles && typeof db.settings.payment.receiverProfiles === 'object') {
+    for (const profile of Object.values(db.settings.payment.receiverProfiles)) {
+      if (!profile || typeof profile !== 'object') continue;
+      for (const field of removedPromptPayFields) {
+        if (Object.hasOwn(profile, field)) {
+          delete profile[field];
+          changed = true;
+        }
+      }
+    }
+  }
   if (db.settings.payment.receiverProfiles && db.settings.payment.receiverProfiles.easyslip) {
     delete db.settings.payment.receiverProfiles.easyslip;
     changed = true;
@@ -594,7 +602,7 @@ function migrateSchema(db) {
   // then the marker prevents later restarts from clearing newly entered data.
   if ((Number(db.settings.payment.receivingAccountResetVersion) || 0) < 1) {
     Object.assign(db.settings.payment, {
-      promptpayId: '', promptpayName: '', bankName: '', bankAccountNumber: '', bankAccountName: '',
+      bankName: '', bankAccountNumber: '', bankAccountName: '',
       receivingAccountResetVersion: 1,
     });
     changed = true;

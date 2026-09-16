@@ -15,7 +15,7 @@
       <img src="/images/truemoney-wallet.jpg" alt="TrueMoney Wallet" class="w-7 h-7 rounded-lg object-cover" /> <span>ซองของขวัญ TrueMoney</span>
     </button>
     <button type="button" id="tabBank" onclick="switchTab('bank')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--border-light)] bg-[var(--card)] text-[var(--text-3)] hover:border-[var(--gold)]/50">
-      <span><%= promptpayEnabled ? '📱' : '🏦' %></span> <span><%= promptpayEnabled ? 'พร้อมเพย์ / ธนาคาร' : 'โอนผ่านธนาคาร' %></span>
+      <span>🏦</span> <span>โอนผ่านธนาคาร</span>
     </button>
   </div>
 
@@ -27,7 +27,7 @@
 
     <% if (payment.truemoneyEnabled === false || !payment.truemoneyPhone) { %>
       <div class="bg-amber-900/30 border border-amber-600/50 text-amber-300 rounded-xl p-4 text-xs text-center">
-        ⚠️ ระบบเติมเงินผ่านซองของขวัญ TrueMoney ยังไม่พร้อมใช้งานในขณะนี้ กรุณาใช้ช่องทางพร้อมเพย์หรือโอนผ่านธนาคาร
+        ⚠️ ระบบเติมเงินผ่านซองของขวัญ TrueMoney ยังไม่พร้อมใช้งานในขณะนี้ กรุณาใช้ช่องทางโอนผ่านบัญชีธนาคาร
       </div>
     <% } else { %>
       <form action="/account/topup/truemoney" method="post" class="space-y-4">
@@ -57,7 +57,7 @@
     <% } %>
   </div>
 
-  <!-- Form 2: PromptPay & Bank Transfer (Slip Upload) -->
+  <!-- Form 2: Bank Transfer (Slip Upload) -->
   <div id="sectionBank" class="hidden">
     <form action="/account/topup" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 space-y-6 shadow-[0_18px_40px_-24px_rgba(0,0,0,.5)]">
       <div>
@@ -80,23 +80,14 @@
 
       <div>
         <label class="block text-sm font-medium mb-3">ช่องทางชำระเงิน</label>
-        <div class="grid <%= promptpayEnabled ? 'grid-cols-2' : 'grid-cols-1' %> gap-2.5">
-          <% if (promptpayEnabled) { %>
-          <label class="method-option relative flex flex-col items-center gap-1.5 bg-[var(--input)] border-2 border-[var(--gold)] rounded-xl px-3 py-4 cursor-pointer text-center transition-colors">
-            <input type="radio" name="method" value="promptpay" checked class="peer sr-only" />
-            <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--gold-contrast)] text-[10px] items-center justify-center">✓</span>
-            <span class="text-2xl">📱</span>
-            <span class="text-sm font-medium leading-tight">พร้อมเพย์<br />(PromptPay)</span>
-          </label>
-          <% } %>
-          <label class="method-option relative flex flex-col items-center gap-1.5 bg-[var(--input)] border-2 <%= promptpayEnabled ? 'border-[var(--border-light)]' : 'border-[var(--gold)] bg-[var(--gold)]/10' %> rounded-xl px-3 py-4 cursor-pointer text-center transition-colors">
-            <input type="radio" name="method" value="bank_transfer" <%= promptpayEnabled ? '' : 'checked' %> class="peer sr-only" />
+        <div class="grid grid-cols-1 gap-2.5">
+          <label class="method-option relative flex flex-col items-center gap-1.5 bg-[var(--input)] border-2 border-[var(--gold)] bg-[var(--gold)]/10 rounded-xl px-3 py-4 cursor-pointer text-center transition-colors">
+            <input type="radio" name="method" value="bank_transfer" checked class="peer sr-only" />
             <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--gold-contrast)] text-[10px] items-center justify-center">✓</span>
             <span class="text-2xl">🏦</span>
             <span class="text-sm font-medium leading-tight">โอนผ่าน<br />ธนาคาร</span>
           </label>
         </div>
-        <% if (!promptpayEnabled) { %><p class="mt-2 text-[11px] text-[var(--text-4)]">ค่ายตรวจสลิปที่ร้านเลือกใช้รองรับการตั้งค่าบัญชีธนาคารเท่านั้น</p><% } %>
       </div>
 
       <button class="group relative w-full overflow-hidden bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-semibold rounded-xl py-3.5 text-sm transition-colors">

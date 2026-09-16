@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const QRCode = require('qrcode');
 const store = require('../data/store');
 const slipok = require('../services/slipok');
 const slipcheck = require('../services/slipcheck');
 const rdcwSlip = require('../services/rdcw-slip');
 const slip2go = require('../services/slip2go');
-const promptpay = require('../services/promptpay');
 const { effectiveSlipConfig, slipcheckCredentials } = require('../services/slip-config');
 const { parseSlipDate } = require('../services/slip-fields');
 const receiverProfiles = require('../services/receiver-profiles');
@@ -35,16 +33,6 @@ const upload = multer({
 });
 
 const truemoneyRedemptionLocks = new Set();
-const BANK_ONLY_SLIP_PROVIDERS = new Set(['slipcheck', 'rdcw', 'slip2go']);
-
-function activeSlipProvider(payment = {}) {
-  const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
-  return resolveSlipProvider(effective);
-}
-
-function supportsPromptPay(payment = {}) {
-  return !BANK_ONLY_SLIP_PROVIDERS.has(activeSlipProvider(payment));
-}
 
 router.get('/', (req, res) => {
   const user = currentUser(req);
@@ -69,7 +57,7 @@ router.get('/', (req, res) => {
 
 router.get('/topup', (req, res) => {
   const payment = store.data.settings.payment;
-  res.render('shop/topup', { title: 'เติมเงิน', payment, promptpayEnabled: supportsPromptPay(payment) });
+  res.render('shop/topup', { title: 'เติมเงิน', payment });
 });
 
 router.post('/topup/truemoney', async (req, res) => {
@@ -198,7 +186,7 @@ router.post('/topup', async (req, res) => {
   const user = currentUser(req);
   const created = await createTopupRequest({ user, amount: req.body.amount, method: req.body.method });
   if (!created.ok) {
-    req.flash('error', 'กรุณาระบุจำนวนเงินอย่างน้อย 1 บาท');
+    req.flash('error', created.error);
     return res.redirect('/account/topup');
   }
   res.redirect(`/account/topup/${created.request.id}`);
@@ -210,18 +198,8 @@ router.get('/topup/:id', async (req, res) => {
   if (!request) return res.redirect('/account/topup');
 
   const payment = store.data.settings.payment;
-  let qrDataUrl = null;
-  if (request.method === 'promptpay' && payment.promptpayId) {
-    try {
-      const payload = promptpay.generatePayload(payment.promptpayId, request.amount);
-      qrDataUrl = await QRCode.toDataURL(payload, { margin: 1, width: 260 });
-    } catch (err) {
-      qrDataUrl = null;
-    }
-  }
-
   res.render('shop/topup-detail', {
-    title: 'สถานะการเติมเงิน', request, payment, qrDataUrl,
+    title: 'สถานะการเติมเงิน', request, payment,
     automaticSlipCheck: canCheckSlipAutomatically(payment),
   });
 });
@@ -269,7 +247,7 @@ router.get('/topup/:id/slip-file', async (req, res, next) => {
 // context still being current.
 const activeVerifications = new Set();
 
-function receiverCredentials(payment = {}, method = 'promptpay', ...fallbackPayments) {
+function receiverCredentials(payment = {}, method = 'bank_transfer', ...fallbackPayments) {
   // The storefront renders the active flat payment settings, while provider
   // switching also keeps a provider-specific snapshot. Include both sources
   // from this same shop so verification always checks the account the customer
@@ -281,7 +259,7 @@ function canCheckSlipAutomatically(payment = {}) {
   const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
   const selected = resolveSlipProvider(effective);
   const receiverPayment = receiverProfiles.view(payment, selected);
-  const receiver = receiverCredentials(receiverPayment, 'promptpay', payment);
+  const receiver = receiverCredentials(receiverPayment, 'bank_transfer', payment);
   const hasReceiver = Boolean(receiver.expectedReceiverNames.length || receiver.expectedReceiverNumbers.length);
   if (selected === 'slipok') return Boolean(effective.slipokBranchId && effective.slipokApiKey);
   if (selected === 'slipcheck') return Boolean((effective.slipcheckApiKey || (store.isTenantContext() ? false : (effective.slipcheckApiKeys || []).length)) && hasReceiver);
@@ -440,12 +418,12 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
 // one place that kicks off slip verification.
 async function createTopupRequest({ user, amount, method }) {
   const amt = Math.round((Number(amount) || 0) * 100) / 100;
-  const mth = method === 'bank_transfer' ? 'bank_transfer' : 'promptpay';
+  const mth = String(method || 'bank_transfer');
+  if (mth !== 'bank_transfer') {
+    return { ok: false, error: 'ระบบรับชำระผ่านบัญชีธนาคารเท่านั้น' };
+  }
   if (!Number.isFinite(amt) || amt < 1) {
     return { ok: false, error: 'กรุณาระบุจำนวนเงินอย่างน้อย 1 บาท' };
-  }
-  if (mth === 'promptpay' && !supportsPromptPay(store.data.settings.payment)) {
-    return { ok: false, error: 'ค่ายตรวจสลิปที่ร้านเลือกใช้งานรองรับเฉพาะการโอนผ่านบัญชีธนาคาร' };
   }
   const request = {
     id: store.genId(10), userId: user.id, amount: amt, method: mth,

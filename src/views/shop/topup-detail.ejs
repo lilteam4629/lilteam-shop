@@ -23,9 +23,9 @@
       <span class="relative flex h-3 w-3 shrink-0"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-60"></span><span class="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span></span>
       <div><div class="font-semibold text-[var(--text)]">กำลังตรวจสลิปให้คุณ</div><div class="text-xs text-[var(--text-3)] mt-0.5">ระบบกำลังตรวจด้วยคีย์ปัจจุบัน และจะเติมเงินให้ทันทีเมื่อตรวจผ่าน</div></div>
     </div>
-  <% } else if (request.slipPath && request.slipCheck && (request.slipCheck.rateLimited || request.slipCheck.quotaMismatch || request.slipCheck.retryable || request.slipCheck.providerCode === 'verify_failed' || (request.slipCheck.provider === 'easyslip' && !request.slipCheck.checked && !request.slipCheck.verified && (!request.slipCheck.httpStatus || request.slipCheck.retryable)))) { %>
+  <% } else if (request.slipPath && request.slipCheck && (request.slipCheck.rateLimited || request.slipCheck.quotaMismatch || request.slipCheck.retryable || request.slipCheck.providerCode === 'verify_failed')) { %>
     <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-6 text-sm text-amber-300">
-      <%= request.slipCheck.provider === 'easyslip' ? 'EasySlip ยังตรวจรายการนี้ไม่สำเร็จ' : 'ระบบตรวจสลิปยังไม่พร้อมรับคำขอในขณะนี้' %> สลิปถูกเก็บไว้แล้วและสามารถกดตรวจรูปเดิมได้โดยไม่ต้องแนบซ้ำ
+      ระบบตรวจสลิปยังไม่พร้อมรับคำขอในขณะนี้ สลิปถูกเก็บไว้แล้วและสามารถกดตรวจรูปเดิมได้โดยไม่ต้องแนบซ้ำ
     </div>
   <% } else if (!request.slipPath && automaticSlipCheck) { %>
     <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
@@ -47,20 +47,6 @@
           <div class="text-2xl mb-2">🧧</div>
           <div class="font-semibold text-emerald-300">รับเงินจากซองของขวัญเรียบร้อยแล้ว</div>
           <p class="text-xs text-[var(--text-3)] mt-1">ยอดเงินถูกเพิ่มเข้ากระเป๋าในเว็บไซต์อัตโนมัติ</p>
-        </div>
-      <% } else if (request.method === 'promptpay' && (payment.promptpayQrImage || qrDataUrl)) { %>
-        <div class="bg-white rounded-lg p-4 flex flex-col items-center mb-3">
-          <img src="<%= payment.promptpayQrImage || qrDataUrl %>" class="w-56 h-56 object-contain" alt="พร้อมเพย์ QR" />
-          <p class="text-gray-600 text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
-        </div>
-        <div class="text-sm space-y-1">
-          <div class="flex justify-between"><span class="text-[var(--text-3)]">พร้อมเพย์</span><span class="font-mono"><%= payment.promptpayId %></span></div>
-          <div class="flex justify-between"><span class="text-[var(--text-3)]">ชื่อบัญชี</span><span><%= payment.promptpayName %></span></div>
-        </div>
-      <% } else if (request.method === 'promptpay') { %>
-        <div class="text-sm space-y-1">
-          <div class="flex justify-between"><span class="text-[var(--text-3)]">พร้อมเพย์</span><span class="font-mono"><%= payment.promptpayId %></span></div>
-          <div class="flex justify-between"><span class="text-[var(--text-3)]">ชื่อบัญชี</span><span><%= payment.promptpayName %></span></div>
         </div>
       <% } else { %>
         <% if (payment.bankQrImage) { %>
@@ -100,7 +86,7 @@
           <% if (request.slipCheck && request.slipCheck.checked && !request.slipCheck.verified) { %>
             <% if (request.slipCheck.quotaExhausted) { %>
               <p class="text-sm font-semibold text-amber-300 mt-2">⚠️ โควตาตรวจสลิปหมดแล้ว — ระบบยังไม่สามารถเติมเงินอัตโนมัติได้ กรุณาแจ้งแอดมินให้เติมโควตาหรือตรวจสอบยอดด้วยตนเอง</p>
-            <% } else if (request.slipCheck.rateLimited || request.slipCheck.quotaMismatch || request.slipCheck.retryable || request.slipCheck.providerCode === 'verify_failed' || (request.slipCheck.provider === 'easyslip' && !request.slipCheck.checked && !request.slipCheck.verified && (!request.slipCheck.httpStatus || request.slipCheck.retryable))) { %>
+            <% } else if (request.slipCheck.rateLimited || request.slipCheck.quotaMismatch || request.slipCheck.retryable || request.slipCheck.providerCode === 'verify_failed') { %>
               <div class="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
                 <p class="text-xs text-amber-300"><%= request.slipCheck.message %>. สลิปถูกเก็บไว้แล้ว กดตรวจรูปเดิมซ้ำได้โดยไม่ต้องแนบใหม่</p>
                 <form action="/account/topup/<%= request.id %>/retry-slip" method="post" class="mt-2">

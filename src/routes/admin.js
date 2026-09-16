@@ -1573,18 +1573,14 @@ router.post('/slip-verification/test', async (req, res) => {
 
 router.post('/topups/payment-settings', (req, res) => {
   qrImageUpload.fields([
-    { name: 'promptpayQrImage', maxCount: 1 },
     { name: 'bankQrImage', maxCount: 1 },
   ])(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูป QR ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/topups');
     }
-    const {
-      promptpayId, promptpayName, bankAccountNumber, bankAccountName,
-    } = req.body;
+    const { bankAccountNumber, bankAccountName } = req.body;
     const bankCode = (req.body.bankCode || '').trim();
-    const promptpayNameEn = (req.body.promptpayNameEn || '').trim();
     const bankAccountNameEn = (req.body.bankAccountNameEn || '').trim();
     const bankAccountType = req.body.bankAccountType === 'JURISTIC' ? 'JURISTIC' : 'NATURAL';
 
@@ -1609,7 +1605,6 @@ router.post('/topups/payment-settings', (req, res) => {
     }
     receiverProfiles.save(payment, currentlySelectedProvider, receiverProfiles.snapshot(payment));
     const selectedProfile = receiverProfiles.view(payment, slipProvider);
-    payment.promptpayQrImage = selectedProfile.promptpayQrImage;
     payment.bankQrImage = selectedProfile.bankQrImage;
     if (!['none', 'slipok', 'slipcheck', 'rdcw', 'slip2go'].includes(slipProvider)) {
       req.flash('error', 'ผู้ให้บริการตรวจสลิปนี้ยังไม่พร้อมใช้งาน');
@@ -1628,7 +1623,7 @@ router.post('/topups/payment-settings', (req, res) => {
     const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
 
     Object.assign(payment, {
-      promptpayId, promptpayName, promptpayNameEn, bankAccountNumber, bankAccountName, bankAccountNameEn,
+      bankAccountNumber, bankAccountName, bankAccountNameEn,
       bankAccountType,
       bankName: primaryBank ? primaryBank.nameTh : payment.bankName,
       truemoneyPhone, truemoneyEnabled,
@@ -1645,18 +1640,11 @@ router.post('/topups/payment-settings', (req, res) => {
     // comparing against the previous account name/number after a bank change.
     receiverProfiles.save(payment, slipProvider, receiverProfiles.snapshot(payment));
 
-    if (req.body.removePromptpayQrImage === 'on') store.data.settings.payment.promptpayQrImage = null;
     if (req.body.removeBankQrImage === 'on') store.data.settings.payment.bankQrImage = null;
     try {
-      const promptpayFile = req.files && req.files.promptpayQrImage && req.files.promptpayQrImage[0];
       const bankFile = req.files && req.files.bankQrImage && req.files.bankQrImage[0];
-      const directPromptpay = firstDirectUpload(req.body, 'promptpayQrImage');
       const directBank = firstDirectUpload(req.body, 'bankQrImage');
-      if (directPromptpay) store.data.settings.payment.promptpayQrImage = directPromptpay;
       if (directBank) store.data.settings.payment.bankQrImage = directBank;
-      if (promptpayFile) {
-        store.data.settings.payment.promptpayQrImage = await store.saveMedia(promptpayFile.buffer, promptpayFile.originalname, promptpayFile.mimetype);
-      }
       if (bankFile) {
         store.data.settings.payment.bankQrImage = await store.saveMedia(bankFile.buffer, bankFile.originalname, bankFile.mimetype);
       }

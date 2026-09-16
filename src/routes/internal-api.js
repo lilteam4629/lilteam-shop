@@ -232,8 +232,7 @@ router.get('/wallet/topups/:id', (req, res) => {
   if (!request) return res.status(404).json({ error: 'ไม่พบคำขอเติมเงิน' });
   const payment = store.data.settings.payment || {};
   res.json({ ok: true, request, payment: {
-    promptpayId: payment.promptpayId || '', promptpayName: payment.promptpayName || '',
-    promptpayQrImage: payment.promptpayQrImage || null, bankName: payment.bankName || '',
+    bankName: payment.bankName || '',
     bankAccountNumber: payment.bankAccountNumber || '', bankAccountName: payment.bankAccountName || '',
     bankQrImage: payment.bankQrImage || null,
   }, automaticSlipCheck: payment.slipProvider !== 'none' });

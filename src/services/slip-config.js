@@ -8,9 +8,15 @@ function isSharedMode(payment = {}, isTenant = false) {
   return Boolean(isTenant && (payment.slipApiMode || 'shared') === 'shared');
 }
 
+function withoutPromptPayFields(payment = {}) {
+  const result = { ...payment };
+  for (const field of ['promptpayId', 'promptpayName', 'promptpayNameEn', 'promptpayQrImage', 'promptpayBankCode']) delete result[field];
+  return result;
+}
+
 function effectiveSlipConfig(payment = {}, platformPayment = {}, isTenant = false) {
-  if (!isSharedMode(payment, isTenant)) return { ...payment, tenantOwnedSlipApi: Boolean(isTenant) };
-  const effective = { ...payment, slipProvider: platformPayment.slipProvider || 'slipok', tenantOwnedSlipApi: false };
+  if (!isSharedMode(payment, isTenant)) return { ...withoutPromptPayFields(payment), tenantOwnedSlipApi: Boolean(isTenant) };
+  const effective = { ...withoutPromptPayFields(payment), slipProvider: platformPayment.slipProvider || 'slipok', tenantOwnedSlipApi: false };
   for (const field of CREDENTIAL_FIELDS) effective[field] = platformPayment[field];
   return effective;
 }

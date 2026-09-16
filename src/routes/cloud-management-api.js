@@ -40,8 +40,8 @@ router.get('/legacy-cloud-eligibility', (req,res)=>{
 router.get('/legacy-truemoney-config',(req,res)=>{const p=store.data.settings.payment||{};res.json({ok:true,truemoneyEnabled:p.truemoneyEnabled===true,truemoneyPhone:String(p.truemoneyPhone||'')})});
 router.get('/legacy-payment-config', (req, res) => {
   const p = store.data.settings.payment || {};
-  const fields = ['slipProvider','slipokBranchId','slipokApiKey','slipcheckApiKey','slipcheckEndpoint','rdcwClientId','rdcwClientSecret','rdcwEndpoint','slip2goApiKey','slip2goEndpoint','promptpayId','promptpayName',
-    'promptpayQrImage','bankName','bankAccountNumber','bankAccountName','bankQrImage','truemoneyPhone'];
+  const fields = ['slipProvider','slipokBranchId','slipokApiKey','slipcheckApiKey','slipcheckEndpoint','rdcwClientId','rdcwClientSecret','rdcwEndpoint','slip2goApiKey','slip2goEndpoint',
+    'bankName','bankAccountNumber','bankAccountName','bankQrImage','truemoneyPhone'];
   const payment = Object.fromEntries(fields.map(field => [field, p[field] || '']));
   payment.truemoneyEnabled = p.truemoneyEnabled !== false && Boolean(payment.truemoneyPhone);
   res.json({ ok: true, payment });
@@ -131,12 +131,10 @@ router.post('/admin/discord/post-role-panel', async (req, res) => {
 });
 router.get('/payment-info', (req, res) => {
   const p = store.data.settings.payment || {};
-  res.json({ ok: true, payment: { promptpayId: p.promptpayId || '', promptpayName: p.promptpayName || '',
-    promptpayQrImage: p.promptpayQrImage || null, bankName: p.bankName || '', bankAccount: p.bankAccountNumber || '',
+  res.json({ ok: true, payment: { bankName: p.bankName || '', bankAccount: p.bankAccountNumber || '',
     bankAccountNumber: p.bankAccountNumber || '', bankAccountName: p.bankAccountName || '', bankQrImage: p.bankQrImage || null,
     truemoneyEnabled: p.truemoneyEnabled !== false && Boolean(p.truemoneyPhone),
-    truemoneyPhone: p.truemoneyEnabled !== false && Boolean(p.truemoneyPhone) ? 'configured' : '',
-    promptpayEnabled: p.slipProvider !== 'slipcheck' && p.slipProvider !== 'rdcw' && p.slipProvider !== 'slip2go' } });
+    truemoneyPhone: p.truemoneyEnabled !== false && Boolean(p.truemoneyPhone) ? 'configured' : '' } });
 });
 router.get('/sales', (req, res) => {
   if (!activeUser(req.query.userId)) return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบ' });

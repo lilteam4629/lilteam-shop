@@ -47,7 +47,7 @@ function receiverMatches({ actualNames = [], actualNumbers = [], expectedNames =
   }));
   // OCR commonly confuses one Thai character in a first or last name.
   // This deliberately cannot pass on a name alone: it is only combined
-  // with a matching masked account/PromptPay suffix below.
+  // with a matching masked bank-account suffix below.
   const nearNameMatched = actualNameValues.some(actual => expectedNameValues.some(expected => {
     const left = nameTokens(actual), right = nameTokens(expected);
     if (!left[0] || !right[0] || left[0].length < 3 || right[0].length < 3) return false;
