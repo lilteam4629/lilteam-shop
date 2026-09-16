@@ -14,6 +14,27 @@ const quotaIsZero = account => account?.ok
   && Number.isFinite(Number(account.quota.remaining))
   && Number(account.quota.remaining) <= 0;
 
+function providerCode(body = {}) {
+  const values = [
+    body.code, body.errorCode, body.error_code, body.reason,
+    body.error && typeof body.error === 'object' ? body.error.code : body.error,
+    body.data?.code, body.data?.errorCode, body.data?.error_code, body.data?.reason,
+  ];
+  const value = values.find(item => item !== undefined && item !== null && typeof item !== 'object');
+  return value === undefined ? null : String(value);
+}
+
+function providerMessage(body = {}) {
+  const values = [
+    body.message, body.detail,
+    body.error && typeof body.error === 'object' ? body.error.message : null,
+    body.data?.message, body.data?.detail,
+    body.data?.error && typeof body.data.error === 'object' ? body.data.error.message : body.data?.error,
+  ];
+  const value = values.find(item => typeof item === 'string' && item.trim());
+  return value ? value.trim() : null;
+}
+
 function resolveApiKeys(primary, values, maxKeys = 5) {
   const raw = [];
   if (primary) raw.push(primary);
@@ -100,26 +121,37 @@ async function getPoolAccountInfo(apiKeys, endpoint = DEFAULT_ENDPOINT, options 
   };
 }
 
-async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKey) {
+async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKey, transport = 'multipart') {
   if (!apiKey) return { checked: false, verified: false, message: 'ยังไม่ได้ตั้งค่า SlipCheck API Key', raw: null };
   try {
-    const form = new FormData();
-    form.append('file', fileBuffer, {
-      filename: fileOptions.filename || 'slip.jpg',
-      contentType: fileOptions.contentType || 'image/jpeg',
-    });
-    const response = await axios.post(`${cleanEndpoint(credentials.endpoint)}/slip/verify`, form, {
-      headers: { ...form.getHeaders(), 'x-api-key': apiKey, Accept: 'application/json' }, timeout: 15000,
+    let payload;
+    let headers = { 'x-api-key': apiKey, Accept: 'application/json' };
+    if (transport === 'json') {
+      const contentType = /^image\//.test(fileOptions.contentType || '') ? fileOptions.contentType : 'image/jpeg';
+      payload = { image: `data:${contentType};base64,${fileBuffer.toString('base64')}` };
+      headers = { ...headers, 'Content-Type': 'application/json' };
+    } else {
+      const form = new FormData();
+      form.append('file', fileBuffer, {
+        filename: fileOptions.filename || 'slip.jpg',
+        contentType: fileOptions.contentType || 'image/jpeg',
+      });
+      payload = form;
+      headers = { ...headers, ...form.getHeaders() };
+    }
+    const response = await axios.post(`${cleanEndpoint(credentials.endpoint)}/slip/verify`, payload, {
+      headers, timeout: 15000,
     });
     const body = response.data || {};
     const data = body.data || {};
     if (!body.success) {
       const quotaExhausted = isQuotaExhausted(body);
       const keyUnavailable = isKeyUnavailable(body);
+      const code = providerCode(body);
       return {
         checked: true, verified: false, quotaExhausted, keyUnavailable,
-        message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (body.message || 'SlipCheck ไม่สามารถยืนยันสลิปนี้ได้'),
-        providerCode: body.code || body.errorCode || body.error_code || body.reason || null,
+        message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (providerMessage(body) || 'SlipCheck ไม่สามารถยืนยันสลิปนี้ได้'),
+        providerCode: code,
         httpStatus: null,
         raw: body,
       };
@@ -154,8 +186,8 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
     const keyUnavailable = isKeyUnavailable(body, status);
     return {
       checked: [401, 403, 422, 429].includes(status) || quotaExhausted, verified: false, quotaExhausted, keyUnavailable,
-      message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (body?.message || error.message || 'เชื่อมต่อ SlipCheck ไม่สำเร็จ'), raw: body || null,
-      providerCode: body?.code || body?.errorCode || body?.error_code || body?.reason || null,
+      message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (providerMessage(body) || error.message || 'เชื่อมต่อ SlipCheck ไม่สำเร็จ'), raw: body || null,
+      providerCode: providerCode(body),
       httpStatus: Number(status) || null,
     };
   }
@@ -170,6 +202,19 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
   for (let offset = 0; offset < apiKeys.length; offset += 1) {
     const index = (start + offset) % apiKeys.length;
     let result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
+    if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
+      // SlipCheck officially accepts both multipart and JSON base64. Some
+      // otherwise valid images fail in the multipart path; retry the exact
+      // same image once through the alternate transport and the same key.
+      result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index], 'json');
+      if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
+        result = {
+          ...result,
+          retryable: true,
+          message: 'SlipCheck ยังประมวลผลรูปสลิปไม่สำเร็จ ระบบเก็บรูปไว้แล้ว กดตรวจใหม่ได้โดยไม่ต้องอัปโหลดซ้ำ',
+        };
+      }
+    }
     lastResult = result;
 
     if (result.quotaExhausted) {

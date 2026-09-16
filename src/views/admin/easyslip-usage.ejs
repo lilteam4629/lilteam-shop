@@ -1,6 +1,6 @@
 <!-- Slip Verification API Provider Hub Header -->
 <% const activeProvider = effectiveProvider || payment.slipProvider || 'auto'; %>
-<p class="mb-4 rounded-xl border p-4"><%= isMainSite ? 'เว็บหลักใช้ API ของคุณเอง' : ((payment.slipApiMode || 'shared') === 'shared' ? 'ร้านนี้กำลังใช้ระบบตรวจสลิปกลางของเว็บ' : 'ร้านนี้ใช้ API และโควตาของตัวเอง') %></p>
+<p class="mb-4 rounded-xl border p-4"><%= isMainSite ? 'เว็บหลักใช้ API ของคุณเอง' : ((payment.slipApiMode || 'shared') === 'shared' ? 'ร้านนี้ใช้ระบบตรวจสลิปกลางของเว็บ รวมพูล SlipCheck ทุกคีย์ให้อัตโนมัติและไม่ต้องกรอกคีย์ในร้านเช่า' : 'ร้านนี้ใช้ API และโควตาของตัวเอง') %></p>
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
     <div class="flex items-center gap-2">
@@ -53,7 +53,7 @@
         <% } else if (activeProvider === 'easyslip') { %>
           ระบบตรวจสลิปอัตโนมัติผ่าน EasySlip Platform
         <% } else if (activeProvider === 'slipcheck') { %>
-          ระบบตรวจสลิปอัตโนมัติผ่าน SlipCheck โดยใช้ API Key ของร้านนี้
+          <%= usesSharedProvider ? 'ระบบตรวจสลิปอัตโนมัติผ่านพูล SlipCheck ของเว็บหลัก ใช้ทีละคีย์จนโควตาหมดแล้วจึงเปลี่ยนคีย์' : 'ระบบตรวจสลิปอัตโนมัติผ่าน SlipCheck โดยใช้ API Key ของร้านนี้' %>
         <% } else if (activeProvider === 'rdcw') { %>
           ระบบตรวจสลิปอัตโนมัติผ่าน SlipRDCW โดยใช้ Client ID และ Secret ของร้านนี้
         <% } else if (activeProvider === 'slip2go') { %>
@@ -212,7 +212,7 @@
         <label class="cursor-pointer rounded-xl border-2 p-4 <%= (payment.slipApiMode || 'shared') === 'shared' ? 'border-emerald-500 bg-emerald-500/10' : 'border-[var(--border)]' %>">
           <input type="radio" name="slipApiMode" value="shared" <%= (payment.slipApiMode || 'shared') === 'shared' ? 'checked' : '' %> onchange="updateSlipMode()">
           <span class="font-bold text-sm ml-2">ใช้ระบบกลางของเว็บ</span>
-          <p class="text-[11px] text-[var(--text-4)] mt-2">ใช้ค่ายและโควตาที่เจ้าของเว็บกำหนด ไม่ต้องกรอกคีย์</p>
+          <p class="text-[11px] text-[var(--text-4)] mt-2">ใช้ค่ายและพูลคีย์ของเว็บหลักอัตโนมัติ ไม่ต้องกรอกคีย์ในร้านเช่า</p>
         </label>
         <label class="cursor-pointer rounded-xl border-2 p-4 <%= payment.slipApiMode === 'own' ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)]' %>">
           <input type="radio" name="slipApiMode" value="own" <%= payment.slipApiMode === 'own' ? 'checked' : '' %> onchange="updateSlipMode()">

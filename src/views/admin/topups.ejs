@@ -141,10 +141,10 @@
                     เวลาแจ้ง: <%= new Date(r.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
                   </div>
                   <% if (r.slipCheck && r.slipCheck.message) { %>
-                    <div class="inline-block <%= (r.slipCheck.quotaExhausted || r.slipCheck.rateLimited || r.slipCheck.quotaMismatch) ? 'bg-amber-500/15 border-amber-500/50 text-amber-300' : 'bg-[var(--input)] border-[var(--border-light)] text-[var(--text-3)]' %> border text-[11px] px-2.5 py-1 rounded-lg mt-1">
+                    <div class="inline-block <%= (r.slipCheck.quotaExhausted || r.slipCheck.rateLimited || r.slipCheck.quotaMismatch || r.slipCheck.retryable) ? 'bg-amber-500/15 border-amber-500/50 text-amber-300' : 'bg-[var(--input)] border-[var(--border-light)] text-[var(--text-3)]' %> border text-[11px] px-2.5 py-1 rounded-lg mt-1">
                       <%= r.slipCheck.quotaExhausted ? '⚠️ โควตาตรวจสลิปหมดแล้ว: ' : r.slipCheck.quotaMismatch ? '⚠️ สถานะโควตาจาก SlipCheck ไม่ตรงกัน: ' : r.slipCheck.rateLimited ? '⏳ SlipCheck ยังไม่พร้อม: ' : '🤖 ผลตรวจอัตโนมัติ: ' %><%= r.slipCheck.message %><% if (r.slipCheck.providerCode || r.slipCheck.httpStatus) { %> <span class="opacity-70">(<%= r.slipCheck.providerCode || r.slipCheck.httpStatus %>)</span><% } %>
                     </div>
-                    <% if ((r.slipCheck.quotaExhausted || r.slipCheck.rateLimited || r.slipCheck.quotaMismatch) && r.slipStorageId) { %>
+                    <% if ((r.slipCheck.quotaExhausted || r.slipCheck.rateLimited || r.slipCheck.quotaMismatch || r.slipCheck.retryable) && r.slipStorageId) { %>
                       <form action="/admin/topups/<%= r.id %>/retry-slip" method="post" class="inline-block ml-1">
                         <button type="submit" class="border border-amber-400/60 text-amber-300 hover:bg-amber-500/15 rounded-lg px-2.5 py-1 text-[11px] font-bold">↻ ตรวจใหม่ด้วยคีย์ปัจจุบัน</button>
                       </form>

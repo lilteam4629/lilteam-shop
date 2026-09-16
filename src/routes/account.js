@@ -9,7 +9,7 @@ const rdcwSlip = require('../services/rdcw-slip');
 const slip2go = require('../services/slip2go');
 const easyslip = require('../services/easyslip');
 const promptpay = require('../services/promptpay');
-const { effectiveSlipConfig } = require('../services/slip-config');
+const { effectiveSlipConfig, slipcheckCredentials } = require('../services/slip-config');
 const { parseSlipDate } = require('../services/slip-fields');
 const receiverProfiles = require('../services/receiver-profiles');
 const webhook = require('../services/webhook');
@@ -343,10 +343,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     } else if (selectedProvider === 'slipcheck') {
       provider = 'slipcheck';
       result = await slipcheck.verifySlip(fileBuffer, request.amount, fileOptions, {
-        apiKey: effective.slipcheckApiKey,
-        apiKeys: store.isTenantContext() ? undefined : effective.slipcheckApiKeys,
-        independentQuota: !store.isTenantContext() && effective.slipcheckIndependentQuota,
-        endpoint: effective.slipcheckEndpoint,
+        ...slipcheckCredentials(effective),
         ...receiverCredentials(receiverPayment, request.method, payment),
       });
     } else if (selectedProvider === 'rdcw') {
@@ -408,6 +405,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         quotaExhausted: Boolean(result.quotaExhausted),
         rateLimited: Boolean(result.rateLimited),
         quotaMismatch: Boolean(result.quotaMismatch),
+        retryable: Boolean(result.retryable),
         providerCode: result.providerCode || null,
         httpStatus: result.httpStatus || null,
         message: result.message,

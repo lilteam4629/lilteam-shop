@@ -15,4 +15,14 @@ function effectiveSlipConfig(payment = {}, platformPayment = {}, isTenant = fals
   return effective;
 }
 
-module.exports = { effectiveSlipConfig, isSharedMode };
+function slipcheckCredentials(effective = {}) {
+  const useSharedPool = !effective.tenantOwnedSlipApi;
+  return {
+    apiKey: effective.slipcheckApiKey,
+    apiKeys: useSharedPool ? effective.slipcheckApiKeys : undefined,
+    independentQuota: Boolean(useSharedPool && effective.slipcheckIndependentQuota),
+    endpoint: effective.slipcheckEndpoint,
+  };
+}
+
+module.exports = { effectiveSlipConfig, isSharedMode, slipcheckCredentials };
