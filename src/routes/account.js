@@ -359,10 +359,49 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       });
     } else if (selectedProvider === 'slipcheck') {
       provider = 'slipcheck';
+      const expectedReceiver = receiverCredentials(receiverPayment, request.method, payment);
       result = await slipcheck.verifySlip(fileBuffer, request.amount, fileOptions, {
         ...slipcheckCredentials(effective),
-        ...receiverCredentials(receiverPayment, request.method, payment),
+        ...expectedReceiver,
       });
+      if (result.retryable) {
+        const fallbackChecks = [];
+        if (easyslip.isConfigured(easyKey) && expectedReceiver.expectedReceiverNumbers.length) {
+          fallbackChecks.push({
+            provider: 'easyslip-fallback',
+            run: () => easyslip.verifySlip(fileBuffer, request.amount, fileOptions, expectedReceiver.expectedReceiverNumbers, easyKey),
+          });
+        }
+        if (effective.slip2goApiKey) {
+          fallbackChecks.push({
+            provider: 'slip2go-fallback',
+            run: () => slip2go.verifySlip(fileBuffer, request.amount, fileOptions, {
+              apiKey: effective.slip2goApiKey,
+              endpoint: effective.slip2goEndpoint,
+              ...expectedReceiver,
+            }),
+          });
+        }
+        if (effective.rdcwClientId && effective.rdcwClientSecret) {
+          fallbackChecks.push({
+            provider: 'rdcw-fallback',
+            run: () => rdcwSlip.verifySlip(fileBuffer, request.amount, fileOptions, {
+              clientId: effective.rdcwClientId,
+              clientSecret: effective.rdcwClientSecret,
+              endpoint: effective.rdcwEndpoint,
+              ...expectedReceiver,
+            }),
+          });
+        }
+        for (const fallback of fallbackChecks) {
+          const fallbackResult = await fallback.run();
+          if (fallbackResult.verified || /สลิปซ้ำ|เคยถูกใช้/.test(String(fallbackResult.message || ''))) {
+            result = fallbackResult;
+            provider = fallback.provider;
+            break;
+          }
+        }
+      }
     } else if (selectedProvider === 'rdcw') {
       provider = 'rdcw';
       result = await rdcwSlip.verifySlip(fileBuffer, request.amount, fileOptions, {
