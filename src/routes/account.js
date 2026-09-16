@@ -211,6 +211,20 @@ router.get('/topup/:id', async (req, res) => {
   const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
   if (!request) return res.redirect('/account/topup');
 
+  // Recover records created before automatic retries were introduced. Opening
+  // the detail page queues the saved image once; subsequent failures carry a
+  // retryAttempts value and are handled by the normal 5s/15s retry schedule.
+  const legacyVerifyFailure = request.status === 'pending'
+    && request.slipStorageId
+    && (request.slipCheck?.retryable || request.slipCheck?.providerCode === 'verify_failed')
+    && (Number(request.slipCheck?.retryAttempts) || 0) === 0
+    && !activeVerifications.has(request.id);
+  if (legacyVerifyFailure) {
+    const retryInTenant = store.bindTenantContext(retryTopupSlipVerification);
+    setImmediate(() => retryInTenant({ requestId: request.id, origin: `${req.protocol}://${req.get('host')}` })
+      .catch(error => console.error('[topup] legacy SlipCheck retry failed:', error.message)));
+  }
+
   const payment = store.data.settings.payment;
   let qrDataUrl = null;
   if (request.method === 'promptpay' && payment.promptpayId) {
