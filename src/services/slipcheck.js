@@ -8,6 +8,11 @@ const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
 const keyCursor = new Map();
 const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+const quotaIsZero = account => account?.ok
+  && account.quota?.remaining !== null
+  && account.quota?.remaining !== undefined
+  && Number.isFinite(Number(account.quota.remaining))
+  && Number(account.quota.remaining) <= 0;
 
 function resolveApiKeys(primary, values, maxKeys = 5) {
   const raw = [];
@@ -33,8 +38,11 @@ function isQuotaExhausted(errorOrBody, status) {
     body.message, body.error, body.detail,
     body.data && body.data.message, body.data && body.data.error,
   ].filter(value => value !== undefined && value !== null).map(value => String(value).toLowerCase());
+  // SlipCheck documents HTTP/code 429 as `quota_exceeded`. Do not reinterpret
+  // it as a temporary rate limit: doing so made the pool jump between valid
+  // keys even though their /me quota was still available.
   if (Number(status) === 429 || Number(body.code) === 429 || Number(body.errorCode) === 429 || Number(body.error_code) === 429) return true;
-  if (values.some(value => /quota|rate.?limit|too many|limit.?exceed|เครดิต|โควตา|จำกัดการใช้งาน/.test(value))) return true;
+  if (values.some(value => /quota.?exceed|quota.*(หมด|ครบ)|limit.?exceed|โควตา.*(หมด|ครบ)/.test(value))) return true;
   const quota = body.quota || (body.data && body.data.quota);
   if (quota && quota.remaining !== undefined && Number(quota.remaining) <= 0) return true;
   return false;
@@ -42,7 +50,7 @@ function isQuotaExhausted(errorOrBody, status) {
 
 function isKeyUnavailable(errorOrBody, status) {
   const body = errorOrBody && typeof errorOrBody === 'object' ? errorOrBody : {};
-  if ([401, 403, 429].includes(Number(status)) || [401, 403, 429].includes(Number(body.code))) return true;
+  if ([401, 403].includes(Number(status)) || [401, 403].includes(Number(body.code))) return true;
   const message = [body.message, body.error, body.detail, body.reason].filter(Boolean).join(' ').toLowerCase();
   return /invalid.*key|api.?key.*invalid|unauthori[sz]ed|forbidden|inactive|disabled|ปิดใช้งาน|คีย์.*ไม่ถูกต้อง/.test(message);
 }
@@ -111,6 +119,8 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
       return {
         checked: true, verified: false, quotaExhausted, keyUnavailable,
         message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (body.message || 'SlipCheck ไม่สามารถยืนยันสลิปนี้ได้'),
+        providerCode: body.code || body.errorCode || body.error_code || body.reason || null,
+        httpStatus: null,
         raw: body,
       };
     }
@@ -145,6 +155,8 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
     return {
       checked: [401, 403, 422, 429].includes(status) || quotaExhausted, verified: false, quotaExhausted, keyUnavailable,
       message: quotaExhausted ? 'โควตาตรวจสลิป SlipCheck หมดแล้ว กรุณาเติมโควตาหรือติดต่อผู้ดูแลระบบ' : (body?.message || error.message || 'เชื่อมต่อ SlipCheck ไม่สำเร็จ'), raw: body || null,
+      providerCode: body?.code || body?.errorCode || body?.error_code || body?.reason || null,
+      httpStatus: Number(status) || null,
     };
   }
 }
@@ -158,34 +170,42 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
   for (let offset = 0; offset < apiKeys.length; offset += 1) {
     const index = (start + offset) % apiKeys.length;
     let result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
-    if (result.quotaExhausted) {
-      const account = await getAccountInfo(apiKeys[index], credentials.endpoint);
-      if (account.ok && Number(account.quota?.remaining) > 0) {
-        // HTTP 429 can also mean a short rate limit. If /me confirms quota is
-        // still available, keep this key and retry instead of consuming the
-        // next configured account.
-        for (let attempt = 1; attempt <= 1 && result.quotaExhausted; attempt += 1) {
-          await wait(400);
-          result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
-        }
-        if (result.quotaExhausted) {
-          result = {
-            ...result,
-            quotaExhausted: false,
-            keyUnavailable: true,
-            rateLimited: true,
-            message: 'SlipCheck จำกัดความถี่ของคีย์นี้ชั่วคราว ระบบกำลังลองคีย์ถัดไป',
-          };
-        }
-      }
-    }
     lastResult = result;
-    if (result.quotaExhausted || result.keyUnavailable) {
-      keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
-      if (offset < apiKeys.length - 1) continue;
-      if (result.rateLimited) {
-        return { ...result, message: 'SlipCheck จำกัดความถี่ของทุกคีย์ชั่วคราว กรุณากดตรวจสลิปเดิมอีกครั้งในอีกสักครู่' };
+
+    if (result.quotaExhausted) {
+      const after = await getAccountInfo(apiKeys[index], credentials.endpoint);
+      if (quotaIsZero(after)) {
+        keyCursor.set(cursorKey, (index + 1) % apiKeys.length);
+        if (offset < apiKeys.length - 1) continue;
+        return result;
+      } else if (after.ok && Number(after.quota?.remaining) > 0) {
+        // A fresh /me response says this key is usable. Retry this same key
+        // once to recover from a stale/transient 429 without touching the
+        // next configured key or leaving the customer waiting for minutes.
+        await wait(500);
+        result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
+        if (!result.quotaExhausted) {
+          keyCursor.set(cursorKey, index);
+          return result;
+        }
       }
+      // Provider returned 429 while /me still says this exact key has quota.
+      // Keep the cursor on it; switching here violates configured key order
+      // and hides a provider inconsistency behind a misleading rate-limit UI.
+      keyCursor.set(cursorKey, index);
+      return {
+        ...result,
+        quotaExhausted: false,
+        quotaMismatch: true,
+        message: after.ok && Number(after.quota?.remaining) > 0
+          ? 'SlipCheck ตอบว่าโควตาหมด แต่คีย์ปัจจุบันยังมีโควตา ระบบยังคงใช้คีย์เดิม กรุณากดตรวจสลิปเดิมอีกครั้ง'
+          : 'SlipCheck ตอบว่าโควตาหมด แต่ยังยืนยันไม่ได้ว่าโควตาคีย์ปัจจุบันเหลือ 0 ระบบจึงยังไม่ข้ามคีย์ กรุณากดตรวจสลิปเดิมอีกครั้ง',
+      };
+    }
+    if (result.keyUnavailable) {
+      // A bad/disabled key is a configuration error, not permission to skip
+      // the configured order. Keep it selected so an operator can fix it.
+      keyCursor.set(cursorKey, index);
       return result;
     }
     // Keep using the same working key. Advance only after that key runs out
