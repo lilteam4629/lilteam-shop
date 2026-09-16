@@ -150,7 +150,7 @@ async function verifySlipCheckProbesNextAccountOnProcessingFailure() {
     });
     assert.equal(result.verified, true, 'another configured SlipCheck account must recover a key-specific verify_failed response');
     assert.equal(result.fallbackKeyUsed, true);
-    assert.deepEqual(usedKeys, ['key-one', 'key-two']);
+    assert.deepEqual(usedKeys, ['key-one', 'key-one', 'key-two']);
   } finally {
     axios.post = originalPost;
     delete require.cache[require.resolve('../src/services/slipcheck')];

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const FormData = require('form-data');
+const sharp = require('sharp');
 const { receiverMatches, textValues, extractReceiverEvidence } = require('./receiver-match');
 const { numberValue, officialEndpoint } = require('./slip-fields');
 
@@ -7,6 +8,20 @@ const DEFAULT_ENDPOINT = 'https://mxrslip.lovable.app/api/public/v1';
 
 const cleanEndpoint = value => officialEndpoint(value, DEFAULT_ENDPOINT, 'mxrslip.lovable.app');
 const keyCursor = new Map();
+
+async function normalizeSlipImage(fileBuffer) {
+  try {
+    return await sharp(fileBuffer, { failOn: 'none' })
+      .rotate()
+      .flatten({ background: '#ffffff' })
+      .resize({ width: 2000, height: 2000, fit: 'inside', withoutEnlargement: true })
+      .sharpen()
+      .jpeg({ quality: 92, mozjpeg: true })
+      .toBuffer();
+  } catch (_) {
+    return fileBuffer;
+  }
+}
 
 function providerCode(body = {}) {
   const values = [
@@ -187,6 +202,26 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     const index = (start + offset) % apiKeys.length;
     const result = await verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, credentials, apiKeys[index]);
     lastResult = result;
+
+    // SlipCheck can reject an otherwise valid mobile screenshot when its
+    // original orientation/encoding is difficult for the OCR service. Retry
+    // the same key with a normalized JPEG before probing another account.
+    if (String(result.providerCode || '').toLowerCase() === 'verify_failed') {
+      const normalizedImage = await normalizeSlipImage(fileBuffer);
+      const normalizedResult = await verifySlipWithKey(
+        normalizedImage,
+        expectedAmount,
+        { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' },
+        credentials,
+        apiKeys[index],
+      );
+      if (normalizedResult.verified || (!normalizedResult.quotaExhausted && !normalizedResult.keyUnavailable
+        && String(normalizedResult.providerCode || '').toLowerCase() !== 'verify_failed')) {
+        keyCursor.set(cursorKey, index);
+        return normalizedResult;
+      }
+      lastResult = normalizedResult;
+    }
 
     if (String(result.providerCode || '').toLowerCase() === 'verify_failed' && apiKeys.length > 1) {
       // A key can pass /me yet its account-side verifier can still return
