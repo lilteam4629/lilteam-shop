@@ -135,9 +135,10 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
   try {
     let payload;
     let headers = { 'x-api-key': apiKey, Accept: 'application/json' };
-    if (transport === 'json') {
+    if (transport === 'json' || transport === 'json-raw') {
       const contentType = /^image\//.test(fileOptions.contentType || '') ? fileOptions.contentType : 'image/jpeg';
-      payload = { image: `data:${contentType};base64,${fileBuffer.toString('base64')}` };
+      const encoded = fileBuffer.toString('base64');
+      payload = { image: transport === 'json-raw' ? encoded : `data:${contentType};base64,${encoded}` };
       headers = { ...headers, 'Content-Type': 'application/json' };
     } else {
       const form = new FormData();
@@ -246,6 +247,21 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
         return jsonResult;
       }
       lastResult = jsonResult;
+
+      const rawJsonResult = await verifySlipWithKey(
+        normalizedImage,
+        expectedAmount,
+        { ...fileOptions, contentType: 'image/jpeg', filename: 'slip-normalized.jpg' },
+        credentials,
+        apiKeys[index],
+        'json-raw',
+      );
+      if (rawJsonResult.verified || (!rawJsonResult.quotaExhausted && !rawJsonResult.keyUnavailable
+        && String(rawJsonResult.providerCode || '').toLowerCase() !== 'verify_failed')) {
+        keyCursor.set(cursorKey, index);
+        return rawJsonResult;
+      }
+      lastResult = rawJsonResult;
     }
 
     if (String(result.providerCode || '').toLowerCase() === 'verify_failed' && apiKeys.length > 1) {
