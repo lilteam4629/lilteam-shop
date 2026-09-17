@@ -157,6 +157,17 @@ async function main() {
     assert.equal(duplicateResult.verified, false);
     assert.equal(duplicateResult.providerCode, 'SLIP_ALREADY_USED');
   });
+  const unauthorizedService = load('src/services/xepht-slip.js', {
+    axios: { post: async () => { const error = new Error('unauthorized'); error.response = { status: 401, data: { code: 'UNAUTHORIZED', message: 'bad key' } }; throw error; } },
+    'form-data': XephtFormData,
+    './receiver-match': require('../src/services/receiver-match'), './slip-fields': require('../src/services/slip-fields'),
+  });
+  const unauthorizedResult = await unauthorizedService.verifySlip(Buffer.from('fixture'), 10);
+  check('Slip XEPHT authentication errors are actionable instead of endlessly pending', () => {
+    assert.equal(unauthorizedResult.checked, true);
+    assert.equal(unauthorizedResult.retryable, false);
+    assert.equal(unauthorizedResult.providerCode, 'UNAUTHORIZED');
+  });
   const { receiverMatches } = require('../src/services/receiver-match');
   check('Receiver matching accepts Thai titles but rejects unsafe four-digit-only account matches', () => {
     assert.equal(receiverMatches({ actualNames: ['นาย อุรพงค์ สงทิม'], expectedNames: ['อุรพงค์ สงทิม'] }).matched, true);

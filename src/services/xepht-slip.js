@@ -4,7 +4,10 @@ const { receiverMatches, textValues, extractReceiverEvidence } = require('./rece
 const { numberValue, officialEndpoint } = require('./slip-fields');
 
 const DEFAULT_ENDPOINT = 'https://slip.xepht.com/api/v1';
-const RETRYABLE_CODES = new Set(['VERIFY_UNAVAILABLE', 'RATE_LIMITED', 'INTERNAL_ERROR', 'UNAUTHORIZED']);
+// Authentication/configuration failures are actionable and should surface as
+// a failed verification; only provider availability/rate-limit errors stay
+// pending for the background verifier to retry.
+const RETRYABLE_CODES = new Set(['VERIFY_UNAVAILABLE', 'RATE_LIMITED', 'INTERNAL_ERROR']);
 
 function providerMessage(body, fallback = 'Slip XEPHT ไม่สามารถยืนยันสลิปนี้ได้') {
   return String(body?.message || body?.error || fallback);
@@ -101,7 +104,7 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
     const body = error.response?.data || {};
     const status = Number(error.response?.status) || null;
     const code = String(body.code || '').trim().toUpperCase();
-    const retryable = RETRYABLE_CODES.has(code) || [401, 429, 500, 503].includes(status);
+    const retryable = RETRYABLE_CODES.has(code) || [429, 500, 503].includes(status);
     return {
       checked: !retryable && Boolean(body.code),
       verified: false,
