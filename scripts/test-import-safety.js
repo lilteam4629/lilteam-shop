@@ -392,9 +392,12 @@ async function main() {
   });
   check('Automatic slip page shows a five-minute per-second countdown', () => {
     const topupDetail = fs.readFileSync(path.join(root, 'src/views/shop/topup-detail.ejs'), 'utf8');
+    const accountSource = fs.readFileSync(path.join(root, 'src/routes/account.js'), 'utf8');
     assert.match(topupDetail, /id="slipCountdown"/);
     assert.match(topupDetail, /5 \* 60 \* 1000/);
     assert.match(topupDetail, /เหลือ ' \+ remaining \+ ' วินาที/);
+    assert.match(accountSource, /const TOPUP_SLIP_WINDOW_MS = 5 \* 60 \* 1000/);
+    assert.match(accountSource, /หมดเวลาแนบสลิปแล้ว/);
   });
   let js = 0, templates = 0;
   function scan(dir) { for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

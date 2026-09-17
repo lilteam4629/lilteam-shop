@@ -73,7 +73,7 @@
   <% if (request.status === 'pending' || request.status === 'verifying') { %>
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
       <h2 class="font-semibold mb-3">แนบสลิปการโอนเงิน</h2>
-      <% if (automaticSlipCheck && !request.slipPath) { %>
+      <% if (!request.slipPath) { %>
         <div id="slipDeadline" data-deadline="<%= new Date(request.createdAt).getTime() + (5 * 60 * 1000) %>" class="mb-4 rounded-xl border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-center">
           <p class="text-xs text-[var(--text-3)]">กรุณาโอนและแนบสลิปภายใน</p>
           <p id="slipCountdown" class="mt-1 font-mono text-3xl font-bold tabular-nums text-amber-400">05:00</p>
@@ -127,6 +127,7 @@
     var box = document.getElementById('slipDeadline');
     var countdown = document.getElementById('slipCountdown');
     var hint = document.getElementById('slipDeadlineHint');
+    var uploadForm = document.getElementById('slipUploadForm');
     if (!box || !countdown) return;
     var deadline = Number(box.dataset.deadline);
     function updateCountdown() {
@@ -139,6 +140,7 @@
         box.classList.add('border-[var(--coral)]/50', 'bg-[var(--coral)]/10');
         countdown.classList.remove('text-amber-400');
         countdown.classList.add('text-[var(--coral)]');
+        if (uploadForm) uploadForm.querySelectorAll('input, button').forEach(function (field) { field.disabled = true; });
         if (hint) hint.textContent = 'หมดเวลาแล้ว กรุณากลับไปสร้างคำขอเติมเงินใหม่และใช้สลิปใหม่';
         return false;
       }
