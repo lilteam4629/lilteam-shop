@@ -390,12 +390,10 @@ async function main() {
     assert.match(providerPage, /selectOwnProvider\([^\n]+, false\);/);
     assert.doesNotMatch(providerPage, /EasySlip|easyslip|EASYSLIP/);
   });
-  check('Automatic slip page shows a five-minute per-second countdown', () => {
+  check('Automatic slip page explains the five-minute slip timestamp rule', () => {
     const topupDetail = fs.readFileSync(path.join(root, 'src/views/shop/topup-detail.ejs'), 'utf8');
     const accountSource = fs.readFileSync(path.join(root, 'src/routes/account.js'), 'utf8');
-    assert.match(topupDetail, /id="slipCountdown"/);
-    assert.match(topupDetail, /5 \* 60 \* 1000/);
-    assert.match(topupDetail, /เหลือ ' \+ remaining \+ ' วินาที/);
+    assert.match(topupDetail, /ภายใน 5 นาทีล่าสุด/);
     assert.match(accountSource, /slipAge > 5 \* 60 \* 1000/);
   });
   let js = 0, templates = 0;
