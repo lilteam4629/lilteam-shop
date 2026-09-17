@@ -214,6 +214,12 @@ async function checkBulkFilterDelete(cookie) {
     body: ids.map(id => `tagIds=${encodeURIComponent(id)}`).join('&'),
   });
   if (response.statusCode !== 302 || response.headers.location !== '/admin/filter-tags') throw new Error(`bulk filter delete returned HTTP ${response.statusCode}`);
+  const manyIds = Array.from({ length: 150 }, (_, index) => `synthetic-${index}`).join(',');
+  const many = await request('/admin/filter-tags/bulk-delete', {
+    method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: `tagIds=${encodeURIComponent(manyIds)}`,
+  });
+  if (many.statusCode !== 302 || many.headers.location !== '/admin/filter-tags') throw new Error(`bulk filter delete 150 IDs returned HTTP ${many.statusCode}`);
 }
 
 async function run() {

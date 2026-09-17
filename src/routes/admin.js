@@ -831,7 +831,10 @@ router.post('/filter-tags/:id/delete', async (req, res) => {
 });
 
 router.post('/filter-tags/bulk-delete', async (req, res) => {
-  const ids = new Set([].concat(req.body?.tagIds || []).map(value => String(value || '').trim()).filter(Boolean));
+  const ids = new Set([].concat(req.body?.tagIds || [])
+    .flatMap(value => String(value || '').split(','))
+    .map(value => value.trim())
+    .filter(Boolean));
   if (!ids.size) {
     req.flash('error', 'กรุณาเลือกตัวกรองที่ต้องการลบ');
     return res.redirect('/admin/filter-tags');
