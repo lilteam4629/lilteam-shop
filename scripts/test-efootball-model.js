@@ -19,6 +19,8 @@ assert.match(adminRoute, /efootball-\$\{player\.id\}/);
 assert.match(adminRoute, /source: 'eFHUB'/);
 const modelAdmin = fs.readFileSync('src/views/admin/storefront-models.ejs', 'utf8');
 assert.ok(!modelAdmin.includes('value="efootball"'), 'eFootball must stay out of storefront model selection');
+const filterAdmin = fs.readFileSync('src/views/admin/filter-tags.ejs', 'utf8');
+assert.match(filterAdmin, /filter-tags\/efootball\/import/);
 const shopRoute = fs.readFileSync('src/routes/shop.js', 'utf8');
 assert.ok(!shopRoute.includes('home-efootball'), 'eFootball must not replace the existing storefront');
 console.log('eFootball filter checks passed: eFHUB player cards, deterministic tags, and classic filter import');
