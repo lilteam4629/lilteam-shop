@@ -177,6 +177,15 @@ router.get('/preview/rangers-market', requireAdmin, (req, res) => {
   });
 });
 
+router.get('/preview/efootball', requireAdmin, (req, res) => {
+  res.render('shop/home-efootball', {
+    ...homeViewData(false, req.query.page),
+    title: 'ตัวอย่างโมเดล eFootball Market',
+    publicPreview: true,
+    publicPreviewModel: 'efootball',
+  });
+});
+
 router.get('/preview/locker-home', requireAdmin, (req, res) => {
   res.render('shop/home', { ...homeViewData(false, req.query.page), title: 'หน้าแรกแบบเดิม' });
 });

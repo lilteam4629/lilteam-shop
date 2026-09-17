@@ -159,7 +159,7 @@
     }
   </style>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %>">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? (publicPreviewModel || 'rangers-market') : (settings.storefrontModel || 'classic') %>">
   <div id="page-loading-overlay" aria-hidden="true">
     <div class="loading-ring">
       <% if (settings.branding && settings.branding.logoImage) { %>
