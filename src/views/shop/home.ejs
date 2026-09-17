@@ -63,17 +63,6 @@
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
   <section class="storefront-hero-banner">
     <div class="banner-hero-shell w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
-      <div class="lilteam-hero-command">
-        <div class="lilteam-hero-command__copy">
-          <span class="lilteam-hero-command__eyebrow">LILTEAM · DIGITAL GAME STORE</span>
-          <h1>ยินดีต้อนรับสู่ <em><%= settings.shopName %></em></h1>
-          <p><%= settings.tagline %><br><span>ชำระเงินง่าย · ส่งมอบอัตโนมัติ · พร้อมดูแลตลอด 24 ชั่วโมง</span></p>
-          <div class="lilteam-hero-command__actions">
-            <a href="/products" class="lilteam-hero-command__primary"><svg><use href="#ui-cart"/></svg> เลือกดูสินค้า <span>→</span></a>
-            <a href="/help" class="lilteam-hero-command__secondary"><svg><use href="#ui-book"/></svg> วิธีสั่งซื้อ</a>
-          </div>
-        </div>
-      </div>
       <% if (settings.hero.bannerLink) { %>
         <a href="<%= settings.hero.bannerLink %>"
           class="banner-sparkle group block overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]
