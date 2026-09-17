@@ -921,11 +921,12 @@ router.get('/storefront-models', (req, res) => {
     active: 'storefront-models',
     currentModel: store.data.settings.storefrontModel || 'classic',
     allowRangersMarket: !!req.tenantShop?.isSystemLab,
+    allowEfootball: true,
   });
 });
 
 router.post('/storefront-models', async (req, res) => {
-  const allowed = new Set(['classic', 'line-rangers']);
+  const allowed = new Set(['classic', 'line-rangers', 'efootball']);
   if (req.tenantShop?.isSystemLab) allowed.add('rangers-market');
   const model = String(req.body.model || '');
   if (!allowed.has(model)) {
@@ -938,6 +939,7 @@ router.post('/storefront-models', async (req, res) => {
     classic: 'โมเดลหน้าร้านมาตรฐาน',
     'line-rangers': 'โมเดล LINE Rangers เดิม',
     'rangers-market': 'โมเดล Rangers Market',
+    efootball: 'โมเดล eFootball Market',
   };
   req.flash('success', `เปิดใช้${modelNames[model]}แล้ว`);
   res.redirect('/admin/storefront-models');

@@ -4,6 +4,7 @@ const store = require('../data/store');
 const { withEffectivePrice } = require('../services/pricing');
 const { requireAdmin } = require('../middleware/auth');
 const rangersSource = require('../services/rangers-catalog');
+const efootballSource = require('../services/efootball-catalog');
 
 function publishTime(product) {
   if (!product.publishAt) return 0;
@@ -134,16 +135,23 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     // layout, even while the source is using its local fallback data.
     rangersFeatured: rangersSource.queryCatalog({ view: 'top100', limit: 12 }).items.slice(0, 5)
       .map((item, index) => ({ ...item, rank: Number(item.rank) || index + 1 })),
+    efootballFeatured: efootballSource.queryCatalog({ sort: 'rating' }).items,
   };
 }
 
 router.get('/', (req, res) => {
-  const view = req.tenantShop?.isSystemLab && store.data.settings.storefrontModel === 'rangers-market'
-    ? 'shop/home-rangers-market'
-    : 'shop/home';
+  const model = store.data.settings.storefrontModel;
+  const view = model === 'efootball'
+    ? 'shop/home-efootball'
+    : (req.tenantShop?.isSystemLab && model === 'rangers-market' ? 'shop/home-rangers-market' : 'shop/home');
   const tenantSlug = String(req.tenantShop?.slug || '').toLowerCase();
   const showAllProducts = UNPAGINATED_HOME_TENANTS.has(tenantSlug);
   res.render(view, homeViewData(false, req.query.page, showAllProducts));
+});
+
+router.get('/api/efootball-catalog', (req, res) => {
+  if (store.data.settings.storefrontModel !== 'efootball') return res.status(404).json({ error: 'not_found' });
+  res.json(efootballSource.queryCatalog(req.query));
 });
 
 router.get('/api/rangers-catalog', (req, res) => {
