@@ -831,17 +831,27 @@ router.post('/filter-tags/:id/delete', async (req, res) => {
 });
 
 router.post('/filter-tags/bulk-delete', async (req, res) => {
-  const ids = new Set([].concat(req.body.tagIds || []).map(String).filter(Boolean));
+  const ids = new Set([].concat(req.body?.tagIds || []).map(value => String(value || '').trim()).filter(Boolean));
   if (!ids.size) {
     req.flash('error', 'กรุณาเลือกตัวกรองที่ต้องการลบ');
     return res.redirect('/admin/filter-tags');
   }
-  store.data.filterTags = store.data.filterTags.filter(t => !ids.has(String(t.id)));
-  store.data.products.forEach(p => {
-    if (p.filterTagIds) p.filterTagIds = p.filterTagIds.filter(id => !ids.has(String(id)));
-  });
-  await store.save();
-  req.flash('success', `ลบตัวกรอง ${ids.size} รายการแล้ว`);
+  try {
+    const removed = await store.transact(data => {
+      data.filterTags ||= [];
+      data.products ||= [];
+      const before = data.filterTags.length;
+      data.filterTags = data.filterTags.filter(tag => !ids.has(String(tag.id)));
+      data.products.forEach(product => {
+        product.filterTagIds = (product.filterTagIds || []).filter(id => !ids.has(String(id)));
+      });
+      return before - data.filterTags.length;
+    });
+    req.flash('success', `ลบตัวกรอง ${removed} รายการแล้ว`);
+  } catch (error) {
+    console.error('[filter-tags/bulk-delete] failed:', error.message);
+    req.flash('error', 'ลบตัวกรองไม่สำเร็จ กรุณาลองใหม่');
+  }
   res.redirect('/admin/filter-tags');
 });
 

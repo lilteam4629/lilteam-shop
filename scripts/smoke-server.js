@@ -205,6 +205,17 @@ async function checkHomeSectionDelete(cookie) {
   if (after.body.includes(`action="${action}"`)) throw new Error('deleted home section is still present');
 }
 
+async function checkBulkFilterDelete(cookie) {
+  const page = await fetchOk('/admin/filter-tags', 'text/html', { cookie });
+  const ids = [...page.body.matchAll(/data-filter-card[^>]*data-id="([^"]+)"/g)].map(match => match[1]).slice(0, 2);
+  if (!ids.length) throw new Error('filter-tag page has no tags for bulk-delete smoke test');
+  const response = await request('/admin/filter-tags/bulk-delete', {
+    method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: ids.map(id => `tagIds=${encodeURIComponent(id)}`).join('&'),
+  });
+  if (response.statusCode !== 302 || response.headers.location !== '/admin/filter-tags') throw new Error(`bulk filter delete returned HTTP ${response.statusCode}`);
+}
+
 async function run() {
   try {
     let ready = false;
@@ -272,6 +283,7 @@ async function run() {
     if (protectedCatalog.statusCode !== 404) throw new Error(`main admin can access System Lab catalog (HTTP ${protectedCatalog.statusCode})`);
     await checkInstalledDisabledRainModule(cookie);
     await checkStorefrontModels(cookie);
+    await checkBulkFilterDelete(cookie);
     await checkHomeSectionDelete(cookie);
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);
