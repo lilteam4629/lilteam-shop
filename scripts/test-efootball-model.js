@@ -5,7 +5,11 @@ const catalog = require('../src/services/efootball-catalog');
 const status = catalog.status();
 assert.strictEqual(status.source, 'eFHUB New Players');
 assert.strictEqual(status.sourceUrl, 'https://efhub.com/th/new-players');
-assert.ok(status.count >= 10, 'eFootball source should contain a useful player set');
+assert.strictEqual(status.count, 7, 'eFootball source should contain only the seven requested cards');
+assert.deepStrictEqual(catalog.queryCatalog().items.map(item => item.name).sort(), [
+  'Alessandro Del Piero', 'Tomas Rosicky', 'Carles Puyol', 'Gareth Bale',
+  'George Best', 'Edwin van der Sar', 'Eric Cantona',
+].sort());
 const forwards = catalog.queryCatalog({ position: 'CF' });
 assert.ok(forwards.items.length > 0 && forwards.items.every(item => item.position === 'CF'));
 assert.ok(catalog.queryCatalog({ minRating: 89 }).items.every(item => item.rating >= 89));
