@@ -17,6 +17,7 @@ const topupsService = require('../services/topups');
 const { getCloudUrl } = require('../services/cloud-url');
 const { requireAdmin } = require('../middleware/auth');
 const r2 = require('../services/r2');
+const efootballSource = require('../services/efootball-catalog');
 
 const toArr = value => Array.isArray(value) ? value : (value === undefined ? [] : [value]);
 
@@ -674,6 +675,41 @@ router.get('/filter-tags', (req, res) => {
   res.render('admin/filter-tags', { title: 'ตัวกรองสินค้า', active: 'filter-tags', filterTags, products });
 });
 
+// Import the eFHUB player-card images into the existing filter-tag library.
+// This deliberately does not change the storefront model; it only creates
+// reusable image tags that work with the classic filter panel and product
+// assignment UI.
+router.post('/filter-tags/efootball/import', async (req, res) => {
+  const sourceItems = efootballSource.queryCatalog({}).items;
+  const existing = new Map(store.data.filterTags.map(tag => [String(tag.id), tag]));
+  let created = 0;
+  sourceItems.forEach(player => {
+    const id = `efootball-${player.id}`;
+    const current = existing.get(id);
+    if (current) {
+      current.name = player.name;
+      current.image = player.imageUrl;
+      current.source = 'eFHUB';
+      current.sourceId = player.id;
+      return;
+    }
+    const tag = {
+      id,
+      name: player.name,
+      image: player.imageUrl,
+      source: 'eFHUB',
+      sourceId: player.id,
+      createdAt: new Date().toISOString(),
+    };
+    store.data.filterTags.push(tag);
+    existing.set(id, tag);
+    created += 1;
+  });
+  await store.save();
+  req.flash('success', `นำเข้ารูปผู้เล่น eFootball เป็นแท็กตัวกรองแล้ว ${sourceItems.length} รายการ (เพิ่มใหม่ ${created})`);
+  res.redirect('/admin/filter-tags');
+});
+
 router.post('/filter-tags/:id/products', async (req, res) => {
   const tag = store.data.filterTags.find(t => String(t.id) === String(req.params.id));
   if (!tag) {
@@ -921,12 +957,11 @@ router.get('/storefront-models', (req, res) => {
     active: 'storefront-models',
     currentModel: store.data.settings.storefrontModel || 'classic',
     allowRangersMarket: !!req.tenantShop?.isSystemLab,
-    allowEfootball: true,
   });
 });
 
 router.post('/storefront-models', async (req, res) => {
-  const allowed = new Set(['classic', 'line-rangers', 'efootball']);
+  const allowed = new Set(['classic', 'line-rangers']);
   if (req.tenantShop?.isSystemLab) allowed.add('rangers-market');
   const model = String(req.body.model || '');
   if (!allowed.has(model)) {
@@ -939,7 +974,6 @@ router.post('/storefront-models', async (req, res) => {
     classic: 'โมเดลหน้าร้านมาตรฐาน',
     'line-rangers': 'โมเดล LINE Rangers เดิม',
     'rangers-market': 'โมเดล Rangers Market',
-    efootball: 'โมเดล eFootball Market',
   };
   req.flash('success', `เปิดใช้${modelNames[model]}แล้ว`);
   res.redirect('/admin/storefront-models');

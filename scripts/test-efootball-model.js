@@ -13,9 +13,12 @@ for (const item of catalog.queryCatalog().items) {
   assert.match(item.imageUrl, /^https:\/\/efimg\.com\/efootballhub22\/images\/player_cards\//);
   assert.ok(item.name && item.position && Number.isInteger(item.rating));
 }
-const template = fs.readFileSync('src/views/shop/home-efootball.ejs', 'utf8');
-assert.match(template, /data-ef-player/);
-assert.match(template, /https:\/\/efhub\.com\/th/);
+const adminRoute = fs.readFileSync('src/routes/admin.js', 'utf8');
+assert.match(adminRoute, /filter-tags\/efootball\/import/);
+assert.match(adminRoute, /efootball-\$\{player\.id\}/);
+assert.match(adminRoute, /source: 'eFHUB'/);
+const modelAdmin = fs.readFileSync('src/views/admin/storefront-models.ejs', 'utf8');
+assert.ok(!modelAdmin.includes('value="efootball"'), 'eFootball must stay out of storefront model selection');
 const shopRoute = fs.readFileSync('src/routes/shop.js', 'utf8');
-assert.match(shopRoute, /shop\/home-efootball/);
-console.log('eFootball model checks passed: isolated template, eFHUB player cards, filters, and route');
+assert.ok(!shopRoute.includes('home-efootball'), 'eFootball must not replace the existing storefront');
+console.log('eFootball filter checks passed: eFHUB player cards, deterministic tags, and classic filter import');
