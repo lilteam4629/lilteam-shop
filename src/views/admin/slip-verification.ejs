@@ -29,6 +29,7 @@
       <% } else if (activeProvider === 'slipcheck') { %>✅
       <% } else if (activeProvider === 'rdcw') { %>🛡️
       <% } else if (activeProvider === 'slip2go') { %>🔎
+      <% } else if (activeProvider === 'xepht') { %>🌐
       <% } else { %>🔌<% } %>
     </div>
     <div>
@@ -40,6 +41,7 @@
           <% } else if (activeProvider === 'slipcheck') { %>SlipCheck API
           <% } else if (activeProvider === 'rdcw') { %>SlipRDCW API
           <% } else if (activeProvider === 'slip2go') { %>Slip2Go API
+          <% } else if (activeProvider === 'xepht') { %>Slip XEPHT API
           <% } else { %>Custom Slip API<% } %>
         </span>
       </div>
@@ -54,6 +56,8 @@
           ระบบตรวจสลิปอัตโนมัติผ่าน SlipRDCW โดยใช้ Client ID และ Secret ของร้านนี้
         <% } else if (activeProvider === 'slip2go') { %>
           ระบบตรวจสลิปอัตโนมัติผ่าน Slip2Go API
+        <% } else if (activeProvider === 'xepht') { %>
+          ระบบตรวจสลิปอัตโนมัติผ่าน Slip XEPHT โดยใช้เลขบัญชีและชื่อบัญชีเดิมของร้าน
         <% } else { %>
           ระบบตรวจสลิปผ่าน Custom Endpoint / Webhook
         <% } %>
@@ -74,6 +78,7 @@
   { id: 'slipcheck', name: 'SlipCheck', info: slipcheckInfo, used: slipcheckPoolInfo?.totalUsed ?? slipcheckInfo?.quota?.used, max: slipcheckPoolInfo?.totalMax ?? slipcheckInfo?.quota?.max, remaining: slipcheckPoolInfo ? slipcheckPoolInfo.totalRemaining : (slipcheckInfo?.quota?.max == null ? null : Math.max(0, Number(slipcheckInfo.quota.max) - Number(slipcheckInfo.quota.used || 0))), note: slipcheckPoolInfo ? `${slipcheckPoolInfo.keyCount} คีย์ • ${payment.slipcheckIndependentQuota ? 'รวมโควตาแยกแต่ละบัญชี' : 'โควตารวมบัญชีเดียว'}` : (slipcheckInfo?.message || 'ยังไม่ได้กรอก API Key') },
   { id: 'rdcw', name: 'SlipRDCW', info: rdcwInfo, used: null, max: null, remaining: null, note: rdcwInfo?.ok ? 'เชื่อมข้อมูลแล้ว • ค่ายนี้ไม่มี API สำหรับอ่านโควตา' : (rdcwInfo?.message || 'ยังไม่ได้กรอก Client ID / Secret') },
   { id: 'slip2go', name: 'Slip2Go', info: slip2goInfo, used: slip2goInfo?.used, max: slip2goInfo?.quota, remaining: slip2goInfo?.quota == null ? null : Math.max(0, Number(slip2goInfo.quota) - Number(slip2goInfo.used || 0)), note: slip2goInfo?.message || 'ยังไม่ได้กรอก API Key' },
+  { id: 'xepht', name: 'Slip XEPHT', info: xephtInfo, used: null, max: null, remaining: null, note: xephtInfo?.message || 'พร้อมใช้โดยไม่ต้องใช้ API Key' },
 ]; %>
 <div data-provider-quota-details class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
   <% providerStatuses.forEach(status => { const connected = status.info && status.info.ok; const hasQuota = connected && status.remaining !== null && status.remaining !== undefined && Number.isFinite(Number(status.remaining)); %>
@@ -196,12 +201,13 @@
       <input type="hidden" name="slipApiMode" value="own">
     <% } %>
 
-    <% const selectableProviders = ['slipcheck', 'rdcw', 'slip2go']; const selectedOwnProvider = selectableProviders.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck'; %>
+    <% const selectableProviders = ['slipcheck', 'rdcw', 'slip2go', 'xepht']; const selectedOwnProvider = selectableProviders.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck'; %>
     <div id="own-provider-choice" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
       <% const ownProviders = [
         ['slipcheck', '✅', 'SlipCheck', 'ฟรี 500 ครั้ง/เดือน'],
         ['rdcw', '🛡️', 'SlipRDCW', 'Client ID + Secret'],
-        ['slip2go', '🔎', 'Slip2Go', 'API Key']
+        ['slip2go', '🔎', 'Slip2Go', 'API Key'],
+        ['xepht', '🌐', 'Slip XEPHT', 'ไม่ต้องใช้ API Key']
       ]; %>
       <% ownProviders.forEach(provider => { %>
         <label data-provider-card="<%= provider[0] %>" class="relative cursor-pointer rounded-xl border-2 p-4 transition <%= selectedOwnProvider === provider[0] ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--input)]/30' %>">
@@ -250,6 +256,15 @@
       <input id="own-slip2go-endpoint" type="hidden" name="slip2goEndpoint" value="https://connect.slip2go.com/api" />
       <button type="button" onclick="testOwnProvider('slip2go')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ทดสอบ Slip2Go</button>
       <div id="own-slip2go-result" class="text-xs text-[var(--text-4)]"></div>
+    </div>
+
+    <div id="provider-settings-xepht" data-provider-settings="xepht" class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+      <div class="flex items-center justify-between"><h3 class="font-bold">🌐 Slip XEPHT</h3><a href="https://slip.xepht.com/docs.html" target="_blank" rel="noopener" class="text-xs text-[var(--gold-text)]">อ่านเอกสาร ↗</a></div>
+      <p class="text-xs text-[var(--text-4)]">ตรวจสลิปด้วย QR และเทียบยอดเงิน เลขบัญชี และชื่อบัญชีเดิมของร้านโดยตรง ไม่ต้องสมัครคีย์ในโหมดสาธารณะ</p>
+      <label class="block text-xs text-[var(--text-3)]">API Key (ถ้าระบบของคุณกำหนดให้ใช้) <% if (payment.xephtApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %><input id="own-xepht-key" type="password" name="xephtApiKey" value="<%= payment.xephtApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" /></label>
+      <input id="own-xepht-endpoint" type="hidden" name="xephtEndpoint" value="<%= payment.xephtEndpoint || 'https://slip.xepht.com/api/v1' %>" />
+      <button type="button" onclick="testOwnProvider('xepht')" class="text-xs border border-[var(--border)] rounded-lg px-3 py-2">ตรวจการตั้งค่า Slip XEPHT</button>
+      <div id="own-xepht-result" class="text-xs text-[var(--text-4)]"></div>
     </div>
   </div>
 
@@ -302,6 +317,7 @@ async function testOwnProvider(provider) {
   if (provider === 'slipcheck') { payload.apiKey = document.getElementById('own-slipcheck-key').value; payload.apiKeys = document.getElementById('own-slipcheck-keys')?.value || ''; payload.independent = Boolean(document.getElementById('own-slipcheck-independent')?.checked); payload.endpoint = document.getElementById('own-slipcheck-endpoint').value; }
   if (provider === 'rdcw') { payload.clientId = document.getElementById('own-rdcw-id').value; payload.clientSecret = document.getElementById('own-rdcw-secret').value; }
   if (provider === 'slip2go') { payload.apiKey = document.getElementById('own-slip2go-key').value; payload.endpoint = document.getElementById('own-slip2go-endpoint').value; }
+  if (provider === 'xepht') { payload.apiKey = document.getElementById('own-xepht-key').value; payload.endpoint = document.getElementById('own-xepht-endpoint').value; }
   try {
     const response = await fetch('/admin/slip-verification/test', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
     const data = await response.json();

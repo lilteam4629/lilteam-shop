@@ -94,7 +94,7 @@ async function main() {
     assert.equal(receiverProfiles.view(payment, 'slipcheck').bankAccountNumber, '1234567890');
     assert.equal(Object.hasOwn(receiverProfiles.view(payment, 'slipcheck'), 'promptpayId'), false);
     assert.equal(Object.hasOwn(payment.receiverProfiles.slipcheck, 'promptpayId'), false);
-    assert.deepEqual(receiverProfiles.PROVIDERS, ['slipcheck', 'rdcw', 'slip2go']);
+    assert.deepEqual(receiverProfiles.PROVIDERS, ['slipcheck', 'rdcw', 'slip2go', 'xepht']);
   });
   check('PromptPay receiver fields and customer payment option are removed', () => {
     const adminForm = fs.readFileSync(path.join(root, 'src/views/admin/topups.ejs'), 'utf8');
@@ -117,6 +117,45 @@ async function main() {
   check('Slip2Go uses the documented Connect endpoint and raw Secret header', () => {
     assert.equal(slip2goRequest.url, 'https://connect.slip2go.com/api/verify-slip/qr-image/info');
     assert.equal(slip2goRequest.authorization, 'demo_fixture');
+  });
+  let xephtRequest = null;
+  class XephtFormData {
+    constructor() { this.fields = []; }
+    append(name, value) { this.fields.push([name, value]); }
+    getHeaders() { return { 'content-type': 'multipart/form-data; boundary=fixture' }; }
+  }
+  const xephtService = load('src/services/xepht-slip.js', {
+    axios: { post: async (url, form, options) => {
+      xephtRequest = { url, fields: form.fields, headers: options.headers };
+      return { status: 200, data: { success: true, code: 'VERIFIED', data: {
+        trans_ref: 'xepht-fixture-ref', amountInSlip: 10, is_amount_matched: true,
+        rawSlip: { transRef: 'xepht-fixture-ref', date: '2026-09-18T12:00:00+07:00', receiver: { account: { name: { th: 'ร้านทดสอบ' }, bank: { account: '1234567890' } } } },
+      } } };
+    } },
+    'form-data': XephtFormData,
+    './receiver-match': require('../src/services/receiver-match'),
+    './slip-fields': require('../src/services/slip-fields'),
+  });
+  const xephtResult = await xephtService.verifySlip(Buffer.from('fixture'), 10, { filename: 'slip.png', contentType: 'image/png' }, {
+    apiKey: 'xepht-fixture-key', expectedReceiverNames: ['ร้านทดสอบ'], expectedReceiverNumbers: ['1234567890'],
+  });
+  check('Slip XEPHT sends documented multipart fields and verifies the shared receiver', () => {
+    assert.equal(xephtResult.verified, true);
+    assert.equal(xephtRequest.url, 'https://slip.xepht.com/api/v1/slips/verify');
+    assert.equal(xephtRequest.headers['X-Api-Key'], 'xepht-fixture-key');
+    assert.equal(xephtRequest.fields.find(field => field[0] === 'amount')[1], '10.00');
+    assert.equal(xephtRequest.fields.find(field => field[0] === 'receiver_account')[1], '1234567890');
+    assert.equal(xephtRequest.fields.find(field => field[0] === 'receiver_name')[1], 'ร้านทดสอบ');
+  });
+  const duplicateService = load('src/services/xepht-slip.js', {
+    axios: { post: async () => ({ status: 200, data: { code: 'VERIFIED', data: { amountInSlip: 10, is_duplicate: true } } }) },
+    'form-data': XephtFormData,
+    './receiver-match': require('../src/services/receiver-match'), './slip-fields': require('../src/services/slip-fields'),
+  });
+  const duplicateResult = await duplicateService.verifySlip(Buffer.from('fixture'), 10);
+  check('Slip XEPHT rejects duplicate results before crediting', () => {
+    assert.equal(duplicateResult.verified, false);
+    assert.equal(duplicateResult.providerCode, 'SLIP_ALREADY_USED');
   });
   const { receiverMatches } = require('../src/services/receiver-match');
   check('Receiver matching accepts Thai titles but rejects unsafe four-digit-only account matches', () => {
@@ -237,7 +276,7 @@ async function main() {
   r.body.amount = 'Infinity';
   await als.run(f, () => topup(r, response()));
   check('Non-finite topup amounts are rejected', () => assert.equal(f.topupRequests.length, 1));
-  for (const provider of ['slipcheck', 'rdcw', 'slip2go']) {
+  for (const provider of ['slipcheck', 'rdcw', 'slip2go', 'xepht']) {
     const bankOnly = fixture();
     bankOnly.settings.payment.slipProvider = provider;
     bankOnly.settings.payment.slipApiMode = 'own';
@@ -332,7 +371,7 @@ async function main() {
     { render(view, values) { ownTopupView = values; } },
   ));
   check('Own-API tenant can keep separate receiver settings for every provider', () => {
-    assert.equal(JSON.stringify(ownTopupView.availableReceiverProviders), JSON.stringify(['slipcheck', 'rdcw', 'slip2go']));
+    assert.equal(JSON.stringify(ownTopupView.availableReceiverProviders), JSON.stringify(['slipcheck', 'rdcw', 'slip2go', 'xepht']));
     assert.equal(ownTopupView.receiverProvider, 'slip2go');
   });
   check('Provider page initialization does not switch a shared tenant to own API mode', () => {

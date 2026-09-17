@@ -194,7 +194,7 @@ function defaultData() {
         bankQrImage: null,
         truemoneyPhone: '',
         truemoneyEnabled: true,
-        // Slip Verification Provider: 'slipok' | 'slipcheck' | 'rdcw' | 'slip2go' | 'none'
+        // Slip Verification Provider: 'slipok' | 'slipcheck' | 'rdcw' | 'slip2go' | 'xepht' | 'none'
         slipProvider: 'auto',
         slip2goApiKey: '',
         slip2goEndpoint: 'https://api.slip2go.com/api',
@@ -203,6 +203,8 @@ function defaultData() {
         rdcwClientId: '',
         rdcwClientSecret: '',
         rdcwEndpoint: 'https://suba.rdcw.co.th/v2/inquiry',
+        xephtApiKey: '',
+        xephtEndpoint: 'https://slip.xepht.com/api/v1',
         slipApiMode: 'own',
         tenantOwnedSlipApi: false,
         // Optional per-shop SlipOK credentials (see /admin/topups). When set,

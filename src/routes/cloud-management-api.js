@@ -40,7 +40,7 @@ router.get('/legacy-cloud-eligibility', (req,res)=>{
 router.get('/legacy-truemoney-config',(req,res)=>{const p=store.data.settings.payment||{};res.json({ok:true,truemoneyEnabled:p.truemoneyEnabled===true,truemoneyPhone:String(p.truemoneyPhone||'')})});
 router.get('/legacy-payment-config', (req, res) => {
   const p = store.data.settings.payment || {};
-  const fields = ['slipProvider','slipokBranchId','slipokApiKey','slipcheckApiKey','slipcheckEndpoint','rdcwClientId','rdcwClientSecret','rdcwEndpoint','slip2goApiKey','slip2goEndpoint',
+  const fields = ['slipProvider','slipokBranchId','slipokApiKey','slipcheckApiKey','slipcheckEndpoint','rdcwClientId','rdcwClientSecret','rdcwEndpoint','slip2goApiKey','slip2goEndpoint','xephtApiKey','xephtEndpoint',
     'bankName','bankAccountNumber','bankAccountName','bankQrImage','truemoneyPhone'];
   const payment = Object.fromEntries(fields.map(field => [field, p[field] || '']));
   payment.truemoneyEnabled = p.truemoneyEnabled !== false && Boolean(payment.truemoneyPhone);

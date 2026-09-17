@@ -10,6 +10,7 @@ const slipok = require('../services/slipok');
 const slip2go = require('../services/slip2go');
 const slipcheck = require('../services/slipcheck');
 const rdcwSlip = require('../services/rdcw-slip');
+const xephtSlip = require('../services/xepht-slip');
 const { effectiveSlipConfig } = require('../services/slip-config');
 const receiverProfiles = require('../services/receiver-profiles');
 const theme = require('../services/theme');
@@ -1456,6 +1457,7 @@ async function renderSlipVerificationHub(req, res) {
   const rdcwInfo = !usesSharedProvider && effective.rdcwClientId && effective.rdcwClientSecret
     ? { ...rdcwSlip.validateCredentials(effective.rdcwClientId, effective.rdcwClientSecret), quotaUnavailable: true }
     : null;
+  const xephtInfo = xephtSlip.validateCredentials(effective.xephtApiKey, effective.xephtEndpoint);
 
   const bankOptions = banks;
   const savedOwnerCosts = store.data.settings.ownerOperatingCosts || {};
@@ -1489,6 +1491,7 @@ async function renderSlipVerificationHub(req, res) {
     slipcheckInfo,
     slipcheckPoolInfo,
     rdcwInfo,
+    xephtInfo,
     effectiveProvider: effective.slipProvider,
     usesSharedProvider,
     banks: bankOptions,
@@ -1520,7 +1523,7 @@ router.post('/slip-verification', async (req, res) => {
   const previousReceiverProvider = receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck';
   receiverProfiles.save(payment, previousReceiverProvider, receiverProfiles.snapshot(payment));
   const slipApiMode = req.tenantShop && req.body.slipApiMode === 'own' ? 'own' : (req.tenantShop ? 'shared' : 'own');
-  const allowedProviders = ['none', 'slipok', 'slipcheck', 'rdcw', 'slip2go'];
+  const allowedProviders = ['none', 'slipok', 'slipcheck', 'rdcw', 'slip2go', 'xepht'];
   const submittedProvider = Array.isArray(req.body.slipProvider) ? req.body.slipProvider.at(-1) : req.body.slipProvider;
   const previousProvider = allowedProviders.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck';
   const slipProvider = submittedProvider || previousProvider;
@@ -1542,6 +1545,15 @@ router.post('/slip-verification', async (req, res) => {
   const rdcwClientId = (req.body.rdcwClientId !== undefined ? req.body.rdcwClientId : (payment.rdcwClientId || '')).trim();
   const rdcwClientSecret = (req.body.rdcwClientSecret !== undefined ? req.body.rdcwClientSecret : (payment.rdcwClientSecret || '')).trim();
   const rdcwEndpoint = (req.body.rdcwEndpoint !== undefined ? req.body.rdcwEndpoint : (payment.rdcwEndpoint || rdcwSlip.DEFAULT_ENDPOINT)).trim();
+  const xephtApiKey = (req.body.xephtApiKey !== undefined ? req.body.xephtApiKey : (payment.xephtApiKey || '')).trim();
+  const xephtEndpoint = (req.body.xephtEndpoint !== undefined ? req.body.xephtEndpoint : (payment.xephtEndpoint || xephtSlip.DEFAULT_ENDPOINT)).trim();
+  if (slipProvider === 'xepht') {
+    const validation = xephtSlip.validateCredentials(xephtApiKey, xephtEndpoint);
+    if (!validation.ok) {
+      req.flash('error', validation.message);
+      return res.redirect('/admin/slip-verification');
+    }
+  }
   const customSlipEndpoint = (req.body.customSlipEndpoint !== undefined ? req.body.customSlipEndpoint : (payment.customSlipEndpoint || '')).trim();
   const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
 
@@ -1567,6 +1579,8 @@ router.post('/slip-verification', async (req, res) => {
     rdcwClientId,
     rdcwClientSecret,
     rdcwEndpoint,
+    xephtApiKey,
+    xephtEndpoint,
     tenantOwnedSlipApi: slipApiMode === 'own' && Boolean(req.tenantShop),
     customSlipEndpoint,
     customSlipApiKey,
@@ -1619,6 +1633,10 @@ router.post('/slip-verification/test', async (req, res) => {
       return res.json(result);
     }
 
+    if (provider === 'xepht') {
+      return res.json(xephtSlip.validateCredentials(apiKey, endpoint || xephtSlip.DEFAULT_ENDPOINT));
+    }
+
     if (provider === 'custom') {
       if (!endpoint) return res.json({ ok: false, message: 'กรุณาระบุ Webhook/Endpoint URL ก่อนทดสอบ' });
       return res.json({ ok: false, message: 'Custom Slip Webhook ยังไม่เปิดใช้งานจริง' });
@@ -1665,7 +1683,7 @@ router.post('/topups/payment-settings', (req, res) => {
     receiverProfiles.save(payment, currentlySelectedProvider, receiverProfiles.snapshot(payment));
     const selectedProfile = receiverProfiles.view(payment, slipProvider);
     payment.bankQrImage = selectedProfile.bankQrImage;
-    if (!['none', 'slipok', 'slipcheck', 'rdcw', 'slip2go'].includes(slipProvider)) {
+    if (!['none', 'slipok', 'slipcheck', 'rdcw', 'slip2go', 'xepht'].includes(slipProvider)) {
       req.flash('error', 'ผู้ให้บริการตรวจสลิปนี้ยังไม่พร้อมใช้งาน');
       return res.redirect('/admin/topups');
     }
@@ -1678,6 +1696,13 @@ router.post('/topups/payment-settings', (req, res) => {
     const rdcwClientId = (req.body.rdcwClientId !== undefined ? req.body.rdcwClientId : (payment.rdcwClientId || '')).trim();
     const rdcwClientSecret = (req.body.rdcwClientSecret !== undefined ? req.body.rdcwClientSecret : (payment.rdcwClientSecret || '')).trim();
     const rdcwEndpoint = (req.body.rdcwEndpoint !== undefined ? req.body.rdcwEndpoint : (payment.rdcwEndpoint || rdcwSlip.DEFAULT_ENDPOINT)).trim();
+    const xephtApiKey = (req.body.xephtApiKey !== undefined ? req.body.xephtApiKey : (payment.xephtApiKey || '')).trim();
+    const xephtEndpoint = (req.body.xephtEndpoint !== undefined ? req.body.xephtEndpoint : (payment.xephtEndpoint || xephtSlip.DEFAULT_ENDPOINT)).trim();
+    const xephtValidation = xephtSlip.validateCredentials(xephtApiKey, xephtEndpoint);
+    if (!xephtValidation.ok) {
+      req.flash('error', xephtValidation.message);
+      return res.redirect('/admin/topups?tab=bank');
+    }
     const customSlipEndpoint = (req.body.customSlipEndpoint !== undefined ? req.body.customSlipEndpoint : (payment.customSlipEndpoint || '')).trim();
     const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
 
@@ -1690,6 +1715,7 @@ router.post('/topups/payment-settings', (req, res) => {
       slip2goApiKey, slip2goEndpoint, customSlipEndpoint, customSlipApiKey,
       slipcheckApiKey, slipcheckEndpoint,
       rdcwClientId, rdcwClientSecret, rdcwEndpoint,
+      xephtApiKey, xephtEndpoint,
       tenantOwnedSlipApi: payment.slipApiMode === 'own' && Boolean(req.tenantShop),
       topupWebhookUrl: (req.body.topupWebhookUrl || '').trim(),
     });
@@ -1716,7 +1742,7 @@ router.post('/topups/payment-settings', (req, res) => {
     if (sharedTenant) payment.slipProvider = currentlySelectedProvider;
 
     await store.save();
-    req.flash('success', `บันทึกข้อมูลบัญชีรับเงินสำหรับ ${slipProvider === 'slipcheck' ? 'SlipCheck' : slipProvider === 'rdcw' ? 'SlipRDCW' : slipProvider === 'slip2go' ? 'Slip2Go' : 'SlipOK'} แล้ว`);
+    req.flash('success', `บันทึกข้อมูลบัญชีรับเงินสำหรับ ${slipProvider === 'slipcheck' ? 'SlipCheck' : slipProvider === 'rdcw' ? 'SlipRDCW' : slipProvider === 'slip2go' ? 'Slip2Go' : slipProvider === 'xepht' ? 'Slip XEPHT' : 'SlipOK'} แล้ว`);
     res.redirect(`/admin/topups?tab=bank&receiverProvider=${slipProvider}`);
   }));
 });

@@ -1,4 +1,4 @@
-const PROVIDERS = ['slipcheck', 'rdcw', 'slip2go'];
+const PROVIDERS = ['slipcheck', 'rdcw', 'slip2go', 'xepht'];
 const FIELDS = [
   'bankName', 'bankAccountNumber', 'bankAccountName', 'bankAccountNameEn',
   'bankAccountType', 'bankQrImage',

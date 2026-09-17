@@ -2,6 +2,7 @@ const CREDENTIAL_FIELDS = [
   'slipcheckApiKey', 'slipcheckApiKeys', 'slipcheckEndpoint', 'slipcheckIndependentQuota',
   'rdcwClientId', 'rdcwClientSecret', 'rdcwEndpoint',
   'slip2goApiKey', 'slip2goEndpoint', 'slipokBranchId', 'slipokApiKey',
+  'xephtApiKey', 'xephtEndpoint',
 ];
 
 function isSharedMode(payment = {}, isTenant = false) {

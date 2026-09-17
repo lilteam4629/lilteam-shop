@@ -6,6 +6,7 @@ const slipok = require('../services/slipok');
 const slipcheck = require('../services/slipcheck');
 const rdcwSlip = require('../services/rdcw-slip');
 const slip2go = require('../services/slip2go');
+const xephtSlip = require('../services/xepht-slip');
 const { effectiveSlipConfig, slipcheckCredentials } = require('../services/slip-config');
 const { parseSlipDate } = require('../services/slip-fields');
 const receiverProfiles = require('../services/receiver-profiles');
@@ -265,6 +266,7 @@ function canCheckSlipAutomatically(payment = {}) {
   if (selected === 'slipcheck') return Boolean((effective.slipcheckApiKey || (store.isTenantContext() ? false : (effective.slipcheckApiKeys || []).length)) && hasReceiver);
   if (selected === 'rdcw') return Boolean(effective.rdcwClientId && effective.rdcwClientSecret && hasReceiver);
   if (selected === 'slip2go') return Boolean(effective.slip2goApiKey && hasReceiver);
+  if (selected === 'xepht') return Boolean(hasReceiver);
   return false;
 }
 
@@ -311,6 +313,13 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       result = await slip2go.verifySlip(fileBuffer, request.amount, fileOptions, {
         apiKey: effective.slip2goApiKey,
         endpoint: effective.slip2goEndpoint,
+        ...receiverCredentials(receiverPayment, request.method, payment),
+      });
+    } else if (selectedProvider === 'xepht') {
+      provider = 'xepht';
+      result = await xephtSlip.verifySlip(fileBuffer, request.amount, fileOptions, {
+        apiKey: effective.xephtApiKey,
+        endpoint: effective.xephtEndpoint,
         ...receiverCredentials(receiverPayment, request.method, payment),
       });
     } else {
