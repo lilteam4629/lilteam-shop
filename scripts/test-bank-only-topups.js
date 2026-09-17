@@ -49,6 +49,10 @@ assert.equal(oldData.settings.payment.bankAccountNumber, '1234567890', 'bank rec
 assert.equal(oldData.topupRequests[0].id, 'old-topup', 'top-up history must remain');
 
 const receiverProfiles = require('../src/services/receiver-profiles');
+const sharedPayment = { slipProvider: 'slipcheck', bankName: '', bankAccountNumber: '', bankAccountName: '', receiverProfiles: {
+  slipcheck: { bankName: 'ธนาคารกสิกรไทย', bankAccountNumber: '1473368044', bankAccountName: 'Shop Owner' },
+} };
+assert.equal(receiverProfiles.view(sharedPayment, 'rdcw').bankAccountNumber, '1473368044', 'a new provider must reuse the existing bank account');
 const profile = receiverProfiles.saveAndActivate(
   { slipProvider: 'slipcheck', promptpayId: 'legacy-phone' },
   'slipcheck',

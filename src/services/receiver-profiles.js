@@ -25,11 +25,15 @@ function profiles(payment = {}) {
 }
 
 function view(payment = {}, provider) {
-  if (!PROVIDERS.includes(provider)) provider = PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck';
-  const saved = payment.receiverProfiles && payment.receiverProfiles[provider];
-  if (saved) return snapshot(saved);
-  if (provider === payment.slipProvider || !payment.receiverProfiles) return snapshot(payment);
-  return blankProfile();
+  // The receiving account is shared by every slip provider. Older versions
+  // stored one copy per provider, so recover that copy only when the shared
+  // payment fields are still empty; never make a new provider ask for it again.
+  const shared = snapshot(payment);
+  if (shared.bankAccountNumber || shared.bankAccountName || shared.bankName) return shared;
+  const savedProfiles = payment.receiverProfiles && typeof payment.receiverProfiles === 'object'
+    ? Object.values(payment.receiverProfiles) : [];
+  const legacy = savedProfiles.find(profile => profile && (profile.bankAccountNumber || profile.bankAccountName || profile.bankName));
+  return legacy ? { ...blankProfile(), ...snapshot(legacy) } : shared;
 }
 
 function saveAndActivate(payment, provider, profile) {

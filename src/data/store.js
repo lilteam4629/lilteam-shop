@@ -391,8 +391,7 @@ async function init() {
     await mongoCollection.updateMany(
       { 'settings.payment.receivingAccountResetVersion': { $ne: 1 } },
       { $set: {
-        'settings.payment.bankName': '', 'settings.payment.bankAccountNumber': '',
-        'settings.payment.bankAccountName': '', 'settings.payment.receivingAccountResetVersion': 1,
+        'settings.payment.receivingAccountResetVersion': 1,
       } }
     );
 
@@ -570,7 +569,15 @@ function migrateSchema(db) {
     }
   }
   if (db.settings.payment.receiverProfiles && typeof db.settings.payment.receiverProfiles === 'object') {
-    for (const profile of Object.values(db.settings.payment.receiverProfiles)) {
+    const profiles = Object.values(db.settings.payment.receiverProfiles);
+    const legacyBank = profiles.find(profile => profile && (profile.bankAccountNumber || profile.bankAccountName || profile.bankName));
+    if (legacyBank && !db.settings.payment.bankAccountNumber && !db.settings.payment.bankAccountName && !db.settings.payment.bankName) {
+      for (const field of ['bankName', 'bankAccountNumber', 'bankAccountName', 'bankAccountNameEn', 'bankAccountType', 'bankQrImage']) {
+        if (legacyBank[field] !== undefined && legacyBank[field] !== null && legacyBank[field] !== '') db.settings.payment[field] = legacyBank[field];
+      }
+      changed = true;
+    }
+    for (const profile of profiles) {
       if (!profile || typeof profile !== 'object') continue;
       for (const field of removedPromptPayFields) {
         if (Object.hasOwn(profile, field)) {
@@ -602,7 +609,6 @@ function migrateSchema(db) {
   // then the marker prevents later restarts from clearing newly entered data.
   if ((Number(db.settings.payment.receivingAccountResetVersion) || 0) < 1) {
     Object.assign(db.settings.payment, {
-      bankName: '', bankAccountNumber: '', bankAccountName: '',
       receivingAccountResetVersion: 1,
     });
     changed = true;
