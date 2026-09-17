@@ -1,5 +1,5 @@
 // Google reCAPTCHA v2 (checkbox) verification for signup forms — one
-// platform-wide key pair shared by every shop, same as EASYSLIP_API_KEY.
+// platform-wide key pair shared by every shop.
 const axios = require('axios');
 
 const SITE_KEY = process.env.RECAPTCHA_SITE_KEY || '';

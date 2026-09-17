@@ -194,10 +194,8 @@ function defaultData() {
         bankQrImage: null,
         truemoneyPhone: '',
         truemoneyEnabled: true,
-        // Slip Verification Provider: 'byshop' (recommended) | 'slipok' | 'easyslip' | 'none'
+        // Slip Verification Provider: 'slipok' | 'slipcheck' | 'rdcw' | 'slip2go' | 'none'
         slipProvider: 'auto',
-        byshopApiKey: '',
-        byshopEndpoint: 'https://api.byshop.me/api',
         slip2goApiKey: '',
         slip2goEndpoint: 'https://api.slip2go.com/api',
         slipcheckApiKey: '',
@@ -540,8 +538,11 @@ function migrateSchema(db) {
   }
   if (db.settings.payment.slipProvider === undefined) {
     db.settings.payment.slipProvider = 'auto';
-    db.settings.payment.byshopApiKey ??= '';
-    db.settings.payment.byshopEndpoint ??= 'https://api.byshop.me/api';
+    changed = true;
+  }
+  if (db.settings.payment.byshopApiKey !== undefined || db.settings.payment.byshopEndpoint !== undefined) {
+    delete db.settings.payment.byshopApiKey;
+    delete db.settings.payment.byshopEndpoint;
     changed = true;
   }
   if (db.settings.payment.topupWebhookUrl === undefined) {
@@ -674,12 +675,6 @@ function migrateSchema(db) {
   }
   if (!db.settings.apiProviders) {
     db.settings.apiProviders = {
-      byshop: {
-        enabled: false,
-        apiKey: '',
-        endpoint: 'https://api.byshop.me/api',
-        autoFulfill: true,
-      },
       custom: {
         enabled: false,
         endpoint: '',
@@ -689,13 +684,8 @@ function migrateSchema(db) {
     };
     changed = true;
   }
-  if (!db.settings.apiProviders.byshop) {
-    db.settings.apiProviders.byshop = {
-      enabled: false,
-      apiKey: '',
-      endpoint: 'https://api.byshop.me/api',
-      autoFulfill: true,
-    };
+  if (db.settings.apiProviders.byshop) {
+    delete db.settings.apiProviders.byshop;
     changed = true;
   }
   if (!db.settings.apiProviders.custom) {
@@ -1065,7 +1055,10 @@ async function getPrivateMedia(id) {
 async function getMedia(id) {
   if (!mediaBucket || !ObjectId.isValid(id)) return null;
   const objectId = new ObjectId(id);
-  const file = await mediaBucket.find({ _id: objectId }).next();
+  // Private uploads (customer slips) must only be served through the
+  // authenticated /account/topup/:id/slip-file route. Never expose them via
+  // the public GridFS media endpoint even if an ObjectId is guessed.
+  const file = await mediaBucket.find({ _id: objectId, 'metadata.private': { $ne: true } }).next();
   if (!file) return null;
   return { file, stream: mediaBucket.openDownloadStream(objectId) };
 }

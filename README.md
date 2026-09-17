@@ -52,6 +52,8 @@ public/                # ไฟล์ static (css, img)
 
 หากเข้าแอดมินไม่ได้ ให้ตั้ง `ADMIN_USERNAME` และ `ADMIN_PASSWORD` ใน Environment Variables ของโฮสต์แล้ว Deploy ใหม่ ระบบจะกู้สิทธิ์และเปลี่ยนรหัสของบัญชีแอดมินให้โดยไม่ลบข้อมูลร้าน
 
+ใน production ต้องตั้ง `SESSION_SECRET` เป็นค่าสุ่มยาวอย่างน้อย 32 ตัวอักษร ระบบจะหยุดเริ่มต้นเมื่อไม่ได้ตั้งค่านี้ เพื่อไม่ให้ใช้ secret ค่าเริ่มต้นที่เดาได้
+
 โครงสร้างข้อมูลทั้งหมด (settings, products, filterTags, stockItems, orders, coupons, announcements, users, reviews, walletTransactions) นิยามไว้ที่ `defaultData()` ใน `src/data/store.js` — นี่คือจุดเดียวที่ควรดูเพื่อเข้าใจ schema ทั้งหมดของระบบ
 
 ## ฟีเจอร์หลัก

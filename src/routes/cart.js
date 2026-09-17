@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
-const byshop = require('../services/byshop');
 const { requireLogin, currentUser } = require('../middleware/auth');
 const { withEffectivePrice } = require('../services/pricing');
 
@@ -11,13 +10,7 @@ function getCart(req) {
 }
 
 function availableStock(productId) {
-  const localStock = store.data.stockItems.filter(s => s.productId === productId && s.status === 'available').length;
-  if (localStock > 0) return localStock;
-  const product = store.data.products.find(p => p.id === productId);
-  if (product && product.apiProvider === 'byshop' && store.data.settings?.apiProviders?.byshop?.enabled) {
-    return 999;
-  }
-  return 0;
+  return store.data.stockItems.filter(s => s.productId === productId && s.status === 'available').length;
 }
 
 function isProductVisible(product) {
@@ -182,28 +175,7 @@ router.post('/checkout', requireLogin, (req, res) => {
 
       const orderItems = [];
       for (const item of items) {
-        const isByshop = item.product.apiProvider === 'byshop' && store.data.settings?.apiProviders?.byshop?.enabled;
         let stockPool = store.data.stockItems.filter(s => s.productId === item.product.id && s.status === 'available');
-
-        // If BYSHOP auto-fulfillment is active and stock pool has fewer items than requested,
-        // create instant stock items for this order.
-        if (isByshop && stockPool.length < item.qty) {
-          const needed = item.qty - stockPool.length;
-          for (let k = 0; k < needed; k++) {
-            const newStock = {
-              id: store.genId(10),
-              productId: item.product.id,
-              username: '',
-              password: '',
-              extra: 'จัดส่งผ่านระบบ BYSHOP API',
-              status: 'available',
-              soldOrderId: null,
-              addedAt: new Date().toISOString()
-            };
-            store.data.stockItems.push(newStock);
-            stockPool.push(newStock);
-          }
-        }
 
         if (stockPool.length < item.qty) {
           req.flash('error', `สินค้า "${item.product.title}" มีไม่พอในสต๊อก กรุณาลองใหม่`);
@@ -214,30 +186,6 @@ router.post('/checkout', requireLogin, (req, res) => {
           const stockItem = stockPool[i];
           stockItem.status = 'reserved';
           reservedStockItems.push(stockItem);
-
-          // Trigger BYSHOP API auto-order if enabled
-          if (isByshop && store.data.settings?.apiProviders?.byshop?.autoFulfill) {
-            const byshopKey = store.data.settings.apiProviders.byshop.apiKey;
-            const byshopEndpoint = store.data.settings.apiProviders.byshop.endpoint;
-            const byshopProductId = item.product.apiProductId || item.product.id;
-
-            try {
-              const apiRes = await byshop.placeOrder({
-                apiKey: byshopKey,
-                byshopProductId: byshopProductId,
-                quantity: 1,
-                customerInput: user.username,
-                customEndpoint: byshopEndpoint
-              });
-              if (apiRes.ok && apiRes.deliveredCredentials) {
-                stockItem.username = apiRes.deliveredCredentials.username || stockItem.username;
-                stockItem.password = apiRes.deliveredCredentials.password || stockItem.password;
-                stockItem.extra = apiRes.deliveredCredentials.extra || stockItem.extra;
-              }
-            } catch (apiErr) {
-              console.error('[BYSHOP checkout fulfill error]:', apiErr.message);
-            }
-          }
 
           orderItems.push({
             productId: item.product.id,

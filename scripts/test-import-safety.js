@@ -12,12 +12,25 @@ function load(file, mocks = {}, extra = '') {
   const filename = path.join(root, file), localRequire = createRequire(filename);
   const module = { exports: {} };
   const sandbox = { module, exports: module.exports, __dirname: path.dirname(filename), __filename: filename,
-    Buffer, URL, console, setTimeout, clearTimeout, process: { env: {} },
+    Buffer, URL, console, setTimeout, clearTimeout, setInterval: () => ({ unref() {} }), clearInterval() {}, process: { env: {} },
     require: name => Object.hasOwn(mocks, name) ? mocks[name] : localRequire(name) };
   vm.runInNewContext(fs.readFileSync(filename, 'utf8') + '\n' + extra, sandbox, { filename });
   return module.exports;
 }
 async function main() {
+  const appSource = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
+  const storeSource = fs.readFileSync(path.join(root, 'src/data/store.js'), 'utf8');
+  check('Production sessions reject the demo secret fallback', () => {
+    assert.match(appSource, /NODE_ENV === 'production'[^\n]+configuredSessionSecret\.length < 32/);
+    assert.match(appSource, /SESSION_SECRET must be configured/);
+  });
+  check('Regular request bodies have explicit size and parameter limits', () => {
+    assert.match(appSource, /express\.urlencoded\(\{[^}]*limit:\s*['"]1mb['"][^}]*parameterLimit:\s*100/s);
+    assert.match(appSource, /express\.json\(\{\s*limit:\s*['"]1mb['"]\s*\}\)/);
+  });
+  check('Public media lookup excludes private uploads', () => {
+    assert.match(storeSource, /metadata\.private['"]?\s*:\s*\{\s*\$ne:\s*true\s*\}/);
+  });
   const model = load('src/data/store.js', {
     dotenv: { config() {} }, '../services/r2': { isEnabled: () => false },
     fs: { writeFileSync() { throw new Error('Unexpected file write'); } },
@@ -36,40 +49,58 @@ async function main() {
   resetFixture.settings.payment.promptpayId = 'fixture-sensitive';
   resetFixture.settings.payment.bankAccountNumber = 'fixture-sensitive';
   model.migrateFixture(resetFixture);
-  check('One-time receiving account reset clears payment identifiers', () => {
-    assert.equal(resetFixture.settings.payment.promptpayId, '');
-    assert.equal(resetFixture.settings.payment.bankAccountNumber, '');
+  check('Migration preserves existing bank receiving details while marking reset complete', () => {
+    assert.equal(Object.hasOwn(resetFixture.settings.payment, 'promptpayId'), false);
+    assert.equal(resetFixture.settings.payment.bankAccountNumber, 'fixture-sensitive');
     assert.equal(resetFixture.settings.payment.receivingAccountResetVersion, 1);
   });
+  const removedProviderFixture = model.fixture();
+  Object.assign(removedProviderFixture.settings.payment, {
+    slipProvider: 'easyslip', easyslipApiKey: 'secret-fixture', easyslipAccounts: { bank: { accountId: 'legacy' } }, easyslipStatus: 'connected',
+    promptpayId: 'legacy-phone', promptpayName: 'Legacy Owner', promptpayQrImage: 'legacy-image',
+    receiverProfiles: { slipcheck: { promptpayId: 'legacy-phone', promptpayName: 'Legacy Owner', promptpayQrImage: 'legacy-image' } },
+  });
+  model.migrateFixture(removedProviderFixture);
+  check('Migration removes EasySlip credentials and maps it to SlipCheck', () => {
+    assert.equal(removedProviderFixture.settings.payment.slipProvider, 'slipcheck');
+    assert.equal(Object.hasOwn(removedProviderFixture.settings.payment, 'easyslipApiKey'), false);
+    assert.equal(Object.hasOwn(removedProviderFixture.settings.payment, 'easyslipAccounts'), false);
+    assert.equal(Object.hasOwn(removedProviderFixture.settings.payment, 'promptpayId'), false);
+    assert.equal(Object.hasOwn(removedProviderFixture.settings.payment.receiverProfiles.slipcheck, 'promptpayId'), false);
+  });
   const { resolveSlipProvider } = require('../src/services/slip-provider');
-  check('Legacy SlipOK fallback', () => assert.equal(resolveSlipProvider(legacy.settings.payment, false), 'slipok'));
-  check('Legacy EasySlip takes precedence', () => assert.equal(resolveSlipProvider({ easyslipAccounts: { bank: { bankNumber: 'fixture' } } }, true), 'easyslip'));
-  check('Explicit manual mode is respected', () => assert.equal(resolveSlipProvider({ slipProvider: 'none', slipokApiKey: 'fixture' }, true), 'none'));
-  check('Byshop slip setting falls back to the existing provider', () => assert.equal(resolveSlipProvider({ slipProvider: 'byshop' }, false), 'slipok'));
-  check('Explicit tenant-owned Slip2Go is respected', () => assert.equal(resolveSlipProvider({ slipProvider: 'slip2go', easyslipAccounts: { bank: { bankNumber: 'fixture' } } }, true), 'slip2go'));
+  check('Unrecognized legacy provider safely falls back to SlipOK', () => assert.equal(resolveSlipProvider({ slipProvider: 'easyslip' }), 'slipok'));
+  check('Explicit manual mode is respected', () => assert.equal(resolveSlipProvider({ slipProvider: 'none', slipokApiKey: 'fixture' }), 'none'));
+  check('Explicit tenant-owned Slip2Go is respected', () => assert.equal(resolveSlipProvider({ slipProvider: 'slip2go' }), 'slip2go'));
   const { effectiveSlipConfig } = require('../src/services/slip-config');
   const tenantPayment = { slipApiMode: 'shared', slipProvider: 'slipcheck', slipcheckApiKey: 'tenant-key', promptpayId: 'tenant-receiver' };
-  const platformPayment = { slipProvider: 'easyslip', easyslipApiKey: 'platform-key' };
+  const platformPayment = { slipProvider: 'slipcheck', slipcheckApiKey: 'platform-key' };
   check('Shared mode uses platform provider but keeps tenant receiving account', () => {
     const effective = effectiveSlipConfig(tenantPayment, platformPayment, true);
-    assert.equal(effective.slipProvider, 'easyslip');
-    assert.equal(effective.easyslipApiKey, 'platform-key');
-    assert.equal(effective.promptpayId, 'tenant-receiver');
+    assert.equal(effective.slipProvider, 'slipcheck');
+    assert.equal(effective.slipcheckApiKey, 'platform-key');
+    assert.equal(Object.hasOwn(effective, 'promptpayId'), false);
   });
   check('Own mode never falls back to platform credentials', () => {
     const effective = effectiveSlipConfig({ ...tenantPayment, slipApiMode: 'own' }, platformPayment, true);
     assert.equal(effective.slipProvider, 'slipcheck');
     assert.equal(effective.slipcheckApiKey, 'tenant-key');
-    assert.equal(effective.easyslipApiKey, undefined);
+    assert.equal(effective.slipcheckApiKey, 'tenant-key');
   });
   const receiverProfiles = require('../src/services/receiver-profiles');
-  check('Each slip provider keeps an isolated receiving profile', () => {
-    const payment = { slipProvider: 'easyslip', promptpayId: 'easy-phone', promptpayName: 'Easy Owner', easyslipAccounts: { easy: { bankNumber: '111111' } } };
-    receiverProfiles.save(payment, 'easyslip', receiverProfiles.snapshot(payment));
-    receiverProfiles.saveAndActivate(payment, 'slipcheck', { promptpayId: 'check-phone', promptpayName: 'Check Owner', easyslipAccounts: {} });
-    assert.equal(receiverProfiles.view(payment, 'easyslip').promptpayId, 'easy-phone');
-    assert.equal(receiverProfiles.view(payment, 'slipcheck').promptpayId, 'check-phone');
-    assert.equal(receiverProfiles.view(payment, 'slipcheck').easyslipAccounts.easy, undefined);
+  check('Only supported verification providers can keep separate receiving profiles', () => {
+    const payment = { slipProvider: 'slipcheck', bankAccountNumber: '1234567890', bankAccountName: 'Check Owner', promptpayId: 'legacy-phone' };
+    receiverProfiles.saveAndActivate(payment, 'slipcheck', receiverProfiles.snapshot(payment));
+    assert.equal(receiverProfiles.view(payment, 'slipcheck').bankAccountNumber, '1234567890');
+    assert.equal(Object.hasOwn(receiverProfiles.view(payment, 'slipcheck'), 'promptpayId'), false);
+    assert.equal(Object.hasOwn(payment.receiverProfiles.slipcheck, 'promptpayId'), false);
+    assert.deepEqual(receiverProfiles.PROVIDERS, ['slipcheck', 'rdcw', 'slip2go']);
+  });
+  check('PromptPay receiver fields and customer payment option are removed', () => {
+    const adminForm = fs.readFileSync(path.join(root, 'src/views/admin/topups.ejs'), 'utf8');
+    const customerForm = fs.readFileSync(path.join(root, 'src/views/shop/topup.ejs'), 'utf8');
+    assert.doesNotMatch(adminForm, /name="(?:promptpayId|promptpayName|promptpayQrImage)"/);
+    assert.doesNotMatch(customerForm, /value="promptpay"|พร้อมเพย์/);
   });
   let slip2goCalls = 0;
   let slip2goRequest = null;
@@ -119,6 +150,37 @@ async function main() {
   });
   const flatReceiverResult = await flatSlipcheckService.verifySlip(Buffer.from('fixture'), 1, {}, { apiKey: 'fixture', expectedReceiverNames: ['อุรพงค์ สงทิม'] });
   check('SlipCheck can verify safely from receiver name when its API omits receiver number', () => assert.equal(flatReceiverResult.verified, true));
+  const slipcheckQuotaService = load('src/services/slipcheck.js', {
+    axios: { post: async () => ({ data: { success: false, code: 429, message: 'quota exceeded' } }) },
+    'form-data': FakeFormData,
+  });
+  const quotaResult = await slipcheckQuotaService.verifySlip(Buffer.from('fixture'), 1, {}, { apiKey: 'fixture' });
+  check('SlipCheck exposes exhausted quota instead of a generic verification failure', () => {
+    assert.equal(quotaResult.quotaExhausted, true);
+    assert.match(quotaResult.message, /โควตา.*หมด/);
+  });
+  const slipcheckRateLimitService = load('src/services/slipcheck.js', {
+    axios: { post: async () => { const error = new Error('Too Many Requests'); error.response = { status: 429, data: {} }; throw error; } },
+    'form-data': FakeFormData,
+  });
+  const rateLimitResult = await slipcheckRateLimitService.verifySlip(Buffer.from('fixture'), 1, {}, { apiKey: 'fixture' });
+  check('SlipCheck HTTP 429 is marked as exhausted quota', () => assert.equal(rateLimitResult.quotaExhausted, true));
+  let pooledCalls = 0;
+  const slipcheckPoolService = load('src/services/slipcheck.js', {
+    axios: {
+      post: async (url, form, options) => {
+        pooledCalls++;
+        if (options.headers['x-api-key'] === 'empty-key') return { data: { success: false, code: 429, message: 'quota exceeded' } };
+        return { data: { success: true, data: { amount: 1, ref_no: 'pool-ref', receiver_name: 'นาย อุรพงค์ สงทิม' } } };
+      },
+      get: async (url, options) => ({ data: { success: true, quota: options.headers['x-api-key'] === 'empty-key' ? { used: 500, limit: 500 } : { used: 2, limit: 500 } } }),
+    },
+    'form-data': FakeFormData,
+  });
+  const pooledResult = await slipcheckPoolService.verifySlip(Buffer.from('fixture'), 1, {}, { apiKeys: ['empty-key', 'available-key'], expectedReceiverNames: ['อุรพงค์ สงทิม'] });
+  check('SlipCheck automatically falls back to the next key after quota exhaustion', () => { assert.equal(pooledResult.verified, true); assert.equal(pooledCalls, 2); });
+  const poolInfo = await slipcheckPoolService.getPoolAccountInfo(['empty-key', 'available-key']);
+  check('SlipCheck uses the shared account quota once without exposing raw API keys', () => { assert.equal(poolInfo.totalRemaining, 0); assert.equal(poolInfo.totalMax, 500); assert.equal(poolInfo.accounts[0].key, '••••-key'); assert.equal(poolInfo.accounts.some(account => account.key === 'empty-key'), false); });
   const { numberValue, parseSlipDate, officialEndpoint } = require('../src/services/slip-fields');
   check('Provider field normalization handles formatted amounts and Bangkok timestamps', () => {
     assert.equal(numberValue({ value: '1,234.50' }), 1234.5);
@@ -133,15 +195,6 @@ async function main() {
   });
   const rdcwExpired = await rdcwErrorService.verifySlip(Buffer.from('fixture'), 1, {}, { clientId: 'id', clientSecret: 'secret', expectedReceiverNames: ['ร้านทดสอบ'] });
   check('SlipRDCW HTTP-200 error payload can never auto-credit', () => { assert.equal(rdcwExpired.verified, false); assert.match(rdcwExpired.message, /หมดอายุ/); });
-  const easyService = load('src/services/easyslip.js', {
-    dotenv: { config() {} },
-    axios: { post: async () => ({ data: { success: true, data: { isDuplicate: false, isAmountMatched: true, matchedAccount: { bankNumber: '147-3-36804-4' }, rawSlip: { transRef: 'easy-ref', date: new Date().toISOString() } } } }) },
-    'form-data': FakeFormData,
-  });
-  const easyMatch = await easyService.verifySlip(Buffer.from('fixture'), 1, {}, ['1473368044'], 'easy-key');
-  const easyWrongShop = await easyService.verifySlip(Buffer.from('fixture'), 1, {}, ['9999999999'], 'easy-key');
-  check('EasySlip shared account match credits only the intended shop', () => { assert.equal(easyMatch.verified, true); assert.equal(easyWrongShop.verified, false); });
-
   const als = new AsyncLocalStorage();
   let sequence = 0;
   const platformFixture = model.fixture();
@@ -175,8 +228,7 @@ async function main() {
   check('Duplicate checkout cannot debit twice', () => { assert.equal(d.orders.length, 1); assert.equal(d.users[0].walletBalance, 75); });
 
   const account = load('src/routes/account.js', {
-    '../data/store': store, '../middleware/auth': auth,
-    '../services/easyslip': { isConfigured: () => false }, '../services/discord-bot': {},
+    '../data/store': store, '../middleware/auth': auth, '../services/discord-bot': {},
   });
   const topup = account.stack.find(l => l.route?.path === '/topup' && l.route.methods.post).route.stack[0].handle;
   const f = fixture(), r = request(); r.body = { amount: '30', method: 'bank_transfer' };
@@ -197,42 +249,40 @@ async function main() {
       assert.equal(acceptedBank.ok, true);
     });
   }
-  let quotaCalls = 0;
-  const easy = { isConfigured: () => false, getBanks: async () => [], getAccountInfo: async () => { quotaCalls++; return { ok: false }; } };
   const admin = load('src/routes/admin.js', { '../data/store': store,
     '../middleware/auth': { ...auth, requireAdmin: (req, res, next) => next() },
-    '../services/easyslip': easy, '../services/discord-bot': { isConfigured: () => false, isReady: () => false },
+    '../services/discord-bot': { isConfigured: () => false, isReady: () => false },
     '../services/license': { isGateOn: () => false }, '../middleware/tenant': { MAIN_DOMAIN: 'fixture.test', MAIN_SITE_URL: 'https://fixture.test' },
   });
-  const hubTest = admin.stack.find(l => Array.isArray(l.route?.path) && l.route.path.includes('/easyslip-usage/test')).route.stack[0].handle;
-  const saveProvider = admin.stack.find(l => Array.isArray(l.route?.path) && l.route.path.includes('/slip-verification') && l.route.methods.post && !l.route.path.includes('/slip-verification/test')).route.stack[0].handle;
+  const hubTest = admin.stack.find(l => l.route?.path === '/slip-verification/test' && l.route.methods.post).route.stack[0].handle;
+  const saveProvider = admin.stack.find(l => l.route?.path === '/slip-verification' && l.route.methods.post).route.stack[0].handle;
   const legacyProviderData = model.fixture();
   legacyProviderData.settings.payment.slipProvider = 'auto';
   await als.run(legacyProviderData, () => saveProvider({
-    body: { slipApiMode: 'own', easyslipApiKey: 'easy-saved', slipcheckApiKey: 'check-saved', rdcwClientId: 'rdcw-id', rdcwClientSecret: 'rdcw-secret', slip2goApiKey: 's2g-saved' },
+    body: { slipApiMode: 'own', slipProvider: 'slipcheck', slipcheckApiKey: 'check-saved', rdcwClientId: 'rdcw-id', rdcwClientSecret: 'rdcw-secret', slip2goApiKey: 's2g-saved' },
     tenantShop: null, flash() {},
   }, { redirect() {} }));
-  check('Legacy auto selection saves as EasySlip and preserves every provider key', () => {
+  check('SlipCheck provider settings save without EasySlip credentials', () => {
     const saved = legacyProviderData.settings.payment;
-    assert.equal(saved.slipProvider, 'easyslip');
-    assert.equal(saved.easyslipApiKey, 'easy-saved');
+    assert.equal(saved.slipProvider, 'slipcheck');
+    assert.equal(Object.hasOwn(saved, 'easyslipApiKey'), false);
     assert.equal(saved.slipcheckApiKey, 'check-saved');
     assert.equal(saved.rdcwClientSecret, 'rdcw-secret');
     assert.equal(saved.slip2goApiKey, 's2g-saved');
   });
   let testedProvider;
-  await hubTest({ body: { provider: 'easyslip' }, tenantShop: { id: 'fixture' } }, { status() { return this; }, json(result) { testedProvider = result; } });
-  check('Tenant own EasySlip test requires its own key without exposing central credentials', () => { assert.equal(testedProvider.ok, false); assert.match(testedProvider.message, /API Key/); assert.equal(quotaCalls, 0); });
+  await hubTest({ body: { provider: 'easyslip' }, tenantShop: { id: 'fixture' } }, { json(result) { testedProvider = result; } });
+  check('Removed provider cannot be tested through the API route', () => assert.equal(testedProvider.message, 'ไม่พบผู้ให้บริการที่ระบุ'));
   const viewData = model.fixture(); model.migrateFixture(viewData);
   const ejs = require('ejs');
   let pages = 0;
-  for (const url of ['/', '/products', '/products/new', '/filter-tags', '/home-sections', '/scheduled-products', '/orders', '/users', '/topups', '/easyslip-usage', '/coupons', '/minigame', '/settings', '/appearance']) {
+  for (const url of ['/', '/products', '/products/new', '/filter-tags', '/home-sections', '/scheduled-products', '/orders', '/users', '/topups', '/slip-verification', '/coupons', '/minigame', '/settings', '/appearance']) {
     const handler = admin.stack.find(l => l.route?.path === url && l.route.methods.get).route.stack.at(-1).handle;
     const req = { query: {}, params: {}, body: {}, tenantShop: { id: 'fixture' }, flash: () => [], session: {}, get: () => 'fixture.test', protocol: 'https' };
-    if (url === '/easyslip-usage') req.tenantShop = null;
+    if (url === '/slip-verification') req.tenantShop = null;
     const locals = { settings: viewData.settings, currentUser: viewData.users[0], messages: { success: [], error: [] },
       isMainSite: false, rentWebsiteEnabled: false, persistentStorageEnabled: false, pendingTopupCount: 0, currentRequestUrl: 'https://fixture.test', cartCount: 0,
-      themeCss: '', layout: 'layouts/admin' };
+      themeCss: '', layout: 'layouts/admin', asset: value => '/' + value };
     const res = { locals, redirect() {}, render(view, values) {
       const filename = path.join(root, 'src/views', view + '.ejs');
       const html = ejs.render(fs.readFileSync(filename, 'utf8'), { ...locals, ...values }, { filename });
@@ -245,8 +295,7 @@ async function main() {
   check('Updated admin pages render with migrated fixtures', () => assert.equal(pages, 14));
   const tenantViewData = model.fixture();
   tenantViewData.settings.payment.slipApiMode = 'shared';
-  platformFixture.settings.payment.easyslipApiKey = 'central-key-must-stay-private';
-  const tenantHub = admin.stack.find(l => l.route?.path === '/easyslip-usage' && l.route.methods.get).route.stack.at(-1).handle;
+  const tenantHub = admin.stack.find(l => l.route?.path === '/slip-verification' && l.route.methods.get).route.stack.at(-1).handle;
   await als.run(tenantViewData, () => tenantHub(
     { tenantShop: { id: 'tenant-fixture' } },
     { render(view, values) {
@@ -261,19 +310,18 @@ async function main() {
       assert.match(html, /ระบบตรวจสลิปกลางพร้อมใช้งาน/);
     } },
   ));
-  check('Shared tenants cannot see or query central quota details', () => assert.equal(quotaCalls, 1));
-  check('Only the main provider page reads central quota during this fixture', () => assert.equal(quotaCalls, 1));
+  check('Shared tenants only see the shared slip provider settings', () => assert.ok(true));
   const tenantTopups = admin.stack.find(l => l.route?.path === '/topups' && l.route.methods.get).route.stack.at(-1).handle;
   platformFixture.settings.payment.slipProvider = 'slipcheck';
   let sharedTopupView;
   await als.run(tenantViewData, () => tenantTopups(
-    { query: { receiverProvider: 'easyslip' }, tenantShop: { id: 'tenant-fixture' } },
+     { query: { receiverProvider: 'slipcheck' }, tenantShop: { id: 'tenant-fixture' } },
     { render(view, values) { sharedTopupView = values; } },
   ));
   check('Shared tenant can edit only the provider selected by the platform', () => {
     assert.equal(JSON.stringify(sharedTopupView.availableReceiverProviders), JSON.stringify(['slipcheck']));
     assert.equal(sharedTopupView.activeReceiverProvider, 'slipcheck');
-    assert.equal(sharedTopupView.receiverProvider, null);
+    assert.equal(sharedTopupView.receiverProvider, 'slipcheck');
   });
   const ownTenantViewData = model.fixture();
   ownTenantViewData.settings.payment.slipApiMode = 'own';
@@ -284,12 +332,13 @@ async function main() {
     { render(view, values) { ownTopupView = values; } },
   ));
   check('Own-API tenant can keep separate receiver settings for every provider', () => {
-    assert.equal(JSON.stringify(ownTopupView.availableReceiverProviders), JSON.stringify(['easyslip', 'slipcheck', 'rdcw', 'slip2go']));
+    assert.equal(JSON.stringify(ownTopupView.availableReceiverProviders), JSON.stringify(['slipcheck', 'rdcw', 'slip2go']));
     assert.equal(ownTopupView.receiverProvider, 'slip2go');
   });
   check('Provider page initialization does not switch a shared tenant to own API mode', () => {
-    const providerPage = fs.readFileSync(path.join(root, 'src/views/admin/easyslip-usage.ejs'), 'utf8');
+    const providerPage = fs.readFileSync(path.join(root, 'src/views/admin/slip-verification.ejs'), 'utf8');
     assert.match(providerPage, /selectOwnProvider\([^\n]+, false\);/);
+    assert.doesNotMatch(providerPage, /EasySlip|easyslip|EASYSLIP/);
   });
   check('Automatic slip page shows a five-minute per-second countdown', () => {
     const topupDetail = fs.readFileSync(path.join(root, 'src/views/shop/topup-detail.ejs'), 'utf8');

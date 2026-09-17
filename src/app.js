@@ -42,8 +42,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(expressLayouts);
 app.set('layout', 'layouts/main');
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+// Keep request bodies bounded before they reach route handlers. Multipart
+// uploads have their own 5 MB multer limit; these limits cover regular forms
+// and JSON endpoints so a crafted request cannot consume unbounded memory.
+app.use(express.urlencoded({ extended: true, limit: '1mb', parameterLimit: 100 }));
+app.use(express.json({ limit: '1mb' }));
 app.get('/health', async (req, res) => {
   try {
     await store.healthCheck();
@@ -159,8 +162,14 @@ class LocalFileSessionStore extends session.Store {
   }
 }
 
+const configuredSessionSecret = String(process.env.SESSION_SECRET || '').trim();
+if (process.env.NODE_ENV === 'production' && configuredSessionSecret.length < 32) {
+  throw new Error('SESSION_SECRET must be configured with at least 32 characters in production');
+}
+const sessionSecret = configuredSessionSecret || 'lilteam-shop-demo-secret';
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'lilteam-shop-demo-secret',
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: false,
   store: process.env.MONGODB_URI

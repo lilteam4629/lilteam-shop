@@ -23,15 +23,26 @@
   @media(min-width:901px){
     .storefront-hero-banner .lilteam-hero-command{position:relative!important;isolation:isolate!important}
     .storefront-hero-banner .lilteam-hero-command::before{display:none!important;content:none!important}
-    .storefront-hero-banner .lilteam-hero-command__copy{position:relative!important;z-index:1!important;max-width:1100px!important;padding:24px 18px 28px!important;background:none!important}
+    .storefront-hero-banner .lilteam-hero-command__copy{position:relative!important;z-index:1!important;width:min(820px,100%)!important;max-width:820px!important;padding:28px 32px 30px!important;border:1px solid color-mix(in srgb,var(--hero-outline-color) 18%,transparent)!important;border-radius:22px!important;background:linear-gradient(120deg,color-mix(in srgb,var(--hero-outline-color) 68%,transparent),color-mix(in srgb,var(--hero-outline-color) 28%,transparent) 72%,transparent)!important;box-shadow:0 18px 45px rgba(0,0,0,.14)!important;backdrop-filter:blur(9px)!important}
     .storefront-hero-banner .lilteam-hero-command__copy:before,.storefront-hero-banner .lilteam-hero-command__copy:after{display:none!important;content:none!important}
-    .storefront-hero-banner .lilteam-hero-command h1{max-width:1080px;color:var(--hero-text-color)!important;white-space:normal!important;font-size:clamp(38px,4vw,58px)!important;font-weight:950!important;line-height:1.08!important;letter-spacing:-.035em!important;-webkit-text-stroke:var(--hero-outline-width) var(--hero-outline-color)!important;paint-order:stroke fill!important;text-shadow:none!important;filter:none!important}
-    .storefront-hero-banner .lilteam-hero-command__copy>p{max-width:850px!important;color:var(--hero-text-color)!important;font-size:16px!important;font-weight:800!important;line-height:1.5!important;-webkit-text-stroke:calc(var(--hero-outline-width) * .55) var(--hero-outline-color)!important;paint-order:stroke fill!important;text-shadow:none!important;filter:none!important}
+    .storefront-hero-banner .lilteam-hero-command h1{max-width:760px;color:var(--hero-text-color)!important;white-space:normal!important;font-size:clamp(34px,3.5vw,52px)!important;font-weight:950!important;line-height:1.08!important;letter-spacing:-.045em!important;-webkit-text-stroke:0!important;paint-order:normal!important;text-shadow:0 3px 14px color-mix(in srgb,var(--hero-outline-color) 42%,transparent)!important;filter:none!important}
+    .storefront-hero-banner .lilteam-hero-command h1 em{display:inline-block;padding:.02em .16em;border-radius:.28em;background:color-mix(in srgb,var(--hero-text-color) 13%,transparent)!important;color:var(--hero-text-color)!important}
+    .storefront-hero-banner .lilteam-hero-command__copy>p{max-width:680px!important;color:var(--hero-text-color)!important;font-size:15px!important;font-weight:700!important;line-height:1.6!important;-webkit-text-stroke:0!important;paint-order:normal!important;text-shadow:0 2px 9px color-mix(in srgb,var(--hero-outline-color) 38%,transparent)!important;filter:none!important}
     .storefront-hero-banner .lilteam-hero-command__copy>p span{color:var(--hero-text-color)!important;text-shadow:none!important;filter:none!important}
     .storefront-hero-banner .lilteam-hero-command__eyebrow{color:var(--hero-text-color)!important;font-size:12px!important;font-weight:950!important;-webkit-text-stroke:calc(var(--hero-outline-width) * .45) var(--hero-outline-color)!important;paint-order:stroke fill!important;text-shadow:none!important;filter:none!important}.storefront-hero-banner .lilteam-hero-command h1 em{color:var(--hero-text-color)!important;-webkit-text-stroke:var(--hero-outline-width) var(--hero-outline-color)!important;text-shadow:none!important;filter:none!important}
     .latest-orders-heading h2,.latest-orders-heading p,.home-catalog-title h2,.home-catalog-title p{color:var(--text)!important;text-shadow:0 2px 5px color-mix(in srgb,var(--gold-dark) 75%,transparent)!important}
   }
   @media(max-width:900px){body{background-image:none!important;background-color:var(--bg)!important;background-attachment:scroll!important}}
+  /* Keep the copy treatment consistent when the banner is viewed at tablet
+     widths too; the older mobile stylesheet otherwise restores the oversized
+     text treatment shown in the previous design. */
+  .storefront-hero-banner .lilteam-hero-command__copy{position:relative!important;z-index:1!important;width:min(820px,100%)!important;max-width:820px!important;padding:24px 26px 26px!important;border:1px solid color-mix(in srgb,var(--hero-outline-color) 18%,transparent)!important;border-radius:20px!important;background:linear-gradient(120deg,color-mix(in srgb,var(--hero-outline-color) 68%,transparent),color-mix(in srgb,var(--hero-outline-color) 28%,transparent) 72%,transparent)!important;box-shadow:0 18px 45px rgba(0,0,0,.14)!important;backdrop-filter:blur(9px)!important}
+  .storefront-hero-banner .lilteam-hero-command h1{max-width:760px!important;color:var(--hero-text-color)!important;white-space:normal!important;font-size:clamp(30px,5.5vw,52px)!important;font-weight:950!important;line-height:1.08!important;letter-spacing:-.045em!important;-webkit-text-stroke:0!important;text-shadow:0 3px 14px color-mix(in srgb,var(--hero-outline-color) 42%,transparent)!important}
+  .storefront-hero-banner .lilteam-hero-command h1 em{display:inline-block!important;padding:.02em .16em!important;border-radius:.28em!important;background:color-mix(in srgb,var(--hero-text-color) 13%,transparent)!important;color:var(--hero-text-color)!important;-webkit-text-stroke:0!important}
+  .storefront-hero-banner .lilteam-hero-command__copy>p{max-width:680px!important;color:var(--hero-text-color)!important;font-size:14px!important;font-weight:700!important;line-height:1.6!important;-webkit-text-stroke:0!important;text-shadow:0 2px 9px color-mix(in srgb,var(--hero-outline-color) 38%,transparent)!important}
+  .storefront-hero-banner .lilteam-hero-command__copy>p span{color:var(--hero-text-color)!important;text-shadow:none!important}
+  .storefront-hero-banner .lilteam-hero-command__eyebrow{color:var(--hero-text-color)!important;font-size:11px!important;font-weight:950!important;-webkit-text-stroke:0!important;text-shadow:0 2px 8px color-mix(in srgb,var(--hero-outline-color) 36%,transparent)!important}
+  @media(max-width:640px){.storefront-hero-banner .lilteam-hero-command__copy{padding:18px!important;border-radius:16px!important}.storefront-hero-banner .lilteam-hero-command h1{font-size:clamp(26px,8vw,36px)!important}.storefront-hero-banner .lilteam-hero-command__copy>p{font-size:12px!important}.storefront-hero-banner .lilteam-hero-command__eyebrow{font-size:9px!important}}
 </style>
 <style>
 /* Category banners mirror the storefront reference: wide 600x200 artwork with metadata below. */
@@ -53,9 +64,9 @@
     <div class="banner-hero-shell w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
       <div class="lilteam-hero-command">
         <div class="lilteam-hero-command__copy">
-          <span class="lilteam-hero-command__eyebrow">LILTEAM DIGITAL STORE</span>
+          <span class="lilteam-hero-command__eyebrow">LILTEAM · DIGITAL GAME STORE</span>
           <h1>ยินดีต้อนรับสู่ <em><%= settings.shopName %></em></h1>
-          <p><%= settings.tagline %><br><span>เลือกซื้อสินค้าและชำระเงินได้สะดวกตลอด 24 ชั่วโมง</span></p>
+          <p><%= settings.tagline %><br><span>ชำระเงินง่าย · ส่งมอบอัตโนมัติ · พร้อมดูแลตลอด 24 ชั่วโมง</span></p>
           <div class="lilteam-hero-command__actions">
             <a href="/products" class="lilteam-hero-command__primary"><svg><use href="#ui-cart"/></svg> เลือกดูสินค้า <span>→</span></a>
             <a href="/help" class="lilteam-hero-command__secondary"><svg><use href="#ui-book"/></svg> วิธีสั่งซื้อ</a>

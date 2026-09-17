@@ -9,16 +9,13 @@ local secrets, data, and the user's README edits were preserved.
 
 - Legacy shops retain the existing EasySlip/SlipOK selection via `auto`.
 - Explicit manual review no longer falls through to a different provider.
-- Per the owner's latest instruction, the supplied checkout, BYSHOP, Slip2Go,
-  TrueMoney services and TrueMoney UI have been restored to the developer's version.
-  Content comparison confirms these five files match (ignoring line endings).
+- Per the owner's latest instruction, the supplied checkout, Slip2Go,
+  TrueMoney services and TrueMoney UI were restored to the developer's version.
 - Bank-slip verification routes only to the existing EasySlip/SlipOK integrations.
   Unsupported provider settings fall back to the existing configured provider;
-  manual review remains available. BYSHOP/Slip2Go demo slip approval is not called
+  manual review remains available. Slip2Go demo slip approval is not called
   by the account topup flow.
-- Restoring the supplied integrations is not a live payment certification: the
-  BYSHOP implementation includes simulated orders for demo keys and can complete
-  checkout after provider delivery failure. TrueMoney forwards redeemable vouchers
+- Restoring the supplied integrations is not a live payment certification: TrueMoney forwards redeemable vouchers
   and receiver phone numbers to api.xpluem.com. These behaviors are retained from
   the supplied code, not newly validated against live services.
 - Provider responses cannot approve a request already reviewed by an administrator.
