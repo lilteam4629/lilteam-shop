@@ -102,3 +102,37 @@ html:not(.light) .store-nav__account-name,html:not(.light) .store-nav__chevron{c
 /* A dedicated desktop top-up action keeps the wallet balance readable. */
 .store-nav__desktop-topup{display:flex;align-items:center;justify-content:center;gap:6px;height:39px;padding:0 13px;border:1px solid color-mix(in srgb,var(--gold) 48%,var(--border));border-radius:9px;background:color-mix(in srgb,var(--gold) 11%,var(--card));color:var(--gold-text);font-size:10px;font-weight:800;transition:.15s}.store-nav__desktop-topup svg{width:15px;height:15px}.store-nav__desktop-topup:hover{border-color:var(--gold);background:var(--gold);color:var(--gold-contrast);transform:translateY(-1px)}
 @media(max-width:900px){.store-nav__desktop-topup{display:none!important}}
+
+/* Mobile header inspired by the clean, high-contrast reference: a compact
+   black bar with one strong brand, round utility buttons and a white login
+   pill. The desktop navigation remains unchanged. */
+@media(max-width:900px){
+  .store-nav{background:#050505!important;border-bottom:1px solid #242424!important;box-shadow:none!important;color:#fff!important}
+  .store-nav__inner{display:flex!important;align-items:center!important;width:100%!important;min-height:82px!important;padding:11px 14px!important;gap:9px!important}
+  .store-nav__mobile-toggle{display:grid!important;place-items:center!important;flex:0 0 52px!important;width:52px!important;height:52px!important;padding:0!important;border:1px solid #2b2b2b!important;border-radius:18px!important;background:#101010!important;color:#fff!important;box-shadow:none!important}
+  .store-nav__mobile-toggle span{display:block!important;width:27px!important;height:3px!important;margin:3px 0!important;border-radius:99px!important;background:#fff!important}
+  .store-nav__brand{display:flex!important;align-items:center!important;flex:1 1 auto!important;min-width:0!important;gap:0!important;color:#fff!important}
+  .store-nav__brand img,.store-nav__logo-fallback{display:none!important}
+  .store-nav__brand strong{max-width:100%!important;overflow:hidden!important;color:#fff!important;font-size:clamp(17px,5.5vw,28px)!important;font-weight:850!important;letter-spacing:-.04em!important;text-overflow:ellipsis!important;white-space:nowrap!important}
+  .store-nav__links{display:none!important}
+  .store-nav__search{display:flex!important;flex:0 0 50px!important;width:50px!important;height:50px!important;margin:0!important;padding:0!important;border:1px solid #2b2b2b!important;border-radius:50%!important;background:transparent!important;overflow:hidden!important}
+  .store-nav__search input{display:none!important}
+  .store-nav__search button{display:grid!important;place-items:center!important;width:100%!important;height:100%!important;padding:0!important;border:0!important;background:transparent!important;color:#fff!important}
+  .store-nav__search button svg{width:24px!important;height:24px!important}
+  .store-nav__actions{display:flex!important;align-items:center!important;flex:0 0 auto!important;gap:8px!important;margin-left:0!important}
+  .store-nav__theme{display:grid!important;place-items:center!important;width:50px!important;height:50px!important;border:1px solid #2b2b2b!important;border-radius:50%!important;background:transparent!important;color:#fff!important}
+  .store-nav__theme svg{width:24px!important;height:24px!important}
+  .store-nav__cart,.store-nav__mobile-topup,.store-nav__desktop-topup,.store-nav__register{display:none!important}
+  .store-nav__login{display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;height:50px!important;min-width:112px!important;padding:0 16px!important;border:0!important;border-radius:999px!important;background:#fff!important;color:#090909!important;font-size:14px!important;font-weight:800!important;box-shadow:none!important}
+  .store-nav__login svg{width:21px!important;height:21px!important}
+  .store-nav__account{display:flex!important}
+  .store-nav__account summary{height:50px!important;padding:0 14px!important;border:0!important;border-radius:999px!important;background:#fff!important;color:#090909!important}
+  .store-nav__account-name,.store-nav__chevron{color:#090909!important}
+}
+@media(max-width:430px){
+  .store-nav__inner{padding-inline:10px!important;gap:6px!important}
+  .store-nav__mobile-toggle{flex-basis:48px!important;width:48px!important;height:48px!important;border-radius:16px!important}
+  .store-nav__search,.store-nav__theme{flex-basis:46px!important;width:46px!important;height:46px!important}
+  .store-nav__login{min-width:104px!important;height:46px!important;padding-inline:12px!important;font-size:12px!important}
+  .store-nav__login svg{width:19px!important;height:19px!important}
+}
