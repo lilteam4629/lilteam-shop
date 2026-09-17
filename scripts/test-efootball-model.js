@@ -3,7 +3,8 @@ const fs = require('fs');
 const catalog = require('../src/services/efootball-catalog');
 
 const status = catalog.status();
-assert.strictEqual(status.source, 'eFHUB');
+assert.strictEqual(status.source, 'eFHUB New Players');
+assert.strictEqual(status.sourceUrl, 'https://efhub.com/th/new-players');
 assert.ok(status.count >= 10, 'eFootball source should contain a useful player set');
 const forwards = catalog.queryCatalog({ position: 'CF' });
 assert.ok(forwards.items.length > 0 && forwards.items.every(item => item.position === 'CF'));

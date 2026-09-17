@@ -681,6 +681,16 @@ router.get('/filter-tags', (req, res) => {
 // assignment UI.
 router.post('/filter-tags/efootball/import', async (req, res) => {
   const sourceItems = efootballSource.queryCatalog({}).items;
+  const sourceIds = new Set(sourceItems.map(player => String(player.id)));
+  const staleIds = new Set(store.data.filterTags
+    .filter(tag => String(tag.id).startsWith('efootball-') && !sourceIds.has(String(tag.sourceId || tag.id).replace(/^efootball-/, '')))
+    .map(tag => String(tag.id)));
+  if (staleIds.size) {
+    store.data.filterTags = store.data.filterTags.filter(tag => !staleIds.has(String(tag.id)));
+    store.data.products.forEach(product => {
+      product.filterTagIds = (product.filterTagIds || []).filter(id => !staleIds.has(String(id)));
+    });
+  }
   const existing = new Map(store.data.filterTags.map(tag => [String(tag.id), tag]));
   let created = 0;
   sourceItems.forEach(player => {
@@ -706,7 +716,7 @@ router.post('/filter-tags/efootball/import', async (req, res) => {
     created += 1;
   });
   await store.save();
-  req.flash('success', `นำเข้ารูปผู้เล่น eFootball เป็นแท็กตัวกรองแล้ว ${sourceItems.length} รายการ (เพิ่มใหม่ ${created})`);
+  req.flash('success', `นำเข้ารูปผู้เล่นจาก eFHUB New Players เป็นแท็กตัวกรองแล้ว ${sourceItems.length} รายการ (เพิ่มใหม่ ${created}${staleIds.size ? ` ลบรายการเก่า ${staleIds.size}` : ''})`);
   res.redirect('/admin/filter-tags');
 });
 

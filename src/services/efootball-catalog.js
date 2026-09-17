@@ -18,6 +18,6 @@ function queryCatalog(query = {}) {
   return { items, total: items.length, positions: [...new Set(fallback.map(item => item.position))].sort() };
 }
 
-function status() { return { count: fallback.length, source: 'eFHUB', sourceUrl: 'https://efhub.com/th' }; }
+function status() { return { count: fallback.length, source: 'eFHUB New Players', sourceUrl: 'https://efhub.com/th/new-players' }; }
 
 module.exports = { queryCatalog, status, get sourceCount() { return fallback.length; } };
