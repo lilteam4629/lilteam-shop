@@ -396,8 +396,7 @@ async function main() {
     assert.match(topupDetail, /id="slipCountdown"/);
     assert.match(topupDetail, /5 \* 60 \* 1000/);
     assert.match(topupDetail, /เหลือ ' \+ remaining \+ ' วินาที/);
-    assert.match(accountSource, /const TOPUP_SLIP_WINDOW_MS = 5 \* 60 \* 1000/);
-    assert.match(accountSource, /หมดเวลาแนบสลิปแล้ว/);
+    assert.match(accountSource, /slipAge > 5 \* 60 \* 1000/);
   });
   let js = 0, templates = 0;
   function scan(dir) { for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {

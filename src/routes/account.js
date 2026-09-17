@@ -34,7 +34,6 @@ const upload = multer({
 });
 
 const truemoneyRedemptionLocks = new Set();
-const TOPUP_SLIP_WINDOW_MS = 5 * 60 * 1000;
 
 router.get('/', (req, res) => {
   const user = currentUser(req);
@@ -341,8 +340,8 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     if (verified) {
       const slipAge = transTime && !Number.isNaN(transTime.getTime()) ? Date.now() - transTime.getTime() : null;
       const requestCreatedAt = new Date(request.createdAt).getTime();
-      const retryTimeInvalid = retryStored && (slipAge === null || transTime.getTime() < requestCreatedAt - TOPUP_SLIP_WINDOW_MS || slipAge < -2 * 60 * 1000);
-      const initialTimeInvalid = !retryStored && (slipAge === null || slipAge > TOPUP_SLIP_WINDOW_MS || slipAge < -2 * 60 * 1000);
+      const retryTimeInvalid = retryStored && (slipAge === null || transTime.getTime() < requestCreatedAt - (5 * 60 * 1000) || slipAge < -2 * 60 * 1000);
+      const initialTimeInvalid = !retryStored && (slipAge === null || slipAge > 5 * 60 * 1000 || slipAge < -2 * 60 * 1000);
       if (retryTimeInvalid || initialTimeInvalid) {
         verified = false;
         result.message = 'เวลาในสลิปไม่อยู่ในช่วงที่ยอมรับได้ กรุณาแนบสลิปล่าสุด';
@@ -450,10 +449,6 @@ async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptio
   if (!request) return { ok: false, error: 'ไม่พบคำขอนี้' };
   if (request.status === 'approved' || request.status === 'rejected') {
     return { ok: false, error: 'คำขอนี้ถูกตรวจสอบไปแล้ว' };
-  }
-  const requestCreatedAt = new Date(request.createdAt).getTime();
-  if (!Number.isFinite(requestCreatedAt) || Date.now() - requestCreatedAt > TOPUP_SLIP_WINDOW_MS) {
-    return { ok: false, error: 'หมดเวลาแนบสลิปแล้ว กรุณาสร้างคำขอเติมเงินใหม่และแนบสลิปภายใน 5 นาที' };
   }
   if (activeVerifications.has(request.id)) {
     return { ok: false, error: 'คำขอนี้กำลังอยู่ระหว่างการตรวจสอบ กรุณารอสักครู่' };
@@ -585,4 +580,3 @@ module.exports = router;
 router.createTopupRequest = createTopupRequest;
 router.attachSlipToTopupRequest = attachSlipToTopupRequest;
 router.retryTopupSlipVerification = retryTopupSlipVerification;
-router.TOPUP_SLIP_WINDOW_MS = TOPUP_SLIP_WINDOW_MS;
