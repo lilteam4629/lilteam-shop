@@ -917,7 +917,7 @@ router.post('/home-sections/:id/toggle', async (req, res) => {
 // ---------- Storefront models ----------
 router.get('/storefront-models', (req, res) => {
   res.render('admin/storefront-models', {
-    title: 'โมเดลหน้าร้าน LINE Rangers',
+    title: 'โมเดลหน้าร้าน',
     active: 'storefront-models',
     currentModel: store.data.settings.storefrontModel || 'classic',
     allowRangersMarket: !!req.tenantShop?.isSystemLab,
