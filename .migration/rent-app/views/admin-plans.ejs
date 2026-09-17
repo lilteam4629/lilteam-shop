@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <%- include('_head-style') %>
+  <%- include('_theme-init') %>
+</head>
+<body class="admin-page">
+  <div class="admin-content">
+    <%- include('_admin-nav', { active: 'plans' }) %>
+
+    <% messages.error.forEach(m => { %>
+      <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/50 text-[var(--coral)] px-4 py-2 rounded-lg mb-3 text-sm"><%= m %></div>
+    <% }) %>
+    <% messages.success.forEach(m => { %>
+      <div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 px-4 py-2 rounded-lg mb-3 text-sm"><%= m %></div>
+    <% }) %>
+
+    <div class="space-y-3 mb-6">
+      <% plans.forEach(function (plan) { %>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <span class="font-bold text-lg"><%= plan.days %> วัน</span>
+              <span class="text-[var(--gold)] font-bold text-lg ml-2">฿<%= Number(plan.price).toLocaleString() %></span>
+              <% if (plan.promo) { %><span class="text-xs bg-[var(--coral)]/20 text-[var(--coral)] px-2 py-0.5 rounded-full ml-2">โปรโมชั่น</span><% } %>
+              <% if (!plan.active) { %><span class="text-xs bg-[var(--text-4)]/20 text-[var(--text-4)] px-2 py-0.5 rounded-full ml-2">ปิดใช้งาน</span><% } %>
+              <% if (plan.active && !plan.available) { %><span class="text-xs bg-[var(--coral)]/20 text-[var(--coral)] px-2 py-0.5 rounded-full ml-2">โปรหมดอายุ/เต็มโควต้า</span><% } %>
+            </div>
+            <div class="flex gap-2">
+              <form action="/admin/plans/<%= plan.id %>/toggle" method="post">
+                <button class="text-xs border border-[var(--border-light)] hover:border-[var(--gold)] rounded-lg px-3 py-1.5"><%= plan.active ? 'ปิดใช้งาน' : 'เปิดใช้งาน' %></button>
+              </form>
+              <form action="/admin/plans/<%= plan.id %>/delete" method="post" onsubmit="return confirm('ลบแพ็กเกจนี้?');">
+                <button class="text-xs border border-[var(--coral)]/50 text-[var(--coral)] hover:bg-[var(--coral)]/10 rounded-lg px-3 py-1.5">ลบ</button>
+              </form>
+            </div>
+          </div>
+          <form action="/admin/plans/<%= plan.id %>" method="post" class="grid grid-cols-2 sm:grid-cols-5 gap-2 items-end">
+            <div>
+              <label class="text-xs text-[var(--text-3)] block mb-1">จำนวนวัน</label>
+              <input name="days" type="number" min="1" value="<%= plan.days %>" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 text-sm" />
+            </div>
+            <div>
+              <label class="text-xs text-[var(--text-3)] block mb-1">ราคา (บาท)</label>
+              <input name="price" type="number" min="0" step="0.01" value="<%= plan.price %>" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 text-sm" />
+            </div>
+            <div class="flex items-center gap-1.5 pb-2">
+              <input type="checkbox" name="promo" id="promo-<%= plan.id %>" <%= plan.promo ? 'checked' : '' %> class="w-4 h-4" />
+              <label for="promo-<%= plan.id %>" class="text-xs text-[var(--text-3)]">โปรโมชั่น</label>
+            </div>
+            <div>
+              <label class="text-xs text-[var(--text-3)] block mb-1">โควต้าโปร</label>
+              <input name="promoLimit" type="number" min="1" value="<%= plan.promoLimit || '' %>" placeholder="ไม่จำกัด" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 text-sm" />
+            </div>
+            <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-3 py-1.5 text-sm">บันทึก</button>
+          </form>
+        </div>
+      <% }) %>
+      <% if (!plans.length) { %>
+        <p class="text-sm text-[var(--text-3)] text-center py-8">ยังไม่มีแพ็กเกจ — เพิ่มด้านล่าง</p>
+      <% } %>
+    </div>
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5">
+      <h2 class="font-semibold mb-3">เพิ่มแพ็กเกจใหม่</h2>
+      <form action="/admin/plans" method="post" class="grid grid-cols-2 sm:grid-cols-3 gap-2 items-end">
+        <div>
+          <label class="text-xs text-[var(--text-3)] block mb-1">จำนวนวัน</label>
+          <input name="days" type="number" min="1" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 text-sm" />
+        </div>
+        <div>
+          <label class="text-xs text-[var(--text-3)] block mb-1">ราคา (บาท)</label>
+          <input name="price" type="number" min="0" step="0.01" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-2 py-1.5 text-sm" />
+        </div>
+        <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-3 py-1.5 text-sm">เพิ่ม</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>

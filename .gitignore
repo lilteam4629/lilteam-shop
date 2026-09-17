@@ -9,7 +9,11 @@ public/uploads/media/
 *.zip
 *.pem
 *.key
-.migration/
+# The standalone rent-app is deployed from this subdirectory; keep its source
+# versioned so rental storefront changes are included in deploys.
+.migration/*
+!.migration/rent-app/
+!.migration/rent-app/**
 scripts/prepare-cloud-migration.js
 public/uploads/slips/*
 !public/uploads/slips/.gitkeep

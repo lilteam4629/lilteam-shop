@@ -1,0 +1,14 @@
+<button id="public-theme-toggle" type="button" aria-label="สลับโหมดมืดสว่าง" class="fixed top-4 right-4 z-50 w-10 h-10 rounded-xl border border-[var(--border-light)] bg-[var(--card)] shadow-lg hover:border-[var(--gold)] transition-colors">☀️</button>
+<script>
+(function(){
+  var root=document.documentElement,button=document.getElementById('public-theme-toggle');
+  function sync(){button.textContent=root.getAttribute('data-theme')==='light'?'🌙':'☀️'}
+  sync();
+  button.addEventListener('click',function(){
+    var next=root.getAttribute('data-theme')==='light'?'dark':'light';
+    root.setAttribute('data-theme',next);
+    try{localStorage.setItem('rentTheme',next)}catch(e){}
+    sync();
+  });
+})();
+</script>

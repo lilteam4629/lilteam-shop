@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <%- include('_head-style') %>
+  <%- include('_theme-init') %>
+</head>
+<body class="min-h-screen">
+  <%- include('_public-theme-toggle') %>
+  <header class="border-b border-[var(--border)]">
+    <div class="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+      <a href="/" class="font-bold text-sm">← หน้าหลัก</a>
+      <div class="flex items-center gap-3 text-sm">
+        <% if (currentUser) { %><span class="text-[var(--text-3)]">฿<%= currentUser.walletBalance.toLocaleString() %></span><% } %>
+        <a href="/wallet" class="text-[var(--gold)] hover:underline">เติมเงิน</a>
+        <form action="/logout" method="post"><button class="text-[var(--text-4)] hover:text-[var(--coral)]">ออกจากระบบ</button></form>
+      </div>
+    </div>
+  </header>
+
+  <section class="max-w-xl mx-auto px-4 py-10">
+    <h1 class="text-2xl font-bold mb-1">🏪 ร้านของฉัน</h1>
+    <p class="text-sm text-[var(--text-3)] mb-6">ร้านที่คุณเปิดทั้งหมด ต่ออายุได้จากตรงนี้เลย</p>
+
+    <% messages.error.forEach(m => { %><div class="bg-[var(--coral)]/10 border border-[var(--coral)]/50 text-[var(--coral)] px-4 py-2 rounded-lg mb-3 text-sm text-center"><%= m %></div><% }) %>
+    <% messages.success.forEach(m => { %><div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 px-4 py-2 rounded-lg mb-3 text-sm text-center"><%= m %></div><% }) %>
+
+    <% if (!shops.length) { %>
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-8 text-center text-sm text-[var(--text-4)] mb-6">
+        ยังไม่มีร้าน — <a href="/start" class="text-[var(--gold)] underline">เปิดร้านแรกของคุณ</a>
+      </div>
+    <% } else { %>
+      <div class="space-y-4 mb-6">
+        <% shops.forEach(shop => { %>
+          <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
+            <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+              <div>
+                <div class="font-semibold"><%= shop.name %></div>
+                <a href="<%= shop.url %>" target="_blank" class="text-xs text-[var(--gold)] underline font-mono"><%= shop.url.replace(/^https?:\/\//, '') %> →</a>
+              </div>
+              <span class="countdown text-xs font-mono px-2 py-1 rounded-full border border-[var(--border-light)]" data-exp="<%= shop.expiresAt %>">…</span>
+            </div>
+            <div class="grid grid-cols-2 gap-2 mb-3">
+              <a href="<%= shop.url %>" target="_blank" rel="noopener" class="text-center border border-[var(--border-light)] hover:border-[var(--gold)] rounded-lg px-3 py-2 text-sm">เปิดหน้าร้าน</a>
+              <a href="<%= shop.url.replace(/\/$/, '') %>/admin" target="_blank" rel="noopener" class="text-center bg-[var(--gold)] text-[var(--bg)] rounded-lg px-3 py-2 text-sm font-semibold">เข้าหลังร้าน</a>
+            </div>
+            <form action="/my-shops/<%= shop.id %>/renew" method="post" class="flex gap-2">
+              <select name="planId" required class="flex-1 min-w-0 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm">
+                <% plans.forEach(plan => { %><option value="<%= plan.id %>"><%= plan.days %> วัน — ฿<%= plan.price.toLocaleString() %></option><% }) %>
+              </select>
+              <button class="shrink-0 bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-4 py-2 text-sm">ต่ออายุ</button>
+            </form>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+    <a href="/start" class="block text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">+ เปิดร้านใหม่</a>
+  </section>
+
+  <script>
+    function fmtCountdown(ms) {
+      if (ms <= 0) return '✕ หมดอายุแล้ว';
+      const s = Math.floor(ms / 1000);
+      const d = Math.floor(s / 86400);
+      const h = Math.floor((s % 86400) / 3600);
+      if (d > 0) return `เหลือ ${d} วัน ${h} ชม.`;
+      const m = Math.floor((s % 3600) / 60);
+      if (h > 0) return `เหลือ ${h} ชม. ${m} นาที`;
+      return `เหลือ ${m} นาที`;
+    }
+    function tickCountdowns() {
+      document.querySelectorAll('.countdown[data-exp]').forEach(el => {
+        const ms = Number(el.dataset.exp) - Date.now();
+        el.textContent = fmtCountdown(ms);
+        el.classList.toggle('text-[var(--coral)]', ms <= 0);
+        el.classList.toggle('text-emerald-400', ms > 0);
+      });
+    }
+    tickCountdowns();
+    setInterval(tickCountdowns, 30000);
+  </script>
+<p class="text-center pb-6"><a href="/sales" class="text-[var(--gold)]">ประวัติคีย์และเว็บเช่าเดิม</a></p>
+</body>
+</html>

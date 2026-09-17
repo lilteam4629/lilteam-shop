@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <%- include('_head-style') %>
+  <%- include('_theme-init') %>
+</head>
+<body class="admin-page">
+  <div class="admin-content">
+    <%- include('_admin-nav', { active: 'topups' }) %>
+
+    <% messages.error.forEach(m => { %>
+      <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/50 text-[var(--coral)] px-4 py-2 rounded-lg mb-3 text-sm"><%= m %></div>
+    <% }) %>
+    <% messages.success.forEach(m => { %>
+      <div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 px-4 py-2 rounded-lg mb-3 text-sm"><%= m %></div>
+    <% }) %>
+
+    <form method="get" class="flex flex-wrap gap-2 mb-4">
+      <% ['', 'pending', 'approved', 'rejected'].forEach(function (s) { %>
+        <a href="/admin/topups<%= s ? '?status=' + s : '' %>" class="px-3 py-1.5 rounded-lg text-xs font-medium <%= status === s ? 'bg-[var(--gold)] text-[var(--bg)]' : 'bg-[var(--input)] text-[var(--text-3)] hover:text-[var(--gold)]' %>"><%= s || 'ทั้งหมด' %></a>
+      <% }) %>
+      <input name="q" value="<%= q %>" placeholder="ค้นหา ชื่อ/อีเมล/รหัสอ้างอิง" class="flex-1 min-w-[160px] bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-1.5 text-xs" />
+      <button class="bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)] rounded-lg px-3 py-1.5 text-xs">ค้นหา</button>
+    </form>
+
+    <div class="space-y-3">
+      <% requests.forEach(function (r) { %>
+        <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4">
+          <div class="flex items-start justify-between gap-3 mb-2">
+            <div>
+              <div class="font-semibold"><%= r.buyerUsername || 'ไม่พบผู้ใช้' %> <span class="text-[var(--text-3)] font-normal text-sm">(<%= r.buyerEmail %>)</span></div>
+              <div class="text-xs text-[var(--text-4)]">อ้างอิง <%= r.refCode %> · <%= new Date(r.createdAt).toLocaleString('th-TH') %></div>
+            </div>
+            <div class="text-right">
+              <div class="font-bold text-lg text-[var(--gold)]">฿<%= Number(r.amount).toLocaleString() %></div>
+              <span class="text-xs px-2 py-0.5 rounded-full <%= r.status === 'pending' ? 'bg-yellow-500/20 text-yellow-500' : r.status === 'approved' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-[var(--coral)]/20 text-[var(--coral)]' %>"><%= r.status %></span>
+            </div>
+          </div>
+          <% if (r.slipPath) { %>
+            <img src="<%= r.slipPath.startsWith('/media/') ? mainSiteUrl + r.slipPath : '/admin/topups/' + r.id + '/slip' %>" class="max-h-64 rounded-lg border border-[var(--border-light)] mb-3" loading="lazy" />
+          <% } %>
+          <% if (r.status === 'pending') { %>
+            <div class="flex gap-2">
+              <form action="/admin/topups/<%= r.id %>/approve" method="post" onsubmit="return confirm('อนุมัติคำขอนี้?');">
+                <button class="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-lg px-3 py-1.5 text-sm">อนุมัติ</button>
+              </form>
+              <form action="/admin/topups/<%= r.id %>/reject" method="post" onsubmit="return confirm('ปฏิเสธคำขอนี้?');">
+                <button class="border border-[var(--coral)]/50 text-[var(--coral)] hover:bg-[var(--coral)]/10 font-semibold rounded-lg px-3 py-1.5 text-sm">ปฏิเสธ</button>
+              </form>
+            </div>
+          <% } %>
+        </div>
+      <% }) %>
+      <% if (!requests.length) { %>
+        <p class="text-sm text-[var(--text-3)] text-center py-8">ไม่มีรายการ</p>
+      <% } %>
+    </div>
+  </div>
+</body>
+</html>

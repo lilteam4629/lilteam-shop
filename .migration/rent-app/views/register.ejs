@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <%- include('_head-style') %>
+  <%- include('_theme-init') %>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+  <%- include('_public-theme-toggle') %>
+  <div class="w-full max-w-sm bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+    <div class="mb-4">
+      <a href="/" class="inline-flex items-center gap-1.5 text-xs text-[var(--text-3)] hover:text-[var(--gold)] transition-colors">
+        <span>←</span> <span>กลับหน้าหลัก</span>
+      </a>
+    </div>
+    <div class="text-center mb-5">
+      <div class="text-3xl mb-2">📝</div>
+      <h1 class="text-xl font-bold">สมัครสมาชิก</h1>
+      <p class="text-sm text-[var(--text-3)] mt-1">สร้างบัญชีผู้เช่าร้านสำหรับใช้บนเว็บนี้</p>
+    </div>
+
+    <% messages.error.forEach(m => { %>
+      <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/50 text-[var(--coral)] px-4 py-2 rounded-lg mb-3 text-sm text-center"><%= m %></div>
+    <% }) %>
+
+    <form action="/register" method="post" class="space-y-3">
+      <input name="username" required placeholder="ชื่อผู้ใช้" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2.5 text-sm" />
+      <input name="email" type="email" required placeholder="อีเมล" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2.5 text-sm" />
+      <input name="password" type="password" required minlength="8" placeholder="รหัสผ่าน (อย่างน้อย 8 ตัว)" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2.5 text-sm" />
+      <input name="confirmPassword" type="password" required placeholder="ยืนยันรหัสผ่าน" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2.5 text-sm" />
+      <% if (recaptchaSiteKey) { %>
+        <div class="g-recaptcha" data-sitekey="<%= recaptchaSiteKey %>"></div>
+      <% } %>
+      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg py-2.5 text-sm">สมัครสมาชิก</button>
+    </form>
+    <% if (recaptchaSiteKey) { %><script src="https://www.google.com/recaptcha/api.js" async defer></script><% } %>
+    <p class="text-xs text-[var(--text-4)] text-center mt-4">มีบัญชีอยู่แล้ว? <a href="/login" class="text-[var(--gold)] underline">เข้าสู่ระบบ</a></p>
+  </div>
+</body>
+</html>

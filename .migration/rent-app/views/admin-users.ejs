@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <%- include('_head-style') %>
+  <%- include('_theme-init') %>
+</head>
+<body class="admin-page">
+  <div class="admin-content">
+    <%- include('_admin-nav', { active: 'users' }) %>
+
+    <% messages.error.forEach(m => { %>
+      <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/50 text-[var(--coral)] px-4 py-2 rounded-lg mb-3 text-sm"><%= m %></div>
+    <% }) %>
+    <% messages.success.forEach(m => { %>
+      <div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 px-4 py-2 rounded-lg mb-3 text-sm"><%= m %></div>
+    <% }) %>
+
+    <form method="get" class="flex gap-2 mb-4">
+      <input name="q" value="<%= q %>" placeholder="ค้นหาชื่อผู้ใช้หรืออีเมล" class="flex-1 bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
+      <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-4 py-2 text-sm">ค้นหา</button>
+    </form>
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="border-b border-[var(--border)] text-left text-[var(--text-3)] text-xs">
+              <th class="px-4 py-3">ผู้ใช้</th>
+              <th class="px-4 py-3">อีเมล</th>
+              <th class="px-4 py-3 text-right">ยอดเงิน</th>
+              <th class="px-4 py-3">สถานะ</th>
+              <th class="px-4 py-3">สมัครเมื่อ</th><th class="px-4 py-3">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% users.forEach(function (u) { %>
+              <tr class="border-b border-[var(--border)] last:border-0">
+                <td class="px-4 py-3 font-medium"><%= u.username %></td>
+                <td class="px-4 py-3 text-[var(--text-3)]"><%= u.email %></td>
+                <td class="px-4 py-3 text-right text-[var(--gold)] font-semibold">฿<%= Number(u.walletBalance || 0).toLocaleString() %></td>
+                <td class="px-4 py-3"><span class="text-xs px-2 py-0.5 rounded-full <%= u.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-[var(--coral)]/20 text-[var(--coral)]' %>"><%= u.status %></span></td>
+                <td class="px-4 py-3 text-[var(--text-4)] text-xs"><%= new Date(u.createdAt).toLocaleDateString('th-TH') %></td><td class="px-4 py-3"><form class="flex gap-1 mb-1" method="post" action="/admin/users/<%= encodeURIComponent(u.id) %>/balance"><input name="amount" type="number" min="0" step="0.01" placeholder="ยอดใหม่" class="w-24 bg-[var(--input)] border rounded p-1"><button class="text-[var(--gold)]">ตั้งยอด</button></form><form method="post" action="/admin/users/<%= encodeURIComponent(u.id) %>/toggle"><button class="text-xs <%= u.status==='banned'?'text-emerald-400':'text-red-400' %>"><%= u.status==='banned'?'ปลดระงับ':'ระงับ' %></button></form></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <% if (!users.length) { %>
+        <p class="text-sm text-[var(--text-3)] text-center py-8">ไม่พบผู้ใช้</p>
+      <% } %>
+    </div>
+    <p class="text-xs text-[var(--text-4)] mt-2">แสดงสูงสุด 100 รายการล่าสุด — ใช้ช่องค้นหาเพื่อระบุคนที่ต้องการ</p>
+  </div>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <%- include('_head-style') %>
+  <%- include('_theme-init') %>
+</head>
+<body class="admin-page">
+  <div class="admin-content">
+    <%- include('_admin-nav', { active: 'branding' }) %>
+
+    <% messages.error.forEach(m => { %>
+      <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/50 text-[var(--coral)] px-4 py-2 rounded-lg mb-3 text-sm"><%= m %></div>
+    <% }) %>
+    <% messages.success.forEach(m => { %>
+      <div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 px-4 py-2 rounded-lg mb-3 text-sm"><%= m %></div>
+    <% }) %>
+
+    <div class="grid lg:grid-cols-3 gap-4 mb-4">
+      <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 lg:col-span-2">
+        <p class="text-xs text-[var(--gold)] font-semibold mb-1">ตั้งค่าหน้าหลัก</p>
+        <h2 class="text-xl font-bold mb-4">แบรนด์และบรรยากาศเว็บไซต์</h2>
+        <form action="/admin/settings" method="post" class="space-y-4">
+          <div><label class="text-xs text-[var(--text-3)] block mb-1">ชื่อเว็บไซต์</label><input name="shopName" value="<%= shopName %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3 py-2.5 text-sm" /></div>
+          <div class="grid sm:grid-cols-2 gap-3">
+            <label class="flex items-center justify-between gap-3 bg-[var(--input)] border border-[var(--border-light)] rounded-xl p-4"><span><b class="block text-sm">❄️ หิมะบนหน้าหลัก</b><small class="text-[var(--text-4)]">เอฟเฟกต์หิมะตกแบบนุ่มนวล</small></span><input type="checkbox" name="snowEnabled" <%= siteEffects.snowEnabled ? 'checked' : '' %> class="w-5 h-5 accent-[var(--gold)]" /></label>
+            <label class="flex items-center justify-between gap-3 bg-[var(--input)] border border-[var(--border-light)] rounded-xl p-4"><span><b class="block text-sm">🎵 เพลงบนหน้าหลัก</b><small class="text-[var(--text-4)]">เล่นจาก YouTube พร้อมแผงควบคุม</small></span><input type="checkbox" name="musicEnabled" <%= siteEffects.musicEnabled ? 'checked' : '' %> class="w-5 h-5 accent-[var(--gold)]" /></label>
+          </div>
+          <div><label class="text-xs text-[var(--text-3)] block mb-1">ลิงก์วิดีโอ YouTube</label><input name="musicUrl" type="url" value="<%= siteEffects.musicUrl %>" placeholder="https://www.youtube.com/watch?v=..." class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3 py-2.5 text-sm" /><p class="text-[11px] text-[var(--text-4)] mt-1">รองรับ YouTube, YouTube Music, youtu.be, Shorts และ Live</p></div>
+          <div class="grid grid-cols-2 gap-3"><div><label class="text-xs text-[var(--text-3)] block mb-1">เริ่มเล่นที่</label><input name="musicStartTime" value="<%= Math.floor(siteEffects.musicStartSeconds/60) %>:<%= String(siteEffects.musicStartSeconds%60).padStart(2,'0') %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3 py-2.5 text-sm" /></div><div><label class="text-xs text-[var(--text-3)] block mb-1">จบท่อนที่ (ไม่บังคับ)</label><input name="musicEndTime" value="<%= siteEffects.musicEndSeconds ? Math.floor(siteEffects.musicEndSeconds/60)+':'+String(siteEffects.musicEndSeconds%60).padStart(2,'0') : '' %>" placeholder="0:00" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3 py-2.5 text-sm" /></div></div>
+          <div><label class="text-xs text-[var(--text-3)] block mb-1">ระดับเสียง <%= siteEffects.musicVolume %>%</label><input name="musicVolume" type="range" min="0" max="100" value="<%= siteEffects.musicVolume %>" class="w-full accent-[var(--gold)]" /></div>
+          <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-xl px-5 py-2.5 text-sm">บันทึกการตั้งค่า</button>
+        </form>
+      </div>
+      <div class="bg-gradient-to-br from-[var(--gold)]/20 to-[var(--card)] border border-[var(--gold)]/30 rounded-2xl p-6"><span class="text-3xl">✨</span><h3 class="font-bold mt-3">ปรับหน้าเว็บได้ทันที</h3><p class="text-sm text-[var(--text-3)] mt-2">การตั้งค่าจะถูกเก็บใน volume และไม่หายเมื่อระบบ deploy เวอร์ชันใหม่</p></div>
+    </div>
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6">
+      <h2 class="font-semibold mb-3">โลโก้</h2>
+      <div class="flex items-center gap-3 mb-4">
+        <% if (logoImage) { %>
+          <img src="<%= logoImage %>" alt="โลโก้ปัจจุบัน" class="w-14 h-14 rounded-xl object-contain p-1 bg-gradient-to-br from-[var(--gold-light)] via-[var(--gold)] to-[var(--gold-dark)] border border-[var(--gold)]/50" style="mix-blend-mode: multiply;" />
+        <% } else { %>
+          <span class="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[var(--bg)] flex items-center justify-center text-2xl">🏪</span>
+        <% } %>
+        <span class="text-sm text-[var(--text-3)]">โลโก้ปัจจุบัน</span>
+      </div>
+      <form action="/admin/logo" method="post" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-2">
+        <input type="file" name="logo" accept="image/*" required class="flex-1 text-sm file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--text)] file:text-sm" />
+        <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-4 py-2 text-sm whitespace-nowrap">อัปโหลด</button>
+      </form>
+      <p class="text-xs text-[var(--text-4)] mt-2">รองรับไฟล์ภาพ ขนาดไม่เกิน 5MB</p>
+    </div>
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 mt-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-semibold">ข้อความหัวเว็บ</h2>
+        <% if (heroCustomized) { %>
+          <form action="/admin/hero/reset" method="post">
+            <button class="text-xs text-[var(--text-3)] hover:text-[var(--gold)] underline">รีเซ็ตเป็นค่าเริ่มต้น</button>
+          </form>
+        <% } %>
+      </div>
+      <form action="/admin/hero" method="post" class="space-y-2">
+        <div>
+          <label class="text-xs text-[var(--text-3)] block mb-1">หัวข้อใหญ่</label>
+          <textarea name="heroTitle" rows="2" placeholder="เปิดร้านค้าออนไลน์ของคุณ&#10;ใน 1 นาที" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= heroCustomized ? heroTitle : '' %></textarea>
+        </div>
+        <div>
+          <label class="text-xs text-[var(--text-3)] block mb-1">คำอธิบายใต้หัวข้อ</label>
+          <textarea name="heroSubtitle" rows="3" placeholder="<%= heroSubtitle %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"><%= heroSubtitle %></textarea>
+        </div>
+        <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-4 py-2 text-sm">บันทึก</button>
+      </form>
+      <p class="text-xs text-[var(--text-4)] mt-2">เว้นว่างช่องไหนไว้จะใช้ค่าเริ่มต้นของช่องนั้น</p>
+    </div>
+
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 mt-4">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-semibold">รูปตัวอย่างร้านค้า</h2>
+        <% if (showcaseIsCustom) { %>
+          <form action="/admin/showcase-images/reset" method="post">
+            <button class="text-xs text-[var(--text-3)] hover:text-[var(--gold)] underline">ใช้รูปอัตโนมัติแทน</button>
+          </form>
+        <% } %>
+      </div>
+      <p class="text-xs text-[var(--text-4)] mb-3">
+        <% if (showcaseIsCustom) { %>
+          กำลังใช้รูปที่คุณเลือกเอง
+        <% } else { %>
+          ตอนนี้ดึงรูปสินค้าล่าสุดจากเว็บหลักอัตโนมัติ — อัปโหลดรูปด้านล่างเพื่อกำหนดเอง
+        <% } %>
+      </p>
+      <% if (showcaseImages.length) { %>
+        <div class="grid grid-cols-4 gap-2 mb-4">
+          <% showcaseImages.forEach(function(img, i) { %>
+            <div class="relative group">
+              <img src="<%= img %>" class="w-full aspect-square object-cover rounded-lg border border-[var(--border-light)]" />
+              <form action="/admin/showcase-images/<%= i %>/remove" method="post" class="absolute -top-1.5 -right-1.5">
+                <button class="w-5 h-5 rounded-full bg-[var(--coral)] text-white text-xs leading-none flex items-center justify-center">×</button>
+              </form>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+      <% if (showcaseImages.length < 4) { %>
+        <form action="/admin/showcase-images" method="post" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-2">
+          <input type="file" name="image" accept="image/*" required class="flex-1 text-sm file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--text)] file:text-sm" />
+          <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold rounded-lg px-4 py-2 text-sm whitespace-nowrap">เพิ่มรูป</button>
+        </form>
+      <% } %>
+      <p class="text-xs text-[var(--text-4)] mt-2">สูงสุด 4 รูป</p>
+    </div>
+  </div>
+</body>
+</html>

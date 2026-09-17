@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <%- include('_head-style') %>
+  <%- include('_theme-init') %>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 text-center">
+  <%- include('_public-theme-toggle') %>
+  <div>
+    <div class="text-4xl mb-3">🤔</div>
+    <h1 class="text-xl font-bold mb-2">ไม่พบหน้านี้</h1>
+    <a href="/" class="text-[var(--gold)] underline">กลับหน้าหลัก</a>
+  </div>
+</body>
+</html>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <meta name="description" content="เช่าเว็บร้านค้าออนไลน์พร้อมระบบขาย จัดการสต็อก กระเป๋าเงิน มินิเกม และตรวจสลิปอัตโนมัติ ติดตั้งพร้อมใช้งานทันที" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <% if (logoImage) { %><link rel="icon" href="<%= logoImage %>" /><% } %>
+  <style>
+    :root{
+      --bg:#100e08; --card:#1a160d; --border:#3a3220; --border-light:#443a22; --input:#211c11;
+      --text:#f3ecd8; --text-2:#d6c9a0; --text-3:#a89a6c; --text-4:#7a6f47;
+      --gold:#c8a63f; --gold-hover:#dbb94d; --gold-light:#e8d48a; --gold-dark:#8a6f28;
+    }
+    :root[data-theme="light"]{--bg:#faf7ee;--card:#fff;--border:#e6dcc0;--border-light:#ddcfaa;--input:#f3ecd9;--text:#28220f;--text-2:#4b4021;--text-3:#76683f;--text-4:#9d8e64;--gold:#a98428;--gold-hover:#8f6d1c;--gold-light:#caa94c;--gold-dark:#725613}
+    body{font-family:'Kanit',sans-serif;background:var(--bg);color:var(--text);transition:background .2s,color .2s;}
+    .grad-text{background:linear-gradient(135deg,var(--gold-light),var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent}
+    .hero-glow{background:radial-gradient(ellipse 60% 50% at 50% 0%,color-mix(in srgb,var(--gold) 18%,transparent),transparent)}
+    .hero-title{color:#fff}:root[data-theme="light"] .hero-title{color:#111}
+    .badge{display:flex;align-items:center;gap:.4rem;font-size:.8rem;color:var(--text-3)}
+    .feature-card{background:linear-gradient(160deg,var(--card),var(--input));border:1px solid var(--border-light);border-radius:1rem;padding:1.5rem}
+    .plan-card{position:relative;background:linear-gradient(160deg,var(--card),var(--input));border:1px solid var(--border-light);border-radius:1.25rem;padding:1.75rem;transition:transform .2s,border-color .2s}
+    .plan-card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--gold) 55%,var(--border-light))}
+    .plan-card.is-popular{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold),0 20px 40px -20px color-mix(in srgb,var(--gold) 60%,transparent)}
+    .popular-badge{position:absolute;top:-.7rem;left:50%;transform:translateX(-50%);background:var(--gold);color:var(--bg);font-size:.65rem;font-weight:800;padding:.25rem .8rem;border-radius:999px;white-space:nowrap}
+    .effect-button{width:2.55rem;height:2.55rem;border-radius:.8rem;border:1px solid var(--border-light);background:var(--input);display:grid;place-items:center;transition:.2s}.effect-button:hover{border-color:var(--gold);transform:translateY(-1px)}
+    .snowflake{position:fixed;top:-2rem;z-index:50;color:#fff;pointer-events:none;text-shadow:0 0 6px #8bd5ff;animation:snow-fall linear forwards}@keyframes snow-fall{to{transform:translate3d(var(--drift),105vh,0) rotate(360deg);opacity:.1}}
+  </style>
+  <script>(function(){try{var t=localStorage.getItem('rentTheme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}})();</script>
+</head>
+<body class="min-h-screen">
+
+  <header class="border-b border-[var(--border)] sticky top-0 z-30 bg-[var(--bg)]/90 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-2 font-bold text-lg">
+        <% if (logoImage) { %>
+          <img src="<%= logoImage %>" alt="โลโก้" class="w-9 h-9 rounded-xl object-contain p-1 bg-gradient-to-br from-[var(--gold-light)] via-[var(--gold)] to-[var(--gold-dark)] border border-[var(--gold)]/50" style="mix-blend-mode: multiply;" />
+        <% } else { %>
+          <span class="w-9 h-9 rounded-xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[var(--bg)] flex items-center justify-center">🏪</span>
+        <% } %>
+        <span><%= shopName %></span>
+      </a>
+      <nav class="hidden sm:flex items-center gap-6 text-sm text-[var(--text-3)]">
+        <a href="#example" class="hover:text-[var(--gold)] transition-colors">ตัวอย่างร้าน</a>
+        <a href="#features" class="hover:text-[var(--gold)] transition-colors">ฟีเจอร์</a>
+        <a href="#packages" class="hover:text-[var(--gold)] transition-colors">แพ็กเกจ</a>
+      </nav>
+      <div class="flex items-center gap-2">
+        <button id="site-theme-toggle" type="button" class="effect-button" aria-label="สลับโหมดมืดสว่าง">☀️</button>
+        <% if (isAdmin) { %>
+          <a href="/my-shops" class="text-sm text-[var(--gold)]">ร้านของฉัน</a>
+          <a href="/wallet" class="text-sm text-[var(--gold)]">เติมเงิน</a>
+          <a href="/admin" class="hidden sm:inline-block border border-[var(--gold)]/50 text-[var(--gold)] hover:bg-[var(--gold)] hover:text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm transition-colors">🛠️ หลังบ้านแอดมิน</a>
+          <form action="/admin/logout?next=/" method="post"><button class="text-[var(--text-4)] hover:text-[var(--gold)] text-sm px-2">ออกจากระบบ</button></form>
+        <% } else if (currentUser) { %>
+          <a href="/wallet" class="hidden sm:inline-block border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)] font-medium px-4 py-2 rounded-lg text-sm transition-colors">เติมเงิน</a>
+          <a href="/my-shops" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">จัดการร้านของฉัน</a>
+        <% } else { %>
+          <a href="/register" class="hidden sm:inline-block border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)] font-medium px-4 py-2 rounded-lg text-sm transition-colors">สมัครสมาชิก</a>
+          <a href="/login" class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 rounded-lg text-sm">เข้าสู่ระบบ</a>
+        <% } %>
+      </div>
+    </div>
+  </header>
+
+  <% if (messages.error.length || messages.success.length) { %>
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-4">
+      <% messages.error.forEach(m => { %><div class="bg-[var(--coral,#e2836f)]/10 border border-[var(--coral,#e2836f)]/50 text-[var(--coral,#e2836f)] px-4 py-2 rounded-lg mb-2 text-sm text-center"><%= m %></div><% }) %>
+      <% messages.success.forEach(m => { %><div class="bg-emerald-500/10 border border-emerald-500/40 text-emerald-400 px-4 py-2 rounded-lg mb-2 text-sm text-center"><%= m %></div><% }) %>
+    </div>
+  <% } %>
+
+  <section class="hero-glow relative overflow-hidden">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 pt-16 pb-14 text-center">
+      <h1 class="hero-title text-4xl sm:text-6xl font-extrabold tracking-tight leading-tight mb-5">
+        <% if (heroCustomized) { %>
+          <span style="white-space: pre-line;"><%= heroTitle %></span>
+        <% } else { %>
+          เปิดร้านค้าออนไลน์ของคุณ<br class="hidden sm:block" />
+          ใน 1 นาที
+        <% } %>
+      </h1>
+      <p class="text-[var(--text-3)] text-base sm:text-lg max-w-2xl mx-auto mb-8">
+        <%= heroSubtitle %>
+      </p>
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-4">
+        <a href="#packages" class="w-full sm:w-auto text-center bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-semibold px-7 py-3 rounded-xl transition-transform hover:-translate-y-0.5">ดูแพ็กเกจทั้งหมด</a>
+        <a href="<%= currentUser ? '/my-shops' : '/login' %>" class="w-full sm:w-auto text-center bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)] font-medium px-7 py-3 rounded-xl transition-colors"><%= currentUser ? 'ไปหน้าร้านของฉัน' : 'เข้าสู่ระบบเพื่อเริ่มต้น' %></a>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 mb-10 text-sm">
+        <% if (!currentUser) { %>
+          <a href="/register" class="text-[var(--text-3)] hover:text-[var(--gold)] transition-colors">ยังไม่มีบัญชี? <span class="underline">สมัครสมาชิก</span></a>
+        <% } %>
+        <a href="/wallet" class="text-[var(--text-3)] hover:text-[var(--gold)] transition-colors">💰 <span class="underline">เติมเงินเข้ากระเป๋า</span></a>
+      </div>
+      <div class="flex flex-wrap items-center justify-center gap-x-8 gap-y-3">
+        <span class="badge">⚡ ติดตั้งอัตโนมัติทันที</span>
+        <span class="badge">🔒 SSL ฟรีทุกแพ็กเกจ</span>
+        <span class="badge">🌐 โดเมนย่อย .<%= mainDomain %> ฟรี</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="example" class="max-w-5xl mx-auto px-4 sm:px-6 pt-4 pb-16">
+    <div class="text-center mb-8">
+      <p class="text-[var(--gold)] text-xs font-bold tracking-wide mb-2">ตัวอย่างร้านค้าจริง</p>
+      <h2 class="text-2xl sm:text-3xl font-bold">ไม่ใช่แค่โมเดล — นี่คือร้านค้าจริงที่ใช้ระบบนี้อยู่</h2>
+      <p class="text-[var(--text-3)] mt-2"><%= shopName %> คือร้านของเราเองที่เปิดขายจริงบนระบบเดียวกันนี้ทุกวัน ลองเข้าไปดูของจริงได้เลย ไม่ใช่ภาพตัวอย่างปลอม</p>
+    </div>
+    <a href="<%= mainSiteUrl %>" target="_blank" rel="noopener" class="block group max-w-5xl mx-auto">
+      <div class="rounded-2xl border border-[var(--border-light)] overflow-hidden shadow-2xl transition-transform group-hover:-translate-y-1">
+        <div class="flex items-center gap-2 bg-[var(--input)] px-4 py-2.5 border-b border-[var(--border-light)]">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-400/70"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-yellow-400/70"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-green-400/70"></span>
+          <span class="ml-3 text-xs text-[var(--text-4)] bg-[var(--bg)] rounded-full px-3 py-1 truncate">🔒 <%= mainDomain %></span>
+        </div>
+        <div class="relative bg-white overflow-hidden" style="aspect-ratio: 2/1;">
+          <img src="/showcase-full.png" alt="ตัวอย่างหน้าเว็บ <%= shopName %> แบบเต็ม" class="absolute inset-0 w-full h-full object-cover object-top" loading="lazy">
+          <span class="absolute right-3 bottom-3 text-xs bg-black/70 text-white rounded-full px-3 py-1.5 opacity-0 group-hover:opacity-100 transition">เปิดดูร้านค้าจริง ↗</span>
+        </div>
+      </div>
+    </a>
+  </section>
+
+  <section id="features" class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+    <div class="text-center mb-10">
+      <p class="text-[var(--gold)] text-xs font-bold tracking-wide mb-2">ฟีเจอร์</p>
+      <h2 class="text-2xl sm:text-3xl font-bold">ร้านคุณได้ระบบเดียวกับ<%= shopName %>ทุกอย่าง</h2>
+      <p class="text-[var(--text-3)] mt-2">เพราะเป็นแอปเดียวกัน แค่คนละร้าน ฟีเจอร์ใหม่ที่เพิ่มให้ระบบหลัก ร้านคุณได้ใช้ด้วยทันทีโดยไม่ต้องรออัปเดตเอง</p>
+    </div>
+    <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="feature-card"><div class="text-3xl mb-3">🛒</div><h3 class="font-semibold mb-1">ระบบขายอัตโนมัติ</h3><p class="text-sm text-[var(--text-3)]">ลูกค้าจ่ายเงินปุ๊บ รับสินค้าปั๊บ ไม่ต้องมานั่งส่งเอง</p></div>
+      <div class="feature-card"><div class="text-3xl mb-3">🧾</div><h3 class="font-semibold mb-1">ตรวจสลิปอัตโนมัติ</h3><p class="text-sm text-[var(--text-3)]">เชื่อมต่อระบบตรวจสลิป อนุมัติเงินเข้าได้ตลอด 24 ชม.</p></div>
+      <div class="feature-card"><div class="text-3xl mb-3">🎰</div><h3 class="font-semibold mb-1">มินิเกมลุ้นรางวัล</h3><p class="text-sm text-[var(--text-3)]">เปิดกล่องสุ่มหรือรางเลื่อน ดึงลูกค้ากลับมาเล่นซ้ำ</p></div>
+      <div class="feature-card"><div class="text-3xl mb-3">📦</div><h3 class="font-semibold mb-1">จัดการสต็อกเรียลไทม์</h3><p class="text-sm text-[var(--text-3)]">เพิ่ม/ตัดสต็อกอัตโนมัติ รู้ทันทีว่าเหลือเท่าไหร่</p></div>
+    </div>
+  </section>
+
+  <section id="packages" class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+    <div class="text-center mb-10">
+      <p class="text-[var(--gold)] text-xs font-bold tracking-wide mb-2">แพ็กเกจ</p>
+      <h2 class="text-2xl sm:text-3xl font-bold">เลือกระยะเวลาเช่าร้านของคุณ</h2>
+      <p class="text-[var(--text-3)] mt-2">จ่ายเป็นรอบ ไม่มีสัญญาผูกมัดระยะยาว ต่ออายุเมื่อไหร่ก็ได้</p>
+    </div>
+
+    <% if (!plans.length) { %>
+      <div class="text-center text-[var(--text-3)] bg-[var(--card)] border border-[var(--border)] rounded-2xl p-10 max-w-md mx-auto">
+        ยังไม่มีแพ็กเกจเปิดขายตอนนี้ กลับมาดูใหม่อีกครั้งเร็วๆ นี้
+      </div>
+    <% } else { %>
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 max-w-4xl mx-auto">
+        <% plans.forEach((plan, i) => { %>
+          <% const isPopular = i === Math.min(1, plans.length - 1); %>
+          <div class="plan-card <%= isPopular ? 'is-popular' : '' %>">
+            <% if (isPopular) { %><span class="popular-badge">ยอดนิยม</span><% } %>
+            <% if (plan.promo) { %><div class="text-xs font-bold text-[var(--gold)] mb-2">🔥 โปรโมชั่น</div><% } %>
+            <div class="text-sm text-[var(--text-3)] mb-1">แพ็กเกจ <%= plan.days %> วัน</div>
+            <div class="flex items-baseline gap-1 mb-4">
+              <span class="text-4xl font-black text-[var(--gold)]">฿<%= plan.price.toLocaleString() %></span>
+              <span class="text-sm text-[var(--text-4)]">/ <%= plan.days %> วัน</span>
+            </div>
+            <ul class="space-y-2 text-sm text-[var(--text-2)] mb-6">
+              <li class="flex items-center gap-2">✅ โดเมนย่อย .<%= mainDomain %> ฟรี</li>
+              <li class="flex items-center gap-2">✅ SSL ฟรี</li>
+              <li class="flex items-center gap-2">✅ ระบบครบ: สต็อก, กระเป๋าเงิน, มินิเกม, ตรวจสลิปอัตโนมัติ</li>
+              <li class="flex items-center gap-2">✅ ติดตั้งพร้อมใช้งานทันที</li>
+            </ul>
+            <a href="/start?plan=<%= plan.id %>" class="block text-center font-semibold px-5 py-3 rounded-xl transition-colors <%= isPopular ? 'bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)]' : 'bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)] hover:text-[var(--gold)]' %>">เริ่มต้นใช้งาน</a>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+
+    <p class="text-center text-sm text-[var(--text-3)] mt-8">
+      <%= currentUser ? 'กดเลือกแพ็กเกจเพื่อเปิดร้านได้เลย' : '' %>
+      <% if (!currentUser) { %>ต้อง<a href="/login" class="text-[var(--gold)] hover:underline">เข้าสู่ระบบ</a>ก่อนเริ่มเปิดร้าน<% } %>
+    </p>
+  </section>
+
+  <footer class="border-t border-[var(--border)] py-8">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm text-[var(--text-4)]">
+      <span>&copy; <%= new Date().getFullYear() %> <%= shopName %></span>
+      <a href="/login" class="hover:text-[var(--gold)] transition-colors">เข้าสู่ระบบ →</a>
+    </div>
+  </footer>
+
+  <%- include('_music-player') %>
+  <style id="rent-home-editorial-v2">
+    /* Editorial storefront direction inspired by the supplied reference. */
+    :root{--bg:#f5fbfd;--card:#fff;--border:#d9e9ee;--border-light:#c7dfe6;--input:#eef7f9;--text:#102f3d;--text-2:#3d6070;--text-3:#6e8b98;--text-4:#94aab3;--gold:#078db6;--gold-hover:#06799c;--gold-light:#8ce4f2;--gold-dark:#075d78}
+    :root[data-theme="light"]{--bg:#f5fbfd;--card:#fff;--border:#d9e9ee;--border-light:#c7dfe6;--input:#eef7f9;--text:#102f3d;--text-2:#3d6070;--text-3:#6e8b98;--text-4:#94aab3;--gold:#078db6;--gold-hover:#06799c;--gold-light:#8ce4f2;--gold-dark:#075d78}
+    body{background:radial-gradient(circle at 82% 4%,#dff6fb 0,transparent 28%),linear-gradient(180deg,#f8fcfd 0,#f3f9fb 100%);color:var(--text);letter-spacing:.01em}
+    body:before{content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.55;background-image:linear-gradient(#0b7d9c0b 1px,transparent 1px),linear-gradient(90deg,#0b7d9c0b 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(155deg,#000,transparent 70%)}
+    header{background:#f8fcfdd9!important;border-color:#d9e9ee!important;box-shadow:0 10px 30px #2a71840d}header>div{height:4.5rem!important}header a{color:var(--text)!important}header nav a{color:var(--text-3)!important}header nav a:hover{color:var(--gold)!important}header .effect-button{background:#fff;border-color:var(--border-light);color:var(--text);box-shadow:0 5px 15px #14566a12}
+    .hero-glow{background:transparent!important}.hero-glow:before{content:'';position:absolute;inset:0 0 auto;height:100%;background:radial-gradient(ellipse 52% 80% at 85% 35%,#c7f1f777,transparent 70%),radial-gradient(ellipse 42% 70% at 5% 25%,#e9f9fb,transparent 72%);pointer-events:none}.hero-glow>div{position:relative;max-width:1180px!important;padding-top:7.5rem!important;padding-bottom:6rem!important;text-align:left!important}.hero-glow h1{max-width:760px;color:var(--text)!important;font-size:clamp(2.8rem,7vw,6.4rem)!important;line-height:.98!important;letter-spacing:-.07em!important}.hero-glow p{max-width:650px!important;margin-left:0!important;color:var(--text-2)!important;font-size:1.05rem!important;line-height:1.8!important}.hero-glow>div>div:nth-of-type(1),.hero-glow>div>div:nth-of-type(2){justify-content:flex-start!important}.hero-glow .badge{color:var(--text-3)!important}.hero-glow .badge:first-child{color:var(--gold)!important}.hero-glow a{border-radius:.75rem!important}.hero-glow a.bg-\[var\(--gold\)\]{background:var(--gold)!important;color:#fff!important;box-shadow:0 12px 24px #078db633}.hero-glow a.bg-\[var\(--input\)\]{background:#fff!important;border-color:var(--border-light)!important;color:var(--text)!important}
+    #example,#features,#packages{max-width:1180px!important;padding-top:4rem!important;padding-bottom:5rem!important}#example>div:first-child,#features>div:first-child,#packages>div:first-child{text-align:left!important;max-width:760px}#example>div:first-child p:first-child,#features>div:first-child p:first-child,#packages>div:first-child p:first-child{color:var(--gold)!important;letter-spacing:.16em;text-transform:uppercase}#example h2,#features h2,#packages h2{color:var(--text)!important;font-size:clamp(1.7rem,3vw,2.7rem)!important;letter-spacing:-.045em}#example>div:first-child p:last-child,#features>div:first-child p:last-child,#packages>div:first-child p:last-child{color:var(--text-3)!important;line-height:1.7}
+    #example>a>div{border-color:var(--border-light)!important;border-radius:1.25rem!important;box-shadow:0 18px 45px #1c607312!important}#example>a>div>div:first-child{background:var(--input)!important;border-color:var(--border)!important}.feature-card{border-color:var(--border)!important;border-radius:1.1rem!important;background:#ffffffd9!important;box-shadow:0 12px 28px #1e64750c!important;min-height:190px;padding:1.4rem!important;transition:transform .2s,box-shadow .2s,border-color .2s}.feature-card:hover{transform:translateY(-4px);border-color:#078db655!important;box-shadow:0 18px 32px #1e647518!important}.feature-card h3{color:var(--text)!important}.feature-card p{color:var(--text-3)!important;line-height:1.6}
+    .plan-card{border-color:var(--border)!important;border-radius:1.15rem!important;background:#fff!important;box-shadow:0 14px 35px #1e647510!important;padding:1.5rem!important}.plan-card:hover{border-color:#078db677!important;box-shadow:0 18px 38px #1e64751b!important}.plan-card.is-popular{border-color:var(--gold)!important;box-shadow:0 0 0 2px #078db622,0 20px 40px #078db51f!important}.popular-badge{background:var(--gold)!important;color:#fff!important;box-shadow:0 6px 14px #078db633}.plan-card a{border-radius:.75rem!important}.plan-card a.bg-\[var\(--gold\)\]{background:var(--gold)!important;color:#fff!important}footer{border-color:var(--border)!important;background:#ffffff66}
+    @media(max-width:700px){header>div{height:4rem!important}.hero-glow>div{padding-top:5rem!important;padding-bottom:3.5rem!important}.hero-glow h1{font-size:clamp(2.5rem,13vw,4.2rem)!important}.hero-glow p{font-size:.9rem!important}#example,#features,#packages{padding-top:3rem!important;padding-bottom:3.5rem!important}.feature-card{min-height:0}.plan-card{padding:1.2rem!important}}
+    @media(prefers-reduced-motion:reduce){.feature-card,.plan-card{transition:none!important}}
+  </style>
+  <script>
+    (function(){
+      var root=document.documentElement,theme=document.getElementById('site-theme-toggle');
+      function sync(){theme.textContent=root.getAttribute('data-theme')==='light'?'🌙':'☀️'} sync();
+      theme.onclick=function(){var n=root.getAttribute('data-theme')==='light'?'dark':'light';root.setAttribute('data-theme',n);try{localStorage.setItem('rentTheme',n)}catch(e){}sync()};
+      <% if (siteEffects.snowEnabled) { %>
+      setInterval(function(){if(document.hidden)return;var f=document.createElement('span');f.className='snowflake';f.textContent=['❄','❅','•'][Math.floor(Math.random()*3)];f.style.left=Math.random()*100+'vw';f.style.opacity=.25+Math.random()*.55;f.style.fontSize=8+Math.random()*14+'px';f.style.setProperty('--drift',(Math.random()*100-50)+'px');f.style.animationDuration=6+Math.random()*7+'s';document.body.appendChild(f);setTimeout(function(){f.remove()},14000)},450);
+      <% } %>
+    })();
+  </script>
+
+</body>
+</html>

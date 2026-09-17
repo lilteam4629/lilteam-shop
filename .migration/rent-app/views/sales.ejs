@@ -1,0 +1,5 @@
+<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title><%= title %></title><script src="https://cdn.tailwindcss.com"></script><%- include('_head-style') %><%- include('_theme-init') %></head>
+<body><main class="max-w-3xl mx-auto p-6"><a href="/my-shops">← ร้านของฉัน</a><h1 class="text-2xl font-bold my-6">ประวัติคีย์และเว็บเช่าเดิม</h1>
+<% if (!sales.length) { %><p>ยังไม่มีประวัติการเช่าแบบเดิม</p><% } %>
+<% sales.forEach(s => { %><a class="block p-4 mb-3 rounded-xl border border-[var(--border)]" href="/sales/<%= encodeURIComponent(s.id) %>"><%= s.days %> วัน · ฿<%= Number(s.price || 0).toLocaleString() %> · <%= new Date(s.createdAt).toLocaleDateString('th-TH') %></a><% }) %>
+</main></body></html>

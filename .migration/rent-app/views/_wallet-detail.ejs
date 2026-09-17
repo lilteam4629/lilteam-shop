@@ -1,0 +1,195 @@
+<section class="max-w-lg mx-auto px-4 py-10">
+  <a href="/wallet" class="text-sm text-[var(--gold)]">← กลับไปหน้าเติมเงิน</a>
+  <h1 class="text-2xl font-bold mt-2 mb-1">คำขอเติมเงิน #<%= request.refCode %></h1>
+  <p class="text-sm text-[var(--text-3)] mb-6"><%= new Date(request.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></p>
+
+  <% if (request.status === 'approved') { %>
+    <div class="bg-emerald-900/30 border border-emerald-700 rounded-xl p-5 text-center mb-6">
+      <div class="text-3xl mb-2">✅</div>
+      <div class="text-emerald-300 font-semibold mb-1">อนุมัติแล้ว เติมเงินสำเร็จ</div>
+      <div class="text-2xl font-bold text-[var(--gold)]">฿<%= request.amount.toLocaleString() %>.00</div>
+      <% if (request.slipCheck && request.slipCheck.verified) { %>
+        <p class="text-xs text-emerald-400 mt-2">⚡ ตรวจสอบและอนุมัติอัตโนมัติแล้ว</p>
+      <% } %>
+    </div>
+  <% } else if (request.status === 'rejected') { %>
+    <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 rounded-xl p-5 text-center mb-6">
+      <div class="text-3xl mb-2">✕</div>
+      <div class="text-[var(--coral)] font-semibold mb-1">คำขอนี้ถูกปฏิเสธ</div>
+      <% if (request.reviewNote) { %><p class="text-sm text-[var(--text-3)]"><%= request.reviewNote %></p><% } %>
+    </div>
+  <% } else if (request.slipPath && automaticSlipCheck) { %>
+    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
+      ⏳ ระบบกำลังตรวจสอบสลิปโดยอัตโนมัติ — หน้านี้จะแสดงผลสำเร็จให้ทันที ไม่ต้องรีเฟรช
+    </div>
+  <% } else if (!request.slipPath && automaticSlipCheck) { %>
+    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
+      ⏳ โอนเงินแล้วแนบสลิปด้านล่าง ระบบจะตรวจสอบและเติมเงินให้อัตโนมัติทันที
+    </div>
+  <% } else { %>
+    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
+      ⏳ แนบสลิปแล้วรอแอดมินร้านตรวจสอบและอนุมัติยอดเงิน
+    </div>
+  <% } %>
+
+  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 space-y-4 mb-6">
+    <div class="flex justify-between text-sm"><span class="text-[var(--text-3)]">จำนวนเงิน</span><span class="text-[var(--gold)] font-bold text-lg">฿<%= request.amount.toLocaleString() %>.00</span></div>
+    <div class="flex justify-between text-sm"><span class="text-[var(--text-3)]">ช่องทาง</span><span><%= request.method === 'truemoney_angpao' ? 'ซองของขวัญ TrueMoney' : (request.method === 'promptpay' ? 'พร้อมเพย์ (PromptPay)' : 'โอนผ่านธนาคาร') %></span></div>
+
+    <div class="border-t border-[var(--border)] pt-4">
+      <% if (request.method === 'truemoney_angpao') { %>
+        <div class="bg-emerald-900/20 border border-emerald-700/50 rounded-xl px-4 py-4 text-center">
+          <div class="text-2xl mb-2">🧧</div>
+          <div class="font-semibold text-emerald-300">รับเงินจากซองของขวัญเรียบร้อยแล้ว</div>
+          <p class="text-xs text-[var(--text-3)] mt-1">ยอดเงินถูกเพิ่มเข้ากระเป๋าในเว็บไซต์อัตโนมัติ</p>
+        </div>
+      <% } else if (request.method === 'promptpay' && (payment.promptpayQrImage || qrDataUrl)) { %>
+        <div class="bg-white rounded-lg p-4 flex flex-col items-center mb-3">
+          <img src="<%= payment.promptpayQrImage || qrDataUrl %>" class="w-56 h-56 object-contain" alt="พร้อมเพย์ QR" />
+          <p class="text-[var(--bg)] text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
+        </div>
+        <div class="text-sm space-y-1">
+          <div class="flex justify-between"><span class="text-[var(--text-3)]">พร้อมเพย์</span><span class="font-mono"><%= payment.promptpayId %></span></div>
+          <div class="flex justify-between"><span class="text-[var(--text-3)]">ชื่อบัญชี</span><span><%= payment.promptpayName %></span></div>
+        </div>
+      <% } else if (request.method === 'promptpay') { %>
+        <div class="text-sm space-y-1">
+          <div class="flex justify-between"><span class="text-[var(--text-3)]">พร้อมเพย์</span><span class="font-mono"><%= payment.promptpayId %></span></div>
+          <div class="flex justify-between"><span class="text-[var(--text-3)]">ชื่อบัญชี</span><span><%= payment.promptpayName %></span></div>
+        </div>
+      <% } else { %>
+        <% if (payment.bankQrImage) { %>
+          <div class="bg-white rounded-lg p-4 flex flex-col items-center mb-3">
+            <img src="<%= payment.bankQrImage %>" class="w-56 h-56 object-contain" alt="QR โอนธนาคาร" />
+            <p class="text-[var(--bg)] text-xs mt-2 text-center">สแกนด้วยแอปธนาคารเพื่อชำระ ฿<%= request.amount.toLocaleString() %>.00</p>
+          </div>
+        <% } %>
+        <div class="text-sm space-y-1">
+          <div class="flex justify-between"><span class="text-[var(--text-3)]">ธนาคาร</span><span><%= payment.bankName %></span></div>
+          <div class="flex justify-between"><span class="text-[var(--text-3)]">เลขบัญชี</span><span class="font-mono"><%= payment.bankAccountNumber %></span></div>
+          <div class="flex justify-between"><span class="text-[var(--text-3)]">ชื่อบัญชี</span><span><%= payment.bankAccountName %></span></div>
+        </div>
+      <% } %>
+      <% if (request.method !== 'truemoney_angpao') { %>
+        <div class="flex items-start gap-2.5 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl px-4 py-3 mt-4 text-sm">
+          <span class="shrink-0 text-lg">⚠️</span>
+          <span class="text-[var(--text)]">โอนแล้วกรุณาระบุจำนวนเงินให้ตรงเป๊ะ <b class="text-[var(--gold)]">(฿<%= request.amount.toLocaleString() %>.00)</b><%= automaticSlipCheck ? ' เพื่อให้ระบบตรวจสอบอัตโนมัติผ่านและเติมเงินได้ทันที' : ' จากนั้นแอดมินร้านจะตรวจสอบและอนุมัติให้' %></span>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <% if (request.status === 'pending' || request.status === 'verifying') { %>
+    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+      <h2 class="font-semibold mb-3">แนบสลิปการโอนเงิน</h2>
+      <% if (automaticSlipCheck) { %>
+        <div id="slipDeadline" data-deadline="<%= new Date(request.createdAt).getTime() + (5 * 60 * 1000) %>" class="mb-4 rounded-xl border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-center">
+          <p class="text-xs text-[var(--text-3)]">กรุณาโอนและแนบสลิปภายใน</p>
+          <p id="slipCountdown" class="mt-1 font-mono text-3xl font-bold tabular-nums text-amber-400">05:00</p>
+          <p id="slipDeadlineHint" class="mt-1 text-[11px] text-[var(--text-4)]">ระบบนับถอยหลังให้ทุกวินาที</p>
+        </div>
+      <% } %>
+      <% if (request.slipPath) { %>
+        <div class="mb-3">
+          <img src="<%= request.slipPath %>" class="max-w-full rounded-lg border border-[var(--border)]" alt="สลิปที่แนบ" />
+          <% if (request.slipCheck && request.slipCheck.checked && !request.slipCheck.verified) { %>
+            <p class="text-xs text-[var(--coral)] mt-2">✕ ตรวจสอบอัตโนมัติไม่ผ่าน: <%= request.slipCheck.message %> — กรุณาตรวจสอบยอดเงิน/สลิปแล้วลองแนบใหม่อีกครั้ง</p>
+            <p class="text-xs text-[var(--gold-light)] mt-1">⏳ คำขอนี้ยังอยู่ระหว่างรอแอดมินตรวจสอบด้วยตนเอง ไม่ได้ถูกปฏิเสธ</p>
+          <% } else { %>
+            <p class="text-xs text-emerald-400 mt-2">✓ แนบสลิปแล้ว รอการตรวจสอบ</p>
+          <% } %>
+        </div>
+      <% } %>
+      <form id="slipUploadForm" action="/account/topup/<%= request.id %>/slip" method="post" enctype="multipart/form-data" class="flex flex-col sm:flex-row gap-2">
+        <input type="file" name="slip" accept="image/*" required class="min-w-0 flex-1 text-sm text-[var(--text-3)] file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-[var(--input)] file:text-[var(--gold)] file:text-sm" />
+        <button class="bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--bg)] font-medium px-4 py-2 sm:py-0 rounded-lg text-sm whitespace-nowrap"><%= request.slipPath ? 'แนบใหม่' : 'แนบสลิป' %></button>
+      </form>
+      <p class="text-[10px] text-[var(--text-4)] mt-2">⚠️ สลิปต้องเป็นรายการโอนภายใน 5 นาทีล่าสุด และใช้ยืนยันได้ครั้งเดียวเท่านั้น (สลิปเก่าเกิน 5 นาที หรือสลิปที่เคยใช้แล้วจะไม่ผ่านการตรวจสอบ)</p>
+    </div>
+  <% } %>
+</section>
+
+<div id="slipUploadOverlay" class="hidden fixed inset-0 z-50 bg-[var(--bg)]/95 backdrop-blur-sm flex flex-col items-center justify-center px-6 text-center">
+  <% if (settings.branding && settings.branding.logoImage) { %>
+    <img src="<%= settings.branding.logoImage %>" alt="<%= settings.shopName %>" class="w-20 h-20 rounded-2xl object-cover mb-5 shadow-[0_10px_30px_color-mix(in_srgb,var(--gold)_25%,transparent)]" />
+  <% } else { %>
+    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[var(--gold-light)] to-[var(--gold-dark)] text-[#171208] flex items-center justify-center text-3xl font-bold mb-5 shadow-[0_10px_30px_color-mix(in_srgb,var(--gold)_25%,transparent)]"><%= (settings.shopName || 'S').charAt(0).toUpperCase() %></div>
+  <% } %>
+  <div class="w-10 h-10 border-[3px] border-[var(--gold)]/25 border-t-[var(--gold)] rounded-full animate-spin mb-5"></div>
+  <div class="text-lg font-semibold mb-1"><%= automaticSlipCheck ? 'กำลังส่งสลิปเพื่อตรวจสอบ...' : 'กำลังบันทึกสลิป...' %></div>
+  <p class="text-sm text-[var(--text-3)]"><%= automaticSlipCheck ? 'กรุณารอสักครู่ ระบบกำลังตรวจสอบอัตโนมัติ' : 'กรุณารอสักครู่ จากนั้นคำขอจะรอแอดมินร้านตรวจสอบ' %></p>
+</div>
+<script>
+  (function () {
+    var box = document.getElementById('slipDeadline');
+    var countdown = document.getElementById('slipCountdown');
+    var hint = document.getElementById('slipDeadlineHint');
+    if (!box || !countdown) return;
+    var deadline = Number(box.dataset.deadline);
+    function updateCountdown() {
+      var remaining = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+      var minutes = Math.floor(remaining / 60);
+      var seconds = remaining % 60;
+      countdown.textContent = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+      if (remaining <= 0) {
+        box.classList.remove('border-amber-500/50', 'bg-amber-500/10');
+        box.classList.add('border-[var(--coral)]/50', 'bg-[var(--coral)]/10');
+        countdown.classList.remove('text-amber-400');
+        countdown.classList.add('text-[var(--coral)]');
+        if (hint) hint.textContent = 'หมดเวลาแล้ว กรุณากลับไปสร้างคำขอเติมเงินใหม่และใช้สลิปใหม่';
+        return false;
+      }
+      if (hint) hint.textContent = 'เหลือ ' + remaining + ' วินาทีสำหรับโอนและแนบสลิป';
+      return true;
+    }
+    if (updateCountdown()) {
+      var timer = setInterval(function () { if (!updateCountdown()) clearInterval(timer); }, 1000);
+    }
+  })();
+  (function () {
+    var form = document.getElementById('slipUploadForm');
+    var overlay = document.getElementById('slipUploadOverlay');
+    if (!form || !overlay) return;
+    form.addEventListener('submit', function () {
+      overlay.classList.remove('hidden');
+    });
+  })();
+  <% if (automaticSlipCheck && request.status === 'verifying' && request.slipPath) { %>
+  (function () {
+    var overlay = document.getElementById('slipUploadOverlay');
+    var statusUrl = '/account/topup/<%= request.id %>/status';
+    var detailUrl = '/account/topup/<%= request.id %>';
+    var attempts = 0;
+
+    if (overlay) {
+      overlay.classList.remove('hidden');
+      var title = overlay.querySelector('.text-lg');
+      var message = overlay.querySelector('p');
+      if (title) title.textContent = 'กำลังตรวจสอบสลิปอัตโนมัติ...';
+      if (message) message.textContent = 'ตรวจเสร็จแล้วระบบจะพาไปหน้าผลสำเร็จให้ทันที ไม่ต้องรีเฟรช';
+    }
+
+    function checkStatus() {
+      fetch(statusUrl, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+        .then(function (response) {
+          if (!response.ok) throw new Error('status request failed');
+          return response.json();
+        })
+        .then(function (result) {
+          if (result.finished) {
+            window.location.replace(detailUrl);
+            return;
+          }
+          attempts += 1;
+          setTimeout(checkStatus, attempts < 10 ? 1200 : 2000);
+        })
+        .catch(function () {
+          attempts += 1;
+          setTimeout(checkStatus, attempts < 10 ? 1500 : 3000);
+        });
+    }
+
+    checkStatus();
+  })();
+  <% } %>
+</script>
