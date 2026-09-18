@@ -279,7 +279,7 @@
           </div>
           <a href="/admin/slip-verification" class="text-xs font-bold text-[var(--gold-text)]">ตั้งค่าค่ายตรวจสลิป →</a>
         </div>
-        <% const receiverProviders = [['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go'],['xepht','🌐','Slip XEPHT']].filter(item => availableReceiverProviders.includes(item[0])); %>
+        <% const receiverProviders = [['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go'],['xepht','🌐','ระบบตรวจสอบอัตโนมัติ']].filter(item => availableReceiverProviders.includes(item[0])); %>
         <div class="flex flex-col gap-2">
           <% receiverProviders.forEach(item => { const isActiveReceiverProvider = activeReceiverProvider === item[0]; const editingProvider = receiverProvider === item[0]; %>
             <a href="/admin/topups?tab=bank&receiverProvider=<%= item[0] %>" class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition hover:border-[var(--gold)] <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
@@ -294,14 +294,14 @@
       <% if (receiverProvider) { %>
       <div class="flex items-center justify-between gap-3">
         <a href="/admin/topups?tab=bank" class="text-xs font-bold text-[var(--gold-text)]">← กลับไปเลือกค่าย</a>
-        <span class="text-xs text-[var(--text-4)]">กำลังกรอกข้อมูลสำหรับ <b class="text-[var(--text)]"><%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go',xepht:'Slip XEPHT'})[receiverProvider] %></b></span>
+        <span class="text-xs text-[var(--text-4)]">กำลังกรอกข้อมูลสำหรับ <b class="text-[var(--text)]"><%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go',xepht:'ระบบตรวจสอบอัตโนมัติ'})[receiverProvider] %></b></span>
       </div>
 
       <div class="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-[var(--text-3)]">
         <% if (receiverProvider === 'slipcheck') { %>SlipCheck ส่งชื่อผู้รับและธนาคารกลับมา ระบบจะตรวจจากชื่อผู้รับ ส่วนเบอร์/เลขบัญชีและ QR ใช้แสดงให้ลูกค้าโอน
         <% } else if (receiverProvider === 'rdcw') { %>SlipRDCW ไม่มีหน้าลงทะเบียนบัญชีผ่าน API ระบบจะใช้ชื่อและเลขผู้รับที่กรอกหน้านี้เทียบกับผลตรวจ
         <% } else if (receiverProvider === 'slip2go') { %>Slip2Go รองรับชื่อ เลขผู้รับ และประเภทบัญชี ระบบจะใช้ข้อมูลหน้านี้สร้างเงื่อนไขตรวจของค่ายนี้
-        <% } else { %>Slip XEPHT จะรับยอดเงิน ชื่อบัญชี และเลขบัญชีเดิมของร้านไปตรวจพร้อม QR โดยอัตโนมัติ
+        <% } else { %>ระบบจะรับยอดเงิน ชื่อบัญชี และเลขบัญชีเดิมของร้านไปตรวจพร้อม QR โดยอัตโนมัติ
         <% } %>
       </div>
 
@@ -364,7 +364,7 @@
 
       <div class="pt-2">
         <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
-          💾 บันทึกและใช้ข้อมูลของ <%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go',xepht:'Slip XEPHT'})[receiverProvider] %>
+          💾 บันทึกและใช้ข้อมูลของ <%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go',xepht:'ระบบตรวจสอบอัตโนมัติ'})[receiverProvider] %>
         </button>
       </div>
       <% } %>
@@ -470,7 +470,7 @@
                 <% if (!payment.slipProvider || payment.slipProvider === 'auto') { %>SlipOK อัตโนมัติ
                 <% } else if (payment.slipProvider === 'slipok') { %>⭐ SlipOK API (แนะนำ)
                 <% } else if (payment.slipProvider === 'slip2go') { %>Slip2Go API
-                <% } else if (payment.slipProvider === 'xepht') { %>Slip XEPHT API
+                <% } else if (payment.slipProvider === 'xepht') { %>ระบบตรวจสอบอัตโนมัติ
                 <% } else { %>Custom Slip API<% } %>
               </span>
             </div>

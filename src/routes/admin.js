@@ -1760,7 +1760,7 @@ router.post('/topups/payment-settings', (req, res) => {
     if (sharedTenant) payment.slipProvider = currentlySelectedProvider;
 
     await store.save();
-    req.flash('success', `บันทึกข้อมูลบัญชีรับเงินสำหรับ ${slipProvider === 'slipcheck' ? 'SlipCheck' : slipProvider === 'rdcw' ? 'SlipRDCW' : slipProvider === 'slip2go' ? 'Slip2Go' : slipProvider === 'xepht' ? 'Slip XEPHT' : 'SlipOK'} แล้ว`);
+    req.flash('success', `บันทึกข้อมูลบัญชีรับเงินสำหรับ ${slipProvider === 'slipcheck' ? 'SlipCheck' : slipProvider === 'rdcw' ? 'SlipRDCW' : slipProvider === 'slip2go' ? 'Slip2Go' : slipProvider === 'xepht' ? 'ระบบตรวจสอบอัตโนมัติ' : 'SlipOK'} แล้ว`);
     res.redirect(`/admin/topups?tab=bank&receiverProvider=${slipProvider}`);
   }));
 });

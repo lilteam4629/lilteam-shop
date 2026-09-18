@@ -9,8 +9,12 @@ const DEFAULT_ENDPOINT = 'https://slip.xepht.com/api/v1';
 // pending for the background verifier to retry.
 const RETRYABLE_CODES = new Set(['VERIFY_UNAVAILABLE', 'RATE_LIMITED', 'INTERNAL_ERROR']);
 
-function providerMessage(body, fallback = 'Slip XEPHT ไม่สามารถยืนยันสลิปนี้ได้') {
-  return String(body?.message || body?.error || fallback);
+function providerMessage(body, fallback = 'ระบบตรวจสอบไม่สามารถยืนยันสลิปนี้ได้') {
+  return String(body?.message || body?.error || fallback)
+    .replace(/Slip\s*XEPHT/gi, 'ระบบตรวจสอบ')
+    .replace(/slip\.xepht\.com/gi, 'ระบบภายนอก')
+    .replace(/XEPHT/gi, 'ระบบตรวจสอบ')
+    .replace(/https?:\/\/[^\s)]+/gi, 'ระบบภายนอก');
 }
 
 function normalizeResponse(body = {}) {
@@ -90,14 +94,14 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
       allowMaskedNumber: true,
     });
     if ((expectedNames.length || expectedNumbers.length) && receiverCheck.hasEvidence && !receiverCheck.matched) {
-      return { checked: true, verified: false, providerCode: 'WRONG_RECEIVER', message: 'Slip XEPHT: ผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw };
+      return { checked: true, verified: false, providerCode: 'WRONG_RECEIVER', message: 'ผู้รับในสลิปไม่ตรงกับบัญชีร้านค้า', raw };
     }
 
     return {
       checked: true,
       verified: true,
       providerCode: 'VERIFIED',
-      message: 'ตรวจสอบสลิปสำเร็จผ่าน Slip XEPHT',
+      message: 'ตรวจสอบสลิปสำเร็จ',
       raw,
     };
   } catch (error) {
@@ -111,7 +115,7 @@ async function verifySlip(fileBuffer, expectedAmount, fileOptions = {}, credenti
       retryable,
       providerCode: code || null,
       httpStatus: status,
-      message: providerMessage(body, error.message || 'เชื่อมต่อ Slip XEPHT ไม่สำเร็จ'),
+      message: providerMessage(body, error.message || 'เชื่อมต่อระบบตรวจสอบไม่สำเร็จ'),
       raw: body,
     };
   }
@@ -124,13 +128,13 @@ function validateCredentials(apiKey = '', endpoint = DEFAULT_ENDPOINT) {
       const url = new URL(requested);
       const validPath = url.pathname === '/api/v1' || url.pathname === '/api/v1/';
       if (url.protocol !== 'https:' || url.hostname.toLowerCase() !== 'slip.xepht.com' || !validPath) {
-        return { ok: false, message: 'Endpoint ต้องเป็น https://slip.xepht.com/api/v1 เท่านั้น' };
+        return { ok: false, message: 'รูปแบบปลายทางระบบตรวจสอบไม่ถูกต้อง' };
       }
     } catch (_) {
-      return { ok: false, message: 'รูปแบบ Endpoint ของ Slip XEPHT ไม่ถูกต้อง' };
+      return { ok: false, message: 'รูปแบบปลายทางระบบตรวจสอบไม่ถูกต้อง' };
     }
   }
-  return { ok: true, message: String(apiKey || '').trim() ? 'บันทึก Slip XEPHT พร้อม API Key แล้ว' : 'พร้อมใช้ Slip XEPHT (ค่ายนี้ไม่จำเป็นต้องใช้ API Key หากระบบเปิดแบบสาธารณะ)' };
+  return { ok: true, message: String(apiKey || '').trim() ? 'บันทึกระบบตรวจสอบพร้อมคีย์แล้ว' : 'ระบบตรวจสอบพร้อมใช้งาน' };
 }
 
 module.exports = { DEFAULT_ENDPOINT, RETRYABLE_CODES, normalizeResponse, validateCredentials, verifySlip };
