@@ -19,6 +19,16 @@ const { requireLogin, currentUser } = require('../middleware/auth');
 
 router.use(requireLogin);
 
+// When a rented shop enables the central catalog, all wallet top-ups use the
+// platform receiving account. The tenant wallet still credits locally, while
+// catalog checkout records the owner cost and tenant markup separately.
+function settlementPayment(payment = store.data.settings.payment) {
+  const catalog = store.isTenantContext() ? store.data.settings.catalogApi : null;
+  return catalog?.enabled && catalog.settlementMode === 'platform'
+    ? store.platformData.settings.payment
+    : payment;
+}
+
 const path = require('path');
 
 const upload = multer({
@@ -58,14 +68,14 @@ router.get('/', (req, res) => {
 });
 
 router.get('/topup', (req, res) => {
-  const payment = store.data.settings.payment;
-  res.render('shop/topup', { title: 'เติมเงิน', payment });
+  const payment = settlementPayment();
+  res.render('shop/topup', { title: 'เติมเงิน', payment, settlementToPlatform: Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled && store.data.settings.catalogApi?.settlementMode === 'platform') });
 });
 
 router.post('/topup/truemoney', async (req, res) => {
   const user = currentUser(req);
   const voucherInput = String(req.body.voucherLink || req.body.voucherCode || '').trim();
-  const payment = store.data.settings.payment;
+  const payment = settlementPayment();
 
   if (!payment.truemoneyEnabled) {
     req.flash('error', 'ระบบเติมเงินผ่านซองของขวัญ TrueMoney ปิดให้บริการชั่วคราว');
@@ -199,7 +209,7 @@ router.get('/topup/:id', async (req, res) => {
   const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
   if (!request) return res.redirect('/account/topup');
 
-  const payment = store.data.settings.payment;
+  const payment = settlementPayment();
   res.render('shop/topup-detail', {
     title: 'สถานะการเติมเงิน', request, payment,
     automaticSlipCheck: canCheckSlipAutomatically(payment),
@@ -282,7 +292,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     const user = store.data.users.find(u => u.id === userId);
     if (!request || !user || request.status === 'approved' || request.status === 'rejected') return;
 
-    const payment = store.data.settings.payment;
+    const payment = settlementPayment();
     const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
     let provider = null;
     let result;
@@ -569,7 +579,7 @@ router.get('/orders/:id', (req, res) => {
     const stockItem = store.data.stockItems.find(s => s.id === oi.stockItemId);
     return {
       ...oi,
-      credentials: stockItem,
+      credentials: oi.credentials || stockItem,
       productTitle: oi.title || product?.title || 'สินค้า',
       productImage: oi.productImage || product?.images?.[0] || '',
     };

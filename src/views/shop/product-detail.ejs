@@ -169,11 +169,15 @@
       <% } %>
 
       <% if (product.isSyndicated) { %>
-        <div class="rounded-2xl border border-[var(--gold)]/40 bg-[var(--input)]/60 p-5">
-          <div class="mb-2 text-sm font-bold text-[var(--gold-text)]">สินค้าจากร้านหลัก</div>
-          <p class="mb-4 text-sm text-[var(--text-3)]">รายการนี้แสดงจากร้านหลัก ราคานี้รวมส่วนต่างของร้านคุณแล้ว การชำระเงินและการจัดส่งไอดีจะดำเนินการที่ร้านหลักโดยตรง</p>
-          <% if (product.sourceUrl) { %><a href="<%= product.sourceUrl %>" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[var(--gold-contrast)]">สั่งซื้อผ่านร้านหลัก ↗</a><% } %>
-        </div>
+        <% if (product.stockCount > 0) { %>
+          <div class="rounded-2xl border border-[var(--gold)]/40 bg-[var(--input)]/60 p-5">
+            <div class="mb-2 text-sm font-bold text-[var(--gold-text)]">สินค้าจากร้านหลัก</div>
+            <p class="mb-4 text-sm text-[var(--text-3)]">ซื้อผ่านร้านนี้ได้เลย เงินจะหักจากกระเป๋าร้านนี้ ราคานี้รวมส่วนต่างของร้านแล้ว และระบบจะส่งไอดีให้ในคำสั่งซื้อ</p>
+            <form action="/cart/add/<%= product.id %>" method="post"><button class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[var(--gold-contrast)]">เพิ่มลงตะกร้าร้านนี้</button></form>
+          </div>
+        <% } else { %>
+          <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมดจากร้านหลัก</div>
+        <% } %>
       <% } else if (product.stockCount > 0) { %>
         <form action="/cart/add/<%= product.id %><%= product.federatedCheckout ? '?federated=1' : '' %>" method="post" <%= product.purchaseApprovalEnabled ? 'class="relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 bg-gradient-to-br from-[var(--card)] to-[var(--input)] p-5 shadow-lg"' : '' %>>
           <% if (qtyTiers.length) { %>

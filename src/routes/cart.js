@@ -3,6 +3,8 @@ const router = express.Router();
 const store = require('../data/store');
 const { requireLogin, currentUser } = require('../middleware/auth');
 const { withEffectivePrice } = require('../services/pricing');
+const catalogSyndication = require('../services/catalog-syndication');
+const { MAIN_SITE_URL } = require('../middleware/tenant');
 
 function getCart(req) {
   if (!req.session.cart) req.session.cart = [];
@@ -33,56 +35,76 @@ function resolveUnitPrice(product, qty) {
   return price;
 }
 
+function tenantRemoteProduct(req, slug) {
+  if (!req?.tenantShop) return null;
+  return catalogSyndication.findTenantProduct(
+    store.platformData,
+    store.data,
+    slug,
+    MAIN_SITE_URL || `${req.protocol}://${req.get('host')}`,
+    req.tenantShop,
+  );
+}
+
 function buildCartView(req) {
   const cart = getCart(req);
   const items = cart.map(ci => {
-    const storedProduct = store.data.products.find(p => p.id === ci.productId);
+    const remote = ci.sourceProductId ? tenantRemoteProduct(req, ci.productId) : null;
+    const storedProduct = remote || store.data.products.find(p => p.id === ci.productId);
     if (!isProductVisible(storedProduct)) return null;
-    const product = withEffectivePrice(storedProduct);
+    const product = remote ? { ...remote, federatedCheckout: true } : withEffectivePrice(storedProduct);
     if (ci.federatedPrice !== undefined && Number.isFinite(Number(ci.federatedPrice)) && Number(ci.federatedPrice) >= 0) {
       product.price = Math.round(Number(ci.federatedPrice) * 100) / 100;
       product.federatedCheckout = true;
     }
-    const stock = availableStock(product.id);
+    const stock = remote ? remote.stockCount : availableStock(product.id);
     if (stock <= 0) return null;
     const qty = Math.min(ci.qty, Math.max(stock, 0));
     if (qty <= 0) return null;
     const unitPrice = resolveUnitPrice(product, qty);
-    return { product, qty, stock, unitPrice, subtotal: unitPrice * qty, federatedTenantId: ci.federatedTenantId || null };
+    return {
+      product, qty, stock, unitPrice, subtotal: unitPrice * qty,
+      federatedTenantId: ci.federatedTenantId || null,
+      sourceProductId: ci.sourceProductId || null,
+      sourcePrice: Number(ci.sourcePrice || product.sourcePrice || product.price) || 0,
+    };
   }).filter(Boolean);
   const total = items.reduce((sum, i) => sum + i.subtotal, 0);
   return { items, total };
 }
 
 router.post('/add/:productId', (req, res) => {
-  const product = store.data.products.find(p => p.id === req.params.productId);
+  const localProduct = store.data.products.find(p => p.id === req.params.productId);
+  const remoteProduct = localProduct ? null : tenantRemoteProduct(req, req.params.productId);
+  const product = remoteProduct || localProduct;
   if (!isProductVisible(product)) {
     req.flash('error', 'ไม่พบสินค้า');
     return res.redirect('back');
   }
-  const stock = availableStock(product.id);
+  const stock = remoteProduct ? remoteProduct.stockCount : availableStock(product.id);
   if (stock < 1) {
     req.flash('error', 'สินค้าหมดสต๊อก');
     return res.redirect('back');
   }
-  if (product.purchaseApprovalEnabled) {
-    if (req.body.purchaseConfirmed !== 'yes') {
-      req.flash('error', 'กรุณาติ๊กยืนยันเงื่อนไขก่อนเพิ่มลงตะกร้า');
-      return res.redirect(`/game/${product.slug}`);
-    }
+  if (!remoteProduct && product.purchaseApprovalEnabled && req.body.purchaseConfirmed !== 'yes') {
+    req.flash('error', 'กรุณาติ๊กยืนยันเงื่อนไขก่อนเพิ่มลงตะกร้า');
+    return res.redirect(`/game/${product.slug}`);
   }
   const requestedQty = Math.max(1, parseInt(req.body.qty, 10) || 1);
-  const federated = req.query.federated === '1' && req.session.federatedCatalog &&
+  const federated = Boolean(remoteProduct) || (req.query.federated === '1' && req.session.federatedCatalog &&
     String(req.session.federatedCatalog.sourceProductId) === String(product.id) &&
-    Number(req.session.federatedCatalog.expiresAt) > Date.now();
+    Number(req.session.federatedCatalog.expiresAt) > Date.now());
   const cart = getCart(req);
-  const existing = cart.find(c => c.productId === product.id && Boolean(c.federatedPrice) === Boolean(federated));
+  const cartProductId = remoteProduct ? remoteProduct.slug : product.id;
+  const existing = cart.find(c => c.productId === cartProductId);
   if (existing) {
     existing.qty = Math.min(existing.qty + requestedQty, stock);
   } else {
-    cart.push({ productId: product.id, qty: Math.min(requestedQty, stock), ...(federated ? {
-      federatedPrice: Number(req.session.federatedCatalog.price),
-      federatedTenantId: String(req.session.federatedCatalog.tenantId),
+    cart.push({ productId: cartProductId, qty: Math.min(requestedQty, stock), ...(federated ? {
+      sourceProductId: remoteProduct?.sourceProductId || String(req.session.federatedCatalog.sourceProductId),
+      sourcePrice: Number(remoteProduct?.sourcePrice || req.session.federatedCatalog.sourcePrice || product.price),
+      federatedPrice: Number(remoteProduct?.price || req.session.federatedCatalog.price || product.price),
+      federatedTenantId: String(remoteProduct ? req.tenantShop.id : req.session.federatedCatalog.tenantId),
     } : {}) });
   }
   req.flash('success', `เพิ่ม "${product.title}" ลงตะกร้าแล้ว`);
@@ -94,7 +116,8 @@ router.post('/update/:productId', (req, res) => {
   const item = cart.find(c => c.productId === req.params.productId);
   const qty = parseInt(req.body.qty, 10);
   if (item && qty > 0) {
-    const stock = availableStock(item.productId);
+    const remote = item.sourceProductId ? tenantRemoteProduct(req, item.productId) : null;
+    const stock = remote ? remote.stockCount : availableStock(item.productId);
     item.qty = Math.min(qty, stock);
   }
   res.redirect('/cart');
@@ -140,6 +163,87 @@ function runWithCheckoutQueue(fn) {
 
 const checkoutLocks = new Set();
 
+async function completeFederatedCheckout({ req, user, items, total, discount, finalTotal, validCoupon }) {
+  if (items.some(item => !item.federatedTenantId)) {
+    throw new Error('กรุณาแยกซื้อสินค้าร้านหลักและสินค้าจาก API คนละรายการ');
+  }
+  const orderId = store.genId(10);
+  const now = new Date().toISOString();
+  const sourceItems = [];
+  let ownerRevenue = 0;
+  let tenantRevenue = 0;
+
+  // Reserve and mark the platform stock first. The separate tenant write is
+  // rolled back below if it fails, so one source ID can never be sold twice.
+  await store.runOnPlatform(() => store.transact(data => {
+    const sourceProducts = new Map((data.products || []).map(product => [String(product.id), product]));
+    for (const item of items) {
+      const source = sourceProducts.get(String(item.sourceProductId));
+      if (!source || source.status !== 'active') throw new Error(`สินค้า "${item.product.title}" ไม่พร้อมขาย`);
+      const pool = data.stockItems.filter(stock => stock.productId === source.id && stock.status === 'available');
+      if (pool.length < item.qty) throw new Error(`สินค้า "${item.product.title}" มีสต็อกไม่พอ`);
+      for (let index = 0; index < item.qty; index += 1) {
+        const stock = pool[index];
+        stock.status = 'sold';
+        stock.soldOrderId = orderId;
+        sourceItems.push({ item, source, stock });
+      }
+    }
+    const sourceTotal = sourceItems.reduce((sum, row) => sum + ((Number(row.item.sourcePrice) || Number(row.source.price) || 0)), 0);
+    ownerRevenue = Math.min(finalTotal, Math.round(sourceTotal * 100) / 100);
+    tenantRevenue = Math.max(0, Math.round((finalTotal - ownerRevenue) * 100) / 100);
+    data.settings.catalogApi ||= { enabled: true, source: 'main-store', markupMode: 'percent', markupValue: 0, settlementMode: 'platform', ownerRevenue: 0, tenantRevenue: 0, transactions: [] };
+    data.settings.catalogApi.ownerRevenue = Math.round((Number(data.settings.catalogApi.ownerRevenue) + ownerRevenue) * 100) / 100;
+    data.settings.catalogApi.transactions ||= [];
+    data.settings.catalogApi.transactions.push({ orderId, tenantId: String(req.tenantShop.id), ownerRevenue, tenantRevenue, total: finalTotal, createdAt: now });
+  }));
+
+  try {
+    await store.transact(data => {
+      const freshUser = data.users.find(candidate => candidate.id === user.id);
+      if (!freshUser || Number(freshUser.walletBalance) < finalTotal) throw new Error('ยอดเงินในกระเป๋าไม่เพียงพอ กรุณาเติมเงินก่อนทำรายการ');
+      const orderItems = sourceItems.map(({ item, source, stock }) => ({
+        productId: source.id,
+        title: source.title,
+        price: item.unitPrice,
+        sourcePrice: Number(item.sourcePrice) || Number(source.price) || 0,
+        productImage: source.images?.[0] || '',
+        importedFileCode: source.internalNote || '',
+        stockItemId: stock.id,
+        // Credentials are copied into this tenant order only so the buyer can
+        // receive the item from their own shop. They never enter the catalog.
+        credentials: { username: stock.username || '', password: stock.password || '', extra: stock.extra || '' },
+        fulfillmentMode: source.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
+        fulfillmentInstructions: source.fulfillmentInstructions || '',
+        contactMessageIntro: source.contactMessageIntro || '',
+        contactMessageOutro: source.contactMessageOutro || '',
+        federatedTenantId: String(req.tenantShop.id),
+      }));
+      freshUser.walletBalance = Math.round((Number(freshUser.walletBalance) - finalTotal) * 100) / 100;
+      data.walletTransactions.push({ id: store.genId(10), userId: freshUser.id, type: 'purchase', amount: -finalTotal, note: `สั่งซื้อ API #${orderId}`, createdAt: now });
+      if (validCoupon) {
+        const coupon = data.coupons.find(candidate => candidate.code === validCoupon.code && candidate.active);
+        if (coupon) coupon.usedCount = (coupon.usedCount || 0) + 1;
+      }
+      data.settings.catalogApi ||= {};
+      data.settings.catalogApi.tenantRevenue = Math.round((Number(data.settings.catalogApi.tenantRevenue) + tenantRevenue) * 100) / 100;
+      data.settings.catalogApi.transactions ||= [];
+      data.settings.catalogApi.transactions.push({ orderId, type: 'markup', amount: tenantRevenue, createdAt: now });
+      data.orders.push({ id: orderId, userId: freshUser.id, items: orderItems, subtotal: total, discount, total: finalTotal, couponCode: validCoupon ? validCoupon.code : null, status: 'completed', paymentMethod: 'wallet', salesChannel: 'catalog-api', federatedTenantIds: [String(req.tenantShop.id)], createdAt: now });
+    });
+  } catch (error) {
+    await store.runOnPlatform(() => store.transact(data => {
+      data.stockItems.filter(stock => stock.soldOrderId === orderId).forEach(stock => { stock.status = 'available'; stock.soldOrderId = null; });
+      if (data.settings.catalogApi) {
+        data.settings.catalogApi.ownerRevenue = Math.max(0, Math.round((Number(data.settings.catalogApi.ownerRevenue || 0) - ownerRevenue) * 100) / 100);
+        data.settings.catalogApi.transactions = (data.settings.catalogApi.transactions || []).filter(entry => entry.orderId !== orderId);
+      }
+    }));
+    throw error;
+  }
+  return { orderId, tenantRevenue, ownerRevenue };
+}
+
 router.post('/checkout', requireLogin, (req, res) => {
   const user = currentUser(req);
   if (!user) {
@@ -181,6 +285,15 @@ router.post('/checkout', requireLogin, (req, res) => {
       if (user.walletBalance < finalTotal) {
         req.flash('error', 'ยอดเงินในกระเป๋าไม่เพียงพอ กรุณาเติมเงินก่อนทำการสั่งซื้อ');
         return res.redirect('/cart');
+      }
+
+      if (items.some(item => item.federatedTenantId)) {
+        const completed = await completeFederatedCheckout({ req, user, items, total, discount, finalTotal, validCoupon });
+        req.session.cart = [];
+        req.session.coupon = null;
+        req.session.federatedCatalog = null;
+        req.flash('success', `สั่งซื้อสำเร็จ! ร้านหลักได้รับต้นทุน ฿${completed.ownerRevenue.toLocaleString()} และร้านนี้ได้รับส่วนต่าง ฿${completed.tenantRevenue.toLocaleString()}`);
+        return res.redirect(`/account/orders/${completed.orderId}`);
       }
 
       const orderItems = [];
@@ -261,7 +374,10 @@ router.post('/checkout', requireLogin, (req, res) => {
         if (s.status === 'reserved') s.status = 'available';
       });
       console.error('[checkout] error:', err);
-      req.flash('error', 'เกิดข้อผิดพลาดในการสั่งซื้อ กรุณาลองใหม่อีกครั้ง');
+      const userMessage = /^(กรุณาแยก|สินค้า .*ไม่พร้อมขาย|สินค้า .*มีสต็อกไม่พอ|ยอดเงินในกระเป๋า)/.test(String(err.message || ''))
+        ? err.message
+        : 'เกิดข้อผิดพลาดในการสั่งซื้อ กรุณาลองใหม่อีกครั้ง';
+      req.flash('error', userMessage);
       res.redirect('/cart');
     } finally {
       checkoutLocks.delete(user.id);

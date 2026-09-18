@@ -9,6 +9,10 @@
     </div>
   </div>
 
+  <% if (typeof settlementToPlatform !== 'undefined' && settlementToPlatform) { %>
+    <div class="mb-4 rounded-xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-4 py-3 text-xs text-[var(--text-2)]">เงินเติมของร้านนี้รับเข้าบัญชีร้านหลักเพื่อคุ้มครองการส่งสินค้า ระบบจะเติมยอดเข้ากระเป๋าคุณทันทีหลังตรวจสอบ และส่วนต่างของร้านเช่าจะบันทึกแยกอัตโนมัติ</div>
+  <% } %>
+
   <!-- Channel Select Tabs -->
   <div class="grid grid-cols-2 gap-2 mb-4">
     <button type="button" id="tabTruemoney" onclick="switchTab('truemoney')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--gold-text)]">

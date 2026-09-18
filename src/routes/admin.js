@@ -312,7 +312,8 @@ router.post('/catalog-api/settings', async (req, res) => {
   const mode = req.body.markupMode === 'fixed' ? 'fixed' : 'percent';
   const max = mode === 'fixed' ? 100000 : 1000;
   const value = Math.min(max, Math.max(0, Number(req.body.markupValue) || 0));
-  store.data.settings.catalogApi = { enabled: req.body.enabled === 'on', source: 'main-store', markupMode: mode, markupValue: value, syncedAt: new Date().toISOString() };
+  const previous = catalogSyndication.normalizeConfig(store.data.settings || {});
+  store.data.settings.catalogApi = { ...previous, enabled: req.body.enabled === 'on', source: 'main-store', markupMode: mode, markupValue: value, syncedAt: new Date().toISOString() };
   await store.save();
   req.flash('success', store.data.settings.catalogApi.enabled ? 'เปิดรับสินค้าจากร้านหลักแล้ว' : 'ปิด API แคตตาล็อกแล้ว');
   res.redirect('/admin/catalog-api');

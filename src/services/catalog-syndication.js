@@ -12,6 +12,9 @@ function normalizeConfig(settings = {}) {
     source: 'main-store',
     markupMode,
     markupValue,
+    ownerRevenue: Math.max(0, Number(raw.ownerRevenue) || 0),
+    tenantRevenue: Math.max(0, Number(raw.tenantRevenue) || 0),
+    transactions: Array.isArray(raw.transactions) ? raw.transactions.slice(-100) : [],
     syncedAt: raw.syncedAt || null,
   };
 }

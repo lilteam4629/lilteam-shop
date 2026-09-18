@@ -183,6 +183,10 @@ function defaultData() {
         source: 'main-store',
         markupMode: 'percent',
         markupValue: 0,
+        settlementMode: 'platform',
+        ownerRevenue: 0,
+        tenantRevenue: 0,
+        transactions: [],
         syncedAt: null,
       },
       storefrontModel: 'classic', // 'classic' | 'line-rangers' | 'rangers-market'
@@ -489,12 +493,16 @@ function migrateAdminRecovery(db) {
 function migrateSchema(db) {
   let changed = false;
   if (!db.settings.catalogApi || typeof db.settings.catalogApi !== 'object') {
-    db.settings.catalogApi = { enabled: false, source: 'main-store', markupMode: 'percent', markupValue: 0, syncedAt: null };
+    db.settings.catalogApi = { enabled: false, source: 'main-store', markupMode: 'percent', markupValue: 0, settlementMode: 'platform', ownerRevenue: 0, tenantRevenue: 0, transactions: [], syncedAt: null };
     changed = true;
   } else {
     const api = db.settings.catalogApi;
     if (api.enabled === undefined) { api.enabled = false; changed = true; }
     if (api.source !== 'main-store') { api.source = 'main-store'; changed = true; }
+    if (api.settlementMode !== 'platform') { api.settlementMode = 'platform'; changed = true; }
+    if (!Number.isFinite(Number(api.ownerRevenue)) || Number(api.ownerRevenue) < 0) { api.ownerRevenue = 0; changed = true; }
+    if (!Number.isFinite(Number(api.tenantRevenue)) || Number(api.tenantRevenue) < 0) { api.tenantRevenue = 0; changed = true; }
+    if (!Array.isArray(api.transactions)) { api.transactions = []; changed = true; }
     if (!['percent', 'fixed'].includes(api.markupMode)) { api.markupMode = 'percent'; changed = true; }
     const max = api.markupMode === 'fixed' ? 100000 : 1000;
     const normalized = Math.min(max, Math.max(0, Number.isFinite(Number(api.markupValue)) ? Number(api.markupValue) : 0));
@@ -958,6 +966,13 @@ function runInTenant(shopId, tenantDb, fn) {
   return tenantContext.run({ shopId, db: tenantDb }, fn);
 }
 
+// Execute a callback against the platform document even when the current
+// request is running inside a tenant context. Federated checkout uses this to
+// reserve the source shop's stock without ever exposing the tenant database.
+function runOnPlatform(fn) {
+  return tenantContext.run(undefined, fn);
+}
+
 function reset() {
   db = defaultData();
   save();
@@ -1117,6 +1132,7 @@ module.exports = {
   createTenantDb,
   deleteTenantDb,
   runInTenant,
+  runOnPlatform,
   transact,
   claimGlobalSlipRef,
   // Wrap a callback with the CURRENT tenant context so it still resolves
