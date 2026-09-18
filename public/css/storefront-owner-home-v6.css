@@ -20,3 +20,6 @@
   .v6-banner h1{font-size:clamp(32px,8.8vw,50px);letter-spacing:-.08em;line-height:.94}
   .v6-product-card__media{aspect-ratio:16/9}
 }
+/* v6 typography refinement: restore readable tracking for the banner title. */
+.v6-banner h1{letter-spacing:-.045em}
+@media(max-width:700px){.v6-banner h1{letter-spacing:-.03em}}
