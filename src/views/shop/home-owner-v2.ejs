@@ -1,0 +1,73 @@
+<% const ownerProducts = Array.isArray(products) ? products : []; %>
+<% const ownerCategories = Array.isArray(recommendedCategories) ? recommendedCategories.slice(0, 4) : []; %>
+<% const ownerNewest = Array.isArray(newest) ? newest.slice(0, 6) : []; %>
+<main class="owner-v2-home">
+  <section class="owner-v2-hero" aria-labelledby="owner-v2-title">
+    <div class="owner-v2-hero__copy">
+      <span class="owner-v2-kicker">LILTEAM · DIGITAL GAME STORE</span>
+      <h1 id="owner-v2-title">ยินดีต้อนรับสู่<br><em><%= settings.shopName %></em></h1>
+      <p><%= settings.tagline || 'เลือกสินค้า เติมเงิน และรับของได้ในระบบเดียว' %></p>
+      <div class="owner-v2-actions">
+        <a class="owner-v2-button owner-v2-button--solid" href="/products">เลือกสินค้า <span>→</span></a>
+        <a class="owner-v2-button owner-v2-button--quiet" href="/account/topup">เติมเงินเข้าระบบ</a>
+      </div>
+      <div class="owner-v2-proof" aria-label="จุดเด่นร้าน">
+        <span><i>✓</i> พร้อมส่งหลังชำระเงิน</span>
+        <span><i>✓</i> ตรวจสอบรายการได้</span>
+      </div>
+    </div>
+    <div class="owner-v2-hero__visual">
+      <% if (settings.hero && settings.hero.bannerImage) { %>
+        <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" fetchpriority="high" decoding="async" />
+      <% } else if (ownerNewest.length && ownerNewest[0].images && ownerNewest[0].images[0]) { %>
+        <img src="<%= ownerNewest[0].images[0] %>" alt="<%= ownerNewest[0].title %>" fetchpriority="high" decoding="async" />
+      <% } else { %>
+        <div class="owner-v2-hero__placeholder"><span>L</span></div>
+      <% } %>
+      <div class="owner-v2-live"><b></b><span>ระบบร้านออนไลน์</span><strong>พร้อมให้บริการ</strong></div>
+      <div class="owner-v2-hero__glow"></div>
+    </div>
+  </section>
+
+  <section class="owner-v2-quick" aria-label="ทางลัดร้าน">
+    <a href="/products"><span class="owner-v2-quick__icon">▦</span><span><b>สินค้าทั้งหมด</b><small><%= Number(productTotal || 0).toLocaleString() %> รายการ</small></span><em>↗</em></a>
+    <a href="/account/topup"><span class="owner-v2-quick__icon">฿</span><span><b>เติมเงิน</b><small>เติมแล้วใช้งานได้ทันที</small></span><em>↗</em></a>
+    <a href="/help"><span class="owner-v2-quick__icon">?</span><span><b>วิธีสั่งซื้อ</b><small>ขั้นตอนสั้น เข้าใจง่าย</small></span><em>↗</em></a>
+    <a href="/contact"><span class="owner-v2-quick__icon">⌁</span><span><b>ติดต่อร้าน</b><small>มีทีมงานคอยดูแล</small></span><em>↗</em></a>
+  </section>
+
+  <% if (ownerCategories.length) { %>
+  <section class="owner-v2-section" aria-labelledby="owner-v2-categories">
+    <div class="owner-v2-section-head"><div><span class="owner-v2-eyebrow">BROWSE BY CATEGORY</span><h2 id="owner-v2-categories">เลือกจากหมวดที่สนใจ</h2></div><a href="/products">ดูทั้งหมด <span>→</span></a></div>
+    <div class="owner-v2-categories">
+      <% ownerCategories.forEach((category, index) => { %>
+        <a href="/products?recommended=<%= encodeURIComponent(category.id) %>" class="owner-v2-category">
+          <div class="owner-v2-category__image"><% if (category.imageUrl) { %><img src="<%= category.imageUrl %>" alt="<%= category.title %>" loading="lazy" decoding="async" /><% } else { %><span><%= String(index + 1).padStart(2, '0') %></span><% } %></div>
+          <div><b><%= category.title %></b><small><%= Number(category.count || 0).toLocaleString() %> รายการ</small></div><em>↗</em>
+        </a>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <% if (ownerNewest.length) { %>
+  <section class="owner-v2-section" aria-labelledby="owner-v2-newest">
+    <div class="owner-v2-section-head"><div><span class="owner-v2-eyebrow">JUST DROPPED</span><h2 id="owner-v2-newest">สินค้าใหม่ที่อยากให้คุณเห็น</h2></div><a href="/products?sort=newest">ดูสินค้าใหม่ <span>→</span></a></div>
+    <div class="owner-v2-products">
+      <% ownerNewest.forEach((p) => { const soldOut = Number(p.stockCount || 0) < 1; %>
+        <a href="/game/<%= p.slug %>" class="owner-v2-product <%= soldOut ? 'is-sold' : '' %>">
+          <div class="owner-v2-product__image"><img src="<%= p.images && p.images[0] ? p.images[0] : '' %>" alt="<%= p.title %>" loading="lazy" decoding="async" /><span><%= soldOut ? 'หมดแล้ว' : 'พร้อมส่ง' %></span></div>
+          <div class="owner-v2-product__body"><h3><%= p.title %></h3><div><strong>฿<%= Number(p.price || 0).toLocaleString() %></strong><small><%= soldOut ? 'รอสินค้าเข้าใหม่' : `เหลือ ${Number(p.stockCount || 0).toLocaleString()} ชิ้น` %></small></div></div>
+        </a>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+
+  <section class="owner-v2-system" aria-label="ระบบของร้าน">
+    <div class="owner-v2-system__copy"><span class="owner-v2-eyebrow">BUILT FOR YOUR NEXT PURCHASE</span><h2>ทุกอย่างที่จำเป็น<br>อยู่ในระบบเดียว</h2><p>ค้นหา กรองสินค้า เติมเงิน ตรวจสอบคำสั่งซื้อ และติดต่อร้านได้จากบัญชีเดียว โดยไม่ต้องสลับหลายหน้า</p><a class="owner-v2-button owner-v2-button--solid" href="/register">สร้างบัญชีฟรี <span>→</span></a></div>
+    <div class="owner-v2-system__grid"><div><b>01</b><strong>กระเป๋าเงิน</strong><span>เติมเงินแล้วใช้ซื้อได้ทันที</span></div><div><b>02</b><strong>คำสั่งซื้อ</strong><span>ดูสถานะและรายการย้อนหลัง</span></div><div><b>03</b><strong>รับประกัน</strong><span>มีช่องทางติดต่อเมื่อมีปัญหา</span></div><div><b>04</b><strong>อัปเดตสินค้า</strong><span>รู้ทันรายการใหม่ก่อนใคร</span></div></div>
+  </section>
+
+  <section class="owner-v2-footer-cta"><div><span class="owner-v2-eyebrow">READY WHEN YOU ARE</span><h2>เริ่มจากสินค้าที่ใช่สำหรับคุณ</h2></div><a class="owner-v2-button owner-v2-button--solid" href="/products">เข้าสู่ร้านค้า <span>→</span></a></section>
+</main>
