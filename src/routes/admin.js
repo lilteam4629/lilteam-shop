@@ -176,7 +176,7 @@ router.get('/products/bulk-import/progress/:jobId', (req, res) => {
 // ---------- Dashboard ----------
 router.get('/', (req, res) => {
   const { orders, users, products, stockItems } = store.data;
-  const paidOrders = orders.filter(order => order.status !== 'cancelled');
+  const paidOrders = orders.filter(order => order.status !== 'cancelled' && order.salesChannel !== 'catalog-api-fulfillment');
   const revenue = paidOrders.reduce((sum, o) => sum + o.total, 0);
   const now = new Date();
   const bangkokKey = date => new Intl.DateTimeFormat('en-CA', {
@@ -1282,7 +1282,9 @@ router.get('/orders', (req, res) => {
   const orders = [...store.data.orders]
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map(o => {
-      const buyer = store.data.users.find(u => u.id === o.userId);
+      const buyer = store.data.users.find(u => u.id === o.userId) || (o.salesChannel === 'catalog-api-fulfillment'
+        ? { username: `ร้านเช่า: ${o.tenantShopName || o.tenantShopId || '-'}`, email: '' }
+        : undefined);
       const itemSearchTerms = (o.items || []).flatMap(item => {
         const product = productsById.get(item.productId);
         return [item.title, item.productId, item.importedFileCode, product?.internalNote];
@@ -1306,7 +1308,9 @@ router.get('/orders', (req, res) => {
 router.get('/orders/:id', (req, res) => {
   const order = store.data.orders.find(o => o.id === req.params.id);
   if (!order) { req.flash('error', 'ไม่พบคำสั่งซื้อ'); return res.redirect('/admin/orders'); }
-  const buyer = store.data.users.find(u => u.id === order.userId);
+  const buyer = store.data.users.find(u => u.id === order.userId) || (order.salesChannel === 'catalog-api-fulfillment'
+    ? { username: `ร้านเช่า: ${order.tenantShopName || order.tenantShopId || '-'}`, email: '' }
+    : undefined);
   const itemsWithCreds = order.items.map(oi => {
     const product = store.data.products.find(p => p.id === oi.productId);
     return {
@@ -1327,6 +1331,15 @@ router.post('/orders/:id/status', async (req, res) => {
   if (order && nextStatus) {
     order.status = nextStatus;
     await store.save();
+    if (order.salesChannel === 'catalog-api-fulfillment' && order.tenantShopId) {
+      const tenantDb = await store.loadTenantDb(order.tenantShopId);
+      if (tenantDb) {
+        await store.runInTenant(order.tenantShopId, tenantDb, () => store.transact(data => {
+          const tenantOrder = data.orders.find(candidate => candidate.id === order.id && candidate.salesChannel === 'catalog-api');
+          if (tenantOrder) tenantOrder.status = nextStatus;
+        }));
+      }
+    }
     req.flash('success', 'อัปเดตสถานะคำสั่งซื้อแล้ว');
   } else if (order) {
     req.flash('error', 'สถานะคำสั่งซื้อไม่ถูกต้อง');

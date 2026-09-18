@@ -207,6 +207,36 @@ async function completeTenantFederatedCheckout({ req, user, items, total, discou
       tenantRevenue,
       createdAt: now,
     });
+    // Keep a fulfillment copy in the main shop so the owner can open the
+    // order and see the reserved credentials. This shadow order is excluded
+    // from revenue totals to avoid counting the tenant sale twice.
+    data.orders.push({
+      id: orderId,
+      userId: null,
+      tenantOrderId: orderId,
+      tenantShopId: tenantId,
+      tenantShopName: req.tenantShop.name || req.tenantShop.slug || tenantId,
+      items: sourceItems.map(({ item, source, stock }) => ({
+        productId: source.id,
+        title: source.title,
+        price: item.unitPrice,
+        sourcePrice: Number(item.sourcePrice) || Number(source.price) || 0,
+        productImage: source.images?.[0] || '',
+        importedFileCode: source.internalNote || '',
+        stockItemId: stock.id,
+        fulfillmentMode: 'automatic',
+        federatedTenantId: tenantId,
+      })),
+      subtotal: total,
+      discount,
+      total: finalTotal,
+      couponCode: validCoupon ? validCoupon.code : null,
+      status: 'pending',
+      paymentMethod: 'wallet',
+      salesChannel: 'catalog-api-fulfillment',
+      federatedTenantIds: [tenantId],
+      createdAt: now,
+    });
   }));
 
   try {
@@ -246,6 +276,7 @@ async function completeTenantFederatedCheckout({ req, user, items, total, discou
         data.settings.catalogApi.tenantRevenue = Math.max(0, Math.round((Number(data.settings.catalogApi.tenantRevenue || 0) - tenantRevenue) * 100) / 100);
         data.settings.catalogApi.transactions = (data.settings.catalogApi.transactions || []).filter(entry => entry.orderId !== orderId);
       }
+      data.orders = (data.orders || []).filter(order => order.id !== orderId);
     }));
     throw error;
   }
