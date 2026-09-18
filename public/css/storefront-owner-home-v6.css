@@ -12,3 +12,11 @@
 @media(max-width:1000px){.owner-v6-home{width:calc(100% - 32px)}.v6-category-row{grid-template-columns:repeat(3,1fr)}.v6-product-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:700px){.owner-v6-home{width:calc(100% - 20px);padding-top:9px}.v6-banner{min-height:410px}.v6-banner__content{min-height:410px;padding:15px 16px 14px}.v6-banner__top{font-size:8px}.v6-banner__top span:last-child{font-size:8px}.v6-banner h1{font-size:clamp(43px,13vw,68px)}.v6-banner p{font-size:12px}.v6-actions{margin-top:18px}.v6-button{min-height:39px;padding-inline:13px;font-size:10px}.v6-banner__bottom{font-size:8px;letter-spacing:0}.v6-banner__bottom span{max-width:62%}.v6-quick{grid-template-columns:repeat(2,1fr)}.v6-quick a:nth-child(2){border-right:0}.v6-quick a{min-height:62px;padding:8px 9px}.v6-quick span{font-size:10px}.v6-quick small{font-size:8px}.v6-announcement{gap:10px}.v6-announcement>div{font-size:9px}.v6-section{margin-top:37px}.v6-section-head h2{font-size:23px}.v6-category-row{grid-template-columns:repeat(3,1fr);gap:6px}.v6-category{grid-template-rows:76px auto auto;padding:6px;gap:5px}.v6-category b{font-size:9px}.v6-category small{font-size:7px}.v6-catalog-head{align-items:stretch;flex-direction:column}.v6-catalog-tools{display:grid;gap:6px}.v6-catalog-tools label{width:100%;height:36px}.v6-catalog-tools>div{display:flex}.v6-catalog-tools button{flex:1;height:31px}.v6-managed-section{margin-top:22px}.v6-product-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.v6-product-card__body{padding:8px}.v6-product-card__body h3{font-size:10px}.v6-product-card__body strong{font-size:15px}.v6-footer-cta{align-items:flex-start;flex-direction:column;margin-top:48px}.v6-footer-cta h2{font-size:32px}.v6-footer-cta .v6-button{margin-top:2px}}
 @media(prefers-reduced-motion:reduce){.v6-category,.v6-product-card{transition:none!important}}
+/* v6 refinement: keep the banner title inside narrow screens and match product art's 16:9 frame. */
+.v6-banner h1{font-size:clamp(39px,5.5vw,76px);letter-spacing:-.09em;line-height:.92;max-width:100%}
+.v6-product-card__media{aspect-ratio:16/9;background:#0b0d0d}
+.v6-product-card__body{padding:9px 10px 10px}
+@media(max-width:700px){
+  .v6-banner h1{font-size:clamp(32px,8.8vw,50px);letter-spacing:-.08em;line-height:.94}
+  .v6-product-card__media{aspect-ratio:16/9}
+}
