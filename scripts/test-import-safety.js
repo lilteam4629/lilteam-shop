@@ -293,6 +293,14 @@ async function main() {
   const account = load('src/routes/account.js', {
     '../data/store': store, '../middleware/auth': auth, '../services/discord-bot': {},
   });
+  const xephtReadiness = model.fixture();
+  xephtReadiness.settings.payment.slipProvider = 'xepht';
+  check('XEPHT requires a receiving account before automatic verification', () => {
+    assert.equal(als.run(xephtReadiness, () => account.canCheckSlipAutomatically(xephtReadiness.settings.payment)), false);
+    xephtReadiness.settings.payment.bankAccountNumber = '1234567890';
+    xephtReadiness.settings.payment.bankAccountName = 'ร้านทดสอบ';
+    assert.equal(als.run(xephtReadiness, () => account.canCheckSlipAutomatically(xephtReadiness.settings.payment)), true);
+  });
   const topup = account.stack.find(l => l.route?.path === '/topup' && l.route.methods.post).route.stack[0].handle;
   const f = fixture(), r = request(); r.body = { amount: '30', method: 'bank_transfer' };
   await als.run(f, () => topup(r, response()));
@@ -316,6 +324,55 @@ async function main() {
     '../middleware/auth': { ...auth, requireAdmin: (req, res, next) => next() },
     '../services/discord-bot': { isConfigured: () => false, isReady: () => false },
     '../services/license': { isGateOn: () => false }, '../middleware/tenant': { MAIN_DOMAIN: 'fixture.test', MAIN_SITE_URL: 'https://fixture.test' },
+  });
+  const orderStatus = admin.stack.find(l => l.route?.path === '/orders/:id/status' && l.route.methods.post).route.stack.at(-1).handle;
+  const orderStatusFixture = model.fixture();
+  orderStatusFixture.orders = [{ id: 'order-status-fixture', status: 'pending', items: [] }];
+  let invalidStatusFlash = '';
+  await als.run(orderStatusFixture, () => orderStatus(
+    { params: { id: 'order-status-fixture' }, body: { status: 'not-a-status' }, flash(type, message) { if (type === 'error') invalidStatusFlash = message; } },
+    { redirect() {} },
+  ));
+  check('Admin order status rejects unknown values', () => {
+    assert.equal(orderStatusFixture.orders[0].status, 'pending');
+    assert.match(invalidStatusFlash, /สถานะคำสั่งซื้อไม่ถูกต้อง/);
+  });
+  const stockDelete = admin.stack.find(l => l.route?.path === '/products/:id/stock/:stockId/delete' && l.route.methods.post).route.stack.at(-1).handle;
+  const stockDeleteFixture = model.fixture();
+  stockDeleteFixture.products = [{ id: 'product-a', title: 'A' }, { id: 'product-b', title: 'B' }];
+  stockDeleteFixture.stockItems = [{ id: 'stock-b', productId: 'product-b', status: 'available' }];
+  let stockDeleteFlash = '';
+  await als.run(stockDeleteFixture, () => stockDelete(
+    { params: { id: 'product-a', stockId: 'stock-b' }, flash(type, message) { if (type === 'error') stockDeleteFlash = message; } },
+    { redirect() {} },
+  ));
+  check('Admin stock deletion cannot remove another product’s stock', () => {
+    assert.equal(stockDeleteFixture.stockItems.length, 1);
+    assert.match(stockDeleteFlash, /ไม่พบไอดีในสต๊อก/);
+  });
+  const createUser = admin.stack.find(l => l.route?.path === '/users/new' && l.route.methods.post).route.stack.at(-1).handle;
+  const createUserFixture = model.fixture();
+  createUserFixture.users = [{ id: 'existing', username: 'existing', email: 'used@example.com', role: 'customer', status: 'active', walletBalance: 0 }];
+  let duplicateEmailFlash = '';
+  await als.run(createUserFixture, () => createUser(
+    { body: { username: 'new-user', email: 'USED@EXAMPLE.COM', password: '123456' }, flash(type, message) { if (type === 'error') duplicateEmailFlash = message; } },
+    { redirect() {} },
+  ));
+  check('Admin user creation rejects duplicate email addresses', () => {
+    assert.equal(createUserFixture.users.length, 1);
+    assert.match(duplicateEmailFlash, /อีเมลนี้ถูกใช้งานแล้ว/);
+  });
+  const createCoupon = admin.stack.find(l => l.route?.path === '/coupons' && l.route.methods.post).route.stack.at(-1).handle;
+  const createCouponFixture = model.fixture();
+  createCouponFixture.coupons = [{ id: 'existing', code: 'SALE10', type: 'percent', value: 10, usageLimit: 0, usedCount: 0, active: true }];
+  let invalidCouponFlash = '';
+  await als.run(createCouponFixture, () => createCoupon(
+    { body: { code: 'sale10', type: 'percent', value: 'not-a-number', usageLimit: '' }, flash(type, message) { if (type === 'error') invalidCouponFlash = message; } },
+    { redirect() {} },
+  ));
+  check('Admin coupon creation rejects invalid or duplicate coupons', () => {
+    assert.equal(createCouponFixture.coupons.length, 1);
+    assert.match(invalidCouponFlash, /ตรวจสอบรหัสคูปอง/);
   });
   const hubTest = admin.stack.find(l => l.route?.path === '/slip-verification/test' && l.route.methods.post).route.stack[0].handle;
   const saveProvider = admin.stack.find(l => l.route?.path === '/slip-verification' && l.route.methods.post).route.stack[0].handle;

@@ -266,6 +266,8 @@ function canCheckSlipAutomatically(payment = {}) {
   if (selected === 'slipcheck') return Boolean((effective.slipcheckApiKey || (store.isTenantContext() ? false : (effective.slipcheckApiKeys || []).length)) && hasReceiver);
   if (selected === 'rdcw') return Boolean(effective.rdcwClientId && effective.rdcwClientSecret && hasReceiver);
   if (selected === 'slip2go') return Boolean(effective.slip2goApiKey && hasReceiver);
+  // XEPHT supports its public verification endpoint without a key; a receiver
+  // is still required so a verified slip cannot credit the wrong account.
   if (selected === 'xepht') return Boolean(hasReceiver);
   return false;
 }
@@ -580,3 +582,4 @@ module.exports = router;
 router.createTopupRequest = createTopupRequest;
 router.attachSlipToTopupRequest = attachSlipToTopupRequest;
 router.retryTopupSlipVerification = retryTopupSlipVerification;
+router.canCheckSlipAutomatically = canCheckSlipAutomatically;

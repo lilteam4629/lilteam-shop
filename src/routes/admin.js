@@ -1202,7 +1202,13 @@ router.post('/products/:id/stock/add', async (req, res) => {
 });
 
 router.post('/products/:id/stock/:stockId/delete', async (req, res) => {
-  store.data.stockItems = store.data.stockItems.filter(s => s.id !== req.params.stockId);
+  const product = store.data.products.find(p => p.id === req.params.id);
+  const stock = store.data.stockItems.find(s => s.id === req.params.stockId && s.productId === req.params.id);
+  if (!product || !stock) {
+    req.flash('error', 'ไม่พบไอดีในสต๊อกของสินค้านี้');
+    return res.redirect(`/admin/products/${req.params.id}/stock`);
+  }
+  store.data.stockItems = store.data.stockItems.filter(s => s.id !== stock.id);
   await store.save();
   req.flash('success', 'ลบไอดีออกจากสต๊อกแล้ว');
   res.redirect(`/admin/products/${req.params.id}/stock`);
@@ -1253,10 +1259,15 @@ router.get('/orders/:id', (req, res) => {
 
 router.post('/orders/:id/status', async (req, res) => {
   const order = store.data.orders.find(o => o.id === req.params.id);
-  if (order) {
-    order.status = req.body.status;
+  const nextStatus = ['completed', 'pending', 'cancelled'].includes(String(req.body.status || ''))
+    ? String(req.body.status)
+    : null;
+  if (order && nextStatus) {
+    order.status = nextStatus;
     await store.save();
     req.flash('success', 'อัปเดตสถานะคำสั่งซื้อแล้ว');
+  } else if (order) {
+    req.flash('error', 'สถานะคำสั่งซื้อไม่ถูกต้อง');
   }
   res.redirect(`/admin/orders/${req.params.id}`);
 });
@@ -1359,17 +1370,21 @@ router.post('/users/:id/toggle-ban', async (req, res) => {
 
 router.post('/users/new', async (req, res) => {
   const username = String(req.body.username || '').trim();
-  const email = String(req.body.email || '').trim();
+  const email = String(req.body.email || '').trim().toLowerCase();
   const password = String(req.body.password || '123456');
   const role = req.body.role;
 
-  if (!username) {
-    req.flash('error', 'กรุณาระบุชื่อผู้ใช้');
+  if (!username || username.length > 100 || !email || email.length > 254 || !/^\S+@\S+\.\S+$/.test(email)) {
+    req.flash('error', 'กรุณาระบุชื่อผู้ใช้และอีเมลให้ถูกต้อง');
     return res.redirect('/admin/users');
   }
 
   if (store.data.users.some(u => (u.username || '').toLowerCase() === username.toLowerCase())) {
     req.flash('error', 'ชื่อผู้ใช้นี้ถูกใช้งานแล้ว');
+    return res.redirect('/admin/users');
+  }
+  if (store.data.users.some(u => String(u.email || '').toLowerCase() === email)) {
+    req.flash('error', 'อีเมลนี้ถูกใช้งานแล้ว');
     return res.redirect('/admin/users');
   }
   const passwordHash = await bcrypt.hash(password, 10);
@@ -1788,9 +1803,20 @@ router.get('/coupons', (req, res) => {
 
 router.post('/coupons', async (req, res) => {
   const { code, type, value, usageLimit } = req.body;
+  const couponCode = String(code || '').trim().toUpperCase();
+  const couponType = type === 'fixed' ? 'fixed' : 'percent';
+  const couponValue = Number(value);
+  const couponUsageLimit = usageLimit === '' || usageLimit === undefined ? 0 : Number(usageLimit);
+  if (!couponCode || couponCode.length > 100 || !Number.isFinite(couponValue) || couponValue <= 0
+    || (couponType === 'percent' && couponValue > 100)
+    || !Number.isInteger(couponUsageLimit) || couponUsageLimit < 0
+    || store.data.coupons.some(coupon => String(coupon.code || '').toUpperCase() === couponCode)) {
+    req.flash('error', 'กรุณาตรวจสอบรหัสคูปอง มูลค่า และจำนวนการใช้งาน (ห้ามซ้ำ)');
+    return res.redirect('/admin/coupons');
+  }
   store.data.coupons.push({
-    id: store.genId(8), code: code.toUpperCase(), type: type === 'fixed' ? 'fixed' : 'percent',
-    value: parseInt(value, 10) || 0, active: true, usageLimit: parseInt(usageLimit, 10) || 0,
+    id: store.genId(8), code: couponCode, type: couponType,
+    value: Math.round(couponValue * 100) / 100, active: true, usageLimit: Math.floor(couponUsageLimit),
     usedCount: 0, expiresAt: null, createdAt: new Date().toISOString(),
   });
   await store.save();
