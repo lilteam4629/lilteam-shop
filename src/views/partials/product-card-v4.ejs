@@ -1,0 +1,9 @@
+<% const v4SoldOut = Number(p.stockCount || 0) < 1; %>
+<a href="/game/<%= p.slug %>" class="v4-product-card <%= v4SoldOut ? 'is-sold' : '' %>" data-v4-product data-title="<%= String(p.title || '').toLowerCase() %>" data-stock="<%= v4SoldOut ? 'sold' : 'available' %>">
+  <div class="v4-product-card__image">
+    <img src="<%= p.images && p.images[0] ? p.images[0] : '' %>" alt="<%= p.title %>" loading="lazy" decoding="async" />
+    <span class="v4-product-card__status"><i></i><%= v4SoldOut ? 'สินค้าหมด' : 'พร้อมส่ง' %></span>
+    <% if (p.flashSaleActive) { %><b class="v4-product-card__sale">ลดพิเศษ</b><% } %>
+  </div>
+  <div class="v4-product-card__copy"><h3><%= p.title %></h3><div><strong>฿<%= Number(p.price || 0).toLocaleString() %></strong><small><%= v4SoldOut ? 'รอสินค้าเข้าใหม่' : `เหลือ ${Number(p.stockCount || 0).toLocaleString()} ชิ้น` %></small></div></div>
+</a>
