@@ -347,8 +347,11 @@ router.get('/products', (req, res) => {
     const selectedFilterTags = (p.filterTagIds || []).map(id => filterTagById.get(id)).filter(Boolean);
     return { ...p, stockCount, selectedFilterTags };
   });
-  const totalProductPrice = products.reduce((sum, product) => sum + (Number(product.price) || 0), 0);
-  res.render('admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, productCardStyle: store.data.settings.productCardStyle || 'natural' });
+  // Inventory value is based on IDs that are still available. Sold/issued
+  // IDs remain in history but must not inflate the amount shown to the admin.
+  const totalAvailableProductCount = products.reduce((sum, product) => sum + product.stockCount, 0);
+  const totalProductPrice = products.reduce((sum, product) => sum + ((Number(product.price) || 0) * product.stockCount), 0);
+  res.render('admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
 });
 
 router.post('/products/card-style', async (req, res) => {
