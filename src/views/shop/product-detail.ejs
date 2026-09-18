@@ -177,9 +177,12 @@
         <% if (product.stockCount > 0) { %>
           <div class="rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-5 shadow-[0_12px_30px_-18px_color-mix(in_srgb,var(--gold)_70%,transparent)]">
             <div class="mb-2 flex items-center gap-2 text-base font-black text-[var(--gold-text)]">🔒 ชำระเงินและรับสินค้าในร้านหลักเท่านั้น</div>
-            <p class="mb-3 text-sm font-medium leading-relaxed text-[var(--text-2)]">รายการนี้เป็นสินค้าจากร้านหลัก เมื่อกดซื้อ ระบบจะพาไปโอนเงินเข้าบัญชีร้านหลักโดยตรง และหลังชำระเงินสำเร็จต้องรับไอดีที่ร้านหลักเท่านั้น</p>
-            <p class="mb-4 text-xs text-[var(--text-3)]">ราคาที่แสดงรวมส่วนต่างของร้านนี้แล้ว ส่วนต่างจะถูกบันทึกไว้ให้เจ้าของร้านหลักโอนคืนภายหลัง</p>
-            <% if (product.sourceUrl) { %><a href="<%= product.sourceUrl %>" class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-black text-[var(--gold-contrast)]">ไปชำระเงินและรับไอดีที่ร้านหลัก ↗</a><% } %>
+            <p class="mb-3 text-sm font-medium leading-relaxed text-[var(--text-2)]">ก่อนกดซื้อ กรุณาเติมเงินในร้านนี้ก่อน เงินเติมจะเข้าบัญชีร้านหลักของเรา และยอดจะใช้ซื้อสินค้านี้จากร้านนี้ได้ทันที</p>
+            <p class="mb-4 text-xs text-[var(--text-3)]">หลังสั่งซื้อสำเร็จเท่านั้น ให้กดปุ่มติดต่อร้านหลักในหน้าออเดอร์เพื่อรับไอดีที่ร้านหลัก · ราคานี้รวมส่วนต่างร้านเช่าแล้ว</p>
+            <div class="grid gap-2 sm:grid-cols-2">
+              <a href="/account/topup" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)]/50 bg-[var(--card)] px-5 py-3 text-sm font-black text-[var(--gold-text)]">💰 เติมเงินก่อนซื้อ</a>
+              <form action="/cart/add/<%= product.id %>" method="post"><button class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-5 py-3 text-sm font-black text-[var(--gold-contrast)]">เพิ่มลงตะกร้าเพื่อซื้อ</button></form>
+            </div>
           </div>
         <% } else { %>
           <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมดจากร้านหลัก</div>
@@ -275,7 +278,7 @@
           </svg>
           <span>เติมเงิน</span>
         </a>
-        <a href="/contact" class="product-contact-action inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-6 py-3 text-sm font-medium transition hover:border-[var(--gold)] hover:text-[var(--gold-text)]">💬 ติดต่อร้าน</a>
+        <% if (isMainSite && !product.federatedCheckout) { %><a href="/contact" class="product-contact-action inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-6 py-3 text-sm font-medium transition hover:border-[var(--gold)] hover:text-[var(--gold-text)]">💬 ติดต่อร้าน</a><% } %>
       </div>
 
       <% if (product.fulfillmentMode === 'contact' && product.fulfillmentInstructions) { %>

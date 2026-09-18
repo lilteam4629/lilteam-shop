@@ -1,3 +1,4 @@
+<% const contactSettings = orderContactSettings || settings; %>
 <section class="max-w-3xl mx-auto px-4 py-8">
   <a href="/account/orders" class="text-sm text-[var(--gold-text)]">← กลับไปหน้าคำสั่งซื้อ</a>
   <h1 class="text-2xl font-bold mt-2 mb-1">คำสั่งซื้อ #<%= order.id %></h1>
@@ -32,7 +33,7 @@
 ชื่อลูกค้า: <%= currentUser.username %>
 <% if (i.fulfillmentInstructions) { %>ข้อมูลที่ร้านขอให้เตรียม: <%= i.fulfillmentInstructions %>
 <% } %><%= i.contactMessageOutro || 'กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ' %></textarea>
-            <button type="button" data-contact-url="<%= settings.contactMessenger || settings.contactFacebook %>" class="contact-order-btn inline-flex items-center justify-center w-full sm:w-auto px-5 py-2.5 rounded-lg bg-[var(--gold)] text-[var(--gold-contrast)] font-medium">💬 คัดลอกข้อความและเปิด Messenger</button>
+            <button type="button" data-contact-url="<%= contactSettings.contactMessenger || contactSettings.contactFacebook || '/contact' %>" class="contact-order-btn inline-flex items-center justify-center w-full sm:w-auto px-5 py-2.5 rounded-lg bg-[var(--gold)] text-[var(--gold-contrast)] font-black"><%= order.salesChannel === 'catalog-api' ? '📩 ติดต่อร้านหลักเพื่อรับสินค้า' : '💬 คัดลอกข้อความและเปิด Messenger' %></button>
             <div class="contact-order-status text-[10px] text-[var(--text-4)] mt-2"></div>
           </div>
         <% } else if (i.credentials) { %>

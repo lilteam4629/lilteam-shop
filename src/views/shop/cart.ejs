@@ -10,8 +10,9 @@
     <% const ownerPickupOnly = items.some(i => i.federatedTenantId); %>
     <% if (ownerPickupOnly) { %>
       <div class="mb-5 rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-4 shadow-sm">
-        <div class="font-black text-[var(--gold-text)]">🔒 ออเดอร์นี้ต้องชำระเงินและรับสินค้าที่ร้านหลักเท่านั้น</div>
-        <p class="mt-1 text-sm leading-relaxed text-[var(--text-2)]">ยอดจะตัดจากบัญชีร้านหลัก และหลังชำระเงินสำเร็จให้ติดต่อร้านหลักเพื่อรับไอดีที่ร้านหลัก ส่วนต่างราคาของร้านเช่าจะถูกบันทึกไว้ให้เจ้าของร้านโอนคืนเอง</p>
+        <div class="font-black text-[var(--gold-text)]">🔒 เติมเงินในร้านนี้ก่อนซื้อ · รับสินค้าที่ร้านหลักเท่านั้น</div>
+        <p class="mt-1 text-sm leading-relaxed text-[var(--text-2)]">เงินเติมเข้าบัญชีร้านหลักของเรา ยอดจะถูกใช้ซื้อผ่านร้านนี้ หลังซื้อสำเร็จเท่านั้นให้กดติดต่อร้านหลักจากหน้าออเดอร์เพื่อรับไอดี ส่วนต่างราคาจะถูกบันทึกไว้ให้เจ้าของร้านโอนคืนเอง</p>
+        <a href="/account/topup" class="mt-3 inline-flex items-center justify-center rounded-lg border border-[var(--gold)]/45 bg-[var(--card)] px-4 py-2 text-xs font-black text-[var(--gold-text)]">เติมเงินเข้าบัญชีร้านหลักก่อนซื้อ →</a>
       </div>
     <% } %>
     <div class="space-y-3 mb-6">

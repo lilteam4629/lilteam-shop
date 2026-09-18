@@ -33,7 +33,7 @@
     <a href="/products"><span class="owner-v2-quick__icon">▦</span><span><b>สินค้าทั้งหมด</b><small><%= Number(productTotal || 0).toLocaleString() %> รายการ</small></span><em>↗</em></a>
     <a href="/account/topup"><span class="owner-v2-quick__icon">฿</span><span><b>เติมเงิน</b><small>เติมแล้วใช้งานได้ทันที</small></span><em>↗</em></a>
     <a href="/help"><span class="owner-v2-quick__icon">?</span><span><b>วิธีสั่งซื้อ</b><small>ขั้นตอนสั้น เข้าใจง่าย</small></span><em>↗</em></a>
-    <a href="/contact"><span class="owner-v2-quick__icon">⌁</span><span><b>ติดต่อร้าน</b><small>มีทีมงานคอยดูแล</small></span><em>↗</em></a>
+    <% if (isMainSite) { %><a href="/contact"><span class="owner-v2-quick__icon">⌁</span><span><b>ติดต่อร้าน</b><small>มีทีมงานคอยดูแล</small></span><em>↗</em></a><% } %>
   </section>
 
   <% if (ownerCategories.length) { %>

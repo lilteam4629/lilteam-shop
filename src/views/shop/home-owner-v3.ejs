@@ -23,7 +23,7 @@
     <a href="/products"><b>01</b><span>ค้นหาสินค้า<small>เปิดคลังทั้งหมด</small></span><em>↗</em></a>
     <a href="/account/topup"><b>02</b><span>เติมเงิน<small>เข้ากระเป๋าเงิน</small></span><em>↗</em></a>
     <a href="/account/orders"><b>03</b><span>คำสั่งซื้อ<small>ตรวจสอบรายการ</small></span><em>↗</em></a>
-    <a href="/contact"><b>04</b><span>ติดต่อร้าน<small>คุยกับทีมงาน</small></span><em>↗</em></a>
+    <% if (isMainSite) { %><a href="/contact"><b>04</b><span>ติดต่อร้าน<small>คุยกับทีมงาน</small></span><em>↗</em></a><% } %>
   </section>
 
   <section class="owner-v3-deck" aria-labelledby="owner-v3-deck-title">
@@ -52,7 +52,7 @@
 
   <section class="owner-v3-pulse" aria-label="ระบบของ LILTeam"><div class="owner-v3-pulse__copy"><span class="owner-v3-eyebrow">THE LILTEAM PULSE</span><h2>ระบบที่คิดไว้<br>เพื่อจังหวะของคุณ</h2><p>ทุกการซื้อมีสถานะ ทุกยอดเติมเงินมีประวัติ และทุกสินค้าถูกจัดให้ค้นหาได้ง่ายจากบัญชีเดียว</p><a href="/help" class="owner-v3-btn owner-v3-btn--light">ดูวิธีใช้งาน <span>→</span></a></div><div class="owner-v3-pulse__grid"><div><b>01</b><strong>WALLET</strong><span>เติมเงินแล้วใช้ได้ทันที</span></div><div><b>02</b><strong>DELIVERY</strong><span>รับสินค้าหลังรายการสำเร็จ</span></div><div><b>03</b><strong>HISTORY</strong><span>ตรวจสอบคำสั่งซื้อย้อนหลัง</span></div><div><b>04</b><strong>SUPPORT</strong><span>มีทีมงานคอยดูแล</span></div></div></section>
 
-  <section class="owner-v3-final"><div><span class="owner-v3-eyebrow">YOUR NEXT MOVE</span><h2>พร้อมเริ่มหรือยัง?</h2></div><div><a class="owner-v3-btn owner-v3-btn--primary" href="/products">เข้าสู่คลังสินค้า <span>↗</span></a><a class="owner-v3-textlink" href="/contact">ติดต่อทีมงาน <span>→</span></a></div></section>
+<section class="owner-v3-final"><div><span class="owner-v3-eyebrow">YOUR NEXT MOVE</span><h2>พร้อมเริ่มหรือยัง?</h2></div><div><a class="owner-v3-btn owner-v3-btn--primary" href="/products">เข้าสู่คลังสินค้า <span>↗</span></a><% if (isMainSite) { %><a class="owner-v3-textlink" href="/contact">ติดต่อทีมงาน <span>→</span></a><% } %></div></section>
 </main>
 <script>
 (function(){

@@ -41,7 +41,7 @@
         </div>
       </details>
       <a href="/help"><svg><use href="#ui-book"/></svg> วิธีสั่งซื้อ</a>
-      <a href="/contact"><svg><use href="#ui-phone"/></svg> ติดต่อเรา</a>
+      <% if (isMainSite) { %><a href="/contact"><svg><use href="#ui-phone"/></svg> ติดต่อเรา</a><% } %>
     </nav>
     <form action="/search" method="get" class="store-nav__search" role="search">
       <input type="search" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="ค้นหาสินค้า..." aria-label="ค้นหาสินค้า" /><button aria-label="ค้นหา"><svg><use href="#ui-search"/></svg></button>
@@ -70,7 +70,7 @@
             </div>
             <div class="store-nav__menu-group store-nav__menu-group--support">
               <a href="/help"><i><svg><use href="#ui-help"/></svg></i><span>คู่มือการใช้งาน</span></a>
-              <a href="/contact"><i><svg><use href="#ui-phone"/></svg></i><span>ติดต่อร้าน</span></a>
+              <% if (isMainSite) { %><a href="/contact"><i><svg><use href="#ui-phone"/></svg></i><span>ติดต่อร้าน</span></a><% } %>
             </div>
             <a href="/logout" class="store-nav__logout"><i><svg><use href="#ui-logout"/></svg></i><span>ออกจากระบบ</span></a>
           </div>
@@ -83,7 +83,7 @@
   <aside class="store-nav__mobile-row" id="storeMobileMenu" aria-label="เมนูมือถือ">
     <header><a href="/" class="store-nav__drawer-brand"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="" /><% } else { %><span>L</span><% } %><strong><%= settings.shopName %></strong></a><button type="button" class="store-nav__mobile-close" aria-label="ปิดเมนู">×</button></header>
     <form action="/search" method="get"><input type="search" name="q" placeholder="ค้นหาสินค้า..." /><button aria-label="ค้นหา"><svg><use href="#ui-search"/></svg></button></form>
-    <nav><a href="/"><svg><use href="#ui-home"/></svg><span>หน้าหลัก</span></a><a href="/products"><svg><use href="#ui-grid"/></svg><span>หมวดหมู่สินค้า</span></a><a href="/products"><svg><use href="#ui-box"/></svg><span>สินค้าทั้งหมด</span></a><a href="/help"><svg><use href="#ui-book"/></svg><span>คู่มือการใช้งาน</span></a><% if (currentUser) { %><a href="/account/topup"><svg><use href="#ui-wallet"/></svg><span>เติมเงิน</span></a><a href="/cart"><svg><use href="#ui-cart"/></svg><span>ตะกร้า</span></a><% } %><a href="/contact"><svg><use href="#ui-phone"/></svg><span>ติดต่อเรา</span></a></nav>
+    <nav><a href="/"><svg><use href="#ui-home"/></svg><span>หน้าหลัก</span></a><a href="/products"><svg><use href="#ui-grid"/></svg><span>หมวดหมู่สินค้า</span></a><a href="/products"><svg><use href="#ui-box"/></svg><span>สินค้าทั้งหมด</span></a><a href="/help"><svg><use href="#ui-book"/></svg><span>คู่มือการใช้งาน</span></a><% if (currentUser) { %><a href="/account/topup"><svg><use href="#ui-wallet"/></svg><span>เติมเงิน</span></a><a href="/cart"><svg><use href="#ui-cart"/></svg><span>ตะกร้า</span></a><% } %><% if (isMainSite) { %><a href="/contact"><svg><use href="#ui-phone"/></svg><span>ติดต่อเรา</span></a><% } %></nav>
     <% if (currentUser) { %><div class="store-nav__drawer-section"><b>ระบบสมาชิก</b></div><nav><a href="/account"><svg><use href="#ui-user"/></svg><span>จัดการโปรไฟล์</span></a><a href="/account/orders"><svg><use href="#ui-box"/></svg><span>สถานะคำสั่งซื้อ</span></a><% if (currentUser.role === 'admin') { %><a href="/admin"><svg><use href="#ui-shield"/></svg><span>จัดการหลังบ้าน</span></a><% } %><a href="/logout" class="store-nav__drawer-logout"><svg><use href="#ui-logout"/></svg><span>ออกจากระบบ</span></a></nav><% } else { %><div class="store-nav__drawer-auth"><a href="/login">เข้าสู่ระบบ</a><a href="/register">สมัครสมาชิก</a></div><% } %>
   </aside>
 </header>

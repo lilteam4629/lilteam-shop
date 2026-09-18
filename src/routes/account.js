@@ -69,7 +69,9 @@ router.get('/', (req, res) => {
 
 router.get('/topup', (req, res) => {
   const payment = settlementPayment();
-  res.render('shop/topup', { title: 'เติมเงิน', payment, settlementToPlatform: Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled && store.data.settings.catalogApi?.settlementMode === 'platform') });
+  const settlementToPlatform = Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled && store.data.settings.catalogApi?.settlementMode === 'platform');
+  const settlementSettings = settlementToPlatform ? store.platformData.settings : store.data.settings;
+  res.render('shop/topup', { title: 'เติมเงิน', payment, settlementToPlatform, settlementShopName: settlementSettings.shopName || 'ร้านหลัก' });
 });
 
 router.post('/topup/truemoney', async (req, res) => {
@@ -210,8 +212,11 @@ router.get('/topup/:id', async (req, res) => {
   if (!request) return res.redirect('/account/topup');
 
   const payment = settlementPayment();
+  const settlementToPlatform = Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled && store.data.settings.catalogApi?.settlementMode === 'platform');
+  const settlementSettings = settlementToPlatform ? store.platformData.settings : store.data.settings;
   res.render('shop/topup-detail', {
     title: 'สถานะการเติมเงิน', request, payment,
+    settlementToPlatform, settlementShopName: settlementSettings.shopName || 'ร้านหลัก',
     automaticSlipCheck: canCheckSlipAutomatically(payment),
   });
 });
@@ -584,7 +589,8 @@ router.get('/orders/:id', (req, res) => {
       productImage: oi.productImage || product?.images?.[0] || '',
     };
   });
-  res.render('shop/order-detail', { title: `คำสั่งซื้อ #${order.id}`, order, itemsWithCreds });
+  const orderContactSettings = order.salesChannel === 'catalog-api' ? store.platformData.settings : store.data.settings;
+  res.render('shop/order-detail', { title: `คำสั่งซื้อ #${order.id}`, order, itemsWithCreds, orderContactSettings });
 });
 
 module.exports = router;
