@@ -197,3 +197,47 @@ html:not(.light) .store-nav__account-name,html:not(.light) .store-nav__chevron{c
   .store-nav__mobile-topup svg{width:16px!important;height:16px!important}
 }
 @media(max-width:430px){.store-nav__mobile-topup{min-width:40px!important;width:40px!important;padding:0!important}.store-nav__mobile-topup span{display:none!important}}
+
+/* Final compact hamburger: keep the menu control cute and proportional to
+   the mobile header instead of letting earlier responsive rules make it
+   oversized. */
+@media(max-width:900px){
+  .store-nav__mobile-toggle{
+    display:grid!important;
+    place-items:center!important;
+    flex:0 0 36px!important;
+    width:36px!important;
+    min-width:36px!important;
+    height:36px!important;
+    min-height:36px!important;
+    padding:0!important;
+    gap:3px!important;
+    border:1px solid color-mix(in srgb,var(--gold) 30%,var(--border-light))!important;
+    border-radius:11px!important;
+    background:color-mix(in srgb,var(--gold) 7%,var(--card))!important;
+    color:var(--text)!important;
+    box-shadow:0 3px 9px color-mix(in srgb,var(--bg) 14%,transparent)!important;
+  }
+  .store-nav__mobile-toggle>span{
+    width:17px!important;
+    height:1.75px!important;
+    margin:0!important;
+    border-radius:99px!important;
+    background:currentColor!important;
+    box-shadow:none!important;
+  }
+  .store-nav__mobile-toggle.is-open>span:first-child{transform:translateY(4.75px) rotate(45deg)!important}
+  .store-nav__mobile-toggle.is-open>span:nth-child(2){opacity:0!important}
+  .store-nav__mobile-toggle.is-open>span:last-child{transform:translateY(-4.75px) rotate(-45deg)!important}
+}
+@media(max-width:430px){
+  .store-nav__mobile-toggle{
+    flex-basis:34px!important;
+    width:34px!important;
+    min-width:34px!important;
+    height:34px!important;
+    min-height:34px!important;
+    border-radius:10px!important;
+  }
+  .store-nav__mobile-toggle>span{width:16px!important;height:1.6px!important}
+}
