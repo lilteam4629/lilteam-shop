@@ -1,0 +1,46 @@
+<section class="mx-auto max-w-6xl space-y-6">
+  <header class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 shadow-sm">
+    <div class="flex flex-wrap items-start justify-between gap-4">
+      <div>
+        <p class="text-xs font-bold uppercase tracking-[.18em] text-[var(--gold-text)]">CATALOG API</p>
+        <h1 class="mt-1 text-2xl font-black text-[var(--text)]">ยิงสินค้าไปยังร้านเช่า</h1>
+        <p class="mt-2 max-w-2xl text-sm text-[var(--text-3)]">ร้านเช่าจะเห็นข้อมูลสินค้าและราคาที่บวกแล้วแบบย่อ สต็อกไอดีและรหัสสินค้าไม่ถูกส่งออกจากร้านหลัก การชำระเงินจะกลับมาที่ร้านหลักเสมอ</p>
+      </div>
+      <span class="rounded-full border px-3 py-1 text-xs font-bold <%= tenantMode && config.enabled ? 'border-emerald-400/40 bg-emerald-500/10 text-emerald-400' : 'border-[var(--border)] text-[var(--text-3)]' %>"><%= tenantMode ? (config.enabled ? 'เปิดใช้งาน' : 'ปิดใช้งาน') : 'ร้านหลัก' %></span>
+    </div>
+  </header>
+
+  <% if (tenantMode) { %>
+    <section class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+      <form action="/admin/catalog-api/settings" method="post" class="grid gap-5 lg:grid-cols-[1.2fr_1fr_1fr_auto] lg:items-end">
+        <label class="flex items-center gap-3 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-4 py-3">
+          <input type="checkbox" name="enabled" <%= config.enabled ? 'checked' : '' %> class="h-5 w-5 accent-[var(--gold)]" />
+          <span><b class="block text-sm text-[var(--text)]">รับสินค้าจากร้านหลัก</b><small class="text-xs text-[var(--text-4)]">แสดงสินค้าทั้งหมดในหน้าร้านนี้</small></span>
+        </label>
+        <label class="text-sm font-semibold text-[var(--text-2)]">รูปแบบบวกราคา
+          <select name="markupMode" class="mt-2 w-full rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-3 py-2.5 text-sm"><option value="percent" <%= config.markupMode === 'percent' ? 'selected' : '' %>>เปอร์เซ็นต์ (%)</option><option value="fixed" <%= config.markupMode === 'fixed' ? 'selected' : '' %>>จำนวนเงิน (บาท)</option></select>
+        </label>
+        <label class="text-sm font-semibold text-[var(--text-2)]">เพิ่มราคาทุกชิ้น
+          <input name="markupValue" type="number" min="0" step="0.01" value="<%= config.markupValue %>" class="mt-2 w-full rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-3 py-2.5 text-sm" />
+        </label>
+        <button class="rounded-xl bg-[var(--gold)] px-5 py-3 text-sm font-black text-[var(--gold-contrast)]">บันทึกการตั้งค่า</button>
+      </form>
+      <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-light)] bg-[var(--input)]/60 px-4 py-3 text-xs text-[var(--text-3)]">
+        <span>ตัวอย่าง: ฿100 + <%= config.markupMode === 'percent' ? `${config.markupValue}%` : `฿${config.markupValue}` %> = <b class="text-[var(--gold-text)]">฿<%= Math.round((100 + (config.markupMode === 'percent' ? 100 * config.markupValue / 100 : config.markupValue)) * 100) / 100 %></b></span>
+        <form action="/admin/catalog-api/sync" method="post"><button class="rounded-lg border border-[var(--border-light)] px-3 py-2 font-bold text-[var(--text-2)] hover:border-[var(--gold)]">ซิงก์ตอนนี้</button></form>
+      </div>
+    </section>
+
+    <section class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+      <div class="mb-4 flex items-center justify-between"><h2 class="text-lg font-black">ตัวอย่างสินค้าที่จะขึ้นหน้าร้าน</h2><span class="text-xs text-[var(--text-4)]">ทั้งหมด <%= preview.length %> รายการตัวอย่าง</span></div>
+      <% if (!preview.length) { %><p class="rounded-xl border border-dashed border-[var(--border)] p-8 text-center text-sm text-[var(--text-3)]">ยังไม่ได้เปิดรับสินค้า หรือร้านหลักยังไม่มีสินค้าที่เปิดขาย</p><% } else { %>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"><% preview.forEach(product => { %><article class="overflow-hidden rounded-xl border border-[var(--border-light)] bg-[var(--input)]"><img src="<%= product.images[0] || '' %>" alt="<%= product.title %>" class="aspect-[4/3] w-full object-cover" /><div class="p-2"><b class="block truncate text-xs"><%= product.title %></b><span class="text-xs font-black text-[var(--gold-text)]">฿<%= Number(product.price).toLocaleString() %></span><small class="block text-[10px] text-[var(--text-4)]">เหลือ <%= product.stockCount %></small></div></article><% }) %></div>
+      <% } %>
+    </section>
+  <% } else { %>
+    <section class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
+      <div class="mb-4 flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-lg font-black">ร้านเช่าทั้งหมด</h2><p class="text-sm text-[var(--text-3)]">เปิดดูสถานะการเชื่อมต่อ API ของแต่ละร้านได้จากหน้านี้</p></div><span class="text-sm font-bold text-[var(--gold-text)]"><%= sourceProducts.length %> สินค้าจากร้านหลัก</span></div>
+      <div class="overflow-x-auto"><table class="w-full min-w-[620px] text-left text-sm"><thead class="text-xs text-[var(--text-4)]"><tr><th class="px-3 py-3">ร้าน</th><th class="px-3 py-3">ลิงก์</th><th class="px-3 py-3">สถานะ</th><th class="px-3 py-3">บวกราคา</th></tr></thead><tbody><% if (!shops.length) { %><tr><td colspan="4" class="px-3 py-8 text-center text-[var(--text-3)]">ยังไม่มีร้านเช่า</td></tr><% } %><% shops.forEach(shop => { %><tr class="border-t border-[var(--border-light)]"><td class="px-3 py-3 font-bold"><%= shop.name %></td><td class="px-3 py-3 text-xs text-[var(--text-3)]"><%= shop.slug %></td><td class="px-3 py-3"><span class="rounded-full px-2 py-1 text-xs font-bold <%= shop.config.enabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[var(--input)] text-[var(--text-4)]' %>"><%= shop.config.enabled ? 'เปิดใช้งาน' : 'ปิดอยู่' %></span></td><td class="px-3 py-3 text-xs"><%= shop.config.markupMode === 'fixed' ? `฿${shop.config.markupValue}` : `${shop.config.markupValue}%` %></td></tr><% }) %></tbody></table></div>
+    </section>
+  <% } %>
+</section>

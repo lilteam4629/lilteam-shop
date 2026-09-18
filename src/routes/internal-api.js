@@ -29,6 +29,7 @@ const licensePlansService = require('../services/license-plans');
 const r2 = require('../services/r2');
 const { getShopUrl, MAIN_SITE_URL } = require('../middleware/tenant');
 const { publicTopupRequest } = require('../services/public-slip');
+const catalogSyndication = require('../services/catalog-syndication');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -184,6 +185,40 @@ router.post('/shops/:id/renew', async (req, res) => {
   const result = await provisioning.renewShop({ user, shopId: req.params.id, planId: req.body.planId, skipWallet: Boolean(external) });
   if (!result.ok) return res.status(400).json({ error: result.error });
   res.json({ ok: true, shop: result.shop });
+});
+
+
+// ---------- Central catalog API ----------
+// Returns public product metadata only. Never include stock credentials,
+// internal notes, or order history in this response.
+router.get('/catalog/products', (req, res) => {
+  const requestedShopId = String(req.query.shopId || '').trim();
+  let tenantDb = null;
+  if (requestedShopId) {
+    const shop = store.data.shops.find(item => String(item.id) === requestedShopId);
+    if (!shop) return res.status(404).json({ error: 'shop_not_found' });
+    return store.loadTenantDb(shop.id).then(db => {
+      const result = catalogSyndication.getTenantProducts(store.platformData, db, MAIN_SITE_URL, shop);
+      res.json({ ok: true, source: 'main-store', shopId: shop.id, config: result.config, products: result.products });
+    });
+  }
+  const config = { enabled: true, source: 'main-store', markupMode: 'percent', markupValue: 0 };
+  const products = store.platformData.products.filter(product => product.status === 'active').map(product => ({
+    id: String(product.id), slug: product.slug, title: product.title, price: Number(product.price) || 0,
+    originalPrice: Number(product.originalPrice) || 0, images: Array.isArray(product.images) ? product.images.slice(0, 3) : [],
+    description: product.description || '', status: product.status,
+    availableStock: store.platformData.stockItems.filter(item => item.productId === product.id && item.status === 'available').length,
+  }));
+  res.json({ ok: true, source: 'main-store', shopName: store.platformData.settings.shopName, products });
+});
+
+router.get('/catalog/shops', async (req, res) => {
+  const shops = await Promise.all((store.data.shops || []).map(async shop => {
+    const db = await store.loadTenantDb(shop.id);
+    const config = catalogSyndication.normalizeConfig(db?.settings || {});
+    return { id: shop.id, name: shop.name, slug: shop.slug, expiresAt: shop.expiresAt, catalogApi: config };
+  }));
+  res.json({ ok: true, shops });
 });
 
 // ---------- Wallet / topup ----------

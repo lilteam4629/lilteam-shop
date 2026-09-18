@@ -39,12 +39,16 @@ function buildCartView(req) {
     const storedProduct = store.data.products.find(p => p.id === ci.productId);
     if (!isProductVisible(storedProduct)) return null;
     const product = withEffectivePrice(storedProduct);
+    if (ci.federatedPrice !== undefined && Number.isFinite(Number(ci.federatedPrice)) && Number(ci.federatedPrice) >= 0) {
+      product.price = Math.round(Number(ci.federatedPrice) * 100) / 100;
+      product.federatedCheckout = true;
+    }
     const stock = availableStock(product.id);
     if (stock <= 0) return null;
     const qty = Math.min(ci.qty, Math.max(stock, 0));
     if (qty <= 0) return null;
     const unitPrice = resolveUnitPrice(product, qty);
-    return { product, qty, stock, unitPrice, subtotal: unitPrice * qty };
+    return { product, qty, stock, unitPrice, subtotal: unitPrice * qty, federatedTenantId: ci.federatedTenantId || null };
   }).filter(Boolean);
   const total = items.reduce((sum, i) => sum + i.subtotal, 0);
   return { items, total };
@@ -68,12 +72,18 @@ router.post('/add/:productId', (req, res) => {
     }
   }
   const requestedQty = Math.max(1, parseInt(req.body.qty, 10) || 1);
+  const federated = req.query.federated === '1' && req.session.federatedCatalog &&
+    String(req.session.federatedCatalog.sourceProductId) === String(product.id) &&
+    Number(req.session.federatedCatalog.expiresAt) > Date.now();
   const cart = getCart(req);
-  const existing = cart.find(c => c.productId === product.id);
+  const existing = cart.find(c => c.productId === product.id && Boolean(c.federatedPrice) === Boolean(federated));
   if (existing) {
     existing.qty = Math.min(existing.qty + requestedQty, stock);
   } else {
-    cart.push({ productId: product.id, qty: Math.min(requestedQty, stock) });
+    cart.push({ productId: product.id, qty: Math.min(requestedQty, stock), ...(federated ? {
+      federatedPrice: Number(req.session.federatedCatalog.price),
+      federatedTenantId: String(req.session.federatedCatalog.tenantId),
+    } : {}) });
   }
   req.flash('success', `เพิ่ม "${product.title}" ลงตะกร้าแล้ว`);
   res.redirect('/cart');
@@ -198,6 +208,7 @@ router.post('/checkout', requireLogin, (req, res) => {
             fulfillmentInstructions: item.product.fulfillmentInstructions || '',
             contactMessageIntro: item.product.contactMessageIntro || '',
             contactMessageOutro: item.product.contactMessageOutro || '',
+            federatedTenantId: item.federatedTenantId || null,
           });
         }
       }
@@ -218,6 +229,8 @@ router.post('/checkout', requireLogin, (req, res) => {
         status: orderItems.some(item => item.fulfillmentMode === 'contact') ? 'pending' : 'completed',
         paymentMethod: 'wallet',
         createdAt: new Date().toISOString(),
+        salesChannel: orderItems.some(item => item.federatedTenantId) ? 'catalog-api' : 'direct',
+        federatedTenantIds: [...new Set(orderItems.map(item => item.federatedTenantId).filter(Boolean))],
       };
 
       reservedStockItems.forEach(stockItem => {
@@ -240,6 +253,7 @@ router.post('/checkout', requireLogin, (req, res) => {
 
       req.session.cart = [];
       req.session.coupon = null;
+      req.session.federatedCatalog = null;
       req.flash('success', 'สั่งซื้อสำเร็จ! ตรวจสอบวิธีรับสินค้าได้ที่หน้าคำสั่งซื้อ');
       res.redirect(`/account/orders/${order.id}`);
     } catch (err) {

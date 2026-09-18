@@ -30,6 +30,7 @@
       </div>
 
       <h1 class="text-2xl font-bold mb-2"><%= product.title %></h1>
+      <% if (product.federatedCheckout) { %><p class="mb-3 text-xs text-[var(--text-3)]">ราคานี้รวมส่วนต่างจากร้านเช่าแล้ว · ชำระผ่านบัญชีร้านหลัก</p><% } %>
       <% if (productRangers && productRangers.length) { %>
         <section class="product-detail-filters mb-5" aria-labelledby="product-ranger-title">
           <div class="product-detail-filter-head">
@@ -167,8 +168,14 @@
         </div>
       <% } %>
 
-      <% if (product.stockCount > 0) { %>
-        <form action="/cart/add/<%= product.id %>" method="post" <%= product.purchaseApprovalEnabled ? 'class="relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 bg-gradient-to-br from-[var(--card)] to-[var(--input)] p-5 shadow-lg"' : '' %>>
+      <% if (product.isSyndicated) { %>
+        <div class="rounded-2xl border border-[var(--gold)]/40 bg-[var(--input)]/60 p-5">
+          <div class="mb-2 text-sm font-bold text-[var(--gold-text)]">สินค้าจากร้านหลัก</div>
+          <p class="mb-4 text-sm text-[var(--text-3)]">รายการนี้แสดงจากร้านหลัก ราคานี้รวมส่วนต่างของร้านคุณแล้ว การชำระเงินและการจัดส่งไอดีจะดำเนินการที่ร้านหลักโดยตรง</p>
+          <% if (product.sourceUrl) { %><a href="<%= product.sourceUrl %>" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[var(--gold-contrast)]">สั่งซื้อผ่านร้านหลัก ↗</a><% } %>
+        </div>
+      <% } else if (product.stockCount > 0) { %>
+        <form action="/cart/add/<%= product.id %><%= product.federatedCheckout ? '?federated=1' : '' %>" method="post" <%= product.purchaseApprovalEnabled ? 'class="relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 bg-gradient-to-br from-[var(--card)] to-[var(--input)] p-5 shadow-lg"' : '' %>>
           <% if (qtyTiers.length) { %>
             <div class="flex flex-wrap items-center gap-4 mb-4" data-qty-wrap data-base-price="<%= product.price %>" data-tiers='<%- JSON.stringify(qtyTiers) %>'>
               <div>

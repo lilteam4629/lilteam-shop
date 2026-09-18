@@ -19,6 +19,7 @@ const { getCloudUrl } = require('../services/cloud-url');
 const { requireAdmin } = require('../middleware/auth');
 const r2 = require('../services/r2');
 const efootballSource = require('../services/efootball-catalog');
+const catalogSyndication = require('../services/catalog-syndication');
 
 const toArr = value => Array.isArray(value) ? value : (value === undefined ? [] : [value]);
 
@@ -278,6 +279,52 @@ router.post('/license-label', async (req, res) => {
   await store.save();
   req.flash('success', 'แก้ไขชื่อแล้ว');
   res.redirect('/admin');
+});
+
+
+// ---------- Catalog API / product syndication ----------
+router.get('/catalog-api', async (req, res) => {
+  const mainDb = store.platformData;
+  const tenantMode = Boolean(req.tenantShop);
+  const config = catalogSyndication.normalizeConfig(store.data.settings || {});
+  const sourceProducts = mainDb.products.filter(product => product.status === 'active');
+  let shops = [];
+  if (!tenantMode) {
+    shops = await Promise.all((mainDb.shops || []).map(async shop => {
+      const tenantDb = await store.loadTenantDb(shop.id);
+      return { id: shop.id, name: shop.name, slug: shop.slug, expiresAt: shop.expiresAt, config: catalogSyndication.normalizeConfig(tenantDb?.settings || {}) };
+    }));
+  }
+  const preview = tenantMode
+    ? catalogSyndication.getTenantProducts(mainDb, store.data, '').products.slice(0, 12)
+    : [];
+  res.render('admin/catalog-api', {
+    title: 'API แคตตาล็อกร้านหลัก', active: 'catalog-api', tenantMode, config,
+    sourceProducts, preview, shops, sourceShopName: mainDb.settings.shopName || 'ร้านหลัก',
+  });
+});
+
+router.post('/catalog-api/settings', async (req, res) => {
+  if (!req.tenantShop) {
+    req.flash('error', 'ตั้งค่าการรับสินค้าให้ร้านเช่าจากหน้าแอดมินของร้านนั้น');
+    return res.redirect('/admin/catalog-api');
+  }
+  const mode = req.body.markupMode === 'fixed' ? 'fixed' : 'percent';
+  const max = mode === 'fixed' ? 100000 : 1000;
+  const value = Math.min(max, Math.max(0, Number(req.body.markupValue) || 0));
+  store.data.settings.catalogApi = { enabled: req.body.enabled === 'on', source: 'main-store', markupMode: mode, markupValue: value, syncedAt: new Date().toISOString() };
+  await store.save();
+  req.flash('success', store.data.settings.catalogApi.enabled ? 'เปิดรับสินค้าจากร้านหลักแล้ว' : 'ปิด API แคตตาล็อกแล้ว');
+  res.redirect('/admin/catalog-api');
+});
+
+router.post('/catalog-api/sync', async (req, res) => {
+  if (!req.tenantShop) return res.redirect('/admin/catalog-api');
+  const current = catalogSyndication.normalizeConfig(store.data.settings || {});
+  store.data.settings.catalogApi = { ...current, syncedAt: new Date().toISOString() };
+  await store.save();
+  req.flash('success', 'ซิงก์รายการสินค้าจากร้านหลักแล้ว');
+  res.redirect('/admin/catalog-api');
 });
 
 // ---------- Products ----------

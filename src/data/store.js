@@ -176,6 +176,15 @@ function defaultData() {
         style: 'normal',
       },
       productCardStyle: 'natural', // 'natural' = full uncropped image, price below; 'classic' = cropped cover photo with price overlaid
+      // Optional catalog feed for rented shops. The feed contains public
+      // product metadata only; stock credentials always remain in the main db.
+      catalogApi: {
+        enabled: false,
+        source: 'main-store',
+        markupMode: 'percent',
+        markupValue: 0,
+        syncedAt: null,
+      },
       storefrontModel: 'classic', // 'classic' | 'line-rangers' | 'rangers-market'
       music: {
         enabled: false,
@@ -479,6 +488,19 @@ function migrateAdminRecovery(db) {
 // Generic schema backfill — safe to run against any db, main or tenant.
 function migrateSchema(db) {
   let changed = false;
+  if (!db.settings.catalogApi || typeof db.settings.catalogApi !== 'object') {
+    db.settings.catalogApi = { enabled: false, source: 'main-store', markupMode: 'percent', markupValue: 0, syncedAt: null };
+    changed = true;
+  } else {
+    const api = db.settings.catalogApi;
+    if (api.enabled === undefined) { api.enabled = false; changed = true; }
+    if (api.source !== 'main-store') { api.source = 'main-store'; changed = true; }
+    if (!['percent', 'fixed'].includes(api.markupMode)) { api.markupMode = 'percent'; changed = true; }
+    const max = api.markupMode === 'fixed' ? 100000 : 1000;
+    const normalized = Math.min(max, Math.max(0, Number.isFinite(Number(api.markupValue)) ? Number(api.markupValue) : 0));
+    if (api.markupValue !== normalized) { api.markupValue = normalized; changed = true; }
+    if (api.syncedAt === undefined) { api.syncedAt = null; changed = true; }
+  }
   if (!db.settings.hero) {
     db.settings.hero = { mode: 'default', bannerImage: null, bannerLink: '', textStyle: { textColor: '#ffffff', outlineColor: '#000000', outlineWidth: 1.5 } };
     changed = true;

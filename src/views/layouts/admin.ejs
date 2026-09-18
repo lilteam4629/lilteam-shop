@@ -228,6 +228,10 @@
             <span class="sidebar-text">หมวดหมู่หน้าแรก</span>
           </a>
 
+          <a href="/admin/catalog-api" class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-xl transition duration-150 group <%= active==='catalog-api'?'bg-[var(--gold)]/10 text-[var(--gold-text)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="API แคตตาล็อก">
+            <span class="text-base">↗</span><span class="sidebar-text">API สินค้าร้านหลัก</span>
+          </a>
+
           <% if (typeof isSystemLab !== 'undefined' && isSystemLab) { %>
           <details class="group" <%= (active==='rangers-model' || active==='rangers-catalog') ? 'open' : '' %>>
             <summary class="sidebar-link flex cursor-pointer list-none items-center gap-3 rounded-xl px-3 py-2.5 transition duration-150 group <%= (active==='rangers-model' || active==='rangers-catalog')?'bg-[var(--gold)]/10 text-[var(--gold-text)] font-semibold border-l-4 border-[var(--gold)] pl-2.5':'text-[var(--text-3)] hover:text-[var(--text)] hover:bg-[var(--input)]' %>" title="LINE Rangers Studio">

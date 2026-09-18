@@ -4,6 +4,8 @@ const store = require('../data/store');
 const { withEffectivePrice } = require('../services/pricing');
 const { requireAdmin } = require('../middleware/auth');
 const rangersSource = require('../services/rangers-catalog');
+const catalogSyndication = require('../services/catalog-syndication');
+const { MAIN_SITE_URL } = require('../middleware/tenant');
 
 function publishTime(product) {
   if (!product.publishAt) return 0;
@@ -30,13 +32,28 @@ function withStock(product, counts) {
   return { ...withEffectivePrice(product), stockCount };
 }
 
-function shopStats() {
+function shopStats(extraProductCount = 0) {
   return {
     orderCount: store.data.orders.length,
     customerCount: store.data.users.filter(u => u.role === 'customer').length,
     reviewCount: store.data.reviews.length,
-    gameCount: store.data.products.filter(isProductVisible).length,
+    gameCount: store.data.products.filter(isProductVisible).length + extraProductCount,
   };
+}
+
+function mainSiteUrlFor(req) {
+  if (MAIN_SITE_URL) return MAIN_SITE_URL;
+  const host = String(req?.get('host') || '').split(':')[0].toLowerCase();
+  if (host.endsWith('.localhost') || host.endsWith('.lvh.me') || host.endsWith('.127.0.0.1.nip.io')) {
+    const port = String(req?.get('host') || '').includes(':') ? String(req.get('host')).split(':').slice(1).join(':') : (process.env.PORT || '3000');
+    return `http://localhost${port && port !== '80' ? `:${port}` : ''}`;
+  }
+  return `${req?.protocol || 'https'}://${req?.get('host') || 'localhost'}`;
+}
+
+function syndicatedProducts(req) {
+  if (!req?.tenantShop) return [];
+  return catalogSyndication.getTenantProducts(store.platformData, store.data, mainSiteUrlFor(req), req.tenantShop).products;
 }
 
 function sortProducts(products, sort) {
@@ -83,9 +100,10 @@ function latestOrderCards() {
 const HOME_PAGE_SIZE = 24;
 const UNPAGINATED_HOME_TENANTS = new Set(['moopee-shop']);
 
-function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts = false) {
+function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts = false, req = null) {
   const stockCounts = availableStockCounts();
-  const active = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
+  const remote = syndicatedProducts(req);
+  const active = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts)).concat(remote);
   const scheduledProducts = store.data.products
     .filter(product => product.status === 'active' && product.publishAt && publishTime(product) > Date.now())
     .sort((a, b) => publishTime(a) - publishTime(b))
@@ -110,7 +128,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     : active.slice((page - 1) * HOME_PAGE_SIZE, page * HOME_PAGE_SIZE);
   return {
     title: 'หน้าแรก',
-    stats: shopStats(),
+    stats: shopStats(remote.length),
     newest,
     homeSections,
     recommendedCategories,
@@ -144,7 +162,7 @@ router.get('/', (req, res) => {
     : 'shop/home';
   const tenantSlug = String(req.tenantShop?.slug || '').toLowerCase();
   const showAllProducts = UNPAGINATED_HOME_TENANTS.has(tenantSlug);
-  res.render(view, homeViewData(false, req.query.page, showAllProducts));
+  res.render(view, homeViewData(false, req.query.page, showAllProducts, req));
 });
 
 router.get('/api/rangers-catalog', (req, res) => {
@@ -184,7 +202,7 @@ router.get('/preview/mobile-cinematic-7f4c2a', (req, res) => {
 
 router.get('/products', (req, res) => {
   const stockCounts = availableStockCounts();
-  let products = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
+  let products = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts)).concat(syndicatedProducts(req));
   const recommendedId = String(req.query.recommended || '').trim();
   const recommendedCategory = recommendedId
     ? (store.data.recommendedCategories || []).find(category => String(category.id) === recommendedId)
@@ -229,7 +247,8 @@ router.get('/search', (req, res) => {
   const stockCounts = availableStockCounts();
   const products = store.data.products
     .filter(p => isProductVisible(p) && p.title.toLowerCase().includes(q))
-    .map(product => withStock(product, stockCounts));
+    .map(product => withStock(product, stockCounts))
+    .concat(syndicatedProducts(req).filter(p => String(p.title || '').toLowerCase().includes(q)));
   res.render('shop/listing', { title: `ผลการค้นหา: ${q}`, products, listType: null, sort: '', q, filterTags: null });
 });
 
@@ -245,18 +264,48 @@ router.get('/cookie-policy', (req, res) => {
   res.render('shop/cookie-policy', { title: 'นโยบายคุกกี้' });
 });
 
+router.get('/federated/checkout', async (req, res) => {
+  if (req.tenantShop) return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });
+  const payload = catalogSyndication.verifyToken(req.query.token);
+  if (!payload?.tenantId || !payload.productId) return res.status(400).send('ลิงก์สั่งซื้อหมดอายุหรือไม่ถูกต้อง');
+  const tenant = store.platformData.shops.find(shop => String(shop.id) === String(payload.tenantId));
+  if (!tenant) return res.status(404).send('ไม่พบร้านต้นทาง');
+  const tenantDb = await store.loadTenantDb(tenant.id);
+  const source = catalogSyndication.getTenantProducts(store.platformData, tenantDb, MAIN_SITE_URL || `${req.protocol}://${req.get('host')}`, tenant).products
+    .find(product => String(product.sourceProductId) === String(payload.productId));
+  if (!source || source.stockCount < 1) return res.status(409).send('สินค้านี้หมดสต็อกหรือปิดการขายแล้ว');
+  req.session.federatedCatalog = {
+    sourceProductId: source.sourceProductId,
+    tenantId: tenant.id,
+    tenantSlug: tenant.slug,
+    price: source.price,
+    sourcePrice: source.sourcePrice,
+    expiresAt: Date.now() + 10 * 60 * 1000,
+  };
+  res.redirect(`/game/${encodeURIComponent(source.sourceSlug)}?federated=1`);
+});
+
 router.get('/game/:slug', (req, res) => {
-  const product = store.data.products.find(p => p.slug === req.params.slug);
+  const remoteProduct = catalogSyndication.findTenantProduct(store.platformData, store.data, req.params.slug, mainSiteUrlFor(req), req.tenantShop);
+  const product = remoteProduct || store.data.products.find(p => p.slug === req.params.slug);
   if (!product || !isProductVisible(product)) return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });
-  const reviews = store.data.reviews.filter(r => r.productId === product.id);
+  const federated = !remoteProduct && req.session.federatedCatalog &&
+    String(req.session.federatedCatalog.sourceProductId) === String(product.id) &&
+    Number(req.session.federatedCatalog.expiresAt) > Date.now();
+  const displayProduct = remoteProduct ? remoteProduct : (() => {
+    const local = withStock(product);
+    if (!federated) return local;
+    return { ...local, price: Number(req.session.federatedCatalog.price), sourcePrice: Number(req.session.federatedCatalog.sourcePrice), federatedCheckout: true };
+  })();
+  const reviews = remoteProduct ? [] : store.data.reviews.filter(r => r.productId === product.id);
   const selectedFilterTagIds = new Set((product.filterTagIds || []).map(String));
   const productFilterTags = store.data.filterTags.filter(tag => selectedFilterTagIds.has(String(tag.id)));
   const productRangers = rangersSource.resolveCodes(
-    store.data.settings.rangersCatalog?.productAssignments?.[product.id] || [],
+    remoteProduct ? [] : store.data.settings.rangersCatalog?.productAssignments?.[product.id] || [],
   );
   res.render('shop/product-detail', {
     title: product.title,
-    product: withStock(product),
+    product: displayProduct,
     genreNames: (product.genres || []).map(g => store.data.settings.genres[g] || g),
     productFilterTags,
     productRangers,
