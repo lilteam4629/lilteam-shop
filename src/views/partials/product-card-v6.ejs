@@ -1,0 +1,5 @@
+<% const v6SoldOut = Number(p.stockCount || 0) < 1; %>
+<a href="/game/<%= p.slug %>" class="v6-product-card <%= v6SoldOut ? 'is-sold' : '' %>" data-v6-product data-title="<%= String(p.title || '').toLowerCase() %>" data-stock="<%= v6SoldOut ? 'sold' : 'available' %>">
+  <div class="v6-product-card__media"><img src="<%= p.images && p.images[0] ? p.images[0] : '' %>" alt="<%= p.title %>" loading="lazy" decoding="async" /><span><%= v6SoldOut ? 'หมดแล้ว' : 'พร้อมส่ง' %></span><% if (p.flashSaleActive) { %><b>ลดพิเศษ</b><% } %></div>
+  <div class="v6-product-card__body"><h3><%= p.title %></h3><div><strong>฿<%= Number(p.price || 0).toLocaleString() %></strong><small><%= v6SoldOut ? 'รอสินค้าเข้าใหม่' : `เหลือ ${Number(p.stockCount || 0).toLocaleString()} ชิ้น` %></small></div></div>
+</a>
