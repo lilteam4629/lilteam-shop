@@ -15,6 +15,9 @@
     background-attachment:fixed!important;
     background-blend-mode:normal!important;
   }
+  /* Keep the owner's home footer attached to the catalog. The body artwork
+     is decorative and must not leak into a blank margin above the footer. */
+  body.storefront-owner-lilteam > div > footer { margin-top:0!important; }
   .storefront-hero-banner { background:transparent!important;background-image:none!important; }
   .storefront-hero-banner::before,.storefront-hero-banner::after { display:none!important;content:none!important; }
   .storefront-hero-banner>.banner-hero-shell { background:transparent!important; }
