@@ -85,7 +85,7 @@ const UNPAGINATED_HOME_TENANTS = new Set(['moopee-shop']);
 // Keep the pre-redesign storefront view in home-original.ejs so the owner
 // can switch back without touching tenant storefronts if the new direction
 // is not a fit.
-const OWNER_HOME_DESIGN = 'v2';
+const OWNER_HOME_DESIGN = 'v3';
 
 function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts = false) {
   const stockCounts = availableStockCounts();
@@ -145,7 +145,9 @@ router.get('/', (req, res) => {
   const model = store.data.settings.storefrontModel;
   const view = req.tenantShop?.isSystemLab && model === 'rangers-market'
     ? 'shop/home-rangers-market'
-    : (!req.tenantShop ? (OWNER_HOME_DESIGN === 'classic' ? 'shop/home-original' : 'shop/home-owner-v2') : 'shop/home');
+    : (!req.tenantShop
+      ? (OWNER_HOME_DESIGN === 'classic' ? 'shop/home-original' : (OWNER_HOME_DESIGN === 'v2' ? 'shop/home-owner-v2' : 'shop/home-owner-v3'))
+      : 'shop/home');
   const tenantSlug = String(req.tenantShop?.slug || '').toLowerCase();
   const showAllProducts = UNPAGINATED_HOME_TENANTS.has(tenantSlug);
   res.render(view, homeViewData(false, req.query.page, showAllProducts));

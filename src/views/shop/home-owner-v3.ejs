@@ -1,0 +1,67 @@
+<% const v3Products = (Array.isArray(newest) ? newest : []).slice(0, 8); %>
+<% const v3Categories = (Array.isArray(recommendedCategories) ? recommendedCategories : []).slice(0, 6); %>
+<% const v3Tags = (Array.isArray(filterTags) ? filterTags : []).slice(0, 8); %>
+<main class="owner-v3-home" data-owner-v3>
+  <section class="owner-v3-hero" aria-labelledby="owner-v3-title">
+    <div class="owner-v3-hero__copy">
+      <div class="owner-v3-systemline"><span class="owner-v3-pulse-dot"></span><span>STORE OS / ONLINE</span><b>V3.0</b></div>
+      <span class="owner-v3-kicker">LILTEAM · DIGITAL GAME STORE</span>
+      <h1 id="owner-v3-title">ร้านของคุณ<br><em>ในโหมดที่เหนือกว่า</em></h1>
+      <p>เลือกไอดี เติมเงิน และรับสินค้าในระบบเดียวที่ออกแบบมาเพื่อความเร็วของคุณ</p>
+      <div class="owner-v3-hero__actions"><a class="owner-v3-btn owner-v3-btn--primary" href="/products">เปิดคลังสินค้า <span>↗</span></a><button type="button" class="owner-v3-btn owner-v3-btn--ghost" data-v3-random>สุ่มสินค้าให้ฉัน <span>⌁</span></button></div>
+      <div class="owner-v3-metrics"><div><strong><%= Number(stats.gameCount || 0).toLocaleString() %></strong><span>ACTIVE ITEMS</span></div><div><strong><%= Number(stats.orderCount || 0).toLocaleString() %></strong><span>ORDERS DONE</span></div><div><strong>24/7</strong><span>STORE ONLINE</span></div></div>
+    </div>
+    <div class="owner-v3-hero__visual">
+      <div class="owner-v3-orbit owner-v3-orbit--one"></div><div class="owner-v3-orbit owner-v3-orbit--two"></div><div class="owner-v3-scanline"></div>
+      <div class="owner-v3-hero__panel"><span>NOW PLAYING</span><strong><%= settings.shopName %></strong><small>ระบบร้านพร้อมให้บริการ</small><i></i></div>
+      <div class="owner-v3-hero__mark">L</div>
+    </div>
+  </section>
+
+  <section class="owner-v3-commandbar" aria-label="คำสั่งลัด">
+    <div class="owner-v3-commandbar__label"><span>COMMAND BAR</span><small>เลือกการทำงานที่ต้องการ</small></div>
+    <a href="/products"><b>01</b><span>ค้นหาสินค้า<small>เปิดคลังทั้งหมด</small></span><em>↗</em></a>
+    <a href="/account/topup"><b>02</b><span>เติมเงิน<small>เข้ากระเป๋าเงิน</small></span><em>↗</em></a>
+    <a href="/account/orders"><b>03</b><span>คำสั่งซื้อ<small>ตรวจสอบรายการ</small></span><em>↗</em></a>
+    <a href="/contact"><b>04</b><span>ติดต่อร้าน<small>คุยกับทีมงาน</small></span><em>↗</em></a>
+  </section>
+
+  <section class="owner-v3-deck" aria-labelledby="owner-v3-deck-title">
+    <div class="owner-v3-section-head"><div><span class="owner-v3-eyebrow">DISCOVERY DECK / LIVE</span><h2 id="owner-v3-deck-title">เลือกสิ่งที่ใช่ แล้วไปต่อ</h2></div><button type="button" class="owner-v3-random" data-v3-random>สุ่มจากคลัง <span>⌁</span></button></div>
+    <div class="owner-v3-deck__toolbar"><span>FILTER</span><button type="button" class="is-active" data-v3-filter="all">ทั้งหมด</button><button type="button" data-v3-filter="available">พร้อมขาย</button><button type="button" data-v3-filter="sold">สินค้าหมด</button><% v3Tags.slice(0, 4).forEach(tag => { %><a href="/products?tags=<%= encodeURIComponent(tag.id) %>"><%= tag.name %></a><% }) %></div>
+    <% if (v3Products.length) { %>
+    <div class="owner-v3-deck__body">
+      <div class="owner-v3-deck__rail" role="listbox" aria-label="รายการสินค้าแนะนำ">
+        <% v3Products.forEach((p, index) => { const sold = Number(p.stockCount || 0) < 1; %>
+          <button type="button" class="owner-v3-rail-card <%= index === 0 ? 'is-active' : '' %> <%= sold ? 'is-sold' : '' %>" data-v3-item data-stock="<%= sold ? 'sold' : 'available' %>" data-title="<%= p.title %>" data-price="฿<%= Number(p.price || 0).toLocaleString() %>" data-stock-label="<%= sold ? 'รอสินค้าเข้าใหม่' : `เหลือ ${Number(p.stockCount || 0).toLocaleString()} ชิ้น` %>" data-image="<%= p.images && p.images[0] ? p.images[0] : '' %>" data-href="/game/<%= p.slug %>">
+            <span><%= String(index + 1).padStart(2, '0') %></span><img src="<%= p.images && p.images[0] ? p.images[0] : '' %>" alt="" loading="lazy" decoding="async" /><b><%= p.title %></b><small><%= sold ? 'SOLD OUT' : 'READY' %></small>
+          </button>
+        <% }) %>
+      </div>
+      <article class="owner-v3-spotlight" data-v3-spotlight>
+        <div class="owner-v3-spotlight__image"><img data-v3-image src="<%= v3Products[0].images && v3Products[0].images[0] ? v3Products[0].images[0] : '' %>" alt="<%= v3Products[0].title %>" /><span data-v3-badge><%= Number(v3Products[0].stockCount || 0) > 0 ? 'READY TO DELIVER' : 'SOLD OUT' %></span></div>
+        <div class="owner-v3-spotlight__content"><span class="owner-v3-eyebrow">SELECTED ITEM</span><h3 data-v3-title><%= v3Products[0].title %></h3><p data-v3-stock-label><%= Number(v3Products[0].stockCount || 0) > 0 ? `เหลือ ${Number(v3Products[0].stockCount || 0).toLocaleString()} ชิ้น` : 'รอสินค้าเข้าใหม่' %></p><div><strong data-v3-price>฿<%= Number(v3Products[0].price || 0).toLocaleString() %></strong><a data-v3-link href="/game/<%= v3Products[0].slug %>">ดูรายละเอียด <span>→</span></a></div></div>
+      </article>
+    </div>
+    <% } else { %><div class="owner-v3-empty">ยังไม่มีสินค้าใหม่ในคลัง</div><% } %>
+  </section>
+
+  <% if (v3Categories.length) { %>
+  <section class="owner-v3-categories" aria-labelledby="owner-v3-categories-title"><div class="owner-v3-section-head"><div><span class="owner-v3-eyebrow">MAP / CATEGORIES</span><h2 id="owner-v3-categories-title">เลือกเส้นทางของคุณ</h2></div><a class="owner-v3-textlink" href="/products">ดูทั้งหมด <span>→</span></a></div><div class="owner-v3-category-grid"><% v3Categories.forEach((category, index) => { %><a href="/products?recommended=<%= encodeURIComponent(category.id) %>" class="owner-v3-category"><span class="owner-v3-category__index"><%= String(index + 1).padStart(2, '0') %></span><div class="owner-v3-category__image"><% if (category.imageUrl) { %><img src="<%= category.imageUrl %>" alt="<%= category.title %>" loading="lazy" decoding="async" /><% } else { %><span>+</span><% } %></div><span class="owner-v3-category__name"><b><%= category.title %></b><small><%= Number(category.count || 0).toLocaleString() %> รายการ</small></span><em>↗</em></a><% }) %></div></section>
+  <% } %>
+
+  <section class="owner-v3-pulse" aria-label="ระบบของ LILTeam"><div class="owner-v3-pulse__copy"><span class="owner-v3-eyebrow">THE LILTEAM PULSE</span><h2>ระบบที่คิดไว้<br>เพื่อจังหวะของคุณ</h2><p>ทุกการซื้อมีสถานะ ทุกยอดเติมเงินมีประวัติ และทุกสินค้าถูกจัดให้ค้นหาได้ง่ายจากบัญชีเดียว</p><a href="/help" class="owner-v3-btn owner-v3-btn--light">ดูวิธีใช้งาน <span>→</span></a></div><div class="owner-v3-pulse__grid"><div><b>01</b><strong>WALLET</strong><span>เติมเงินแล้วใช้ได้ทันที</span></div><div><b>02</b><strong>DELIVERY</strong><span>รับสินค้าหลังรายการสำเร็จ</span></div><div><b>03</b><strong>HISTORY</strong><span>ตรวจสอบคำสั่งซื้อย้อนหลัง</span></div><div><b>04</b><strong>SUPPORT</strong><span>มีทีมงานคอยดูแล</span></div></div></section>
+
+  <section class="owner-v3-final"><div><span class="owner-v3-eyebrow">YOUR NEXT MOVE</span><h2>พร้อมเริ่มหรือยัง?</h2></div><div><a class="owner-v3-btn owner-v3-btn--primary" href="/products">เข้าสู่คลังสินค้า <span>↗</span></a><a class="owner-v3-textlink" href="/contact">ติดต่อทีมงาน <span>→</span></a></div></section>
+</main>
+<script>
+(function(){
+  const root=document.querySelector('[data-owner-v3]'); if(!root)return;
+  const items=[...root.querySelectorAll('[data-v3-item]')], filters=[...root.querySelectorAll('[data-v3-filter]')];
+  const image=root.querySelector('[data-v3-image]'), title=root.querySelector('[data-v3-title]'), price=root.querySelector('[data-v3-price]'), stock=root.querySelector('[data-v3-stock-label]'), link=root.querySelector('[data-v3-link]'), badge=root.querySelector('[data-v3-badge]');
+  function select(item){if(!item||!image)return;items.forEach(x=>x.classList.toggle('is-active',x===item));image.src=item.dataset.image||'';image.alt=item.dataset.title||'';title.textContent=item.dataset.title||'';price.textContent=item.dataset.price||'';stock.textContent=item.dataset.stockLabel||'';link.href=item.dataset.href||'/products';const ready=item.dataset.stock!=='sold';badge.textContent=ready?'READY TO DELIVER':'SOLD OUT';badge.classList.toggle('is-sold',!ready)}
+  items.forEach(item=>item.addEventListener('click',()=>select(item)));
+  filters.forEach(filter=>filter.addEventListener('click',()=>{const value=filter.dataset.v3Filter;filters.forEach(x=>x.classList.toggle('is-active',x===filter));items.forEach(item=>{item.hidden=value!=='all'&&item.dataset.stock!==value})}));
+  root.querySelectorAll('[data-v3-random]').forEach(button=>button.addEventListener('click',()=>{const visible=items.filter(x=>!x.hidden);if(visible.length)select(visible[Math.floor(Math.random()*visible.length)])}));
+})();
+</script>
