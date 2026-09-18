@@ -47,6 +47,7 @@
     <% } else { %>
       <span class="ready-glow absolute top-2 left-2 z-10 bg-emerald-950/80 border border-emerald-400/70 text-emerald-300 font-medium text-[10px] px-2.5 py-1 rounded-full backdrop-blur-sm">● พร้อมส่ง</span>
     <% } %>
+    <% if (p.isSyndicated) { %><span class="absolute top-2 right-2 z-10 rounded-full border border-[var(--gold)]/70 bg-black/75 px-2 py-1 text-[9px] font-black text-[var(--gold-light)] backdrop-blur-sm">API · ร้านหลัก</span><% } %>
 
     <div class="absolute inset-x-0 bottom-0 p-3 flex flex-col gap-1 min-w-0 bg-gradient-to-t from-black via-black/55 to-transparent">
       <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
@@ -126,6 +127,7 @@
       <% } else { %>
         <span class="theme-success shrink-0 inline-flex items-center gap-1 border bg-[var(--input)] font-bold text-[9px] px-2 py-1 rounded-full">● พร้อมขาย</span>
       <% } %>
+      <% if (p.isSyndicated) { %><span class="shrink-0 inline-flex items-center gap-1 rounded-full border border-[var(--gold)]/50 bg-[var(--input)] px-2 py-1 text-[9px] font-black text-[var(--gold-text)]">API · ร้านหลัก</span><% } %>
     </div>
     <span <%= soldOut ? '' : 'data-theme-fill="accent"' %> class="mt-1 block w-full text-center rounded-lg py-1.5 text-xs font-bold transition-colors <%= soldOut ? 'theme-danger bg-[var(--input)] border' : 'bg-[var(--gold)] text-[var(--gold-contrast)] group-hover:bg-[var(--gold-hover)]' %>"><%= soldOut ? 'สินค้าหมด' : 'สั่งซื้อสินค้า' %></span>
     <span class="text-[10px] text-[var(--text-4)] text-center truncate"><%= soldOut ? 'รอสินค้าเข้าใหม่' : `สินค้าคงเหลือ ${p.stockCount.toLocaleString()} ชิ้น` %></span>
