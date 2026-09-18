@@ -183,8 +183,9 @@
             <% if (currentUser && currentUser.role === 'admin' && !isMainSite) { %>
               <div class="rounded-xl border border-[var(--coral)]/45 bg-[var(--coral)]/10 px-4 py-3 text-sm font-bold text-[var(--coral)]">บัญชีเจ้าของร้านเช่าไม่สามารถใช้เงินของร้านเช่าซื้อสินค้านี้ได้ ลูกค้าต้องเป็นผู้เติมเงินและสั่งซื้อเอง</div>
             <% } else { %>
-              <div class="grid gap-2 sm:grid-cols-2">
+              <div class="grid gap-2 sm:grid-cols-3">
                 <a href="/account/topup/catalog-api?product=<%= encodeURIComponent(product.slug || product.id) %>" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)]/50 bg-[var(--card)] px-5 py-3 text-sm font-black text-[var(--gold-text)]">💰 เติมเงินสินค้า API</a>
+                <a href="/contact?api=1" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-5 py-3 text-sm font-black text-[var(--text)]">💬 ติดต่อร้านหลัก</a>
                 <form action="/cart/add/<%= product.id %>" method="post"><button class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-5 py-3 text-sm font-black text-[var(--gold-contrast)]">เพิ่มลงตะกร้าเพื่อซื้อ</button></form>
               </div>
             <% } %>

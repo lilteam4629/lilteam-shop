@@ -257,7 +257,14 @@ router.get('/help', (req, res) => {
 });
 
 router.get('/contact', (req, res) => {
-  if (req.tenantShop) return res.render('shop/contact', { title: 'ติดต่อร้านหลักหลังสั่งซื้อ', postPurchaseOnly: true });
+  if (req.tenantShop && req.query.api !== '1') return res.render('shop/contact', { title: 'ติดต่อร้านหลักหลังสั่งซื้อ', postPurchaseOnly: true });
+  if (req.tenantShop && req.query.api === '1') {
+    return res.render('shop/contact', {
+      title: 'ติดต่อร้านหลักสำหรับสินค้า API',
+      settings: store.platformData.settings,
+      apiContact: true,
+    });
+  }
   res.render('shop/contact', { title: 'ติดต่อร้าน' });
 });
 
