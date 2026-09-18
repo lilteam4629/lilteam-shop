@@ -179,10 +179,14 @@
             <div class="mb-2 flex items-center gap-2 text-base font-black text-[var(--gold-text)]">🔒 ชำระเงินและรับสินค้าในร้านหลักเท่านั้น</div>
             <p class="mb-3 text-sm font-medium leading-relaxed text-[var(--text-2)]">ก่อนกดซื้อ กรุณาเติมเงินในร้านนี้ก่อน เงินเติมจะเข้าบัญชีร้านหลักของเรา และยอดจะใช้ซื้อสินค้านี้จากร้านนี้ได้ทันที</p>
             <p class="mb-4 text-xs text-[var(--text-3)]">หลังสั่งซื้อสำเร็จเท่านั้น ให้กดปุ่มติดต่อร้านหลักในหน้าออเดอร์เพื่อรับไอดีที่ร้านหลัก · ราคานี้รวมส่วนต่างร้านเช่าแล้ว</p>
-            <div class="grid gap-2 sm:grid-cols-2">
-              <a href="/account/topup" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)]/50 bg-[var(--card)] px-5 py-3 text-sm font-black text-[var(--gold-text)]">💰 เติมเงินก่อนซื้อ</a>
-              <form action="/cart/add/<%= product.id %>" method="post"><button class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-5 py-3 text-sm font-black text-[var(--gold-contrast)]">เพิ่มลงตะกร้าเพื่อซื้อ</button></form>
-            </div>
+            <% if (currentUser && currentUser.role === 'admin' && !isMainSite) { %>
+              <div class="rounded-xl border border-[var(--coral)]/45 bg-[var(--coral)]/10 px-4 py-3 text-sm font-bold text-[var(--coral)]">บัญชีเจ้าของร้านเช่าไม่สามารถใช้เงินของร้านเช่าซื้อสินค้านี้ได้ ลูกค้าต้องเป็นผู้เติมเงินและสั่งซื้อเอง</div>
+            <% } else { %>
+              <div class="grid gap-2 sm:grid-cols-2">
+                <a href="/account/topup" class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--gold)]/50 bg-[var(--card)] px-5 py-3 text-sm font-black text-[var(--gold-text)]">💰 เติมเงินก่อนซื้อ</a>
+                <form action="/cart/add/<%= product.id %>" method="post"><button class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-5 py-3 text-sm font-black text-[var(--gold-contrast)]">เพิ่มลงตะกร้าเพื่อซื้อ</button></form>
+              </div>
+            <% } %>
           </div>
         <% } else { %>
           <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมดจากร้านหลัก</div>

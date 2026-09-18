@@ -327,6 +327,10 @@ router.post('/checkout', requireLogin, (req, res) => {
       }
 
       if (req.tenantShop && items.some(item => item.federatedTenantId)) {
+        if (user.role === 'admin') {
+          req.flash('error', 'บัญชีเจ้าของร้านเช่าไม่สามารถใช้เงินของร้านเช่าซื้อสินค้าจากร้านหลักได้');
+          return res.redirect('/cart');
+        }
         if (items.some(item => !item.federatedTenantId)) {
           req.flash('error', 'กรุณาแยกซื้อสินค้าร้านนี้และสินค้าจากร้านหลักคนละรายการ');
           return res.redirect('/cart');
