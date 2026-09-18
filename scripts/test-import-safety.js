@@ -110,6 +110,11 @@ async function main() {
     assert.match(productsPage, /มูลค่าไอดีที่พร้อมขาย/);
     assert.match(productsPage, /data-available-stock/);
   });
+  check('Admin top-up rows hide empty slip placeholders', () => {
+    const topupsPage = fs.readFileSync(path.join(root, 'src/views/admin/topups.ejs'), 'utf8');
+    assert.doesNotMatch(topupsPage, /ยังไม่แนบสลิป/);
+    assert.match(topupsPage, /if \(r\.slipPath\)/);
+  });
   let slip2goCalls = 0;
   let slip2goRequest = null;
   class FakeFormData { append() {} getHeaders() { return {}; } }
