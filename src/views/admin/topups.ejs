@@ -1,4 +1,8 @@
 <div class="admin-workspace-view workspace-topups">
+<% const publicSlipMessage = (message) => String(message || '')
+  .replace(/Slip\s*XEPHT/gi, 'ระบบตรวจสอบ')
+  .replace(/slip\.xepht\.com/gi, 'ระบบภายนอก')
+  .replace(/XEPHT/gi, 'ระบบตรวจสอบ'); %>
 <!-- Topup & Payment Management -->
 <div class="space-y-6">
 
@@ -137,7 +141,7 @@
                   </div>
                   <% if (r.slipCheck && r.slipCheck.message) { %>
                     <div class="inline-block <%= (r.slipCheck.quotaExhausted || r.slipCheck.rateLimited || r.slipCheck.quotaMismatch || r.slipCheck.retryable || r.slipCheck.providerCode === 'verify_failed') ? 'bg-amber-500/15 border-amber-500/50 text-amber-300' : 'bg-[var(--input)] border-[var(--border-light)] text-[var(--text-3)]' %> border text-[11px] px-2.5 py-1 rounded-lg mt-1">
-                      <%= r.slipCheck.quotaExhausted ? '⚠️ โควตาตรวจสลิปหมดแล้ว: ' : r.slipCheck.quotaMismatch ? '⚠️ สถานะโควตาจาก SlipCheck ไม่ตรงกัน: ' : r.slipCheck.rateLimited ? '⏳ SlipCheck ยังไม่พร้อม: ' : '🤖 ผลตรวจอัตโนมัติ: ' %><%= r.slipCheck.message %><% if (r.slipCheck.providerCode || r.slipCheck.httpStatus) { %> <span class="opacity-70">(<%= r.slipCheck.providerCode || r.slipCheck.httpStatus %>)</span><% } %>
+                      <%= r.slipCheck.quotaExhausted ? '⚠️ โควตาตรวจสลิปหมดแล้ว: ' : r.slipCheck.quotaMismatch ? '⚠️ สถานะโควตาจาก SlipCheck ไม่ตรงกัน: ' : r.slipCheck.rateLimited ? '⏳ ระบบตรวจสอบยังไม่พร้อม: ' : '🤖 ผลตรวจอัตโนมัติ: ' %><%= publicSlipMessage(r.slipCheck.message) %><% if (r.slipCheck.providerCode || r.slipCheck.httpStatus) { %> <span class="opacity-70">(<%= r.slipCheck.providerCode || r.slipCheck.httpStatus %>)</span><% } %>
                     </div>
                     <% if ((r.slipCheck.quotaExhausted || r.slipCheck.rateLimited || r.slipCheck.quotaMismatch || r.slipCheck.retryable || r.slipCheck.providerCode === 'verify_failed') && r.slipStorageId) { %>
                       <form action="/admin/topups/<%= r.id %>/retry-slip" method="post" class="inline-block ml-1">
