@@ -13,6 +13,7 @@ const receiverProfiles = require('../services/receiver-profiles');
 const webhook = require('../services/webhook');
 const truemoney = require('../services/truemoney');
 const { resolveSlipProvider } = require('../services/slip-provider');
+const { publicSlipMessage } = require('../services/public-slip');
 const discordBot = require('../services/discord-bot');
 const { requireLogin, currentUser } = require('../middleware/auth');
 
@@ -216,7 +217,7 @@ router.get('/topup/:id/status', (req, res) => {
     status: request.status,
     finished: request.status !== 'verifying',
     approved: request.status === 'approved',
-    message: request.slipCheck?.message || '',
+    message: publicSlipMessage(request.slipCheck?.message || ''),
   });
 });
 

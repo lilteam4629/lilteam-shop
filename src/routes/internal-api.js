@@ -28,6 +28,7 @@ const discordBot = require('../services/discord-bot');
 const licensePlansService = require('../services/license-plans');
 const r2 = require('../services/r2');
 const { getShopUrl, MAIN_SITE_URL } = require('../middleware/tenant');
+const { publicTopupRequest } = require('../services/public-slip');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -193,7 +194,7 @@ router.get('/wallet/topups', (req, res) => {
     .filter(t => t.userId === user.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 20);
-  res.json({ ok: true, topups, walletBalance: user.walletBalance });
+  res.json({ ok: true, topups: topups.map(publicTopupRequest), walletBalance: user.walletBalance });
 });
 
 router.post('/wallet/topup', (req, res) => {
@@ -211,7 +212,7 @@ router.post('/wallet/topup', (req, res) => {
       // Amount-only request (e.g. bank transfer) — the rent-app can let
       // the customer come back and attach a slip later via the same
       // endpoint using this request's id.
-      return res.json({ ok: true, request: created.request });
+      return res.json({ ok: true, request: publicTopupRequest(created.request) });
     }
 
     const attached = await accountRoutes.attachSlipToTopupRequest({
@@ -222,7 +223,7 @@ router.post('/wallet/topup', (req, res) => {
       origin: MAIN_SITE_URL || '',
     });
     if (!attached.ok) return res.status(400).json({ error: attached.error, request: created.request });
-    res.json({ ok: true, request: attached.request });
+    res.json({ ok: true, request: publicTopupRequest(attached.request) });
   });
 });
 
@@ -231,7 +232,7 @@ router.get('/wallet/topups/:id', (req, res) => {
   const request = user && store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
   if (!request) return res.status(404).json({ error: 'ไม่พบคำขอเติมเงิน' });
   const payment = store.data.settings.payment || {};
-  res.json({ ok: true, request, payment: {
+  res.json({ ok: true, request: publicTopupRequest(request), payment: {
     bankName: payment.bankName || '',
     bankAccountNumber: payment.bankAccountNumber || '', bankAccountName: payment.bankAccountName || '',
     bankQrImage: payment.bankQrImage || null,
@@ -260,7 +261,7 @@ router.post('/wallet/topups/:id/slip', (req, res) => {
       fileBuffer: req.file.buffer, fileOptions: { filename: req.file.originalname, contentType: req.file.mimetype },
       origin: MAIN_SITE_URL || '' });
     if (!result.ok) return res.status(400).json({ error: result.error });
-    res.json({ ok: true, request: result.request });
+    res.json({ ok: true, request: publicTopupRequest(result.request) });
   });
 });
 
@@ -350,7 +351,7 @@ router.get('/admin/topups', (req, res) => {
   const requests = [...store.data.topupRequests]
     .map(t => {
       const buyer = store.data.users.find(u => u.id === t.userId);
-      return { ...t, buyerUsername: buyer ? buyer.username : null, buyerEmail: buyer ? buyer.email : null };
+      return { ...publicTopupRequest(t), buyerUsername: buyer ? buyer.username : null, buyerEmail: buyer ? buyer.email : null };
     })
     .filter(t => {
       if (status && t.status !== status) return false;
@@ -386,7 +387,7 @@ router.get('/admin/topups/:id/slip', async (req, res, next) => {
 router.post('/admin/topups/:id/approve', async (req, res) => {
   const result = await topupsService.approveTopup(req.params.id);
   if (!result.ok) return res.status(400).json({ error: result.error });
-  res.json({ ok: true, request: result.request, user: publicUser(result.user) });
+  res.json({ ok: true, request: publicTopupRequest(result.request), user: publicUser(result.user) });
 });
 
 router.post('/admin/topups/:id/reject', async (req, res) => {
