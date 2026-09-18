@@ -6,10 +6,10 @@
   <a href="/account" class="text-sm text-[var(--gold-text)]">← กลับไปหน้าบัญชี</a>
   <h1 class="text-2xl font-bold mt-2 mb-1">คำขอเติมเงิน #<%= request.refCode %></h1>
   <p class="text-sm text-[var(--text-3)] mb-6"><%= new Date(request.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></p>
-  <% if (typeof settlementToPlatform !== 'undefined' && settlementToPlatform) { %>
+  <% if (catalogApiTopup) { %>
     <div class="mb-5 rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-4 text-sm">
-      <div class="font-black text-[var(--gold-text)]">🔒 ยอดนี้โอนเข้าบัญชีร้านหลัก: <%= settlementShopName %></div>
-      <p class="mt-1 text-xs leading-relaxed text-[var(--text-2)]">เมื่อยอดอนุมัติแล้ว ให้นำยอดไปซื้อสินค้าในร้านนี้ได้ หลังซื้อสำเร็จเท่านั้นให้กดติดต่อร้านหลักจากหน้าออเดอร์เพื่อรับไอดี</p>
+      <div class="font-black text-[var(--gold-text)]">🔒 ยอดเติมเงินสินค้า API โอนเข้าบัญชีร้านหลัก: <%= settlementShopName %></div>
+      <p class="mt-1 text-xs leading-relaxed text-[var(--text-2)]">ยอดนี้แยกจากเงินเติมร้านเช่า เมื่ออนุมัติแล้วใช้ซื้อสินค้า API เท่านั้น หลังซื้อสำเร็จให้กดติดต่อร้านหลักจากหน้าออเดอร์เพื่อรับไอดี</p>
     </div>
   <% } %>
 

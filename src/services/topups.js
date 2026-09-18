@@ -18,10 +18,18 @@ async function approveTopup(requestId) {
     if (!freshRequest || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
     const freshUser = data.users.find(u => u.id === freshRequest.userId);
     if (!freshUser) return false;
-    freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + Number(freshRequest.amount)) * 100) / 100;
+    if (freshRequest.catalogApiTopup) {
+      freshUser.catalogWalletBalance = Math.round(((Number(freshUser.catalogWalletBalance) || 0) + Number(freshRequest.amount)) * 100) / 100;
+    } else {
+      freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + Number(freshRequest.amount)) * 100) / 100;
+    }
     data.walletTransactions.push({
-      id: store.genId(10), userId: freshUser.id, type: 'topup', amount: freshRequest.amount,
-      note: `เติมเงินสำเร็จ (อ้างอิง ${freshRequest.refCode})`, createdAt: new Date().toISOString(),
+      id: store.genId(10), userId: freshUser.id,
+      type: freshRequest.catalogApiTopup ? 'catalog-topup' : 'topup',
+      catalogApiTopup: Boolean(freshRequest.catalogApiTopup),
+      amount: freshRequest.amount,
+      note: `${freshRequest.catalogApiTopup ? 'เติมเงินสินค้า API' : 'เติมเงิน'}สำเร็จ (อ้างอิง ${freshRequest.refCode})`,
+      createdAt: new Date().toISOString(),
     });
     freshRequest.status = 'approved';
     freshRequest.reviewedAt = new Date().toISOString();

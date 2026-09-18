@@ -164,9 +164,10 @@ function runWithCheckoutQueue(fn) {
 const checkoutLocks = new Set();
 
 // A tenant can complete a syndicated purchase in its own storefront. The
-// tenant wallet is funded through the platform receiver (see account.js),
-// while the source stock is reserved on the main shop and the order remains a
-// contact/pickup order so credentials never leak into the tenant database.
+// dedicated API wallet is funded through the platform receiver (see
+// account.js), while the source stock is reserved on the main shop and the
+// order remains a contact/pickup order so credentials never leak into the
+// tenant database.
 async function completeTenantFederatedCheckout({ req, user, items, total, discount, finalTotal, validCoupon }) {
   if (!req.tenantShop || items.some(item => !item.federatedTenantId)) {
     throw new Error('กรุณาแยกซื้อสินค้าร้านหลักและสินค้าจาก API คนละรายการ');
@@ -242,7 +243,7 @@ async function completeTenantFederatedCheckout({ req, user, items, total, discou
   try {
     await store.transact(data => {
       const freshUser = data.users.find(candidate => candidate.id === user.id);
-      if (!freshUser || Number(freshUser.walletBalance) < finalTotal) throw new Error('ยอดเงินในกระเป๋าไม่เพียงพอ กรุณาเติมเงินก่อนทำรายการ');
+      if (!freshUser || Number(freshUser.catalogWalletBalance) < finalTotal) throw new Error('ยอดเติมเงินสินค้า API ไม่เพียงพอ กรุณากดปุ่มเติมเงินสินค้า API และโอนเข้าบัญชีร้านหลักก่อนทำรายการ');
       const orderItems = sourceItems.map(({ item, source }) => ({
         productId: source.id,
         title: source.title,
@@ -256,8 +257,8 @@ async function completeTenantFederatedCheckout({ req, user, items, total, discou
         contactMessageOutro: 'กรุณาตรวจสอบยอดชำระและแจ้งขั้นตอนรับสินค้าที่ร้านหลักให้ด้วยครับ',
         federatedTenantId: tenantId,
       }));
-      freshUser.walletBalance = Math.round((Number(freshUser.walletBalance) - finalTotal) * 100) / 100;
-      data.walletTransactions.push({ id: store.genId(10), userId: freshUser.id, type: 'purchase', amount: -finalTotal, note: `สั่งซื้อสินค้าร้านหลักผ่านร้านเช่า #${orderId}`, createdAt: now });
+      freshUser.catalogWalletBalance = Math.round((Number(freshUser.catalogWalletBalance) - finalTotal) * 100) / 100;
+      data.walletTransactions.push({ id: store.genId(10), userId: freshUser.id, type: 'catalog-purchase', catalogApiTopup: true, amount: -finalTotal, note: `สั่งซื้อสินค้า API ผ่านร้านเช่า #${orderId}`, createdAt: now });
       if (validCoupon) {
         const coupon = data.coupons.find(candidate => candidate.code === validCoupon.code && candidate.active);
         if (coupon) coupon.usedCount = (coupon.usedCount || 0) + 1;
@@ -321,11 +322,6 @@ router.post('/checkout', requireLogin, (req, res) => {
       }
       const finalTotal = Math.round(Math.max(0, total - discount) * 100) / 100;
 
-      if (user.walletBalance < finalTotal) {
-        req.flash('error', 'ยอดเงินในกระเป๋าไม่เพียงพอ กรุณาเติมเงินก่อนทำการสั่งซื้อ');
-        return res.redirect('/cart');
-      }
-
       if (req.tenantShop && items.some(item => item.federatedTenantId)) {
         if (user.role === 'admin') {
           req.flash('error', 'บัญชีเจ้าของร้านเช่าไม่สามารถใช้เงินของร้านเช่าซื้อสินค้าจากร้านหลักได้');
@@ -335,12 +331,21 @@ router.post('/checkout', requireLogin, (req, res) => {
           req.flash('error', 'กรุณาแยกซื้อสินค้าร้านนี้และสินค้าจากร้านหลักคนละรายการ');
           return res.redirect('/cart');
         }
+        if (Number(user.catalogWalletBalance || 0) < finalTotal) {
+          req.flash('error', 'ยอดเติมเงินสินค้า API ไม่เพียงพอ กรุณากดปุ่ม “เติมเงินสินค้า API” และโอนเข้าบัญชีร้านหลักก่อนซื้อ');
+          return res.redirect('/cart');
+        }
         const completed = await completeTenantFederatedCheckout({ req, user, items, total, discount, finalTotal, validCoupon });
         req.session.cart = [];
         req.session.coupon = null;
         req.session.federatedCatalog = null;
         req.flash('success', `สั่งซื้อสำเร็จ! กรุณากดติดต่อร้านหลักจากหน้าออเดอร์เพื่อรับไอดี (ยอดส่วนต่าง ฿${completed.tenantRevenue.toLocaleString()} บันทึกไว้แล้ว)`);
         return res.redirect(`/account/orders/${completed.orderId}`);
+      }
+
+      if (Number(user.walletBalance || 0) < finalTotal) {
+        req.flash('error', 'ยอดเงินในกระเป๋าไม่เพียงพอ กรุณาเติมเงินก่อนทำการสั่งซื้อ');
+        return res.redirect('/cart');
       }
 
       const orderItems = [];
@@ -469,7 +474,7 @@ router.post('/checkout', requireLogin, (req, res) => {
         if (s.status === 'reserved') s.status = 'available';
       });
       console.error('[checkout] error:', err);
-      const userMessage = /^(กรุณาแยก|สินค้า .*ไม่พร้อมขาย|สินค้า .*มีสต็อกไม่พอ|ยอดเงินในกระเป๋า)/.test(String(err.message || ''))
+      const userMessage = /^(กรุณาแยก|สินค้า .*ไม่พร้อมขาย|สินค้า .*มีสต็อกไม่พอ|ยอดเงินในกระเป๋า|ยอดเติมเงินสินค้า API)/.test(String(err.message || ''))
         ? err.message
         : 'เกิดข้อผิดพลาดในการสั่งซื้อ กรุณาลองใหม่อีกครั้ง';
       req.flash('error', userMessage);

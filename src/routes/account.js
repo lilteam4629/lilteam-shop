@@ -19,14 +19,10 @@ const { requireLogin, currentUser } = require('../middleware/auth');
 
 router.use(requireLogin);
 
-// When a rented shop enables the central catalog, all wallet top-ups use the
-// platform receiving account. The tenant wallet still credits locally, while
-// catalog checkout records the owner cost and tenant markup separately.
-function settlementPayment(payment = store.data.settings.payment) {
-  const catalog = store.isTenantContext() ? store.data.settings.catalogApi : null;
-  return catalog?.enabled && catalog.settlementMode === 'platform'
-    ? store.platformData.settings.payment
-    : payment;
+// Normal tenant top-ups always use that shop's own receiving account. The
+// platform account is selected only for an explicitly marked API top-up.
+function settlementPayment({ catalogApiTopup = false } = {}) {
+  return catalogApiTopup ? store.platformData.settings.payment : store.data.settings.payment;
 }
 
 const path = require('path');
@@ -69,9 +65,19 @@ router.get('/', (req, res) => {
 
 router.get('/topup', (req, res) => {
   const payment = settlementPayment();
-  const settlementToPlatform = Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled && store.data.settings.catalogApi?.settlementMode === 'platform');
-  const settlementSettings = settlementToPlatform ? store.platformData.settings : store.data.settings;
-  res.render('shop/topup', { title: 'เติมเงิน', payment, settlementToPlatform, settlementShopName: settlementSettings.shopName || 'ร้านหลัก' });
+  res.render('shop/topup', { title: 'เติมเงิน', payment, catalogApiTopup: false });
+});
+
+// Separate balance and bank receiver for products syndicated from the main
+// shop. This route never changes the regular tenant wallet top-up flow.
+router.get('/topup/catalog-api', (req, res) => {
+  const payment = settlementPayment({ catalogApiTopup: true });
+  res.render('shop/topup', {
+    title: 'เติมเงินสินค้า API',
+    payment,
+    catalogApiTopup: true,
+    settlementShopName: store.platformData.settings.shopName || 'ร้านหลัก',
+  });
 });
 
 router.post('/topup/truemoney', async (req, res) => {
@@ -206,18 +212,32 @@ router.post('/topup', async (req, res) => {
   res.redirect(`/account/topup/${created.request.id}`);
 });
 
+router.post('/topup/catalog-api', async (req, res) => {
+  const user = currentUser(req);
+  const created = await createTopupRequest({
+    user,
+    amount: req.body.amount,
+    method: 'bank_transfer',
+    catalogApiTopup: true,
+  });
+  if (!created.ok) {
+    req.flash('error', created.error);
+    return res.redirect('/account/topup/catalog-api');
+  }
+  res.redirect(`/account/topup/${created.request.id}`);
+});
+
 router.get('/topup/:id', async (req, res) => {
   const user = currentUser(req);
   const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
   if (!request) return res.redirect('/account/topup');
 
-  const payment = settlementPayment();
-  const settlementToPlatform = Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled && store.data.settings.catalogApi?.settlementMode === 'platform');
-  const settlementSettings = settlementToPlatform ? store.platformData.settings : store.data.settings;
+  const catalogApiTopup = Boolean(request.catalogApiTopup);
+  const payment = settlementPayment({ catalogApiTopup });
   res.render('shop/topup-detail', {
     title: 'สถานะการเติมเงิน', request, payment,
-    settlementToPlatform, settlementShopName: settlementSettings.shopName || 'ร้านหลัก',
-    automaticSlipCheck: canCheckSlipAutomatically(payment),
+    catalogApiTopup, settlementShopName: store.platformData.settings.shopName || 'ร้านหลัก',
+    automaticSlipCheck: canCheckSlipAutomatically(payment, catalogApiTopup),
   });
 });
 
@@ -272,8 +292,8 @@ function receiverCredentials(payment = {}, method = 'bank_transfer', ...fallback
   return receiverProfiles.credentials(method, payment, ...fallbackPayments);
 }
 
-function canCheckSlipAutomatically(payment = {}) {
-  const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
+function canCheckSlipAutomatically(payment = {}, catalogApiTopup = false) {
+  const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, catalogApiTopup ? false : store.isTenantContext());
   const selected = resolveSlipProvider(effective);
   const receiverPayment = receiverProfiles.view(payment, selected);
   const receiver = receiverCredentials(receiverPayment, 'bank_transfer', payment);
@@ -297,8 +317,10 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     const user = store.data.users.find(u => u.id === userId);
     if (!request || !user || request.status === 'approved' || request.status === 'rejected') return;
 
-    const payment = settlementPayment();
-    const effective = effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
+    const payment = settlementPayment({ catalogApiTopup: Boolean(request.catalogApiTopup) });
+    const effective = request.catalogApiTopup
+      ? effectiveSlipConfig(payment, payment, false)
+      : effectiveSlipConfig(payment, store.platformData.settings.payment, store.isTenantContext());
     let provider = null;
     let result;
 
@@ -394,10 +416,18 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       };
       freshRequest.slipCheck.verified = verified;
       if (verified) {
-        freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + freshRequest.amount) * 100) / 100;
+        if (freshRequest.catalogApiTopup) {
+          freshUser.catalogWalletBalance = Math.round(((Number(freshUser.catalogWalletBalance) || 0) + freshRequest.amount) * 100) / 100;
+        } else {
+          freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + freshRequest.amount) * 100) / 100;
+        }
         data.walletTransactions.push({
-          id: store.genId(10), userId: freshUser.id, type: 'topup', amount: freshRequest.amount,
-          note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${freshRequest.refCode})`, createdAt: new Date().toISOString(),
+          id: store.genId(10), userId: freshUser.id,
+          type: freshRequest.catalogApiTopup ? 'catalog-topup' : 'topup',
+          catalogApiTopup: Boolean(freshRequest.catalogApiTopup),
+          amount: freshRequest.amount,
+          note: `${freshRequest.catalogApiTopup ? 'เติมเงินสินค้า API' : 'เติมเงิน'}สำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${freshRequest.refCode})`,
+          createdAt: new Date().toISOString(),
         });
         freshRequest.status = 'approved';
         freshRequest.reviewedAt = new Date().toISOString();
@@ -443,7 +473,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
 // these two instead of re-implementing topup + slip verification itself)
 // so there is exactly one place that creates a topup request and exactly
 // one place that kicks off slip verification.
-async function createTopupRequest({ user, amount, method }) {
+async function createTopupRequest({ user, amount, method, catalogApiTopup = false }) {
   const amt = Math.round((Number(amount) || 0) * 100) / 100;
   const mth = String(method || 'bank_transfer');
   if (mth !== 'bank_transfer') {
@@ -454,6 +484,7 @@ async function createTopupRequest({ user, amount, method }) {
   }
   const request = {
     id: store.genId(10), userId: user.id, amount: amt, method: mth,
+    catalogApiTopup: Boolean(catalogApiTopup),
     refCode: 'TU' + store.genId(6).toUpperCase(),
     slipPath: null, slipCheck: null, status: 'pending',
     createdAt: new Date().toISOString(), reviewedAt: null, reviewNote: '',
@@ -473,7 +504,10 @@ async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptio
   }
   try {
     const storageId = await store.savePrivateMedia(fileBuffer, fileOptions.filename, fileOptions.contentType);
-    const automatic = canCheckSlipAutomatically(store.data.settings.payment);
+    const requestPayment = request.catalogApiTopup
+      ? store.platformData.settings.payment
+      : store.data.settings.payment;
+    const automatic = canCheckSlipAutomatically(requestPayment, Boolean(request.catalogApiTopup));
     await store.transact((data) => {
       const fresh = data.topupRequests.find(t => t.id === requestId && t.userId === user.id);
       if (!fresh || fresh.status === 'approved' || fresh.status === 'rejected') throw new Error('คำขอนี้ถูกตรวจสอบแล้ว');
