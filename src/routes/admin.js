@@ -20,6 +20,7 @@ const { requireAdmin } = require('../middleware/auth');
 const r2 = require('../services/r2');
 const efootballSource = require('../services/efootball-catalog');
 const catalogSyndication = require('../services/catalog-syndication');
+const { MAIN_SITE_URL } = require('../middleware/tenant');
 
 const toArr = value => Array.isArray(value) ? value : (value === undefined ? [] : [value]);
 
@@ -288,6 +289,9 @@ router.get('/catalog-api', async (req, res) => {
   const tenantMode = Boolean(req.tenantShop);
   const config = catalogSyndication.normalizeConfig(store.data.settings || {});
   const sourceProducts = mainDb.products.filter(product => product.status === 'active');
+  if (!config.featuredProductIds.length) {
+    config.featuredProductIds = sourceProducts.slice(0, 5).map(product => String(product.id));
+  }
   let shops = [];
   if (!tenantMode) {
     shops = await Promise.all((mainDb.shops || []).map(async shop => {
@@ -309,25 +313,37 @@ router.get('/catalog-api', async (req, res) => {
       }
     });
   }
+  const tenantProducts = tenantMode
+    ? catalogSyndication.getTenantProducts(mainDb, store.data, '').products
+    : [];
   const preview = tenantMode
-    ? catalogSyndication.getTenantProducts(mainDb, store.data, '').products.slice(0, 12)
+    ? (config.featuredProductIds.length
+      ? tenantProducts.filter(product => config.featuredProductIds.includes(String(product.sourceProductId))).slice(0, 5)
+      : tenantProducts.slice(0, 5))
     : [];
   res.render('admin/catalog-api', {
     title: 'API แคตตาล็อกร้านหลัก', active: 'catalog-api', tenantMode, config,
     sourceProducts, preview, shops, payoutByTenant, sourceShopName: mainDb.settings.shopName || 'ร้านหลัก',
+    sourceLogo: mainDb.settings.branding?.logoImage || null,
+    sourceShopUrl: MAIN_SITE_URL || '/',
   });
 });
 
 router.post('/catalog-api/settings', async (req, res) => {
   if (!req.tenantShop) {
-    req.flash('error', 'ตั้งค่าการรับสินค้าให้ร้านเช่าจากหน้าแอดมินของร้านนั้น');
+    const mainConfig = catalogSyndication.normalizeConfig(store.platformData.settings || {});
+    const selected = toArr(req.body.featuredProductIds).map(String).filter(Boolean).slice(0, 5);
+    store.platformData.settings.catalogApi = { ...mainConfig, featuredProductIds: selected, syncedAt: new Date().toISOString() };
+    await store.save();
+    req.flash('success', 'บันทึกสินค้า Partner ที่จะแสดงบนร้านเช่าทั้งหมดแล้ว');
     return res.redirect('/admin/catalog-api');
   }
   const mode = req.body.markupMode === 'fixed' ? 'fixed' : 'percent';
   const max = mode === 'fixed' ? 100000 : 1000;
   const value = Math.min(max, Math.max(0, Number(req.body.markupValue) || 0));
   const previous = catalogSyndication.normalizeConfig(store.data.settings || {});
-  store.data.settings.catalogApi = { ...previous, enabled: req.body.enabled === 'on', source: 'main-store', markupMode: mode, markupValue: value, syncedAt: new Date().toISOString() };
+  const selected = toArr(req.body.featuredProductIds).map(String).filter(Boolean).slice(0, 5);
+  store.data.settings.catalogApi = { ...previous, enabled: req.body.enabled === 'on', source: 'main-store', markupMode: mode, markupValue: value, featuredProductIds: selected, syncedAt: new Date().toISOString() };
   await store.save();
   req.flash('success', store.data.settings.catalogApi.enabled ? 'เปิดรับสินค้าจากร้านหลักแล้ว' : 'ปิด API แคตตาล็อกแล้ว');
   res.redirect('/admin/catalog-api');

@@ -107,6 +107,14 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
   // Keep the tenant's own catalog and the platform/API catalog as separate
   // storefront sections. The main shop still sees its complete catalog.
   const active = req?.tenantShop ? localProducts : localProducts.concat(remote);
+  const apiConfig = catalogSyndication.normalizeConfig(store.data.settings || {});
+  const platformApiConfig = catalogSyndication.normalizeConfig(store.platformData.settings || {});
+  const selectedApiIds = platformApiConfig.featuredProductIdsConfigured
+    ? platformApiConfig.featuredProductIds
+    : (apiConfig.featuredProductIds || []);
+  const catalogApiFeaturedProducts = req?.tenantShop
+    ? (selectedApiIds.length ? remote.filter(product => selectedApiIds.includes(String(product.sourceProductId))).slice(0, 5) : remote.slice(0, 5))
+    : [];
   const scheduledProducts = store.data.products
     .filter(product => product.status === 'active' && product.publishAt && publishTime(product) > Date.now())
     .sort((a, b) => publishTime(a) - publishTime(b))
@@ -142,7 +150,10 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     catalogApiNotice: Boolean(req?.tenantShop && store.data.settings.catalogApi?.enabled),
     catalogApiProductCount: remote.length,
     catalogApiProducts: req?.tenantShop ? remote : [],
+    catalogApiFeaturedProducts,
     catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
+    catalogApiLogo: store.platformData.settings.branding?.logoImage || null,
+    catalogApiShopUrl: mainSiteUrlFor(req),
     announcements: store.data.announcements.filter(a => a.active),
     latestOrders: latestOrderCards(),
     scheduledProducts,
@@ -249,6 +260,8 @@ router.get('/products', (req, res) => {
     catalogApiProducts,
     catalogApiProductCount: catalogApiProducts.length,
     catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
+    catalogApiLogo: store.platformData.settings.branding?.logoImage || null,
+    catalogApiShopUrl: mainSiteUrlFor(req),
   });
 });
 
@@ -270,6 +283,8 @@ router.get('/search', (req, res) => {
     catalogApiProducts,
     catalogApiProductCount: catalogApiProducts.length,
     catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
+    catalogApiLogo: store.platformData.settings.branding?.logoImage || null,
+    catalogApiShopUrl: mainSiteUrlFor(req),
   });
 });
 

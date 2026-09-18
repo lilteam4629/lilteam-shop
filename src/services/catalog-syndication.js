@@ -12,6 +12,8 @@ function normalizeConfig(settings = {}) {
     source: 'main-store',
     markupMode,
     markupValue,
+    featuredProductIds: [...new Set((Array.isArray(raw.featuredProductIds) ? raw.featuredProductIds : []).map(String))].slice(0, 5),
+    featuredProductIdsConfigured: Array.isArray(raw.featuredProductIds),
     ownerRevenue: Math.max(0, Number(raw.ownerRevenue) || 0),
     tenantRevenue: Math.max(0, Number(raw.tenantRevenue) || 0),
     transactions: Array.isArray(raw.transactions) ? raw.transactions.slice(-100) : [],

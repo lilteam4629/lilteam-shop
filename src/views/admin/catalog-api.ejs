@@ -23,6 +23,17 @@
         <label class="text-sm font-semibold text-[var(--text-2)]">เพิ่มราคาทุกชิ้น
           <input name="markupValue" type="number" min="0" step="0.01" value="<%= config.markupValue %>" class="mt-2 w-full rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-3 py-2.5 text-sm" />
         </label>
+        <div class="lg:col-span-4 rounded-xl border border-[var(--border-light)] bg-[var(--input)]/55 p-4">
+          <div class="mb-3 flex flex-wrap items-end justify-between gap-2"><div><b class="block text-sm text-[var(--text)]">สินค้า Partner ที่โชว์บนหน้าหลักร้านเช่า</b><small class="text-xs text-[var(--text-4)]">เลือกได้สูงสุด 5 ไอดี · รายการอื่นยังดูได้จากปุ่ม “ดูสินค้า API ทั้งหมด”</small></div><span id="featuredApiCount" class="text-xs font-black text-[var(--gold-text)]"><%= config.featuredProductIds.length %>/5 รายการ</span></div>
+          <div class="grid max-h-72 gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3">
+            <% sourceProducts.forEach(product => { const selected = config.featuredProductIds.includes(String(product.id)); %>
+              <label class="featured-api-option flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--border-light)] bg-[var(--card)] p-2 transition hover:border-[var(--gold)] <%= selected ? 'is-selected border-[var(--gold)]/70' : '' %>">
+                <input type="checkbox" name="featuredProductIds" value="<%= product.id %>" <%= selected ? 'checked' : '' %> class="featured-api-checkbox h-4 w-4 accent-[var(--gold)]" />
+                <img src="<%= product.images?.[0] || '' %>" alt="" class="h-10 w-14 rounded object-cover" /><span class="min-w-0"><b class="block truncate text-xs"><%= product.title %></b><small class="text-[10px] text-[var(--text-4)]">฿<%= Number(product.price || 0).toLocaleString() %> · <%= product.id %></small></span>
+              </label>
+            <% }) %>
+          </div>
+        </div>
         <button class="rounded-xl bg-[var(--gold)] px-5 py-3 text-sm font-black text-[var(--gold-contrast)]">บันทึกการตั้งค่า</button>
       </form>
       <div class="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[var(--border-light)] bg-[var(--input)]/60 px-4 py-3 text-xs text-[var(--text-3)]">
@@ -33,15 +44,45 @@
     </section>
 
     <section class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
-      <div class="mb-4 flex items-center justify-between"><h2 class="text-lg font-black">ตัวอย่างสินค้าที่จะขึ้นหน้าร้าน</h2><span class="text-xs text-[var(--text-4)]">ทั้งหมด <%= preview.length %> รายการตัวอย่าง</span></div>
+      <div class="mb-4 flex items-center justify-between"><h2 class="text-lg font-black">ตัวอย่างสินค้าที่จะขึ้นหน้าร้าน</h2><span class="text-xs text-[var(--text-4)]">แสดงตามรายการที่เลือกสูงสุด 5 รายการ</span></div>
       <% if (!preview.length) { %><p class="rounded-xl border border-dashed border-[var(--border)] p-8 text-center text-sm text-[var(--text-3)]">ยังไม่ได้เปิดรับสินค้า หรือร้านหลักยังไม่มีสินค้าที่เปิดขาย</p><% } else { %>
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"><% preview.forEach(product => { %><article class="overflow-hidden rounded-xl border border-[var(--border-light)] bg-[var(--input)]"><img src="<%= product.images[0] || '' %>" alt="<%= product.title %>" class="aspect-[4/3] w-full object-cover" /><div class="p-2"><b class="block truncate text-xs"><%= product.title %></b><span class="text-xs font-black text-[var(--gold-text)]">฿<%= Number(product.price).toLocaleString() %></span><small class="block text-[10px] text-[var(--text-4)]">เหลือ <%= product.stockCount %></small></div></article><% }) %></div>
       <% } %>
     </section>
   <% } else { %>
+    <section class="rounded-2xl border border-[var(--gold)]/45 bg-[var(--card)] p-6 shadow-[0_18px_38px_-28px_color-mix(in_srgb,var(--gold)_65%,transparent)]">
+      <div class="mb-4 flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-lg font-black">เลือกสินค้า Partner ที่จะแสดงบนร้านเช่าทั้งหมด</h2><p class="text-sm text-[var(--text-3)]">เลือกได้สูงสุด 5 ไอดี · เมื่อบันทึกแล้วร้านเช่าที่เปิด API จะอัปเดตตามรายการนี้ทันที</p></div><span id="featuredApiCount" class="text-xs font-black text-[var(--gold-text)]"><%= config.featuredProductIds.length %>/5 รายการ</span></div>
+      <form action="/admin/catalog-api/settings" method="post">
+        <div class="grid max-h-72 gap-2 overflow-y-auto sm:grid-cols-2 lg:grid-cols-3">
+          <% sourceProducts.forEach(product => { const selected = config.featuredProductIds.includes(String(product.id)); %>
+            <label class="featured-api-option flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--border-light)] bg-[var(--input)] p-2 transition hover:border-[var(--gold)] <%= selected ? 'is-selected border-[var(--gold)]/70' : '' %>">
+              <input type="checkbox" name="featuredProductIds" value="<%= product.id %>" <%= selected ? 'checked' : '' %> class="featured-api-checkbox h-4 w-4 accent-[var(--gold)]" />
+              <img src="<%= product.images?.[0] || '' %>" alt="" class="h-10 w-14 rounded object-cover" /><span class="min-w-0"><b class="block truncate text-xs"><%= product.title %></b><small class="text-[10px] text-[var(--text-4)]">฿<%= Number(product.price || 0).toLocaleString() %> · <%= product.id %></small></span>
+            </label>
+          <% }) %>
+        </div>
+        <button class="mt-4 rounded-xl bg-[var(--gold)] px-5 py-3 text-sm font-black text-[var(--gold-contrast)]">บันทึกรายการ Partner</button>
+      </form>
+    </section>
     <section class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
       <div class="mb-4 flex flex-wrap items-end justify-between gap-3"><div><h2 class="text-lg font-black">ร้านเช่าทั้งหมด</h2><p class="text-sm text-[var(--text-3)]">เปิดดูสถานะการเชื่อมต่อ API ของแต่ละร้านได้จากหน้านี้</p></div><div class="text-right"><span class="block text-sm font-bold text-[var(--gold-text)]"><%= sourceProducts.length %> สินค้าจากร้านหลัก</span><small class="block text-xs text-emerald-400">ยอดชำระเข้าร้านหลัก ฿<%= Number(config.ownerRevenue || 0).toLocaleString() %></small><small class="block text-xs text-amber-400">ส่วนต่างรอโอนคืนร้านเช่า ฿<%= Number(config.tenantRevenue || 0).toLocaleString() %></small></div></div>
       <div class="overflow-x-auto"><table class="w-full min-w-[760px] text-left text-sm"><thead class="text-xs text-[var(--text-4)]"><tr><th class="px-3 py-3">ร้าน</th><th class="px-3 py-3">ลิงก์</th><th class="px-3 py-3">สถานะ</th><th class="px-3 py-3">บวกราคา</th><th class="px-3 py-3">ส่วนต่างรอโอน</th></tr></thead><tbody><% if (!shops.length) { %><tr><td colspan="5" class="px-3 py-8 text-center text-[var(--text-3)]">ยังไม่มีร้านเช่า</td></tr><% } %><% shops.forEach(shop => { %><tr class="border-t border-[var(--border-light)]"><td class="px-3 py-3 font-bold"><%= shop.name %></td><td class="px-3 py-3 text-xs text-[var(--text-3)]"><%= shop.slug %></td><td class="px-3 py-3"><span class="rounded-full px-2 py-1 text-xs font-bold <%= shop.config.enabled ? 'bg-emerald-500/10 text-emerald-400' : 'bg-[var(--input)] text-[var(--text-4)]' %>"><%= shop.config.enabled ? 'เปิดใช้งาน' : 'ปิดอยู่' %></span></td><td class="px-3 py-3 text-xs"><%= shop.config.markupMode === 'fixed' ? `฿${shop.config.markupValue}` : `${shop.config.markupValue}%` %></td><td class="px-3 py-3 text-xs font-bold text-amber-400">฿<%= Number(payoutByTenant[String(shop.id)] || 0).toLocaleString() %></td></tr><% }) %></tbody></table></div>
     </section>
   <% } %>
 </section>
+<script>
+  (() => {
+    const boxes = [...document.querySelectorAll('.featured-api-checkbox')];
+    const count = document.getElementById('featuredApiCount');
+    const sync = () => {
+      const selected = boxes.filter(box => box.checked);
+      if (count) count.textContent = `${selected.length}/5 รายการ`;
+      boxes.forEach(box => {
+        box.disabled = !box.checked && selected.length >= 5;
+        box.closest('.featured-api-option')?.classList.toggle('is-selected', box.checked);
+      });
+    };
+    boxes.forEach(box => box.addEventListener('change', sync));
+    sync();
+  })();
+</script>
