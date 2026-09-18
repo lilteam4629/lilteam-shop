@@ -184,6 +184,19 @@
 </style>
 <% } %>
 
+<% if (catalogApiProducts && catalogApiProducts.length) { %>
+<section class="api-product-shelf" aria-label="สินค้า API จากร้านหลัก">
+  <div class="api-product-shelf-head"><div><span>MAIN SHOP API</span><h2>สินค้า API จากร้านหลัก</h2><p>รายการนี้แยกจากสินค้าร้านเช่า · ต้องเติมเงินสินค้า API ก่อนซื้อเท่านั้น</p></div><div class="api-product-shelf-actions"><a href="/account/topup/catalog-api">เติมเงิน API →</a><a href="/contact?api=1">ติดต่อร้านหลัก</a></div></div>
+  <div class="api-product-shelf-grid product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 sm:gap-4">
+    <% catalogApiProducts.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
+  </div>
+</section>
+<style>
+  .api-product-shelf{width:min(1320px,calc(100% - 48px));margin:18px auto 4px;padding:16px;border:1px solid color-mix(in srgb,var(--gold) 48%,var(--border));border-radius:16px;background:linear-gradient(140deg,color-mix(in srgb,var(--gold) 7%,var(--card)),var(--card));box-shadow:0 16px 34px -28px color-mix(in srgb,var(--gold) 90%,transparent)}.api-product-shelf-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:13px}.api-product-shelf-head span{color:var(--gold-text);font-size:9px;font-weight:950;letter-spacing:.18em}.api-product-shelf-head h2{margin-top:4px;color:var(--text);font-size:20px;font-weight:950;line-height:1.2}.api-product-shelf-head p{margin-top:4px;color:var(--text-2);font-size:11px}.api-product-shelf-actions{display:flex;gap:7px}.api-product-shelf-actions a{display:inline-flex;align-items:center;justify-content:center;min-height:34px;padding:7px 11px;border-radius:8px;background:var(--gold);color:var(--gold-contrast);font-size:10px;font-weight:900;white-space:nowrap}.api-product-shelf-actions a+a{border:1px solid var(--border-light);background:var(--input);color:var(--text)}
+  @media(max-width:640px){.api-product-shelf{width:calc(100% - 24px);padding:12px;border-radius:13px}.api-product-shelf-head{align-items:flex-start;flex-direction:column}.api-product-shelf-head h2{font-size:17px}.api-product-shelf-actions{width:100%;display:grid;grid-template-columns:1fr 1fr}.api-product-shelf-actions a{font-size:10px}}
+</style>
+<% } %>
+
 <% if (recommendedCategories && recommendedCategories.length) { %>
 <section class="home-category-rail" aria-label="หมวดหมู่สินค้า">
   <div class="home-category-head"><div class="home-category-heading"><span class="home-category-icon">◇</span><span><b>หมวดหมู่แนะนำ</b><small>Recommended Categories</small></span></div><a href="<%= (typeof isAdmin !== 'undefined' && isAdmin) ? '/admin/home-sections' : '/products' %>"><%= (typeof isAdmin !== 'undefined' && isAdmin) ? 'เพิ่มหมวด ›' : 'ดูทั้งหมด ›' %></a></div>

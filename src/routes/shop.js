@@ -103,7 +103,10 @@ const UNPAGINATED_HOME_TENANTS = new Set(['moopee-shop']);
 function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts = false, req = null) {
   const stockCounts = availableStockCounts();
   const remote = syndicatedProducts(req);
-  const active = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts)).concat(remote);
+  const localProducts = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
+  // Keep the tenant's own catalog and the platform/API catalog as separate
+  // storefront sections. The main shop still sees its complete catalog.
+  const active = req?.tenantShop ? localProducts : localProducts.concat(remote);
   const scheduledProducts = store.data.products
     .filter(product => product.status === 'active' && product.publishAt && publishTime(product) > Date.now())
     .sort((a, b) => publishTime(a) - publishTime(b))
@@ -128,7 +131,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     : active.slice((page - 1) * HOME_PAGE_SIZE, page * HOME_PAGE_SIZE);
   return {
     title: 'หน้าแรก',
-    stats: shopStats(remote.length),
+    stats: shopStats(req?.tenantShop ? 0 : remote.length),
     newest,
     homeSections,
     recommendedCategories,
@@ -138,6 +141,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     productTotalPages: totalPages,
     catalogApiNotice: Boolean(req?.tenantShop && store.data.settings.catalogApi?.enabled),
     catalogApiProductCount: remote.length,
+    catalogApiProducts: req?.tenantShop ? remote : [],
     catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
     announcements: store.data.announcements.filter(a => a.active),
     latestOrders: latestOrderCards(),
@@ -229,6 +233,8 @@ router.get('/products', (req, res) => {
     });
   }
   products = sortProducts(products, req.query.sort);
+  const catalogApiProducts = req.tenantShop ? products.filter(product => product.isSyndicated) : [];
+  if (req.tenantShop) products = products.filter(product => !product.isSyndicated);
   res.render('shop/listing', {
     title: recommendedCategory
       ? `หมวดหมู่: ${recommendedCategory.title}`
@@ -240,7 +246,8 @@ router.get('/products', (req, res) => {
     activeFilterTags,
     filterProductCount: products.length,
     catalogApiNotice: Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled),
-    catalogApiProductCount: products.filter(product => product.isSyndicated).length,
+    catalogApiProducts,
+    catalogApiProductCount: catalogApiProducts.length,
     catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
   });
 });
@@ -255,10 +262,13 @@ router.get('/search', (req, res) => {
     .filter(p => isProductVisible(p) && p.title.toLowerCase().includes(q))
     .map(product => withStock(product, stockCounts))
     .concat(syndicatedProducts(req).filter(p => String(p.title || '').toLowerCase().includes(q)));
+  const catalogApiProducts = req.tenantShop ? products.filter(product => product.isSyndicated) : [];
+  const visibleProducts = req.tenantShop ? products.filter(product => !product.isSyndicated) : products;
   res.render('shop/listing', {
-    title: `ผลการค้นหา: ${q}`, products, listType: null, sort: '', q, filterTags: null,
+    title: `ผลการค้นหา: ${q}`, products: visibleProducts, listType: null, sort: '', q, filterTags: null,
     catalogApiNotice: Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled),
-    catalogApiProductCount: products.filter(product => product.isSyndicated).length,
+    catalogApiProducts,
+    catalogApiProductCount: catalogApiProducts.length,
     catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
   });
 });
