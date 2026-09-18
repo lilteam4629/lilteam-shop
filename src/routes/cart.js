@@ -86,6 +86,10 @@ router.post('/add/:productId', (req, res) => {
     req.flash('error', 'สินค้าหมดสต๊อก');
     return res.redirect('back');
   }
+  if (remoteProduct) {
+    req.flash('error', 'สินค้านี้ต้องชำระเงินและรับสินค้าที่ร้านหลักเท่านั้น');
+    return res.redirect(`/game/${remoteProduct.slug}`);
+  }
   if (!remoteProduct && product.purchaseApprovalEnabled && req.body.purchaseConfirmed !== 'yes') {
     req.flash('error', 'กรุณาติ๊กยืนยันเงื่อนไขก่อนเพิ่มลงตะกร้า');
     return res.redirect(`/game/${product.slug}`);
@@ -163,87 +167,6 @@ function runWithCheckoutQueue(fn) {
 
 const checkoutLocks = new Set();
 
-async function completeFederatedCheckout({ req, user, items, total, discount, finalTotal, validCoupon }) {
-  if (items.some(item => !item.federatedTenantId)) {
-    throw new Error('กรุณาแยกซื้อสินค้าร้านหลักและสินค้าจาก API คนละรายการ');
-  }
-  const orderId = store.genId(10);
-  const now = new Date().toISOString();
-  const sourceItems = [];
-  let ownerRevenue = 0;
-  let tenantRevenue = 0;
-
-  // Reserve and mark the platform stock first. The separate tenant write is
-  // rolled back below if it fails, so one source ID can never be sold twice.
-  await store.runOnPlatform(() => store.transact(data => {
-    const sourceProducts = new Map((data.products || []).map(product => [String(product.id), product]));
-    for (const item of items) {
-      const source = sourceProducts.get(String(item.sourceProductId));
-      if (!source || source.status !== 'active') throw new Error(`สินค้า "${item.product.title}" ไม่พร้อมขาย`);
-      const pool = data.stockItems.filter(stock => stock.productId === source.id && stock.status === 'available');
-      if (pool.length < item.qty) throw new Error(`สินค้า "${item.product.title}" มีสต็อกไม่พอ`);
-      for (let index = 0; index < item.qty; index += 1) {
-        const stock = pool[index];
-        stock.status = 'sold';
-        stock.soldOrderId = orderId;
-        sourceItems.push({ item, source, stock });
-      }
-    }
-    const sourceTotal = sourceItems.reduce((sum, row) => sum + ((Number(row.item.sourcePrice) || Number(row.source.price) || 0)), 0);
-    ownerRevenue = Math.min(finalTotal, Math.round(sourceTotal * 100) / 100);
-    tenantRevenue = Math.max(0, Math.round((finalTotal - ownerRevenue) * 100) / 100);
-    data.settings.catalogApi ||= { enabled: true, source: 'main-store', markupMode: 'percent', markupValue: 0, settlementMode: 'platform', ownerRevenue: 0, tenantRevenue: 0, transactions: [] };
-    data.settings.catalogApi.ownerRevenue = Math.round((Number(data.settings.catalogApi.ownerRevenue) + ownerRevenue) * 100) / 100;
-    data.settings.catalogApi.transactions ||= [];
-    data.settings.catalogApi.transactions.push({ orderId, tenantId: String(req.tenantShop.id), ownerRevenue, tenantRevenue, total: finalTotal, createdAt: now });
-  }));
-
-  try {
-    await store.transact(data => {
-      const freshUser = data.users.find(candidate => candidate.id === user.id);
-      if (!freshUser || Number(freshUser.walletBalance) < finalTotal) throw new Error('ยอดเงินในกระเป๋าไม่เพียงพอ กรุณาเติมเงินก่อนทำรายการ');
-      const orderItems = sourceItems.map(({ item, source, stock }) => ({
-        productId: source.id,
-        title: source.title,
-        price: item.unitPrice,
-        sourcePrice: Number(item.sourcePrice) || Number(source.price) || 0,
-        productImage: source.images?.[0] || '',
-        importedFileCode: source.internalNote || '',
-        stockItemId: stock.id,
-        // Credentials are copied into this tenant order only so the buyer can
-        // receive the item from their own shop. They never enter the catalog.
-        credentials: { username: stock.username || '', password: stock.password || '', extra: stock.extra || '' },
-        fulfillmentMode: source.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
-        fulfillmentInstructions: source.fulfillmentInstructions || '',
-        contactMessageIntro: source.contactMessageIntro || '',
-        contactMessageOutro: source.contactMessageOutro || '',
-        federatedTenantId: String(req.tenantShop.id),
-      }));
-      freshUser.walletBalance = Math.round((Number(freshUser.walletBalance) - finalTotal) * 100) / 100;
-      data.walletTransactions.push({ id: store.genId(10), userId: freshUser.id, type: 'purchase', amount: -finalTotal, note: `สั่งซื้อ API #${orderId}`, createdAt: now });
-      if (validCoupon) {
-        const coupon = data.coupons.find(candidate => candidate.code === validCoupon.code && candidate.active);
-        if (coupon) coupon.usedCount = (coupon.usedCount || 0) + 1;
-      }
-      data.settings.catalogApi ||= {};
-      data.settings.catalogApi.tenantRevenue = Math.round((Number(data.settings.catalogApi.tenantRevenue) + tenantRevenue) * 100) / 100;
-      data.settings.catalogApi.transactions ||= [];
-      data.settings.catalogApi.transactions.push({ orderId, type: 'markup', amount: tenantRevenue, createdAt: now });
-      data.orders.push({ id: orderId, userId: freshUser.id, items: orderItems, subtotal: total, discount, total: finalTotal, couponCode: validCoupon ? validCoupon.code : null, status: 'completed', paymentMethod: 'wallet', salesChannel: 'catalog-api', federatedTenantIds: [String(req.tenantShop.id)], createdAt: now });
-    });
-  } catch (error) {
-    await store.runOnPlatform(() => store.transact(data => {
-      data.stockItems.filter(stock => stock.soldOrderId === orderId).forEach(stock => { stock.status = 'available'; stock.soldOrderId = null; });
-      if (data.settings.catalogApi) {
-        data.settings.catalogApi.ownerRevenue = Math.max(0, Math.round((Number(data.settings.catalogApi.ownerRevenue || 0) - ownerRevenue) * 100) / 100);
-        data.settings.catalogApi.transactions = (data.settings.catalogApi.transactions || []).filter(entry => entry.orderId !== orderId);
-      }
-    }));
-    throw error;
-  }
-  return { orderId, tenantRevenue, ownerRevenue };
-}
-
 router.post('/checkout', requireLogin, (req, res) => {
   const user = currentUser(req);
   if (!user) {
@@ -287,13 +210,9 @@ router.post('/checkout', requireLogin, (req, res) => {
         return res.redirect('/cart');
       }
 
-      if (items.some(item => item.federatedTenantId)) {
-        const completed = await completeFederatedCheckout({ req, user, items, total, discount, finalTotal, validCoupon });
-        req.session.cart = [];
-        req.session.coupon = null;
-        req.session.federatedCatalog = null;
-        req.flash('success', `สั่งซื้อสำเร็จ! ร้านหลักได้รับต้นทุน ฿${completed.ownerRevenue.toLocaleString()} และร้านนี้ได้รับส่วนต่าง ฿${completed.tenantRevenue.toLocaleString()}`);
-        return res.redirect(`/account/orders/${completed.orderId}`);
+      if (req.tenantShop && items.some(item => item.federatedTenantId)) {
+        req.flash('error', 'สินค้านี้ต้องชำระเงินและรับสินค้าที่ร้านหลักเท่านั้น');
+        return res.redirect('/cart');
       }
 
       const orderItems = [];
@@ -314,13 +233,20 @@ router.post('/checkout', requireLogin, (req, res) => {
             productId: item.product.id,
             title: item.product.title,
             price: item.unitPrice,
+            sourcePrice: Number(item.sourcePrice || item.unitPrice) || item.unitPrice,
             productImage: item.product.images?.[0] || '',
             importedFileCode: item.product.internalNote || '',
             stockItemId: stockItem.id,
-            fulfillmentMode: item.product.fulfillmentMode === 'contact' ? 'contact' : 'automatic',
-            fulfillmentInstructions: item.product.fulfillmentInstructions || '',
-            contactMessageIntro: item.product.contactMessageIntro || '',
-            contactMessageOutro: item.product.contactMessageOutro || '',
+            fulfillmentMode: (item.federatedTenantId || item.product.fulfillmentMode === 'contact') ? 'contact' : 'automatic',
+            fulfillmentInstructions: item.federatedTenantId
+              ? 'ชำระเงินเข้าร้านหลักแล้ว กรุณาติดต่อร้านหลักเพื่อรับไอดีและรับสินค้า ณ ร้านหลักเท่านั้น'
+              : (item.product.fulfillmentInstructions || ''),
+            contactMessageIntro: item.federatedTenantId
+              ? 'สวัสดีครับ ผมชำระเงินสำหรับสินค้าที่มาจากร้านเช่าแล้ว ขอรับไอดีที่ร้านหลักครับ'
+              : (item.product.contactMessageIntro || ''),
+            contactMessageOutro: item.federatedTenantId
+              ? 'กรุณาตรวจสอบยอดชำระและแจ้งจุดรับสินค้าที่ร้านหลักให้ด้วยครับ'
+              : (item.product.contactMessageOutro || ''),
             federatedTenantId: item.federatedTenantId || null,
           });
         }
@@ -359,6 +285,47 @@ router.post('/checkout', requireLogin, (req, res) => {
 
       if (validCoupon) {
         validCoupon.usedCount = (validCoupon.usedCount || 0) + 1;
+      }
+
+      // Federated purchases are paid into the main shop. Keep the tenant's
+      // markup in the platform ledger so the owner can transfer it manually.
+      if (orderItems.some(item => item.federatedTenantId)) {
+        const sourceTotal = Math.round(orderItems.reduce((sum, item) => sum + (Number(item.sourcePrice) || Number(item.price) || 0), 0) * 100) / 100;
+        const tenantRevenue = Math.max(0, Math.round((finalTotal - sourceTotal) * 100) / 100);
+        const rawMarkupByTenant = {};
+        orderItems.forEach(item => {
+          if (!item.federatedTenantId) return;
+          const rawMarkup = Math.max(0, (Number(item.price) || 0) - (Number(item.sourcePrice) || Number(item.price) || 0));
+          rawMarkupByTenant[item.federatedTenantId] = (rawMarkupByTenant[item.federatedTenantId] || 0) + rawMarkup;
+        });
+        const rawMarkupTotal = Object.values(rawMarkupByTenant).reduce((sum, amount) => sum + amount, 0);
+        const tenantRevenueByTenant = Object.fromEntries(Object.entries(rawMarkupByTenant).map(([tenantId, amount]) => [
+          tenantId,
+          Math.round((rawMarkupTotal > 0 ? tenantRevenue * (amount / rawMarkupTotal) : 0) * 100) / 100,
+        ]));
+        const catalogApi = store.data.settings.catalogApi ||= {
+          enabled: true,
+          source: 'main-store',
+          markupMode: 'percent',
+          markupValue: 0,
+          settlementMode: 'platform',
+          ownerRevenue: 0,
+          tenantRevenue: 0,
+          transactions: [],
+        };
+        catalogApi.ownerRevenue = Math.round((Number(catalogApi.ownerRevenue || 0) + finalTotal) * 100) / 100;
+        catalogApi.tenantRevenue = Math.round((Number(catalogApi.tenantRevenue || 0) + tenantRevenue) * 100) / 100;
+        catalogApi.transactions ||= [];
+        catalogApi.transactions.push({
+          orderId: order.id,
+          type: 'manual-payout',
+          tenantIds: [...new Set(orderItems.map(item => item.federatedTenantId).filter(Boolean))],
+          total: finalTotal,
+          ownerRevenue: finalTotal,
+          tenantRevenue,
+          tenantRevenueByTenant,
+          createdAt: order.createdAt,
+        });
       }
 
       store.data.orders.push(order);

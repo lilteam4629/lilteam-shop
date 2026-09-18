@@ -7,6 +7,13 @@
       <a href="/products" class="text-[var(--gold-text)]">เลือกซื้อสินค้า →</a>
     </div>
   <% } else { %>
+    <% const ownerPickupOnly = items.some(i => i.federatedTenantId); %>
+    <% if (ownerPickupOnly) { %>
+      <div class="mb-5 rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-4 shadow-sm">
+        <div class="font-black text-[var(--gold-text)]">🔒 ออเดอร์นี้ต้องชำระเงินและรับสินค้าที่ร้านหลักเท่านั้น</div>
+        <p class="mt-1 text-sm leading-relaxed text-[var(--text-2)]">ยอดจะตัดจากบัญชีร้านหลัก และหลังชำระเงินสำเร็จให้ติดต่อร้านหลักเพื่อรับไอดีที่ร้านหลัก ส่วนต่างราคาของร้านเช่าจะถูกบันทึกไว้ให้เจ้าของร้านโอนคืนเอง</p>
+      </div>
+    <% } %>
     <div class="space-y-3 mb-6">
       <% items.forEach(i => { %>
         <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 flex flex-col sm:flex-row gap-4">
@@ -56,7 +63,7 @@
         <span class="text-[var(--gold-text)]">฿<%= total.toLocaleString() %>.00</span>
       </div>
       <form action="/cart/checkout" method="post">
-        <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] rounded-lg py-3 font-medium">ชำระเงินด้วยกระเป๋าเงิน (Demo)</button>
+        <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] rounded-lg py-3 font-medium"><%= ownerPickupOnly ? 'ชำระเงินผ่านบัญชีร้านหลักและยืนยันออเดอร์' : 'ชำระเงินด้วยกระเป๋าเงิน (Demo)' %></button>
       </form>
     </div>
   <% } %>

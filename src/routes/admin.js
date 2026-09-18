@@ -295,12 +295,26 @@ router.get('/catalog-api', async (req, res) => {
       return { id: shop.id, name: shop.name, slug: shop.slug, expiresAt: shop.expiresAt, config: catalogSyndication.normalizeConfig(tenantDb?.settings || {}) };
     }));
   }
+  const payoutByTenant = {};
+  if (!tenantMode) {
+    (config.transactions || []).forEach(transaction => {
+      const breakdown = transaction.tenantRevenueByTenant;
+      if (breakdown && typeof breakdown === 'object') {
+        Object.entries(breakdown).forEach(([tenantId, amount]) => {
+          payoutByTenant[String(tenantId)] = Math.round(((Number(payoutByTenant[String(tenantId)]) || 0) + (Number(amount) || 0)) * 100) / 100;
+        });
+      } else if (transaction.tenantId && transaction.tenantRevenue) {
+        const tenantId = String(transaction.tenantId);
+        payoutByTenant[tenantId] = Math.round(((Number(payoutByTenant[tenantId]) || 0) + (Number(transaction.tenantRevenue) || 0)) * 100) / 100;
+      }
+    });
+  }
   const preview = tenantMode
     ? catalogSyndication.getTenantProducts(mainDb, store.data, '').products.slice(0, 12)
     : [];
   res.render('admin/catalog-api', {
     title: 'API แคตตาล็อกร้านหลัก', active: 'catalog-api', tenantMode, config,
-    sourceProducts, preview, shops, sourceShopName: mainDb.settings.shopName || 'ร้านหลัก',
+    sourceProducts, preview, shops, payoutByTenant, sourceShopName: mainDb.settings.shopName || 'ร้านหลัก',
   });
 });
 

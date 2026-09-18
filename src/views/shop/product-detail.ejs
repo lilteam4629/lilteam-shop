@@ -30,7 +30,12 @@
       </div>
 
       <h1 class="text-2xl font-bold mb-2"><%= product.title %></h1>
-      <% if (product.federatedCheckout) { %><p class="mb-3 text-xs text-[var(--text-3)]">ราคานี้รวมส่วนต่างจากร้านเช่าแล้ว · ชำระผ่านบัญชีร้านหลัก</p><% } %>
+      <% if (product.federatedCheckout) { %>
+        <div class="mb-4 rounded-xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 px-4 py-3 text-sm">
+          <div class="font-black text-[var(--gold-text)]">🔒 ชำระเงินกับร้านหลักและรับสินค้าที่ร้านหลักเท่านั้น</div>
+          <div class="mt-1 text-xs leading-relaxed text-[var(--text-2)]">ราคานี้เป็นราคาจากร้านเช่า ส่วนต่างจะถูกบันทึกไว้ให้เจ้าของร้านหลักโอนคืนร้านเช่าภายหลัง</div>
+        </div>
+      <% } %>
       <% if (productRangers && productRangers.length) { %>
         <section class="product-detail-filters mb-5" aria-labelledby="product-ranger-title">
           <div class="product-detail-filter-head">
@@ -170,10 +175,11 @@
 
       <% if (product.isSyndicated) { %>
         <% if (product.stockCount > 0) { %>
-          <div class="rounded-2xl border border-[var(--gold)]/40 bg-[var(--input)]/60 p-5">
-            <div class="mb-2 text-sm font-bold text-[var(--gold-text)]">สินค้าจากร้านหลัก</div>
-            <p class="mb-4 text-sm text-[var(--text-3)]">ซื้อผ่านร้านนี้ได้เลย เงินจะหักจากกระเป๋าร้านนี้ ราคานี้รวมส่วนต่างของร้านแล้ว และระบบจะส่งไอดีให้ในคำสั่งซื้อ</p>
-            <form action="/cart/add/<%= product.id %>" method="post"><button class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-bold text-[var(--gold-contrast)]">เพิ่มลงตะกร้าร้านนี้</button></form>
+          <div class="rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-5 shadow-[0_12px_30px_-18px_color-mix(in_srgb,var(--gold)_70%,transparent)]">
+            <div class="mb-2 flex items-center gap-2 text-base font-black text-[var(--gold-text)]">🔒 ชำระเงินและรับสินค้าในร้านหลักเท่านั้น</div>
+            <p class="mb-3 text-sm font-medium leading-relaxed text-[var(--text-2)]">รายการนี้เป็นสินค้าจากร้านหลัก เมื่อกดซื้อ ระบบจะพาไปโอนเงินเข้าบัญชีร้านหลักโดยตรง และหลังชำระเงินสำเร็จต้องรับไอดีที่ร้านหลักเท่านั้น</p>
+            <p class="mb-4 text-xs text-[var(--text-3)]">ราคาที่แสดงรวมส่วนต่างของร้านนี้แล้ว ส่วนต่างจะถูกบันทึกไว้ให้เจ้าของร้านหลักโอนคืนภายหลัง</p>
+            <% if (product.sourceUrl) { %><a href="<%= product.sourceUrl %>" class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-6 py-3 text-sm font-black text-[var(--gold-contrast)]">ไปชำระเงินและรับไอดีที่ร้านหลัก ↗</a><% } %>
           </div>
         <% } else { %>
           <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมดจากร้านหลัก</div>

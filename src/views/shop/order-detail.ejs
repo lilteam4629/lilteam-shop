@@ -2,6 +2,12 @@
   <a href="/account/orders" class="text-sm text-[var(--gold-text)]">← กลับไปหน้าคำสั่งซื้อ</a>
   <h1 class="text-2xl font-bold mt-2 mb-1">คำสั่งซื้อ #<%= order.id %></h1>
   <p class="text-[var(--text-3)] text-sm mb-6"><%= new Date(order.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %> &middot; สถานะ: <span class="text-emerald-400"><%= order.status %></span></p>
+  <% if (order.salesChannel === 'catalog-api') { %>
+    <div class="mb-6 rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-4">
+      <div class="font-black text-[var(--gold-text)]">🔒 รับสินค้าที่ร้านหลักเท่านั้น</div>
+      <p class="mt-1 text-sm leading-relaxed text-[var(--text-2)]">ออเดอร์นี้ชำระเงินเข้าร้านหลักแล้ว กรุณาติดต่อร้านหลักเพื่อรับไอดีและสินค้า ระบบจะไม่ส่งไอดีไปยังร้านเช่า</p>
+    </div>
+  <% } %>
 
   <div class="space-y-3 mb-6">
     <% itemsWithCreds.forEach(i => { %>
