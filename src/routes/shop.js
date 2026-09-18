@@ -239,6 +239,9 @@ router.get('/products', (req, res) => {
     filterTags: store.data.filterTags,
     activeFilterTags,
     filterProductCount: products.length,
+    catalogApiNotice: Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled),
+    catalogApiProductCount: products.filter(product => product.isSyndicated).length,
+    catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
   });
 });
 
@@ -252,7 +255,12 @@ router.get('/search', (req, res) => {
     .filter(p => isProductVisible(p) && p.title.toLowerCase().includes(q))
     .map(product => withStock(product, stockCounts))
     .concat(syndicatedProducts(req).filter(p => String(p.title || '').toLowerCase().includes(q)));
-  res.render('shop/listing', { title: `ผลการค้นหา: ${q}`, products, listType: null, sort: '', q, filterTags: null });
+  res.render('shop/listing', {
+    title: `ผลการค้นหา: ${q}`, products, listType: null, sort: '', q, filterTags: null,
+    catalogApiNotice: Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled),
+    catalogApiProductCount: products.filter(product => product.isSyndicated).length,
+    catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
+  });
 });
 
 router.get('/help', (req, res) => {
