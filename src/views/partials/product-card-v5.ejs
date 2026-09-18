@@ -1,0 +1,10 @@
+<% const v5SoldOut = Number(p.stockCount || 0) < 1; %>
+<a href="/game/<%= p.slug %>" class="v5-product-card <%= v5SoldOut ? 'is-sold' : '' %>" data-v5-product data-title="<%= String(p.title || '').toLowerCase() %>" data-stock="<%= v5SoldOut ? 'sold' : 'available' %>">
+  <div class="v5-product-card__media">
+    <img src="<%= p.images && p.images[0] ? p.images[0] : '' %>" alt="<%= p.title %>" loading="lazy" decoding="async" />
+    <span class="v5-product-card__index">ITEM <%= String(p.id || '').slice(-3).toUpperCase() %></span>
+    <span class="v5-product-card__status"><i></i><%= v5SoldOut ? 'SOLD OUT' : 'IN STOCK' %></span>
+    <% if (p.flashSaleActive) { %><b class="v5-product-card__sale">FLASH</b><% } %>
+  </div>
+  <div class="v5-product-card__body"><h3><%= p.title %></h3><div><strong>฿<%= Number(p.price || 0).toLocaleString() %></strong><small><%= v5SoldOut ? 'รอเติมสต็อก' : `เหลือ ${Number(p.stockCount || 0).toLocaleString()} ชิ้น` %></small></div></div>
+</a>
