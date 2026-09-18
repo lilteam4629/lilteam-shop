@@ -136,6 +136,30 @@
 </section>
 <% } %>
 
+<% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+<section class="owner-home-command" aria-label="จุดเด่นของร้าน LILTeam">
+  <div class="owner-home-command__lead">
+    <span class="owner-home-command__kicker">LILTEAM STORE OS</span>
+    <h2>เลือกสินค้า เติมเงิน และรับของได้ในระบบเดียว</h2>
+    <p>สินค้าคัดแล้ว พร้อมส่งหลังชำระเงิน มีระบบค้นหา ตัวกรอง กระเป๋าเงิน และประวัติคำสั่งซื้อให้ใช้งานครบในที่เดียว</p>
+    <div class="owner-home-command__actions">
+      <a class="owner-home-command__primary" href="/products">เริ่มเลือกสินค้า <span>→</span></a>
+      <a class="owner-home-command__secondary" href="/help">ดูวิธีสั่งซื้อ</a>
+    </div>
+  </div>
+  <div class="owner-home-command__stats" aria-label="สถิติร้าน">
+    <div><strong><%= Number(stats.gameCount || 0).toLocaleString() %></strong><span>สินค้าในร้าน</span></div>
+    <div><strong><%= Number(newest.length || 0).toLocaleString() %></strong><span>รายการใหม่</span></div>
+    <div><strong>24/7</strong><span>เปิดให้บริการ</span></div>
+  </div>
+</section>
+<section class="owner-home-steps" aria-label="ขั้นตอนการสั่งซื้อ">
+  <div><i>01</i><span><b>เลือกสินค้า</b><small>ค้นหาและกรองรายการที่ต้องการ</small></span></div>
+  <div><i>02</i><span><b>เติมเงินหรือชำระเงิน</b><small>ตรวจสอบสถานะได้จากบัญชีของคุณ</small></span></div>
+  <div><i>03</i><span><b>รับสินค้าอัตโนมัติ</b><small>ดูคำสั่งซื้อและข้อมูลได้ทันที</small></span></div>
+</section>
+<% } %>
+
 <style>
 .banner-sparkle{position:relative;isolation:isolate}
 .banner-sparkle:after{content:'';position:absolute;z-index:20;top:-28%;bottom:-28%;left:-18%;width:9%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.58),transparent);transform:skewX(-16deg);pointer-events:none;animation:banner-sparkle-sweep 8s ease-in-out 1 both;animation-play-state:paused}
