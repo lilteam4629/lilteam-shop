@@ -296,6 +296,14 @@ router.get('/help', (req, res) => {
 router.get('/contact', (req, res) => {
   if (req.tenantShop && req.query.api !== '1') return res.render('shop/contact', { title: 'ติดต่อร้านหลักหลังสั่งซื้อ', postPurchaseOnly: true });
   if (req.tenantShop && req.query.api === '1') {
+    // Partner/API products belong to the platform shop. Keep the tenant's
+    // own `/contact` page and settings untouched; this special action should
+    // take the customer to the actual source shop's contact page instead of
+    // rendering the platform contact details inside the rental storefront.
+    if (MAIN_SITE_URL) {
+      const target = new URL('/contact', mainSiteUrlFor(req));
+      return res.redirect(302, target.toString());
+    }
     return res.render('shop/contact', {
       title: 'ติดต่อร้านหลักสำหรับสินค้า API',
       settings: store.platformData.settings || store.data.settings,
