@@ -317,9 +317,11 @@ router.get('/catalog-api', async (req, res) => {
     ? catalogSyndication.getTenantProducts(mainDb, store.data, '').products
     : [];
   const preview = tenantMode
-    ? (config.featuredProductIds.length
-      ? tenantProducts.filter(product => config.featuredProductIds.includes(String(product.sourceProductId))).slice(0, 5)
-      : tenantProducts.slice(0, 5))
+    ? catalogSyndication.selectFeaturedProducts(
+      tenantProducts,
+      config,
+      catalogSyndication.normalizeConfig(mainDb.settings || {}),
+    )
     : [];
   res.render('admin/catalog-api', {
     title: 'API แคตตาล็อกร้านหลัก', active: 'catalog-api', tenantMode, config,

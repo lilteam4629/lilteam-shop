@@ -21,6 +21,22 @@ function normalizeConfig(settings = {}) {
   };
 }
 
+// Resolve the five Partner products for a tenant storefront. A tenant's
+// explicit selection must win over the platform default; otherwise the
+// tenant admin can tick different products but the homepage keeps rendering
+// the platform list. An explicitly empty selection is intentional and hides
+// the Partner shelf instead of silently restoring the first five products.
+function selectFeaturedProducts(products, tenantConfig = {}, platformConfig = {}, limit = 5) {
+  const tenant = tenantConfig && typeof tenantConfig === 'object' ? tenantConfig : {};
+  const platform = platformConfig && typeof platformConfig === 'object' ? platformConfig : {};
+  let selectedIds = null;
+  if (tenant.featuredProductIdsConfigured) selectedIds = tenant.featuredProductIds || [];
+  else if (platform.featuredProductIdsConfigured) selectedIds = platform.featuredProductIds || [];
+  if (selectedIds === null) return products.slice(0, limit);
+  const allowed = new Set(selectedIds.map(String));
+  return products.filter(product => allowed.has(String(product.sourceProductId))).slice(0, limit);
+}
+
 function availableCounts(db) {
   const counts = new Map();
   (db.stockItems || []).forEach(item => {
@@ -120,6 +136,7 @@ function createCheckoutToken({ tenantId, tenantSlug, productId, returnUrl = '' }
 
 module.exports = {
   normalizeConfig,
+  selectFeaturedProducts,
   applyMarkup,
   getTenantProducts,
   findTenantProduct,
