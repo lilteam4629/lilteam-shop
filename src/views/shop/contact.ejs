@@ -1,3 +1,11 @@
+<% const contactSettings = (typeof settings !== 'undefined' && settings) || {
+  contactMessenger: '/contact',
+  contactFacebook: '/contact',
+  contactFacebookName: 'ร้านหลัก',
+  shopName: 'ร้านหลัก',
+  openHours: '17:00 - 00:00',
+  contactResponseTime: '5–15 นาที'
+}; %>
 <% if (postPurchaseOnly) { %>
 <section class="contact-page max-w-2xl mx-auto px-4 py-14">
   <div class="rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-6 text-center shadow-sm">
@@ -15,19 +23,19 @@
     <p class="text-sm text-[var(--text-3)] mt-1"><%= apiContact ? 'สินค้านี้มาจากร้านหลัก ติดต่อผมได้ที่ช่องทางด้านล่าง' : 'สอบถามสินค้า แจ้งปัญหา หรือติดต่อรับสินค้าได้ที่นี่' %></p>
   </div>
   <div class="space-y-3">
-    <a href="<%= settings.contactMessenger || settings.contactFacebook %>" target="_blank" rel="noopener" class="contact-primary group">
+    <a href="<%= contactSettings.contactMessenger || contactSettings.contactFacebook %>" target="_blank" rel="noopener" class="contact-primary group">
       <span class="contact-icon contact-icon-primary"><svg viewBox="0 0 24 24" class="w-7 h-7 fill-current"><path d="M12 2C6.36 2 2 6.13 2 11.7c0 2.92 1.2 5.45 3.16 7.2V22l2.9-1.6c1.2.34 2.52.53 3.94.53 5.64 0 10-4.13 10-9.23S17.64 2 12 2Zm1 13-2.55-2.72L5.5 15l5.44-5.78L13.55 12l4.95-2.72L13 15Z"/></svg></span>
-      <span class="min-w-0 flex-1"><span class="block text-lg sm:text-xl font-extrabold">Messenger</span><span class="contact-primary-subtitle block text-xs sm:text-sm mt-0.5">ตอบเร็วที่สุด • เปิด <%= settings.openHours %></span></span>
+      <span class="min-w-0 flex-1"><span class="block text-lg sm:text-xl font-extrabold">Messenger</span><span class="contact-primary-subtitle block text-xs sm:text-sm mt-0.5">ตอบเร็วที่สุด • เปิด <%= contactSettings.openHours %></span></span>
       <span class="contact-open">เปิด ›</span>
     </a>
-    <a href="<%= settings.contactFacebook %>" target="_blank" rel="noopener" class="contact-row group">
+    <a href="<%= contactSettings.contactFacebook %>" target="_blank" rel="noopener" class="contact-row group">
       <span class="contact-icon contact-icon-facebook"><svg viewBox="0 0 24 24" class="w-6 h-6 fill-current"><path d="M13.5 22v-9h3l.5-3.5h-3.5V7.25c0-1 .28-1.75 1.8-1.75H17V2.15A23 23 0 0 0 14.4 2C11.75 2 10 3.62 10 6.6v2.9H7V13h3v9h3.5Z"/></svg></span>
-      <span class="min-w-0 flex-1"><span class="block font-bold">Facebook Page</span><span class="block text-xs text-[var(--text-3)] mt-0.5 truncate"><%= settings.contactFacebookName || settings.shopName %></span></span>
+      <span class="min-w-0 flex-1"><span class="block font-bold">Facebook Page</span><span class="block text-xs text-[var(--text-3)] mt-0.5 truncate"><%= contactSettings.contactFacebookName || contactSettings.shopName %></span></span>
       <span class="text-xl text-[var(--text-4)] group-hover:text-[var(--gold-text)]">›</span>
     </a>
     <div class="contact-row">
       <span class="contact-icon contact-icon-hours"><svg viewBox="0 0 24 24" class="w-6 h-6 fill-none stroke-current" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
-      <span class="min-w-0 flex-1"><span class="block text-sm text-[var(--text-3)]">ทีมงานพร้อมให้บริการ <b class="text-[var(--text)]">ทุกวัน <%= settings.openHours %></b></span><span class="block text-xs text-[var(--text-4)] mt-0.5">ตอบกลับภายใน <%= settings.contactResponseTime || '5–15 นาที' %></span></span>
+      <span class="min-w-0 flex-1"><span class="block text-sm text-[var(--text-3)]">ทีมงานพร้อมให้บริการ <b class="text-[var(--text)]">ทุกวัน <%= contactSettings.openHours %></b></span><span class="block text-xs text-[var(--text-4)] mt-0.5">ตอบกลับภายใน <%= contactSettings.contactResponseTime || '5–15 นาที' %></span></span>
       <span class="contact-online"><i></i> ออนไลน์</span>
     </div>
   </div>
