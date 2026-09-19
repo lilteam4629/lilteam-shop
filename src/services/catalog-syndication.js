@@ -40,7 +40,10 @@ function selectFeaturedProducts(products, tenantConfig = {}, platformConfig = {}
 function availableCounts(db) {
   const counts = new Map();
   (db.stockItems || []).forEach(item => {
-    if (item.status === 'available') counts.set(item.productId, (counts.get(item.productId) || 0) + 1);
+    if (item.status === 'available') {
+      const productId = String(item.productId);
+      counts.set(productId, (counts.get(productId) || 0) + 1);
+    }
   });
   return counts;
 }
@@ -61,7 +64,7 @@ function sanitizeProduct(product, mainDb, config, mainSiteUrl, tenantShop = null
   const counts = availableCounts(mainDb);
   const basePrice = Math.max(0, Number(product.price) || 0);
   const price = applyMarkup(basePrice, config);
-  const stockCount = counts.get(product.id) || 0;
+  const stockCount = counts.get(String(product.id)) || 0;
   return {
     id: remoteSlug(product),
     sourceProductId: String(product.id),
@@ -98,7 +101,10 @@ function getTenantProducts(mainDb, tenantDb, mainSiteUrl = '', tenantShop = null
   const products = (mainDb.products || [])
     .filter(product => product && product.status === 'active')
     .filter(product => !product.publishAt || Date.parse(String(product.publishAt).includes('T') ? product.publishAt : `${product.publishAt}:00+07:00`) <= Date.now())
-    .map(product => sanitizeProduct(product, mainDb, config, mainSiteUrl, tenantShop));
+    .map(product => sanitizeProduct(product, mainDb, config, mainSiteUrl, tenantShop))
+    // A Partner listing represents an actually purchasable account. Do not
+    // advertise an active product after its last available stock item was sold.
+    .filter(product => product.stockCount > 0);
   return { config, products };
 }
 

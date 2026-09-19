@@ -207,8 +207,8 @@ router.get('/catalog/products', (req, res) => {
     id: String(product.id), slug: product.slug, title: product.title, price: Number(product.price) || 0,
     originalPrice: Number(product.originalPrice) || 0, images: Array.isArray(product.images) ? product.images.slice(0, 3) : [],
     description: product.description || '', status: product.status,
-    availableStock: store.platformData.stockItems.filter(item => item.productId === product.id && item.status === 'available').length,
-  }));
+    availableStock: store.platformData.stockItems.filter(item => String(item.productId) === String(product.id) && item.status === 'available').length,
+  })).filter(product => product.availableStock > 0);
   res.json({ ok: true, source: 'main-store', shopName: store.platformData.settings.shopName, products });
 });
 

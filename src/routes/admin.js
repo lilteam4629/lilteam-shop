@@ -302,7 +302,11 @@ router.get('/catalog-api', async (req, res) => {
   const mainDb = store.platformData;
   const tenantMode = Boolean(req.tenantShop);
   const config = catalogSyndication.normalizeConfig(store.data.settings || {});
-  const sourceProducts = mainDb.products.filter(product => product.status === 'active');
+  const availableSourceIds = new Set((mainDb.stockItems || [])
+    .filter(item => item.status === 'available')
+    .map(item => String(item.productId)));
+  const sourceProducts = mainDb.products.filter(product => product.status === 'active'
+    && availableSourceIds.has(String(product.id)));
   if (!config.featuredProductIds.length && !config.featuredProductIdsConfigured) {
     config.featuredProductIds = sourceProducts.slice(0, 5).map(product => String(product.id));
   }
