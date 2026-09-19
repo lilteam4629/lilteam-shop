@@ -28,6 +28,7 @@
   <meta name="twitter:title" content="<%= ogTitleVal %>" />
   <meta name="twitter:description" content="<%= ogDescriptionVal %>" />
   <% if (ogImageVal) { %><meta name="twitter:image" content="<%= ogImageVal %>" /><% } %>
+  <% const storefrontBackground = settings.storefrontAppearance && settings.storefrontAppearance.backgroundImage; %>
   <script>
     (function () {
       try {
@@ -51,6 +52,27 @@
   <link rel="stylesheet" href="<%= asset('css/scroll-motion-v1.css') %>" />
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
+
+    <% if (storefrontBackground) { %>
+    /* Keep the configured storefront artwork on every page, not only the
+       homepage shell. This prevents it disappearing during refresh or
+       seamless navigation to products, help, contact, and account pages. */
+    body.storefront-global-background {
+      background-color: var(--bg) !important;
+      background-image: url('<%= storefrontBackground %>') !important;
+      background-repeat: no-repeat !important;
+      background-position: center 64px !important;
+      background-size: 100vw auto !important;
+      background-attachment: fixed !important;
+      background-blend-mode: normal !important;
+    }
+    @media (max-width: 900px) {
+      body.storefront-global-background {
+        background-attachment: scroll !important;
+        background-image: none !important;
+      }
+    }
+    <% } %>
 
     html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
       transition: none !important;
@@ -160,7 +182,7 @@
     }
   </style>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %>">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %>">
   <div id="page-loading-overlay" aria-hidden="true">
     <div class="loading-ring">
       <% if (settings.branding && settings.branding.logoImage) { %>

@@ -6,15 +6,6 @@
 <% if (storefrontBackground) { %>
 <style>
   .storefront-hero-banner{--hero-text-color:<%= heroTextColor %>;--hero-outline-color:<%= heroOutlineColor %>;--hero-outline-width:<%= heroOutlineWidth %>px}
-  body {
-    background-color:var(--bg)!important;
-    background-image:url('<%= storefrontBackground %>')!important;
-    background-repeat:no-repeat!important;
-    background-position:center 64px!important;
-    background-size:100vw auto!important;
-    background-attachment:fixed!important;
-    background-blend-mode:normal!important;
-  }
   /* Keep the owner's home footer attached to the catalog. The body artwork
      is decorative and must not leak into a blank margin above the footer. */
   body.storefront-owner-lilteam > div > footer { margin-top:0!important; }
@@ -35,7 +26,6 @@
     .storefront-hero-banner .lilteam-hero-command__eyebrow{color:var(--hero-text-color)!important;font-size:12px!important;font-weight:950!important;-webkit-text-stroke:calc(var(--hero-outline-width) * .45) var(--hero-outline-color)!important;paint-order:stroke fill!important;text-shadow:none!important;filter:none!important}.storefront-hero-banner .lilteam-hero-command h1 em{color:var(--hero-text-color)!important;-webkit-text-stroke:var(--hero-outline-width) var(--hero-outline-color)!important;text-shadow:none!important;filter:none!important}
     .latest-orders-heading h2,.latest-orders-heading p,.home-catalog-title h2,.home-catalog-title p{color:var(--text)!important;text-shadow:0 2px 5px color-mix(in srgb,var(--gold-dark) 75%,transparent)!important}
   }
-  @media(max-width:900px){body{background-image:none!important;background-color:var(--bg)!important;background-attachment:scroll!important}}
   /* Keep the copy treatment consistent when the banner is viewed at tablet
      widths too; the older mobile stylesheet otherwise restores the oversized
      text treatment shown in the previous design. */
