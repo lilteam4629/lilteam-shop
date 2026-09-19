@@ -21,8 +21,7 @@ function useFixture(fixture) {
   });
   const reservation = await accountRoutes.reserveTrueMoneyClaim('voucher-1', 'user-1');
   assert.equal(reservation.retryExisting, false);
-  await accountRoutes.rememberTrueMoneyResult('voucher-1', 'user-1', { amount: 25, senderName: 'Tester' });
-  const credit = await accountRoutes.creditTrueMoneyClaim({
+  const credit = await accountRoutes.finalizeTrueMoneyClaim({
     voucherCode: 'voucher-1', userId: 'user-1', result: { amount: 25, senderName: 'Tester' },
   });
   assert.equal(credit.alreadyCredited, false);
@@ -44,7 +43,7 @@ function useFixture(fixture) {
   const recovered = await accountRoutes.reserveTrueMoneyClaim('voucher-2', 'user-2');
   assert.equal(recovered.retryExisting, true);
   assert.equal(recovered.amount, 40);
-  await accountRoutes.creditTrueMoneyClaim({
+  await accountRoutes.finalizeTrueMoneyClaim({
     voucherCode: 'voucher-2', userId: 'user-2', result: { amount: 40, recovered: true, senderName: 'Tester' },
   });
   assert.equal(pending.users[0].walletBalance, 40);
@@ -66,7 +65,7 @@ function useFixture(fixture) {
     truemoneyRedemptions: [],
   });
   await accountRoutes.reserveTrueMoneyClaim('voucher-4', 'user-4');
-  await accountRoutes.creditTrueMoneyClaim({
+  await accountRoutes.finalizeTrueMoneyClaim({
     voucherCode: 'voucher-4', userId: 'user-4', result: { amount: 15, senderName: 'Tester' },
   });
   assert.equal(legacy.users[0].walletBalance, 15);
