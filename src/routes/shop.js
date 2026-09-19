@@ -300,11 +300,14 @@ router.get('/contact', (req, res) => {
   if (req.tenantShop && req.query.api === '1') {
     return res.render('shop/contact', {
       title: 'ติดต่อร้านหลักสำหรับสินค้า API',
-      settings: store.platformData.settings,
+      settings: store.platformData.settings || store.data.settings,
       apiContact: true,
     });
   }
-  res.render('shop/contact', { title: 'ติดต่อร้าน' });
+  // The contact view reads the configured channels and opening hours.  The
+  // main-site branch previously omitted `settings`, causing EJS to throw a
+  // ReferenceError and return a 500 as soon as the contact button was used.
+  res.render('shop/contact', { title: 'ติดต่อร้าน', settings: store.data.settings });
 });
 
 router.get('/cookie-policy', (req, res) => {
