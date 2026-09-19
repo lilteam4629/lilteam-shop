@@ -169,6 +169,9 @@ function defaultData() {
       authAppearance: {
         backgroundImage: null,
       },
+      storefrontAppearance: {
+        backgroundImage: null,
+      },
       theme: {
         accent: '#c8a63f',
         bgPreset: 'warmDark',
@@ -523,6 +526,13 @@ function migrateSchema(db) {
   }
   if (!db.settings.authAppearance) {
     db.settings.authAppearance = { backgroundImage: null };
+    changed = true;
+  }
+  if (!db.settings.storefrontAppearance || typeof db.settings.storefrontAppearance !== 'object') {
+    db.settings.storefrontAppearance = { backgroundImage: null };
+    changed = true;
+  } else if (db.settings.storefrontAppearance.backgroundImage === undefined) {
+    db.settings.storefrontAppearance.backgroundImage = null;
     changed = true;
   }
   if (!db.settings.theme) {

@@ -219,6 +219,37 @@
 
   <%- include('../partials/cookie-consent') %>
 
+  <% if (storefrontBackground) { %>
+  <!--
+    Model templates can add their own body/shell backgrounds after this
+    layout is rendered. Keep the merchant's uploaded storefront artwork as
+    the final cascade winner without changing model-specific styling when no
+    artwork is configured.
+  -->
+  <style id="storefront-background-override">
+    body.storefront-global-background {
+      background-color: var(--bg) !important;
+      background-image: url('<%= storefrontBackground %>') !important;
+      background-repeat: no-repeat !important;
+      background-position: center 64px !important;
+      background-size: 100vw auto !important;
+      background-attachment: fixed !important;
+      background-blend-mode: normal !important;
+    }
+    @media (min-width: 901px) {
+      body.storefront-global-background #site-page-shell {
+        background: transparent !important;
+      }
+    }
+    @media (max-width: 900px) {
+      body.storefront-global-background {
+        background-attachment: scroll !important;
+        background-image: none !important;
+      }
+    }
+  </style>
+  <% } %>
+
   <script>
     (function () {
       function isLight() { return document.documentElement.classList.contains('light'); }

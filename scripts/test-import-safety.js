@@ -466,6 +466,17 @@ async function main() {
     assert.match(topupDetail, /ภายใน 5 นาทีล่าสุด/);
     assert.match(accountSource, /slipAge > 5 \* 60 \* 1000/);
   });
+  check('Storefront background survives every storefront model', () => {
+    const mainLayout = fs.readFileSync(path.join(root, 'src/views/layouts/main.ejs'), 'utf8');
+    const marketView = fs.readFileSync(path.join(root, 'src/views/shop/home-rangers-market.ejs'), 'utf8');
+    const lineRangersCss = fs.readFileSync(path.join(root, 'public/css/storefront-line-rangers-v1.css'), 'utf8');
+    assert.match(mainLayout, /id="storefront-background-override"/);
+    assert.match(mainLayout, /storefront-global-background #site-page-shell/);
+    assert.match(mainLayout, /background-image: url\('<%= storefrontBackground %>'\)/);
+    assert.ok(mainLayout.indexOf('id="storefront-background-override"') > mainLayout.indexOf('<%- body %>'));
+    assert.match(marketView, /body\.storefront-model-rangers-market\s*\{/);
+    assert.match(lineRangersCss, /body\.storefront-model-line-rangers\s*\{/);
+  });
   let js = 0, templates = 0;
   function scan(dir) { for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     const filename = path.join(dir, entry.name);
