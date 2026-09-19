@@ -126,6 +126,12 @@
                     <%= r.buyer ? r.buyer.username : 'ไม่พบชื่อผู้ใช้' %>
                     <span class="text-[11px] font-normal text-[var(--text-4)]">(<%= r.buyer ? r.buyer.email : '-' %>)</span>
                   </div>
+                  <% if (r.catalogApiTopup && r.tenantShopId) { %>
+                    <div class="inline-flex items-center gap-1.5 bg-violet-500/15 border border-violet-400/40 text-violet-300 text-[11px] font-bold px-2.5 py-1 rounded-lg">
+                      🔗 สินค้า Partner จากร้านเช่า: <%= r.tenantShopName || r.tenantShopId %>
+                    </div>
+                    <div class="text-[var(--text-3)] text-[11px]">อนุมัติที่เว็บหลักแล้วระบบจะเติมยอด API เข้ากระเป๋าลูกค้าในร้านเช่าอัตโนมัติ</div>
+                  <% } %>
                   <div class="text-[var(--text-3)] font-mono text-[11px]">
                     รหัส: <b>#<%= r.refCode %></b> &middot; ช่องทาง:
                     <% if (r.method === 'truemoney_angpao') { %>
@@ -212,6 +218,9 @@
                   <div class="font-semibold text-sm text-[var(--text)]">
                     <%= r.buyer ? r.buyer.username : 'ไม่พบผู้ใช้' %>
                   </div>
+                  <% if (r.catalogApiTopup && r.tenantShopId) { %>
+                    <div class="text-[10px] text-violet-300 font-semibold">🔗 Partner · <%= r.tenantShopName || r.tenantShopId %></div>
+                  <% } %>
                   <div class="text-[var(--text-3)] font-mono text-[11px]">
                     #<%= r.refCode %> &middot; <%= r.method === 'truemoney_angpao' ? 'ซอง TrueMoney' : (r.method === 'promptpay' ? 'พร้อมเพย์' : 'โอนธนาคาร') %>
                   </div>

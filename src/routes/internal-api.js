@@ -418,7 +418,9 @@ router.get('/admin/topups', (req, res) => {
   const q = String(req.query.q || '').trim().toLocaleLowerCase('th-TH');
   const requests = [...store.data.topupRequests]
     .map(t => {
-      const buyer = store.data.users.find(u => u.id === t.userId);
+      const buyer = t.tenantShopId
+        ? { username: t.tenantUsername || `ผู้ใช้ร้านเช่า ${t.tenantShopName || t.tenantShopId}`, email: t.tenantUserEmail || '' }
+        : store.data.users.find(u => u.id === t.userId);
       return { ...publicTopupRequest(t), buyerUsername: buyer ? buyer.username : null, buyerEmail: buyer ? buyer.email : null };
     })
     .filter(t => {

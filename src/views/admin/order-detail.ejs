@@ -10,6 +10,11 @@
     <p class="text-xs text-[var(--text-4)] mt-0.5">
       สั่งซื้อเมื่อ: <%= new Date(order.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %>
     </p>
+    <% if (order.salesChannel === 'catalog-api-fulfillment') { %>
+      <div class="inline-flex items-center gap-2 mt-2 bg-violet-500/15 border border-violet-400/40 text-violet-300 text-xs font-bold px-3 py-1.5 rounded-lg">
+        🔗 คำสั่งซื้อสินค้า Partner จากร้านเช่า <%= order.tenantShopName || order.tenantShopId || '-' %> · ชำระเข้าร้านหลักแล้ว
+      </div>
+    <% } %>
   </div>
 
   <div>

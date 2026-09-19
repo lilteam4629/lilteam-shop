@@ -72,6 +72,9 @@
                   <% if (o.buyer && o.buyer.email) { %>
                     <div class="text-[11px] text-[var(--text-4)] truncate"><%= o.buyer.email %></div>
                   <% } %>
+                  <% if (o.salesChannel === 'catalog-api-fulfillment') { %>
+                    <div class="text-[10px] text-violet-300 font-semibold">🔗 Partner จากร้านเช่า: <%= o.tenantShopName || o.tenantShopId || '-' %></div>
+                  <% } %>
                 </div>
               </div>
             </td>

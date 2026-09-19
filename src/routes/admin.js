@@ -1546,20 +1546,27 @@ router.get('/topups', async (req, res) => {
   const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : '';
   const needle = q.toLocaleLowerCase('th-TH');
   const requests = [...store.data.topupRequests]
-    .map(t => ({ ...t, buyer: store.data.users.find(u => u.id === t.userId) }))
+    .map(t => ({
+      ...t,
+      buyer: t.tenantShopId
+        ? { username: t.tenantUsername || `ผู้ใช้ร้านเช่า ${t.tenantShopName || t.tenantShopId}`, email: t.tenantUserEmail || '' }
+        : store.data.users.find(u => u.id === t.userId),
+    }))
     .filter(request => {
       if (status && request.status !== status) return false;
       if (!needle) return true;
       return String(request.refCode || '').toLocaleLowerCase('th-TH').includes(needle)
         || String(request.buyer && request.buyer.username || '').toLocaleLowerCase('th-TH').includes(needle)
-        || String(request.buyer && request.buyer.email || '').toLocaleLowerCase('th-TH').includes(needle);
+        || String(request.buyer && request.buyer.email || '').toLocaleLowerCase('th-TH').includes(needle)
+        || String(request.tenantShopName || '').toLocaleLowerCase('th-TH').includes(needle)
+        || String(request.tenantShopId || '').toLocaleLowerCase('th-TH').includes(needle);
     })
     .sort((a, b) => {
       if (a.status === 'pending' && b.status !== 'pending') return -1;
       if (a.status !== 'pending' && b.status === 'pending') return 1;
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
-  const pendingCount = store.data.topupRequests.filter(t => t.status === 'pending').length;
+  const pendingCount = store.data.topupRequests.filter(t => t.status === 'pending' || t.status === 'verifying').length;
   const payment = store.data.settings.payment;
   const isTenant = Boolean(req.tenantShop);
   const sharedTenant = Boolean(isTenant && (payment.slipApiMode || 'shared') === 'shared');

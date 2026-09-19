@@ -1127,6 +1127,7 @@ module.exports = {
   get data() { return tenantContext.getStore()?.db || db; },
   get platformData() { return db; },
   isTenantContext: () => Boolean(tenantContext.getStore()),
+  currentTenantId: () => tenantContext.getStore()?.shopId || null,
   init,
   save,
   reset,

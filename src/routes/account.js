@@ -26,6 +26,80 @@ function settlementPayment({ catalogApiTopup = false } = {}) {
   return source?.settings?.payment || {};
 }
 
+// Partner/API top-ups are owned by the platform even when the customer is
+// browsing a rented shop.  Keep the request on the platform queue so the
+// main-shop owner can review it, while retaining the tenant user identity for
+// the wallet credit that follows approval.
+function isPartnerTopup(request) {
+  return Boolean(request?.catalogApiTopup && request?.tenantShopId);
+}
+
+function withTopupStore(request, callback) {
+  return isPartnerTopup(request) ? store.runOnPlatform(callback) : callback();
+}
+
+function findTopupRequestForUser(requestId, userId) {
+  const local = store.data.topupRequests.find(item => item.id === requestId && item.userId === userId);
+  if (local) return local;
+  if (!store.isTenantContext()) return null;
+  const tenantId = store.currentTenantId ? String(store.currentTenantId()) : '';
+  return store.platformData.topupRequests.find(item => isPartnerTopup(item)
+    && (!tenantId || String(item.tenantShopId) === tenantId)
+    && (item.tenantUserId || item.userId) === userId && item.id === requestId);
+}
+
+async function findTopupActor(request, fallbackUserId) {
+  const userId = request?.tenantUserId || request?.userId || fallbackUserId;
+  if (request?.tenantShopId) {
+    const tenantDb = await store.loadTenantDb(request.tenantShopId);
+    const user = tenantDb?.users?.find(item => item.id === userId);
+    return { user, tenantDb, userId };
+  }
+  return { user: store.data.users.find(item => item.id === userId), tenantDb: null, userId };
+}
+
+// Credit a catalog wallet exactly once.  The transaction marker is stored in
+// the tenant wallet transaction so automatic verification and manual approval
+// can safely retry after a provider/network timeout without double crediting.
+async function creditCatalogTopup(request) {
+  if (!request?.catalogApiTopup) return { ok: false, error: 'ไม่ใช่คำขอเติมเงินสินค้า API' };
+  const targetUserId = request.tenantUserId || request.userId;
+  if (request.tenantShopId) {
+    const tenantDb = await store.loadTenantDb(request.tenantShopId);
+    if (!tenantDb) return { ok: false, error: 'ไม่พบข้อมูลร้านเช่าสำหรับเติมเงินสินค้า API' };
+    return store.runInTenant(request.tenantShopId, tenantDb, () => store.transact(data => {
+      data.walletTransactions ||= [];
+      const user = data.users.find(item => item.id === targetUserId);
+      if (!user) return { ok: false, error: 'ไม่พบบัญชีลูกค้าในร้านเช่า' };
+      const already = data.walletTransactions.find(item => item.topupRequestId === request.id);
+      if (already) return { ok: true, alreadyCredited: true, user };
+      const amount = Math.round((Number(request.amount) || 0) * 100) / 100;
+      user.catalogWalletBalance = Math.round(((Number(user.catalogWalletBalance) || 0) + amount) * 100) / 100;
+      data.walletTransactions.push({
+        id: store.genId(10), userId: user.id, type: 'catalog-topup', catalogApiTopup: true,
+        amount, topupRequestId: request.id, tenantShopId: String(request.tenantShopId),
+        note: `เติมเงินสินค้า API สำเร็จ (ร้านหลัก, อ้างอิง ${request.refCode})`, createdAt: new Date().toISOString(),
+      });
+      return { ok: true, alreadyCredited: false, user };
+    }));
+  }
+  return store.transact(data => {
+    data.walletTransactions ||= [];
+    const user = data.users.find(item => item.id === targetUserId);
+    if (!user) return { ok: false, error: 'ไม่พบบัญชีผู้ใช้' };
+    const already = data.walletTransactions.find(item => item.topupRequestId === request.id);
+    if (already) return { ok: true, alreadyCredited: true, user };
+    const amount = Math.round((Number(request.amount) || 0) * 100) / 100;
+    user.catalogWalletBalance = Math.round(((Number(user.catalogWalletBalance) || 0) + amount) * 100) / 100;
+    data.walletTransactions.push({
+      id: store.genId(10), userId: user.id, type: 'catalog-topup', catalogApiTopup: true,
+      amount, topupRequestId: request.id,
+      note: `เติมเงินสินค้า API สำเร็จ (อ้างอิง ${request.refCode})`, createdAt: new Date().toISOString(),
+    });
+    return { ok: true, alreadyCredited: false, user };
+  });
+}
+
 const path = require('path');
 
 const upload = multer({
@@ -180,8 +254,13 @@ router.get('/', (req, res) => {
     .filter(t => t.userId === user.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 20);
-  const topupRequests = store.data.topupRequests
-    .filter(t => t.userId === user.id)
+  const localTopups = store.data.topupRequests.filter(t => t.userId === user.id);
+  const partnerTopups = req.tenantShop
+    ? store.platformData.topupRequests.filter(t => isPartnerTopup(t)
+      && String(t.tenantShopId) === String(req.tenantShop.id)
+      && (t.tenantUserId || t.userId) === user.id)
+    : [];
+  const topupRequests = localTopups.concat(partnerTopups)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .slice(0, 10);
   const allOrders = store.data.orders
@@ -359,6 +438,8 @@ router.post('/topup/catalog-api', async (req, res) => {
     amount: req.body.amount,
     method: 'bank_transfer',
     catalogApiTopup: true,
+    tenantShopId: req.tenantShop?.id || null,
+    tenantShopName: req.tenantShop?.name || req.tenantShop?.slug || '',
   });
   if (!created.ok) {
     req.flash('error', created.error);
@@ -369,7 +450,7 @@ router.post('/topup/catalog-api', async (req, res) => {
 
 router.get('/topup/:id', async (req, res) => {
   const user = currentUser(req);
-  const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
+  const request = findTopupRequestForUser(req.params.id, user.id);
   if (!request) return res.redirect('/account/topup');
 
   const catalogApiTopup = Boolean(request.catalogApiTopup);
@@ -383,7 +464,7 @@ router.get('/topup/:id', async (req, res) => {
 
 router.get('/topup/:id/status', (req, res) => {
   const user = currentUser(req);
-  const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
+  const request = findTopupRequestForUser(req.params.id, user.id);
   if (!request) return res.status(404).json({ ok: false, error: 'ไม่พบคำขอนี้' });
 
   res.setHeader('Cache-Control', 'private, no-store');
@@ -399,8 +480,9 @@ router.get('/topup/:id/status', (req, res) => {
 router.get('/topup/:id/slip-file', async (req, res, next) => {
   try {
     const user = currentUser(req);
-    const request = store.data.topupRequests.find(t => t.id === req.params.id);
-    if (!request || (user.role !== 'admin' && request.userId !== user.id) || !request.slipStorageId) {
+    const request = findTopupRequestForUser(req.params.id, user.id)
+      || (!store.isTenantContext() && store.data.topupRequests.find(t => t.id === req.params.id));
+    if (!request || (user.role !== 'admin' && (request.tenantUserId || request.userId) !== user.id) || !request.slipStorageId) {
       return res.sendStatus(404);
     }
     const media = await store.getPrivateMedia(request.slipStorageId);
@@ -453,8 +535,14 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
   activeVerifications.add(requestId);
 
   try {
-    const request = store.data.topupRequests.find(t => t.id === requestId);
-    const user = store.data.users.find(u => u.id === userId);
+    const localRequest = store.data.topupRequests.find(t => t.id === requestId);
+    const request = localRequest || (store.isTenantContext()
+      ? store.platformData.topupRequests.find(t => isPartnerTopup(t)
+        && (!store.currentTenantId || String(t.tenantShopId) === String(store.currentTenantId()))
+        && t.id === requestId)
+      : null);
+    const actor = await findTopupActor(request, userId);
+    const user = actor.user;
     if (!request || !user || request.status === 'approved' || request.status === 'rejected') return;
 
     const payment = settlementPayment({ catalogApiTopup: Boolean(request.catalogApiTopup) });
@@ -534,11 +622,18 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       }
     }
 
+    // Record the provider result on the platform queue for Partner requests.
+    // Wallet credit is performed in the tenant database below and is guarded
+    // by topupRequestId, making retries idempotent.
+    if (verified && request.catalogApiTopup) {
+      const credit = await creditCatalogTopup(request);
+      if (!credit.ok) throw new Error(credit.error);
+    }
+
     let finalRequest;
-    const applied = await store.transact((data) => {
+    const saveResult = (data) => {
       const freshRequest = data.topupRequests.find(t => t.id === requestId);
-      const freshUser = data.users.find(u => u.id === userId);
-      if (!freshRequest || !freshUser || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
+      if (!freshRequest || freshRequest.status === 'approved' || freshRequest.status === 'rejected') return false;
       freshRequest.slipCheck = {
         checked: result.checked,
         verified: result.verified,
@@ -555,20 +650,22 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         checkedAt: new Date().toISOString(),
       };
       freshRequest.slipCheck.verified = verified;
-      if (verified) {
-        if (freshRequest.catalogApiTopup) {
-          freshUser.catalogWalletBalance = Math.round(((Number(freshUser.catalogWalletBalance) || 0) + freshRequest.amount) * 100) / 100;
-        } else {
+      if (verified && !freshRequest.catalogApiTopup) {
+        const freshUser = data.users.find(u => u.id === userId);
+        if (!freshUser) return false;
+        const alreadyCredited = (data.walletTransactions || []).some(item => item.topupRequestId === freshRequest.id);
+        if (!alreadyCredited) {
           freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + freshRequest.amount) * 100) / 100;
+          data.walletTransactions.push({
+            id: store.genId(10), userId: freshUser.id,
+            type: 'topup', catalogApiTopup: false, topupRequestId: freshRequest.id,
+            amount: freshRequest.amount,
+            note: `เติมเงินสำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${freshRequest.refCode})`,
+            createdAt: new Date().toISOString(),
+          });
         }
-        data.walletTransactions.push({
-          id: store.genId(10), userId: freshUser.id,
-          type: freshRequest.catalogApiTopup ? 'catalog-topup' : 'topup',
-          catalogApiTopup: Boolean(freshRequest.catalogApiTopup),
-          amount: freshRequest.amount,
-          note: `${freshRequest.catalogApiTopup ? 'เติมเงินสินค้า API' : 'เติมเงิน'}สำเร็จ (ตรวจสอบอัตโนมัติ, อ้างอิง ${freshRequest.refCode})`,
-          createdAt: new Date().toISOString(),
-        });
+      }
+      if (verified) {
         freshRequest.status = 'approved';
         freshRequest.reviewedAt = new Date().toISOString();
         freshRequest.reviewNote = 'ตรวจสอบและอนุมัติอัตโนมัติ';
@@ -577,7 +674,8 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       }
       finalRequest = freshRequest;
       return true;
-    });
+    };
+    const applied = await withTopupStore(request, () => store.transact(saveResult));
     if (!applied) return;
 
     // Links to the normal (login-required) admin approve page for now — a
@@ -593,18 +691,26 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     }).catch(() => {});
   } catch (err) {
     console.error('[topup] background verify failed:', err.message);
-    await store.transact((data) => {
+    const fallbackRequest = store.data.topupRequests.find(t => t.id === requestId)
+      || (store.isTenantContext() ? store.platformData.topupRequests.find(t => isPartnerTopup(t)
+        && (!store.currentTenantId || String(t.tenantShopId) === String(store.currentTenantId()))
+        && t.id === requestId) : null);
+    await withTopupStore(fallbackRequest, () => store.transact((data) => {
       const request = data.topupRequests.find(t => t.id === requestId);
       if (request && request.status === 'verifying') {
         request.status = 'pending';
         request.slipCheck = { checked: false, verified: false, message: 'ระบบตรวจสลิปขัดข้องชั่วคราว อยู่ระหว่างรอแอดมินตรวจสอบ' };
       }
-    }).catch(saveErr => console.error('[topup] could not persist verification failure:', saveErr.message));
+    })).catch(saveErr => console.error('[topup] could not persist verification failure:', saveErr.message));
   } finally {
-    await store.transact((data) => {
+    const fallbackRequest = store.data.topupRequests.find(t => t.id === requestId)
+      || (store.isTenantContext() ? store.platformData.topupRequests.find(t => isPartnerTopup(t)
+        && (!store.currentTenantId || String(t.tenantShopId) === String(store.currentTenantId()))
+        && t.id === requestId) : null);
+    await withTopupStore(fallbackRequest, () => store.transact((data) => {
       const request = data.topupRequests.find(t => t.id === requestId);
       if (request && request.status === 'verifying') request.status = 'pending';
-    }).catch(saveErr => console.error('[topup] could not finalize verification:', saveErr.message));
+    })).catch(saveErr => console.error('[topup] could not finalize verification:', saveErr.message));
     activeVerifications.delete(requestId);
   }
 }
@@ -613,7 +719,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
 // these two instead of re-implementing topup + slip verification itself)
 // so there is exactly one place that creates a topup request and exactly
 // one place that kicks off slip verification.
-async function createTopupRequest({ user, amount, method, catalogApiTopup = false }) {
+async function createTopupRequest({ user, amount, method, catalogApiTopup = false, tenantShopId = null, tenantShopName = '' }) {
   const amt = Math.round((Number(amount) || 0) * 100) / 100;
   const mth = String(method || 'bank_transfer');
   if (mth !== 'bank_transfer') {
@@ -622,19 +728,29 @@ async function createTopupRequest({ user, amount, method, catalogApiTopup = fals
   if (!Number.isFinite(amt) || amt < 1) {
     return { ok: false, error: 'กรุณาระบุจำนวนเงินอย่างน้อย 1 บาท' };
   }
+  const isPartner = Boolean(catalogApiTopup && tenantShopId && store.isTenantContext()
+    && (!store.currentTenantId || String(store.currentTenantId()) === String(tenantShopId)));
   const request = {
     id: store.genId(10), userId: user.id, amount: amt, method: mth,
     catalogApiTopup: Boolean(catalogApiTopup),
+    tenantShopId: isPartner ? String(tenantShopId) : null,
+    tenantShopName: isPartner ? String(tenantShopName || tenantShopId) : '',
+    tenantUserId: isPartner ? user.id : null,
+    tenantUsername: isPartner ? String(user.username || '') : '',
+    tenantUserEmail: isPartner ? String(user.email || '') : '',
     refCode: 'TU' + store.genId(6).toUpperCase(),
     slipPath: null, slipCheck: null, status: 'pending',
     createdAt: new Date().toISOString(), reviewedAt: null, reviewNote: '',
   };
-  await store.transact((data) => data.topupRequests.push(request));
+  await withTopupStore(request, () => store.transact((data) => {
+    data.topupRequests ||= [];
+    data.topupRequests.push(request);
+  }));
   return { ok: true, request };
 }
 
 async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptions, origin }) {
-  const request = store.data.topupRequests.find(t => t.id === requestId && t.userId === user.id);
+  const request = findTopupRequestForUser(requestId, user.id);
   if (!request) return { ok: false, error: 'ไม่พบคำขอนี้' };
   if (request.status === 'approved' || request.status === 'rejected') {
     return { ok: false, error: 'คำขอนี้ถูกตรวจสอบไปแล้ว' };
@@ -648,14 +764,17 @@ async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptio
       ? store.platformData.settings.payment
       : store.data.settings.payment;
     const automatic = canCheckSlipAutomatically(requestPayment, Boolean(request.catalogApiTopup));
-    await store.transact((data) => {
+    await withTopupStore(request, () => store.transact((data) => {
       const fresh = data.topupRequests.find(t => t.id === requestId && t.userId === user.id);
-      if (!fresh || fresh.status === 'approved' || fresh.status === 'rejected') throw new Error('คำขอนี้ถูกตรวจสอบแล้ว');
-      fresh.slipStorageId = storageId;
-      fresh.slipPath = `/account/topup/${fresh.id}/slip-file`;
-      fresh.status = automatic ? 'verifying' : 'pending';
-      if (!automatic) fresh.slipCheck = { checked: false, verified: false, message: 'รอแอดมินตรวจสอบสลิป', provider: 'manual' };
-    });
+      const partnerFresh = data.topupRequests.find(t => t.id === requestId && isPartnerTopup(t)
+        && (t.tenantUserId || t.userId) === user.id);
+      const target = fresh || partnerFresh;
+      if (!target || target.status === 'approved' || target.status === 'rejected') throw new Error('คำขอนี้ถูกตรวจสอบแล้ว');
+      target.slipStorageId = storageId;
+      target.slipPath = `/account/topup/${target.id}/slip-file`;
+      target.status = automatic ? 'verifying' : 'pending';
+      if (!automatic) target.slipCheck = { checked: false, verified: false, message: 'รอแอดมินตรวจสอบสลิป', provider: 'manual' };
+    }));
     request.slipStorageId = storageId;
     request.slipPath = `/account/topup/${request.id}/slip-file`;
     request.status = automatic ? 'verifying' : 'pending';
@@ -672,8 +791,12 @@ async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptio
 }
 
 async function retryTopupSlipVerification({ requestId, origin }) {
-  const request = store.data.topupRequests.find(t => t.id === requestId);
-  const user = request && store.data.users.find(u => u.id === request.userId);
+  const request = store.data.topupRequests.find(t => t.id === requestId)
+    || (store.isTenantContext() ? store.platformData.topupRequests.find(t => isPartnerTopup(t)
+      && (!store.currentTenantId || String(t.tenantShopId) === String(store.currentTenantId()))
+      && t.id === requestId) : null);
+  const actor = request ? await findTopupActor(request, request.userId) : { user: null };
+  const user = actor.user;
   if (!request || !user || !request.slipStorageId) return { ok: false, error: 'ไม่พบสลิปของรายการนี้' };
   if (request.status === 'approved' || request.status === 'rejected') return { ok: false, error: 'รายการนี้ถูกดำเนินการแล้ว' };
   if (activeVerifications.has(request.id)) return { ok: false, error: 'รายการนี้กำลังตรวจสอบอยู่' };
@@ -681,10 +804,10 @@ async function retryTopupSlipVerification({ requestId, origin }) {
   if (!media) return { ok: false, error: 'ไม่พบไฟล์สลิปที่บันทึกไว้' };
   const chunks = [];
   for await (const chunk of media.stream) chunks.push(Buffer.from(chunk));
-  await store.transact((data) => {
+  await withTopupStore(request, () => store.transact((data) => {
     const fresh = data.topupRequests.find(t => t.id === requestId);
     if (fresh && fresh.status === 'pending') fresh.status = 'verifying';
-  });
+  }));
   await verifySlipInBackground({
     requestId: request.id,
     userId: user.id,
@@ -698,7 +821,7 @@ async function retryTopupSlipVerification({ requestId, origin }) {
 
 router.post('/topup/:id/retry-slip', async (req, res) => {
   const user = currentUser(req);
-  const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
+  const request = findTopupRequestForUser(req.params.id, user.id);
   if (!request) return res.redirect('/account/topup');
   const result = await retryTopupSlipVerification({ requestId: request.id, origin: `${req.protocol}://${req.get('host')}` });
   req.flash(result.ok ? 'success' : 'error', result.ok ? 'ส่งสลิปเดิมไปตรวจอีกครั้งแล้ว' : result.error);
@@ -707,7 +830,7 @@ router.post('/topup/:id/retry-slip', async (req, res) => {
 
 router.post('/topup/:id/slip', (req, res) => {
   const user = currentUser(req);
-  const request = store.data.topupRequests.find(t => t.id === req.params.id && t.userId === user.id);
+  const request = findTopupRequestForUser(req.params.id, user.id);
   if (!request) return res.redirect('/account/topup');
   if (request.status === 'approved' || request.status === 'rejected') {
     req.flash('error', 'คำขอนี้ถูกตรวจสอบไปแล้ว');
