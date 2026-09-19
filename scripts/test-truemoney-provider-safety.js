@@ -28,7 +28,7 @@ function url(server) { return `http://127.0.0.1:${server.address().port}`; }
 
   const healthy = await listen((req, res) => {
     res.writeHead(200, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ success: true, status: 200, message: 'รับเงินสำเร็จ', data: { amount: '10.00', name: 'Tester' } }));
+    res.end(JSON.stringify({ success: true, status: 200, message: 'รับเงินสำเร็จ', name: 'Tester', data: { amount: '10.00' } }));
   });
   process.env.TRUEMONEY_API_BASE_URL = url(healthy);
   const result = await truemoney.redeemAngpao('https://gift.truemoney.com/campaign/?v=safety-test', '0801234567');
@@ -37,7 +37,7 @@ function url(server) { return `http://127.0.0.1:${server.address().port}`; }
   assert.equal(result.providerBase, url(healthy));
   const consumed = await listen((req, res) => {
     res.writeHead(400, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ status: 400, message: 'ลิงก์ซองของขวัญถูกใช้งานแล้ว', data: null }));
+    res.end(JSON.stringify({ success: false, status: 'FAIL', reason: 'ลิงก์ซองของขวัญถูกใช้งานแล้ว', data: null }));
   });
   process.env.TRUEMONEY_API_BASE_URL = url(consumed);
   const uncertainConsumed = await truemoney.redeemAngpao('https://gift.truemoney.com/campaign/?v=consumed-test', '0801234567');

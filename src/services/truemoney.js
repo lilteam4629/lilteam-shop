@@ -1,11 +1,11 @@
 /**
  * TrueMoney Angpao (gift voucher) redemption service.
  *
- * The old api.xpluem.com proxy now returns 521. These browser-compatible
- * providers return TrueMoney's current { status, data } envelope. A voucher
- * redemption is irreversible, so one request is sent to one provider only;
- * retrying against another provider after a 5xx could turn a credited voucher
- * into a misleading "already used" response.
+ * The provider adapter follows the public truewallet.php contract published
+ * by code.xo.je (success/status/data, plus reason/name on failures/success).
+ * A voucher redemption is irreversible, so one request is sent to one
+ * provider only; retrying against another provider after a 5xx could turn a
+ * credited voucher into a misleading "already used" response.
  */
 const http = require('http');
 const https = require('https');
@@ -14,9 +14,6 @@ const DEFAULT_PROVIDERS = [
   'https://truemoney-voucher-go.vercel.app',
   'https://truemoney-voucher-nestjs.vercel.app',
   'https://truemoney-voucher-fastapi.vercel.app',
-  // Legacy xpluem API. It uses /<code>/<phone> (without /truemoney) and is
-  // kept as a last fallback for shops that still have access to that service.
-  'https://api.xpluem.com',
 ];
 
 function providerBases() {
@@ -78,7 +75,7 @@ function statusFrom(payload) {
   const status = rawStatus && typeof rawStatus === 'object' ? rawStatus : {};
   return {
     code: String(status.code || (typeof rawStatus === 'string' ? rawStatus : '') || payload?.code || (payload?.success === true ? 'SUCCESS' : '')).toUpperCase(),
-    message: String(status.message || payload?.message || '').trim(),
+    message: String(status.message || payload?.message || payload?.reason || '').trim(),
   };
 }
 
@@ -98,10 +95,6 @@ function errorMessage(code, fallback = '') {
     MAINTENANCE: 'ระบบ TrueMoney อยู่ระหว่างปรับปรุง กรุณาลองใหม่ภายหลัง',
   };
   return messages[code] || fallback || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้';
-}
-
-function isTransientProviderFailure(code, statusCode) {
-  return Number(statusCode) >= 500 || ['500', 'INTERNAL_ERROR', 'MAINTENANCE', 'SERVICE_UNAVAILABLE', 'UPSTREAM_ERROR'].includes(String(code || '').toUpperCase());
 }
 
 function responseData(payload) {
@@ -124,14 +117,12 @@ function amountFrom(payload) {
 }
 
 function redeemUrl(base, voucherCode, phone) {
-  const hostname = new URL(base).hostname.toLowerCase();
-  const path = hostname === 'api.xpluem.com' ? '' : '/truemoney';
-  return `${base}${path}/${encodeURIComponent(voucherCode)}/${encodeURIComponent(phone)}`;
+  return `${base}/truemoney/${encodeURIComponent(voucherCode)}/${encodeURIComponent(phone)}`;
 }
 
 function senderFrom(payload) {
   const data = responseData(payload);
-  return data.name || data.owner_profile?.full_name || data.my_ticket?.full_name || 'ไม่ระบุชื่อ';
+  return payload?.name || data.name || data.owner_profile?.full_name || data.my_ticket?.full_name || 'ไม่ระบุชื่อ';
 }
 
 function recipientMatches(payload, phone) {
