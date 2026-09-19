@@ -199,6 +199,28 @@ async function checkHomeSectionDelete(cookie) {
   const page = await fetchOk('/admin/home-sections', 'text/html', { cookie });
   const action = page.body.match(/action="(\/admin\/home-sections\/[^"/]+\/delete)"/)?.[1];
   if (!action || !page.body.includes('hs-delete-button')) throw new Error('home section does not expose its delete action');
+
+  const editAction = page.body.match(/action="(\/admin\/home-sections\/[^"/]+\/edit)"/)?.[1];
+  const productIds = [...page.body.matchAll(/name="productIds" value="([^"]+)"/g)]
+    .map(match => match[1]).filter(Boolean).slice(0, 2);
+  if (!editAction || productIds.length < 2) throw new Error('home section picker does not expose editable products');
+  const editBody = [
+    'title=selection-smoke', 'mode=manual', 'limit=5',
+    ...productIds.map(id => `productIds=${encodeURIComponent(id)}`),
+  ].join('&');
+  const edited = await request(editAction, {
+    method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: editBody,
+  });
+  if (edited.statusCode !== 302 || edited.headers.location !== '/admin/home-sections') throw new Error('home section selection save failed');
+  const afterEdit = await fetchOk('/admin/home-sections', 'text/html', { cookie });
+  for (const id of productIds) {
+    if (!afterEdit.body.includes(`value="${id}"`) || !new RegExp(`value="${id}"[\\s\\S]{0,180}checked`).test(afterEdit.body)) {
+      throw new Error(`home section selection ${id} was not persisted`);
+    }
+  }
+  const storefront = await fetchOk('/', 'text/html', { cookie });
+  if (!storefront.body.includes('selection-smoke')) throw new Error('saved home section is missing from storefront');
+
   const deleted = await request(action, { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' } });
   if (deleted.statusCode !== 302 || deleted.headers.location !== '/admin/home-sections') throw new Error('home section delete failed');
   const after = await fetchOk('/admin/home-sections', 'text/html', { cookie });

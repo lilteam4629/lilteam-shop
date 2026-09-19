@@ -118,10 +118,14 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     .slice(0, 8);
   const newestProducts = [...active].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const newest = newestProducts.slice(0, 5);
-  const byId = new Map(active.map(p => [p.id, p]));
+  // Persisted form values are strings, while older imports may have numeric
+  // product IDs. Canonicalizing both sides keeps manually curated sections
+  // visible after save regardless of the product's legacy ID type.
+  const byId = new Map(active.map(p => [String(p.id), p]));
   const homeSections = (store.data.homeSections || []).filter(section => section.enabled !== false).map(section => {
     const products = section.mode === 'manual'
-      ? (section.productIds || []).map(id => byId.get(id)).filter(Boolean)
+      ? (Array.isArray(section.productIds) ? section.productIds : [])
+        .map(id => byId.get(String(id))).filter(Boolean)
       : newestProducts.slice(0, section.limit || 5);
     return { id: section.id, title: section.title, products };
   }).filter(section => section.products.length);

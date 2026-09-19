@@ -25,7 +25,7 @@ async function main() {
     assert.match(appSource, /SESSION_SECRET must be configured/);
   });
   check('Regular request bodies have explicit size and parameter limits', () => {
-    assert.match(appSource, /express\.urlencoded\(\{[^}]*limit:\s*['"]1mb['"][^}]*parameterLimit:\s*100/s);
+    assert.match(appSource, /express\.urlencoded\(\{[^}]*limit:\s*['"]1mb['"][^}]*parameterLimit:\s*2000/s);
     assert.match(appSource, /express\.json\(\{\s*limit:\s*['"]1mb['"]\s*\}\)/);
   });
   check('Public media lookup excludes private uploads', () => {

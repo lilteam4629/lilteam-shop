@@ -45,7 +45,10 @@ app.set('layout', 'layouts/main');
 // Keep request bodies bounded before they reach route handlers. Multipart
 // uploads have their own 5 MB multer limit; these limits cover regular forms
 // and JSON endpoints so a crafted request cannot consume unbounded memory.
-app.use(express.urlencoded({ extended: true, limit: '1mb', parameterLimit: 100 }));
+// A manual homepage section can legitimately contain one checkbox field per
+// active product. Keep the request bounded, but do not silently truncate a
+// valid selection when a shop has more than 100 products.
+app.use(express.urlencoded({ extended: true, limit: '1mb', parameterLimit: 2000 }));
 app.use(express.json({ limit: '1mb' }));
 app.get('/health', async (req, res) => {
   try {
