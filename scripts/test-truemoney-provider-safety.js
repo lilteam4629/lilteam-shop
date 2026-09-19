@@ -35,8 +35,17 @@ function url(server) { return `http://127.0.0.1:${server.address().port}`; }
   assert.equal(result.success, true);
   assert.equal(result.amount, 10);
   assert.equal(result.providerBase, url(healthy));
+  const consumed = await listen((req, res) => {
+    res.writeHead(400, { 'content-type': 'application/json' });
+    res.end(JSON.stringify({ status: 400, message: 'ลิงก์ซองของขวัญถูกใช้งานแล้ว', data: null }));
+  });
+  process.env.TRUEMONEY_API_BASE_URL = url(consumed);
+  const uncertainConsumed = await truemoney.redeemAngpao('https://gift.truemoney.com/campaign/?v=consumed-test', '0801234567');
+  assert.equal(uncertainConsumed.code, 'PROVIDER_UNCERTAIN');
+  assert.equal(uncertainConsumed.recoverable, true);
   unavailable.close();
   healthy.close();
+  consumed.close();
   console.log('TrueMoney provider safety checks passed: no unsafe cross-provider retry');
 })().catch(error => {
   console.error(error);
