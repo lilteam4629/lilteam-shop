@@ -78,10 +78,10 @@ async function reserveTrueMoneyClaim(voucherCode, userId) {
       existing.status = 'processing';
       existing.message = '';
       existing.updatedAt = new Date().toISOString();
-      return { retryExisting: true, amount: Number(existing.amount) || 0, senderName: existing.senderName || '' };
+      return { retryExisting: true, amount: Number(existing.amount) || 0, senderName: existing.senderName || '', providerBase: existing.providerBase || '' };
     }
     data.truemoneyRedemptions.push({ voucherCode, userId, status: 'processing', createdAt: new Date().toISOString() });
-    return { retryExisting: false, amount: 0, senderName: '' };
+    return { retryExisting: false, amount: 0, senderName: '', providerBase: '' };
   });
 }
 
@@ -91,9 +91,21 @@ async function rememberTrueMoneyResult(voucherCode, userId, result) {
     if (!claim || claim.status === 'approved') return;
     claim.amount = Math.round(Number(result.amount) * 100) / 100;
     claim.senderName = result.senderName || '';
+    claim.providerBase = result.providerBase || claim.providerBase || '';
     claim.providerStatus = result.recovered ? 'TARGET_USER_REDEEMED' : 'SUCCESS';
     claim.redeemedAt = claim.redeemedAt || new Date().toISOString();
     claim.updatedAt = new Date().toISOString();
+  });
+}
+
+async function rememberTrueMoneyProvider(voucherCode, userId, providerBase) {
+  if (!providerBase) return;
+  await transactWithRetry(data => {
+    const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.userId === userId);
+    if (claim && !claim.providerBase) {
+      claim.providerBase = providerBase;
+      claim.updatedAt = new Date().toISOString();
+    }
   });
 }
 
@@ -230,12 +242,6 @@ router.post('/topup/truemoney', async (req, res) => {
     return res.redirect('/account/topup');
   }
 
-  const alreadyUsed = (store.data?.walletTransactions || []).some(t => t.voucherCode === voucherCode);
-  if (alreadyUsed) {
-    req.flash('error', 'ซองของขวัญนี้ถูกใช้งานในระบบแล้ว');
-    return res.redirect('/account/topup');
-  }
-
   truemoneyRedemptionLocks.add(voucherCode);
 
     const reservation = await reserveTrueMoneyClaim(voucherCode, user.id);
@@ -251,14 +257,17 @@ router.post('/topup/truemoney', async (req, res) => {
 
     const result = reservation.retryExisting && reservation.amount > 0
       ? { success: true, recovered: true, amount: reservation.amount, senderName: reservation.senderName || '', message: 'กู้คืนรายการรับเงินสำเร็จ' }
-      : await truemoney.redeemAngpao(voucherInput, receiverPhone);
+      : await truemoney.redeemAngpao(voucherInput, receiverPhone, { providerBase: reservation.providerBase });
 
     if (!result.success || !Number.isFinite(result.amount) || result.amount <= 0) {
+      if (result.recoverable && result.providerBase) {
+        await rememberTrueMoneyProvider(voucherCode, user.id, result.providerBase).catch(error => console.error('[TrueMoney provider claim]', error.message));
+      }
       // TARGET_USER_REDEEMED can be the response from a successful first
       // attempt whose persistence was interrupted. Keep that claim in
       // processing so the next retry can recover it instead of permanently
       // hiding the already-redeemed voucher behind a generic error.
-      if (result.code !== 'TARGET_USER_REDEEMED') {
+      if (!result.recoverable) {
         await markTrueMoneyClaimFailed(voucherCode, user.id, result.message || '').catch(error => {
           console.error('[TrueMoney claim status]', error.message);
         });
@@ -770,3 +779,4 @@ router.rememberTrueMoneyResult = rememberTrueMoneyResult;
 router.markTrueMoneyClaimFailed = markTrueMoneyClaimFailed;
 router.creditTrueMoneyClaim = creditTrueMoneyClaim;
 router.finalizeTrueMoneyClaim = finalizeTrueMoneyClaim;
+router.rememberTrueMoneyProvider = rememberTrueMoneyProvider;

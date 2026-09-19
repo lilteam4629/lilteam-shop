@@ -319,11 +319,14 @@ router.post('/wallet/truemoney', async (req, res) => {
     if (reservation.alreadyCredited) return res.json({ ok: true, alreadyCredited: true, message: 'ซองของขวัญนี้เติมเงินเข้าเว็บแล้ว' });
     const result = reservation.retryExisting && reservation.amount > 0
       ? { success: true, recovered: true, amount: reservation.amount, senderName: reservation.senderName || '', message: 'กู้คืนรายการรับเงินสำเร็จ' }
-      : await truemoney.redeemAngpao(voucherInput, receiverPhone);
+      : await truemoney.redeemAngpao(voucherInput, receiverPhone, { providerBase: reservation.providerBase });
     if (!result.success || !Number.isFinite(result.amount) || result.amount <= 0) {
+      if (result.recoverable && result.providerBase) {
+        await accountRoutes.rememberTrueMoneyProvider(voucherCode, user.id, result.providerBase).catch(error => console.error('[Cloud TrueMoney provider claim]', error.message));
+      }
       // Keep an already-redeemed claim recoverable when the provider does not
       // include the amount in its second response.
-      if (result.code !== 'TARGET_USER_REDEEMED') {
+      if (!result.recoverable) {
         await accountRoutes.markTrueMoneyClaimFailed(voucherCode, user.id, result.message || '').catch(error => {
           console.error('[Cloud TrueMoney claim status]', error.message);
         });
