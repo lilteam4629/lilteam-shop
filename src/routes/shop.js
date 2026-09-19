@@ -294,7 +294,15 @@ router.get('/help', (req, res) => {
 });
 
 router.get('/contact', (req, res) => {
-  if (req.tenantShop && req.query.api !== '1') return res.render('shop/contact', { title: 'ติดต่อร้านหลักหลังสั่งซื้อ', postPurchaseOnly: true });
+  // A tenant's regular contact page belongs to that rental shop.  The API
+  // source-shop contact is an explicit, separate action (`?api=1`) and must
+  // never replace the tenant's own support flow.
+  if (req.tenantShop && req.query.api !== '1') {
+    return res.render('shop/contact', {
+      title: 'ติดต่อร้าน',
+      settings: store.data.settings,
+    });
+  }
   if (req.tenantShop && req.query.api === '1') {
     // Partner/API products belong to the platform shop. Keep the tenant's
     // own `/contact` page and settings untouched; this special action should
