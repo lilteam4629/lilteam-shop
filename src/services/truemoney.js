@@ -11,6 +11,9 @@ const DEFAULT_PROVIDERS = [
   'https://truemoney-voucher-go.vercel.app',
   'https://truemoney-voucher-nestjs.vercel.app',
   'https://truemoney-voucher-fastapi.vercel.app',
+  // Legacy xpluem API. It uses /<code>/<phone> (without /truemoney) and is
+  // kept as a last fallback for shops that still have access to that service.
+  'https://api.xpluem.com',
 ];
 
 function providerBases() {
@@ -108,6 +111,12 @@ function amountFrom(payload) {
   return 0;
 }
 
+function redeemUrl(base, voucherCode, phone) {
+  const hostname = new URL(base).hostname.toLowerCase();
+  const path = hostname === 'api.xpluem.com' ? '' : '/truemoney';
+  return `${base}${path}/${encodeURIComponent(voucherCode)}/${encodeURIComponent(phone)}`;
+}
+
 function senderFrom(payload) {
   const data = responseData(payload);
   return data.name || data.owner_profile?.full_name || data.my_ticket?.full_name || 'ไม่ระบุชื่อ';
@@ -124,13 +133,13 @@ function recipientMatches(payload, phone) {
 async function redeemAngpao(voucherInput, receiverPhone) {
   const voucherCode = extractVoucherCode(voucherInput);
   const phone = normalizePhone(receiverPhone);
-  if (!voucherCode) return { success: false, amount: 0, message: 'ลิงก์ซองของขวัญไม่ถูกต้อง' };
-  if (!/^0\d{9}$/.test(phone)) return { success: false, amount: 0, message: 'เบอร์รับเงิน TrueMoney ไม่ถูกต้อง (ต้องเป็นเบอร์ 10 หลัก)' };
+  if (!voucherCode) return { success: false, amount: 0, code: 'INVALID_VOUCHER', message: 'ลิงก์ซองของขวัญไม่ถูกต้อง' };
+  if (!/^0\d{9}$/.test(phone)) return { success: false, amount: 0, code: 'INVALID_PHONE', message: 'เบอร์รับเงิน TrueMoney ไม่ถูกต้อง (ต้องเป็นเบอร์ 10 หลัก)' };
 
   let lastError = null;
   for (const base of providerBases()) {
-    const targetUrl = `${base}/truemoney/${encodeURIComponent(voucherCode)}/${encodeURIComponent(phone)}`;
     try {
+      const targetUrl = redeemUrl(base, voucherCode, phone);
       const response = await requestJson(targetUrl);
       const { code, message } = statusFrom(response.payload);
       // Return valid voucher errors directly; only network/invalid responses
@@ -139,9 +148,9 @@ async function redeemAngpao(voucherInput, receiverPhone) {
         const amount = amountFrom(response.payload);
         const recovered = code === 'TARGET_USER_REDEEMED' && amount > 0 && recipientMatches(response.payload, phone);
         if ((code === 'SUCCESS' || recovered) && amount > 0) {
-          return { success: true, recovered, amount, senderName: senderFrom(response.payload), message: message || (recovered ? 'กู้คืนรายการรับเงินสำเร็จ' : 'รับเงินสำเร็จ'), raw: response.payload };
+          return { success: true, recovered, amount, code, senderName: senderFrom(response.payload), message: message || (recovered ? 'กู้คืนรายการรับเงินสำเร็จ' : 'รับเงินสำเร็จ'), raw: response.payload };
         }
-        return { success: false, amount: 0, message: errorMessage(code, message), raw: response.payload };
+        return { success: false, amount: 0, code, message: errorMessage(code, message), raw: response.payload };
       }
       lastError = new Error('รูปแบบข้อมูลตอบกลับจากระบบไม่ถูกต้อง');
     } catch (error) {
@@ -150,8 +159,8 @@ async function redeemAngpao(voucherInput, receiverPhone) {
   }
 
   const text = String(lastError?.message || '');
-  if (/หมดเวลา|timeout/i.test(text)) return { success: false, amount: 0, message: 'การเชื่อมต่อไปยังระบบ TrueMoney หมดเวลา กรุณาลองใหม่อีกครั้ง' };
-  return { success: false, amount: 0, message: 'ระบบ TrueMoney ยังไม่พร้อมให้ตรวจสอบ กรุณาลองใหม่อีกครั้ง' };
+  if (/หมดเวลา|timeout/i.test(text)) return { success: false, amount: 0, code: 'NETWORK_TIMEOUT', message: 'การเชื่อมต่อไปยังระบบ TrueMoney หมดเวลา กรุณาลองใหม่อีกครั้ง' };
+  return { success: false, amount: 0, code: 'PROVIDER_UNAVAILABLE', message: 'ระบบ TrueMoney ยังไม่พร้อมให้ตรวจสอบ กรุณาลองใหม่อีกครั้ง' };
 }
 
 module.exports = { extractVoucherCode, normalizePhone, redeemAngpao, providerBases };

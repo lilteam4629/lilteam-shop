@@ -22,7 +22,8 @@ router.use(requireLogin);
 // Normal tenant top-ups always use that shop's own receiving account. The
 // platform account is selected only for an explicitly marked API top-up.
 function settlementPayment({ catalogApiTopup = false } = {}) {
-  return catalogApiTopup ? store.platformData.settings.payment : store.data.settings.payment;
+  const source = catalogApiTopup ? store.platformData : store.data;
+  return source?.settings?.payment || {};
 }
 
 const path = require('path');
@@ -143,6 +144,24 @@ async function creditTrueMoneyClaim({ voucherCode, userId, result }) {
   return creditResult;
 }
 
+// Provider redemption is irreversible, so persist the provider result and
+// wallet credit as a small retryable handoff. This covers a transient Mongo
+// conflict or connection blip between the provider response and our local
+// credit transaction without asking the customer to create another voucher.
+async function finalizeTrueMoneyClaim({ voucherCode, userId, result, attempts = 5 }) {
+  let lastError;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      await rememberTrueMoneyResult(voucherCode, userId, result);
+      return await creditTrueMoneyClaim({ voucherCode, userId, result });
+    } catch (error) {
+      lastError = error;
+      if (attempt + 1 < attempts) await wait(250 * (attempt + 1));
+    }
+  }
+  throw lastError;
+}
+
 router.get('/', (req, res) => {
   const user = currentUser(req);
   const transactions = store.data.walletTransactions
@@ -183,8 +202,11 @@ router.get('/topup/catalog-api', (req, res) => {
 
 router.post('/topup/truemoney', async (req, res) => {
   const user = currentUser(req);
-  const voucherInput = String(req.body.voucherLink || req.body.voucherCode || '').trim();
-  const payment = settlementPayment();
+  let voucherCode = '';
+  let providerAccepted = false;
+  try {
+    const voucherInput = String(req.body.voucherLink || req.body.voucherCode || '').trim();
+    const payment = settlementPayment() || {};
 
   if (!payment.truemoneyEnabled) {
     req.flash('error', 'ระบบเติมเงินผ่านซองของขวัญ TrueMoney ปิดให้บริการชั่วคราว');
@@ -197,7 +219,7 @@ router.post('/topup/truemoney', async (req, res) => {
     return res.redirect('/account/topup');
   }
 
-  const voucherCode = truemoney.extractVoucherCode(voucherInput);
+  voucherCode = truemoney.extractVoucherCode(voucherInput);
   if (!voucherCode) {
     req.flash('error', 'กรุณากรอกลิงก์ซองของขวัญ TrueMoney ให้ถูกต้อง');
     return res.redirect('/account/topup');
@@ -208,7 +230,7 @@ router.post('/topup/truemoney', async (req, res) => {
     return res.redirect('/account/topup');
   }
 
-  const alreadyUsed = store.data.walletTransactions.some(t => t.voucherCode === voucherCode);
+  const alreadyUsed = (store.data?.walletTransactions || []).some(t => t.voucherCode === voucherCode);
   if (alreadyUsed) {
     req.flash('error', 'ซองของขวัญนี้ถูกใช้งานในระบบแล้ว');
     return res.redirect('/account/topup');
@@ -216,7 +238,6 @@ router.post('/topup/truemoney', async (req, res) => {
 
   truemoneyRedemptionLocks.add(voucherCode);
 
-  try {
     const reservation = await reserveTrueMoneyClaim(voucherCode, user.id);
     if (!reservation) {
       req.flash('error', 'ซองของขวัญนี้ถูกใช้แล้วหรือกำลังอยู่ระหว่างการตรวจสอบ');
@@ -233,13 +254,21 @@ router.post('/topup/truemoney', async (req, res) => {
       : await truemoney.redeemAngpao(voucherInput, receiverPhone);
 
     if (!result.success || !Number.isFinite(result.amount) || result.amount <= 0) {
-      await markTrueMoneyClaimFailed(voucherCode, user.id, result.message || '');
+      // TARGET_USER_REDEEMED can be the response from a successful first
+      // attempt whose persistence was interrupted. Keep that claim in
+      // processing so the next retry can recover it instead of permanently
+      // hiding the already-redeemed voucher behind a generic error.
+      if (result.code !== 'TARGET_USER_REDEEMED') {
+        await markTrueMoneyClaimFailed(voucherCode, user.id, result.message || '').catch(error => {
+          console.error('[TrueMoney claim status]', error.message);
+        });
+      }
       req.flash('error', result.message || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้');
       return res.redirect('/account/topup');
     }
 
-    await rememberTrueMoneyResult(voucherCode, user.id, result);
-    const credit = await creditTrueMoneyClaim({ voucherCode, userId: user.id, result });
+    providerAccepted = true;
+    const credit = await finalizeTrueMoneyClaim({ voucherCode, userId: user.id, result });
     if (credit.alreadyCredited) {
       req.flash('success', 'ซองของขวัญนี้เติมเงินเข้าเว็บแล้ว');
       return res.redirect('/account');
@@ -274,7 +303,30 @@ router.post('/topup/truemoney', async (req, res) => {
     res.redirect(topupRequestId ? `/account/topup/${topupRequestId}` : '/account');
   } catch (err) {
     console.error('[TrueMoney Redeem Error]', err);
-    req.flash('error', 'เกิดข้อผิดพลาดในการตรวจสอบซองของขวัญ กรุณาลองใหม่อีกครั้ง');
+    if (providerAccepted) {
+      // The provider has already accepted the voucher. If the final write
+      // hit a transient failure, try one last durable recovery before asking
+      // the customer to retry the same link.
+      try {
+        const claim = (store.data?.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.userId === user.id);
+        if (claim && Number(claim.amount) > 0) {
+          const recovered = await creditTrueMoneyClaim({
+            voucherCode,
+            userId: user.id,
+            result: { amount: Number(claim.amount), senderName: claim.senderName || '', recovered: true },
+          });
+          if (recovered && (recovered.alreadyCredited || recovered.id)) {
+            req.flash('success', `🧧 เติมเงินสำเร็จ! ได้รับ ฿${Number(claim.amount).toLocaleString()} เข้ากระเป๋าเรียบร้อยแล้ว`);
+            return res.redirect(recovered.id ? `/account/topup/${recovered.id}` : '/account');
+          }
+        }
+      } catch (recoveryError) {
+        console.error('[TrueMoney recovery after error]', recoveryError);
+      }
+      req.flash('error', 'รับซองสำเร็จแล้ว แต่ระบบกำลังบันทึกยอดอยู่ กรุณาส่งลิงก์ซองเดิมอีกครั้ง ระบบจะกู้คืนยอดให้โดยไม่หักซ้ำ');
+    } else {
+      req.flash('error', 'เกิดข้อผิดพลาดในการตรวจสอบซองของขวัญ กรุณาลองใหม่อีกครั้ง');
+    }
     res.redirect('/account/topup');
   } finally {
     truemoneyRedemptionLocks.delete(voucherCode);
@@ -717,3 +769,4 @@ router.reserveTrueMoneyClaim = reserveTrueMoneyClaim;
 router.rememberTrueMoneyResult = rememberTrueMoneyResult;
 router.markTrueMoneyClaimFailed = markTrueMoneyClaimFailed;
 router.creditTrueMoneyClaim = creditTrueMoneyClaim;
+router.finalizeTrueMoneyClaim = finalizeTrueMoneyClaim;

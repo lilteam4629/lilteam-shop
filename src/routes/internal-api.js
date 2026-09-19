@@ -312,6 +312,7 @@ router.post('/wallet/truemoney', async (req, res) => {
   if (!voucherCode) return res.status(400).json({ error: 'กรุณากรอกลิงก์ซองของขวัญ TrueMoney ให้ถูกต้อง' });
   if (truemoneyRedemptionLocks.has(voucherCode)) return res.status(409).json({ error: 'ซองนี้กำลังตรวจสอบ กรุณารอสักครู่' });
   truemoneyRedemptionLocks.add(voucherCode);
+  let providerAccepted = false;
   try {
     const reservation = await accountRoutes.reserveTrueMoneyClaim(voucherCode, user.id);
     if (!reservation) return res.status(409).json({ error: 'ซองของขวัญนี้ถูกใช้แล้วหรือกำลังตรวจสอบ' });
@@ -320,11 +321,17 @@ router.post('/wallet/truemoney', async (req, res) => {
       ? { success: true, recovered: true, amount: reservation.amount, senderName: reservation.senderName || '', message: 'กู้คืนรายการรับเงินสำเร็จ' }
       : await truemoney.redeemAngpao(voucherInput, receiverPhone);
     if (!result.success || !Number.isFinite(result.amount) || result.amount <= 0) {
-      await accountRoutes.markTrueMoneyClaimFailed(voucherCode, user.id, result.message || '');
+      // Keep an already-redeemed claim recoverable when the provider does not
+      // include the amount in its second response.
+      if (result.code !== 'TARGET_USER_REDEEMED') {
+        await accountRoutes.markTrueMoneyClaimFailed(voucherCode, user.id, result.message || '').catch(error => {
+          console.error('[Cloud TrueMoney claim status]', error.message);
+        });
+      }
       return res.status(400).json({ error: result.message || 'ไม่สามารถรับเงินจากซองนี้ได้' });
     }
-    await accountRoutes.rememberTrueMoneyResult(voucherCode, user.id, result);
-    const credit = await accountRoutes.creditTrueMoneyClaim({ voucherCode, userId: user.id, result });
+    providerAccepted = true;
+    const credit = await accountRoutes.finalizeTrueMoneyClaim({ voucherCode, userId: user.id, result });
     if (credit.alreadyCredited) return res.json({ ok: true, alreadyCredited: true, message: 'ซองของขวัญนี้เติมเงินเข้าเว็บแล้ว' });
     const amount = Number(result.amount);
     const refCode = credit.refCode;
@@ -337,7 +344,31 @@ router.post('/wallet/truemoney', async (req, res) => {
     Promise.resolve().then(() => discordBot.notifyNewTopup({username:user.username,email:user.email,amount,refCode,method:'ซองของขวัญ TrueMoney'}))
       .catch(error => console.error('[Cloud TrueMoney Discord notify]', error.message));
     res.json({ok:true,requestId:id,amount,recovered:Boolean(result.recovered || reservation.retryExisting)});
-  } catch (err) { console.error('[Cloud TrueMoney]',err); res.status(500).json({error:'เกิดข้อผิดพลาดในการตรวจสอบซอง กรุณาลองใหม่'}); }
+  } catch (err) {
+    console.error('[Cloud TrueMoney]', err);
+    if (providerAccepted) {
+      try {
+        const claim = (store.data?.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.userId === user.id);
+        if (claim && Number(claim.amount) > 0) {
+          const recovered = await accountRoutes.creditTrueMoneyClaim({
+            voucherCode,
+            userId: user.id,
+            result: { amount: Number(claim.amount), senderName: claim.senderName || '', recovered: true },
+          });
+          if (recovered && (recovered.alreadyCredited || recovered.id)) {
+            return res.json({ ok: true, requestId: recovered.id || claim.topupRequestId || null, amount: Number(claim.amount), recovered: true });
+          }
+        }
+      } catch (recoveryError) {
+        console.error('[Cloud TrueMoney recovery after error]', recoveryError);
+      }
+      // Keep the HTTP response successful once the external voucher was
+      // accepted. The rent-app can refresh the wallet and retry the same link
+      // without showing a misleading generic Internal Server Error.
+      return res.json({ ok: true, pending: true, recoverable: true, message: 'รับซองสำเร็จแล้ว ระบบกำลังบันทึกยอด กรุณาลองลิงก์เดิมอีกครั้ง' });
+    }
+    res.status(500).json({error:'เกิดข้อผิดพลาดในการตรวจสอบซอง กรุณาลองใหม่'});
+  }
   finally { truemoneyRedemptionLocks.delete(voucherCode); }
 });
 
