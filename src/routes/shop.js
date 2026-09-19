@@ -109,11 +109,14 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
   const active = req?.tenantShop ? localProducts : localProducts.concat(remote);
   const apiConfig = catalogSyndication.normalizeConfig(store.data.settings || {});
   const platformApiConfig = catalogSyndication.normalizeConfig(store.platformData.settings || {});
+  const platformSelectionConfigured = platformApiConfig.featuredProductIdsConfigured;
   const selectedApiIds = platformApiConfig.featuredProductIdsConfigured
     ? platformApiConfig.featuredProductIds
     : (apiConfig.featuredProductIds || []);
   const catalogApiFeaturedProducts = req?.tenantShop
-    ? (selectedApiIds.length ? remote.filter(product => selectedApiIds.includes(String(product.sourceProductId))).slice(0, 5) : remote.slice(0, 5))
+    ? (platformSelectionConfigured
+      ? remote.filter(product => selectedApiIds.includes(String(product.sourceProductId))).slice(0, 5)
+      : (selectedApiIds.length ? remote.filter(product => selectedApiIds.includes(String(product.sourceProductId))).slice(0, 5) : remote.slice(0, 5)))
     : [];
   const scheduledProducts = store.data.products
     .filter(product => product.status === 'active' && product.publishAt && publishTime(product) > Date.now())
