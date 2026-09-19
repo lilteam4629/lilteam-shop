@@ -67,9 +67,10 @@ function requestJson(url, timeoutMs = 20000) {
 }
 
 function statusFrom(payload) {
-  const status = payload && payload.status && typeof payload.status === 'object' ? payload.status : {};
+  const rawStatus = payload?.status;
+  const status = rawStatus && typeof rawStatus === 'object' ? rawStatus : {};
   return {
-    code: String(status.code || payload?.code || '').toUpperCase(),
+    code: String(status.code || (typeof rawStatus === 'string' ? rawStatus : '') || payload?.code || (payload?.success === true ? 'SUCCESS' : '')).toUpperCase(),
     message: String(status.message || payload?.message || '').trim(),
   };
 }
@@ -88,8 +89,15 @@ function errorMessage(code, fallback = '') {
   return messages[code] || fallback || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้';
 }
 
+function responseData(payload) {
+  if (payload?.data && typeof payload.data === 'object') return payload.data;
+  if (payload?.status?.data && typeof payload.status.data === 'object') return payload.status.data;
+  if (payload?.result?.data && typeof payload.result.data === 'object') return payload.result.data;
+  return {};
+}
+
 function amountFrom(payload) {
-  const data = payload?.data && typeof payload.data === 'object' ? payload.data : {};
+  const data = responseData(payload);
   const ticket = data.my_ticket || data.ticket || {};
   const voucher = data.voucher || {};
   const candidates = [payload.amount, data.amount, ticket.amount_baht, ticket.amount, voucher.redeemed_amount_baht, voucher.amount_baht];
@@ -101,8 +109,16 @@ function amountFrom(payload) {
 }
 
 function senderFrom(payload) {
-  const data = payload?.data && typeof payload.data === 'object' ? payload.data : {};
+  const data = responseData(payload);
   return data.name || data.owner_profile?.full_name || data.my_ticket?.full_name || 'ไม่ระบุชื่อ';
+}
+
+function recipientMatches(payload, phone) {
+  const data = responseData(payload);
+  const rawValues = [data.my_ticket?.mobile, data.my_ticket?.mobile_number, data.redeemer_profile?.mobile, data.redeemer_profile?.mobile_number];
+  const values = rawValues.map(normalizePhone).filter(Boolean);
+  if (!values.length) return true;
+  return values.some(value => value === phone || (value.length >= 4 && phone.slice(-4) === value.slice(-4)));
 }
 
 async function redeemAngpao(voucherInput, receiverPhone) {
@@ -119,10 +135,11 @@ async function redeemAngpao(voucherInput, receiverPhone) {
       const { code, message } = statusFrom(response.payload);
       // Return valid voucher errors directly; only network/invalid responses
       // use a fallback because redemption is irreversible on success.
-      if (code === 'SUCCESS' || code || response.payload?.status) {
+      if (code === 'SUCCESS' || code || response.payload?.status || response.payload?.success === false) {
         const amount = amountFrom(response.payload);
-        if (code === 'SUCCESS' && amount > 0) {
-          return { success: true, amount, senderName: senderFrom(response.payload), message: message || 'รับเงินสำเร็จ', raw: response.payload };
+        const recovered = code === 'TARGET_USER_REDEEMED' && amount > 0 && recipientMatches(response.payload, phone);
+        if ((code === 'SUCCESS' || recovered) && amount > 0) {
+          return { success: true, recovered, amount, senderName: senderFrom(response.payload), message: message || (recovered ? 'กู้คืนรายการรับเงินสำเร็จ' : 'รับเงินสำเร็จ'), raw: response.payload };
         }
         return { success: false, amount: 0, message: errorMessage(code, message), raw: response.payload };
       }

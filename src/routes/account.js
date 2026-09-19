@@ -42,6 +42,103 @@ const upload = multer({
 
 const truemoneyRedemptionLocks = new Set();
 
+const wait = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+// Mongo optimistic writes can lose a race with another wallet request. A
+// redeemed voucher must never be left uncredited just because that write
+// briefly conflicted, so retry the whole mutation before returning an error.
+async function transactWithRetry(mutator, attempts = 4) {
+  let lastError;
+  for (let attempt = 0; attempt < attempts; attempt += 1) {
+    try {
+      return await store.transact(mutator);
+    } catch (error) {
+      lastError = error;
+      if (attempt + 1 < attempts) await wait(150 * (attempt + 1));
+    }
+  }
+  throw lastError;
+}
+
+async function reserveTrueMoneyClaim(voucherCode, userId) {
+  return transactWithRetry(data => {
+    data.truemoneyRedemptions ||= [];
+    if (data.walletTransactions.some(t => t.voucherCode === voucherCode)) return { alreadyCredited: true };
+    const existing = data.truemoneyRedemptions.find(item => item.voucherCode === voucherCode);
+    // A voucher claim is permanently owned by the user who first submitted
+    // it. Even a failed/network-error claim must never be re-assigned to a
+    // different account, otherwise a later retry could credit the wrong user
+    // after the voucher has already been redeemed.
+    if (existing && existing.userId !== userId) return null;
+    if (existing && existing.status === 'approved') return { alreadyCredited: true };
+    if (existing) {
+      existing.userId = userId;
+      existing.status = 'processing';
+      existing.message = '';
+      existing.updatedAt = new Date().toISOString();
+      return { retryExisting: true, amount: Number(existing.amount) || 0, senderName: existing.senderName || '' };
+    }
+    data.truemoneyRedemptions.push({ voucherCode, userId, status: 'processing', createdAt: new Date().toISOString() });
+    return { retryExisting: false, amount: 0, senderName: '' };
+  });
+}
+
+async function rememberTrueMoneyResult(voucherCode, userId, result) {
+  return transactWithRetry(data => {
+    const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.userId === userId);
+    if (!claim || claim.status === 'approved') return;
+    claim.amount = Math.round(Number(result.amount) * 100) / 100;
+    claim.senderName = result.senderName || '';
+    claim.providerStatus = result.recovered ? 'TARGET_USER_REDEEMED' : 'SUCCESS';
+    claim.redeemedAt = claim.redeemedAt || new Date().toISOString();
+    claim.updatedAt = new Date().toISOString();
+  });
+}
+
+async function markTrueMoneyClaimFailed(voucherCode, userId, message) {
+  await transactWithRetry(data => {
+    const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.userId === userId && item.status === 'processing');
+    if (claim) { claim.status = 'failed'; claim.message = message || ''; claim.finishedAt = new Date().toISOString(); }
+  });
+}
+
+async function creditTrueMoneyClaim({ voucherCode, userId, result }) {
+  const amount = Math.round(Number(result.amount) * 100) / 100;
+  if (!Number.isFinite(amount) || amount <= 0) throw new Error('จำนวนเงินในซองไม่ถูกต้อง');
+  const refCode = 'TM' + store.genId(6).toUpperCase();
+  const topupRequestId = store.genId(10);
+  const now = new Date().toISOString();
+  const creditResult = await transactWithRetry(data => {
+    data.truemoneyRedemptions ||= [];
+    if (data.walletTransactions.some(t => t.voucherCode === voucherCode)) return { alreadyCredited: true, id: null, refCode: null };
+    const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.userId === userId);
+    if (!claim) throw new Error('ไม่พบรายการรับซองที่กำลังดำเนินการ');
+    if (claim.status === 'approved') return { alreadyCredited: true, id: claim.topupRequestId || null, refCode: claim.refCode || null };
+    const freshUser = data.users.find(u => u.id === userId);
+    if (!freshUser) throw new Error('ไม่พบบัญชีผู้ใช้');
+    freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + amount) * 100) / 100;
+    data.walletTransactions.push({
+      id: store.genId(10), userId: freshUser.id, type: 'topup', amount, voucherCode,
+      note: `เติมเงินผ่านซอง TrueMoney (ผู้ส่ง: ${result.senderName || claim.senderName || 'ไม่ระบุ'}, อ้างอิง ${refCode})`, createdAt: now,
+    });
+    data.topupRequests.push({
+      id: topupRequestId, userId: freshUser.id, amount, method: 'truemoney_angpao', voucherCode, refCode,
+      slipPath: null,
+      slipCheck: { checked: true, verified: true, message: `ซองของขวัญสำเร็จ (ผู้ส่ง: ${result.senderName || claim.senderName || '-'})`, provider: 'truemoney_angpao' },
+      status: 'approved', createdAt: now, reviewedAt: now,
+      reviewNote: `ซอง TrueMoney ตรวจสอบและอนุมัติอัตโนมัติ${result.recovered ? ' (กู้คืนรายการที่รับเงินแล้ว)' : ''}`,
+    });
+    claim.status = 'approved';
+    claim.amount = amount;
+    claim.senderName = result.senderName || claim.senderName || '';
+    claim.topupRequestId = topupRequestId;
+    claim.refCode = refCode;
+    claim.finishedAt = now;
+    return { alreadyCredited: false, id: topupRequestId, refCode };
+  });
+  return creditResult;
+}
+
 router.get('/', (req, res) => {
   const user = currentUser(req);
   const transactions = store.data.walletTransactions
@@ -116,62 +213,37 @@ router.post('/topup/truemoney', async (req, res) => {
   truemoneyRedemptionLocks.add(voucherCode);
 
   try {
-    const reserved = await store.transact((data) => {
-      data.truemoneyRedemptions ||= [];
-      if (data.walletTransactions.some(t => t.voucherCode === voucherCode)
-        || data.truemoneyRedemptions.some(item => item.voucherCode === voucherCode && item.status !== 'failed')) return false;
-      data.truemoneyRedemptions.push({
-        voucherCode, userId: user.id, status: 'processing', createdAt: new Date().toISOString(),
-      });
-      return true;
-    });
-    if (!reserved) {
+    const reservation = await reserveTrueMoneyClaim(voucherCode, user.id);
+    if (!reservation) {
       req.flash('error', 'ซองของขวัญนี้ถูกใช้แล้วหรือกำลังอยู่ระหว่างการตรวจสอบ');
       return res.redirect('/account/topup');
     }
 
-    const result = await truemoney.redeemAngpao(voucherInput, receiverPhone);
+    if (reservation.alreadyCredited) {
+      req.flash('success', 'ซองของขวัญนี้เติมเงินเข้าเว็บแล้ว');
+      return res.redirect('/account');
+    }
+
+    const result = reservation.retryExisting && reservation.amount > 0
+      ? { success: true, recovered: true, amount: reservation.amount, senderName: reservation.senderName || '', message: 'กู้คืนรายการรับเงินสำเร็จ' }
+      : await truemoney.redeemAngpao(voucherInput, receiverPhone);
 
     if (!result.success || !Number.isFinite(result.amount) || result.amount <= 0) {
-      await store.transact((data) => {
-        const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.status === 'processing');
-        if (claim) { claim.status = 'failed'; claim.message = result.message || ''; claim.finishedAt = new Date().toISOString(); }
-      });
+      await markTrueMoneyClaimFailed(voucherCode, user.id, result.message || '');
       req.flash('error', result.message || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้');
       return res.redirect('/account/topup');
     }
 
-    const amount = result.amount;
-    const refCode = 'TM' + store.genId(6).toUpperCase();
-    const topupRequestId = store.genId(10);
-    const now = new Date().toISOString();
+    await rememberTrueMoneyResult(voucherCode, user.id, result);
+    const credit = await creditTrueMoneyClaim({ voucherCode, userId: user.id, result });
+    if (credit.alreadyCredited) {
+      req.flash('success', 'ซองของขวัญนี้เติมเงินเข้าเว็บแล้ว');
+      return res.redirect('/account');
+    }
+    const amount = Number(result.amount);
+    const topupRequestId = credit.id;
+    const refCode = credit.refCode;
 
-    await store.transact((data) => {
-      if (data.walletTransactions.some(t => t.voucherCode === voucherCode)) {
-        throw new Error('ซองของขวัญนี้ถูกบันทึกเข้าระบบแล้ว');
-      }
-      const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.status === 'processing');
-      if (!claim || claim.userId !== user.id) throw new Error('ไม่พบรายการรับซองที่กำลังดำเนินการ');
-      const freshUser = data.users.find(u => u.id === user.id);
-      if (!freshUser) throw new Error('ไม่พบบัญชีผู้ใช้');
-      freshUser.walletBalance = Math.round(((Number(freshUser.walletBalance) || 0) + amount) * 100) / 100;
-      data.walletTransactions.push({
-        id: store.genId(10), userId: freshUser.id, type: 'topup', amount, voucherCode,
-        note: `เติมเงินผ่านซอง TrueMoney (ผู้ส่ง: ${result.senderName || 'ไม่ระบุ'}, อ้างอิง ${refCode})`, createdAt: now,
-      });
-      data.topupRequests.push({
-        id: topupRequestId, userId: freshUser.id, amount, method: 'truemoney_angpao', refCode,
-        slipPath: null,
-        slipCheck: { checked: true, verified: true, message: `ซองของขวัญสำเร็จ (ผู้ส่ง: ${result.senderName || '-'})`, provider: 'truemoney_angpao' },
-        status: 'approved', createdAt: now, reviewedAt: now,
-        reviewNote: `ซอง TrueMoney ตรวจสอบและอนุมัติอัตโนมัติ (ผู้ส่ง: ${result.senderName || '-'})`,
-      });
-      claim.status = 'approved';
-      claim.amount = amount;
-      claim.finishedAt = now;
-    });
-
-    const origin = `${req.protocol}://${req.get('host')}`;
     webhook.notifyTopup({
       webhookUrl: payment.topupWebhookUrl,
       username: user.username,
@@ -192,7 +264,7 @@ router.post('/topup/truemoney', async (req, res) => {
     }).catch(() => {});
 
     req.flash('success', `🧧 เติมเงินสำเร็จ! ได้รับ ฿${amount.toLocaleString()} เข้ากระเป๋าเรียบร้อยแล้ว`);
-    res.redirect(`/account/topup/${topupRequestId}`);
+    res.redirect(topupRequestId ? `/account/topup/${topupRequestId}` : '/account');
   } catch (err) {
     console.error('[TrueMoney Redeem Error]', err);
     req.flash('error', 'เกิดข้อผิดพลาดในการตรวจสอบซองของขวัญ กรุณาลองใหม่อีกครั้ง');
@@ -634,3 +706,7 @@ router.createTopupRequest = createTopupRequest;
 router.attachSlipToTopupRequest = attachSlipToTopupRequest;
 router.retryTopupSlipVerification = retryTopupSlipVerification;
 router.canCheckSlipAutomatically = canCheckSlipAutomatically;
+router.reserveTrueMoneyClaim = reserveTrueMoneyClaim;
+router.rememberTrueMoneyResult = rememberTrueMoneyResult;
+router.markTrueMoneyClaimFailed = markTrueMoneyClaimFailed;
+router.creditTrueMoneyClaim = creditTrueMoneyClaim;
