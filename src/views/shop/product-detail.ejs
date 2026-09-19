@@ -284,7 +284,7 @@
           </svg>
           <span>เติมเงิน</span>
         </a><% } %>
-        <% if (isMainSite && !product.federatedCheckout) { %><a href="/contact" class="product-contact-action inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-6 py-3 text-sm font-medium transition hover:border-[var(--gold)] hover:text-[var(--gold-text)]">💬 ติดต่อร้าน</a><% } %>
+        <% if (!product.isSyndicated && !product.federatedCheckout) { %><a href="/contact" class="product-contact-action inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-6 py-3 text-sm font-medium transition hover:border-[var(--gold)] hover:text-[var(--gold-text)]">💬 ติดต่อร้าน</a><% } %>
       </div>
 
       <% if (product.fulfillmentMode === 'contact' && product.fulfillmentInstructions) { %>
