@@ -57,6 +57,21 @@ function useFixture(fixture) {
   });
   const otherUser = await accountRoutes.reserveTrueMoneyClaim('voucher-3', 'user-3');
   assert.equal(otherUser, null, 'a failed or pending voucher cannot be reassigned');
+
+  // Older tenant documents may not have every wallet array yet. A successful
+  // redemption must still persist the credit instead of throwing after the
+  // provider has already consumed the voucher.
+  const legacy = useFixture({
+    users: [{ id: 'user-4', walletBalance: 0 }],
+    truemoneyRedemptions: [],
+  });
+  await accountRoutes.reserveTrueMoneyClaim('voucher-4', 'user-4');
+  await accountRoutes.creditTrueMoneyClaim({
+    voucherCode: 'voucher-4', userId: 'user-4', result: { amount: 15, senderName: 'Tester' },
+  });
+  assert.equal(legacy.users[0].walletBalance, 15);
+  assert.equal(legacy.walletTransactions.length, 1);
+  assert.equal(legacy.topupRequests[0].status, 'approved');
   console.log('TrueMoney recovery checks passed: durable credit, idempotency, and ownership isolation');
 })().catch(error => {
   console.error(error);

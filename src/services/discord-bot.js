@@ -20,7 +20,7 @@ function isReady() {
 }
 
 function cfg() {
-  return (store.data.settings && store.data.settings.discord) || {};
+  return (store.data?.settings && store.data.settings.discord) || {};
 }
 
 function attachClientHandlers(target) {
@@ -128,6 +128,22 @@ async function notifyRenewal({ shopName, ownerUsername, days, price, expiresAt }
       { name: 'ต่ออายุ', value: `${days} วัน`, inline: true },
       { name: 'ราคา', value: `฿${Number(price).toLocaleString()}`, inline: true },
       { name: 'หมดอายุใหม่', value: `<t:${Math.floor(expiresAt / 1000)}:F>`, inline: false },
+    ],
+  });
+}
+
+// TrueMoney top-ups are already credited before this best-effort notification
+// runs. Keep the notification helper in this module so a missing Discord
+// configuration can never turn a successful wallet credit into an HTTP 500.
+async function notifyNewTopup({ username, email, amount, refCode, method }) {
+  await sendNotify({
+    title: '💰 เติมเงินสำเร็จอัตโนมัติ',
+    color: 0x4ade80,
+    fields: [
+      { name: 'ผู้ใช้', value: `${String(username || 'ไม่ทราบชื่อ')}${email ? ` (${String(email)})` : ''}`, inline: false },
+      { name: 'จำนวนเงิน', value: `฿${Number(amount || 0).toLocaleString()}`, inline: true },
+      { name: 'ช่องทาง', value: String(method || 'เติมเงินอัตโนมัติ'), inline: true },
+      { name: 'รหัสอ้างอิง', value: `#${String(refCode || '-')}`, inline: true },
     ],
   });
 }
@@ -294,4 +310,4 @@ async function handleCloseTicket(interaction) {
   setTimeout(() => channel.delete().catch(() => {}), 5000);
 }
 
-module.exports = { init, isConfigured, isReady, notifyNewRental, notifyRenewal, postTicketPanel, postRolePanel };
+module.exports = { init, isConfigured, isReady, notifyNewRental, notifyRenewal, notifyNewTopup, postTicketPanel, postRolePanel };

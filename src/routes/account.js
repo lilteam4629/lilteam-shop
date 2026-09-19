@@ -63,6 +63,7 @@ async function transactWithRetry(mutator, attempts = 4) {
 async function reserveTrueMoneyClaim(voucherCode, userId) {
   return transactWithRetry(data => {
     data.truemoneyRedemptions ||= [];
+    data.walletTransactions ||= [];
     if (data.walletTransactions.some(t => t.voucherCode === voucherCode)) return { alreadyCredited: true };
     const existing = data.truemoneyRedemptions.find(item => item.voucherCode === voucherCode);
     // A voucher claim is permanently owned by the user who first submitted
@@ -110,6 +111,9 @@ async function creditTrueMoneyClaim({ voucherCode, userId, result }) {
   const now = new Date().toISOString();
   const creditResult = await transactWithRetry(data => {
     data.truemoneyRedemptions ||= [];
+    data.walletTransactions ||= [];
+    data.topupRequests ||= [];
+    data.users ||= [];
     if (data.walletTransactions.some(t => t.voucherCode === voucherCode)) return { alreadyCredited: true, id: null, refCode: null };
     const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.userId === userId);
     if (!claim) throw new Error('ไม่พบรายการรับซองที่กำลังดำเนินการ');
@@ -244,7 +248,9 @@ router.post('/topup/truemoney', async (req, res) => {
     const topupRequestId = credit.id;
     const refCode = credit.refCode;
 
-    webhook.notifyTopup({
+    // Notifications are deliberately fire-and-forget. They must never be
+    // able to turn an already-credited wallet into an error response.
+    Promise.resolve().then(() => webhook.notifyTopup({
       webhookUrl: payment.topupWebhookUrl,
       username: user.username,
       email: user.email,
@@ -254,14 +260,15 @@ router.post('/topup/truemoney', async (req, res) => {
       slipUrl: null,
       autoApproved: true,
       adminUrl: null,
-    }).catch(() => {});
+    })).catch(error => console.error('[TrueMoney webhook notify]', error.message));
 
-    discordBot.notifyNewTopup({
+    Promise.resolve().then(() => discordBot.notifyNewTopup({
       username: user.username,
+      email: user.email,
       amount,
       refCode,
       method: 'ซองของขวัญ TrueMoney',
-    }).catch(() => {});
+    })).catch(error => console.error('[TrueMoney Discord notify]', error.message));
 
     req.flash('success', `🧧 เติมเงินสำเร็จ! ได้รับ ฿${amount.toLocaleString()} เข้ากระเป๋าเรียบร้อยแล้ว`);
     res.redirect(topupRequestId ? `/account/topup/${topupRequestId}` : '/account');

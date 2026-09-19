@@ -329,8 +329,13 @@ router.post('/wallet/truemoney', async (req, res) => {
     const amount = Number(result.amount);
     const refCode = credit.refCode;
     const id = credit.id;
-    webhook.notifyTopup({webhookUrl:payment.topupWebhookUrl,username:user.username,email:user.email,amount,refCode,method:'truemoney_angpao',slipUrl:null,autoApproved:true,adminUrl:null}).catch(()=>{});
-    discordBot.notifyNewTopup({username:user.username,amount,refCode,method:'ซองของขวัญ TrueMoney'}).catch(()=>{});
+    // The wallet has already been credited. Run optional notifications after
+    // scheduling them so a notifier/configuration failure can never change a
+    // successful top-up into a 500 response from the rental API.
+    Promise.resolve().then(() => webhook.notifyTopup({webhookUrl:payment.topupWebhookUrl,username:user.username,email:user.email,amount,refCode,method:'truemoney_angpao',slipUrl:null,autoApproved:true,adminUrl:null}))
+      .catch(error => console.error('[Cloud TrueMoney webhook notify]', error.message));
+    Promise.resolve().then(() => discordBot.notifyNewTopup({username:user.username,email:user.email,amount,refCode,method:'ซองของขวัญ TrueMoney'}))
+      .catch(error => console.error('[Cloud TrueMoney Discord notify]', error.message));
     res.json({ok:true,requestId:id,amount,recovered:Boolean(result.recovered || reservation.retryExisting)});
   } catch (err) { console.error('[Cloud TrueMoney]',err); res.status(500).json({error:'เกิดข้อผิดพลาดในการตรวจสอบซอง กรุณาลองใหม่'}); }
   finally { truemoneyRedemptionLocks.delete(voucherCode); }
