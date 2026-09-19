@@ -92,6 +92,10 @@ function errorMessage(code, fallback = '') {
   return messages[code] || fallback || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้';
 }
 
+function isTransientProviderFailure(code, statusCode) {
+  return Number(statusCode) >= 500 || ['500', 'INTERNAL_ERROR', 'MAINTENANCE', 'SERVICE_UNAVAILABLE', 'UPSTREAM_ERROR'].includes(String(code || '').toUpperCase());
+}
+
 function responseData(payload) {
   if (payload?.data && typeof payload.data === 'object') return payload.data;
   if (payload?.status?.data && typeof payload.status.data === 'object') return payload.status.data;
@@ -149,6 +153,12 @@ async function redeemAngpao(voucherInput, receiverPhone) {
         const recovered = code === 'TARGET_USER_REDEEMED' && amount > 0 && recipientMatches(response.payload, phone);
         if ((code === 'SUCCESS' || recovered) && amount > 0) {
           return { success: true, recovered, amount, code, senderName: senderFrom(response.payload), message: message || (recovered ? 'กู้คืนรายการรับเงินสำเร็จ' : 'รับเงินสำเร็จ'), raw: response.payload };
+        }
+        // A provider-side outage must not stop us from trying the next
+        // compatible backend (including the legacy xpluem endpoint).
+        if (isTransientProviderFailure(code, response.statusCode)) {
+          lastError = new Error(errorMessage(code, message));
+          continue;
         }
         return { success: false, amount: 0, code, message: errorMessage(code, message), raw: response.payload };
       }
