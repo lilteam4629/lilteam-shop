@@ -179,7 +179,18 @@
             <div class="mb-2 flex items-center gap-2 text-base font-black text-[var(--gold-text)]">🔒 ชำระเงินและรับสินค้าในร้านหลักเท่านั้น</div>
             <p class="mb-3 text-sm font-medium leading-relaxed text-[var(--text-2)]">ก่อนกดซื้อ กรุณากดปุ่ม “เติมเงินสินค้า API” ด้านล่างและโอนเข้าบัญชีร้านหลัก ยอดนี้แยกจากเงินเติมของร้านเช่าและใช้ซื้อสินค้านี้เท่านั้น</p>
             <p class="mb-4 text-xs text-[var(--text-3)]">หลังสั่งซื้อสำเร็จเท่านั้น ให้กดปุ่มติดต่อร้านหลักในหน้าออเดอร์เพื่อรับไอดีที่ร้านหลัก · ราคานี้รวมส่วนต่างร้านเช่าแล้ว</p>
-            <% if (currentUser) { %><div class="mb-4 rounded-lg border border-[var(--gold)]/25 bg-[var(--card)] px-3 py-2 text-xs text-[var(--text-2)]">ยอดสินค้า API ของคุณตอนนี้: <b class="text-[var(--gold-text)]">฿<%= Number(currentUser.catalogWalletBalance || 0).toLocaleString() %></b></div><% } %>
+            <% if (currentUser) { const apiBalance = Number(currentUser.catalogWalletBalance || 0); %>
+              <div class="mb-4 rounded-2xl border-2 border-[var(--gold)]/45 bg-[var(--card)] px-4 py-4 shadow-[0_10px_25px_-18px_color-mix(in_srgb,var(--gold)_80%,transparent)] sm:px-5 sm:py-5" aria-label="ยอดคงเหลือสินค้า API">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
+                  <div>
+                    <div class="text-[0.65rem] font-black uppercase tracking-[0.18em] text-[var(--text-3)]">API WALLET</div>
+                    <div class="mt-1 text-sm font-black text-[var(--text)]">ยอดคงเหลือสำหรับสินค้านี้</div>
+                  </div>
+                  <output class="text-4xl font-black leading-none tabular-nums text-[var(--gold-text)] sm:text-5xl">฿<%= apiBalance.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></output>
+                </div>
+                <div class="mt-2 text-xs font-medium text-[var(--text-3)]">ใช้ได้เฉพาะสินค้าจากร้านหลักเท่านั้น</div>
+              </div>
+            <% } %>
             <% if (currentUser && currentUser.role === 'admin' && !isMainSite) { %>
               <div class="rounded-xl border border-[var(--coral)]/45 bg-[var(--coral)]/10 px-4 py-3 text-sm font-bold text-[var(--coral)]">บัญชีเจ้าของร้านเช่าไม่สามารถใช้เงินของร้านเช่าซื้อสินค้านี้ได้ ลูกค้าต้องเป็นผู้เติมเงินและสั่งซื้อเอง</div>
             <% } else { %>
