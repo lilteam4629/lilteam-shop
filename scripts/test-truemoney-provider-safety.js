@@ -24,7 +24,7 @@ function url(server) { return `http://127.0.0.1:${server.address().port}`; }
   assert.equal(uncertain.success, false);
   assert.equal(uncertain.code, 'PROVIDER_UNCERTAIN');
   assert.equal(uncertain.recoverable, true);
-  assert.equal(calls, 1, 'a provider response must never trigger a second redemption attempt');
+  assert.equal(calls, 2, 'a provider may be retried once, but never replaced by a second provider');
 
   const healthy = await listen((req, res) => {
     res.writeHead(200, { 'content-type': 'application/json' });
