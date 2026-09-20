@@ -38,4 +38,14 @@ assert.deepStrictEqual(
   [],
   'an explicit empty tenant selection must remain empty',
 );
+const ledger = catalog.calculatePayoutLedger({
+  transactions: [
+    { type: 'manual-payout', tenantRevenueByTenant: { 'tenant-1': 100, 'tenant-2': 50 } },
+    { type: 'payout', tenantShopId: 'tenant-1', amount: 999 },
+  ],
+  payouts: [{ tenantShopId: 'tenant-1', amount: 40 }],
+});
+assert.strictEqual(ledger.accrued['tenant-1'], 100, 'sales margin should accrue once');
+assert.strictEqual(ledger.pending['tenant-1'], 60, 'pending balance must subtract completed payouts');
+assert.strictEqual(ledger.pending['tenant-2'], 50, 'unpaid partner margin should remain payable');
 console.log('Catalog syndication checks passed: safe metadata, markup, signed checkout token, disabled feed');

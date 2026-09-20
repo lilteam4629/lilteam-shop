@@ -17,8 +17,54 @@ function normalizeConfig(settings = {}) {
     ownerRevenue: Math.max(0, Number(raw.ownerRevenue) || 0),
     tenantRevenue: Math.max(0, Number(raw.tenantRevenue) || 0),
     transactions: Array.isArray(raw.transactions) ? raw.transactions.slice(-100) : [],
+    // Payouts are kept separately from sales transactions so paying a
+    // partner never changes the immutable sales ledger.  The admin page can
+    // therefore show an exact pending balance and remain idempotent after a
+    // restart or a repeated form submission.
+    payouts: Array.isArray(raw.payouts) ? raw.payouts.slice(-200) : [],
     syncedAt: raw.syncedAt || null,
   };
+}
+
+function roundMoney(value) {
+  return Math.round((Number(value) || 0) * 100) / 100;
+}
+
+/**
+ * Return the partner margin ledger grouped by tenant shop id.
+ *
+ * `transactions` contains the sales-side margin, while `payouts` contains
+ * amounts already transferred to a tenant.  Payout entries are intentionally
+ * ignored when accruing revenue, which prevents a transfer from being counted
+ * as a new margin when this function is called again.
+ */
+function calculatePayoutLedger(settingsOrConfig = {}) {
+  const config = settingsOrConfig && settingsOrConfig.catalogApi
+    ? normalizeConfig(settingsOrConfig)
+    : normalizeConfig({ catalogApi: settingsOrConfig });
+  const accrued = {};
+  const paid = {};
+  const add = (target, tenantId, amount) => {
+    const id = String(tenantId || '').trim();
+    const value = Number(amount) || 0;
+    if (!id || value <= 0) return;
+    target[id] = roundMoney((target[id] || 0) + value);
+  };
+  (config.transactions || []).forEach(transaction => {
+    if (!transaction || transaction.type === 'payout') return;
+    const breakdown = transaction.tenantRevenueByTenant;
+    if (breakdown && typeof breakdown === 'object') {
+      Object.entries(breakdown).forEach(([tenantId, amount]) => add(accrued, tenantId, amount));
+    } else if (transaction.tenantId && transaction.tenantRevenue) {
+      add(accrued, transaction.tenantId, transaction.tenantRevenue);
+    }
+  });
+  (config.payouts || []).forEach(payout => add(paid, payout.tenantShopId || payout.tenantId, payout.amount));
+  const pending = {};
+  new Set([...Object.keys(accrued), ...Object.keys(paid)]).forEach(tenantId => {
+    pending[tenantId] = Math.max(0, roundMoney((accrued[tenantId] || 0) - (paid[tenantId] || 0)));
+  });
+  return { accrued, paid, pending };
 }
 
 // Resolve the five Partner products for a tenant storefront. A tenant's
@@ -142,6 +188,7 @@ function createCheckoutToken({ tenantId, tenantSlug, productId, returnUrl = '' }
 
 module.exports = {
   normalizeConfig,
+  calculatePayoutLedger,
   selectFeaturedProducts,
   applyMarkup,
   getTenantProducts,

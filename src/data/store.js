@@ -190,6 +190,7 @@ function defaultData() {
         ownerRevenue: 0,
         tenantRevenue: 0,
         transactions: [],
+        payouts: [],
         syncedAt: null,
       },
       storefrontModel: 'classic', // 'classic' | 'line-rangers' | 'rangers-market'
@@ -496,7 +497,7 @@ function migrateAdminRecovery(db) {
 function migrateSchema(db) {
   let changed = false;
   if (!db.settings.catalogApi || typeof db.settings.catalogApi !== 'object') {
-    db.settings.catalogApi = { enabled: false, source: 'main-store', markupMode: 'percent', markupValue: 0, settlementMode: 'platform', ownerRevenue: 0, tenantRevenue: 0, transactions: [], syncedAt: null };
+    db.settings.catalogApi = { enabled: false, source: 'main-store', markupMode: 'percent', markupValue: 0, settlementMode: 'platform', ownerRevenue: 0, tenantRevenue: 0, transactions: [], payouts: [], syncedAt: null };
     changed = true;
   } else {
     const api = db.settings.catalogApi;
@@ -506,6 +507,7 @@ function migrateSchema(db) {
     if (!Number.isFinite(Number(api.ownerRevenue)) || Number(api.ownerRevenue) < 0) { api.ownerRevenue = 0; changed = true; }
     if (!Number.isFinite(Number(api.tenantRevenue)) || Number(api.tenantRevenue) < 0) { api.tenantRevenue = 0; changed = true; }
     if (!Array.isArray(api.transactions)) { api.transactions = []; changed = true; }
+    if (!Array.isArray(api.payouts)) { api.payouts = []; changed = true; }
     if (!['percent', 'fixed'].includes(api.markupMode)) { api.markupMode = 'percent'; changed = true; }
     const max = api.markupMode === 'fixed' ? 100000 : 1000;
     const normalized = Math.min(max, Math.max(0, Number.isFinite(Number(api.markupValue)) ? Number(api.markupValue) : 0));

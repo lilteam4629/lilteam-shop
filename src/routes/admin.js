@@ -77,6 +77,14 @@ const qrImageUpload = multer({
   fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
 });
 
+// Partner payout slips are private admin evidence, so they are kept in the
+// private media store and served only through the authenticated admin route.
+const payoutSlipUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 6 * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => cb(null, /^image\//.test(file.mimetype)),
+});
+
 const prizeImageUpload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 4 * 1024 * 1024 },
@@ -314,23 +322,33 @@ router.get('/catalog-api', async (req, res) => {
   if (!tenantMode) {
     shops = await Promise.all((mainDb.shops || []).map(async shop => {
       const tenantDb = await store.loadTenantDb(shop.id);
-      return { id: shop.id, name: shop.name, slug: shop.slug, expiresAt: shop.expiresAt, config: catalogSyndication.normalizeConfig(tenantDb?.settings || {}) };
+      const tenantConfig = catalogSyndication.normalizeConfig(tenantDb?.settings || {});
+      const payment = tenantDb?.settings?.payment || {};
+      return {
+        id: shop.id,
+        name: shop.name,
+        slug: shop.slug,
+        expiresAt: shop.expiresAt,
+        config: tenantConfig,
+        payoutAccount: {
+          bankName: String(payment.bankName || '').trim(),
+          bankAccountNumber: String(payment.bankAccountNumber || '').trim(),
+          bankAccountName: String(payment.bankAccountName || '').trim(),
+          bankQrImage: payment.bankQrImage || null,
+        },
+      };
     }));
   }
-  const payoutByTenant = {};
-  if (!tenantMode) {
-    (config.transactions || []).forEach(transaction => {
-      const breakdown = transaction.tenantRevenueByTenant;
-      if (breakdown && typeof breakdown === 'object') {
-        Object.entries(breakdown).forEach(([tenantId, amount]) => {
-          payoutByTenant[String(tenantId)] = Math.round(((Number(payoutByTenant[String(tenantId)]) || 0) + (Number(amount) || 0)) * 100) / 100;
-        });
-      } else if (transaction.tenantId && transaction.tenantRevenue) {
-        const tenantId = String(transaction.tenantId);
-        payoutByTenant[tenantId] = Math.round(((Number(payoutByTenant[tenantId]) || 0) + (Number(transaction.tenantRevenue) || 0)) * 100) / 100;
-      }
-    });
-  }
+  const payoutLedger = catalogSyndication.calculatePayoutLedger(config);
+  const payoutByTenant = payoutLedger.pending;
+  const payoutShops = !tenantMode
+    ? shops.filter(shop => shop.config.enabled).map(shop => ({
+      ...shop,
+      accruedAmount: payoutLedger.accrued[String(shop.id)] || 0,
+      paidAmount: payoutLedger.paid[String(shop.id)] || 0,
+      pendingAmount: payoutLedger.pending[String(shop.id)] || 0,
+    }))
+    : [];
   const tenantProducts = tenantMode
     ? catalogSyndication.getTenantProducts(mainDb, store.data, '').products
     : [];
@@ -343,10 +361,86 @@ router.get('/catalog-api', async (req, res) => {
     : [];
   res.render('admin/catalog-api', {
     title: 'API แคตตาล็อกร้านหลัก', active: 'catalog-api', tenantMode, config,
-    sourceProducts, preview, shops, payoutByTenant, sourceShopName: mainDb.settings.shopName || 'ร้านหลัก',
+    sourceProducts, preview, shops, payoutByTenant, payoutLedger, payoutShops,
+    payoutHistory: config.payouts || [],
+    sourceShopName: mainDb.settings.shopName || 'ร้านหลัก',
     sourceLogo: mainDb.settings.branding?.logoImage || null,
     sourceShopUrl: MAIN_SITE_URL || '/',
   });
+});
+
+// Record a full partner-margin payout from the main shop. Partial payments
+// are deliberately rejected: the amount shown on the page is the exact
+// pending balance and the server recomputes it inside the write transaction.
+router.post('/catalog-api/payouts', payoutSlipUpload.single('slip'), async (req, res) => {
+  if (req.tenantShop) return res.redirect('/admin/catalog-api');
+  const tenantShopId = String(req.body.tenantShopId || '').trim();
+  const requestedAmount = Math.round((Number(req.body.amount) || 0) * 100) / 100;
+  const shop = (store.platformData.shops || []).find(candidate => String(candidate.id) === tenantShopId);
+  if (!shop) {
+    req.flash('error', 'ไม่พบร้านเช่าที่ต้องการโอนส่วนต่าง');
+    return res.redirect('/admin/catalog-api#catalog-payouts');
+  }
+  try {
+    const tenantDb = await store.loadTenantDb(shop.id);
+    const tenantConfig = catalogSyndication.normalizeConfig(tenantDb?.settings || {});
+    if (!tenantConfig.enabled) throw new Error('ร้านนี้ยังไม่ได้เปิดใช้งานสินค้า Partner');
+    const payment = tenantDb?.settings?.payment || {};
+    const bankName = String(payment.bankName || '').trim();
+    const bankAccountNumber = String(payment.bankAccountNumber || '').trim();
+    const bankAccountName = String(payment.bankAccountName || '').trim();
+    if (!bankAccountNumber || !bankAccountName) throw new Error('ร้านนี้ยังไม่ได้ตั้งค่าบัญชีรับส่วนต่าง');
+    if (!req.file) throw new Error('กรุณาแนบสลิปการโอนเงิน');
+    if (!(requestedAmount > 0)) throw new Error('ยอดโอนต้องมากกว่า 0 บาท');
+
+    const slipStorageId = await store.savePrivateMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+    let payoutRecord;
+    await store.runOnPlatform(() => store.transact(data => {
+      const apiConfig = catalogSyndication.normalizeConfig(data.settings || {});
+      const ledger = catalogSyndication.calculatePayoutLedger(apiConfig);
+      const pending = Math.max(0, Math.round((Number(ledger.pending[tenantShopId]) || 0) * 100) / 100);
+      if (Math.abs(requestedAmount - pending) > 0.001) {
+        throw new Error(`ยอดค้างโอนเปลี่ยนแปลงแล้ว กรุณาโหลดหน้าใหม่ (ยอดเต็มปัจจุบัน ฿${pending.toLocaleString()})`);
+      }
+      payoutRecord = {
+        id: store.genId(12),
+        tenantShopId,
+        tenantShopName: shop.name || shop.slug || tenantShopId,
+        amount: pending,
+        bankName,
+        bankAccountNumber,
+        bankAccountName,
+        slipStorageId,
+        note: String(req.body.note || '').trim().slice(0, 500),
+        status: 'paid',
+        transferredAt: new Date().toISOString(),
+      };
+      data.settings.catalogApi ||= {};
+      data.settings.catalogApi.payouts = Array.isArray(data.settings.catalogApi.payouts)
+        ? data.settings.catalogApi.payouts.slice(-199)
+        : [];
+      data.settings.catalogApi.payouts.push(payoutRecord);
+    }));
+    req.flash('success', `บันทึกการโอนส่วนต่างให้ ${payoutRecord.tenantShopName} ฿${Number(payoutRecord.amount).toLocaleString()} พร้อมสลิปแล้ว`);
+  } catch (error) {
+    req.flash('error', error.message || 'ไม่สามารถบันทึกการโอนส่วนต่างได้');
+  }
+  res.redirect('/admin/catalog-api#catalog-payouts');
+});
+
+// Slips are private evidence. Keep the URL behind the admin middleware and
+// stream directly from private media storage so it never becomes a public
+// upload URL.
+router.get('/catalog-api/payouts/:id/slip', async (req, res) => {
+  if (req.tenantShop) return res.sendStatus(404);
+  const config = catalogSyndication.normalizeConfig(store.platformData.settings || {});
+  const payout = (config.payouts || []).find(item => String(item.id) === String(req.params.id));
+  if (!payout?.slipStorageId) return res.sendStatus(404);
+  const media = await store.getPrivateMedia(payout.slipStorageId);
+  if (!media) return res.sendStatus(404);
+  res.set('Content-Type', media.file?.metadata?.contentType || media.file?.contentType || 'image/jpeg');
+  res.set('Cache-Control', 'private, no-store');
+  media.stream.pipe(res);
 });
 
 router.post('/catalog-api/settings', async (req, res) => {

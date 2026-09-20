@@ -194,7 +194,7 @@ async function completeTenantFederatedCheckout({ req, user, items, total, discou
     }
     const sourceTotal = sourceItems.reduce((sum, row) => sum + (Number(row.item.sourcePrice) || Number(row.source.price) || 0), 0);
     tenantRevenue = Math.max(0, Math.round((finalTotal - sourceTotal) * 100) / 100);
-    data.settings.catalogApi ||= { enabled: true, source: 'main-store', markupMode: 'percent', markupValue: 0, settlementMode: 'platform', ownerRevenue: 0, tenantRevenue: 0, transactions: [] };
+    data.settings.catalogApi ||= { enabled: true, source: 'main-store', markupMode: 'percent', markupValue: 0, settlementMode: 'platform', ownerRevenue: 0, tenantRevenue: 0, transactions: [], payouts: [] };
     data.settings.catalogApi.ownerRevenue = Math.round((Number(data.settings.catalogApi.ownerRevenue || 0) + finalTotal) * 100) / 100;
     data.settings.catalogApi.tenantRevenue = Math.round((Number(data.settings.catalogApi.tenantRevenue || 0) + tenantRevenue) * 100) / 100;
     data.settings.catalogApi.transactions ||= [];
@@ -444,7 +444,7 @@ router.post('/checkout', requireLogin, (req, res) => {
           settlementMode: 'platform',
           ownerRevenue: 0,
           tenantRevenue: 0,
-          transactions: [],
+          transactions: [], payouts: [],
         };
         catalogApi.ownerRevenue = Math.round((Number(catalogApi.ownerRevenue || 0) + finalTotal) * 100) / 100;
         catalogApi.tenantRevenue = Math.round((Number(catalogApi.tenantRevenue || 0) + tenantRevenue) * 100) / 100;
