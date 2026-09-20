@@ -1,8 +1,7 @@
 <% const storefrontBackground = settings.storefrontAppearance && settings.storefrontAppearance.backgroundImage; %>
-<% const heroTextStyle = (settings.hero && settings.hero.textStyle) || {}; %>
-<% const heroTextColor = /^#[0-9a-f]{6}$/i.test(heroTextStyle.textColor || '') ? heroTextStyle.textColor : '#ffffff'; %>
-<% const heroOutlineColor = /^#[0-9a-f]{6}$/i.test(heroTextStyle.outlineColor || '') ? heroTextStyle.outlineColor : '#000000'; %>
-<% const heroOutlineWidth = Math.max(0, Math.min(4, Number(heroTextStyle.outlineWidth) || 0)); %>
+<% const heroTextColor = '#ffffff'; %>
+<% const heroOutlineColor = 'transparent'; %>
+<% const heroOutlineWidth = 0; %>
 <% if (storefrontBackground) { %>
 <style>
   .storefront-hero-banner{--hero-text-color:<%= heroTextColor %>;--hero-outline-color:<%= heroOutlineColor %>;--hero-outline-width:<%= heroOutlineWidth %>px}
