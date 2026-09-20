@@ -109,6 +109,11 @@ function remoteSlug(product) {
   return `api-${String(product.id)}-${String(product.slug || 'item').replace(/[^a-zA-Z0-9ก-๙-]+/g, '-').replace(/^-|-$/g, '')}`;
 }
 
+function safePurchaseActionUrl(value) {
+  const url = String(value || '').trim();
+  return /^https?:\/\//i.test(url) ? url.slice(0, 1000) : '';
+}
+
 function sanitizeProduct(product, mainDb, config, mainSiteUrl, tenantShop = null) {
   const counts = availableCounts(mainDb);
   const basePrice = Math.max(0, Number(product.price) || 0);
@@ -139,7 +144,13 @@ function sanitizeProduct(product, mainDb, config, mainSiteUrl, tenantShop = null
     markupMode: config.markupMode,
     markupValue: config.markupValue,
     priceOptions: [],
-    purchaseApprovalEnabled: false,
+    // Partner products use the same preparation step as main-store products.
+    // These public action fields are copied without exposing any stock data so
+    // a configured “สมัคร …” link remains available on the tenant product.
+    purchaseApprovalEnabled: product.purchaseApprovalEnabled === true,
+    purchaseConfirmationText: String(product.purchaseConfirmationText || '').slice(0, 500),
+    purchaseActionLabel: String(product.purchaseActionLabel || '').slice(0, 80),
+    purchaseActionUrl: safePurchaseActionUrl(product.purchaseActionUrl),
     fulfillmentMode: 'automatic',
   };
 }

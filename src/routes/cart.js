@@ -90,6 +90,10 @@ router.post('/add/:productId', (req, res) => {
     req.flash('error', 'กรุณาติ๊กยืนยันเงื่อนไขก่อนเพิ่มลงตะกร้า');
     return res.redirect(`/game/${product.slug}`);
   }
+  if (remoteProduct && req.body.purchaseConfirmed !== 'yes') {
+    req.flash('error', 'กรุณาติ๊กยืนยันข้อมูลสินค้า Partner ก่อนเพิ่มลงตะกร้า');
+    return res.redirect(`/game/${product.slug}`);
+  }
   const requestedQty = Math.max(1, parseInt(req.body.qty, 10) || 1);
   const federated = Boolean(remoteProduct) || (req.query.federated === '1' && req.session.federatedCatalog &&
     String(req.session.federatedCatalog.sourceProductId) === String(product.id) &&
