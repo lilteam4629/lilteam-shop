@@ -14,7 +14,7 @@
   <% } %>
   <% if (catalogApiProducts && catalogApiProducts.length) { %>
     <section id="catalog-api" class="catalog-api-shelf" aria-label="สินค้า API จากร้านหลัก">
-      <header><div class="catalog-api-shelf-brand"><% if (catalogApiLogo) { %><img src="<%= catalogApiLogo %>" alt="<%= catalogApiShopName %>" /><% } else { %><span class="catalog-api-shelf-logo-fallback">L</span><% } %><div><small>MAIN SHOP API</small><h2>สินค้า Partner <%= catalogApiShopName %></h2><p>แยกจากสินค้าร้านเช่า · ต้องเติมเงินสินค้า API ก่อนซื้อเท่านั้น</p></div></div><div><a href="<%= catalogApiShopUrl %>" target="_blank" rel="noopener">เข้าหน้าร้านหลัก ↗</a><a href="/account/topup/catalog-api">เติมเงิน API →</a><a href="/contact?api=1">ติดต่อร้านหลัก</a></div></header>
+      <header><div class="catalog-api-shelf-brand"><% if (catalogApiLogo) { %><img src="<%= catalogApiLogo %>" alt="<%= catalogApiShopName %>" /><% } else { %><span class="catalog-api-shelf-logo-fallback">L</span><% } %><div><small>MAIN SHOP API</small><h2>สินค้า Partner <%= catalogApiShopName %></h2><p>แยกจากสินค้าร้านเช่า · ต้องเติมเงินสินค้า API ก่อนซื้อเท่านั้น</p></div></div><div><a href="/account/topup/catalog-api">เติมเงิน API →</a><a href="/contact?api=1">ติดต่อร้านหลัก</a></div></header>
       <div class="catalog-api-shelf-grid"><% catalogApiProducts.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %></div>
     </section>
   <% } %>

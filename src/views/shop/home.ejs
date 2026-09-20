@@ -181,7 +181,7 @@
 
 <% if (catalogApiFeaturedProducts && catalogApiFeaturedProducts.length) { %>
 <section class="api-product-shelf" aria-label="สินค้า API จากร้านหลัก">
-  <div class="api-product-shelf-head"><div class="api-product-shelf-brand"><% if (catalogApiLogo) { %><img src="<%= catalogApiLogo %>" alt="<%= catalogApiShopName %>" /><% } else { %><span class="api-product-shelf-logo-fallback">L</span><% } %><div><span>MAIN SHOP API</span><h2>สินค้า Partner <%= catalogApiShopName %></h2><p>รายการนี้แยกจากสินค้าร้านเช่า · ต้องเติมเงินสินค้า API ก่อนซื้อเท่านั้น</p></div></div><div class="api-product-shelf-actions"><a href="<%= catalogApiShopUrl %>" target="_blank" rel="noopener">เข้าหน้าร้านหลัก ↗</a><a href="/products#catalog-api">ดูสินค้า API ทั้งหมด</a><a href="/account/topup/catalog-api">เติมเงิน API →</a><a href="/contact?api=1">ติดต่อร้านหลัก</a></div></div>
+  <div class="api-product-shelf-head"><div class="api-product-shelf-brand"><% if (catalogApiLogo) { %><img src="<%= catalogApiLogo %>" alt="<%= catalogApiShopName %>" /><% } else { %><span class="api-product-shelf-logo-fallback">L</span><% } %><div><span>MAIN SHOP API</span><h2>สินค้า Partner <%= catalogApiShopName %></h2><p>รายการนี้แยกจากสินค้าร้านเช่า · ต้องเติมเงินสินค้า API ก่อนซื้อเท่านั้น</p></div></div><div class="api-product-shelf-actions"><a href="/products#catalog-api">ดูสินค้า API ทั้งหมด</a><a href="/account/topup/catalog-api">เติมเงิน API →</a><a href="/contact?api=1">ติดต่อร้านหลัก</a></div></div>
   <div class="api-product-shelf-grid product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 sm:gap-4">
     <% catalogApiFeaturedProducts.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
   </div>
