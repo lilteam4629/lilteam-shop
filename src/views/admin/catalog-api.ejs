@@ -29,7 +29,7 @@
             <% sourceProducts.forEach(product => { const selected = config.featuredProductIds.includes(String(product.id)); %>
               <label class="featured-api-option flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--border-light)] bg-[var(--card)] p-2 transition hover:border-[var(--gold)] <%= selected ? 'is-selected border-[var(--gold)]/70' : '' %>">
                 <input type="checkbox" name="featuredProductIds" value="<%= product.id %>" <%= selected ? 'checked' : '' %> class="featured-api-checkbox h-4 w-4 accent-[var(--gold)]" />
-                <img src="<%= product.images?.[0] || '' %>" alt="" class="h-10 w-14 rounded object-cover" /><span class="min-w-0"><b class="block truncate text-xs"><%= product.title %></b><small class="text-[10px] text-emerald-400">พร้อมขาย · ฿<%= Number(product.price || 0).toLocaleString() %></small></span>
+                <button type="button" data-api-gallery data-title="<%= product.title %>" data-image="<%= product.images?.[0] || '' %>" class="h-10 w-14 shrink-0 cursor-zoom-in overflow-hidden rounded focus:outline-none focus:ring-2 focus:ring-[var(--gold)]" title="กดเพื่อดูรูปสินค้า <%= product.title %> ขนาดใหญ่"><img src="<%= product.images?.[0] || '' %>" alt="รูป <%= product.title %>" class="h-full w-full object-cover" /></button><span class="min-w-0"><b class="block truncate text-xs"><%= product.title %></b><small class="text-[10px] text-emerald-400">พร้อมขาย · ฿<%= Number(product.price || 0).toLocaleString() %></small></span>
               </label>
             <% }) %>
           </div>
@@ -46,7 +46,7 @@
     <section class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6">
       <div class="mb-4 flex items-center justify-between"><h2 class="text-lg font-black">ตัวอย่างสินค้าที่จะขึ้นหน้าร้าน</h2><span class="text-xs text-[var(--text-4)]">แสดงตามรายการที่เลือกสูงสุด 5 รายการ</span></div>
       <% if (!preview.length) { %><p class="rounded-xl border border-dashed border-[var(--border)] p-8 text-center text-sm text-[var(--text-3)]">ยังไม่ได้เปิดรับสินค้า หรือร้านหลักยังไม่มีสินค้าที่เปิดขาย</p><% } else { %>
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"><% preview.forEach(product => { %><article class="overflow-hidden rounded-xl border border-[var(--border-light)] bg-[var(--input)]"><img src="<%= product.images[0] || '' %>" alt="<%= product.title %>" class="aspect-[4/3] w-full object-cover" /><div class="p-2"><b class="block truncate text-xs"><%= product.title %></b><span class="text-xs font-black text-[var(--gold-text)]">฿<%= Number(product.price).toLocaleString() %></span><small class="block text-[10px] text-[var(--text-4)]">เหลือ <%= product.stockCount %></small></div></article><% }) %></div>
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"><% preview.forEach(product => { %><article class="overflow-hidden rounded-xl border border-[var(--border-light)] bg-[var(--input)]"><button type="button" data-api-gallery data-title="<%= product.title %>" data-image="<%= product.images[0] || '' %>" class="block w-full cursor-zoom-in focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[var(--gold)]" title="กดเพื่อดูรูปสินค้า <%= product.title %> ขนาดใหญ่"><img src="<%= product.images[0] || '' %>" alt="<%= product.title %>" class="aspect-[4/3] w-full object-cover" /></button><div class="p-2"><b class="block truncate text-xs"><%= product.title %></b><span class="text-xs font-black text-[var(--gold-text)]">฿<%= Number(product.price).toLocaleString() %></span><small class="block text-[10px] text-[var(--text-4)]">เหลือ <%= product.stockCount %></small></div></article><% }) %></div>
       <% } %>
     </section>
   <% } else { %>
@@ -57,7 +57,7 @@
           <% sourceProducts.forEach(product => { const selected = config.featuredProductIds.includes(String(product.id)); %>
             <label class="featured-api-option flex cursor-pointer items-center gap-2 rounded-lg border border-[var(--border-light)] bg-[var(--input)] p-2 transition hover:border-[var(--gold)] <%= selected ? 'is-selected border-[var(--gold)]/70' : '' %>">
               <input type="checkbox" name="featuredProductIds" value="<%= product.id %>" <%= selected ? 'checked' : '' %> class="featured-api-checkbox h-4 w-4 accent-[var(--gold)]" />
-              <img src="<%= product.images?.[0] || '' %>" alt="" class="h-10 w-14 rounded object-cover" /><span class="min-w-0"><b class="block truncate text-xs"><%= product.title %></b><small class="text-[10px] text-emerald-400">พร้อมขาย · ฿<%= Number(product.price || 0).toLocaleString() %></small></span>
+              <button type="button" data-api-gallery data-title="<%= product.title %>" data-image="<%= product.images?.[0] || '' %>" class="h-10 w-14 shrink-0 cursor-zoom-in overflow-hidden rounded focus:outline-none focus:ring-2 focus:ring-[var(--gold)]" title="กดเพื่อดูรูปสินค้า <%= product.title %> ขนาดใหญ่"><img src="<%= product.images?.[0] || '' %>" alt="รูป <%= product.title %>" class="h-full w-full object-cover" /></button><span class="min-w-0"><b class="block truncate text-xs"><%= product.title %></b><small class="text-[10px] text-emerald-400">พร้อมขาย · ฿<%= Number(product.price || 0).toLocaleString() %></small></span>
             </label>
           <% }) %>
         </div>
@@ -70,6 +70,10 @@
     </section>
   <% } %>
 </section>
+<dialog id="catalog-api-image-dialog" class="m-auto w-[min(94vw,900px)] max-h-[92vh] overflow-hidden rounded-2xl border border-[var(--gold)]/45 bg-[var(--card)] text-[var(--text)] shadow-2xl backdrop:bg-black/75">
+  <div class="flex items-center justify-between gap-3 border-b border-[var(--border)] px-4 py-3"><strong id="catalog-api-image-title" class="truncate text-sm"></strong><button type="button" data-api-gallery-close class="grid h-9 w-9 place-items-center rounded-lg bg-[var(--input)] text-xl" aria-label="ปิดรูป">×</button></div>
+  <div class="grid max-h-[76vh] min-h-[280px] place-items-center bg-black/90 p-4"><img id="catalog-api-image" src="" alt="" class="max-h-[72vh] max-w-full object-contain" /></div>
+</dialog>
 <script>
   (() => {
     const boxes = [...document.querySelectorAll('.featured-api-checkbox')];
@@ -84,5 +88,24 @@
     };
     boxes.forEach(box => box.addEventListener('change', sync));
     sync();
+  })();
+  (() => {
+    const dialog = document.getElementById('catalog-api-image-dialog');
+    const image = document.getElementById('catalog-api-image');
+    const title = document.getElementById('catalog-api-image-title');
+    if (!dialog || !image || !title) return;
+    document.querySelectorAll('[data-api-gallery]').forEach(button => button.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      const src = button.dataset.image || '';
+      if (!src) return;
+      image.src = src;
+      image.alt = button.dataset.title || 'รูปสินค้า';
+      title.textContent = button.dataset.title || 'รูปสินค้า';
+      dialog.showModal();
+    }));
+    dialog.querySelector('[data-api-gallery-close]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => { image.src = ''; });
   })();
 </script>
