@@ -48,4 +48,6 @@ const ledger = catalog.calculatePayoutLedger({
 assert.strictEqual(ledger.accrued['tenant-1'], 100, 'sales margin should accrue once');
 assert.strictEqual(ledger.pending['tenant-1'], 60, 'pending balance must subtract completed payouts');
 assert.strictEqual(ledger.pending['tenant-2'], 50, 'unpaid partner margin should remain payable');
+const longLedger = catalog.calculatePayoutLedger({ transactions: Array.from({ length: 120 }, () => ({ tenantRevenueByTenant: { 'tenant-long': 1 } })) });
+assert.strictEqual(longLedger.pending['tenant-long'], 120, 'older sales must remain in the payable ledger');
 console.log('Catalog syndication checks passed: safe metadata, markup, signed checkout token, disabled feed');

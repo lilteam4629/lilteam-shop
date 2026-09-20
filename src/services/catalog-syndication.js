@@ -39,9 +39,12 @@ function roundMoney(value) {
  * as a new margin when this function is called again.
  */
 function calculatePayoutLedger(settingsOrConfig = {}) {
+  // Read the raw arrays for accounting. normalizeConfig intentionally keeps a
+  // bounded view for storefront payloads, but an old sale must never vanish
+  // from the amount owed just because more than 100 newer sales exist.
   const config = settingsOrConfig && settingsOrConfig.catalogApi
-    ? normalizeConfig(settingsOrConfig)
-    : normalizeConfig({ catalogApi: settingsOrConfig });
+    ? settingsOrConfig.catalogApi
+    : settingsOrConfig;
   const accrued = {};
   const paid = {};
   const add = (target, tenantId, amount) => {

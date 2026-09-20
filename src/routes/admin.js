@@ -339,7 +339,7 @@ router.get('/catalog-api', async (req, res) => {
       };
     }));
   }
-  const payoutLedger = catalogSyndication.calculatePayoutLedger(config);
+  const payoutLedger = catalogSyndication.calculatePayoutLedger(mainDb.settings || {});
   const payoutByTenant = payoutLedger.pending;
   const payoutShops = !tenantMode
     ? shops.filter(shop => shop.config.enabled).map(shop => ({
