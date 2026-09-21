@@ -28,9 +28,20 @@ const toArr = value => Array.isArray(value) ? value : (value === undefined ? [] 
 // the values canonical and valid before persisting them so legacy numeric IDs,
 // duplicate fields, and stale/deleted products can never make a section look
 // selected in admin but disappear from the storefront.
+//
+// Home sections are an admin curation tool, so they need to be able to see
+// legacy products that do not have an explicit `active` status yet. The
+// storefront still decides what is sellable; here we only hide records that
+// have been explicitly removed from the catalog.
+function isHomeSectionSelectableProduct(product) {
+  if (!product || product.deletedAt) return false;
+  const status = String(product.status || '').trim().toLowerCase();
+  return !['deleted', 'removed', 'archived'].includes(status);
+}
+
 function normalizeHomeSectionProductIds(value, products = store.data.products || []) {
   const validIds = new Set(products
-    .filter(product => product && product.status === 'active')
+    .filter(isHomeSectionSelectableProduct)
     .map(product => String(product.id)));
   return [...new Set(toArr(value)
     .flatMap(item => String(item ?? '').split(','))
@@ -1103,7 +1114,7 @@ router.post('/filter-tags/:id/edit', async (req, res) => {
 // either auto-filled with the shop's newest products or a manually
 // picked/ordered list — replaces the old hardcoded "เกมมาใหม่" block.
 router.get('/home-sections', (req, res) => {
-  const products = (store.data.products || []).filter(p => p.status === 'active');
+  const products = (store.data.products || []).filter(isHomeSectionSelectableProduct);
   res.render('admin/home-sections', {
     title: 'จัดหมวดหมู่หน้าแรก', active: 'home-sections',
     homeSections: store.data.homeSections || [], products,

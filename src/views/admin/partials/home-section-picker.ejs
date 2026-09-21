@@ -1,1 +1,39 @@
-<div class="section-products-field hs-picker" <%=visible?'':'hidden'%>><header><div class="hs-picker-title"><span>เลือกสินค้าที่ต้องการแสดง</span><small data-selection-count>0 รายการที่เลือก</small></div><div class="hs-picker-tools"><button type="button" data-select-all>เลือกทั้งหมด</button><button type="button" data-clear-all>ล้างที่เลือก</button><input type="search" placeholder="ค้นหาชื่อหรือรหัสสินค้า..." aria-label="ค้นหาสินค้าในหมวด" data-product-search></div></header><div><%products.forEach(p=>{const productId=String(p.id);const productSearch=String([p.title,p.slug,p.id].filter(Boolean).join(' ')).toLocaleLowerCase('th-TH');%><label data-product-card data-name="<%=productSearch%>"><input type="checkbox" name="productIds" value="<%=productId%>" aria-label="เลือกสินค้า <%=p.title%>" <%=selected.includes(productId)?'checked':''%>><span><%if(p.images&&p.images[0]){%><img src="<%=p.images[0]%>" alt="รูปสินค้า <%=p.title%>" loading="lazy"><%}else{%><em aria-hidden="true">ไม่มีรูป</em><%}%><i aria-hidden="true">✓</i></span><b title="<%=p.title%>"><%=p.title%></b></label><%})%></div></div>
+<div class="section-products-field hs-picker" <%= visible ? '' : 'hidden' %>>
+  <header>
+    <div class="hs-picker-title">
+      <span>เลือกสินค้าที่ต้องการแสดง</span>
+      <small data-selection-count>0 รายการที่เลือก</small>
+    </div>
+    <div class="hs-picker-tools">
+      <button type="button" data-select-all>เลือกทั้งหมด</button>
+      <button type="button" data-clear-all>ล้างที่เลือก</button>
+      <input type="search" placeholder="ค้นหาชื่อหรือรหัสสินค้า..." aria-label="ค้นหาสินค้าในหมวด" data-product-search>
+    </div>
+  </header>
+  <div class="hs-picker-grid">
+    <% if (products.length) { %>
+      <% products.forEach(p => {
+        const productId = String(p.id);
+        const productSearch = String([p.title, p.slug, p.id].filter(Boolean).join(' ')).toLocaleLowerCase('th-TH');
+      %>
+        <label data-product-card data-name="<%= productSearch %>">
+          <input type="checkbox" name="productIds" value="<%= productId %>" aria-label="เลือกสินค้า <%= p.title %>" <%= selected.includes(productId) ? 'checked' : '' %>>
+          <span>
+            <% if (p.images && p.images[0]) { %>
+              <img src="<%= p.images[0] %>" alt="รูปสินค้า <%= p.title %>" loading="lazy">
+            <% } else { %>
+              <em aria-hidden="true">ไม่มีรูป</em>
+            <% } %>
+            <i aria-hidden="true">✓</i>
+          </span>
+          <b title="<%= p.title %>"><%= p.title %></b>
+        </label>
+      <% }) %>
+    <% } else { %>
+      <div class="hs-picker-empty" role="status">
+        <b>ยังไม่มีสินค้าให้เลือก</b>
+        <span>เพิ่มสินค้าในเมนู “รายการสินค้า” ก่อน แล้วกลับมาเลือกสินค้าที่ต้องการแสดง</span>
+      </div>
+    <% } %>
+  </div>
+</div>
