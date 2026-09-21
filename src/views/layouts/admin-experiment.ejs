@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %> | LILTeam Shop — Experimental UI</title>
+  <meta name="description" content="แดชบอร์ดจัดการร้านค้า LILTeam Shop รุ่นทดลอง" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&family=Rubik:wght@500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="<%= asset('css/admin-experiment-v1.css') %>" />
+</head>
+<body class="experiment-admin">
+  <%- body %>
+  <div id="experiment-toast" class="experiment-toast" role="status" aria-live="polite"></div>
+  <dialog class="experiment-confirm-dialog" data-experiment-confirm-dialog aria-labelledby="experiment-confirm-title" aria-describedby="experiment-confirm-message">
+    <div class="experiment-confirm-head">
+      <div class="experiment-confirm-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg></div>
+      <div><span class="experiment-confirm-kicker">ตรวจสอบก่อนดำเนินการ</span><h2 id="experiment-confirm-title">ยืนยันการทำรายการ</h2></div>
+    </div>
+    <p class="experiment-confirm-message" data-experiment-confirm-message id="experiment-confirm-message"></p>
+    <p class="experiment-confirm-note">ระบบจะทำรายการนี้ทันทีหลังจากกดยืนยัน</p>
+    <div class="experiment-confirm-actions"><button class="experiment-button" type="button" data-experiment-confirm-cancel>ยกเลิก</button><button class="experiment-button primary" type="button" data-experiment-confirm-submit>ยืนยันรายการ</button></div>
+  </dialog>
+  <script>
+    (function () {
+      const root = document.documentElement;
+      const sidebar = document.querySelector('[data-experiment-sidebar]');
+      const collapse = document.querySelector('[data-experiment-collapse]');
+      const toast = document.getElementById('experiment-toast');
+      const confirmDialog = document.querySelector('[data-experiment-confirm-dialog]');
+      const confirmMessage = document.querySelector('[data-experiment-confirm-message]');
+      const confirmTitle = document.getElementById('experiment-confirm-title');
+      const confirmCancel = document.querySelector('[data-experiment-confirm-cancel]');
+      const confirmSubmit = document.querySelector('[data-experiment-confirm-submit]');
+      let pendingConfirmForm = null;
+      const showToast = (message) => {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.add('show');
+        window.clearTimeout(window.__experimentToastTimer);
+        window.__experimentToastTimer = window.setTimeout(() => toast.classList.remove('show'), 2600);
+      };
+      window.showExperimentToast = showToast;
+      const closeExperimentConfirm = () => {
+        pendingConfirmForm = null;
+        if (confirmDialog && confirmDialog.open) confirmDialog.close();
+      };
+      confirmCancel?.addEventListener('click', closeExperimentConfirm);
+      confirmSubmit?.addEventListener('click', () => {
+        if (!pendingConfirmForm) return;
+        const form = pendingConfirmForm;
+        pendingConfirmForm = null;
+        confirmDialog.close();
+        form.dataset.experimentConfirmed = 'true';
+        if (typeof form.requestSubmit === 'function') form.requestSubmit();
+        else form.submit();
+      });
+      confirmDialog?.addEventListener('cancel', () => { pendingConfirmForm = null; });
+      const pendingRoutes = [
+        ['/admin/products/bulk-import', 'นำเข้าสินค้า'],
+        ['/admin/home-sections', 'หมวดหมู่หน้าแรก'],
+        ['/admin/catalog-api', 'API สินค้าร้านหลัก'],
+        ['/admin/storefront-models', 'โมเดลหน้าร้าน'],
+        ['/admin/topups', 'เติมเงินและตรวจสอบ'],
+        ['/admin/coupons', 'คูปองส่วนลด'],
+        ['/admin/users', 'จัดการสมาชิก'],
+        ['/admin/minigame', 'มินิเกม'],
+        ['/admin/slip-verification', 'ตรวจสอบอัตโนมัติ'],
+        ['/admin/appearance', 'รูปและแบนเนอร์'],
+        ['/admin/theme', 'ธีมร้านค้า'],
+        ['/admin/announcements', 'ป้ายประกาศ'],
+        ['/admin/welcome-popup', 'ป๊อปอัปต้อนรับ'],
+        ['/admin/effects', 'ลูกเล่นหน้าเว็บ'],
+        ['/admin/settings', 'ตั้งค่าร้าน'],
+      ];
+      const pendingFor = (pathname) => pendingRoutes.find(([route]) => pathname === route || pathname.startsWith(`${route}/`));
+      const sidebarScroll = document.querySelector('.experiment-sidebar-scroll');
+      const extraNavGroups = [
+        {
+          title: 'แคตตาล็อก & หน้าร้าน',
+          items: [
+            ['/admin/home-sections', 'หมวดหมู่หน้าแรก', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 11H5m14 0a2 2 0 0 1 2 2v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2m14 0V9a2 2 0 0 0-2-2M5 11V9a2 2 0 0 1 2-2m0 0V5a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2M7 7h10"/></svg>'],
+            ['/admin/catalog-api', 'API สินค้าร้านหลัก', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 17 17 7M9 7h8v8"/></svg>'],
+            ['/admin/storefront-models', 'โมเดลหน้าร้าน', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 10h16M4 14h10M4 18h10m4-6 2 2-2 2"/></svg>'],
+          ],
+        },
+        {
+          title: 'โปรโมชั่น & สมาชิก',
+          items: [
+            ['/admin/coupons', 'คูปองส่วนลด', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 0 0-2 2v3a2 2 0 1 1 0 4v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3a2 2 0 1 1 0-4V7a2 2 0 0 0-2-2H5Z"/></svg>'],
+            ['/admin/users', 'จัดการสมาชิก', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3"/><path d="M5 20c.8-3 3-5 7-5s6.2 2 7 5"/></svg>'],
+          ],
+        },
+        {
+          title: 'ตกแต่ง & การตั้งค่า',
+          items: [
+            ['/admin/appearance', 'รูปและแบนเนอร์', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 16 8.6 11.4a2 2 0 0 1 2.8 0L16 16m-2-2 1.6-1.6a2 2 0 0 1 2.8 0L20 14M14 8h.01M6 20h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2Z"/></svg>'],
+            ['/admin/theme', 'ธีมร้านค้า', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3a9 9 0 1 0 0 18h1.5a1.5 1.5 0 0 0 0-3H12a2 2 0 0 1 0-4h2a7 7 0 0 0 0-14h-2Z"/><path d="M7.5 10h.01M9 6.5h.01M14 6h.01"/></svg>'],
+            ['/admin/announcements', 'ป้ายประกาศ', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m11 5-5 4H3v6h3l5 4V5Zm4.5 4a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/></svg>'],
+            ['/admin/welcome-popup', 'ป๊อปอัปต้อนรับ', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 8h10M7 12h6m8 0a9 9 0 0 0-13.1-7.55L3 3v9a9 9 0 0 0 18 0Z"/></svg>'],
+            ['/admin/effects', 'ลูกเล่นหน้าเว็บ', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 18V5l11-2v13M9 9l11-2M6 21a3 3 0 1 1 0-6 3 3 0 0 1 0 6Zm14-2a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"/></svg>'],
+            ['/admin/settings', 'ตั้งค่าร้านค้า', '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10.3 4.3c.4-1.8 3-1.8 3.4 0a1.7 1.7 0 0 0 2.6 1.1c1.5-.9 3.3.8 2.4 2.4a1.7 1.7 0 0 0 1.1 2.6c1.8.4 1.8 3 0 3.4a1.7 1.7 0 0 0-1.1 2.6c.9 1.5-.9 3.3-2.4 2.4a1.7 1.7 0 0 0-2.6 1.1c-.4 1.8-3 1.8-3.4 0a1.7 1.7 0 0 0-2.6-1.1c-1.5.9-3.3-.9-2.4-2.4a1.7 1.7 0 0 0-1.1-2.6c-1.8-.4-1.8-3 0-3.4a1.7 1.7 0 0 0 1.1-2.6c-.9-1.6.9-3.3 2.4-2.4a1.7 1.7 0 0 0 2.6-1.1Z"/><circle cx="12" cy="12" r="3"/></svg>'],
+          ],
+        },
+      ];
+      if (sidebarScroll && !sidebarScroll.querySelector('[data-experiment-extra-nav]')) {
+        const existingHrefs = new Set(Array.from(sidebarScroll.querySelectorAll('a[href]')).map(link => link.getAttribute('href')));
+        extraNavGroups.forEach((group) => {
+          const items = group.items.filter(([href]) => !existingHrefs.has(href));
+          if (!items.length) return;
+          const section = document.createElement('div');
+          section.className = 'experiment-nav-group';
+          section.dataset.experimentExtraNav = 'true';
+          section.innerHTML = `<div class="experiment-nav-label">${group.title}</div>${items.map(([href, label, icon]) => `<a class="experiment-nav-item" href="${href}" aria-label="${label} · รอทำ" data-experiment-pending="true">${icon}<span>${label}</span><em class="experiment-nav-status pending">รอทำ</em></a>`).join('')}`;
+          sidebarScroll.appendChild(section);
+        });
+      }
+      document.querySelectorAll('a[href]').forEach((link) => {
+        let url;
+        try { url = new URL(link.getAttribute('href'), window.location.origin); } catch (_) { return; }
+        const experimentProductFlow = url.pathname === '/admin/products/new' || (url.searchParams.get('ui') === 'experiment' && /^\/admin\/products\/[^/]+\/edit$/.test(url.pathname));
+        const pending = !experimentProductFlow && (pendingFor(url.pathname) || (url.pathname.startsWith('/admin/products/') && url.pathname !== '/admin/products'));
+        if (!pending) return;
+        link.dataset.experimentPending = 'true';
+        const accessibleLabel = link.getAttribute('aria-label') || link.textContent.trim();
+        link.setAttribute('aria-label', accessibleLabel.includes('รอทำ') ? accessibleLabel : `${accessibleLabel} · รอทำ`);
+        if (link.closest('.experiment-nav-item') && !link.querySelector('.experiment-nav-status')) {
+          const badge = document.createElement('em');
+          badge.className = 'experiment-nav-status pending';
+          badge.textContent = 'รอทำ';
+          link.appendChild(badge);
+        } else if (link.closest('.experiment-mobile-nav') && !link.querySelector('.experiment-mobile-pending')) {
+          const badge = document.createElement('em');
+          badge.className = 'experiment-mobile-pending';
+          badge.textContent = 'รอทำ';
+          (link.querySelector('span') || link).appendChild(badge);
+        } else if (link.classList.contains('experiment-button') && !link.querySelector('.experiment-inline-status')) {
+          const badge = document.createElement('em');
+          badge.className = 'experiment-inline-status pending';
+          badge.textContent = 'รอทำ';
+          link.appendChild(badge);
+        } else if (link.closest('.experiment-action-menu-panel') && !link.querySelector('.experiment-menu-status')) {
+          const badge = document.createElement('em');
+          badge.className = 'experiment-menu-status pending';
+          badge.textContent = 'รอทำ';
+          link.appendChild(badge);
+        }
+      });
+      const topbar = document.querySelector('.experiment-topbar');
+      if (topbar && !topbar.querySelector('.experiment-build-legend')) {
+        const legend = document.createElement('div');
+        legend.className = 'experiment-build-legend';
+        legend.setAttribute('aria-label', 'สถานะงานออกแบบ');
+        legend.innerHTML = '<span><i class="ready"></i> ใช้งานได้</span><span><i class="pending"></i> รอทำ</span>';
+        topbar.insertBefore(legend, topbar.firstChild);
+      }
+      const placeholderKicker = document.querySelector('.experiment-placeholder-card .experiment-kicker');
+      if (placeholderKicker && !placeholderKicker.querySelector('.experiment-inline-status')) {
+        const badge = document.createElement('em');
+        badge.className = 'experiment-inline-status pending';
+        badge.textContent = 'รอทำ';
+        placeholderKicker.appendChild(badge);
+      }
+      const roadmapPresets = {
+        dashboard: {
+          ready: ['ดูยอดขายและสต๊อกสรุป', 'เปิดทางลัดไปหน้าที่ทำแล้ว', 'เห็นสถานะเมนูรอทำชัดเจน'],
+          pending: ['รายงานยอดขายแบบละเอียด', 'แจ้งเตือนและงานการเงิน', 'ตั้งค่าร้านและการตกแต่ง'],
+        },
+        products: {
+          ready: ['ค้นหาและกรองสินค้า', 'แก้ราคาและจัดการสต๊อก', 'เพิ่มสินค้าและตั้งเวลาเปิดขาย'],
+          pending: ['นำเข้าสินค้าเป็นชุด', 'ปรับราคา/สต๊อกหลายรายการ', 'ส่งออกข้อมูลสินค้า'],
+        },
+        productForm: {
+          ready: ['กรอกข้อมูลและอัปโหลดรูปสินค้า', 'บันทึกสินค้าใหม่หรือแก้ไขสินค้า', 'กำหนดราคาและสถานะการขาย'],
+          pending: ['นำเข้าข้อมูลจากไฟล์', 'จัดการคีย์สินค้าแบบชุด', 'ตรวจสอบประวัติการแก้ไข'],
+        },
+        scheduled: {
+          ready: ['ค้นหาและกรองรายการตั้งเวลา', 'แก้ไขเวลาหรือยกเลิกกำหนดเวลา', 'แสดงสถานะรอเวลา/ถึงเวลาแล้ว'],
+          pending: ['ตั้งเวลาหลายรายการพร้อมกัน', 'มุมมองปฏิทินและประวัติ', 'แจ้งเตือนก่อนถึงเวลาเปิดขาย'],
+        },
+        filters: {
+          ready: ['สร้าง แก้ไข ลบ และค้นหาแท็ก', 'ดูจำนวนสินค้าที่ผูกอยู่', 'ผูกสินค้าเข้ากับแท็ก'],
+          pending: ['เรียงลำดับแท็กบนหน้าร้าน', 'นำเข้า/ส่งออกแท็กเป็นชุด', 'ดูสถิติการใช้แท็ก'],
+        },
+        recommendations: {
+          ready: ['สร้างหมวดพร้อมภาพตัวอย่าง', 'เลือกสินค้าและเปิด/ปิดการแสดงผล', 'แก้ไขหรือลบหมวดหมู่'],
+          pending: ['ลากเรียงลำดับหมวดบนหน้าร้าน', 'ตั้งเวลาแสดงหมวดอัตโนมัติ', 'ดูตัวอย่างหน้าร้านทุกขนาดจอ'],
+        },
+        orders: {
+          ready: ['ค้นหาและกรองคำสั่งซื้อ', 'กรองสถานะทั้งหมด/รอ/สำเร็จ/ยกเลิก', 'เปิดรายละเอียดและเปลี่ยนสถานะ'],
+          pending: ['ส่งออก CSV / Excel', 'พิมพ์ใบเสร็จ / ใบส่งสินค้า', 'จัดการหลายรายการ / คืนเงิน'],
+        },
+        orderDetail: {
+          ready: ['ดูรายการสินค้าและข้อมูลผู้ซื้อ', 'ดูยอดรวมและสถานะคำสั่งซื้อ', 'เปลี่ยนสถานะจากหน้ารายละเอียด'],
+          pending: ['พิมพ์ใบเสร็จ / ใบส่งสินค้า', 'คืนเงินหรือยกเลิกรายการบางส่วน', 'เพิ่มโน้ตและประวัติการดำเนินการ'],
+        },
+        settings: {
+          ready: ['แก้ไขข้อมูลร้านและคำโปรย', 'ตั้งค่าเวลาเปิดบริการและช่องทางติดต่อ', 'ดูตัวอย่างร้านแบบสดก่อนบันทึก'],
+          pending: ['จัดการโลโก้และภาพแบรนด์', 'ตั้งค่าการชำระเงินและตรวจสอบสลิป', 'สิทธิ์ผู้ดูแลและการแจ้งเตือน'],
+        },
+        placeholder: {
+          ready: ['มีพื้นที่ทดลองและเมนูเข้าถึงได้', 'แยกจากระบบเก่าด้วย URL รุ่นทดลอง'],
+          pending: ['ออกแบบหน้าการทำงานจริง', 'เชื่อมข้อมูลและการบันทึก', 'ทดสอบสิทธิ์และขั้นตอนใช้งาน'],
+        },
+      };
+      const currentPath = window.location.pathname.replace(/\/$/, '') || '/admin';
+      const pageKey = currentPath === '/admin' ? 'dashboard'
+        : currentPath === '/admin/products' ? 'products'
+          : currentPath === '/admin/products/new' || /^\/admin\/products\/[^/]+\/edit$/.test(currentPath) ? 'productForm'
+            : currentPath === '/admin/scheduled-products' ? 'scheduled'
+              : currentPath === '/admin/filter-tags' ? 'filters'
+                : currentPath === '/admin/recommended-categories' ? 'recommendations'
+                  : /^\/admin\/orders\/[^/]+$/.test(currentPath) ? 'orderDetail'
+                    : currentPath === '/admin/orders' ? 'orders'
+                      : currentPath === '/admin/settings' ? 'settings' : 'placeholder';
+      const roadmapPreset = roadmapPresets[pageKey];
+      const buildRoadmap = () => {
+        const content = document.querySelector('.experiment-content');
+        if (!content || document.querySelector('[data-experiment-roadmap]') || document.querySelector('.orders-build-status')) return;
+        const ready = roadmapPreset.ready;
+        const pending = roadmapPreset.pending;
+        const total = ready.length + pending.length;
+        const roadmap = document.createElement('section');
+        roadmap.className = 'experiment-build-roadmap';
+        roadmap.dataset.experimentRoadmap = 'true';
+        roadmap.setAttribute('aria-labelledby', 'experiment-roadmap-title');
+        const list = (items, type) => items.map((label, index) => type === 'ready'
+          ? `<li><span>${label}</span><em>พร้อมใช้</em></li>`
+          : `<li><span>${label}</span><button type="button" data-roadmap-demo data-demo-title="${label}">ดูตัวอย่าง</button></li>`).join('');
+        roadmap.innerHTML = `<div class="experiment-build-roadmap-head"><div><span class="experiment-build-roadmap-kicker">BUILD STATUS · ${pageKey.toUpperCase()}</span><h2 id="experiment-roadmap-title">หน้านี้ทำอะไรได้แล้ว และเหลืออะไร</h2><p>รายการนี้แสดงตามสถานะของหน้านี้ เพื่อให้ไล่แก้ได้ทีละจุด</p></div><span class="experiment-build-roadmap-progress"><b>${ready.length}</b>/${total} จุดพร้อมใช้</span></div><div class="experiment-build-roadmap-grid"><div class="experiment-build-column ready"><h3><i>✓</i> ทำแล้ว · ใช้ข้อมูลจริง</h3><ul>${list(ready, 'ready')}</ul></div><div class="experiment-build-column pending"><h3><i>＋</i> เหลือทำ · มีตัวอย่างให้ดู</h3><ul>${list(pending, 'pending')}</ul></div></div><div class="experiment-build-roadmap-foot"><span>ระบบเก่ายังอยู่ที่ URL เดิมและไม่ได้ถูกลบ</span><button type="button" data-roadmap-toggle>ซ่อนรายการนี้ ↑</button></div>`;
+        const pageHead = content.querySelector('.experiment-page-head');
+        const detail = content.querySelector('.order-detail-page');
+        const placeholder = content.querySelector('.experiment-placeholder-card');
+        if (pageHead) pageHead.insertAdjacentElement('afterend', roadmap);
+        else if (detail) detail.insertAdjacentElement('beforebegin', roadmap);
+        else if (placeholder) placeholder.insertAdjacentElement('beforebegin', roadmap);
+        else content.prepend(roadmap);
+        const toggle = roadmap.querySelector('[data-roadmap-toggle]');
+        toggle?.addEventListener('click', () => {
+          roadmap.classList.toggle('is-collapsed');
+          toggle.textContent = roadmap.classList.contains('is-collapsed') ? 'แสดงรายการนี้ ↓' : 'ซ่อนรายการนี้ ↑';
+        });
+        let dialog = document.querySelector('[data-experiment-roadmap-dialog]');
+        if (!dialog) {
+          dialog = document.createElement('dialog');
+          dialog.className = 'experiment-roadmap-dialog';
+          dialog.dataset.experimentRoadmapDialog = 'true';
+          dialog.innerHTML = '<div class="experiment-roadmap-dialog-head"><div><span class="experiment-build-roadmap-kicker">EXAMPLE PREVIEW</span><h2 data-roadmap-dialog-title>ตัวอย่างฟังก์ชัน</h2><p>หน้าตัวอย่างเพื่อเห็นตำแหน่งและรูปแบบก่อนพัฒนาจริง</p></div><button type="button" data-roadmap-dialog-close aria-label="ปิดตัวอย่าง">×</button></div><div class="experiment-roadmap-dialog-body"><div class="experiment-roadmap-mock-row"><span>↗</span><div><strong data-roadmap-dialog-code>#DEMO-001</strong><small>ตัวอย่างข้อมูล · ไม่กระทบข้อมูลจริง</small></div><em>ตัวอย่าง</em></div><div class="experiment-roadmap-placeholder"><span data-roadmap-dialog-message>ฟังก์ชันนี้ยังไม่เชื่อมกับระบบจริง</span><small>เมื่อเริ่มทำจริง ปุ่มจะทำงานกับข้อมูลจริงของหน้านี้</small></div></div><div class="experiment-roadmap-dialog-actions"><button class="experiment-button" type="button" data-roadmap-dialog-close>ปิด</button><a class="experiment-button primary" href="${window.location.pathname}${window.location.search}">กลับหน้าปัจจุบัน</a></div>';
+          document.body.appendChild(dialog);
+          dialog.querySelectorAll('[data-roadmap-dialog-close]').forEach(button => button.addEventListener('click', () => dialog.close()));
+          dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+        }
+        roadmap.querySelectorAll('[data-roadmap-demo]').forEach(button => button.addEventListener('click', () => {
+          dialog.querySelector('[data-roadmap-dialog-title]').textContent = button.dataset.demoTitle || 'ตัวอย่างฟังก์ชัน';
+          dialog.querySelector('[data-roadmap-dialog-message]').textContent = `${button.dataset.demoTitle || 'ฟังก์ชันนี้'} ยังไม่เชื่อมกับระบบจริง`;
+          dialog.showModal();
+        }));
+      };
+      buildRoadmap();
+      try {
+        if (localStorage.getItem('lilteam_experiment_sidebar') === 'collapsed') root.classList.add('experiment-sidebar-collapsed');
+      } catch (_) {}
+      if (collapse) collapse.addEventListener('click', function () {
+        root.classList.toggle('experiment-sidebar-collapsed');
+        try { localStorage.setItem('lilteam_experiment_sidebar', root.classList.contains('experiment-sidebar-collapsed') ? 'collapsed' : 'open'); } catch (_) {}
+      });
+      document.querySelectorAll('[data-experiment-alert-toggle]').forEach(function (button) {
+        button.addEventListener('click', function () {
+          const alert = document.querySelector('[data-experiment-stock-alert]');
+          if (!alert) return;
+          const expanded = alert.classList.toggle('expanded');
+          button.textContent = expanded ? 'ย่อรายการ' : 'ดูทั้งหมด';
+          button.setAttribute('aria-expanded', String(expanded));
+        });
+      });
+      document.querySelectorAll('[data-experiment-notifications]').forEach(function (button) {
+        button.addEventListener('click', function () { showToast('ยังไม่มีการแจ้งเตือนใหม่'); });
+      });
+      document.querySelectorAll('form[data-experiment-confirm]').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+          if (form.dataset.experimentConfirmed === 'true') {
+            delete form.dataset.experimentConfirmed;
+            return;
+          }
+          event.preventDefault();
+          pendingConfirmForm = form;
+          const isDanger = /ลบ|ย้อนกลับไม่ได้/.test(form.dataset.experimentConfirm || '');
+          confirmDialog.classList.toggle('danger', isDanger);
+          confirmTitle.textContent = isDanger ? 'ยืนยันการลบข้อมูล' : 'ยืนยันการทำรายการ';
+          confirmMessage.textContent = form.dataset.experimentConfirm || 'ต้องการดำเนินการนี้หรือไม่?';
+          confirmSubmit.textContent = isDanger ? 'ยืนยันการลบ' : 'ยืนยันรายการ';
+          confirmDialog.showModal();
+          confirmCancel.focus();
+        });
+      });
+      document.addEventListener('click', function (event) {
+        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+        var link = event.target.closest('a[href]');
+        if (!link) return;
+        var target;
+        try { target = new URL(link.getAttribute('href'), window.location.origin); } catch (_) { return; }
+        if (target.origin !== window.location.origin || !target.pathname.startsWith('/admin') || target.searchParams.has('ui') || link.dataset.experimentLegacy === 'true') return;
+        target.searchParams.set('ui', 'experiment');
+        link.href = target.pathname + target.search + target.hash;
+      });
+    })();
+  </script>
+</body>
+</html>

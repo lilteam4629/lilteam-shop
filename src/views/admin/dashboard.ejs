@@ -81,7 +81,9 @@
 <% } %>
 
 <!-- Quick Action Shortcuts Bar -->
-<div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+<link rel="stylesheet" href="<%= asset('css/dashboard-refresh-v1.css') %>" />
+<div id="lil-dashboard">
+<div class="dash-heading flex items-center justify-between flex-wrap gap-3 mb-6">
   <div>
     <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">ภาพรวมร้านค้า</h1>
     <p class="text-xs text-[var(--text-4)] mt-0.5">ยินดีต้อนรับกลับ, คุณสามารถตรวจสอบสถิติและจัดการระบบได้ที่นี่</p>
@@ -106,14 +108,14 @@
 </div>
 
 <!-- Primary Metric Cards (4 Cards) -->
-<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+<div class="dash-metrics grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
 
   <!-- Card 1: Today's Revenue -->
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm hover:border-[var(--gold)]/40 transition duration-200">
     <div class="flex items-center justify-between mb-3">
       <span class="text-xs font-medium text-[var(--text-4)]">รายได้วันนี้ (Today)</span>
       <div class="w-9 h-9 rounded-xl bg-amber-500/10 text-[var(--gold-text)] flex items-center justify-center text-base">
-        💰
+        ฿
       </div>
     </div>
     <div class="text-2xl sm:text-3xl font-extrabold text-[var(--gold-text)] tracking-tight">฿<%= stats.revenueToday.toLocaleString() %></div>
@@ -128,7 +130,7 @@
     <div class="flex items-center justify-between mb-3">
       <span class="text-xs font-medium text-[var(--text-4)]">รายได้ 7 วันล่าสุด</span>
       <div class="w-9 h-9 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center text-base">
-        📈
+        ↗
       </div>
     </div>
     <div class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight">฿<%= stats.revenue7Days.toLocaleString() %></div>
@@ -142,7 +144,7 @@
     <div class="flex items-center justify-between mb-3">
       <span class="text-xs font-medium text-[var(--text-4)]">ลูกค้าใหม่วันนี้</span>
       <div class="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-base">
-        👥
+        +1
       </div>
     </div>
     <div class="text-2xl sm:text-3xl font-extrabold text-[var(--text)] tracking-tight"><%= stats.newCustomersToday %> <span class="text-sm font-normal text-[var(--text-4)]">คน</span></div>
@@ -154,28 +156,28 @@
   <!-- Card 4: Topup Success Rate -->
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm hover:border-[var(--gold)]/40 transition duration-200">
     <div class="flex items-center justify-between mb-3">
-      <span class="text-xs font-medium text-[var(--text-4)]">ความแม่นยำตรวจสลิป</span>
+      <span class="text-xs font-medium text-[var(--text-4)]">คำสั่งซื้อสะสม</span>
       <div class="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-base">
-        ⚡
+        #
       </div>
     </div>
-    <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400 tracking-tight"><%= stats.topupSuccessRate %>%</div>
+    <div class="text-2xl sm:text-3xl font-extrabold text-emerald-400 tracking-tight"><%= stats.orderCount %> <span class="text-sm font-normal">รายการ</span></div>
     <div class="text-[11px] text-[var(--text-4)] mt-2">
-      จาก <%= stats.reviewedTopups %> รายการที่ตรวจสอบแล้ว
+      ยอดขายรวม ฿<%= stats.revenue.toLocaleString() %>
     </div>
   </div>
 
 </div>
 
 <!-- Secondary Stats Row (4 Mini Stats) -->
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+<div class="dash-secondary grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
   <div class="bg-[var(--card)]/60 border border-[var(--border)] rounded-xl p-3.5 flex flex-col justify-between">
     <span class="text-[11px] text-[var(--text-4)]">ยอดขายรวมทั้งหมด</span>
     <b class="text-base sm:text-lg font-bold text-[var(--gold-text)] mt-1">฿<%= stats.revenue.toLocaleString() %></b>
   </div>
   <div class="bg-[var(--card)]/60 border border-[var(--border)] rounded-xl p-3.5 flex flex-col justify-between">
-    <span class="text-[11px] text-[var(--text-4)]">คำสั่งซื้อสะสม</span>
-    <b class="text-base sm:text-lg font-bold text-[var(--text)] mt-1"><%= stats.orderCount %> รายการ</b>
+    <span class="text-[11px] text-[var(--text-4)]">อัตราอนุมัติสลิป</span>
+    <b class="text-base sm:text-lg font-bold text-[var(--text)] mt-1"><%= stats.topupSuccessRate %>% จาก <%= stats.reviewedTopups %> รายการ</b>
   </div>
   <div class="bg-[var(--card)]/60 border border-[var(--border)] rounded-xl p-3.5 flex flex-col justify-between">
     <span class="text-[11px] text-[var(--text-4)]">สินค้าในระบบ</span>
@@ -208,24 +210,23 @@
 
 <!-- Low Stock Warning Banner -->
 <% if (lowStockProducts.length) { %>
-  <div class="bg-rose-950/40 border border-rose-500/40 text-rose-200 rounded-2xl p-4 sm:p-5 mb-6 shadow-md flex items-start gap-3.5">
-    <span class="text-xl">⚠️</span>
+  <details class="dash-stock">
+    <summary><span class="dash-stock-icon" aria-hidden="true">!</span><span><strong>สินค้า <%= lowStockProducts.length %> รายการควรตรวจสอบสต็อก</strong><small>สินค้าเหลือไม่เกิน 1 ชิ้น · เติมสต็อกเพื่อให้พร้อมขาย</small></span><span class="dash-stock-action">ตรวจสอบสต็อก <span aria-hidden="true">⌄</span></span></summary>
     <div class="text-xs flex-1">
-      <span class="font-semibold text-rose-100 text-sm block mb-1">สินค้าใกล้หมดสต๊อก (<%= lowStockProducts.length %> รายการ):</span>
       <div class="flex flex-wrap gap-2 mt-2">
         <% lowStockProducts.forEach(p => { %>
           <a href="/admin/products/<%= p.id %>/stock" class="inline-flex items-center gap-1.5 bg-rose-900/60 hover:bg-rose-800/80 border border-rose-500/40 text-rose-200 px-3 py-1 rounded-lg transition font-medium">
             <span><%= p.title %></span>
-            <span class="bg-rose-500/30 px-1.5 py-0.2 rounded text-[10px] font-bold text-white">เหลือ 0</span>
+            <span class="bg-rose-500/30 px-1.5 py-0.2 rounded text-[10px] font-bold text-white">ตรวจสอบ →</span>
           </a>
         <% }) %>
       </div>
     </div>
-  </div>
+  </details>
 <% } %>
 
 <!-- Charts & Top Products Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-[1.4fr_.6fr] gap-6 mb-8">
+<div class="dash-analysis grid grid-cols-1 lg:grid-cols-[1.4fr_.6fr] gap-6 mb-8">
 
   <!-- 7-Day Revenue Visual Chart -->
   <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
@@ -241,9 +242,9 @@
     </div>
 
     <!-- Bar Chart Container -->
-    <div class="h-52 flex items-end gap-2 sm:gap-4 border-b border-[var(--border)] pt-4 px-2">
+    <div class="dash-chart h-52 flex items-end gap-2 sm:gap-4 border-b border-[var(--border)] pt-4 px-2" role="img" aria-label="ยอดขายรายวันในช่วง 7 วันล่าสุด แสดงยอดเงินบาทเหนือแต่ละแท่ง">
       <% dailySales.forEach(day => {
-        const height = Math.max(day.amount ? 10 : 3, Math.round((day.amount / maxDailyRevenue) * 100));
+        const height = Math.max(0, Math.round((day.amount / Math.max(1, maxDailyRevenue)) * 100));
       %>
         <div class="flex-1 h-full flex flex-col justify-end items-center min-w-0 group relative">
           <!-- Hover Tooltip -->
@@ -251,7 +252,7 @@
             ฿<%= day.amount.toLocaleString() %>
           </div>
           <!-- Bar Column -->
-          <div class="w-full max-w-10 rounded-t-lg bg-gradient-to-t from-[var(--gold-dark)] to-[var(--gold)] shadow-[0_0_12px_color-mix(in_srgb,var(--gold)_20%,transparent)] group-hover:brightness-110 transition-all duration-200" style="height:<%= height %>%"></div>
+          <div class="dash-bar w-full max-w-10 rounded-t-lg" style="height:calc(<%= height %>% * .75)"></div>
           <!-- Day Label -->
           <span class="text-[10px] sm:text-xs text-[var(--text-4)] py-2.5 font-medium"><%= day.label %></span>
         </div>
@@ -262,7 +263,7 @@
   <!-- Top Products Leaderboard -->
   <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
     <div class="flex items-center justify-between mb-4">
-      <h2 class="font-bold text-sm sm:text-base text-[var(--text)]">🏆 สินค้าขายดี</h2>
+      <h2 class="font-bold text-sm sm:text-base text-[var(--text)]">สินค้าขายดี</h2>
       <a href="/admin/products" class="text-xs text-[var(--gold-text)] hover:underline">ดูทั้งหมด →</a>
     </div>
 
@@ -292,14 +293,14 @@
 </div>
 
 <!-- Recent Orders Section -->
-<section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
+<section class="dash-orders bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
   <div class="flex items-center justify-between flex-wrap gap-3 mb-4">
     <div>
       <h2 class="font-bold text-base text-[var(--text)]">คำสั่งซื้อล่าสุด</h2>
       <p class="text-xs text-[var(--text-4)] mt-0.5">รายการสั่งซื้อสินค้าล่าสุดของสมาชิกร้าน</p>
     </div>
     <div class="flex items-center gap-2">
-      <input type="text" data-table-search="#dashboard-orders-table" placeholder="ค้นหารหัสคำสั่งซื้อ..." class="bg-[var(--input)] border border-[var(--border-light)] text-xs rounded-xl px-3 py-1.5 outline-none focus:border-[var(--gold)] w-48" />
+      <input type="search" aria-label="ค้นหาคำสั่งซื้อ" data-table-search="#dashboard-orders-table" placeholder="ค้นหารหัสคำสั่งซื้อ..." class="bg-[var(--input)] border border-[var(--border-light)] text-xs rounded-xl px-3 py-1.5 outline-none focus:border-[var(--gold)] w-48" />
       <a href="/admin/orders" class="text-xs font-medium text-[var(--gold-text)] hover:underline border border-[var(--gold)]/30 rounded-xl px-3 py-1.5 transition">ดูทั้งหมด →</a>
     </div>
   </div>
@@ -366,3 +367,4 @@
     </table>
   </div>
 </section>
+</div>

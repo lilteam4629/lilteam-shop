@@ -1,0 +1,49 @@
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-settings-v1.css') %>" />
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-settings-v2.css') %>" />
+<div class="experiment-app experiment-settings-page">
+  <aside class="experiment-sidebar" data-experiment-sidebar aria-label="เมนูร้านค้า">
+    <div class="experiment-brand"><div class="experiment-brand-mark"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName || 'ร้านค้า' %>" /><% } else { %><span aria-hidden="true"><%= (settings.shopName || 'L')[0] %></span><% } %></div><div><div class="experiment-brand-title"><%= settings.shopName || 'LILTeam Shop' %></div><div class="experiment-brand-sub">ผู้ดูแลระบบ · รุ่นทดลอง</div></div><button class="experiment-collapse" data-experiment-collapse type="button" aria-label="ย่อหรือขยายเมนู">‹</button></div>
+    <div class="experiment-sidebar-scroll"><div class="experiment-nav-group"><div class="experiment-nav-label">ภาพรวม</div><a class="experiment-nav-item" href="/admin?ui=experiment"><span aria-hidden="true">▦</span><span>แดชบอร์ด</span></a></div><div class="experiment-nav-group"><div class="experiment-nav-label">สินค้าและสต๊อก</div><a class="experiment-nav-item" href="/admin/products?ui=experiment"><span aria-hidden="true">◇</span><span>รายการสินค้า</span></a><a class="experiment-nav-item" href="/admin/scheduled-products?ui=experiment"><span aria-hidden="true">◷</span><span>ตั้งเวลาเปิดขาย</span></a><a class="experiment-nav-item" href="/admin/filter-tags?ui=experiment"><span aria-hidden="true">◈</span><span>แท็ก/จัดหมวดสินค้า</span></a><a class="experiment-nav-item" href="/admin/recommended-categories?ui=experiment"><span aria-hidden="true">☷</span><span>หมวดหมู่แนะนำ</span></a></div><div class="experiment-nav-group"><div class="experiment-nav-label">การสั่งซื้อ & การเงิน</div><a class="experiment-nav-item" href="/admin/orders?ui=experiment"><span aria-hidden="true">▤</span><span>คำสั่งซื้อ</span></a><a class="experiment-nav-item" href="/admin/topups"><span aria-hidden="true">▭</span><span>เติมเงิน & ตรวจสอบ</span></a></div></div>
+    <div class="experiment-sidebar-bottom"><a class="experiment-nav-item" href="/"><span aria-hidden="true">⌂</span><span>กลับหน้าร้าน</span><span style="margin-left:auto">→</span></a><div class="experiment-profile"><div class="experiment-avatar">A</div><div><strong>admin</strong><small>แอดมินสูงสุด</small></div></div></div>
+  </aside>
+  <div class="experiment-main"><header class="experiment-topbar"><button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน">◌</button><span class="experiment-user-name" style="font-size:12px;font-weight:700">admin</span></header>
+    <main class="experiment-content">
+      <div class="experiment-page-head"><div><div class="experiment-kicker">ทดลองหน้าตาใหม่ · ตั้งค่าร้าน</div><h1>ตั้งค่าร้านค้า</h1><p>จัดการข้อมูลที่ลูกค้าเห็น พร้อมดูตัวอย่างร้านก่อนบันทึก</p></div><div class="experiment-settings-save-state"><i></i> แก้ไขได้ทันที</div></div>
+      <section class="settings-hero experiment-card"><div><span class="settings-eyebrow">STORE CONTROL CENTER</span><h2>ทำให้ร้านดูเป็นร้านของคุณ</h2><p>ข้อมูลพื้นฐานจะแสดงบนหน้าร้าน ส่วนตัวเลือกที่ยังรอทำจะมีตัวอย่างให้ดูจากแผงสถานะด้านบน</p></div><div class="settings-hero-mark"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="" /><% } else { %><span><%= (settings.shopName || 'L')[0] %></span><% } %></div></section>
+      <div class="settings-layout">
+        <form class="settings-form" action="/admin/settings?ui=experiment" method="post">
+          <section class="settings-panel experiment-card"><div class="settings-panel-head"><div class="settings-panel-icon green">⌂</div><div><h2>ข้อมูลร้านและแบรนด์</h2><p>ข้อมูลที่แสดงในหัวเว็บ การ์ดร้าน และหน้าติดต่อ</p></div><span class="settings-ready-badge">พร้อมใช้</span></div><div class="settings-fields two-columns"><label><span>ชื่อร้านค้า <b>*</b></span><input name="shopName" value="<%= settings.shopName || '' %>" required maxlength="80" data-settings-shop-name /></label><label><span>คำโปรยร้าน</span><input name="tagline" value="<%= settings.tagline || '' %>" maxlength="120" placeholder="เช่น ร้านจำหน่ายเกมและไอดีแท้ 24 ชม." data-settings-tagline /></label></div></section>
+          <section class="settings-panel experiment-card"><div class="settings-panel-head"><div class="settings-panel-icon blue">◷</div><div><h2>เวลาและช่องทางติดต่อ</h2><p>ช่วยให้ลูกค้ารู้ว่าติดต่อร้านทางไหนและรอคำตอบประมาณเท่าไร</p></div><span class="settings-ready-badge">พร้อมใช้</span></div><div class="settings-fields two-columns"><label><span>เวลาเปิดบริการ</span><input name="openHours" value="<%= settings.openHours || '' %>" placeholder="เช่น เปิดบริการ 24 ชั่วโมง หรือ 10:00 - 22:00" /></label><label><span>Line ID หรือ Line @</span><input name="contactLine" value="<%= settings.contactLine || '' %>" placeholder="เช่น @myshop" /></label><label><span>Facebook Page URL</span><input name="contactFacebook" value="<%= settings.contactFacebook || '' %>" placeholder="https://facebook.com/เพจของคุณ" /></label><label><span>Messenger URL</span><input name="contactMessenger" value="<%= settings.contactMessenger || '' %>" placeholder="https://m.me/ชื่อเพจ" /></label><label><span>ชื่อที่แสดงบนการ์ด Facebook</span><input name="contactFacebookName" value="<%= settings.contactFacebookName || '' %>" placeholder="เช่น LilTeam Official" /></label><label><span>เวลาตอบกลับโดยประมาณ</span><input name="contactResponseTime" value="<%= settings.contactResponseTime || '' %>" placeholder="เช่น ภายใน 5–15 นาที" /></label></div><label class="settings-toggle-row"><span><strong>แสดงแถบเวลาเปิดบริการหน้าหลัก</strong><small>แสดงสถานะเปิดร้านพร้อมเวลาและคำโปรยด้านบนสุดของหน้าร้าน</small></span><input type="checkbox" name="showOpenHoursBar" <%= settings.showOpenHoursBar !== false ? 'checked' : '' %> data-settings-hours-toggle /><i></i></label></section>
+          <div class="settings-form-actions"><span>การบันทึกจะใช้กับหน้าร้านจริง</span><button class="experiment-button primary" type="submit">บันทึกข้อมูลร้านค้า →</button></div>
+        </form>
+        <aside class="settings-preview-column"><section class="settings-preview experiment-card"><div class="settings-preview-head"><div><span>LIVE PREVIEW</span><strong>ตัวอย่างหน้าร้าน</strong></div><i>● สด</i></div><div class="settings-store-preview"><div class="settings-store-preview-top"><div class="settings-preview-logo"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="" data-settings-preview-logo /><% } else { %><span data-settings-preview-initial><%= (settings.shopName || 'L')[0] %></span><% } %></div><span class="settings-preview-open" data-settings-preview-open><i></i> เปิดให้บริการ</span></div><h3 data-settings-preview-name><%= settings.shopName || 'ชื่อร้านของคุณ' %></h3><p data-settings-preview-tagline><%= settings.tagline || 'คำโปรยร้านจะแสดงตรงนี้' %></p><div class="settings-preview-divider"></div><div class="settings-preview-contact"><span>ติดต่อร้าน</span><strong data-settings-preview-line><%= settings.contactLine || '@yourshop' %></strong></div><div class="settings-preview-hours"><span>เวลาเปิดบริการ</span><strong data-settings-preview-hours><%= settings.openHours || 'เปิดบริการ 24 ชั่วโมง' %></strong></div></div><p class="settings-preview-note">ตัวอย่างนี้เปลี่ยนตามข้อมูลในแบบฟอร์มทันที แต่ยังไม่บันทึกจนกว่าจะกดปุ่มด้านล่าง</p></section><section class="settings-quick-links experiment-card"><div class="settings-panel-head"><div class="settings-panel-icon gold">✦</div><div><h2>ตั้งค่าที่เกี่ยวข้อง</h2><p>ส่วนที่ยังรอทำจะแยกไว้ให้ไล่ต่อ</p></div></div><a href="/admin/appearance?ui=experiment"><span><b>รูปและโลโก้ร้าน</b><small>จัดการภาพแบรนด์และแบนเนอร์</small></span><em>รอทำ</em><i>→</i></a><a href="/admin/topups?ui=experiment"><span><b>การชำระเงิน</b><small>บัญชีรับเงินและตรวจสอบสลิป</small></span><em>รอทำ</em><i>→</i></a><a href="/admin/users?ui=experiment"><span><b>ผู้ดูแลและสิทธิ์</b><small>กำหนดบทบาทผู้ใช้งานระบบ</small></span><em>รอทำ</em><i>→</i></a></section></aside>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+  (() => {
+    const name = document.querySelector('[data-settings-shop-name]');
+    const tagline = document.querySelector('[data-settings-tagline]');
+    const line = document.querySelector('[name="contactLine"]');
+    const hours = document.querySelector('[name="openHours"]');
+    const previewName = document.querySelector('[data-settings-preview-name]');
+    const previewTagline = document.querySelector('[data-settings-preview-tagline]');
+    const previewLine = document.querySelector('[data-settings-preview-line]');
+    const previewHours = document.querySelector('[data-settings-preview-hours]');
+    const previewInitial = document.querySelector('[data-settings-preview-initial]');
+    const previewOpen = document.querySelector('[data-settings-preview-open]');
+    const hoursToggle = document.querySelector('[data-settings-hours-toggle]');
+    const sync = () => {
+      if (previewName) previewName.textContent = name?.value.trim() || 'ชื่อร้านของคุณ';
+      if (previewTagline) previewTagline.textContent = tagline?.value.trim() || 'คำโปรยร้านจะแสดงตรงนี้';
+      if (previewLine) previewLine.textContent = line?.value.trim() || '@yourshop';
+      if (previewHours) previewHours.textContent = hours?.value.trim() || 'เปิดบริการ 24 ชั่วโมง';
+      if (previewInitial) previewInitial.textContent = (name?.value.trim() || 'L')[0].toUpperCase();
+      if (previewOpen) previewOpen.hidden = Boolean(hoursToggle && !hoursToggle.checked);
+    };
+    [name, tagline, line, hours].forEach(input => input?.addEventListener('input', sync));
+    hoursToggle?.addEventListener('change', sync);
+    sync();
+  })();
+</script>

@@ -1,0 +1,354 @@
+/*
+ * LILTeam catalog workbench
+ * Scoped to the products, editor, stock and scheduled-product views so the
+ * existing route/form behavior remains unchanged while the surfaces get one
+ * consistent responsive system.
+ */
+:root {
+  --catalog-ink: #10211d;
+  --catalog-muted: #66736f;
+  --catalog-line: #dce5e1;
+  --catalog-soft: #f3f7f5;
+  --catalog-green: #176b52;
+  --catalog-green-strong: #0f5842;
+  --catalog-green-soft: #e6f2ed;
+  --catalog-amber: #b66b08;
+}
+
+.catalog-redesign {
+  color: var(--catalog-ink);
+}
+
+.catalog-redesign > .flex:first-child,
+.catalog-redesign > form:first-child,
+.catalog-redesign > .studio-form-head:first-child {
+  position: relative;
+}
+
+.workspace-products,
+.workspace-product-editor,
+.workspace-stock,
+.workspace-schedule {
+  max-width: 1500px;
+  margin-inline: auto;
+}
+
+.workspace-products h1,
+.workspace-product-editor h1,
+.workspace-stock h1,
+.workspace-schedule h1 {
+  letter-spacing: -0.025em;
+}
+
+.workspace-products .bg-\[var\(--card\)\],
+.workspace-product-editor .bg-\[var\(--card\)\],
+.workspace-stock .bg-\[var\(--card\)\],
+.workspace-schedule .bg-\[var\(--card\)\] {
+  box-shadow: 0 8px 24px rgba(16, 33, 29, 0.045);
+}
+
+.catalog-redesign .catalog-page-kicker {
+  color: var(--catalog-green);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.workspace-products .admin-action-trigger,
+.workspace-products a[href="/admin/products/new"],
+.workspace-schedule a[href="/admin/products/new"],
+.workspace-product-editor button[type="submit"],
+.workspace-stock button[type="submit"] {
+  min-height: 42px;
+  border-radius: 12px;
+}
+
+.workspace-products .admin-action-trigger,
+.workspace-products a[href="/admin/products/new"],
+.workspace-schedule a[href="/admin/products/new"] {
+  background: var(--catalog-green) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 18px rgba(23, 107, 82, 0.16);
+}
+
+.workspace-products .admin-action-trigger:hover,
+.workspace-products a[href="/admin/products/new"]:hover,
+.workspace-schedule a[href="/admin/products/new"]:hover {
+  background: var(--catalog-green-strong) !important;
+}
+
+.workspace-products input[type="search"],
+.workspace-products input[type="text"],
+.workspace-products input[type="number"],
+.workspace-products select,
+.workspace-product-editor input,
+.workspace-product-editor textarea,
+.workspace-product-editor select,
+.workspace-stock input,
+.workspace-stock textarea,
+.workspace-stock select {
+  border-color: var(--catalog-line) !important;
+  border-radius: 10px;
+}
+
+.workspace-products input:focus,
+.workspace-products select:focus,
+.workspace-product-editor input:focus,
+.workspace-product-editor textarea:focus,
+.workspace-product-editor select:focus,
+.workspace-stock input:focus,
+.workspace-stock textarea:focus,
+.workspace-stock select:focus {
+  border-color: var(--catalog-green) !important;
+  box-shadow: 0 0 0 3px rgba(23, 107, 82, 0.12);
+  outline: none;
+}
+
+.workspace-products table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.workspace-products thead th {
+  background: var(--catalog-soft);
+  color: var(--catalog-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.workspace-products tbody tr {
+  transition: background-color 160ms ease;
+}
+
+.workspace-products tbody tr:hover {
+  background: #f7fbf9;
+}
+
+.workspace-products [data-price-edit] {
+  color: var(--catalog-green) !important;
+  font-weight: 800;
+}
+
+.workspace-products [data-price-edit]:hover {
+  text-decoration: underline;
+}
+
+.workspace-products .status-badge,
+.workspace-products [class*="rounded-full"] {
+  letter-spacing: 0.01em;
+}
+
+.workspace-products #product-price-total {
+  border-color: rgba(23, 107, 82, 0.25) !important;
+  background: rgba(255, 255, 255, 0.94) !important;
+}
+
+.workspace-product-editor > form {
+  border-color: var(--catalog-line) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 12px 30px rgba(16, 33, 29, 0.06) !important;
+}
+
+.workspace-product-editor .studio-form-head,
+.workspace-product-editor .studio-form-head + * {
+  color: var(--catalog-ink);
+}
+
+.workspace-product-editor .studio-form-head {
+  border-bottom: 1px solid var(--catalog-line);
+  padding-bottom: 16px;
+}
+
+.workspace-product-editor .studio-form-close {
+  display: grid;
+  min-width: 40px;
+  min-height: 40px;
+  place-items: center;
+  border: 1px solid var(--catalog-line);
+  border-radius: 10px;
+  color: var(--catalog-muted);
+}
+
+.workspace-product-editor .studio-form-close:hover {
+  border-color: var(--catalog-green);
+  color: var(--catalog-green);
+}
+
+.workspace-product-editor button[type="submit"],
+.workspace-stock button[type="submit"] {
+  background: var(--catalog-green) !important;
+  color: #fff !important;
+}
+
+.workspace-product-editor button[type="submit"]:hover,
+.workspace-stock button[type="submit"]:hover {
+  background: var(--catalog-green-strong) !important;
+}
+
+.workspace-stock > form,
+.workspace-stock > div {
+  border-color: var(--catalog-line) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 26px rgba(16, 33, 29, 0.05) !important;
+}
+
+.workspace-stock table thead th {
+  background: var(--catalog-soft);
+  color: var(--catalog-muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.workspace-stock .text-emerald-400 {
+  color: var(--catalog-green) !important;
+}
+
+.workspace-schedule > div.grid {
+  gap: 16px;
+}
+
+.workspace-schedule > div.grid > div {
+  border-color: var(--catalog-line) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 10px 26px rgba(16, 33, 29, 0.05) !important;
+}
+
+.catalog-redesign :is(a, button, input, select, textarea):focus-visible {
+  outline: 3px solid rgba(23, 107, 82, 0.32);
+  outline-offset: 2px;
+}
+
+@media (max-width: 767px) {
+  .catalog-redesign {
+    padding-bottom: 88px;
+  }
+
+  .workspace-products .flex.flex-col.md\:flex-row,
+  .workspace-stock .flex.flex-col.sm\:flex-row,
+  .workspace-schedule .flex.flex-col.sm\:flex-row {
+    align-items: stretch;
+  }
+
+  .workspace-products .admin-action-dropdown,
+  .workspace-products .admin-action-dropdown > button,
+  .workspace-products a[href="/admin/products/new"],
+  .workspace-schedule a[href="/admin/products/new"] {
+    width: 100%;
+  }
+
+  .workspace-products .admin-action-menu {
+    left: auto;
+    right: 0;
+    width: min(100vw - 2rem, 320px);
+  }
+
+  .workspace-products table,
+  .workspace-products thead,
+  .workspace-products tbody,
+  .workspace-products tr,
+  .workspace-products th,
+  .workspace-products td {
+    display: block;
+  }
+
+  .workspace-products thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .workspace-products tbody tr {
+    margin: 10px 0;
+    padding: 12px;
+    border: 1px solid var(--catalog-line);
+    border-radius: 14px;
+    background: #fff;
+  }
+
+  .workspace-products tbody td {
+    min-height: 30px;
+    padding: 6px 4px !important;
+    border: 0 !important;
+  }
+
+  .workspace-products tbody td[data-label]::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 2px;
+    color: var(--catalog-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
+  }
+
+  .workspace-products #product-price-total {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    min-width: 0;
+    text-align: left;
+  }
+
+  .workspace-product-editor > form,
+  .workspace-stock > form,
+  .workspace-stock > div {
+    padding: 16px !important;
+    border-radius: 14px !important;
+  }
+
+  .workspace-stock table {
+    min-width: 0;
+  }
+
+  .workspace-stock .ws-mobile-table thead {
+    display: none;
+  }
+
+  .workspace-stock .ws-mobile-table tbody tr {
+    display: block;
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid var(--catalog-line);
+    border-radius: 12px;
+  }
+
+  .workspace-stock .ws-mobile-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 7px 3px;
+    border: 0;
+  }
+
+  .workspace-stock .ws-mobile-table tbody td::before {
+    content: attr(data-label);
+    color: var(--catalog-muted);
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .workspace-schedule > div.grid > div {
+    padding: 14px !important;
+  }
+
+  .catalog-redesign input,
+  .catalog-redesign select,
+  .catalog-redesign textarea {
+    font-size: 16px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-redesign *,
+  .catalog-redesign *::before,
+  .catalog-redesign *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+    animation-duration: 0.001ms !important;
+  }
+}

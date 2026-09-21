@@ -15,12 +15,17 @@
       <div class="filter-search-box"><span>⌕</span><input id="filter-library-search" placeholder="ค้นหาชื่อตัวกรอง..." /></div>
       <div class="filter-toolbar-actions"><button type="button" id="filter-select-all">เลือกทั้งหมด</button><form id="filter-bulk-delete" action="/admin/filter-tags/bulk-delete" method="post" data-confirm="ลบตัวกรองที่เลือกทั้งหมดใช่หรือไม่?"><div id="filter-selected-inputs"></div><button id="filter-delete-selected" disabled>ลบที่เลือก <span id="filter-selected-count">0</span></button></form></div>
     </div>
+    <div class="filter-order-bar" role="region" aria-label="จัดลำดับตัวกรอง">
+      <div><b>จัดลำดับการแสดงผล</b><small>ลากการ์ดเพื่อย้ายตำแหน่ง หรือใช้ปุ่ม ↑ ↓ · รายการแรกจะแสดงก่อนบนหน้าร้าน</small></div>
+      <div class="filter-order-actions"><span id="filter-order-status" role="status" aria-live="polite">ลำดับปัจจุบัน</span><button type="button" id="filter-save-order" disabled>บันทึกลำดับ</button></div>
+    </div>
     <% if (!filterTags.length) { %><div class="filter-empty"><span>✦</span><h2>คลังตัวกรองยังว่าง</h2><p>กด “สร้างตัวกรอง” เพื่อเพิ่มรายการแรก</p></div><% } else { %>
     <div id="filter-library-grid" class="filter-library-grid">
-      <% filterTags.forEach(t=>{ %><article class="filter-library-card" data-filter-card data-name="<%= t.name.toLowerCase() %>" data-id="<%= t.id %>" data-title="<%= t.name %>">
+      <% filterTags.forEach((t,index)=>{ %><article class="filter-library-card" draggable="true" data-filter-card data-name="<%= t.name.toLowerCase() %>" data-id="<%= t.id %>" data-title="<%= t.name %>" data-order-index="<%= index %>">
+        <div class="filter-card-drag-tools"><button type="button" draggable="true" class="filter-card-drag-handle" data-drag-handle aria-label="ลากเพื่อย้าย <%= t.name %>" title="ลากเพื่อย้าย">⠿</button><span class="filter-order-badge" data-order-badge aria-label="ลำดับที่ <%= index + 1 %>"><%= index + 1 %></span></div>
         <button type="button" class="filter-select-toggle" aria-label="เลือก <%= t.name %>"><span>✓</span></button>
         <div class="filter-image-stage"><img src="<%= t.image %>" alt="<%= t.name %>" /></div>
-        <div class="filter-card-body"><div class="filter-card-name"><b><%= t.name %></b><span><%= t.productCount %> สินค้า</span></div><div class="filter-usage"><i style="width:<%= Math.min(100,t.productCount*12) %>%"></i></div>
+        <div class="filter-card-body"><div class="filter-card-name"><b><%= t.name %></b><span><%= t.productCount %> สินค้า</span></div><div class="filter-usage"><i style="width:<%= Math.min(100,t.productCount*12) %>%"></i></div><div class="filter-card-order-row"><span>ลำดับ <b data-order-label><%= index + 1 %></b></span><div class="filter-card-move-actions"><button type="button" data-move-up aria-label="เลื่อน <%= t.name %> ขึ้น">↑</button><button type="button" data-move-down aria-label="เลื่อน <%= t.name %> ลง">↓</button></div></div>
           <button type="button" class="filter-manage-products"><span>▦</span> จัดการสินค้า</button>
           <div class="filter-card-actions"><button type="button" class="filter-edit-toggle">แก้ไขชื่อ</button><form action="/admin/filter-tags/<%= t.id %>/delete" method="post" data-confirm="ต้องการลบตัวกรอง '<%= t.name %>' ใช่หรือไม่?"><button>ลบ</button></form></div>
           <form action="/admin/filter-tags/<%= t.id %>/edit" method="post" class="filter-inline-editor hidden"><input name="name" value="<%= t.name %>" required maxlength="100" /><button>บันทึก</button></form>
@@ -59,4 +64,94 @@ const cards=[...document.querySelectorAll('[data-filter-card]')],selected=new Se
 const productRows=[...document.querySelectorAll('.filter-product-row')],productCount=document.getElementById('filter-product-count'),syncProductCount=()=>productCount.textContent=productRows.filter(r=>r.querySelector('input').checked).length;cards.forEach(card=>card.querySelector('.filter-manage-products')?.addEventListener('click',()=>{const id=card.dataset.id;document.getElementById('filter-products-title').textContent='สินค้าใน “'+card.dataset.title+'”';document.getElementById('filter-products-form').action='/admin/filter-tags/'+encodeURIComponent(id)+'/products';productRows.forEach(row=>{let tags=[];try{tags=JSON.parse(row.dataset.tags||'[]').map(String)}catch(_){ }row.querySelector('input').checked=tags.includes(String(id));row.classList.remove('hidden')});document.getElementById('filter-product-search').value='';syncProductCount();setProductDrawer(true)}));productRows.forEach(row=>row.querySelector('input').addEventListener('change',syncProductCount));document.getElementById('filter-product-search')?.addEventListener('input',e=>{const q=e.target.value.trim().toLowerCase();productRows.forEach(row=>row.classList.toggle('hidden',!row.dataset.productName.includes(q)))});
 const dragTags=new Map([...document.querySelectorAll('[data-drag-tag]')].map(chip=>[String(chip.dataset.dragTag),{id:String(chip.dataset.dragTag),name:chip.dataset.dragName,image:chip.dataset.dragImage}]));let draggedTag=null;document.querySelectorAll('[data-drag-tag]').forEach(chip=>{chip.addEventListener('dragstart',e=>{draggedTag=dragTags.get(String(chip.dataset.dragTag));chip.classList.add('is-dragging');e.dataTransfer.effectAllowed='copy';e.dataTransfer.setData('text/plain',draggedTag.id)});chip.addEventListener('dragend',()=>{chip.classList.remove('is-dragging');draggedTag=null;productRows.forEach(r=>r.classList.remove('is-drop-ready'))})});productRows.forEach(row=>{row.addEventListener('dragover',e=>{const tagId=e.dataTransfer.getData('text/plain');if(!draggedTag&&!tagId)return;e.preventDefault();e.dataTransfer.dropEffect='copy';row.classList.add('is-drop-ready')});row.addEventListener('dragleave',e=>{if(!e.relatedTarget||!row.contains(e.relatedTarget))row.classList.remove('is-drop-ready')});row.addEventListener('drop',async e=>{e.preventDefault();const tagId=e.dataTransfer.getData('text/plain'),tag=dragTags.get(String(tagId))||draggedTag,box=row.querySelector('.filter-product-tags');row.classList.remove('is-drop-ready');if(!tag)return;if(box.querySelector('[data-linked-tag="'+CSS.escape(tag.id)+'"]')){row.classList.add('is-drop-success');setTimeout(()=>row.classList.remove('is-drop-success'),1000);return}row.classList.add('is-saving');try{const response=await fetch('/admin/filter-tags/'+encodeURIComponent(tag.id)+'/products/'+encodeURIComponent(row.dataset.productId)+'/add',{method:'POST',headers:{Accept:'application/json','X-Requested-With':'XMLHttpRequest'}}),data=await response.json();if(!response.ok||!data.ok)throw new Error(data.message||'บันทึกไม่สำเร็จ');const savedTag=data.tag||tag,item=document.createElement('i'),img=document.createElement('img');item.dataset.linkedTag=String(savedTag.id);img.src=savedTag.image;img.alt='';item.append(img,document.createTextNode(savedTag.name));box.append(item);row.dataset.tags=JSON.stringify((data.filterTagIds||[]).map(String));row.classList.add('is-drop-success');setTimeout(()=>row.classList.remove('is-drop-success'),1200)}catch(error){alert(error.message)}finally{row.classList.remove('is-saving')}})});
 const input=document.getElementById('filterImageInput'),preview=document.getElementById('filterImagePreview');input?.addEventListener('change',()=>{preview.innerHTML='';const files=[...(input.files||[])];preview.classList.toggle('hidden',!files.length);files.forEach(file=>{const item=document.createElement('div'),img=document.createElement('img'),span=document.createElement('span');img.src=URL.createObjectURL(file);img.onload=()=>URL.revokeObjectURL(img.src);span.textContent=file.name.replace(/\.[^.]+$/,'');item.append(img,span);preview.append(item)})})})();
+</script>
+<script>
+(function(){
+  const grid=document.getElementById('filter-library-grid');
+  const saveButton=document.getElementById('filter-save-order');
+  const status=document.getElementById('filter-order-status');
+  if(!grid||!saveButton) return;
+  let dragged=null,dirty=false;
+  const cards=()=>[...grid.querySelectorAll('[data-filter-card]')];
+  const setStatus=(message)=>{if(status) status.textContent=message};
+  const updatePositions=()=>cards().forEach((card,index)=>{
+    card.dataset.orderIndex=String(index);
+    const badge=card.querySelector('[data-order-badge]');
+    const label=card.querySelector('[data-order-label]');
+    if(badge){badge.textContent=String(index+1);badge.setAttribute('aria-label','ลำดับที่ '+(index+1));}
+    if(label) label.textContent=String(index+1);
+    const up=card.querySelector('[data-move-up]'),down=card.querySelector('[data-move-down]');
+    if(up) up.disabled=index===0;
+    if(down) down.disabled=index===cards().length-1;
+  });
+  const markDirty=()=>{dirty=true;saveButton.disabled=false;saveButton.classList.add('is-dirty');setStatus('มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก')};
+  const move=(card,offset)=>{
+    const list=cards(),index=list.indexOf(card),target=index+offset;
+    if(index<0||target<0||target>=list.length) return;
+    if(offset<0) grid.insertBefore(card,list[target]); else grid.insertBefore(card,list[target].nextSibling);
+    updatePositions();markDirty();
+  };
+  // Pointer fallback keeps reordering usable on touch screens and browsers
+  // where native HTML5 drag events do not fire from a button handle.
+  let pointerDrag=null;
+  const finishPointerDrag=()=>{
+    if(!pointerDrag)return;
+    pointerDrag.card.classList.remove('is-dragging');
+    cards().forEach(item=>item.classList.remove('is-drop-target'));
+    pointerDrag=null;
+  };
+  grid.addEventListener('pointerdown',event=>{
+    const handle=event.target.closest('[data-drag-handle]');
+    if(!handle)return;
+    const card=handle.closest('[data-filter-card]');
+    if(!card)return;
+    pointerDrag={card,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,moved:false};
+    handle.setPointerCapture?.(event.pointerId);
+    card.classList.add('is-dragging');
+    event.preventDefault();
+  });
+  document.addEventListener('pointermove',event=>{
+    if(!pointerDrag||event.pointerId!==pointerDrag.pointerId)return;
+    if(!pointerDrag.moved && Math.hypot(event.clientX-pointerDrag.startX,event.clientY-pointerDrag.startY)<5)return;
+    pointerDrag.moved=true;
+    const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-filter-card]');
+    if(!target||target===pointerDrag.card)return;
+    const rect=target.getBoundingClientRect();
+    grid.insertBefore(pointerDrag.card,event.clientY>rect.top+rect.height/2?target.nextSibling:target);
+    updatePositions();markDirty();
+    cards().forEach(item=>item.classList.remove('is-drop-target'));target.classList.add('is-drop-target');
+  });
+  document.addEventListener('pointerup',finishPointerDrag);
+  document.addEventListener('pointercancel',finishPointerDrag);
+  cards().forEach(card=>{
+    card.querySelector('[data-move-up]')?.addEventListener('click',event=>{event.stopPropagation();move(card,-1)});
+    card.querySelector('[data-move-down]')?.addEventListener('click',event=>{event.stopPropagation();move(card,1)});
+    card.addEventListener('dragstart',event=>{
+      if(event.target.closest('button,input,form,a')&&!event.target.closest('[data-drag-handle]')){event.preventDefault();return;}
+      dragged=card;card.classList.add('is-dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',card.dataset.id);
+    });
+    card.addEventListener('dragover',event=>{
+      if(!dragged||dragged===card)return;
+      event.preventDefault();event.dataTransfer.dropEffect='move';
+      const rect=card.getBoundingClientRect();
+      grid.insertBefore(dragged,event.clientY>rect.top+rect.height/2?card.nextSibling:card);
+      updatePositions();markDirty();
+      cards().forEach(item=>item.classList.remove('is-drop-target'));card.classList.add('is-drop-target');
+    });
+    card.addEventListener('dragend',()=>{dragged=null;card.classList.remove('is-dragging');cards().forEach(item=>item.classList.remove('is-drop-target'))});
+  });
+  saveButton.addEventListener('click',async()=>{
+    if(!dirty)return;
+    saveButton.disabled=true;saveButton.classList.add('is-saving');setStatus('กำลังบันทึกลำดับ...');
+    try{
+      const response=await fetch('/admin/filter-tags/reorder',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:JSON.stringify({order:cards().map(card=>card.dataset.id)})});
+      const data=await response.json();
+      if(!response.ok||!data.ok) throw new Error(data.message||'บันทึกลำดับไม่สำเร็จ');
+      dirty=false;saveButton.classList.remove('is-dirty');setStatus('บันทึกลำดับแล้ว');
+      if(window.showToast) window.showToast('บันทึกลำดับตัวกรองแล้ว','success');
+    }catch(error){saveButton.disabled=false;setStatus(error.message||'บันทึกลำดับไม่สำเร็จ');}
+    finally{saveButton.classList.remove('is-saving');if(!dirty)saveButton.disabled=true;}
+  });
+  updatePositions();
+})();
 </script>

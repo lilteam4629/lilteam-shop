@@ -1,3 +1,4 @@
+<div class="admin-workspace-view workspace-stock catalog-redesign">
 <!-- Stock Management Header -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
@@ -64,7 +65,7 @@
     </div>
 
     <div class="overflow-x-auto">
-      <table class="w-full text-left text-xs sm:text-sm">
+      <table class="w-full text-left text-xs sm:text-sm ws-mobile-table">
         <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
           <tr>
             <th class="py-3 px-4 font-semibold">ข้อมูลบน / Username</th>
@@ -76,13 +77,13 @@
         <tbody class="divide-y divide-[var(--border)]">
           <% stockItems.forEach(s => { %>
             <tr class="hover:bg-[var(--input)]/40 transition duration-150">
-              <td class="py-3 px-4 font-mono text-xs">
+              <td class="py-3 px-4 font-mono text-xs" data-label="ข้อมูลบน / Username">
                 <%= s.fulfillmentMode === 'contact' ? 'ติดต่อร้านค้า' : s.username %>
               </td>
-              <td class="py-3 px-4 font-mono text-xs text-[var(--text-3)]">
+              <td class="py-3 px-4 font-mono text-xs text-[var(--text-3)]" data-label="ข้อมูลล่าง / Password">
                 <%= s.fulfillmentMode === 'contact' ? '—' : s.password %>
               </td>
-              <td class="py-3 px-4 whitespace-nowrap">
+              <td class="py-3 px-4 whitespace-nowrap" data-label="สถานะ">
                 <% if (s.status === 'available') { %>
                   <span class="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> พร้อมขาย
@@ -93,7 +94,7 @@
                   </span>
                 <% } %>
               </td>
-              <td class="py-3 px-4 text-right whitespace-nowrap">
+              <td class="py-3 px-4 text-right whitespace-nowrap" data-label="การจัดการ">
                 <% if (s.status === 'available') { %>
                   <form action="/admin/products/<%= product.id %>/stock/<%= s.id %>/delete" method="post" class="inline" data-confirm="ต้องการลบไอดี/คีย์รายการนี้ออกจากสต็อกใช่ไหม?">
                     <button type="submit" class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition" title="ลบรายการนี้">
@@ -148,5 +149,7 @@
       </button>
     </form>
   </div>
+
+</div>
 
 </div>
