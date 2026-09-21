@@ -1,7 +1,9 @@
-<footer class="editorial-footer">
-  <div class="editorial-footer-inner">
-    <div class="editorial-footer-brand"><span class="editorial-footer-mark"><%= (settings.shopName || 'L')[0] %></span><div><strong><%= settings.shopName %></strong><p><%= settings.tagline || 'เลือกสินค้า เติมเงิน และรับของได้ในระบบเดียว' %></p></div></div>
-    <nav class="editorial-footer-links" aria-label="ลิงก์ส่วนท้ายเว็บไซต์"><a href="/products">สินค้าทั้งหมด</a><a href="/help">คู่มือการใช้งาน</a><a href="/contact">ติดต่อร้าน</a><a href="/cookie-policy">นโยบายคุกกี้</a></nav>
-    <div class="editorial-footer-bottom"><span>&copy; <%= new Date().getFullYear() %> <%= settings.shopName %></span><a href="https://web.facebook.com/aurupong.sungthim.2024" target="_blank" rel="noopener">รายงานปัญหาร้านค้า ↗</a></div>
+<footer class="mt-10 border-t border-[var(--border)] bg-[var(--card)]">
+  <div class="store-footer-inner mx-auto flex w-full max-w-[1320px] flex-col items-center justify-between gap-2 px-4 py-3 text-center text-[10px] text-[var(--text-4)] sm:flex-row sm:text-left">
+    <p>&copy; <%= new Date().getFullYear() %> <%= settings.shopName %> • Made by <strong class="text-[var(--text-3)]"><%= settings.shopName %></strong> &nbsp; Powered by &nbsp;<strong class="text-[var(--text-3)]"><%= settings.shopName %></strong></p>
+    <nav class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 sm:justify-end" aria-label="ลิงก์ส่วนท้ายเว็บไซต์">
+      <a href="/help" class="hover:text-[var(--gold-text)]">คู่มือการใช้งาน</a>
+      <a href="https://web.facebook.com/aurupong.sungthim.2024" target="_blank" rel="noopener" class="hover:text-[var(--gold-text)]">ติดต่อร้านไม่ได้ / ต้องการรายงานปัญหาร้านค้าฉ้อโกง? ↗</a>
+    </nav>
   </div>
 </footer>

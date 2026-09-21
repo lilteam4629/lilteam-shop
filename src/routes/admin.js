@@ -105,45 +105,6 @@ router.use((req, res, next) => {
   next();
 });
 
-// The redesigned admin is intentionally opt-in while it is being tested. If
-// a redesigned page links to a section that has not been rebuilt yet, keep the
-// user inside the experimental shell instead of silently falling back to the
-// legacy Tailwind/admin layout. The legacy route remains untouched without
-// `?ui=experiment`.
-router.use((req, res, next) => {
-  if (req.method !== 'GET' || req.query.ui !== 'experiment') return next();
-  const path = req.path.replace(/\/+$/, '') || '/';
-  if (path === '/' || path === '/products' || path === '/scheduled-products' || path === '/filter-tags' || path === '/recommended-categories' || path === '/orders' || path === '/settings' || /^\/orders\/[^/]+$/.test(path) || path === '/products/new' || /^\/products\/[^/]+\/edit$/.test(path)) return next();
-  const labels = {
-    '/products/bulk-import': 'นำเข้าสินค้าเป็นชุด',
-    '/home-sections': 'หมวดหมู่หน้าแรก',
-    '/catalog-api': 'API สินค้าร้านหลัก',
-    '/storefront-models': 'โมเดลหน้าร้าน',
-    '/scheduled-products': 'ตั้งเวลาเปิดขาย',
-    '/filter-tags': 'แท็กและจัดหมวดสินค้า',
-    '/recommended-categories': 'หมวดหมู่แนะนำ',
-    '/orders': 'คำสั่งซื้อ',
-    '/topups': 'เติมเงินและตรวจสอบ',
-    '/coupons': 'คูปองส่วนลด',
-    '/users': 'จัดการสมาชิก',
-    '/minigame': 'มินิเกม',
-    '/slip-verification': 'ตรวจสอบอัตโนมัติ',
-    '/appearance': 'รูปและแบนเนอร์',
-    '/theme': 'ธีมร้านค้า',
-    '/announcements': 'ป้ายประกาศ',
-    '/welcome-popup': 'ป๊อปอัปต้อนรับ',
-    '/effects': 'ลูกเล่นหน้าเว็บ',
-    '/settings': 'ตั้งค่าร้าน',
-  };
-  res.locals.layout = 'layouts/admin-experiment';
-  return res.render('admin/experiment-placeholder', {
-    title: labels[path] || 'หมวดทดลอง',
-    active: path.slice(1),
-    experimentLabel: labels[path] || 'หน้านี้',
-    experimentPath: path,
-  });
-});
-
 function slugify(str) {
   return String(str || '').toLowerCase().trim()
     .replace(/[^a-z0-9ก-๙\s-]/g, '')
@@ -237,8 +198,6 @@ router.get('/products/bulk-import/progress/:jobId', (req, res) => {
 
 // ---------- Dashboard ----------
 router.get('/', (req, res) => {
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
   const { orders, users, products, stockItems } = store.data;
   const paidOrders = orders.filter(order => order.status !== 'cancelled' && order.salesChannel !== 'catalog-api-fulfillment');
   const revenue = paidOrders.reduce((sum, o) => sum + o.total, 0);
@@ -294,7 +253,7 @@ router.get('/', (req, res) => {
   });
   const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
   const pendingTopups = store.data.topupRequests.filter(t => t.status === 'pending').length;
-  res.render(experimentUi ? 'admin/dashboard-experiment' : 'admin/dashboard', {
+  res.render('admin/dashboard', {
     title: 'แดชบอร์ด', active: 'dashboard',
     stats: {
       revenue,
@@ -574,8 +533,6 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
 }
 
 router.get('/products', (req, res) => {
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
   const filterTagById = new Map(store.data.filterTags.map(tag => [tag.id, tag]));
   const products = store.data.products.map(p => {
     const stockCount = store.data.stockItems.filter(s => s.productId === p.id && s.status === 'available').length;
@@ -586,7 +543,7 @@ router.get('/products', (req, res) => {
   // IDs remain in history but must not inflate the amount shown to the admin.
   const totalAvailableProductCount = products.reduce((sum, product) => sum + product.stockCount, 0);
   const totalProductPrice = products.reduce((sum, product) => sum + ((Number(product.price) || 0) * product.stockCount), 0);
-  res.render(experimentUi ? 'admin/products-experiment' : 'admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
+  res.render('admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
 });
 
 router.post('/products/card-style', async (req, res) => {
@@ -597,19 +554,14 @@ router.post('/products/card-style', async (req, res) => {
 });
 
 router.get('/products/new', (req, res) => {
-  if (req.query.ui === 'experiment') {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'สร้างสินค้าแบบตั้งเวลา', active: 'products', product: null });
-  }
   res.render('admin/product-form', { title: 'เพิ่มสินค้าใหม่', active: 'products', product: null, genres: store.data.settings.genres, filterTags: store.data.filterTags });
 });
 
 router.post('/products/new', (req, res) => {
-  const experimentUi = req.query.ui === 'experiment';
   productImageUpload.array('productImages', 10)(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
-      return res.redirect(experimentUi ? '/admin/products/new?ui=experiment' : '/admin/products/new');
+      return res.redirect('/admin/products/new');
     }
     try {
       const uploadedImages = [...directUploadUrls(req.body, 'productImages'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
@@ -620,11 +572,11 @@ router.post('/products/new', (req, res) => {
       };
       store.data.products.push(product);
       await store.save();
-      req.flash('success', experimentUi ? 'สร้างสินค้าแบบตั้งเวลาแล้ว' : 'เพิ่มสินค้าแล้ว');
-      res.redirect(experimentUi ? '/admin/scheduled-products?ui=experiment' : '/admin/products');
+      req.flash('success', 'เพิ่มสินค้าแล้ว');
+      res.redirect('/admin/products');
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
-      res.redirect(experimentUi ? '/admin/products/new?ui=experiment' : '/admin/products/new');
+      res.redirect('/admin/products/new');
     }
   }));
 });
@@ -738,10 +690,6 @@ router.post('/products/bulk-import', (req, res) => {
 router.get('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
-  if (req.query.ui === 'experiment') {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขเวลาขาย', active: 'scheduled-products', product });
-  }
   res.render('admin/product-form', { title: 'แก้ไขสินค้า', active: 'products', product, genres: store.data.settings.genres, filterTags: store.data.filterTags });
 });
 
@@ -795,22 +743,21 @@ router.post('/products/bulk-price', async (req, res) => {
 router.post('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
-  const experimentUi = req.query.ui === 'experiment';
   productImageUpload.array('productImages', 10)(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
-      return res.redirect(`/admin/products/${product.id}/edit${experimentUi ? '?ui=experiment' : ''}`);
+      return res.redirect(`/admin/products/${product.id}/edit`);
     }
     try {
       const uploadedImages = [...directUploadUrls(req.body, 'productImages'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
       const fields = parseProductBody(req.body, uploadedImages, product.images || []);
       Object.assign(product, fields, { status: req.body.status || 'active' });
       await store.save();
-      req.flash('success', experimentUi ? 'บันทึกการตั้งเวลาแล้ว' : 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
-      res.redirect(experimentUi ? '/admin/scheduled-products?ui=experiment' : '/admin/products');
+      req.flash('success', 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
+      res.redirect('/admin/products');
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
-      res.redirect(`/admin/products/${product.id}/edit${experimentUi ? '?ui=experiment' : ''}`);
+      res.redirect(`/admin/products/${product.id}/edit`);
     }
   }));
 });
@@ -910,7 +857,6 @@ router.post('/products/:id/copy', async (req, res) => {
 });
 
 // ---------- Filter Tags ----------
-const filterTagsRedirect = req => req.query.ui === 'experiment' ? '/admin/filter-tags?ui=experiment' : '/admin/filter-tags';
 router.get('/filter-tags', (req, res) => {
   const filterTags = store.data.filterTags.map(t => ({
     ...t, productCount: store.data.products.filter(p => (p.filterTagIds || []).includes(t.id)).length,
@@ -922,22 +868,16 @@ router.get('/filter-tags', (req, res) => {
     status: p.status,
     filterTagIds: p.filterTagIds || [],
   }));
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(experimentUi ? 'admin/filter-tags-experiment' : 'admin/filter-tags', { title: 'แท็กและจัดหมวดสินค้า', active: 'filter-tags', filterTags, products });
+  res.render('admin/filter-tags', { title: 'ตัวกรองสินค้า', active: 'filter-tags', filterTags, products });
 });
 
-// Keep the filter library order in the shared store so the first card here is
-// also the first option shown in the storefront filter panel. The route accepts
-// a JSON array from the drag-and-drop UI and safely keeps any omitted tags after
-// the requested order for backwards compatibility with older clients.
+// Persist the order used by the admin library and storefront filter panel.
 router.post('/filter-tags/reorder', async (req, res) => {
   const rawOrder = req.body && req.body.order;
   const requestedIds = (Array.isArray(rawOrder) ? rawOrder : rawOrder ? [rawOrder] : [])
     .map(value => String(value || '').trim())
     .filter(Boolean);
   const wantsJson = String(req.headers.accept || '').includes('application/json') || req.xhr;
-
   try {
     const order = await store.transact(data => {
       data.filterTags ||= [];
@@ -946,15 +886,9 @@ router.post('/filter-tags/reorder', async (req, res) => {
       const next = [];
       requestedIds.forEach(id => {
         const tag = byId.get(id);
-        if (tag && !seen.has(id)) {
-          seen.add(id);
-          next.push(tag);
-        }
+        if (tag && !seen.has(id)) { seen.add(id); next.push(tag); }
       });
-      data.filterTags.forEach(tag => {
-        const id = String(tag.id);
-        if (!seen.has(id)) next.push(tag);
-      });
+      data.filterTags.forEach(tag => { if (!seen.has(String(tag.id))) next.push(tag); });
       data.filterTags = next;
       return next.map(tag => String(tag.id));
     });
@@ -965,7 +899,7 @@ router.post('/filter-tags/reorder', async (req, res) => {
     if (wantsJson) return res.status(500).json({ ok: false, message: 'บันทึกลำดับไม่สำเร็จ' });
     req.flash('error', 'บันทึกลำดับตัวกรองไม่สำเร็จ กรุณาลองใหม่');
   }
-  return res.redirect(filterTagsRedirect(req));
+  return res.redirect('/admin/filter-tags');
 });
 
 // Import the eFHUB player-card images into the existing filter-tag library.
@@ -1010,14 +944,14 @@ router.post('/filter-tags/efootball/import', async (req, res) => {
   });
   await store.save();
   req.flash('success', `นำเข้ารูปผู้เล่นจาก eFHUB New Players เป็นแท็กตัวกรองแล้ว ${sourceItems.length} รายการ (เพิ่มใหม่ ${created}${staleIds.size ? ` ลบรายการเก่า ${staleIds.size}` : ''})`);
-  res.redirect(filterTagsRedirect(req));
+  res.redirect('/admin/filter-tags');
 });
 
 router.post('/filter-tags/:id/products', async (req, res) => {
   const tag = store.data.filterTags.find(t => String(t.id) === String(req.params.id));
   if (!tag) {
     req.flash('error', 'ไม่พบตัวกรองสินค้า');
-    return res.redirect(filterTagsRedirect(req));
+    return res.redirect('/admin/filter-tags');
   }
   const selected = new Set([].concat(req.body.productIds || []).map(String));
   store.data.products.forEach(p => {
@@ -1028,7 +962,7 @@ router.post('/filter-tags/:id/products', async (req, res) => {
   });
   await store.save();
   req.flash('success', `อัปเดตสินค้าในตัวกรอง “${tag.name}” แล้ว`);
-  res.redirect(filterTagsRedirect(req));
+  res.redirect('/admin/filter-tags');
 });
 
 router.post('/filter-tags/:tagId/products/:productId/add', async (req, res) => {
@@ -1052,12 +986,12 @@ router.post('/filter-tags', (req, res) => {
     const directImages = directUploadUrls(req.body || {}, 'filterImages');
     if (err || (!files.length && !directImages.length)) {
       req.flash('error', 'กรุณาแนบรูปตัวกรอง (สูงสุด 60 รูป รูปละไม่เกิน 8MB)');
-      return res.redirect(filterTagsRedirect(req));
+      return res.redirect('/admin/filter-tags');
     }
     const name = (req.body.name || '').trim();
     if ((files.length + directImages.length) === 1 && !name) {
       req.flash('error', 'กรุณากรอกชื่อตัวกรอง');
-      return res.redirect(filterTagsRedirect(req));
+      return res.redirect('/admin/filter-tags');
     }
     try {
       let savedCount = 0;
@@ -1109,7 +1043,7 @@ router.post('/filter-tags', (req, res) => {
       console.error('[filter-tags] bulk save failed:', saveError.message);
       req.flash('error', `บันทึกรูปตัวกรองไม่สำเร็จ: ${saveError.message}`);
     }
-    res.redirect(filterTagsRedirect(req));
+    res.redirect('/admin/filter-tags');
   }));
 });
 
@@ -1120,7 +1054,7 @@ router.post('/filter-tags/:id/delete', async (req, res) => {
   });
   await store.save();
   req.flash('success', 'ลบตัวกรองสินค้าแล้ว');
-  res.redirect(filterTagsRedirect(req));
+  res.redirect('/admin/filter-tags');
 });
 
 router.post('/filter-tags/bulk-delete', async (req, res) => {
@@ -1130,7 +1064,7 @@ router.post('/filter-tags/bulk-delete', async (req, res) => {
     .filter(Boolean));
   if (!ids.size) {
     req.flash('error', 'กรุณาเลือกตัวกรองที่ต้องการลบ');
-    return res.redirect(filterTagsRedirect(req));
+    return res.redirect('/admin/filter-tags');
   }
   try {
     const removed = await store.transact(data => {
@@ -1148,7 +1082,7 @@ router.post('/filter-tags/bulk-delete', async (req, res) => {
     console.error('[filter-tags/bulk-delete] failed:', error.message);
     req.flash('error', 'ลบตัวกรองไม่สำเร็จ กรุณาลองใหม่');
   }
-  res.redirect(filterTagsRedirect(req));
+  res.redirect('/admin/filter-tags');
 });
 
 router.post('/filter-tags/:id/edit', async (req, res) => {
@@ -1161,7 +1095,7 @@ router.post('/filter-tags/:id/edit', async (req, res) => {
     await store.save();
     req.flash('success', 'แก้ไขชื่อตัวกรองแล้ว');
   }
-  res.redirect(filterTagsRedirect(req));
+  res.redirect('/admin/filter-tags');
 });
 
 // ---------- Home page sections ----------
@@ -1260,21 +1194,16 @@ router.post('/home-sections/:id/move', async (req, res) => {
   res.redirect('/admin/home-sections');
 });
 
-const recommendedCategoriesRedirect = req => req.query.ui === 'experiment' ? '/admin/recommended-categories?ui=experiment' : '/admin/recommended-categories';
 router.get('/recommended-categories', (req, res) => {
-  const categories = store.data.recommendedCategories || [];
-  const products = (store.data.products || []).filter(p => p.status === 'active');
-  const view = req.query.ui === 'experiment' ? 'admin/recommended-categories-experiment' : 'admin/recommended-categories';
-  if (req.query.ui === 'experiment') res.locals.layout = 'layouts/admin-experiment';
-  res.render(view, { title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories, products });
+  res.render('admin/recommended-categories', { title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories: store.data.recommendedCategories || [], products: store.data.products.filter(p => p.status === 'active') });
 });
 router.post('/recommended-categories', (req, res) => bannerUpload.single('image')(req, res, store.bindTenantContext(async err => {
   const title = String(req.body.title || '').trim();
-  if (err || !title) { req.flash('error', err ? 'อัปโหลดรูปไม่สำเร็จ' : 'กรุณากรอกชื่อหมวดหมู่'); return res.redirect(recommendedCategoriesRedirect(req)); }
+  if (err || !title) { req.flash('error', err ? 'อัปโหลดรูปไม่สำเร็จ' : 'กรุณากรอกชื่อหมวดหมู่'); return res.redirect('/admin/recommended-categories'); }
   store.data.recommendedCategories ||= [];
   const imageUrl = req.file ? await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype) : String(req.body.imageUrl || '').trim();
   store.data.recommendedCategories.push({ id: store.genId(8), title, imageUrl, productIds: [], count: 0, enabled: true });
-  await store.save(); req.flash('success', 'เพิ่มหมวดหมู่แนะนำแล้ว'); res.redirect(recommendedCategoriesRedirect(req));
+  await store.save(); req.flash('success', 'เพิ่มหมวดหมู่แนะนำแล้ว'); res.redirect('/admin/recommended-categories');
 })));
 router.post('/recommended-categories/:id/products', async (req, res) => {
   const category = (store.data.recommendedCategories || []).find(item => item.id === req.params.id);
@@ -1282,16 +1211,16 @@ router.post('/recommended-categories/:id/products', async (req, res) => {
   const valid = new Set(store.data.products.map(product => String(product.id)));
   category.productIds = [...new Set([].concat(req.body.productIds || []).map(String).filter(id => valid.has(id)))];
   category.count = category.productIds.length;
-  await store.save(); req.flash('success', 'บันทึกสินค้าในหมวดแล้ว'); res.redirect(recommendedCategoriesRedirect(req));
+  await store.save(); req.flash('success', 'บันทึกสินค้าในหมวดแล้ว'); res.redirect('/admin/recommended-categories');
 });
 router.post('/recommended-categories/:id/delete', async (req, res) => {
   store.data.recommendedCategories = (store.data.recommendedCategories || []).filter(category => category.id !== req.params.id);
-  await store.save(); req.flash('success', 'ลบหมวดหมู่แนะนำแล้ว'); res.redirect(recommendedCategoriesRedirect(req));
+  await store.save(); req.flash('success', 'ลบหมวดหมู่แนะนำแล้ว'); res.redirect('/admin/recommended-categories');
 });
 router.post('/recommended-categories/:id/toggle', async (req, res) => {
   const category = (store.data.recommendedCategories || []).find(item => item.id === req.params.id);
   if (category) category.enabled = category.enabled === false;
-  await store.save(); res.redirect(recommendedCategoriesRedirect(req));
+  await store.save(); res.redirect('/admin/recommended-categories');
 });
 
 router.post('/home-sections/:id/toggle', async (req, res) => {
@@ -1482,25 +1411,7 @@ router.get('/scheduled-products', (req, res) => {
   const products = store.data.products
     .filter(product => product.publishAt)
     .sort((a, b) => String(a.publishAt).localeCompare(String(b.publishAt)));
-  if (req.query.ui === 'experiment') {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/scheduled-products-experiment', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products });
-  }
   res.render('admin/scheduled-products', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products });
-});
-
-router.post('/scheduled-products/:id/clear', async (req, res) => {
-  const product = store.data.products.find(p => p.id === req.params.id);
-  if (!product) {
-    req.flash('error', 'ไม่พบสินค้าที่ต้องการยกเลิกเวลาเปิดขาย');
-    return res.redirect('/admin/scheduled-products?ui=experiment');
-  }
-  product.publishAt = '';
-  product.eventBadge = '';
-  product.eventDescription = '';
-  await store.save();
-  req.flash('success', `ยกเลิกเวลาเปิดขายของ ${product.title} แล้ว`);
-  res.redirect('/admin/scheduled-products?ui=experiment');
 });
 
 router.post('/products/:id/stock/settings', async (req, res) => {
@@ -1587,9 +1498,7 @@ router.get('/orders', (req, res) => {
         searchTerms: [o.id, buyer?.username, buyer?.email, ...itemSearchTerms].filter(Boolean).join(' '),
       };
     });
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(experimentUi ? 'admin/orders-experiment' : 'admin/orders', { title: 'คำสั่งซื้อ', active: 'orders', orders });
+  res.render('admin/orders', { title: 'คำสั่งซื้อ', active: 'orders', orders });
 });
 
 router.get('/orders/:id', (req, res) => {
@@ -1607,9 +1516,7 @@ router.get('/orders/:id', (req, res) => {
       importedFileCode: oi.importedFileCode || product?.internalNote || '',
     };
   });
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(experimentUi ? 'admin/order-detail-experiment' : 'admin/order-detail', { title: `คำสั่งซื้อ #${order.id}`, active: 'orders', order, buyer, itemsWithCreds });
+  res.render('admin/order-detail', { title: `คำสั่งซื้อ #${order.id}`, active: 'orders', order, buyer, itemsWithCreds });
 });
 
 router.post('/orders/:id/status', async (req, res) => {
@@ -1633,7 +1540,7 @@ router.post('/orders/:id/status', async (req, res) => {
   } else if (order) {
     req.flash('error', 'สถานะคำสั่งซื้อไม่ถูกต้อง');
   }
-  res.redirect(`/admin/orders/${req.params.id}${req.query?.ui === 'experiment' ? '?ui=experiment' : ''}`);
+  res.redirect(`/admin/orders/${req.params.id}`);
 });
 
 // ---------- Users ----------
@@ -1805,26 +1712,6 @@ router.get('/topups', async (req, res) => {
     title: 'บัญชี', active: 'topups', requests, pendingCount, payment, receiverPayment,
     receiverProvider, availableReceiverProviders, activeReceiverProvider: effective.slipProvider, banks: bankOptions, q, status,
   });
-});
-
-// Admin-only slip preview. Customer slip files are stored in the private
-// media store; the storefront URL is scoped to the submitting user and can
-// therefore return 404 when an administrator reviews a tenant request.
-router.get('/topups/:id/slip', async (req, res, next) => {
-  try {
-    const request = store.data.topupRequests.find(item => String(item.id) === String(req.params.id));
-    if (!request || !request.slipStorageId) return res.sendStatus(404);
-    const media = await store.getPrivateMedia(request.slipStorageId);
-    if (!media) return res.sendStatus(404);
-    const contentType = media.file?.metadata?.contentType || media.file?.contentType || 'image/jpeg';
-    res.set('Content-Type', contentType);
-    res.set('Content-Length', String(media.file?.length || 0));
-    res.set('Cache-Control', 'private, no-store');
-    res.set('Content-Disposition', 'inline');
-    media.stream.on('error', next).pipe(res);
-  } catch (error) {
-    next(error);
-  }
 });
 
 // Slip Verification Hub & Provider Management.
@@ -2438,7 +2325,7 @@ router.post('/filter-tags/heading', async (req, res) => {
   const heading = String(req.body.filterHeading || '').trim();
   if (!heading) req.flash('error', 'กรุณากรอกหัวข้อตัวกรอง');
   else { store.data.settings.filterHeading = heading.slice(0, 100); await store.save(); req.flash('success', 'บันทึกหัวข้อตัวกรองแล้ว'); }
-  res.redirect(filterTagsRedirect(req));
+  res.redirect('/admin/filter-tags');
 });
 
 router.post('/welcome-popup', (req, res) => {
@@ -2471,10 +2358,6 @@ router.post('/welcome-popup', (req, res) => {
 
 // ---------- Settings ----------
 router.get('/settings', (req, res) => {
-  if (req.query.ui === 'experiment') {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/settings-experiment', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isGateOn() });
-  }
   res.render('admin/settings', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isGateOn() });
 });
 
@@ -2499,7 +2382,6 @@ function normalizeExternalLink(value) {
 }
 
 router.post('/settings', async (req, res) => {
-  const experimentUi = req.query.ui === 'experiment';
   const { shopName, tagline, contactLine, contactFacebook, contactMessenger, contactFacebookName, contactResponseTime, openHours } = req.body;
   Object.assign(store.data.settings, {
     shopName, tagline, contactLine,
@@ -2510,7 +2392,7 @@ router.post('/settings', async (req, res) => {
   });
   await store.save();
   req.flash('success', 'บันทึกการตั้งค่าแล้ว');
-  res.redirect(experimentUi ? '/admin/settings?ui=experiment' : '/admin/settings');
+  res.redirect('/admin/settings');
 });
 
 // ---------- Music player ----------

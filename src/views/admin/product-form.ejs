@@ -1,4 +1,3 @@
-<div class="admin-workspace-view workspace-product-editor catalog-redesign">
 <% const isBulkImport = typeof bulkMode !== 'undefined' && bulkMode; %>
 <form action="<%= isBulkImport ? '/admin/products/bulk-import' : (product ? `/admin/products/${product.id}/edit` : '/admin/products/new') %>" method="post" enctype="multipart/form-data"
   class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 w-full space-y-4">
@@ -50,7 +49,7 @@
   </div>
 
   <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.flashSalePrice != null) ? 'open' : '' %>>
-    <summary class="font-medium text-[var(--gold-text)] cursor-pointer select-none"><span class="admin-summary-icon admin-summary-icon--flash" aria-hidden="true"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 2L5 13h6l-1 9 8-11h-6l1-9z"></path></svg></span><span>Flash Sale</span></summary>
+    <summary class="font-medium text-[var(--gold-text)] cursor-pointer select-none">⚡ Flash Sale</summary>
     <div class="space-y-4 mt-4">
     <p class="text-xs text-[var(--text-4)]">ตั้งราคาพิเศษและเวลาไทยล่วงหน้า ระบบจะเริ่มลดราคาและคืนราคาขายเดิมให้อัตโนมัติเมื่อหมดเวลา เว้นว่างทั้งหมดหากไม่ใช้</p>
     <div class="grid sm:grid-cols-3 gap-3">
@@ -72,7 +71,7 @@
   </details>
 
   <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.priceOptions && product.priceOptions.length) ? 'open' : '' %>>
-      <summary class="font-medium text-[var(--gold-text)] cursor-pointer select-none"><span class="admin-summary-icon admin-summary-icon--volume" aria-hidden="true"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v18M16.5 7.5c0-1.4-1.8-2.5-4-2.5s-4 1.1-4 2.5 1.8 2.5 4 2.5 4 1.1 4 2.5-1.8 2.5-4 2.5-4 1.1-4 2.5 1.8 2.5 4 2.5 4-1.1 4-2.5"></path></svg></span><span>ราคาลดตามจำนวนซื้อ <span class="text-xs font-normal">(ยิ่งซื้อเยอะยิ่งถูก)</span></span></summary>
+    <summary class="font-medium text-[var(--gold-text)] cursor-pointer select-none">💰 ราคาลดตามจำนวนซื้อ (ยิ่งซื้อเยอะยิ่งถูก)</summary>
     <div class="space-y-3 mt-4">
       <p class="text-xs text-[var(--text-4)]">พิมพ์แค่ "ซื้อกี่ชิ้น ราคารวมเท่าไหร่" ระบบคิดราคาต่อชิ้นและราคาตามจำนวนที่ลูกค้าซื้อให้อัตโนมัติ เช่น ซื้อ 5 ชิ้น ราคารวม 200 บาท เว้นว่างไว้ทั้งหมดถ้าไม่ต้องการใช้ (ใช้ราคาขายด้านบนตามปกติ)</p>
       <div id="price-options-list" class="space-y-2">
@@ -366,7 +365,6 @@
     <a href="/admin/products" class="px-6 py-2 rounded-lg text-sm border border-[var(--border-light)] hover:bg-[var(--input)]">ยกเลิก</a>
   </div>
 </form>
-</div>
 <% if (isBulkImport) { %>
 <script>
   (function () {

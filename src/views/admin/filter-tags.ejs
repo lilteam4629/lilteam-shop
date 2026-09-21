@@ -25,7 +25,8 @@
         <div class="filter-card-drag-tools"><button type="button" draggable="true" class="filter-card-drag-handle" data-drag-handle aria-label="ลากเพื่อย้าย <%= t.name %>" title="ลากเพื่อย้าย">⠿</button><span class="filter-order-badge" data-order-badge aria-label="ลำดับที่ <%= index + 1 %>"><%= index + 1 %></span></div>
         <button type="button" class="filter-select-toggle" aria-label="เลือก <%= t.name %>"><span>✓</span></button>
         <div class="filter-image-stage"><img src="<%= t.image %>" alt="<%= t.name %>" /></div>
-        <div class="filter-card-body"><div class="filter-card-name"><b><%= t.name %></b><span><%= t.productCount %> สินค้า</span></div><div class="filter-usage"><i style="width:<%= Math.min(100,t.productCount*12) %>%"></i></div><div class="filter-card-order-row"><span>ลำดับ <b data-order-label><%= index + 1 %></b></span><div class="filter-card-move-actions"><button type="button" data-move-up aria-label="เลื่อน <%= t.name %> ขึ้น">↑</button><button type="button" data-move-down aria-label="เลื่อน <%= t.name %> ลง">↓</button></div></div>
+        <div class="filter-card-body"><div class="filter-card-name"><b><%= t.name %></b><span><%= t.productCount %> สินค้า</span></div><div class="filter-usage"><i style="width:<%= Math.min(100,t.productCount*12) %>%"></i></div>
+          <div class="filter-card-order-row"><span>ลำดับ <b data-order-label><%= index + 1 %></b></span><div class="filter-card-move-actions"><button type="button" data-move-up aria-label="เลื่อน <%= t.name %> ขึ้น">↑</button><button type="button" data-move-down aria-label="เลื่อน <%= t.name %> ลง">↓</button></div></div>
           <button type="button" class="filter-manage-products"><span>▦</span> จัดการสินค้า</button>
           <div class="filter-card-actions"><button type="button" class="filter-edit-toggle">แก้ไขชื่อ</button><form action="/admin/filter-tags/<%= t.id %>/delete" method="post" data-confirm="ต้องการลบตัวกรอง '<%= t.name %>' ใช่หรือไม่?"><button>ลบ</button></form></div>
           <form action="/admin/filter-tags/<%= t.id %>/edit" method="post" class="filter-inline-editor hidden"><input name="name" value="<%= t.name %>" required maxlength="100" /><button>บันทึก</button></form>
@@ -67,91 +68,22 @@ const input=document.getElementById('filterImageInput'),preview=document.getElem
 </script>
 <script>
 (function(){
-  const grid=document.getElementById('filter-library-grid');
-  const saveButton=document.getElementById('filter-save-order');
-  const status=document.getElementById('filter-order-status');
-  if(!grid||!saveButton) return;
-  let dragged=null,dirty=false;
+  const grid=document.getElementById('filter-library-grid'),saveButton=document.getElementById('filter-save-order'),status=document.getElementById('filter-order-status');
+  if(!grid||!saveButton)return;
   const cards=()=>[...grid.querySelectorAll('[data-filter-card]')];
-  const setStatus=(message)=>{if(status) status.textContent=message};
-  const updatePositions=()=>cards().forEach((card,index)=>{
-    card.dataset.orderIndex=String(index);
-    const badge=card.querySelector('[data-order-badge]');
-    const label=card.querySelector('[data-order-label]');
-    if(badge){badge.textContent=String(index+1);badge.setAttribute('aria-label','ลำดับที่ '+(index+1));}
-    if(label) label.textContent=String(index+1);
-    const up=card.querySelector('[data-move-up]'),down=card.querySelector('[data-move-down]');
-    if(up) up.disabled=index===0;
-    if(down) down.disabled=index===cards().length-1;
-  });
-  const markDirty=()=>{dirty=true;saveButton.disabled=false;saveButton.classList.add('is-dirty');setStatus('มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก')};
-  const move=(card,offset)=>{
-    const list=cards(),index=list.indexOf(card),target=index+offset;
-    if(index<0||target<0||target>=list.length) return;
-    if(offset<0) grid.insertBefore(card,list[target]); else grid.insertBefore(card,list[target].nextSibling);
-    updatePositions();markDirty();
-  };
-  // Pointer fallback keeps reordering usable on touch screens and browsers
-  // where native HTML5 drag events do not fire from a button handle.
-  let pointerDrag=null;
-  const finishPointerDrag=()=>{
-    if(!pointerDrag)return;
-    pointerDrag.card.classList.remove('is-dragging');
-    cards().forEach(item=>item.classList.remove('is-drop-target'));
-    pointerDrag=null;
-  };
-  grid.addEventListener('pointerdown',event=>{
-    const handle=event.target.closest('[data-drag-handle]');
-    if(!handle)return;
-    const card=handle.closest('[data-filter-card]');
-    if(!card)return;
-    pointerDrag={card,pointerId:event.pointerId,startX:event.clientX,startY:event.clientY,moved:false};
-    handle.setPointerCapture?.(event.pointerId);
-    card.classList.add('is-dragging');
-    event.preventDefault();
-  });
-  document.addEventListener('pointermove',event=>{
-    if(!pointerDrag||event.pointerId!==pointerDrag.pointerId)return;
-    if(!pointerDrag.moved && Math.hypot(event.clientX-pointerDrag.startX,event.clientY-pointerDrag.startY)<5)return;
-    pointerDrag.moved=true;
-    const target=document.elementFromPoint(event.clientX,event.clientY)?.closest('[data-filter-card]');
-    if(!target||target===pointerDrag.card)return;
-    const rect=target.getBoundingClientRect();
-    grid.insertBefore(pointerDrag.card,event.clientY>rect.top+rect.height/2?target.nextSibling:target);
-    updatePositions();markDirty();
-    cards().forEach(item=>item.classList.remove('is-drop-target'));target.classList.add('is-drop-target');
-  });
-  document.addEventListener('pointerup',finishPointerDrag);
-  document.addEventListener('pointercancel',finishPointerDrag);
-  cards().forEach(card=>{
-    card.querySelector('[data-move-up]')?.addEventListener('click',event=>{event.stopPropagation();move(card,-1)});
-    card.querySelector('[data-move-down]')?.addEventListener('click',event=>{event.stopPropagation();move(card,1)});
-    card.addEventListener('dragstart',event=>{
-      if(event.target.closest('button,input,form,a')&&!event.target.closest('[data-drag-handle]')){event.preventDefault();return;}
-      dragged=card;card.classList.add('is-dragging');event.dataTransfer.effectAllowed='move';event.dataTransfer.setData('text/plain',card.dataset.id);
-    });
-    card.addEventListener('dragover',event=>{
-      if(!dragged||dragged===card)return;
-      event.preventDefault();event.dataTransfer.dropEffect='move';
-      const rect=card.getBoundingClientRect();
-      grid.insertBefore(dragged,event.clientY>rect.top+rect.height/2?card.nextSibling:card);
-      updatePositions();markDirty();
-      cards().forEach(item=>item.classList.remove('is-drop-target'));card.classList.add('is-drop-target');
-    });
-    card.addEventListener('dragend',()=>{dragged=null;card.classList.remove('is-dragging');cards().forEach(item=>item.classList.remove('is-drop-target'))});
-  });
-  saveButton.addEventListener('click',async()=>{
-    if(!dirty)return;
-    saveButton.disabled=true;saveButton.classList.add('is-saving');setStatus('กำลังบันทึกลำดับ...');
-    try{
-      const response=await fetch('/admin/filter-tags/reorder',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:JSON.stringify({order:cards().map(card=>card.dataset.id)})});
-      const data=await response.json();
-      if(!response.ok||!data.ok) throw new Error(data.message||'บันทึกลำดับไม่สำเร็จ');
-      dirty=false;saveButton.classList.remove('is-dirty');setStatus('บันทึกลำดับแล้ว');
-      if(window.showToast) window.showToast('บันทึกลำดับตัวกรองแล้ว','success');
-    }catch(error){saveButton.disabled=false;setStatus(error.message||'บันทึกลำดับไม่สำเร็จ');}
-    finally{saveButton.classList.remove('is-saving');if(!dirty)saveButton.disabled=true;}
-  });
+  let dirty=false,dragged=null,pointerId=null;
+  const updatePositions=()=>{cards().forEach((card,index)=>{card.dataset.orderIndex=String(index);const badge=card.querySelector('[data-order-badge]'),label=card.querySelector('[data-order-label]');if(badge){badge.textContent=String(index+1);badge.setAttribute('aria-label','ลำดับที่ '+(index+1))}if(label)label.textContent=String(index+1);const up=card.querySelector('[data-move-up]'),down=card.querySelector('[data-move-down]');if(up)up.disabled=index===0;if(down)down.disabled=index===cards().length-1})};
+  const markDirty=()=>{dirty=true;saveButton.disabled=false;if(status)status.textContent='มีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก'};
+  const move=(card,offset)=>{const list=cards(),index=list.indexOf(card),next=index+offset;if(index<0||next<0||next>=list.length)return;grid.insertBefore(card,next>index?list[next].nextSibling:list[next]);updatePositions();markDirty()};
+  grid.addEventListener('click',e=>{const up=e.target.closest('[data-move-up]'),down=e.target.closest('[data-move-down]');if(up)move(up.closest('[data-filter-card]'),-1);if(down)move(down.closest('[data-filter-card]'),1)});
+  grid.addEventListener('pointerdown',e=>{const handle=e.target.closest('[data-drag-handle]');if(!handle)return;const card=handle.closest('[data-filter-card]');if(!card)return;pointerId=e.pointerId;dragged=card;card.classList.add('is-dragging');handle.setPointerCapture?.(pointerId);e.preventDefault()});
+  grid.addEventListener('pointermove',e=>{if(!dragged||e.pointerId!==pointerId)return;const target=document.elementFromPoint(e.clientX,e.clientY)?.closest?.('[data-filter-card]');if(!target||target===dragged||!grid.contains(target))return;const rect=target.getBoundingClientRect(),before=e.clientY<rect.top+rect.height/2;if(before)grid.insertBefore(dragged,target);else grid.insertBefore(dragged,target.nextSibling);updatePositions();markDirty()});
+  const stopPointer=()=>{if(!dragged)return;dragged.classList.remove('is-dragging');dragged=null;pointerId=null};
+  grid.addEventListener('pointerup',stopPointer);grid.addEventListener('pointercancel',stopPointer);
+  grid.addEventListener('dragstart',e=>{const card=e.target.closest('[data-filter-card]');if(!card)return;dragged=card;card.classList.add('is-dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',card.dataset.id)});
+  grid.addEventListener('dragover',e=>{if(!dragged)return;e.preventDefault();const target=e.target.closest('[data-filter-card]');if(!target||target===dragged)return;const rect=target.getBoundingClientRect(),before=e.clientY<rect.top+rect.height/2;if(before)grid.insertBefore(dragged,target);else grid.insertBefore(dragged,target.nextSibling);updatePositions();markDirty()});
+  grid.addEventListener('dragend',stopPointer);
+  saveButton.addEventListener('click',async()=>{if(!dirty)return;saveButton.disabled=true;if(status)status.textContent='กำลังบันทึกลำดับ...';try{const response=await fetch('/admin/filter-tags/reorder',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json','X-Requested-With':'XMLHttpRequest'},body:JSON.stringify({order:cards().map(card=>card.dataset.id)})});const data=await response.json();if(!response.ok||!data.ok)throw new Error(data.message||'บันทึกลำดับไม่สำเร็จ');dirty=false;if(status)status.textContent='บันทึกลำดับแล้ว';window.showToast?.('บันทึกลำดับตัวกรองแล้ว','success')}catch(error){saveButton.disabled=false;if(status)status.textContent='บันทึกไม่สำเร็จ';window.showToast?.(error.message||'บันทึกลำดับไม่สำเร็จ','error')}});
   updatePositions();
 })();
 </script>

@@ -1,5 +1,4 @@
 <div class="admin-workspace-view workspace-topups">
-<!-- Legacy compatibility marker: if (r.slipPath) the fallback URL is still supported. -->
 <% const publicSlipMessage = (message) => String(message || '')
   .replace(/Slip\s*XEPHT/gi, 'ระบบตรวจสอบ')
   .replace(/slip\.xepht\.com/gi, 'ระบบภายนอก')
@@ -115,10 +114,9 @@
 
               <!-- Slip Preview & Info -->
               <div class="topup-request-info flex items-start gap-4">
-                <% const adminSlipPath = r.slipStorageId ? `/admin/topups/${encodeURIComponent(r.id)}/slip` : r.slipPath; %>
-                <% if (adminSlipPath) { %>
-                  <a href="<%= adminSlipPath %>" target="_blank" rel="noopener" class="group relative shrink-0">
-                    <img src="<%= adminSlipPath %>" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-[var(--border)] shadow-sm group-hover:brightness-110 transition" alt="สลิปโอนเงิน" loading="lazy" />
+                <% if (r.slipPath) { %>
+                  <a href="<%= r.slipPath %>" target="_blank" rel="noopener" class="group relative shrink-0">
+                    <img src="<%= r.slipPath %>" class="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-xl border border-[var(--border)] shadow-sm group-hover:brightness-110 transition" alt="สลิปโอนเงิน" />
                     <span class="absolute bottom-1 right-1 bg-black/70 text-[9px] text-white px-1 rounded backdrop-blur-xs">🔍 ขยาย</span>
                   </a>
                 <% } %>
@@ -210,10 +208,9 @@
             <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm hover:border-[var(--border-light)] transition">
 
               <div class="flex items-center gap-3.5">
-                <% const historySlipPath = r.slipStorageId ? `/admin/topups/${encodeURIComponent(r.id)}/slip` : r.slipPath; %>
-                <% if (historySlipPath) { %>
-                  <a href="<%= historySlipPath %>" target="_blank" rel="noopener">
-                    <img src="<%= historySlipPath %>" class="w-12 h-12 object-cover rounded-xl border border-[var(--border)]" alt="สลิป" loading="lazy" />
+                <% if (r.slipPath) { %>
+                  <a href="<%= r.slipPath %>" target="_blank" rel="noopener">
+                    <img src="<%= r.slipPath %>" class="w-12 h-12 object-cover rounded-xl border border-[var(--border)]" alt="สลิป" />
                   </a>
                 <% } %>
 
