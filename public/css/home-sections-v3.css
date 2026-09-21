@@ -7,6 +7,7 @@
 .hs-picker label img{display:block;width:100%;height:auto;max-height:none;object-fit:contain}
 @media(max-width:700px){.hs-picker label>span{min-height:0}.hs-picker label img{width:100%;height:auto}}
 .hs-picker-empty{grid-column:1/-1;display:grid;gap:6px;place-items:center;min-height:150px;padding:24px;border:1px dashed var(--border);border-radius:12px;color:var(--text-3);text-align:center}.hs-picker-empty b{color:var(--text);font-size:12px}.hs-picker-empty span{font-size:10px;color:var(--text-4)}
+.hs-editor{min-height:0!important;height:auto!important;overflow:visible}.hs-picker-grid{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(140px,1fr))!important;align-content:start!important;min-height:0!important;height:auto!important}.hs-picker-grid>label{display:block!important;min-width:0!important}.hs-picker-grid>label>span{display:flex!important}
 
 .product-pick-card img{width:100%!important;height:auto!important;aspect-ratio:auto!important;object-fit:contain!important}.product-pick-card{height:auto!important;background:#080808}
 .hs-controls>form{display:flex}.hs-controls .hs-delete-button{border-color:color-mix(in srgb,#ef4444 45%,var(--border));background:color-mix(in srgb,#ef4444 10%,var(--card));color:#ef4444;font-weight:700}.hs-controls .hs-delete-button:hover{border-color:#ef4444;background:color-mix(in srgb,#ef4444 18%,var(--card))}
