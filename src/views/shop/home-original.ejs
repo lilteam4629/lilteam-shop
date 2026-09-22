@@ -160,7 +160,7 @@
 
 <% if (recommendedCategories && recommendedCategories.length) { %>
 <section class="home-category-rail" aria-label="หมวดหมู่สินค้า">
-  <div class="home-category-head"><div class="home-category-heading"><span class="home-category-icon">◇</span><span><b>หมวดหมู่แนะนำ</b><small>Recommended Categories</small></span></div><a href="<%= (typeof isAdmin !== 'undefined' && isAdmin) ? '/admin/home-sections' : '/products' %>"><%= (typeof isAdmin !== 'undefined' && isAdmin) ? 'เพิ่มหมวด ›' : 'ดูทั้งหมด ›' %></a></div>
+  <div class="home-category-head"><div class="home-category-heading"><span class="home-category-icon">◇</span><span><b>หมวดหมู่แนะนำ</b><small>Recommended Categories</small></span></div><a href="<%= (typeof isAdmin !== 'undefined' && isAdmin) ? '/admin/home-sections?ui=experiment' : '/products' %>"><%= (typeof isAdmin !== 'undefined' && isAdmin) ? 'เพิ่มหมวด ›' : 'ดูทั้งหมด ›' %></a></div>
   <div class="home-category-grid">
     <% recommendedCategories.forEach(category => { %>
       <a class="home-category-card" href="/products?recommended=<%= encodeURIComponent(category.id) %>">

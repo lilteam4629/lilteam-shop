@@ -1,0 +1,70 @@
+.experiment-schedule-page .experiment-kicker { color: #0f8967; }
+.experiment-schedule-page .experiment-page-head p { max-width: 660px; }
+.experiment-schedule-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(230px, 1.35fr); gap: 10px; margin-bottom: 14px; }
+.experiment-schedule-stat, .experiment-schedule-note { display: flex; align-items: center; gap: 10px; min-height: 82px; padding: 14px; border: 1px solid var(--ex-line); border-radius: 15px; background: var(--ex-surface); box-shadow: var(--ex-shadow); }
+.experiment-schedule-stat-icon { display: grid; place-items: center; width: 36px; height: 36px; flex: 0 0 36px; border-radius: 11px; color: #b2781d; background: #fff4dc; }
+.experiment-schedule-stat-icon.ready { color: #187557; background: #e5f6ed; }
+.experiment-schedule-stat-icon svg, .experiment-schedule-note-icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.experiment-schedule-stat small, .experiment-schedule-note small { display: block; color: var(--ex-muted); font-size: 10px; }
+.experiment-schedule-stat strong { display: block; margin-top: 4px; color: var(--ex-ink); font: 700 17px var(--ex-display); }
+.experiment-schedule-note { border-color: #cfe9dc; background: #f1fbf6; }
+.experiment-schedule-note-icon { display: grid; place-items: center; width: 35px; height: 35px; border-radius: 10px; color: #187557; background: #dff3e8; font-size: 10px; font-weight: 900; letter-spacing: .04em; }
+.experiment-schedule-note strong { display: block; color: #195641; font-size: 11px; }
+.experiment-schedule-note small { margin-top: 4px; line-height: 1.4; }
+.experiment-schedule-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 13px; margin-bottom: 14px; }
+.experiment-schedule-search { display: flex; align-items: center; gap: 9px; width: min(100%, 360px); min-height: 43px; padding: 0 12px; border: 1px solid var(--ex-line); border-radius: 11px; background: #fbfdfc; }
+.experiment-schedule-search svg { width: 16px; height: 16px; flex: 0 0 16px; fill: none; stroke: #789087; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.experiment-schedule-search input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--ex-ink); background: transparent; font-size: 12px; }
+.experiment-schedule-search:focus-within { border-color: #8acdb3; box-shadow: 0 0 0 3px rgba(31,117,87,.1); }
+.experiment-filter-tabs { display: inline-flex; align-items: center; gap: 3px; max-width: 100%; padding: 4px; overflow-x: auto; border: 1px solid #e2ece7; border-radius: 13px; background: #f3f7f5; scrollbar-width: none; }
+.experiment-filter-tabs::-webkit-scrollbar { display: none; }
+.experiment-filter { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 38px; flex: 0 0 auto; padding: 8px 11px; border: 1px solid transparent; border-radius: 9px; color: #71847c; background: transparent; font: 700 11px var(--ex-body); white-space: nowrap; cursor: pointer; transition: color .16s ease, background .16s ease, border-color .16s ease, box-shadow .16s ease, transform .16s ease; }
+.experiment-filter b { display: inline-grid; place-items: center; min-width: 22px; height: 20px; padding: 0 5px; border-radius: 999px; color: #70827a; background: #e6efea; font-size: 10px; line-height: 1; }
+.experiment-filter:hover { color: #217252; background: #eaf6ef; }
+.experiment-filter:focus-visible { outline: 3px solid rgba(31,117,87,.18); outline-offset: 1px; }
+.experiment-filter.active { color: #176b4e; border-color: #cce9d9; background: #fff; box-shadow: 0 3px 10px rgba(24,89,64,.09); }
+.experiment-filter.active b { color: #fff; background: #268463; }
+.experiment-filter:active { transform: translateY(1px); }
+.experiment-schedule-list { padding: 0; overflow: hidden; }
+.experiment-schedule-list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 20px 15px; border-bottom: 1px solid var(--ex-line); }
+.experiment-schedule-list-head h2 { margin: 0; color: var(--ex-ink); font: 700 18px var(--ex-display); letter-spacing: -.03em; }
+.experiment-schedule-list-head p { margin: 4px 0 0; color: var(--ex-muted); font-size: 11px; }
+.experiment-schedule-list-count { padding: 6px 9px; border-radius: 999px; color: #287159; background: #e9f7ef; font-size: 10px; font-weight: 800; }
+.experiment-schedule-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 14px; }
+.experiment-schedule-card { position: relative; min-width: 0; overflow: hidden; border: 1px solid #e0eae5; border-radius: 15px; background: #fff; transition: border-color .16s ease, transform .16s ease, box-shadow .16s ease; }
+.experiment-schedule-card:hover { border-color: #a9d3bf; box-shadow: 0 12px 30px rgba(15,45,36,.08); transform: translateY(-2px); }
+.experiment-schedule-card-accent { position: absolute; inset: 0 auto 0 0; width: 4px; background: #e3ad48; }
+.experiment-schedule-card-accent.released { background: #2ab07e; }
+.experiment-schedule-card-body { padding: 15px 15px 13px 18px; }
+.experiment-schedule-card-top { display: flex; gap: 11px; min-width: 0; }
+.experiment-schedule-thumb { display: grid; place-items: center; width: 64px; height: 58px; flex: 0 0 64px; overflow: hidden; border: 1px solid #e4ece8; border-radius: 11px; color: #709082; background: #f3f8f5; }
+.experiment-schedule-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.experiment-schedule-thumb svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-width: 1.7; }
+.experiment-schedule-card-copy { min-width: 0; padding-top: 1px; }
+.experiment-schedule-badges { display: flex; align-items: center; gap: 5px; min-height: 20px; flex-wrap: wrap; }
+.experiment-schedule-status, .experiment-schedule-event { display: inline-flex; align-items: center; gap: 5px; padding: 4px 7px; border-radius: 999px; font-size: 9px; font-weight: 800; line-height: 1; }
+.experiment-schedule-status { color: #9a6a16; background: #fff4d8; }
+.experiment-schedule-status.released { color: #217252; background: #e5f6ed; }
+.experiment-schedule-status i { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+.experiment-schedule-event { color: #6b70a1; background: #eef0ff; }
+.experiment-schedule-card-copy h3 { overflow: hidden; margin: 7px 0 2px; color: var(--ex-ink); font-size: 13px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.experiment-schedule-card-copy small { display: block; overflow: hidden; color: #80908a; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.experiment-schedule-datetime { display: flex; align-items: center; gap: 9px; margin-top: 14px; padding: 10px; border: 1px solid #edf2ef; border-radius: 11px; background: #f9fcfa; }
+.experiment-schedule-datetime-icon { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; border-radius: 9px; color: #287159; background: #e5f6ed; }
+.experiment-schedule-datetime-icon svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.experiment-schedule-datetime small { display: block; color: #80908a; font-size: 9px; }
+.experiment-schedule-datetime strong { display: block; margin-top: 2px; color: #36554a; font-size: 11px; }
+.experiment-schedule-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-top: 12px; padding-top: 11px; border-top: 1px solid #edf2ef; }
+.experiment-schedule-card-foot > strong { color: #137653; font: 700 15px var(--ex-display); }
+.experiment-schedule-actions { display: flex; align-items: center; gap: 6px; }
+.experiment-button.compact { min-height: 34px; padding: 7px 9px; border-radius: 8px; font-size: 10px; }
+.experiment-button.compact.danger { color: #b34359; border-color: #f2dfe3; background: #fff8f9; }
+.experiment-button.compact.danger:hover { color: #fff; border-color: #c2415a; background: #c2415a; }
+.experiment-schedule-empty { grid-column: 1 / -1; display: grid; justify-items: center; padding: 48px 20px 52px; text-align: center; }
+.experiment-schedule-empty[hidden] { display: none; }
+.experiment-schedule-empty > svg { width: 42px; height: 42px; margin-bottom: 11px; padding: 10px; border-radius: 13px; color: #287159; background: #e5f6ed; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
+.experiment-schedule-empty h3 { margin: 0; color: var(--ex-ink); font: 700 16px var(--ex-display); }
+.experiment-schedule-empty p { max-width: 390px; margin: 7px 0 16px; color: var(--ex-muted); font-size: 11px; line-height: 1.6; }
+@media (max-width: 980px) { .experiment-schedule-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .experiment-schedule-note { grid-column: span 2; } }
+@media (max-width: 760px) { .experiment-schedule-toolbar { align-items: stretch; flex-direction: column; } .experiment-schedule-search { width: 100%; } .experiment-schedule-toolbar .experiment-filter-tabs { width: 100%; overflow-x: auto; justify-content: flex-start; } .experiment-schedule-grid { grid-template-columns: 1fr; padding: 10px; } .experiment-schedule-list-head { padding: 15px; } }
+@media (max-width: 520px) { .experiment-schedule-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; } .experiment-schedule-stat, .experiment-schedule-note { min-height: 72px; padding: 11px; } .experiment-schedule-stat-icon { width: 31px; height: 31px; flex-basis: 31px; } .experiment-schedule-stat strong { font-size: 14px; } .experiment-schedule-note { grid-column: span 2; } .experiment-schedule-card-foot { align-items: flex-start; flex-direction: column; } .experiment-schedule-actions { width: 100%; } .experiment-schedule-actions .experiment-button { flex: 1; } }

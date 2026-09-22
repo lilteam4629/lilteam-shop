@@ -1,0 +1,102 @@
+  <link rel="stylesheet" href="<%= asset('css/admin-experiment-effects-v1.css') %>" />
+  <style>.legacy-effects-sidebar{display:none!important}</style>
+<%
+  const music = settings.music || { enabled: false, youtubeUrl: '', defaultVolume: 50, startSeconds: 0, endSeconds: 0 };
+  const snow = settings.snow || { enabled: false };
+  const rainInstalled = Boolean(settings.systemModules && settings.systemModules.rain);
+  const rain = settings.rain || { enabled: false, color: '#78c8ff', intensity: 'medium' };
+  const timeValue = seconds => seconds ? `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}` : '';
+%>
+<div class="experiment-app experiment-effects-page">
+  <%- include('../partials/admin-experiment-sidebar-effects') %>
+  <aside class="experiment-sidebar legacy-effects-sidebar" data-experiment-sidebar aria-label="เมนูร้านค้า">
+    <div class="experiment-brand"><div class="experiment-brand-mark"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName || 'ร้านค้า' %>" /><% } else { %><span aria-hidden="true"><%= (settings.shopName || 'L')[0] %></span><% } %></div><div><div class="experiment-brand-title"><%= settings.shopName || 'LILTeam Shop' %></div><div class="experiment-brand-sub">ผู้ดูแลระบบ · รุ่นทดลอง</div></div><button class="experiment-collapse" data-experiment-collapse type="button" aria-label="ย่อหรือขยายเมนู">‹</button></div>
+    <div class="experiment-sidebar-scroll">
+      <div class="experiment-nav-group"><div class="experiment-nav-label">ภาพรวม</div><a class="experiment-nav-item" href="/admin?ui=experiment"><span aria-hidden="true">▦</span><span>แดชบอร์ด</span></a></div>
+      <div class="experiment-nav-group"><div class="experiment-nav-label">สินค้าและสต๊อก</div><a class="experiment-nav-item" href="/admin/products?ui=experiment"><span aria-hidden="true">◇</span><span>รายการสินค้า</span></a><a class="experiment-nav-item" href="/admin/scheduled-products?ui=experiment"><span aria-hidden="true">◷</span><span>ตั้งเวลาเปิดขาย</span></a><a class="experiment-nav-item" href="/admin/filter-tags?ui=experiment"><span aria-hidden="true">◈</span><span>แท็ก/จัดหมวดสินค้า</span></a><a class="experiment-nav-item" href="/admin/recommended-categories?ui=experiment"><span aria-hidden="true">☷</span><span>หมวดหมู่แนะนำ</span></a></div>
+      <div class="experiment-nav-group"><div class="experiment-nav-label">การสั่งซื้อ & การเงิน</div><a class="experiment-nav-item" href="/admin/orders?ui=experiment"><span aria-hidden="true">▤</span><span>คำสั่งซื้อ</span></a><a class="experiment-nav-item" href="/admin/topups?ui=experiment"><span aria-hidden="true">▭</span><span>เติมเงิน & ตรวจสอบ</span><% if (pendingTopupCount) { %><b class="experiment-sidebar-count"><%= pendingTopupCount %></b><% } %></a><a class="experiment-nav-item" href="/admin/coupons?ui=experiment"><span aria-hidden="true">◇</span><span>คูปองส่วนลด</span></a></div>
+      <div class="experiment-nav-group"><div class="experiment-nav-label">ผู้ใช้งาน & ลูกค้า</div><a class="experiment-nav-item" href="/admin/users?ui=experiment"><span aria-hidden="true">◎</span><span>จัดการสมาชิก</span></a></div>
+      <div class="experiment-nav-group"><div class="experiment-nav-label">ระบบเสริม</div><a class="experiment-nav-item active" href="/admin/effects?ui=experiment"><span aria-hidden="true">✦</span><span>ลูกเล่นหน้าเว็บ</span></a><a class="experiment-nav-item" href="/admin/minigame?ui=experiment"><span aria-hidden="true">◌</span><span>มินิเกม</span></a><a class="experiment-nav-item" href="/admin/slip-verification?ui=experiment"><span aria-hidden="true">✓</span><span>ตรวจสอบอัตโนมัติ</span></a></div>
+      <div class="experiment-nav-group"><div class="experiment-nav-label">ตกแต่ง & การตั้งค่า</div><a class="experiment-nav-item" href="/admin/appearance?ui=experiment"><span aria-hidden="true">▧</span><span>รูปและแบนเนอร์</span></a><a class="experiment-nav-item" href="/admin/theme?ui=experiment"><span aria-hidden="true">◌</span><span>ธีมร้านค้า</span></a><a class="experiment-nav-item" href="/admin/settings?ui=experiment"><span aria-hidden="true">⚙</span><span>ตั้งค่าร้านค้า</span></a></div>
+    </div>
+    <div class="experiment-sidebar-bottom"><a class="experiment-nav-item" href="/"><span aria-hidden="true">⌂</span><span>กลับหน้าร้าน</span><span style="margin-left:auto">→</span></a><div class="experiment-profile"><div class="experiment-avatar">A</div><div><strong>admin</strong><small>แอดมินสูงสุด</small></div></div></div>
+  </aside>
+
+  <div class="experiment-main">
+    <header class="experiment-topbar"><div class="experiment-build-legend"><span><i></i> ใช้งานได้</span></div><button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน">◌</button><span class="experiment-user-name" style="font-size:12px;font-weight:700">admin</span></header>
+    <main class="experiment-content">
+      <div class="experiment-page-head"><div><div class="experiment-kicker">ทดลองหน้าตาใหม่ · STOREFRONT EXPERIENCE</div><h1>ลูกเล่นหน้าเว็บ</h1><p>ตั้งค่าเพลงและเอฟเฟกต์ตกแต่งหน้าร้าน พร้อมดูผลลัพธ์จากแผงเดียว</p></div><div class="experiment-actions"><a href="/" class="experiment-button">ดูผลที่หน้าร้าน ↗</a></div></div>
+      <div class="experiment-page-status-note"><strong>สถานะหน้านี้:</strong> ตั้งค่าเพลงพื้นหลัง, หิมะ และระบบฝนได้จริง · พื้นที่ตัวอย่างอัปเดตทันทีโดยไม่ต้องออกจากหน้า</div>
+
+      <section class="effects-preview experiment-card" data-effects-preview>
+        <div class="effects-preview-top"><div><span class="effects-eyebrow">LIVE STOREFRONT PREVIEW</span><h2>บรรยากาศหน้าร้านของคุณ</h2><p>ตัวอย่างนี้เป็นภาพจำลองในโหมดทดลอง ไม่เปลี่ยนหน้าร้านจนกว่าจะกดบันทึก</p></div><span class="effects-preview-live"><i></i> จำลองแบบสด</span></div>
+        <div class="effects-stage <%= snow.enabled ? 'snow-on' : '' %> <%= rainInstalled && rain.enabled ? 'rain-on' : '' %>" data-effects-stage style="--rain-color:<%= rain.color || '#78c8ff' %>">
+          <div class="effects-stage-glow"></div><div class="effects-rain-lines" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="effects-snow-dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="effects-store-chrome"><span class="effects-store-logo"><%= (settings.shopName || 'L')[0] %></span><span class="effects-store-name"><%= settings.shopName || 'LilTeam Shop' %></span><span class="effects-store-nav">สินค้า&nbsp;&nbsp; วิธีสั่งซื้อ&nbsp;&nbsp; ติดต่อเรา</span><span class="effects-store-cart">ตะกร้า</span></div>
+          <div class="effects-stage-body"><div class="effects-stage-kicker">WELCOME TO YOUR STORE</div><strong><%= settings.shopName || 'LilTeam Shop' %></strong><span><%= settings.tagline || 'ร้านของคุณในบรรยากาศที่เป็นเอกลักษณ์' %></span><div class="effects-stage-cards"><b></b><b></b><b></b></div></div>
+          <span class="effects-stage-badge" data-effects-stage-state><%= (snow.enabled || (rainInstalled && rain.enabled)) ? 'เปิดเอฟเฟกต์ตัวอย่าง' : 'เอฟเฟกต์ปิดอยู่' %></span>
+        </div>
+        <div class="effects-preview-foot"><span><i class="music-dot <%= music.enabled ? 'on' : '' %>" data-music-dot></i><b data-music-state><%= music.enabled ? 'เพลงเปิดอยู่' : 'เพลงปิดอยู่' %></b><small data-music-volume><%= music.defaultVolume %>% ระดับเสียง</small></span><span>การเคลื่อนไหวจะหยุดเมื่อผู้ใช้เปิดลดการเคลื่อนไหว</span></div>
+      </section>
+
+      <div class="effects-stat-row"><div><span class="effects-stat-icon green">♪</span><span><small>เพลงพื้นหลัง</small><strong data-music-stat><%= music.enabled ? 'เปิดใช้งาน' : 'ปิดอยู่' %></strong></span></div><div><span class="effects-stat-icon blue">✦</span><span><small>หิมะตก</small><strong data-snow-stat><%= snow.enabled ? 'เปิดใช้งาน' : 'ปิดอยู่' %></strong></span></div><div><span class="effects-stat-icon gold">↘</span><span><small>ระบบฝนตก</small><strong><%= rainInstalled ? (rain.enabled ? 'เปิดใช้งาน' : 'ติดตั้งแล้ว · ปิดอยู่') : 'ยังไม่ติดตั้ง' %></strong></span></div></div>
+
+      <div class="effects-settings-grid">
+        <section class="effects-panel experiment-card">
+          <div class="effects-panel-head"><span class="effects-panel-icon green">♪</span><div><h2>เพลงพื้นหลังหน้าเว็บ</h2><p>เล่นเพลงจาก YouTube ให้ลูกค้าปรับเสียงหรือย่อเก็บได้</p></div><span class="effects-ready">พร้อมใช้</span></div>
+          <form action="/admin/music-player?ui=experiment" method="post" class="effects-form" data-music-form>
+            <label><span>ลิงก์วิดีโอ YouTube</span><input name="youtubeUrl" value="<%= music.youtubeUrl || '' %>" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off" /><small>รองรับ watch, youtu.be, Shorts และ Live</small></label>
+            <div class="effects-form-two"><label><span>เริ่มเล่นที่</span><input name="startTime" value="<%= timeValue(music.startSeconds) %>" placeholder="0:00" /></label><label><span>จบท่อนที่ <em>ไม่บังคับ</em></span><input name="endTime" value="<%= timeValue(music.endSeconds) %>" placeholder="0:00" /></label></div>
+            <label><span class="effects-range-label">ระดับเสียงเริ่มต้น <b data-volume-label><%= music.defaultVolume %>%</b></span><input type="range" name="defaultVolume" min="0" max="100" value="<%= music.defaultVolume %>" data-volume-range /></label>
+            <label class="effects-toggle"><span><strong>เปิดใช้งานเพลงพื้นหลัง</strong><small>เล่นเพลงเมื่อลูกค้าเข้าสู่หน้าร้าน</small></span><input type="checkbox" name="enabled" <%= music.enabled ? 'checked' : '' %> data-music-toggle /><i></i></label>
+            <button class="experiment-button primary" type="submit">บันทึกการตั้งค่าเพลง →</button>
+          </form>
+        </section>
+
+        <section class="effects-panel experiment-card">
+          <div class="effects-panel-head"><span class="effects-panel-icon blue">✦</span><div><h2>เอฟเฟกต์ตกแต่ง</h2><p>เพิ่มบรรยากาศให้หน้าร้านโดยไม่บดบังการใช้งาน</p></div><span class="effects-ready">พร้อมใช้</span></div>
+          <div class="effects-effect-list">
+            <div class="effects-effect-row"><span class="effects-effect-art snow-art">✦</span><span><strong>หิมะตกหน้าเว็บ</strong><small>อนุภาคตกแต่งที่ไม่รบกวนการคลิก</small></span><form action="/admin/snow-toggle?ui=experiment" method="post"><label class="effects-switch"><input type="checkbox" name="enabled" <%= snow.enabled ? 'checked' : '' %> data-snow-toggle /><i></i></label></form></div>
+            <% if (rainInstalled) { %><div class="effects-effect-row"><span class="effects-effect-art rain-art">↘</span><span><strong>ระบบฝนตกหน้าเว็บ</strong><small>ติดตั้งในร้านนี้แล้ว · ปรับสีและความเข้มได้</small></span><button class="effects-inline-link" type="button" data-rain-focus>ตั้งค่า →</button></div><form action="/admin/effects/rain?ui=experiment" method="post" class="effects-rain-form" data-rain-form><label><span>สีของฝน</span><input type="color" name="color" value="<%= rain.color || '#78c8ff' %>" data-rain-color /></label><label><span>ความเข้ม</span><select name="intensity" data-rain-intensity><option value="light" <%= rain.intensity === 'light' ? 'selected' : '' %>>เบา</option><option value="medium" <%= rain.intensity === 'medium' ? 'selected' : '' %>>กำลังสวย</option><option value="heavy" <%= rain.intensity === 'heavy' ? 'selected' : '' %>>ฝนหนัก</option></select></label><label class="effects-toggle compact"><span><strong>เปิดใช้งานฝนตก</strong><small>ใช้บนหน้าร้านจริง</small></span><input type="checkbox" name="enabled" <%= rain.enabled ? 'checked' : '' %> data-rain-toggle /><i></i></label><button class="experiment-button" type="submit">บันทึกฝนตก</button></form><% } %>
+          </div>
+        </section>
+      </div>
+
+      <section class="effects-roadmap experiment-card" data-experiment-roadmap><div><span class="effects-eyebrow">ACTIVE FEATURES · EFFECTS</span><h2>ลูกเล่นที่ใช้งานได้แล้ว</h2><p>รายการด้านล่างเชื่อมกับข้อมูลร้านและบันทึกการตั้งค่าได้จริง</p></div><div class="effects-roadmap-grid effects-roadmap-grid-single"><div class="ready"><h3><i>✓</i> พร้อมใช้งาน</h3><ul><li>บันทึกเพลง YouTube และช่วงเวลาเล่น</li><li>ปรับระดับเสียงเริ่มต้น</li><li>เปิด/ปิดหิมะและฝนที่ติดตั้งแล้ว</li></ul></div></div><div class="effects-roadmap-foot"><span>ระบบเก่ายังอยู่ที่ URL เดิมและไม่ได้ถูกลบ</span><span>หน้านี้แสดงเฉพาะฟังก์ชันที่พร้อมใช้งาน</span></div></section>
+    </main>
+  </div>
+</div>
+<script>
+  (() => {
+    const stage = document.querySelector('[data-effects-stage]');
+    const musicToggle = document.querySelector('[data-music-toggle]');
+    const snowToggle = document.querySelector('[data-snow-toggle]');
+    const rainToggle = document.querySelector('[data-rain-toggle]');
+    const volume = document.querySelector('[data-volume-range]');
+    const volumeLabel = document.querySelector('[data-volume-label]');
+    const volumePreview = document.querySelector('[data-music-volume]');
+    const musicState = document.querySelector('[data-music-state]');
+    const musicDot = document.querySelector('[data-music-dot]');
+    const musicStat = document.querySelector('[data-music-stat]');
+    const snowStat = document.querySelector('[data-snow-stat]');
+    const stageState = document.querySelector('[data-effects-stage-state]');
+    const sync = () => {
+      const musicOn = Boolean(musicToggle?.checked);
+      const snowOn = Boolean(snowToggle?.checked);
+      const rainOn = Boolean(rainToggle?.checked);
+      if (volumeLabel) volumeLabel.textContent = `${volume?.value || 0}%`;
+      if (volumePreview) volumePreview.textContent = `${volume?.value || 0}% ระดับเสียง`;
+      if (musicState) musicState.textContent = musicOn ? 'เพลงเปิดอยู่' : 'เพลงปิดอยู่';
+      if (musicDot) musicDot.classList.toggle('on', musicOn);
+      if (musicStat) musicStat.textContent = musicOn ? 'เปิดใช้งาน' : 'ปิดอยู่';
+      if (snowStat) snowStat.textContent = snowOn ? 'เปิดใช้งาน' : 'ปิดอยู่';
+      stage?.classList.toggle('snow-on', snowOn);
+      stage?.classList.toggle('rain-on', rainOn);
+      if (stageState) stageState.textContent = (snowOn || rainOn) ? 'เปิดเอฟเฟกต์ตัวอย่าง' : 'เอฟเฟกต์ปิดอยู่';
+    };
+    volume?.addEventListener('input', sync); [musicToggle, snowToggle, rainToggle].forEach(input => input?.addEventListener('change', sync));
+    document.querySelector('[data-rain-color]')?.addEventListener('input', event => stage?.style.setProperty('--rain-color', event.target.value));
+    document.querySelector('[data-rain-focus]')?.addEventListener('click', () => document.querySelector('[data-rain-form]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+    sync();
+  })();
+</script>

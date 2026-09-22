@@ -5,11 +5,13 @@ const { requireAdmin } = require('../middleware/auth');
 const router = express.Router();
 router.use(requireAdmin);
 
+const effectsRedirect = req => req.query.ui === 'experiment' ? '/admin/effects?ui=experiment' : '/admin/effects';
+
 router.post('/effects/rain', async (req, res) => {
   const installed = Boolean(store.data.settings.systemModules?.rain);
   if (!installed) {
     req.flash('error', 'ร้านนี้ยังไม่ได้รับแพ็กเกจระบบฝนตก');
-    return res.redirect('/admin/effects');
+    return res.redirect(effectsRedirect(req));
   }
   const previous = store.data.settings.rain || {};
   const color = /^#[0-9a-fA-F]{6}$/.test(req.body.color || '') ? req.body.color : (previous.color || '#78c8ff');
@@ -17,7 +19,7 @@ router.post('/effects/rain', async (req, res) => {
   store.data.settings.rain = { enabled: req.body.enabled === 'on', color, intensity };
   await store.save();
   req.flash('success', store.data.settings.rain.enabled ? 'บันทึกและเปิดระบบฝนตกแล้ว' : 'บันทึกและปิดระบบฝนตกแล้ว');
-  res.redirect('/admin/effects');
+  res.redirect(effectsRedirect(req));
 });
 
 module.exports = router;

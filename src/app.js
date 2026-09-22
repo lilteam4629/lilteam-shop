@@ -125,7 +125,9 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Persistent session store for local development (prevents getting logged out on server reload)
-const SESSION_DIR = path.join(__dirname, '..', 'data', 'sessions');
+const SESSION_DIR = process.env.SESSION_DIR
+  ? path.resolve(process.env.SESSION_DIR)
+  : path.join(__dirname, '..', 'data', 'sessions');
 if (!fs.existsSync(SESSION_DIR)) {
   try { fs.mkdirSync(SESSION_DIR, { recursive: true }); } catch (e) {}
 }
