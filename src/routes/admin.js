@@ -122,9 +122,15 @@ router.use((req, res, next) => {
 router.use((req, res, next) => {
   if (req.method !== 'GET' || req.query.ui || !req.path.startsWith('/')) return next();
   const path = req.path.replace(/\/+$/, '') || '/';
-  const experimentalPaths = new Set(['/', '/products', '/scheduled-products', '/filter-tags', '/recommended-categories', '/orders', '/settings', '/effects']);
+  const experimentalPaths = new Set([
+    '/', '/products', '/products/new', '/scheduled-products', '/filter-tags', '/recommended-categories',
+    '/orders', '/settings', '/effects', '/home-sections', '/catalog-api', '/storefront-models',
+    '/topups', '/coupons', '/users', '/minigame', '/slip-verification', '/appearance', '/theme',
+    '/announcements', '/welcome-popup', '/products/bulk-import',
+  ]);
   if (!experimentalPaths.has(path) && !/^\/orders\/[^/]+$/.test(path) && !/^\/products\/[^/]+\/edit$/.test(path)) return next();
-  return res.redirect(`${req.originalUrl}${req.originalUrl.includes('?') ? '&' : '?'}ui=experiment`);
+  req.query.ui = 'experiment';
+  return next();
 });
 
 // If a redesigned page links to a section that has not been rebuilt yet, keep
