@@ -33,20 +33,8 @@
           </div>
         </header>
 
-        <div class="coupons-notice warning" role="note"><span aria-hidden="true">!</span><div>หน้านี้เปิดผ่าน localhost แต่เชื่อมกับฐานข้อมูลร้านจริง · การสร้าง เปิด/ปิด หรือลบคูปองจะบันทึกและมีผลทันที · ยังไม่ได้ deploy เว็บออนไลน์</div></div>
         <% if (successMessages?.length) { successMessages.forEach(message => { %><div class="coupons-notice success" role="status"><span aria-hidden="true">✓</span><%= message %></div><% }); } %>
         <% if (errorMessages?.length) { errorMessages.forEach(message => { %><div class="coupons-notice error" role="alert"><span aria-hidden="true">!</span><%= message %></div><% }); } %>
-
-        <section class="coupons-build-status" aria-labelledby="coupons-build-title">
-          <div class="coupons-build-head">
-            <div><span class="coupons-build-kicker">COUPON WORKSPACE · STORE DATA</span><h2 id="coupons-build-title">ระบบคูปองทำอะไรได้แล้ว และเหลืออะไร</h2><p>สถานะอิงจากฟังก์ชันที่เชื่อมอยู่จริง แยกส่วนที่ยังต้องพัฒนาต่อให้เห็นชัด</p></div>
-            <span class="coupons-build-count"><b>4</b>/7 พร้อมใช้</span>
-          </div>
-          <div class="coupons-build-grid">
-            <div class="coupons-build-column ready"><h3><i aria-hidden="true">✓</i> ใช้งานได้แล้ว</h3><ul><li>ดูคูปองและยอดใช้จากข้อมูลร้าน</li><li>สร้างโค้ดใหม่ พร้อมตรวจโค้ดซ้ำ</li><li>เปิดหรือปิดคูปอง และลบแบบยืนยันก่อน</li><li>ค้นหา กรองสถานะ และคัดลอกโค้ด</li></ul></div>
-            <div class="coupons-build-column pending"><h3><i aria-hidden="true">＋</i> ยังต้องทำ</h3><ul><li>กำหนดวันเริ่มและวันหมดอายุ</li><li>จำกัดสิทธิ์กับสินค้า หมวดหมู่ หรือสมาชิก</li><li>รายงานยอดใช้และส่วนลดแยกตามแคมเปญ</li></ul></div>
-          </div>
-        </section>
 
         <section class="coupons-kpis" aria-label="สรุปคูปอง">
           <article class="coupons-kpi primary"><span class="coupons-kpi-icon" aria-hidden="true">◇</span><small>คูปองทั้งหมด</small><strong><%= stats.total.toLocaleString('th-TH') %></strong><em>โค้ดในร้าน</em><span class="coupons-kpi-foot"><i></i> อ่านจากข้อมูลปัจจุบัน</span></article>
