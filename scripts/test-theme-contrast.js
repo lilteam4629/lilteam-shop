@@ -54,6 +54,21 @@ assert.equal(darkMono.input, '#000000', 'main dark-mode input background must be
 assert.equal(lightMono.bg, '#ffffff', 'main light-mode page background must be pure white');
 assert.equal(lightMono.card, '#ffffff', 'main light-mode card background must be pure white');
 assert.equal(lightMono.input, '#ffffff', 'main light-mode input background must be pure white');
+for (const darkSurface of ['black', 'white']) {
+  for (const lightSurface of ['black', 'white']) {
+    const [darkVars, lightVars] = modeVariables(theme.renderCss({
+      bgPreset: theme.MAIN_BG_PRESET_KEY,
+      mainMonoSurfaces: { dark: darkSurface, light: lightSurface },
+    }));
+    assert.equal(darkVars.bg, darkSurface === 'black' ? '#000000' : '#ffffff', `dark surface selection ${darkSurface}`);
+    assert.equal(lightVars.bg, lightSurface === 'black' ? '#000000' : '#ffffff', `light surface selection ${lightSurface}`);
+    for (const vars of [darkVars, lightVars]) {
+      for (const surface of ['bg', 'card', 'input']) {
+        assert(theme.contrastRatio(vars.text, vars[surface]) >= 4.5, `monochrome text contrast failed for ${vars[surface]}`);
+      }
+    }
+  }
+}
 assert.equal(theme.getBgPresets().some((item) => item.key === theme.MAIN_BG_PRESET_KEY), false, 'tenant preset list must not gain the main-only palette');
 assert.deepEqual(theme.getBgPresets({ mainShopOnly: true }).map((item) => item.key), [theme.MAIN_BG_PRESET_KEY]);
 console.log('Main-shop monochrome surfaces and tenant palette isolation passed');

@@ -6,9 +6,15 @@
     ? themeSeed.bgPreset
     : (bgPresets[0] && bgPresets[0].key) || 'warmDark';
   const mainThemePage = typeof mainAdminUi !== 'undefined' && mainAdminUi === true;
+  const safeDarkSurface = themeSeed.mainMonoSurfaces && themeSeed.mainMonoSurfaces.dark === 'white' ? 'white' : 'black';
+  const safeLightSurface = themeSeed.mainMonoSurfaces && themeSeed.mainMonoSurfaces.light === 'black' ? 'black' : 'white';
   const bgSeedPresets = typeof bgPreviewPresets !== 'undefined' && Array.isArray(bgPreviewPresets)
     ? bgPreviewPresets
     : bgPresets;
+  const monoSurfaceChoices = [
+    { key: 'black', label: 'ดำสนิท', hex: '#000000' },
+    { key: 'white', label: 'ขาวสว่าง', hex: '#FFFFFF' },
+  ];
   const safeStyle = styles.some(style => style.key === themeSeed.style) ? themeSeed.style : 'normal';
   const accentIsPreset = accentPresets.some(preset => preset.color.toLowerCase() === safeAccent.toLowerCase());
   const flashSuccess = messages && Array.isArray(messages.success) ? messages.success : [];
@@ -19,8 +25,10 @@
 <div class="admin-theme-page" data-admin-theme
   data-main-mono="<%= mainThemePage ? 'true' : 'false' %>"
   data-main-bg-preset="<%= mainThemePage ? 'monochrome' : '' %>"
+  data-seed-dark-surface="<%= safeDarkSurface %>"
+  data-seed-light-surface="<%= safeLightSurface %>"
   data-seed-accent="<%= safeAccent %>"
-  data-seed-bg-preset="<%= mainThemePage ? (themeSeed.bgPreset || safeBgPreset) : safeBgPreset %>"
+  data-seed-bg-preset="<%= mainThemePage ? 'monochrome' : safeBgPreset %>"
   data-seed-bg-color="<%= safeBgColor %>"
   data-seed-style="<%= safeStyle %>">
   <header class="admin-theme-heading">
@@ -88,21 +96,32 @@
             <div>
               <span class="admin-theme-section-kicker">SURFACE & CONTRAST</span>
               <h2 id="theme-background-title">โทนพื้นหลัง</h2>
-              <p><%= mainThemePage ? 'ใช้พื้นดำในโหมดมืด และพื้นขาวในโหมดสว่างเท่านั้น' : 'เลือกชุดสีที่จับคู่โหมดมืดและสว่างให้อัตโนมัติ' %></p>
+              <p><%= mainThemePage ? 'เลือกสีพื้นหลังของโหมดมืดและโหมดสว่างได้แยกกัน' : 'เลือกชุดสีที่จับคู่โหมดมืดและสว่างให้อัตโนมัติ' %></p>
             </div>
           </div>
 
           <fieldset class="admin-theme-backgrounds <%= mainThemePage ? 'admin-theme-backgrounds-mono' : '' %>">
-            <legend class="admin-theme-visually-hidden"><%= mainThemePage ? 'ใช้พื้นหลังสีขาวในโหมดสว่างและสีดำในโหมดมืด' : 'เลือกชุดสีพื้นหลัง' %></legend>
+            <legend class="admin-theme-visually-hidden"><%= mainThemePage ? 'เลือกสีพื้นหลังของแต่ละโหมด' : 'เลือกชุดสีพื้นหลัง' %></legend>
             <% if (mainThemePage) { %>
               <% const monoPreset = bgPresets[0]; %>
-              <label class="admin-theme-background-option admin-theme-monochrome-option">
-                <input type="radio" name="bgPreset" value="<%= monoPreset ? monoPreset.key : 'monochrome' %>" data-theme-bg-choice="<%= monoPreset ? monoPreset.key : 'monochrome' %>" checked />
-                <span class="admin-theme-background-copy"><strong>พื้นหลังขาว–ดำ</strong><small>ปรับตามโหมดที่เลือกบนหน้าร้าน ไม่มีสีพื้นหลังอื่น</small></span>
-                <span class="admin-theme-mono-surface is-dark" aria-label="โหมดมืด พื้นหลังสีดำ #000000"><strong>โหมดมืด</strong><code>#000000</code></span>
-                <span class="admin-theme-mono-surface is-light" aria-label="โหมดสว่าง พื้นหลังสีขาว #FFFFFF"><strong>โหมดสว่าง</strong><code>#FFFFFF</code></span>
-                <span class="admin-theme-selected" aria-hidden="true">✓</span>
-              </label>
+              <input type="radio" name="bgPreset" value="<%= monoPreset ? monoPreset.key : 'monochrome' %>" data-theme-bg-choice="<%= monoPreset ? monoPreset.key : 'monochrome' %>" checked hidden />
+              <div class="admin-theme-mono-controls">
+                <% [['dark', 'โหมดมืด', safeDarkSurface], ['light', 'โหมดสว่าง', safeLightSurface]].forEach(([mode, label, selectedSurface]) => { %>
+                <fieldset class="admin-theme-mono-group">
+                  <legend><%= label %></legend>
+                  <div class="admin-theme-mono-options">
+                    <% monoSurfaceChoices.forEach(choice => { %>
+                    <label class="admin-theme-mono-choice">
+                      <input type="radio" name="main<%= mode === 'dark' ? 'Dark' : 'Light' %>Surface" value="<%= choice.key %>" data-theme-mono-surface="<%= mode %>" <%= selectedSurface === choice.key ? 'checked' : '' %> />
+                      <span class="admin-theme-mono-color <%= choice.key === 'black' ? 'is-black' : 'is-white' %>" aria-hidden="true"></span>
+                      <span class="admin-theme-mono-choice-copy"><strong><%= choice.label %></strong><code><%= choice.hex %></code></span>
+                      <span class="admin-theme-mono-choice-check" aria-hidden="true">✓</span>
+                    </label>
+                    <% }) %>
+                  </div>
+                </fieldset>
+                <% }) %>
+              </div>
             <% } else { %>
               <% bgPresets.forEach(preset => { %>
               <label class="admin-theme-background-option">

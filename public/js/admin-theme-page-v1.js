@@ -18,12 +18,15 @@
   const presetNodes = Array.from(page.querySelectorAll('[data-theme-bg-seed]'));
   const accentOptions = Array.from(page.querySelectorAll('[data-theme-accent-choice]'));
   const backgroundOptions = Array.from(page.querySelectorAll('[data-theme-bg-choice]'));
+  const monoSurfaceOptions = Array.from(page.querySelectorAll('[data-theme-mono-surface]'));
   const styleOptions = Array.from(page.querySelectorAll('[data-theme-style-choice]'));
   const isHex = value => /^#[0-9a-f]{6}$/i.test(String(value || ''));
   const defaultState = {
     accent: isHex(page.dataset.seedAccent) ? page.dataset.seedAccent : '#c8a63f',
     bgPreset: page.dataset.seedBgPreset || presetNodes[0]?.dataset.key || 'warmDark',
     bgColor: isHex(page.dataset.seedBgColor) ? page.dataset.seedBgColor : '',
+    darkSurface: page.dataset.seedDarkSurface === 'white' ? 'white' : 'black',
+    lightSurface: page.dataset.seedLightSurface === 'black' ? 'black' : 'white',
     style: page.dataset.seedStyle || 'normal',
   };
   const presetKeys = new Set(presetNodes.map(node => node.dataset.key));
@@ -39,6 +42,8 @@
       accent: isHex(value.accent) ? value.accent : defaultState.accent,
       bgPreset: presetKeys.has(value.bgPreset) ? value.bgPreset : defaultState.bgPreset,
       bgColor: isHex(value.bgColor) ? value.bgColor : '',
+      darkSurface: value.darkSurface === 'white' ? 'white' : 'black',
+      lightSurface: value.lightSurface === 'black' ? 'black' : 'white',
       style: styleKeys.has(value.style) ? value.style : defaultState.style,
     };
   }
@@ -151,6 +156,12 @@
   }
 
   function getPalette(mode) {
+    if (mainMono) {
+      const surface = (mode === 'dark' ? draft.darkSurface : draft.lightSurface) === 'white' ? 'white' : 'black';
+      return surface === 'black'
+        ? { bg: '#000000', card: '#000000', border: '#3a3a3a', input: '#000000', text: '#ffffff', muted: '#c2c2c2' }
+        : { bg: '#ffffff', card: '#ffffff', border: '#dedede', input: '#ffffff', text: '#000000', muted: '#404040' };
+    }
     if (draft.bgColor) return customPalette(draft.bgColor, mode);
     const preset = presetNodes.find(node => node.dataset.key === draft.bgPreset) || presetNodes[0];
     const paletteMode = mode === 'dark' ? 'dark' : 'light';
@@ -168,6 +179,11 @@
   }
 
   function chosenBackgroundLabel() {
+    if (mainMono) {
+      const dark = draft.darkSurface === 'black' ? 'ดำ' : 'ขาว';
+      const light = draft.lightSurface === 'black' ? 'ดำ' : 'ขาว';
+      return `มืด: ${dark} · สว่าง: ${light}`;
+    }
     if (draft.bgColor) return 'กำหนดเอง';
     const input = backgroundOptions.find(option => option.value === draft.bgPreset);
     return input?.closest('.admin-theme-background-option')?.querySelector('strong')?.textContent?.trim() || 'ธีมร้าน';
@@ -232,6 +248,10 @@
     if (backgroundPicker) backgroundPicker.value = draft.bgColor || '#365a4a';
     backgroundMode.value = draft.bgColor ? 'custom' : 'preset';
     backgroundColor.value = draft.bgColor;
+    monoSurfaceOptions.forEach(option => {
+      const key = option.dataset.themeMonoSurface === 'dark' ? 'darkSurface' : 'lightSurface';
+      option.checked = option.value === draft[key];
+    });
 
     styleOptions.forEach(option => { option.checked = option.value === draft.style; });
   }
@@ -281,6 +301,14 @@
     updateDirtyState();
     updatePreview();
   });
+
+  monoSurfaceOptions.forEach(option => option.addEventListener('change', () => {
+    if (!option.checked) return;
+    const key = option.dataset.themeMonoSurface === 'dark' ? 'darkSurface' : 'lightSurface';
+    draft[key] = option.value === 'white' ? 'white' : 'black';
+    updateDirtyState();
+    updatePreview();
+  }));
 
   styleOptions.forEach(option => option.addEventListener('change', () => {
     if (!option.checked) return;

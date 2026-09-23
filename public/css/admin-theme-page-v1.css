@@ -656,70 +656,135 @@
   .admin-theme-page *, .admin-theme-page *::before, .admin-theme-page *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
 
-/* The main shop uses a single neutral background system: black in dark mode,
-   white in light mode. Tenant theme cards above intentionally stay unchanged. */
+/* The main shop can choose a pure black or white surface independently for
+   dark and light mode. Tenant theme cards above intentionally stay unchanged. */
 .admin-theme-page[data-main-mono="true"] .admin-theme-backgrounds-mono {
-  grid-template-columns: minmax(0, 1fr);
+  display: block;
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option {
-  grid-template-columns: minmax(125px, 1fr) repeat(2, minmax(100px, .72fr));
-  align-items: stretch;
-  min-height: 96px;
-  padding: 10px;
-  border-color: #d5d5d5;
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-group {
+  min-width: 0;
+  margin: 0;
+  padding: 9px;
+  border: 1px solid #e1e9e5;
+  border-radius: 11px;
   background: #fff;
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option:hover {
-  border-color: #777;
-  background: #fff;
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-group legend {
+  padding: 0 5px;
+  color: #34443c;
+  font-size: 11px;
+  font-weight: 800;
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option:has(input:checked) {
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice {
+  position: relative;
+  display: grid;
+  grid-template-columns: 27px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 58px;
+  padding: 8px 22px 8px 8px;
+  border: 1px solid #dce4e0;
+  border-radius: 9px;
+  background: #fff;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice:hover {
+  border-color: #8d9993;
+  background: #fafbfa;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice:has(input:checked) {
   border-color: #111;
-  background: #fff;
+  background: #f4f4f4;
   box-shadow: 0 0 0 2px rgb(0 0 0 / 8%);
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option .admin-theme-background-copy strong {
-  color: #111;
-  font-size: 13px;
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice:focus-within {
+  outline: 3px solid #36a982;
+  outline-offset: 2px;
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option .admin-theme-background-copy small {
-  color: #555;
-  font-size: 11px;
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 6px;
-  min-width: 0;
-  padding: 10px 12px;
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-color {
+  width: 27px;
+  height: 27px;
   border: 1px solid #111;
-  border-radius: 9px;
-  font-size: 11px;
+  border-radius: 7px;
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface.is-dark {
-  color: #fff;
-  background: #000;
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-color.is-black { background: #000; }
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-color.is-white { background: #fff; }
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface.is-light {
-  color: #000;
-  background: #fff;
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice-copy strong {
+  overflow: hidden;
+  color: #17211c;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface strong { font-size: 11px; }
-.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface code {
-  color: inherit;
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice-copy code {
+  color: #5a665f;
   font: 700 10px ui-monospace, SFMono-Regular, Consolas, monospace;
 }
-.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option .admin-theme-selected {
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice-check {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
   color: #fff;
   background: #000;
+  font-size: 10px;
+  font-weight: 900;
+  opacity: 0;
+  transform: scale(.85);
+  transition: opacity .14s ease, transform .14s ease;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice:has(input:checked) .admin-theme-mono-choice-check {
+  opacity: 1;
+  transform: scale(1);
 }
 @media (max-width: 620px) {
-  .admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .admin-theme-page[data-main-mono="true"] .admin-theme-mono-controls {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option .admin-theme-background-copy {
-    grid-column: 1 / -1;
-    padding-right: 20px;
+}
+@media (max-width: 380px) {
+  .admin-theme-page[data-main-mono="true"] .admin-theme-mono-group {
+    padding: 7px;
+  }
+  .admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice {
+    grid-template-columns: 23px minmax(0, 1fr);
+    gap: 5px;
+    min-height: 54px;
+    padding: 7px 19px 7px 6px;
+  }
+  .admin-theme-page[data-main-mono="true"] .admin-theme-mono-color {
+    width: 23px;
+    height: 23px;
   }
 }

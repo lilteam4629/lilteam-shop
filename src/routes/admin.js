@@ -1438,15 +1438,26 @@ router.post('/theme', async (req, res) => {
   const bgMode = mainAdminUi ? 'preset' : (req.body.bgMode === 'custom' ? 'custom' : 'preset');
   let bgPreset = store.data.settings.theme.bgPreset;
   let bgColor = null;
+  let mainMonoSurfaces = null;
   if (mainAdminUi) {
     bgPreset = theme.MAIN_BG_PRESET_KEY;
+    mainMonoSurfaces = {
+      dark: req.body.mainDarkSurface === 'white' ? 'white' : 'black',
+      light: req.body.mainLightSurface === 'black' ? 'black' : 'white',
+    };
   } else if (bgMode === 'custom' && /^#[0-9a-fA-F]{6}$/.test(req.body.bgColor || '')) {
     bgColor = req.body.bgColor;
   } else {
     bgPreset = theme.getBgPresets().some(p => p.key === req.body.bgPreset) ? req.body.bgPreset : store.data.settings.theme.bgPreset;
   }
   const style = theme.getStyles().some(s => s.key === req.body.style) ? req.body.style : 'normal';
-  store.data.settings.theme = { accent, bgPreset, bgColor, style };
+  store.data.settings.theme = {
+    accent,
+    bgPreset,
+    bgColor,
+    style,
+    ...(mainAdminUi ? { mainMonoSurfaces } : {}),
+  };
   await store.save();
   req.flash('success', 'บันทึกธีมสีแล้ว');
   res.redirect('/admin/theme');

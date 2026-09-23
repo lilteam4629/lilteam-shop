@@ -173,6 +173,13 @@ function contrastRatio(hexA, hexB) {
   return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 }
 
+function monochromeSurface(value) {
+  if (value === 'white') {
+    return { bg: '#ffffff', card: '#ffffff', border: '#dedede', borderLight: '#c9c9c9', input: '#ffffff', text: '#000000', text2: '#1a1a1a', text3: '#404040', text4: '#666666' };
+  }
+  return { bg: '#000000', card: '#000000', border: '#3a3a3a', borderLight: '#505050', input: '#000000', text: '#ffffff', text2: '#e6e6e6', text3: '#c2c2c2', text4: '#a0a0a0' };
+}
+
 // The accent is also used directly AS TEXT everywhere (prices, labels,
 // highlighted titles, icons) sitting straight on the page's own --bg/--card —
 // a fine brand color for FILLS (paired with --gold-contrast) can still be
@@ -263,7 +270,15 @@ function generateBgFromColor(hex) {
  */
 function renderCss(theme) {
   const customBg = theme && /^#[0-9a-fA-F]{6}$/.test(theme.bgColor) ? theme.bgColor : null;
-  const preset = customBg ? generateBgFromColor(customBg) : (BG_PRESETS[theme && theme.bgPreset] || BG_PRESETS.warmDark);
+  let preset = customBg ? generateBgFromColor(customBg) : (BG_PRESETS[theme && theme.bgPreset] || BG_PRESETS.warmDark);
+  if (!customBg && theme && theme.bgPreset === MAIN_BG_PRESET_KEY) {
+    const selected = theme.mainMonoSurfaces || {};
+    preset = {
+      ...preset,
+      dark: monochromeSurface(selected.dark),
+      light: monochromeSurface(selected.light === 'black' ? 'black' : 'white'),
+    };
+  }
   const accent = (theme && /^#[0-9a-fA-F]{6}$/.test(theme.accent)) ? theme.accent : ACCENT_PRESETS[0].color;
   const style = (theme && STYLE_LABELS[theme.style]) ? theme.style : 'normal';
 
