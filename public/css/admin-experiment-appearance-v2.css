@@ -1,0 +1,54 @@
+/* Appearance page polish: balanced asset cards, readable controls, and compact disclosure. */
+.as-summary-card small { font-size: 11px; }
+.as-summary-card strong { font-size: 13px; }
+.as-hero-meta,
+.as-section-heading p,
+.as-note { font-size: 11px; }
+.as-section-heading h2 { font-size: 21px; }
+.as-search { min-height: 44px; }
+.as-search input { font-size: 12px; }
+.as-grid { align-items: stretch; }
+.as-card { height: 100%; padding: 18px; }
+.as-card-head h3 { font-size: 15px; }
+.as-card-head p { font-size: 11px; }
+.as-status { font-size: 10px; }
+.as-preview-logo,
+.as-preview-banner,
+.as-preview-background { height: 190px; min-height: 190px; aspect-ratio: auto; }
+.as-preview img[hidden] { display: none; }
+.as-preview-banner img { position: absolute; inset: 0; width: 100%; height: 100%; padding: 8px; object-fit: contain; }
+.as-preview-logo img { max-width: 240px; max-height: 165px; }
+.as-preview-background img { max-height: 174px; }
+.as-file-label { font-size: 12px; }
+.as-file-label small { font-size: 10px; }
+.as-upload-form input[type=file] { min-height: 44px; font-size: 11px; }
+.as-upload-form input[type=file]::file-selector-button { min-height: 32px; font-size: 10px; }
+.as-file-info,
+.as-file-error { font-size: 10px; }
+.as-upload-form .experiment-button,
+.as-remove { min-height: 44px; font-size: 11px; }
+.as-field,
+.as-banner-settings legend { font-size: 12px; }
+.as-field input { min-height: 44px; font-size: 12px; }
+.as-banner-settings fieldset label { min-height: 58px; }
+.as-banner-settings fieldset b { font-size: 11px; }
+.as-banner-settings fieldset small { font-size: 10px; }
+.as-banner-details { margin-top: 12px; border: 1px solid var(--ex-line); border-radius: 11px; background: #fbfdfc; }
+.as-banner-details > summary { display: flex; align-items: center; justify-content: space-between; min-height: 44px; padding: 0 12px; color: var(--ex-ink); font-size: 12px; font-weight: 800; cursor: pointer; list-style: none; }
+.as-banner-details > summary::-webkit-details-marker { display: none; }
+.as-banner-details > summary::after { content: "+"; display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--ex-line); border-radius: 8px; color: var(--ex-green-dark); background: #fff; font-size: 16px; }
+.as-banner-details[open] > summary::after { content: "−"; }
+.as-banner-details > summary:focus-visible { outline: 3px solid rgba(15,159,118,.5); outline-offset: 2px; }
+.as-banner-details .as-banner-settings { margin: 0; padding: 12px; border-top: 1px solid var(--ex-line); }
+.as-card-footer .as-upload-form .experiment-button { min-height: 44px; }
+@media (max-width: 900px) {
+  .as-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  .as-summary-card small { font-size: 10px; }
+  .as-summary-card strong { font-size: 12px; }
+  .as-preview-logo,
+  .as-preview-banner,
+  .as-preview-background { height: 180px; min-height: 180px; }
+  .as-card { padding: 14px; }
+}

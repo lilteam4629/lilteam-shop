@@ -7,6 +7,7 @@
   const notices = [].concat(successMessages || [], errorMessages || []);
 %>
 <link rel="stylesheet" href="<%= asset('css/admin-experiment-appearance-v1.css') %>" />
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-appearance-v2.css') %>" />
 
 <div class="experiment-app experiment-appearance-page">
   <div class="experiment-main">
@@ -72,11 +73,14 @@
             <p class="as-file-info" data-as-file-info aria-live="polite">ยังไม่ได้เลือกไฟล์</p><p class="as-file-error" data-as-file-error hidden></p>
             <button class="experiment-button primary" type="submit">อัปโหลดแบนเนอร์</button>
           </form>
-          <form class="as-banner-settings" action="/admin/hero-banner/mode" method="post">
+          <details class="as-banner-details">
+            <summary>ตั้งค่าการแสดงแบนเนอร์</summary>
+            <form class="as-banner-settings" action="/admin/hero-banner/mode" method="post">
             <label class="as-field"><span>ลิงก์เมื่อคลิกแบนเนอร์ <small>(ไม่บังคับ)</small></span><input type="text" name="bannerLink" value="<%= heroSettings.bannerLink || '' %>" placeholder="/products หรือ https://example.com"></label>
             <fieldset><legend>รูปแบบส่วนบนหน้าแรก</legend><label><input type="radio" name="mode" value="default" <%= heroSettings.mode !== 'banner' ? 'checked' : '' %>><span><b>การ์ดเกมแบบเดิม</b><small>แสดงส่วนเกมตามปกติ</small></span></label><label><input type="radio" name="mode" value="banner" <%= heroSettings.mode === 'banner' ? 'checked' : '' %>><span><b>ใช้ภาพแบนเนอร์</b><small>ใช้ภาพแทนการ์ดเกม</small></span></label></fieldset>
             <button class="experiment-button primary" type="submit">บันทึกรูปแบบหน้าแรก</button>
-          </form>
+            </form>
+          </details>
         </article>
 
         <article class="as-card" data-as-card data-search="พื้นหลังหน้าร้าน storefront background">
@@ -142,6 +146,23 @@
       if (submit) { submit.disabled = true; submit.textContent = 'กำลังอัปโหลด…'; }
     });
     form.addEventListener('reset', function () { if (previewUrl) URL.revokeObjectURL(previewUrl); if (submit) { submit.disabled = false; submit.textContent = originalLabel; } });
+  });
+
+  function showBrokenImageFallback(image) {
+    var preview = image.closest('[data-as-preview]');
+    var empty = preview && preview.querySelector('[data-as-empty]');
+    if (!empty) return;
+    image.hidden = true;
+    empty.hidden = false;
+    var title = empty.querySelector('strong');
+    var hint = empty.querySelector('small');
+    if (title) title.textContent = 'โหลดภาพไม่สำเร็จ';
+    if (hint) hint.textContent = 'เลือกรูปใหม่แล้วอัปโหลดเพื่อแก้ไข';
+  }
+
+  document.querySelectorAll('[data-as-image]').forEach(function (image) {
+    image.addEventListener('error', function () { showBrokenImageFallback(image); });
+    if (!image.hidden && image.complete && image.naturalWidth === 0 && image.currentSrc) showBrokenImageFallback(image);
   });
 
   var search = document.querySelector('[data-as-search]');
