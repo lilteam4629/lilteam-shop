@@ -1,0 +1,68 @@
+/* Main-shop home-section editor refresh. The tenant shop keeps its own view. */
+.hsx-content{max-width:1520px}
+.hsx-content :focus-visible,.hsx-edit-dialog :focus-visible,.hsx-create-dialog :focus-visible{outline:3px solid rgba(15,159,118,.56);outline-offset:3px}
+.hsx-card{gap:17px;padding:19px 22px}
+.hsx-card-rank{min-width:52px;padding:10px 6px}
+.hsx-card-rank span,.hsx-card-meta,.hsx-no-products{font-size:10px}
+.hsx-card-title-row h3{font-size:15px}
+.hsx-state,.hsx-mode{font-size:9px}
+.hsx-product-thumb,.hsx-product-more{width:40px;height:40px}
+.hsx-card-actions{gap:8px}
+.hsx-card-actions .experiment-button,.hsx-toggle-button{min-height:40px;padding-inline:13px;font-size:11px}
+.hsx-icon-button{width:40px;height:40px}
+.hsx-edit-dialog{width:min(980px,calc(100vw - 40px));max-width:none;height:min(850px,90dvh);max-height:90dvh;padding:0;overflow:hidden;border:1px solid #d2e4db;border-radius:20px;color:var(--ex-ink);background:#fff;box-shadow:0 28px 90px rgba(16,45,35,.28)}
+.hsx-edit-dialog[open]{display:grid;grid-template-rows:auto minmax(0,1fr)}
+.hsx-edit-dialog::backdrop{background:rgba(15,31,25,.6);backdrop-filter:blur(4px)}
+.hsx-edit-dialog .hsx-dialog-head{align-items:center;padding:19px 24px;background:linear-gradient(120deg,#f3fbf7 0%,#fffaf0 100%)}
+.hsx-edit-dialog .hsx-dialog-head h2{margin:4px 0;font-size:21px}
+.hsx-edit-dialog .hsx-dialog-head p{font-size:11px}
+.hsx-edit-form{min-height:0;grid-template-rows:minmax(0,1fr) auto;gap:0}
+.hsx-edit-body{min-height:0;padding:22px 24px;overflow:auto;overscroll-behavior:contain;scrollbar-gutter:stable}
+.hsx-edit-body>.hsx-form-grid{margin-bottom:18px}
+.hsx-edit-body .hsx-field{font-size:12px}
+.hsx-edit-body .hsx-field input,.hsx-edit-body .hsx-field select{min-height:44px;font-size:13px}
+.hsx-edit-body .hs-picker{padding:15px;border:1px solid var(--ex-line);border-radius:14px;background:#f9fcfa}
+.hsx-edit-body .hs-picker>header{position:sticky;top:-15px;z-index:2;display:grid;gap:11px;margin:-15px -15px 12px;padding:15px 15px 12px;border-bottom:1px solid #e8efeb;border-radius:14px 14px 0 0;background:rgba(249,252,250,.97);backdrop-filter:blur(8px)}
+.hsx-edit-body .hs-picker-title>span{font-size:12px}
+.hsx-edit-body .hs-picker-title>small{font-size:11px}
+.hsx-edit-body .hs-picker-tools{gap:8px}
+.hsx-edit-body .hs-picker-tools button,.hsx-edit-body .hs-picker-tools input{min-height:40px;font-size:11px}
+.hsx-edit-body .hs-picker-grid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px;max-height:none;overflow:visible}
+.hsx-edit-body .hs-picker-grid>label{gap:7px;padding:7px;border-radius:11px}
+.hsx-edit-body .hs-picker-grid>label>input{top:10px;right:10px;width:19px;height:19px}
+.hsx-edit-body .hs-picker-grid>label>span{height:86px;border-radius:8px}
+.hsx-edit-body .hs-picker-grid>label>b{font-size:10px}
+.hsx-edit-body .hs-picker-empty{font-size:12px}
+.hsx-edit-form>.hsx-form-actions{position:relative;z-index:2;margin:0;padding:13px 24px calc(13px + env(safe-area-inset-bottom));border-top:1px solid #e7eeea;background:rgba(255,255,255,.97);box-shadow:0 -8px 24px rgba(25,48,38,.06);backdrop-filter:blur(8px)}
+.hsx-edit-form>.hsx-form-actions .experiment-button{min-width:130px;min-height:44px;font-size:12px}
+.hsx-create-dialog .hsx-dialog-head h2{font-size:21px}
+.hsx-create-form .hsx-field{font-size:12px}
+.hsx-create-form .hsx-field input,.hsx-create-form .hsx-field select{min-height:44px;font-size:13px}
+@media(max-width:1050px){.hsx-card{grid-template-columns:48px minmax(0,1fr);gap:12px}.hsx-card-actions{grid-column:2;justify-content:flex-start;flex-wrap:wrap}}
+@media(max-width:700px){
+  .hsx-hero h1{font-size:26px}
+  .hsx-hero p{font-size:13px}
+  .hsx-card{grid-template-columns:42px minmax(0,1fr);gap:10px;padding:15px 12px}
+  .hsx-card-title-row h3{font-size:14px}
+  .hsx-card-meta{font-size:10px}
+  .hsx-card-actions{gap:6px}
+  .hsx-card-actions .experiment-button,.hsx-toggle-button{min-height:40px;padding-inline:10px;font-size:10px}
+  .hsx-edit-dialog{width:100vw;height:100dvh;max-height:100dvh;margin:0;border:0;border-radius:0}
+  .hsx-edit-dialog .hsx-dialog-head{padding:calc(14px + env(safe-area-inset-top)) 16px 13px}
+  .hsx-edit-dialog .hsx-dialog-head h2{font-size:18px}
+  .hsx-edit-dialog .hsx-dialog-head p{font-size:11px}
+  .hsx-edit-body{padding:16px;scrollbar-gutter:auto}
+  .hsx-edit-body>.hsx-form-grid{grid-template-columns:1fr;gap:12px;margin-bottom:14px}
+  .hsx-edit-body .hs-picker{padding:11px}
+  .hsx-edit-body .hs-picker>header{top:-11px;margin:-11px -11px 10px;padding:11px 11px 10px}
+  .hsx-edit-body .hs-picker-tools input{min-width:100%}
+  .hsx-edit-body .hs-picker-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+  .hsx-edit-body .hs-picker-grid>label{padding:5px}
+  .hsx-edit-body .hs-picker-grid>label>span{height:clamp(62px,20vw,92px)}
+  .hsx-edit-body .hs-picker-grid>label>b{font-size:9px}
+  .hsx-edit-form>.hsx-form-actions{gap:8px;padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+  .hsx-edit-form>.hsx-form-actions .experiment-button{flex:1;min-width:0}
+  .hsx-create-dialog{width:100vw;height:100dvh;max-height:100dvh;margin:0;border-radius:0}
+  .hsx-create-form{max-height:calc(100dvh - 82px)}
+}
+@media(prefers-reduced-motion:reduce){.hsx-card{transition:none}}

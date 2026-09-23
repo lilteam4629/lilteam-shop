@@ -8,7 +8,7 @@
   const notices = (successMessages || []).concat(errorMessages || []);
 %>
 <link rel="stylesheet" href="<%= asset('css/admin-experiment-home-sections-v1.css') %>" />
-<style>.hsx-board{overflow:visible}.hsx-card:has(.hsx-edit-details[open]){position:relative;z-index:3}</style>
+<link rel="stylesheet" href="<%= asset('css/admin-home-sections-v2.css') %>" />
 
 <div class="experiment-app experiment-home-sections-page">
   <div class="experiment-main">
@@ -96,9 +96,14 @@
                   <form action="/admin/home-sections/<%= section.id %>/move" method="post"><input type="hidden" name="direction" value="up"><button class="hsx-icon-button" type="submit" aria-label="เลื่อน <%= section.title %> ขึ้น" title="เลื่อนขึ้น" <%= index === 0 ? 'disabled' : '' %>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg></button></form>
                   <form action="/admin/home-sections/<%= section.id %>/move" method="post"><input type="hidden" name="direction" value="down"><button class="hsx-icon-button" type="submit" aria-label="เลื่อน <%= section.title %> ลง" title="เลื่อนลง" <%= index === sectionRows.length - 1 ? 'disabled' : '' %>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 10 6 6 6-6"/></svg></button></form>
                 </div>
-                <details class="hsx-edit-details">
-                  <summary class="experiment-button">แก้ไข</summary>
-                  <div class="hsx-edit-panel"><form action="/admin/home-sections/<%= section.id %>/edit" method="post" class="hsx-form">
+                <button class="experiment-button" type="button" data-hsx-open-editor aria-controls="hsx-edit-<%= section.id %>">แก้ไข</button>
+                <form action="/admin/home-sections/<%= section.id %>/toggle" method="post"><button class="experiment-button hsx-toggle-button" type="submit"><%= isVisible ? 'ซ่อนชั่วคราว' : 'เปิดแสดง' %></button></form>
+                <form action="/admin/home-sections/<%= section.id %>/delete" method="post" data-experiment-confirm="ลบหมวดหมู่ ‘<%= section.title %>’ ใช่หรือไม่? สินค้าในร้านจะไม่ถูกลบ"><button class="hsx-icon-button is-danger" type="submit" aria-label="ลบหมวด <%= section.title %>" title="ลบหมวดหมู่"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6.5 7l1 13h9l1-13M9 7V4h6v3"/></svg></button></form>
+              </div>
+              <dialog class="hsx-edit-dialog" id="hsx-edit-<%= section.id %>" aria-labelledby="hsx-edit-title-<%= section.id %>">
+                <div class="hsx-dialog-head"><div><span class="experiment-kicker">แก้ไขแถวสินค้า</span><h2 id="hsx-edit-title-<%= section.id %>">ตั้งค่าหมวดหมู่: <%= section.title %></h2><p>การเปลี่ยนแปลงจะใช้กับหน้าร้านจริงทันทีเมื่อบันทึก</p></div><button class="hsx-icon-button" type="button" data-hsx-close-editor aria-label="ปิดหน้าต่าง">×</button></div>
+                <form action="/admin/home-sections/<%= section.id %>/edit" method="post" class="hsx-form hsx-edit-form">
+                  <div class="hsx-edit-body">
                     <div class="hsx-form-grid">
                       <label class="hsx-field"><span>ชื่อหมวดหมู่</span><input name="title" value="<%= section.title %>" maxlength="100" required></label>
                       <label class="hsx-field"><span>รูปแบบสินค้า</span><select name="mode" class="section-mode-select"><option value="newest" <%= section.mode !== 'manual' ? 'selected' : '' %>>สินค้าใหม่ล่าสุดอัตโนมัติ</option><option value="manual" <%= section.mode === 'manual' ? 'selected' : '' %>>เลือกสินค้าเอง</option></select></label>
@@ -106,12 +111,10 @@
                       <label class="hsx-field"><span>ลิงก์รูปแถวสินค้า <small>(ไม่บังคับ)</small></span><input type="url" name="imageUrl" value="<%= section.imageUrl || '' %>" placeholder="https://..."></label>
                     </div>
                     <%- include('partials/home-section-picker', { products: selectableProducts, selected: selectedIds, visible: section.mode === 'manual' }) %>
-                    <div class="hsx-form-actions"><button class="experiment-button" type="button" data-hsx-close-editor>ปิดการแก้ไข</button><button class="experiment-button primary" type="submit">บันทึกหมวดหมู่</button></div>
-                  </form></div>
-                </details>
-                <form action="/admin/home-sections/<%= section.id %>/toggle" method="post"><button class="experiment-button hsx-toggle-button" type="submit"><%= isVisible ? 'ซ่อนชั่วคราว' : 'เปิดแสดง' %></button></form>
-                <form action="/admin/home-sections/<%= section.id %>/delete" method="post" data-experiment-confirm="ลบหมวดหมู่ ‘<%= section.title %>’ ใช่หรือไม่? สินค้าในร้านจะไม่ถูกลบ"><button class="hsx-icon-button is-danger" type="submit" aria-label="ลบหมวด <%= section.title %>" title="ลบหมวดหมู่"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6.5 7l1 13h9l1-13M9 7V4h6v3"/></svg></button></form>
-              </div>
+                  </div>
+                  <div class="hsx-form-actions"><button class="experiment-button" type="button" data-hsx-close-editor>ยกเลิก</button><button class="experiment-button primary" type="submit">บันทึกหมวดหมู่</button></div>
+                </form>
+              </dialog>
             </article>
           <% }); %>
           <div class="hsx-no-results" data-hsx-no-results hidden>ไม่พบหมวดหมู่ที่ตรงกับคำค้นหาหรือตัวกรองนี้</div>
@@ -141,7 +144,26 @@
   var createDialog = document.querySelector('[data-hsx-create-dialog]');
   document.querySelectorAll('[data-hsx-open-create]').forEach(function (button) { button.addEventListener('click', function () { if (createDialog && !createDialog.open) createDialog.showModal(); }); });
   document.querySelectorAll('[data-hsx-close-create]').forEach(function (button) { button.addEventListener('click', function () { if (createDialog && createDialog.open) createDialog.close(); }); });
-  document.querySelectorAll('[data-hsx-close-editor]').forEach(function (button) { button.addEventListener('click', function () { var details = button.closest('details'); if (details) details.open = false; }); });
+  var editorOpener = null;
+  document.querySelectorAll('[data-hsx-open-editor]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var dialog = document.getElementById(button.getAttribute('aria-controls'));
+      if (!dialog || dialog.open) return;
+      editorOpener = button;
+      dialog.showModal();
+      var firstField = dialog.querySelector('input:not([type="checkbox"]),select');
+      if (firstField) firstField.focus({ preventScroll: true });
+    });
+  });
+  document.querySelectorAll('[data-hsx-close-editor]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      var dialog = button.closest('dialog');
+      if (dialog && dialog.open) dialog.close();
+    });
+  });
+  document.querySelectorAll('.hsx-edit-dialog').forEach(function (dialog) {
+    dialog.addEventListener('close', function () { if (editorOpener) editorOpener.focus({ preventScroll: true }); });
+  });
 
   document.querySelectorAll('.hsx-form').forEach(function (form) {
     var mode = form.querySelector('.section-mode-select');
