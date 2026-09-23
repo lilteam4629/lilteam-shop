@@ -141,6 +141,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
   return {
     title: 'หน้าแรก',
     welcomePopupExperiment: false,
+    welcomePopupRedesign: false,
     stats: shopStats(req?.tenantShop ? 0 : remote.length),
     newest,
     homeSections,
@@ -185,6 +186,7 @@ router.get('/', (req, res) => {
   const viewData = homeViewData(false, req.query.page, showAllProducts, req);
   const localExperimentHost = ['localhost', '127.0.0.1', '::1'].includes(String(req.hostname || '').toLowerCase());
   viewData.welcomePopupExperiment = !req.tenantShop && localExperimentHost && req.query.welcomePopupExperiment === '1';
+  viewData.welcomePopupRedesign = !req.tenantShop;
   res.render(view, viewData);
 });
 

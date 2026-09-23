@@ -1,4 +1,4 @@
-/* Local-only treatment for the customer-facing welcome popup experiment. */
+/* Main-store welcome popup redesign; the tenant storefront keeps its existing presentation. */
 #welcome-popup.welcome-popup-redesign{
   padding: max(18px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom));
   background: rgba(8,20,16,.78);
@@ -28,7 +28,7 @@
   aspect-ratio: 1 / 1;
   background: #e9eee9;
 }
-#welcome-popup.welcome-popup-redesign .welcome-popup-slider img{object-fit: cover}
+#welcome-popup.welcome-popup-redesign .welcome-popup-slider img{object-fit: contain;object-position: center}
 #welcome-popup.welcome-popup-redesign .welcome-popup-copy{
   padding: 17px 22px 16px;
   border-top: 1px solid #e9e4d8;
@@ -160,12 +160,14 @@
 }
 #welcome-popup.welcome-popup-redesign .welcome-popup-slider{
   flex:none;
+  display:grid;
+  place-items:center;
   width:100%;
   max-height:min(58dvh,390px);
   aspect-ratio:1/1;
-  background:#e9eee9;
+  background:radial-gradient(ellipse at center,#f7faf8 0%,#e5eee9 72%,#dce7e1 100%);
 }
-#welcome-popup.welcome-popup-redesign .welcome-popup-slider img{object-fit:cover}
+#welcome-popup.welcome-popup-redesign .welcome-popup-slider img{object-fit:contain;object-position:center}
 #welcome-popup.welcome-popup-redesign .welcome-popup-copy{
   padding:18px 24px 20px;
   border-top:1px solid #e8e5dc;
