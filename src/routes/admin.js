@@ -2082,7 +2082,7 @@ router.post('/topups/payment-settings', (req, res) => {
   ])(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูป QR ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
-      return res.redirect('/admin/topups');
+      return res.redirect('/admin/topups/settings#bank');
     }
     const { bankAccountNumber, bankAccountName } = req.body;
     const bankCode = (req.body.bankCode || '').trim();
@@ -2099,21 +2099,21 @@ router.post('/topups/payment-settings', (req, res) => {
     const sharedTenant = Boolean(req.tenantShop && (payment.slipApiMode || 'shared') === 'shared');
     if (sharedTenant && submittedReceiverProvider && submittedReceiverProvider !== effectiveBeforeSave.slipProvider) {
       req.flash('error', 'ร้านนี้ใช้ระบบกลาง กรุณาตั้งค่าบัญชีรับเงินให้ตรงกับค่ายกลางที่เว็บหลักเลือก');
-      return res.redirect(`/admin/topups?tab=bank&receiverProvider=${effectiveBeforeSave.slipProvider}`);
+      return res.redirect(`/admin/topups/settings?receiverProvider=${effectiveBeforeSave.slipProvider}#bank`);
     }
     const slipProvider = sharedTenant
       ? effectiveBeforeSave.slipProvider
       : (receiverProfiles.PROVIDERS.includes(submittedReceiverProvider) ? submittedReceiverProvider : currentlySelectedProvider);
     if (!receiverProfiles.PROVIDERS.includes(slipProvider)) {
       req.flash('error', 'กรุณาเลือกค่ายตรวจสลิปที่รองรับ');
-      return res.redirect('/admin/topups?tab=bank');
+      return res.redirect('/admin/topups/settings#bank');
     }
     receiverProfiles.save(payment, currentlySelectedProvider, receiverProfiles.snapshot(payment));
     const selectedProfile = receiverProfiles.view(payment, slipProvider);
     payment.bankQrImage = selectedProfile.bankQrImage;
     if (!['none', 'slipok', 'slipcheck', 'rdcw', 'slip2go', 'xepht'].includes(slipProvider)) {
       req.flash('error', 'ผู้ให้บริการตรวจสลิปนี้ยังไม่พร้อมใช้งาน');
-      return res.redirect('/admin/topups');
+      return res.redirect('/admin/topups/settings#bank');
     }
     const slipokBranchId = (req.body.slipokBranchId !== undefined ? req.body.slipokBranchId : (payment.slipokBranchId || '')).trim();
     const slipokApiKey = (req.body.slipokApiKey !== undefined ? req.body.slipokApiKey : (payment.slipokApiKey || '')).trim();
@@ -2129,7 +2129,7 @@ router.post('/topups/payment-settings', (req, res) => {
     const xephtValidation = xephtSlip.validateCredentials(xephtApiKey, xephtEndpoint);
     if (!xephtValidation.ok) {
       req.flash('error', xephtValidation.message);
-      return res.redirect('/admin/topups?tab=bank');
+      return res.redirect('/admin/topups/settings#bank');
     }
     const customSlipEndpoint = (req.body.customSlipEndpoint !== undefined ? req.body.customSlipEndpoint : (payment.customSlipEndpoint || '')).trim();
     const customSlipApiKey = (req.body.customSlipApiKey !== undefined ? req.body.customSlipApiKey : (payment.customSlipApiKey || '')).trim();
@@ -2163,7 +2163,7 @@ router.post('/topups/payment-settings', (req, res) => {
       }
     } catch (saveError) {
       req.flash('error', 'บันทึกรูป QR ไม่สำเร็จ กรุณาลองใหม่');
-      return res.redirect('/admin/topups');
+      return res.redirect('/admin/topups/settings#bank');
     }
 
     receiverProfiles.saveAndActivate(payment, slipProvider, receiverProfiles.snapshot(payment));
@@ -2171,7 +2171,7 @@ router.post('/topups/payment-settings', (req, res) => {
 
     await store.save();
     req.flash('success', `บันทึกข้อมูลบัญชีรับเงินสำหรับ ${slipProvider === 'slipcheck' ? 'SlipCheck' : slipProvider === 'rdcw' ? 'SlipRDCW' : slipProvider === 'slip2go' ? 'Slip2Go' : slipProvider === 'xepht' ? 'ระบบตรวจสอบอัตโนมัติ' : 'SlipOK'} แล้ว`);
-    res.redirect(`/admin/topups?tab=bank&receiverProvider=${slipProvider}`);
+    res.redirect(`/admin/topups/settings?receiverProvider=${slipProvider}#bank`);
   }));
 });
 

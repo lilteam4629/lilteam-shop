@@ -295,7 +295,7 @@
         <% const receiverProviders = [['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go'],['xepht','🌐','ระบบตรวจสอบอัตโนมัติ']].filter(item => availableReceiverProviders.includes(item[0])); %>
         <div class="flex flex-col gap-2">
           <% receiverProviders.forEach(item => { const isActiveReceiverProvider = activeReceiverProvider === item[0]; const editingProvider = receiverProvider === item[0]; %>
-            <a href="/admin/topups?tab=bank&receiverProvider=<%= item[0] %>" class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition hover:border-[var(--gold)] <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
+            <a href="/admin/topups/settings?receiverProvider=<%= item[0] %>#bank" class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition hover:border-[var(--gold)] <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
               <div class="w-10 h-10 shrink-0 rounded-xl bg-[var(--input)] flex items-center justify-center text-xl"><%= item[1] %></div>
               <div class="min-w-0 flex-1"><div class="text-sm font-bold"><%= item[2] %></div><div class="text-[10px] <%= isActiveReceiverProvider ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= isActiveReceiverProvider ? 'กำลังใช้งาน • กดเข้าไปแก้ไข' : 'กดเข้าไปกรอกข้อมูลของค่ายนี้' %></div></div>
               <div class="text-[var(--text-4)] text-lg">›</div>
@@ -306,7 +306,7 @@
 
       <% if (receiverProvider) { %>
       <div class="flex items-center justify-between gap-3">
-        <a href="/admin/topups?tab=bank" class="text-xs font-bold text-[var(--gold-text)]">← กลับไปเลือกค่าย</a>
+        <a href="/admin/topups/settings#bank" class="text-xs font-bold text-[var(--gold-text)]">← กลับไปเลือกค่าย</a>
         <span class="text-xs text-[var(--text-4)]">กำลังกรอกข้อมูลสำหรับ <b class="text-[var(--text)]"><%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go',xepht:'ระบบตรวจสอบอัตโนมัติ'})[receiverProvider] %></b></span>
       </div>
 
