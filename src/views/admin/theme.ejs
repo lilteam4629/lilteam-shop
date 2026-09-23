@@ -1,169 +1,206 @@
-<div class="mb-5 rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-  <h2 class="font-semibold text-[var(--text)]">ธีมเดียว อ่านชัดทั้งหน้าร้านและหลังบ้าน</h2>
-  <p class="mt-1 text-sm text-[var(--text-3)]">เลือก <b>สีหลัก</b> สำหรับปุ่มและจุดเด่น แล้วเลือก <b>โทนพื้นหลัง</b> ระบบจะสร้างคู่สีข้อความที่อ่านง่ายให้ทั้งโหมดมืดและสว่างอัตโนมัติ การตั้งค่านี้มีผลกับทุกหน้า</p>
+<%
+  const themeSeed = currentTheme || {};
+  const safeAccent = /^#[0-9a-fA-F]{6}$/.test(themeSeed.accent || '') ? themeSeed.accent : '#c8a63f';
+  const safeBgColor = /^#[0-9a-fA-F]{6}$/.test(themeSeed.bgColor || '') ? themeSeed.bgColor : '';
+  const safeBgPreset = bgPresets.some(preset => preset.key === themeSeed.bgPreset)
+    ? themeSeed.bgPreset
+    : (bgPresets[0] && bgPresets[0].key) || 'warmDark';
+  const safeStyle = styles.some(style => style.key === themeSeed.style) ? themeSeed.style : 'normal';
+  const accentIsPreset = accentPresets.some(preset => preset.color.toLowerCase() === safeAccent.toLowerCase());
+  const flashSuccess = messages && Array.isArray(messages.success) ? messages.success : [];
+  const flashErrors = messages && Array.isArray(messages.error) ? messages.error : [];
+%>
+<link rel="stylesheet" href="<%= asset('css/admin-theme-page-v1.css') %>" />
+
+<div class="admin-theme-page" data-admin-theme
+  data-seed-accent="<%= safeAccent %>"
+  data-seed-bg-preset="<%= safeBgPreset %>"
+  data-seed-bg-color="<%= safeBgColor %>"
+  data-seed-style="<%= safeStyle %>">
+  <header class="admin-theme-heading">
+    <div>
+      <span class="admin-theme-kicker">STORE APPEARANCE · BRAND THEME</span>
+      <h1>ธีมร้านค้า</h1>
+      <p>เลือกสีและบรรยากาศของร้าน พร้อมดูตัวอย่างทั้งโหมดมืดและสว่างก่อนบันทึก</p>
+    </div>
+    <div class="admin-theme-current" data-theme-page-state data-dirty="false" role="status" aria-live="polite" aria-atomic="true">
+      <span class="admin-theme-state-dot" aria-hidden="true"></span>
+      <span data-theme-save-state>ค่าปัจจุบันของร้าน</span>
+    </div>
+  </header>
+
+  <% if (flashSuccess.length) { %>
+    <div class="admin-theme-flash is-success" role="status" aria-live="polite"><span aria-hidden="true">✓</span><%= flashSuccess[0] %></div>
+  <% } %>
+  <% if (flashErrors.length) { %>
+    <div class="admin-theme-flash is-error" role="alert"><span aria-hidden="true">!</span><%= flashErrors[0] %></div>
+  <% } %>
+
+  <form action="/admin/theme" method="post" class="admin-theme-form" data-theme-form>
+    <input type="hidden" name="bgMode" value="<%= safeBgColor ? 'custom' : 'preset' %>" data-theme-bg-mode />
+    <input type="hidden" name="bgColor" value="<%= safeBgColor %>" data-theme-bg-color-value />
+
+    <div class="admin-theme-layout">
+      <div class="admin-theme-controls">
+        <section class="admin-theme-card" aria-labelledby="theme-accent-title">
+          <div class="admin-theme-section-head">
+            <span class="admin-theme-step" aria-hidden="true">01</span>
+            <div>
+              <span class="admin-theme-section-kicker">BRAND COLOR</span>
+              <h2 id="theme-accent-title">สีหลักของร้าน</h2>
+              <p>ใช้กับปุ่ม ราคา และจุดสำคัญบนหน้าร้าน</p>
+            </div>
+            <span class="admin-theme-current-chip"><i data-theme-current-dot></i><span data-theme-current-accent><%= safeAccent.toUpperCase() %></span></span>
+          </div>
+
+          <fieldset class="admin-theme-swatches">
+            <legend class="admin-theme-visually-hidden">เลือกสีหลักของร้าน</legend>
+            <% accentPresets.forEach(preset => { %>
+              <label class="admin-theme-swatch-option">
+                <input type="radio" name="accent" value="<%= preset.color %>" data-theme-accent-choice <%= safeAccent.toLowerCase() === preset.color.toLowerCase() ? 'checked' : '' %> />
+                <span class="admin-theme-swatch" style="--swatch:<%= preset.color %>" aria-hidden="true"><span>✓</span></span>
+                <span class="admin-theme-swatch-name"><%= preset.label %></span>
+              </label>
+            <% }) %>
+          </fieldset>
+
+          <div class="admin-theme-custom-row">
+            <label class="admin-theme-custom-radio">
+              <input type="radio" name="accent" value="<%= safeAccent %>" data-theme-accent-custom <%= accentIsPreset ? '' : 'checked' %> />
+              <span>ใช้สีที่เลือกเอง</span>
+            </label>
+            <label class="admin-theme-picker-label" for="theme-accent-picker">
+              <span>เลือกสี</span>
+              <input id="theme-accent-picker" type="color" value="<%= safeAccent %>" data-theme-accent-picker aria-label="เลือกสีหลักของร้านเอง" />
+            </label>
+          </div>
+        </section>
+
+        <section class="admin-theme-card" aria-labelledby="theme-background-title">
+          <div class="admin-theme-section-head">
+            <span class="admin-theme-step is-amber" aria-hidden="true">02</span>
+            <div>
+              <span class="admin-theme-section-kicker">SURFACE & CONTRAST</span>
+              <h2 id="theme-background-title">โทนพื้นหลัง</h2>
+              <p>เลือกชุดสีที่จับคู่โหมดมืดและสว่างให้อัตโนมัติ</p>
+            </div>
+          </div>
+
+          <fieldset class="admin-theme-backgrounds">
+            <legend class="admin-theme-visually-hidden">เลือกชุดสีพื้นหลัง</legend>
+            <% bgPresets.forEach(preset => { %>
+              <label class="admin-theme-background-option">
+                <input type="radio" name="bgPreset" value="<%= preset.key %>" data-theme-bg-choice="<%= preset.key %>" <%= !safeBgColor && safeBgPreset === preset.key ? 'checked' : '' %> />
+                <span class="admin-theme-background-copy"><strong><%= preset.label %></strong><small>ชุดสีสำหรับทั้งสองโหมด</small></span>
+                <span class="admin-theme-background-samples" aria-hidden="true">
+                  <span style="--sample-bg:<%= preset.preview.dark.bg %>;--sample-card:<%= preset.preview.dark.card %>;--sample-text:<%= preset.preview.dark.text %>"><i></i><b>มืด</b></span>
+                  <span style="--sample-bg:<%= preset.preview.light.bg %>;--sample-card:<%= preset.preview.light.card %>;--sample-text:<%= preset.preview.light.text %>"><i></i><b>สว่าง</b></span>
+                </span>
+                <span class="admin-theme-selected" aria-hidden="true">✓</span>
+              </label>
+              <span hidden data-theme-bg-seed data-key="<%= preset.key %>"
+                data-dark-bg="<%= preset.preview.dark.bg %>" data-dark-card="<%= preset.preview.dark.card %>" data-dark-text="<%= preset.preview.dark.text %>"
+                data-light-bg="<%= preset.preview.light.bg %>" data-light-card="<%= preset.preview.light.card %>" data-light-text="<%= preset.preview.light.text %>"></span>
+            <% }) %>
+          </fieldset>
+
+          <div class="admin-theme-custom-row admin-theme-custom-background">
+            <label class="admin-theme-custom-radio">
+              <input type="radio" name="bgPreset" value="custom" data-theme-bg-choice="custom" <%= safeBgColor ? 'checked' : '' %> />
+              <span>สร้างชุดสีจากสีที่เลือก</span>
+            </label>
+            <label class="admin-theme-picker-label" for="theme-background-picker">
+              <span>สีตั้งต้น</span>
+              <input id="theme-background-picker" type="color" value="<%= safeBgColor || '#365a4a' %>" data-theme-background-picker aria-label="กำหนดชุดสีพื้นหลังเอง" />
+            </label>
+          </div>
+        </section>
+
+        <section class="admin-theme-card" aria-labelledby="theme-effects-title">
+          <div class="admin-theme-section-head">
+            <span class="admin-theme-step is-violet" aria-hidden="true">03</span>
+            <div>
+              <span class="admin-theme-section-kicker">BUTTON FINISH</span>
+              <h2 id="theme-effects-title">ลูกเล่นปุ่ม</h2>
+              <p>เลือกเอฟเฟกต์ที่ใช้กับปุ่มและจุดเน้นของร้าน</p>
+            </div>
+          </div>
+
+          <fieldset class="admin-theme-effects">
+            <legend class="admin-theme-visually-hidden">เลือกลูกเล่นปุ่ม</legend>
+            <% styles.forEach(style => { %>
+              <label class="admin-theme-effect-option">
+                <input type="radio" name="style" value="<%= style.key %>" data-theme-style-choice <%= safeStyle === style.key ? 'checked' : '' %> />
+                <span class="admin-theme-effect-sample" data-effect="<%= style.key %>" aria-hidden="true"><i>LT</i><b>ปุ่มตัวอย่าง</b></span>
+                <strong><%= style.label.replace(/^\p{Emoji_Presentation}|^\p{Extended_Pictographic}/u, '').trim() %></strong>
+                <span class="admin-theme-selected" aria-hidden="true">✓</span>
+              </label>
+            <% }) %>
+          </fieldset>
+        </section>
+      </div>
+
+      <aside class="admin-theme-preview-column" aria-label="ตัวอย่างหน้าร้าน">
+        <section class="admin-theme-card admin-theme-preview-card" aria-labelledby="theme-preview-title">
+          <div class="admin-theme-preview-head">
+            <div>
+              <span class="admin-theme-section-kicker">LIVE STORE PREVIEW</span>
+              <h2 id="theme-preview-title">หน้าร้านตัวอย่าง</h2>
+              <p>ตัวอย่างเปลี่ยนตามตัวเลือก · ยังไม่เปลี่ยนร้านจนกดบันทึก</p>
+            </div>
+            <span class="admin-theme-live"><i aria-hidden="true"></i> แสดงทันที</span>
+          </div>
+
+          <div class="admin-theme-mode-switch" role="group" aria-label="เลือกโหมดสีของตัวอย่าง">
+            <button type="button" data-theme-preview-mode="dark" aria-pressed="true">มืด</button>
+            <button type="button" data-theme-preview-mode="light" aria-pressed="false">สว่าง</button>
+          </div>
+
+          <div class="admin-theme-store" data-theme-store-preview data-mode="dark" data-style="<%= safeStyle %>">
+            <div class="admin-theme-store-nav">
+              <span class="admin-theme-store-logo" data-theme-store-logo>L</span>
+              <span class="admin-theme-store-brand"><strong>LiTeam Shop</strong><small>ร้านค้าออนไลน์</small></span>
+              <span class="admin-theme-store-nav-action" aria-hidden="true"><i></i><i></i></span>
+            </div>
+            <div class="admin-theme-store-content">
+              <span class="admin-theme-store-eyebrow"><i aria-hidden="true"></i> ร้านค้าแนะนำ</span>
+              <h3>เลือกไอเทมที่ใช่<br /><span>พร้อมใช้งานทันที</span></h3>
+              <p>โทนสีและปุ่มสำคัญจะปรับตามธีมที่คุณเลือก</p>
+              <div class="admin-theme-store-actions">
+                <button type="button" class="admin-theme-demo-primary">เลือกชมสินค้า <span aria-hidden="true">→</span></button>
+                <button type="button" class="admin-theme-demo-secondary">ดูรายละเอียด</button>
+              </div>
+              <div class="admin-theme-product-preview">
+                <div class="admin-theme-product-art" aria-hidden="true"><span>LT</span><i></i><i></i></div>
+                <div class="admin-theme-product-info">
+                  <span class="admin-theme-product-label">ตัวอย่างสินค้า</span>
+                  <strong>การ์ดสินค้าและราคา</strong>
+                  <small>ตัวอย่างการแสดงผลบนหน้าร้าน</small>
+                  <div><b>฿ 199</b><span><i aria-hidden="true"></i> พร้อมขาย</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="admin-theme-preview-caption"><span aria-hidden="true">i</span><p>บันทึกแล้วจึงจะนำสีและลูกเล่นไปใช้กับหน้าร้านจริง</p></div>
+        </section>
+
+        <section class="admin-theme-summary" aria-label="สรุปธีมที่เลือก" aria-live="polite" aria-atomic="true">
+          <div><span class="admin-theme-summary-dot" data-theme-summary-dot></span><span>สีหลัก</span><strong data-theme-summary-accent><%= safeAccent.toUpperCase() %></strong></div>
+          <div><span class="admin-theme-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 1-9-9Z" /></svg></span><span>พื้นหลัง</span><strong data-theme-summary-background>—</strong></div>
+          <div><span class="admin-theme-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 2.1 6.7L21 11l-6.9 2.3L12 20l-2.1-6.7L3 11l6.9-2.3L12 2Z" /><path d="m19 16 .9 2.1L22 19l-2.1.9L19 22l-.9-2.1L16 19l2.1-.9L19 16Z" /></svg></span><span>ลูกเล่น</span><strong data-theme-summary-style>—</strong></div>
+        </section>
+      </aside>
+    </div>
+
+    <footer class="admin-theme-actions">
+      <div class="admin-theme-action-copy"><strong data-theme-action-state>ยังไม่มีการเปลี่ยนแปลง</strong><span>การบันทึกมีผลกับหน้าร้านหลักทันที</span></div>
+      <button class="admin-theme-save" type="submit" data-theme-submit>
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h12l3 3v13H4V4h1Zm2 0v6h10V4M7 20v-7h10v7" /></svg>
+        <span>บันทึกธีมร้าน</span>
+      </button>
+    </footer>
+  </form>
 </div>
 
-<form action="/admin/theme" method="post" class="space-y-6 w-full">
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-    <h3 class="font-semibold mb-1">🎯 สีหลัก (ปุ่ม / ราคา / จุดเด่น)</h3>
-    <p class="text-xs text-[var(--text-4)] mb-4">ใช้กับปุ่ม, ตัวหนังสือราคา, กรอบการ์ดสินค้า, ป้ายต่างๆ ทั่วเว็บ</p>
-    <div class="grid grid-cols-4 sm:grid-cols-6 gap-3 mb-4">
-      <% accentPresets.forEach(p => { %>
-        <label class="flex flex-col items-center gap-1 cursor-pointer">
-          <input type="radio" name="accent" value="<%= p.color %>" class="accent-swatch-input sr-only" <%= currentTheme.accent === p.color ? 'checked' : '' %> />
-          <span class="accent-swatch w-10 h-10 rounded-full border-2 border-transparent transition" style="background: <%= p.color %>;"></span>
-          <span class="text-[9px] text-[var(--text-4)] text-center leading-tight"><%= p.label %></span>
-        </label>
-      <% }) %>
-    </div>
-    <label class="flex items-center gap-3 text-sm">
-      <span class="text-[var(--text-3)]">หรือเลือกสีเอง:</span>
-      <input type="color" id="accentCustomInput" value="<%= currentTheme.accent %>" class="w-12 h-9 rounded-lg border border-[var(--border-light)] bg-transparent cursor-pointer" />
-    </label>
-  </div>
-
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-    <h3 class="font-semibold mb-1">🌗 โทนพื้นหลัง</h3>
-    <p class="text-xs text-[var(--text-4)] mb-4">คุมพื้นหลัง/การ์ด/ตัวหนังสือให้เข้ากันเป็นชุด (มีทั้งโหมดมืดและสว่างในตัว สลับได้ด้วยปุ่ม 🌙 บนเว็บ)</p>
-    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-      <% bgPresets.forEach(p => { %>
-        <label class="bg-preset-card relative flex flex-col gap-2 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer">
-          <input type="radio" name="bgPreset" value="<%= p.key %>" class="bg-preset-input sr-only" <%= (!currentTheme.bgColor && currentTheme.bgPreset === p.key) ? 'checked' : '' %> />
-          <span class="text-xs font-medium"><%= p.label %></span>
-          <span class="grid grid-cols-2 gap-1" aria-hidden="true">
-            <span class="rounded-md border p-2 text-center text-[9px]" style="background:<%= p.preview.dark.card %>;border-color:<%= p.preview.dark.text %>55;color:<%= p.preview.dark.text %>">มืด</span>
-            <span class="rounded-md border p-2 text-center text-[9px]" style="background:<%= p.preview.light.card %>;border-color:<%= p.preview.light.text %>55;color:<%= p.preview.light.text %>">สว่าง</span>
-          </span>
-          <span class="bg-preset-check hidden absolute top-2 right-2 text-[var(--gold-text)] text-xs">✓</span>
-        </label>
-      <% }) %>
-    </div>
-    <label class="flex items-center gap-3 text-sm">
-      <span class="text-[var(--text-3)]">หรือเลือกสีพื้นหลังเอง:</span>
-      <input type="color" id="bgCustomInput" value="<%= currentTheme.bgColor || '#c8a63f' %>" class="w-12 h-9 rounded-lg border border-[var(--border-light)] bg-transparent cursor-pointer" />
-    </label>
-    <input type="hidden" name="bgMode" id="bgModeInput" value="<%= currentTheme.bgColor ? 'custom' : 'preset' %>" />
-    <input type="hidden" name="bgColor" id="bgColorInput" value="<%= currentTheme.bgColor || '' %>" />
-  </div>
-
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-    <h3 class="font-semibold mb-1">✨ ลูกเล่นพิเศษ</h3>
-    <p class="text-xs text-[var(--text-4)] mb-4">เพิ่มลูกเล่นให้ปุ่มและจุดเด่นในเว็บ</p>
-    <div class="grid grid-cols-3 gap-3">
-      <% styles.forEach(s => { %>
-        <label class="style-card relative flex flex-col items-center gap-1 rounded-xl border-2 border-[var(--border-light)] bg-[var(--input)] p-3 cursor-pointer text-center">
-          <input type="radio" name="style" value="<%= s.key %>" class="style-input sr-only" <%= currentTheme.style === s.key ? 'checked' : '' %> />
-          <span class="text-xs font-medium"><%= s.label %></span>
-          <span class="style-check hidden absolute top-2 right-2 text-[var(--gold-text)] text-xs">✓</span>
-        </label>
-      <% }) %>
-    </div>
-  </div>
-
-  <div class="theme-live-preview rounded-xl border border-[var(--border)] bg-[var(--input)] p-5">
-    <div class="flex items-center justify-between gap-3">
-      <div>
-        <h3 class="font-semibold">ตัวอย่างสีที่ใช้งานจริง</h3>
-        <p class="text-xs text-[var(--text-4)]">ลองสลับ 🌙 / ☀️ ด้านบนเพื่อตรวจทั้งสองโหมดก่อนบันทึก</p>
-      </div>
-      <span class="rounded-full border border-[var(--border-light)] px-2 py-1 text-[10px] text-[var(--text-3)]">Light + Dark</span>
-    </div>
-    <div class="mt-4 grid gap-3 sm:grid-cols-2">
-      <div class="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4">
-        <div class="font-semibold text-[var(--text)]">ข้อความหลัก</div>
-        <div class="mt-1 text-xs text-[var(--text-3)]">ข้อความรองยังอ่านได้ชัดบนการ์ด</div>
-        <div class="mt-3 flex flex-wrap gap-2">
-          <span data-theme-fill="accent" class="rounded-lg bg-[var(--gold)] px-3 py-2 text-xs font-bold">ปุ่มสีหลัก</span>
-          <span class="rounded-lg border border-[var(--border-light)] bg-[var(--input)] px-3 py-2 text-xs text-[var(--text)]">ปุ่มรอง</span>
-        </div>
-      </div>
-      <div class="rounded-xl border border-[var(--border)] bg-[var(--card)] p-4 text-xs">
-        <div class="theme-success font-semibold">● สำเร็จ / พร้อมขาย</div>
-        <div class="theme-warning mt-2 font-semibold">● รอตรวจสอบ</div>
-        <div class="theme-danger mt-2 font-semibold">● ผิดพลาด / สินค้าหมด</div>
-      </div>
-    </div>
-  </div>
-
-  <p class="text-xs text-[var(--text-4)]">💡 อยากเปลี่ยนรูปแบบการ์ดสินค้า (คลาสสิก/เต็มรูป) ไปตั้งได้ที่หน้า <a href="/admin/products" class="text-[var(--gold-text)] underline">สินค้า</a> ด้านบนตารางเลยครับ</p>
-
-  <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium rounded-lg py-2.5 text-sm">บันทึกธีมสี</button>
-</form>
-
-<style>
-  .accent-swatch-input:checked + .accent-swatch { border-color: var(--text); box-shadow: 0 0 0 2px var(--card), 0 0 0 4px var(--gold); }
-  .bg-preset-input:checked ~ .bg-preset-check { display: block; }
-  .style-input:checked ~ .style-check { display: block; }
-  .bg-preset-card:focus-within,.style-card:focus-within,label:has(.accent-swatch-input:focus-visible) .accent-swatch { outline: 2px solid var(--gold-text); outline-offset: 2px; }
-</style>
-<script>
-  (function () {
-    const form = document.querySelector('form[action="/admin/theme"]');
-    const customInput = document.getElementById('accentCustomInput');
-    const radios = document.querySelectorAll('.accent-swatch-input');
-    function useCustomAccent() {
-      radios.forEach(r => { r.checked = false; });
-      let hidden = document.getElementById('accentCustomRadio');
-      if (!hidden) {
-        hidden = document.createElement('input');
-        hidden.type = 'radio';
-        hidden.name = 'accent';
-        hidden.id = 'accentCustomRadio';
-        hidden.className = 'sr-only';
-        customInput.closest('form').appendChild(hidden);
-      }
-      hidden.value = customInput.value;
-      hidden.checked = true;
-    }
-    customInput.addEventListener('input', useCustomAccent);
-    customInput.addEventListener('change', useCustomAccent);
-
-    const bgPresetCards = document.querySelectorAll('.bg-preset-card');
-    const bgPresetInputs = document.querySelectorAll('.bg-preset-input');
-    const bgCustomInput = document.getElementById('bgCustomInput');
-    const bgModeInput = document.getElementById('bgModeInput');
-    const bgColorInput = document.getElementById('bgColorInput');
-
-    function syncBgCard(card) {
-      const input = card.querySelector('.bg-preset-input');
-      card.classList.toggle('border-[var(--gold)]', input.checked);
-    }
-    bgPresetCards.forEach((card) => {
-      const input = card.querySelector('.bg-preset-input');
-      input.addEventListener('change', () => {
-        bgModeInput.value = 'preset';
-        bgColorInput.value = '';
-        bgPresetCards.forEach(syncBgCard);
-      });
-      syncBgCard(card);
-    });
-    function useCustomBg() {
-      bgPresetInputs.forEach(r => { r.checked = false; });
-      bgPresetCards.forEach(c => c.classList.remove('border-[var(--gold)]'));
-      bgModeInput.value = 'custom';
-      bgColorInput.value = bgCustomInput.value;
-    }
-    bgCustomInput.addEventListener('input', useCustomBg);
-    bgCustomInput.addEventListener('change', useCustomBg);
-
-    document.querySelectorAll('.style-card').forEach((card) => {
-      const input = card.querySelector('.style-input');
-      function sync() { card.classList.toggle('border-[var(--gold)]', input.checked); }
-      input.addEventListener('change', () => {
-        document.querySelectorAll('.style-card').forEach(c => c.classList.remove('border-[var(--gold)]'));
-        sync();
-      });
-      sync();
-    });
-
-    // Safety net: some mobile browsers are inconsistent about firing input/change
-    // on <input type="color">. Re-sync the hidden fields from the live picker
-    // values right before submit so a custom pick is never silently lost.
-    if (form) {
-      form.addEventListener('submit', () => {
-        const anyPresetChecked = Array.from(bgPresetInputs).some(r => r.checked);
-        if (!anyPresetChecked) useCustomBg();
-      });
-    }
-  })();
-</script>
+<script src="<%= asset('js/admin-theme-page-v1.js') %>" defer></script>

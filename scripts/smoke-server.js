@@ -155,6 +155,41 @@ async function checkBulkPrice(cookie) {
   if (!updatedProduct || updatedProduct.price !== expected) throw new Error(`bulk price did not update ${originalPrice} to ${expected}`);
 }
 
+async function checkThemePage(cookie) {
+  const page = await fetchOk('/admin/theme', 'text/html', { cookie });
+  for (const marker of [
+    'class="admin-theme-page"',
+    'name="accent"',
+    'name="bgPreset"',
+    'name="style"',
+    'หน้าร้านตัวอย่าง',
+    'ยังไม่เปลี่ยนร้านจนกดบันทึก',
+    '/css/admin-theme-page-v1.css',
+    '/js/admin-theme-page-v1.js',
+  ]) {
+    if (!page.body.includes(marker)) throw new Error(`redesigned theme page is missing ${marker}`);
+  }
+  await fetchOk('/css/admin-theme-page-v1.css', 'text/css');
+  await fetchOk('/js/admin-theme-page-v1.js', 'application/javascript');
+
+  const checkedValue = name => page.body.match(new RegExp(`name="${name}" value="([^"]+)"[^>]*checked`))?.[1];
+  const accent = checkedValue('accent');
+  const bgPreset = checkedValue('bgPreset');
+  const style = checkedValue('style');
+  const bgMode = page.body.match(/name="bgMode" value="([^"]*)"/)?.[1];
+  const bgColor = page.body.match(/name="bgColor" value="([^"]*)"/)?.[1] || '';
+  if (!accent || !bgPreset || !style || !bgMode) throw new Error('theme form does not preserve the current saved selections');
+
+  const saved = await request('/admin/theme', {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ accent, bgPreset, bgMode, bgColor, style }).toString(),
+  });
+  if (saved.statusCode !== 302 || saved.headers.location !== '/admin/theme') throw new Error('redesigned theme form did not save to the existing production route');
+  const afterSave = await fetchOk('/admin/theme', 'text/html', { cookie });
+  if (!afterSave.body.includes('บันทึกธีมสีแล้ว')) throw new Error('theme save did not show its success feedback');
+}
+
 async function checkUninstalledRainModule(cookie) {
   const effects = await fetchOk('/admin/effects', 'text/html', { cookie });
   if (!effects.body.includes('เพลงพื้นหลังหน้าเว็บ') || !effects.body.includes('data-snow-toggle')) {
@@ -326,6 +361,7 @@ async function run() {
     const protectedCatalog = await request('/admin/rangers-catalog', { headers: { cookie } });
     if (protectedCatalog.statusCode !== 404) throw new Error(`main admin can access System Lab catalog (HTTP ${protectedCatalog.statusCode})`);
     await checkUninstalledRainModule(cookie);
+    await checkThemePage(cookie);
     await checkStorefrontModels(cookie);
     await checkBulkFilterDelete(cookie);
     await checkHomeSectionDelete(cookie);
