@@ -1,4 +1,149 @@
-<link rel="stylesheet" href="<%= asset('css/admin-experiment-orders-v1.css') %>" />
-<% const buyerName = buyer?.username || 'ไม่พบข้อมูลผู้ซื้อ'; const statusLabel = order.status === 'completed' ? 'สำเร็จ' : order.status === 'pending' ? 'รอดำเนินการ' : 'ยกเลิก'; %>
-<div class="experiment-app experiment-orders-page"><aside class="experiment-sidebar" data-experiment-sidebar aria-label="เมนูร้านค้า"><div class="experiment-brand"><div class="experiment-brand-mark"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName || 'ร้านค้า' %>" /><% } else { %><span><%= (settings.shopName || 'L')[0] %></span><% } %></div><div><div class="experiment-brand-title"><%= settings.shopName || 'LILTeam Shop' %></div><div class="experiment-brand-sub">ผู้ดูแลระบบ</div></div><button class="experiment-collapse" data-experiment-collapse type="button" aria-label="ย่อหรือขยายเมนู">‹</button></div><div class="experiment-sidebar-scroll"><div class="experiment-nav-group"><div class="experiment-nav-label">ภาพรวม</div><a class="experiment-nav-item" href="/admin"><span>▦</span><span>แดชบอร์ด</span></a></div><div class="experiment-nav-group"><div class="experiment-nav-label">สินค้าและสต๊อก</div><a class="experiment-nav-item" href="/admin/products"><span>◇</span><span>รายการสินค้า</span></a><a class="experiment-nav-item" href="/admin/scheduled-products"><span>◷</span><span>ตั้งเวลาเปิดขาย</span></a><a class="experiment-nav-item" href="/admin/filter-tags"><span>◈</span><span>แท็ก/จัดหมวดสินค้า</span></a><a class="experiment-nav-item" href="/admin/recommended-categories"><span>☷</span><span>หมวดหมู่แนะนำ</span></a></div><div class="experiment-nav-group"><div class="experiment-nav-label">การสั่งซื้อ & การเงิน</div><a class="experiment-nav-item active" href="/admin/orders"><span>▤</span><span>คำสั่งซื้อ</span></a><a class="experiment-nav-item" href="/admin/topups"><span>▭</span><span>เติมเงิน & ตรวจสอบ</span></a></div></div><div class="experiment-sidebar-bottom"><a class="experiment-nav-item" href="/"><span>⌂</span><span>กลับหน้าร้าน</span><span style="margin-left:auto">→</span></a><div class="experiment-profile"><div class="experiment-avatar">A</div><div><strong>admin</strong><small>แอดมินสูงสุด</small></div></div></div></aside><div class="experiment-main"><header class="experiment-topbar"><span class="experiment-user-name" style="font-size:12px;font-weight:700">admin</span></header><main class="experiment-content"><section class="order-detail-page"><div class="order-detail-head"><div><a class="order-detail-back" href="/admin/orders">← กลับไปหน้ารวมคำสั่งซื้อ</a><h1 class="order-detail-title">คำสั่งซื้อ #<%= order.id %></h1><p class="order-detail-sub">สั่งซื้อเมื่อ <%= new Date(order.createdAt).toLocaleString('th-TH',{dateStyle:'long',timeStyle:'short',timeZone:'Asia/Bangkok'}) %></p><% if(order.salesChannel === 'catalog-api-fulfillment'){ %><span class="experiment-inline-status" style="display:inline-flex;margin-top:9px">คำสั่งซื้อ Partner · <%= order.tenantShopName || order.tenantShopId || '-' %></span><% } %></div><span class="orders-status <%= order.status %>"><i></i><%= statusLabel %></span></div><div class="order-detail-grid"><div class="order-panel"><h2>รายการสินค้าที่จัดส่ง <span style="color:var(--ex-muted);font-size:10px;font-weight:500">· <%= itemsWithCreds.length %> รายการ</span></h2><% itemsWithCreds.forEach((item,index)=>{ %><div class="order-item"><div class="order-item-image"><% if(item.productImage){ %><img src="<%= item.productImage %>" alt="รูปสินค้า <%= item.title %>" loading="lazy"><% }else{ %><span>◇</span><% } %></div><div class="order-item-copy"><strong><%= item.title %></strong><small>รหัสสินค้า: <%= item.productId %></small><% if(item.importedFileCode){ %><small>รหัสไฟล์นำเข้า: <%= item.importedFileCode %></small><% } %><% if(item.fulfillmentMode === 'contact'){ %><small style="color:#9a6412">ต้องติดต่อร้านเพื่อรับมอบสินค้า</small><% }else if(item.credentials){ %><small style="color:var(--ex-green-dark)">มีข้อมูลคีย์/บัญชีสำหรับจัดส่งแล้ว</small><% } %></div><span class="order-item-price">฿<%= Number(item.price||0).toLocaleString('th-TH') %></span></div><% }) %></div><div class="order-side-stack"><div class="order-panel"><h2>ข้อมูลผู้ซื้อ</h2><div class="order-buyer-line"><span class="orders-avatar"><%= buyerName[0].toUpperCase() %></span><span><strong><%= buyerName %></strong><small><%= buyer?.email || '-' %></small></span></div></div><div class="order-panel"><h2>สรุปการชำระเงิน</h2><div class="order-summary-row"><span>ยอดรวมสินค้า</span><span>฿<%= Number(order.subtotal || order.total || 0).toLocaleString('th-TH') %></span></div><% if(order.discount>0){ %><div class="order-summary-row"><span>ส่วนลด</span><span style="color:var(--ex-green-dark)">-฿<%= Number(order.discount).toLocaleString('th-TH') %></span></div><% } %><div class="order-summary-row total"><span>ยอดชำระสุทธิ</span><strong>฿<%= Number(order.total||0).toLocaleString('th-TH') %></strong></div><form action="/admin/orders/<%= order.id %>/status" method="post" class="order-status-form"><label for="order-status">เปลี่ยนสถานะคำสั่งซื้อ</label><select id="order-status" name="status"><option value="completed" <%= order.status==='completed'?'selected':'' %>>สำเร็จ</option><option value="pending" <%= order.status==='pending'?'selected':'' %>>รอดำเนินการ</option><option value="cancelled" <%= order.status==='cancelled'?'selected':'' %>>ยกเลิก</option></select><button type="submit">บันทึกสถานะ</button></form></div></div></div></section></main></div></div>
-<script>document.querySelector('[data-experiment-collapse]')?.addEventListener('click',()=>document.documentElement.classList.toggle('experiment-sidebar-collapsed'));</script>
+<%
+  const buyerName = buyer?.username || 'ไม่พบข้อมูลผู้ซื้อ';
+  const currentStatus = order.status || 'pending';
+  const statusLabel = currentStatus === 'completed' ? 'สำเร็จ' : currentStatus === 'pending' ? 'รอดำเนินการ' : currentStatus === 'cancelled' ? 'ยกเลิก' : currentStatus;
+  const statusTone = currentStatus === 'completed' ? 'is-complete' : currentStatus === 'cancelled' ? 'is-cancelled' : 'is-pending';
+  const orderDate = new Date(order.createdAt);
+  const orderDateLabel = Number.isNaN(orderDate.valueOf()) ? 'ไม่ระบุวันเวลา' : orderDate.toLocaleString('th-TH', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Bangkok' });
+  const orderDateIso = Number.isNaN(orderDate.valueOf()) ? '' : orderDate.toISOString();
+%>
+<link rel="stylesheet" href="<%= asset('css/admin-order-detail-v2.css') %>" />
+
+<div class="experiment-app experiment-orders-page order-detail-app">
+  <div class="experiment-main">
+    <header class="experiment-topbar"><span class="experiment-user-name" style="font-size:12px;font-weight:700">admin</span></header>
+    <main class="experiment-content">
+      <section class="order-detail-page" aria-labelledby="order-detail-title">
+        <header class="order-detail-head">
+          <div class="order-detail-heading-copy">
+            <a class="order-detail-back" href="/admin/orders">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m14 18-6-6 6-6M8 12h12"/></svg>
+              กลับไปรายการคำสั่งซื้อ
+            </a>
+            <span class="order-detail-kicker">ORDER DETAILS</span>
+            <div class="order-detail-title-line">
+              <h1 class="order-detail-title" id="order-detail-title">คำสั่งซื้อ <span>#<%= order.id %></span></h1>
+              <span class="order-status-badge <%= statusTone %>"><i aria-hidden="true"></i><%= statusLabel %></span>
+            </div>
+            <p class="order-detail-sub">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3.5 2"/></svg>
+              สั่งซื้อเมื่อ <time datetime="<%= orderDateIso %>"><%= orderDateLabel %></time>
+            </p>
+          </div>
+        </header>
+
+        <% if (order.salesChannel === 'catalog-api-fulfillment') { %>
+          <aside class="order-partner-note" aria-label="คำสั่งซื้อจากร้านเช่า">
+            <span class="order-partner-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 7h16v13H4zM8 7V5a4 4 0 0 1 8 0v2M8 13h8"/></svg>
+            </span>
+            <span><strong>คำสั่งซื้อ Partner</strong><small>มาจากร้านเช่า <b><%= order.tenantShopName || order.tenantShopId || '-' %></b> · ชำระเข้าร้านหลักแล้ว</small></span>
+          </aside>
+        <% } %>
+
+        <div class="order-detail-grid">
+          <section class="order-panel order-items-panel" aria-labelledby="order-items-title">
+            <div class="order-section-heading">
+              <span class="order-section-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="m4 7 8-4 8 4-8 4-8-4Z"/><path d="M4 7v10l8 4 8-4V7M12 11v10"/></svg>
+              </span>
+              <span><span class="order-section-kicker">PRODUCTS & DELIVERY</span><h2 id="order-items-title">รายการสินค้า</h2></span>
+              <span class="order-count-pill"><%= itemsWithCreds.length %> รายการ</span>
+            </div>
+
+            <% if (itemsWithCreds.length) { %>
+              <div class="order-items-list">
+                <% itemsWithCreds.forEach((item, index) => { %>
+                  <article class="order-item-card">
+                    <div class="order-item-main">
+                      <span class="order-item-index"><%= String(index + 1).padStart(2, '0') %></span>
+                      <% if (item.productImage) { %>
+                        <a class="order-item-image" href="<%= item.productImage %>" target="_blank" rel="noopener" aria-label="เปิดรูปสินค้า <%= item.title %> ขนาดเต็ม">
+                          <img src="<%= item.productImage %>" alt="รูปสินค้า <%= item.title %>" loading="lazy" />
+                        </a>
+                      <% } else { %>
+                        <span class="order-item-image is-empty" aria-hidden="true">
+                          <svg viewBox="0 0 24 24"><path d="m4 7 8-4 8 4-8 4-8-4Z"/><path d="M4 7v10l8 4 8-4V7M12 11v10"/></svg>
+                        </span>
+                      <% } %>
+                      <div class="order-item-copy">
+                        <h3><%= item.title || 'สินค้าไม่ระบุชื่อ' %></h3>
+                        <div class="order-item-meta"><span>รหัสสินค้า</span><code><%= item.productId || '-' %></code></div>
+                        <% if (item.importedFileCode) { %>
+                          <div class="order-item-meta"><span>รหัสอ้างอิง</span><code><%= item.importedFileCode %></code></div>
+                        <% } %>
+                      </div>
+                      <div class="order-item-price"><small>ราคา</small><strong>฿<%= Number(item.price || 0).toLocaleString('th-TH') %></strong></div>
+                    </div>
+
+                    <% if (item.fulfillmentMode === 'contact') { %>
+                      <div class="order-fulfillment-note is-contact">
+                        <span class="order-fulfillment-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 11.5a7.5 7.5 0 0 1-8 7.5 8 8 0 0 1-3.5-.8L4 20l1.3-3.6A7.4 7.4 0 0 1 4 12c0-4.4 3.6-8 8-8s8 3.4 8 7.5Z"/><path d="M8 12h8M8 15h5"/></svg></span>
+                        <span><strong>ต้องติดต่อร้านเพื่อส่งมอบสินค้า</strong><% if (item.fulfillmentInstructions) { %><small><%= item.fulfillmentInstructions %></small><% } %></span>
+                      </div>
+                    <% } else if (item.credentials) { %>
+                      <div class="order-fulfillment-note is-ready">
+                        <span class="order-fulfillment-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>
+                        <span><strong>มีข้อมูลรับสินค้าในระบบ</strong><small>ข้อมูลบัญชีหรือคีย์ยังคงซ่อนไว้ในหน้านี้</small></span>
+                      </div>
+                    <% } else { %>
+                      <div class="order-fulfillment-note is-pending">
+                        <span class="order-fulfillment-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span>
+                        <span><strong>ไม่มีข้อมูลการจัดส่งแนบมากับรายการนี้</strong><small>ตรวจสอบรายละเอียดสินค้าหรือการส่งมอบเพิ่มเติม</small></span>
+                      </div>
+                    <% } %>
+                  </article>
+                <% }) %>
+              </div>
+            <% } else { %>
+              <div class="order-empty-items"><strong>ไม่พบรายการสินค้าในคำสั่งซื้อนี้</strong><span>ตรวจสอบข้อมูลคำสั่งซื้อในระบบอีกครั้ง</span></div>
+            <% } %>
+          </section>
+
+          <aside class="order-side-stack" aria-label="ข้อมูลคำสั่งซื้อและการชำระเงิน">
+            <section class="order-panel order-buyer-panel" aria-labelledby="order-buyer-title">
+              <div class="order-section-heading compact">
+                <span class="order-section-icon is-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20a7 7 0 0 1 14 0"/></svg></span>
+                <span><span class="order-section-kicker">CUSTOMER</span><h2 id="order-buyer-title">ข้อมูลผู้ซื้อ</h2></span>
+              </div>
+              <div class="order-buyer-line">
+                <span class="orders-avatar" aria-hidden="true"><%= buyerName[0].toUpperCase() %></span>
+                <span class="order-buyer-copy"><strong><%= buyerName %></strong><small><%= buyer?.email || 'ไม่มีอีเมลในระบบ' %></small></span>
+              </div>
+            </section>
+
+            <section class="order-panel order-payment-panel" aria-labelledby="order-payment-title">
+              <div class="order-section-heading compact">
+                <span class="order-section-icon is-green" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg></span>
+                <span><span class="order-section-kicker">PAYMENT SUMMARY</span><h2 id="order-payment-title">สรุปการชำระเงิน</h2></span>
+              </div>
+              <div class="order-summary-row"><span>ยอดรวมสินค้า</span><strong>฿<%= Number(order.subtotal || order.total || 0).toLocaleString('th-TH') %></strong></div>
+              <% if (Number(order.discount) > 0) { %>
+                <div class="order-summary-row is-discount"><span>ส่วนลดคูปอง</span><strong>−฿<%= Number(order.discount).toLocaleString('th-TH') %></strong></div>
+              <% } %>
+              <div class="order-summary-row total"><span>ยอดชำระสุทธิ</span><strong>฿<%= Number(order.total || 0).toLocaleString('th-TH') %></strong></div>
+            </section>
+
+            <section class="order-panel order-status-panel" aria-labelledby="order-status-title">
+              <div class="order-section-heading compact">
+                <span class="order-section-icon is-amber" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v3M12 18v3M4.2 6l2.1 2.1m11.4 7.8 2.1 2.1M3 12h3m12 0h3M4.2 18l2.1-2.1m11.4-7.8L19.8 6"/><circle cx="12" cy="12" r="5"/></svg></span>
+                <span><span class="order-section-kicker">ORDER MANAGEMENT</span><h2 id="order-status-title">จัดการสถานะ</h2></span>
+              </div>
+              <div class="order-current-status <%= statusTone %>"><i aria-hidden="true"></i><span>สถานะปัจจุบัน</span><strong><%= statusLabel %></strong></div>
+              <form action="/admin/orders/<%= order.id %>/status" method="post" class="order-status-form">
+                <label for="order-status">เปลี่ยนสถานะคำสั่งซื้อ</label>
+                <select id="order-status" name="status">
+                  <option value="completed" <%= currentStatus === 'completed' ? 'selected' : '' %>>สำเร็จ</option>
+                  <option value="pending" <%= currentStatus === 'pending' ? 'selected' : '' %>>รอดำเนินการ</option>
+                  <option value="cancelled" <%= currentStatus === 'cancelled' ? 'selected' : '' %>>ยกเลิก</option>
+                </select>
+                <button type="submit">บันทึกสถานะ</button>
+                <small>การเปลี่ยนสถานะจะอัปเดตข้อมูลคำสั่งซื้อในระบบ</small>
+              </form>
+            </section>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
