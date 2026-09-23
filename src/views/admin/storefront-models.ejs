@@ -10,9 +10,9 @@
 <div class="model-studio-page">
   <header class="experiment-page-head model-studio-page-head">
     <div>
-      <span class="experiment-kicker">STOREFRONT STUDIO · MODEL</span>
-      <h1>เลือกโมเดลหน้าร้าน</h1>
-      <p>เลือกรูปแบบที่เข้ากับร้านของคุณ แล้วดูตัวอย่างก่อนนำไปใช้</p>
+      <span class="experiment-kicker">STORE LOOKBOOK · LILTEAM SHOP</span>
+      <h1>เลือกหน้าตาร้านในแบบของคุณ</h1>
+      <p>ลองดูบรรยากาศของแต่ละแบบ แล้วเลือกใช้กับหน้าร้านหลักได้ทันที</p>
     </div>
     <a href="/" class="experiment-button model-studio-store-link">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 4l9 6.5M5.5 9v10h13V9M9 19v-6h6v6"/></svg>
@@ -25,7 +25,7 @@
     <span class="model-studio-safety-icon" aria-hidden="true">
       <svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.2c0 4.5 3.1 7.8 7.5 9.8 4.4-2 7.5-5.3 7.5-9.8V6L12 3Z"/><path d="m9 12 2 2 4-4"/></svg>
     </span>
-    <p><strong>เปลี่ยนเฉพาะหน้าตาร้าน</strong><span>สินค้า รูป ราคา สต็อก และข้อมูลลูกค้ายังคงเดิม</span></p>
+    <p><strong>เลือกสไตล์ ไม่แตะข้อมูลร้าน</strong><span>สินค้า รูป ราคา สต็อก และข้อมูลลูกค้ายังคงเดิม</span></p>
     <a href="/admin/theme">ปรับสีร้านได้ที่ธีม <span aria-hidden="true">→</span></a>
   </div>
 
@@ -49,18 +49,22 @@
 
   <form action="/admin/storefront-models" method="post" class="model-studio-form" data-model-studio-form data-current-model="<%= currentModel %>">
     <fieldset>
-      <legend>เลือกหน้าตาร้านของคุณ</legend>
-      <p class="model-studio-field-hint">เลือกการ์ดเพื่อดูสถานะที่ต้องการ แล้วกดบันทึกเมื่อพร้อม</p>
+      <legend>โมเดลหน้าร้าน</legend>
+      <p class="model-studio-field-hint">เลือกจากรูปแบบที่มีให้ใช้งานจริง · การเปลี่ยนจะยังไม่เผยแพร่จนกว่าจะกดบันทึก</p>
 
       <div class="model-studio-grid">
         <label class="model-studio-option <%= availableCurrentModel === 'classic' ? 'is-current' : '' %>" data-model-option data-model-value="classic" data-model-name="โมเดลมาตรฐาน">
           <input type="radio" name="model" value="classic" required <%= availableCurrentModel === 'classic' ? 'checked' : '' %> />
           <span class="model-studio-preview model-studio-preview-classic" aria-hidden="true">
-            <span class="model-preview-topbar"><i class="model-preview-brand-mark">L</i><b>LILTeam Shop</b><i class="model-preview-menu"></i></span>
-            <span class="model-preview-search"></span>
-            <span class="model-preview-hero"><b>ค้นหาสินค้าที่ใช่</b><i></i></span>
-            <span class="model-preview-products"><i><b></b><small></small></i><i><b></b><small></small></i><i><b></b><small></small></i></span>
-            <span class="model-preview-caption">หน้าร้านมาตรฐาน</span>
+            <span class="model-preview-paper-clips"><i></i><i></i><i></i></span>
+            <span class="model-preview-model-tag">01 <b>CLASSIC SHOP</b></span>
+            <span class="model-preview-window">
+              <span class="model-preview-topbar"><i class="model-preview-brand-mark">L</i><b>LILTeam Shop</b><i class="model-preview-menu"></i></span>
+              <span class="model-preview-search"><i></i><b></b></span>
+              <span class="model-preview-hero"><span><small>ยินดีต้อนรับ</small><b>ร้านของคุณ<br />ในแบบที่คุ้นเคย</b></span><svg viewBox="0 0 120 100" fill="none"><path d="M16 78h89M26 78V45l34-22 34 22v33"/><path d="M18 45 60 18l42 27M39 78V54h17v24m15-24h15v12H71z"/><path d="M17 82c8-9 13-7 16 0m52 0c7-12 16-12 22 0"/><circle cx="93" cy="23" r="8"/></svg></span>
+              <span class="model-preview-products"><i><b></b><small></small></i><i><b></b><small></small></i><i><b></b><small></small></i></span>
+            </span>
+            <span class="model-preview-caption">บรรยากาศเรียบง่าย · ใช้สีธีมร้าน</span>
           </span>
           <span class="model-studio-option-info">
             <span class="model-studio-option-icon" aria-hidden="true">
@@ -74,11 +78,15 @@
         <label class="model-studio-option model-studio-option-rangers <%= availableCurrentModel === 'line-rangers' ? 'is-current' : '' %>" data-model-option data-model-value="line-rangers" data-model-name="LINE Rangers">
           <input type="radio" name="model" value="line-rangers" <%= availableCurrentModel === 'line-rangers' ? 'checked' : '' %> />
           <span class="model-studio-preview model-studio-preview-rangers" aria-hidden="true">
-            <span class="model-preview-topbar"><i class="model-preview-brand-mark">L</i><b>LILTeam Shop</b><i class="model-preview-menu"></i></span>
-            <span class="model-preview-search"></span>
-            <span class="model-preview-hero"><b>LINE RANGERS</b><i></i></span>
-            <span class="model-preview-products"><i><b></b><small></small></i><i><b></b><small></small></i><i><b></b><small></small></i></span>
-            <span class="model-preview-caption">เกม · การ์ด · ทีม</span>
+            <span class="model-preview-paper-clips"><i></i><i></i><i></i></span>
+            <span class="model-preview-model-tag">02 <b>RANGERS EDITION</b></span>
+            <span class="model-preview-window">
+              <span class="model-preview-topbar"><i class="model-preview-brand-mark">L</i><b>LILTeam Shop</b><i class="model-preview-menu"></i></span>
+              <span class="model-preview-search"><i></i><b></b></span>
+              <span class="model-preview-hero"><span><small>GEAR UP · SHOP ON</small><b>ไอเทมเด่น<br />พร้อมลุย!</b></span><svg viewBox="0 0 120 100" fill="none"><path d="M24 42h72l9 36H82l-10-11H49L38 78H15l9-36Z"/><path d="M39 51v15m-7-7h14m35-5h.1m11 10h.1"/><path d="m55 34 5-10 5 10 11 2-8 7 2 11-10-6-10 6 2-11-8-7 11-2Z"/><circle cx="94" cy="21" r="7"/></svg></span>
+              <span class="model-preview-products"><i><b></b><small></small></i><i><b></b><small></small></i><i><b></b><small></small></i></span>
+            </span>
+            <span class="model-preview-caption">โทนเกมเข้ม · การ์ดสินค้าแบบ Rangers</span>
           </span>
           <span class="model-studio-option-info">
             <span class="model-studio-option-icon is-blue" aria-hidden="true">
