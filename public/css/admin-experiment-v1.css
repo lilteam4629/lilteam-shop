@@ -63,6 +63,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-icon-button { width: 38px; height: 38px; display: grid; place-items: center; position: relative; border: 1px solid var(--ex-line); border-radius: 10px; color: var(--ex-muted); background: var(--ex-surface); }
 .experiment-icon-button:hover { color: var(--ex-ink); border-color: #b7c9c1; background: #f4faf7; }
 .experiment-notification-dot { position: absolute; right: 7px; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: var(--ex-orange); }
+.experiment-notification-count { position: absolute; top: -6px; right: -6px; min-width: 18px; height: 18px; display: grid; place-items: center; padding: 0 4px; border: 2px solid #fff; border-radius: 999px; color: #fff; background: var(--ex-orange); font-size: 9px; font-weight: 800; line-height: 1; }
 .experiment-content { width: min(1500px, 100%); padding: 30px clamp(18px, 3vw, 42px) 42px; margin: 0 auto; }
 .experiment-page-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 20px; margin-bottom: 22px; }
 .experiment-page-head h1, .experiment-panel h2, .experiment-panel h3 { margin: 0; letter-spacing: -.04em; font-family: var(--ex-display); }
