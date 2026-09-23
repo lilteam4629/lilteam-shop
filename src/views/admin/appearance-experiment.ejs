@@ -73,14 +73,6 @@
             <p class="as-file-info" data-as-file-info aria-live="polite">ยังไม่ได้เลือกไฟล์</p><p class="as-file-error" data-as-file-error hidden></p>
             <button class="experiment-button primary" type="submit">อัปโหลดแบนเนอร์</button>
           </form>
-          <details class="as-banner-details">
-            <summary>ตั้งค่าการแสดงแบนเนอร์</summary>
-            <form class="as-banner-settings" action="/admin/hero-banner/mode" method="post">
-            <label class="as-field"><span>ลิงก์เมื่อคลิกแบนเนอร์ <small>(ไม่บังคับ)</small></span><input type="text" name="bannerLink" value="<%= heroSettings.bannerLink || '' %>" placeholder="/products หรือ https://example.com"></label>
-            <fieldset><legend>รูปแบบส่วนบนหน้าแรก</legend><label><input type="radio" name="mode" value="default" <%= heroSettings.mode !== 'banner' ? 'checked' : '' %>><span><b>การ์ดเกมแบบเดิม</b><small>แสดงส่วนเกมตามปกติ</small></span></label><label><input type="radio" name="mode" value="banner" <%= heroSettings.mode === 'banner' ? 'checked' : '' %>><span><b>ใช้ภาพแบนเนอร์</b><small>ใช้ภาพแทนการ์ดเกม</small></span></label></fieldset>
-            <button class="experiment-button primary" type="submit">บันทึกรูปแบบหน้าแรก</button>
-            </form>
-          </details>
         </article>
 
         <article class="as-card" data-as-card data-search="พื้นหลังหน้าร้าน storefront background">
@@ -107,6 +99,14 @@
           </form><% if (authAppearance.backgroundImage) { %><form action="/admin/auth-background/remove" method="post" data-experiment-confirm="นำภาพพื้นหลังเฉพาะหน้าเข้าสู่ระบบออก และกลับไปใช้พื้นหลังหน้าร้านใช่หรือไม่?"><button class="experiment-button as-remove" type="submit">กลับไปใช้ภาพหน้าร้าน</button></form><% } %></div>
         </article>
       </div>
+      <details class="as-banner-details as-banner-details-panel">
+        <summary><span><strong>ตั้งค่าการแสดงแบนเนอร์</strong><small>เลือกรูปแบบส่วนบนหน้าแรกและลิงก์เมื่อคลิก</small></span></summary>
+        <form class="as-banner-settings" action="/admin/hero-banner/mode" method="post">
+          <label class="as-field"><span>ลิงก์เมื่อคลิกแบนเนอร์ <small>(ไม่บังคับ)</small></span><input type="text" name="bannerLink" value="<%= heroSettings.bannerLink || '' %>" placeholder="/products หรือ https://example.com"></label>
+          <fieldset><legend>รูปแบบส่วนบนหน้าแรก</legend><label><input type="radio" name="mode" value="default" <%= heroSettings.mode !== 'banner' ? 'checked' : '' %>><span><b>การ์ดเกมแบบเดิม</b><small>แสดงส่วนเกมตามปกติ</small></span></label><label><input type="radio" name="mode" value="banner" <%= heroSettings.mode === 'banner' ? 'checked' : '' %>><span><b>ใช้ภาพแบนเนอร์</b><small>ใช้ภาพแทนการ์ดเกม</small></span></label></fieldset>
+          <button class="experiment-button primary" type="submit">บันทึกรูปแบบหน้าแรก</button>
+        </form>
+      </details>
       <div class="as-no-results" data-as-no-results hidden>ไม่พบส่วนรูปภาพที่ตรงกับคำค้นหา</div>
       <p class="as-note"><span aria-hidden="true">i</span> รูปที่อัปโหลดจะถูกเก็บในระบบร้าน ไม่หายเมื่อ Deploy · หน้านี้จัดการเฉพาะสื่อ ไม่เปลี่ยนธีมสีหรือข้อความประกาศ</p>
     </main>

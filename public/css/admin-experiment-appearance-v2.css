@@ -40,11 +40,21 @@
 .as-banner-details[open] > summary::after { content: "−"; }
 .as-banner-details > summary:focus-visible { outline: 3px solid rgba(15,159,118,.5); outline-offset: 2px; }
 .as-banner-details .as-banner-settings { margin: 0; padding: 12px; border-top: 1px solid var(--ex-line); }
+.as-banner-details-panel { margin: 14px 0 0; overflow: hidden; box-shadow: var(--ex-shadow); }
+.as-banner-details-panel > summary { min-height: 60px; padding: 8px 16px; }
+.as-banner-details-panel > summary > span { display: grid; gap: 4px; }
+.as-banner-details-panel > summary strong { font-size: 13px; }
+.as-banner-details-panel > summary small { color: var(--ex-muted); font-size: 11px; font-weight: 500; }
+.as-banner-details-panel .as-banner-settings { grid-template-columns: minmax(180px, .8fr) minmax(0, 1.6fr) auto; align-items: end; }
+.as-banner-details-panel .as-banner-settings fieldset { align-self: end; }
+.as-banner-details-panel .as-banner-settings > .experiment-button { min-height: 44px; white-space: nowrap; }
 .as-card-footer .as-upload-form .experiment-button { min-height: 44px; }
 @media (max-width: 900px) {
   .as-grid { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 700px) {
+  .as-banner-details-panel .as-banner-settings { grid-template-columns: minmax(0, 1fr); }
+  .as-banner-details-panel .as-banner-settings > .experiment-button { width: 100%; }
   .as-summary-card small { font-size: 10px; }
   .as-summary-card strong { font-size: 12px; }
   .as-preview-logo,
