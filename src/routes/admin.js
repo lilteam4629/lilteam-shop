@@ -2558,8 +2558,11 @@ router.get('/effects', (req, res) => {
 router.get('/appearance', (req, res) => {
   if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
+    const recommendedCategories = (store.data.recommendedCategories || []).filter(category => category.enabled !== false);
     return res.render('admin/appearance-experiment', {
       title: 'รูปและแบนเนอร์', active: 'appearance',
+      recommendedCategories: recommendedCategories.slice(0, 4),
+      recommendedCategoryTotal: recommendedCategories.length,
       successMessages: req.flash('success'), errorMessages: req.flash('error'),
     });
   }

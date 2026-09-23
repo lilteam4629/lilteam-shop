@@ -4,6 +4,8 @@
   const storefrontAppearance = settings.storefrontAppearance || {};
   const mediaCount = [settings.branding && settings.branding.logoImage, heroSettings.bannerImage,
     storefrontAppearance.backgroundImage, authAppearance.backgroundImage].filter(Boolean).length;
+  const appearanceCategories = Array.isArray(recommendedCategories) ? recommendedCategories : [];
+  const appearanceCategoryTotal = Number(recommendedCategoryTotal || appearanceCategories.length);
   const notices = [].concat(successMessages || [], errorMessages || []);
 %>
 <link rel="stylesheet" href="<%= asset('css/admin-experiment-appearance-v1.css') %>" />
@@ -40,6 +42,47 @@
         <article class="as-summary-card"><span class="as-summary-icon is-gold" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m5 16 4-4 3 3 3-5 4 6"/></svg></span><div><small>หน้าแรก</small><strong><%= heroSettings.mode === 'banner' ? 'แสดงแบนเนอร์' : 'แสดงการ์ดสินค้า' %></strong></div></article>
         <article class="as-summary-card"><span class="as-summary-icon is-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m5 17 5-5 3 3 2-2 4 4"/></svg></span><div><small>พื้นหลังหน้าร้าน</small><strong><%= storefrontAppearance.backgroundImage ? 'กำหนดรูปแล้ว' : 'ใช้สีธีมร้าน' %></strong></div></article>
         <article class="as-summary-card"><span class="as-summary-icon is-violet" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8h6M8 17c.5-2 1.8-3 4-3s3.5 1 4 3"/><circle cx="12" cy="10.5" r="1.5"/></svg></span><div><small>หน้าเข้าสู่ระบบ</small><strong><%= authAppearance.backgroundImage ? 'กำหนดรูปแล้ว' : 'ใช้ภาพหน้าร้าน' %></strong></div></article>
+      </section>
+
+      <section class="as-menu-studio" aria-labelledby="as-menu-title">
+        <header class="as-menu-studio__head">
+          <div><span class="experiment-kicker">LILTEAM STORE · LIVE SHORTCUTS</span><h2 id="as-menu-title">เมนูหน้าร้านในสไตล์ของเรา</h2><p>การ์ดตัวอย่างโทนเกมมิ่งที่พาลูกค้าไปยังหน้าร้านจริง และหมวดแนะนำที่คุณตั้งไว้</p></div>
+          <span class="as-menu-studio__badge"><i></i> ลิงก์ใช้งานจริง</span>
+        </header>
+        <div class="as-menu-grid" aria-label="ตัวอย่างเมนูลัดหน้าร้าน">
+          <a class="as-menu-card as-menu-card--catalog" href="/products">
+            <span class="as-menu-card__index">01 <i aria-hidden="true">↗</i></span>
+            <span class="as-menu-card__art" aria-hidden="true"><svg viewBox="0 0 96 78"><path class="as-art-shadow" d="M23 56 41 16h37L59 56z"/><path class="as-art-panel" d="M17 53 35 13h37L54 53z"/><path class="as-art-side" d="M17 53h37l6 10H23z"/><path class="as-art-line" d="M43 26h17M39 34h17M35 42h17"/><circle class="as-art-dot" cx="66" cy="48" r="8"/><path class="as-art-line" d="M63 48h6m-3-3v6"/></svg></span>
+            <span class="as-menu-card__copy"><strong>คลังสินค้า</strong><small>เลือกดูไอเทมและสินค้าในร้าน</small></span>
+          </a>
+          <a class="as-menu-card as-menu-card--wallet" href="/account/topup">
+            <span class="as-menu-card__index">02 <i aria-hidden="true">↗</i></span>
+            <span class="as-menu-card__art" aria-hidden="true"><svg viewBox="0 0 96 78"><rect class="as-art-shadow" x="18" y="23" width="54" height="39" rx="9"/><rect class="as-art-panel" x="14" y="17" width="54" height="39" rx="9"/><path class="as-art-side" d="M14 29h54v9H14z"/><circle class="as-art-coin" cx="67" cy="23" r="15"/><path class="as-art-line" d="M67 15v16m5-12c-1-4-9-4-10 0-1 5 11 3 10 8-1 5-9 5-11 1"/></svg></span>
+            <span class="as-menu-card__copy"><strong>เติมเงิน</strong><small>เพิ่มยอดเข้ากระเป๋าได้ทันที</small></span>
+          </a>
+          <a class="as-menu-card as-menu-card--orders" href="/account/orders">
+            <span class="as-menu-card__index">03 <i aria-hidden="true">↗</i></span>
+            <span class="as-menu-card__art" aria-hidden="true"><svg viewBox="0 0 96 78"><path class="as-art-shadow" d="M24 13h45v52l-7-4-7 4-8-4-7 4-8-4-8 4z"/><path class="as-art-panel" d="M18 8h45v52l-7-4-7 4-8-4-7 4-8-4-8 4z"/><path class="as-art-line" d="M29 23h22m-22 9h24m-24 9h16"/><path class="as-art-side" d="m52 41 6 6 12-15"/></svg></span>
+            <span class="as-menu-card__copy"><strong>คำสั่งซื้อ</strong><small>ติดตามสถานะรายการของคุณ</small></span>
+          </a>
+        </div>
+        <div class="as-category-preview">
+          <div class="as-category-preview__head"><div><span>YOUR COLLECTIONS</span><strong>หมวดแนะนำบนหน้าร้าน</strong></div><a href="/admin/recommended-categories?ui=experiment">จัดการหมวด <span aria-hidden="true">→</span></a></div>
+          <% if (appearanceCategories.length) { %>
+            <div class="as-category-strip">
+              <% appearanceCategories.forEach((category, index) => { %>
+                <a class="as-category-chip" href="/products?recommended=<%= encodeURIComponent(category.id) %>">
+                  <span class="as-category-chip__image"><% if (category.imageUrl) { %><img src="<%= category.imageUrl %>" alt="" loading="lazy" decoding="async"><% } else { %><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m4 8 8-4 8 4-8 4-8-4Zm0 0v9l8 4 8-4V8m-8 4v9"/></svg><% } %></span>
+                  <span class="as-category-chip__copy"><small>หมวด <%= String(index + 1).padStart(2, '0') %></small><strong><%= category.title %></strong><em><%= Number(category.count || 0).toLocaleString() %> รายการ</em></span>
+                  <span class="as-category-chip__arrow" aria-hidden="true">↗</span>
+                </a>
+              <% }); %>
+              <% if (appearanceCategoryTotal > appearanceCategories.length) { %><a class="as-category-more" href="/admin/recommended-categories?ui=experiment">ดูอีก <%= appearanceCategoryTotal - appearanceCategories.length %> หมวด <span aria-hidden="true">→</span></a><% } %>
+            </div>
+          <% } else { %>
+            <div class="as-category-empty"><span aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m4 8 8-4 8 4-8 4-8-4Zm0 0v9l8 4 8-4V8m-8 4v9"/></svg></span><p><strong>ยังไม่มีหมวดแนะนำ</strong><small>สร้างหมวดสินค้าเพื่อแสดงการ์ดแบบนี้บนหน้าร้าน</small></p><a href="/admin/recommended-categories?ui=experiment">สร้างหมวดแรก <span aria-hidden="true">→</span></a></div>
+          <% } %>
+        </div>
       </section>
 
       <div class="as-section-heading"><div><span class="experiment-kicker">MEDIA LIBRARY</span><h2>สื่อของร้าน</h2><p>อัปโหลดภาพใหม่เพื่อแทนรูปปัจจุบัน หรือดูตัวอย่างก่อนบันทึก</p></div><label class="as-search"><span aria-hidden="true">⌕</span><input type="search" aria-label="ค้นหาประเภทสื่อ" placeholder="ค้นหาโลโก้ แบนเนอร์ หรือพื้นหลัง..." data-as-search></label></div>
