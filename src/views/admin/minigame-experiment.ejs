@@ -52,6 +52,7 @@
             const endpoint = '/admin/minigame/live-catalog';
             const status = document.getElementById('mgx-live-catalog-status');
             let pending = null;
+            let selectedProductId = null;
             const catalogPreview = {
               load: function (url) {
                 if (!pending) {
@@ -66,7 +67,18 @@
                     .catch(function (error) { pending = null; throw error; });
                 }
                 return pending;
-              }
+              },
+              select: function (productId) {
+                selectedProductId = productId === null || productId === undefined ? null : String(productId);
+              },
+              pick: function (products) {
+                const items = Array.isArray(products) ? products : [];
+                const selected = selectedProductId === null ? null : items.find(function (product) {
+                  return String(product.id) === selectedProductId;
+                });
+                return selected || items[Math.floor(Math.random() * items.length)] || null;
+              },
+              selectedId: function () { return selectedProductId; }
             };
             window.lilteamLiveCatalogPreview = catalogPreview;
             if (status) {
@@ -80,9 +92,121 @@
             }
           })();
         </script>
+        <section class="mgx-product-picker" aria-labelledby="mgx-live-products-title">
+          <div class="mgx-product-picker-head">
+            <div><span class="mgx-eyebrow">LIVE STORE CATALOG</span><h3 id="mgx-live-products-title">เลือกสินค้าจริงเพื่อทดสอบ</h3><p>เลือกสินค้าเพื่อดูภาพบนกล่องและราง หรือปล่อยให้สุ่มจากสินค้าทั้งหมด</p></div>
+            <button class="mgx-product-random is-selected" id="mgx-product-random" type="button" aria-pressed="true">สุ่มจากสินค้าทั้งหมด</button>
+          </div>
+          <div class="mgx-product-grid" id="mgx-live-products" aria-label="สินค้าจริงจากหน้าร้าน" aria-busy="true">
+            <% for (let i = 0; i < 4; i++) { %><div class="mgx-product-skeleton" aria-hidden="true"><span></span><i></i><b></b><small></small></div><% } %>
+          </div>
+          <div class="mgx-product-picker-footer"><p id="mgx-product-selection" role="status" aria-live="polite" aria-atomic="true">กำลังโหลดสินค้าจากหน้าร้าน…</p><button class="mgx-products-more" id="mgx-products-more" type="button" hidden>แสดงสินค้าเพิ่มเติม</button></div>
+        </section>
         <div class="mgx-game-tabs" role="tablist" aria-label="เลือกเกมที่ต้องการทดลอง"><button class="mgx-game-tab is-active" type="button" role="tab" id="mgx-tab-box" aria-selected="true" aria-controls="mgx-panel-box" data-mgx-game-tab="box"><span class="mgx-game-tab-icon box"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-5 9 5v9l-9 5-9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v9"/></svg></span><span><strong><%= game.title || 'เกมเปิดกล่อง' %></strong><small>ทดลองสุ่มรางวัลจากกล่อง</small></span><span class="mgx-tab-arrow" aria-hidden="true">→</span></button><button class="mgx-game-tab" type="button" role="tab" id="mgx-tab-rail" aria-selected="false" aria-controls="mgx-panel-rail" data-mgx-game-tab="rail"><span class="mgx-game-tab-icon rail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM8 9v6m4-6v6m4-6v6"/></svg></span><span><strong><%= game.railTitle || 'เกมรางเลื่อน' %></strong><small>ทดลองเลื่อนดูผลรางวัล</small></span><span class="mgx-tab-arrow" aria-hidden="true">→</span></button></div>
-        <div class="mgx-preview-panel experiment-card" id="mgx-panel-box" role="tabpanel" aria-labelledby="mgx-tab-box" data-mgx-game-panel="box"><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.title || 'เกมเปิดกล่อง' %></h3><p>สุ่มแสดงสินค้าจริงที่มีรูปและสต็อกจากเว็บร้าน เพื่อดูเอฟเฟกต์เท่านั้น</p></div><span class="mgx-mode-tag">ตัวอย่างปลอดภัย</span></div><%- include('../partials/minigame-widget', { endpoint: '/admin/minigame/preview', catalogEndpoint: '/admin/minigame/live-catalog', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> อ่านข้อมูลสินค้าจริงเท่านั้น · สุ่มตัวอย่างโอกาสเท่ากัน ไม่ใช่อัตรารางวัลจริง · ไม่ตัดเครดิต/สต็อกและไม่บันทึกข้อมูลลงเว็บจริง</p></div>
-        <div class="mgx-preview-panel experiment-card" id="mgx-panel-rail" role="tabpanel" aria-labelledby="mgx-tab-rail" data-mgx-game-panel="rail" hidden><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.railTitle || 'เกมรางเลื่อน' %></h3><p>ใช้รูปสินค้าจริงที่มีสต็อก แสดงบนรางและเลื่อนหยุดตรงช่องกลาง</p></div><span class="mgx-mode-tag">ตัวอย่างปลอดภัย</span></div><%- include('../partials/minigame-rail', { endpoint: '/admin/minigame/preview?mode=rail', catalogEndpoint: '/admin/minigame/live-catalog', cost: 0, prizes: prizes.filter(prize => prize.active && (prize.gameType || 'box') === 'rail').map(prize => ({ ...prize, image: prize.resolvedImage || prize.image || null })), showLogin: false, balance: null }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> สุ่มตัวอย่างโอกาสเท่ากันเพื่อดูภาพและเอฟเฟกต์ ไม่ใช่อัตรารางวัลจริง · ไม่ตัดเครดิต/สต็อกและไม่บันทึกข้อมูลลงเว็บจริง</p></div>
+        <div class="mgx-preview-panel experiment-card" id="mgx-panel-box" role="tabpanel" aria-labelledby="mgx-tab-box" data-mgx-game-panel="box"><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.title || 'เกมเปิดกล่อง' %></h3><p>แสดงสินค้าจริงที่เลือก หรือสุ่มดูภาพและเอฟเฟกต์จากแค็ตตาล็อก</p></div><span class="mgx-mode-tag">ตัวอย่างปลอดภัย</span></div><%- include('../partials/minigame-widget', { endpoint: '/admin/minigame/preview', catalogEndpoint: '/admin/minigame/live-catalog', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, mainSiteExperience: true }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> ใช้รูปและข้อมูลสินค้าจริง · ผลทดลองไม่ใช่อัตรารางวัลจริง · ไม่ตัดเครดิต/สต็อกและไม่บันทึกประวัติ</p></div>
+        <div class="mgx-preview-panel experiment-card" id="mgx-panel-rail" role="tabpanel" aria-labelledby="mgx-tab-rail" data-mgx-game-panel="rail" hidden><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.railTitle || 'เกมรางเลื่อน' %></h3><p>รางแสดงสินค้าจริงและเลื่อนไปหยุดที่สินค้าที่เลือก</p></div><span class="mgx-mode-tag">ตัวอย่างปลอดภัย</span></div><%- include('../partials/minigame-rail', { endpoint: '/admin/minigame/preview?mode=rail', catalogEndpoint: '/admin/minigame/live-catalog', cost: null, prizes: prizes.filter(prize => prize.active && (prize.gameType || 'box') === 'rail').map(prize => ({ ...prize, image: prize.resolvedImage || prize.image || null })), showLogin: false, balance: null, mainSiteExperience: true }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> ใช้รูปและข้อมูลสินค้าจริง · ผลทดลองไม่ใช่อัตรารางวัลจริง · ไม่ตัดเครดิต/สต็อกและไม่บันทึกประวัติ</p></div>
+        <script>
+          (function () {
+            const endpoint = '/admin/minigame/live-catalog';
+            const catalogPreview = window.lilteamLiveCatalogPreview;
+            const grid = document.getElementById('mgx-live-products');
+            const status = document.getElementById('mgx-product-selection');
+            const randomButton = document.getElementById('mgx-product-random');
+            const moreButton = document.getElementById('mgx-products-more');
+            if (!catalogPreview || !grid || !status || !randomButton) return;
+
+            let products = [];
+            let shownCount = 12;
+            const svgNs = 'http://www.w3.org/2000/svg';
+            function selectedId() { return catalogPreview.selectedId(); }
+            function render() {
+              grid.replaceChildren();
+              const selected = selectedId();
+              randomButton.classList.toggle('is-selected', selected === null);
+              randomButton.setAttribute('aria-pressed', String(selected === null));
+              products.slice(0, shownCount).forEach(function (product) {
+                const isSelected = selected !== null && String(product.id) === selected;
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.className = 'mgx-product-card' + (isSelected ? ' is-selected' : '');
+                card.setAttribute('aria-pressed', String(isSelected));
+                card.setAttribute('aria-label', 'เลือก ' + product.title + ' สำหรับตัวอย่างเกม');
+                const media = document.createElement('span');
+                media.className = 'mgx-product-media';
+                const image = document.createElement('img');
+                image.src = product.image;
+                image.alt = product.title;
+                image.width = 120;
+                image.height = 120;
+                image.loading = 'lazy';
+                image.decoding = 'async';
+                image.addEventListener('error', function () {
+                  const icon = document.createElementNS(svgNs, 'svg');
+                  icon.setAttribute('viewBox', '0 0 24 24');
+                  icon.setAttribute('aria-hidden', 'true');
+                  icon.innerHTML = '<path d="M4 5h16v14H4zM4 15l4-4 4 4 3-3 5 5"/><circle cx="9" cy="9" r="1"/>';
+                  media.replaceChildren(icon);
+                }, { once: true });
+                media.appendChild(image);
+                const name = document.createElement('span');
+                name.className = 'mgx-product-name';
+                name.textContent = product.title;
+                const price = document.createElement('span');
+                price.className = 'mgx-product-price';
+                price.textContent = '฿' + Number(product.price || 0).toLocaleString('th-TH');
+                const stock = document.createElement('span');
+                stock.className = 'mgx-product-stock';
+                stock.textContent = 'พร้อมขาย ' + Number(product.availableStock || 0).toLocaleString('th-TH');
+                card.append(media, name, price, stock);
+                card.addEventListener('click', function () {
+                  catalogPreview.select(product.id);
+                  render();
+                  status.textContent = 'เลือก “' + product.title + '” · ทั้งกล่องและรางจะใช้สินค้านี้ในการแสดงตัวอย่าง';
+                });
+                grid.appendChild(card);
+              });
+              grid.setAttribute('aria-busy', 'false');
+              moreButton.hidden = shownCount >= products.length;
+              moreButton.textContent = 'แสดงเพิ่มอีก ' + Math.min(12, products.length - shownCount) + ' รายการ';
+            }
+            randomButton.addEventListener('click', function () {
+              catalogPreview.select(null);
+              render();
+              status.textContent = 'โหมดสุ่มจากสินค้าจริงทั้งหมด ' + products.length + ' รายการ · ไม่ตัดสต็อก';
+            });
+            moreButton.addEventListener('click', function () {
+              shownCount += 12;
+              render();
+            });
+            function showError(error) {
+              grid.replaceChildren();
+              grid.setAttribute('aria-busy', 'false');
+              const empty = document.createElement('div');
+              empty.className = 'mgx-product-empty';
+              empty.textContent = error.message || 'โหลดสินค้าจริงไม่สำเร็จ';
+              grid.appendChild(empty);
+              status.textContent = 'เชื่อมแค็ตตาล็อกไม่ได้ · ลองโหลดใหม่ได้';
+              moreButton.hidden = true;
+              const retry = document.createElement('button');
+              retry.type = 'button';
+              retry.className = 'mgx-product-random';
+              retry.textContent = 'ลองโหลดสินค้าอีกครั้ง';
+              retry.addEventListener('click', loadCatalog, { once: true });
+              grid.appendChild(retry);
+            }
+            function loadCatalog() {
+              grid.setAttribute('aria-busy', 'true');
+              status.textContent = 'กำลังโหลดสินค้าจากหน้าร้าน…';
+              catalogPreview.load(endpoint).then(function (catalog) {
+                products = catalog.products;
+                if (!products.length) throw new Error('ยังไม่มีสินค้าที่มีรูปและสต็อกพร้อมทดสอบ');
+                render();
+                status.textContent = 'สุ่มจากสินค้าจริงทั้งหมด ' + products.length + ' รายการ · เลือกสินค้าเพื่อทดสอบเฉพาะรายการได้';
+              }).catch(showError);
+            }
+            loadCatalog();
+          })();
+        </script>
       </section>
 
       <details class="experiment-card mgx-settings" id="mgx-settings">

@@ -271,9 +271,10 @@
         try {
           const catalog = await window.lilteamLiveCatalogPreview.load(catalogEndpoint);
           if (!Array.isArray(catalog.products) || !catalog.products.length) throw new Error('เว็บจริงไม่มีสินค้าพร้อมทดลอง');
-          const product = catalog.products[Math.floor(Math.random() * catalog.products.length)];
+          const product = window.lilteamLiveCatalogPreview.pick(catalog.products);
+          if (!product) throw new Error('ไม่มีสินค้าจริงพร้อมทดลอง');
           response = { ok: true };
-          data = { prizeName: product.title, image: product.image, availableStock: product.availableStock, isWin: true, isPreview: true, fromLiveCatalog: true };
+          data = { prizeName: product.title, image: product.image, productId: product.id, price: product.price, availableStock: product.availableStock, isWin: true, isPreview: true, fromLiveCatalog: true };
         } catch (err) {
           response = { ok: false };
           data = { error: err.message || 'อ่านสินค้าจริงไม่สำเร็จ' };

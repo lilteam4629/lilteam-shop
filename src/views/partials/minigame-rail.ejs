@@ -1,5 +1,6 @@
 <%
-  const railCost = Number(cost) || 0;
+  const railCost = typeof cost === 'number' && Number.isFinite(cost) ? cost : null;
+  const railBalance = typeof balance === 'number' && Number.isFinite(balance) ? balance : null;
   const railPrizes = (prizes || []).map(p => ({ name: p.name, image: p.image || null, isPrize: Boolean(p.isPrize) }));
   const railCatalogEndpoint = typeof catalogEndpoint === 'undefined' ? '' : catalogEndpoint;
   const railMainSiteExperience = typeof mainSiteExperience !== 'undefined' && mainSiteExperience === true;
@@ -15,8 +16,8 @@
   <% if (showLogin) { %>
     <a href="/login" class="rail-button block text-center">เข้าสู่ระบบเพื่อเล่น</a>
   <% } else { %>
-    <button type="button" class="rail-button rail-play w-full" data-endpoint="<%= endpoint %>"<% if (railCatalogEndpoint) { %> data-catalog-endpoint="<%= railCatalogEndpoint %>" disabled aria-describedby="mgx-live-catalog-status"<% } %>><% if (railMainSiteExperience) { %><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01M9 17h6"/></svg> เริ่มเลื่อน<% } else { %>🎰 เริ่มเลื่อน<% } %> (฿<%= railCost.toLocaleString() %>)</button>
-    <p class="text-xs text-[var(--text-4)] text-center mt-2">เครดิตคงเหลือ: ฿<span class="rail-balance"><%= Number(balance || 0).toLocaleString() %></span></p>
+    <button type="button" class="rail-button rail-play w-full" data-endpoint="<%= endpoint %>"<% if (railCatalogEndpoint) { %> data-catalog-endpoint="<%= railCatalogEndpoint %>" disabled aria-describedby="mgx-live-catalog-status"<% } %>><% if (railMainSiteExperience) { %><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01M9 17h6"/></svg> เริ่มเลื่อน<% } else { %>🎰 เริ่มเลื่อน<% } %><% if (railCost !== null) { %> (฿<%= railCost.toLocaleString() %>)<% } %></button>
+    <% if (railBalance !== null) { %><p class="text-xs text-[var(--text-4)] text-center mt-2">เครดิตคงเหลือ: ฿<span class="rail-balance"><%= railBalance.toLocaleString() %></span></p><% } %>
   <% } %>
 </div>
 
@@ -135,7 +136,7 @@
       if(catalogPreview){
         catalogPreview.load(catalogEndpoint).then(function(catalog){
           if(!game.isConnected||!Array.isArray(catalog.products))return;
-          prizes=catalog.products.map(function(product){return {name:product.title,image:product.image||null,isPrize:true,productId:product.id,availableStock:product.availableStock}});
+          prizes=catalog.products.map(function(product){return {name:product.title,image:product.image||null,isPrize:true,productId:product.id,price:product.price,availableStock:product.availableStock}});
           seed();button.disabled=!prizes.length;
           if(result)result.textContent=prizes.length?'พร้อมทดลองจากสินค้าจริง '+prizes.length+' รายการ · ไม่ตัดสต็อก':'เว็บจริงไม่มีสินค้าพร้อมทดลอง';
         }).catch(function(error){if(result)result.textContent=error.message||'อ่านสินค้าจริงไม่สำเร็จ';});
@@ -149,7 +150,7 @@
     button.addEventListener('click',async function(){
       if(spinning||button.disabled)return;
       spinning=true;game.classList.add('is-spinning');button.disabled=true;button.setAttribute('aria-busy','true');result.textContent='กำลังสุ่ม...';seed();
-      let response,data;if(catalogEndpoint){try{const catalog=await window.lilteamLiveCatalogPreview.load(catalogEndpoint);if(!Array.isArray(catalog.products)||!catalog.products.length)throw new Error('เว็บจริงไม่มีสินค้าพร้อมทดลอง');const product=catalog.products[Math.floor(Math.random()*catalog.products.length)];response={ok:true};data={prizeName:product.title,image:product.image,availableStock:product.availableStock,isWin:true,isPreview:true,fromLiveCatalog:true}}catch(e){response={ok:false};data={error:e.message||'อ่านสินค้าจริงไม่สำเร็จ'}}}else{activeController=new AbortController();requestTimer=setTimeout(function(){activeController&&activeController.abort()},10000);try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:activeController.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimer);requestTimer=0;activeController=null}}
+      let response,data;if(catalogEndpoint){try{const catalog=await window.lilteamLiveCatalogPreview.load(catalogEndpoint);if(!Array.isArray(catalog.products)||!catalog.products.length)throw new Error('เว็บจริงไม่มีสินค้าพร้อมทดลอง');const product=window.lilteamLiveCatalogPreview.pick(catalog.products);if(!product)throw new Error('ไม่มีสินค้าจริงพร้อมทดลอง');response={ok:true};data={prizeName:product.title,image:product.image,productId:product.id,price:product.price,availableStock:product.availableStock,isWin:true,isPreview:true,fromLiveCatalog:true}}catch(e){response={ok:false};data={error:e.message||'อ่านสินค้าจริงไม่สำเร็จ'}}}else{activeController=new AbortController();requestTimer=setTimeout(function(){activeController&&activeController.abort()},10000);try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:activeController.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimer);requestTimer=0;activeController=null}}
       if(!response||!response.ok||!data){releaseSpin((data&&data.error)||'ระบบตอบช้า กรุณากดลองใหม่',false);return}
       const winner={name:data.prizeName,image:data.image||null,isPrize:data.isWin};
       const winnerIndex=20;const total=24;

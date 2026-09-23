@@ -13,6 +13,8 @@ const homeView = read('src/views/shop/home.ejs');
 const adminMobileCss = read('public/css/admin-mobile-v1.css');
 const minigameWidget = read('src/views/partials/minigame-widget.ejs');
 const minigameRail = read('src/views/partials/minigame-rail.ejs');
+const minigameExperiment = read('src/views/admin/minigame-experiment.ejs');
+const minigameExperimentCss = read('public/css/admin-experiment-minigame-v1.css');
 const filterPanel = read('src/views/partials/filter-panel.ejs');
 const productDetail = read('src/views/shop/product-detail.ejs');
 const productForm = read('src/views/admin/product-form.ejs');
@@ -59,6 +61,14 @@ assert.match(minigameRail, /\.rail-window{[^}]*overflow:hidden/, 'rail preview m
 assert.match(minigameRail, /new AbortController\(\)[\s\S]{0,180}10000/, 'rail preview must time out a stalled request');
 assert.match(minigameRail, /addEventListener\(['"]transitionend['"],onTransitionEnd/, 'rail preview must finish from the real transition event');
 assert.match(minigameRail, /pageshow[\s\S]{0,180}releaseSpin/, 'rail preview must recover from browser cache with an enabled button');
+assert.match(minigameExperiment, /id="mgx-live-products"/, 'main admin minigame must expose the real product catalog before play');
+assert.match(minigameExperiment, /catalogPreview\.select\(product\.id\)/, 'admin can select a real product for both minigame previews');
+assert.match(minigameExperiment, /product\.availableStock/, 'real catalog cards must show live available stock');
+assert.match(minigameWidget, /lilteamLiveCatalogPreview\.pick\(catalog\.products\)/, 'box preview must honor the selected real product');
+assert.match(minigameRail, /lilteamLiveCatalogPreview\.pick\(catalog\.products\)/, 'rail preview must honor the selected real product');
+assert.match(minigameExperimentCss, /\.mgx-product-grid\{display:grid;grid-template-columns:repeat\(6/, 'live catalog cards must use a responsive grid');
+assert.match(minigameExperimentCss, /prefers-reduced-motion:reduce[^\n]*mgx-product-skeleton/, 'catalog loading animation must respect reduced motion');
+assert.match(minigameExperimentCss, /\.mgx-preview-panel \.mg-result-el\{[^}]*text-align:center/, 'box preview status must remain centered and readable');
 
 assert.match(filterPanel, /window\.location\.assign\(query\?['"]\/products\?tags=/, 'filter selection must navigate to a server-filtered listing');
 assert.doesNotMatch(filterPanel, /if\(cards\.length\)\{apply\(\);return\}/, 'filter selection must not remain client-only');
