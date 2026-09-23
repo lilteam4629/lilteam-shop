@@ -1,10 +1,12 @@
 <!-- Slip Verification API Provider Hub Header -->
 <% const activeProvider = effectiveProvider || payment.slipProvider || 'auto'; %>
-<p class="mb-4 rounded-xl border p-4"><%= isMainSite ? 'เว็บหลักใช้ API ของคุณเอง' : ((payment.slipApiMode || 'shared') === 'shared' ? 'ร้านนี้ใช้ระบบตรวจสลิปกลางของเว็บ รวมพูล SlipCheck ทุกคีย์ให้อัตโนมัติและไม่ต้องกรอกคีย์ในร้านเช่า' : 'ร้านนี้ใช้ API และโควตาของตัวเอง') %></p>
-<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+<% if (isMainSite) { %><div class="slip-owner-page" data-slip-owner-page><% } %>
+<% if (isMainSite) { %><style>@import url("<%= asset('css/admin-slip-verification-owner-v1.css') %>");</style><% } %>
+<p data-slip-owner-intro class="mb-4 rounded-xl border p-4"><%= isMainSite ? 'เว็บหลักใช้ API ของคุณเอง' : ((payment.slipApiMode || 'shared') === 'shared' ? 'ร้านนี้ใช้ระบบตรวจสลิปกลางของเว็บ รวมพูล SlipCheck ทุกคีย์ให้อัตโนมัติและไม่ต้องกรอกคีย์ในร้านเช่า' : 'ร้านนี้ใช้ API และโควตาของตัวเอง') %></p>
+<div data-slip-owner-header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
     <div class="flex items-center gap-2">
-      <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]">🧾 ระบบตรวจสอบสลิปด้วย API</h1>
+      <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)]"><% if (isMainSite) { %><svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.8h8l4 4V20a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5.8a2 2 0 0 1 2-2Z"/><path d="M14.5 4v4.5H19M8.5 13h7M8.5 16.5h7"/></svg><% } else { %>🧾 <% } %>ระบบตรวจสอบสลิปด้วย API</h1>
       <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
         Multi-Provider
       </span>
@@ -21,16 +23,17 @@
 </div>
 
 <!-- Active Provider Notification Card -->
-<div class="bg-gradient-to-r from-[var(--gold)]/10 via-[var(--card)] to-[var(--card)] border border-[var(--gold)]/30 rounded-2xl p-4 sm:p-5 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div data-slip-owner-active class="bg-gradient-to-r from-[var(--gold)]/10 via-[var(--card)] to-[var(--card)] border border-[var(--gold)]/30 rounded-2xl p-4 sm:p-5 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
   <div class="flex items-center gap-3.5">
     <div class="w-12 h-12 rounded-xl bg-[var(--gold)]/20 text-[var(--gold-text)] flex items-center justify-center text-2xl shrink-0 shadow-inner">
+      <% if (isMainSite) { %><svg aria-hidden="true" width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 20 6v5.4c0 4.8-3.1 7.8-8 9.6-4.9-1.8-8-4.8-8-9.6V6l8-3Z"/><path d="m8.5 12 2.2 2.2 4.8-4.8"/></svg><% } else { %>
       <% if (!activeProvider || activeProvider === 'auto') { %>⚡
       <% } else if (payment.slipProvider === 'slipok') { %>🛡️
       <% } else if (activeProvider === 'slipcheck') { %>✅
       <% } else if (activeProvider === 'rdcw') { %>🛡️
       <% } else if (activeProvider === 'slip2go') { %>🔎
       <% } else if (activeProvider === 'xepht') { %>🌐
-      <% } else { %>🔌<% } %>
+      <% } else { %>🔌<% } %><% } %>
     </div>
     <div>
       <div class="flex items-center gap-2">
@@ -80,9 +83,9 @@
   { id: 'slip2go', name: 'Slip2Go', info: slip2goInfo, used: slip2goInfo?.used, max: slip2goInfo?.quota, remaining: slip2goInfo?.quota == null ? null : Math.max(0, Number(slip2goInfo.quota) - Number(slip2goInfo.used || 0)), note: slip2goInfo?.message || 'ยังไม่ได้กรอก API Key' },
   { id: 'xepht', name: 'ระบบตรวจสอบอัตโนมัติ', info: xephtInfo, used: null, max: null, remaining: null, note: xephtInfo?.message || 'พร้อมใช้งาน' },
 ]; %>
-<div data-provider-quota-details class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+<div data-provider-quota-details data-slip-owner-quotas class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
   <% providerStatuses.forEach(status => { const connected = status.info && status.info.ok; const hasQuota = connected && status.remaining !== null && status.remaining !== undefined && Number.isFinite(Number(status.remaining)); %>
-    <div class="bg-[var(--card)] border <%= activeProvider === status.id ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> rounded-2xl p-5 shadow-sm">
+    <div data-slip-owner-provider="<%= status.id %>" data-selected="<%= activeProvider === status.id ? 'true' : 'false' %>" class="bg-[var(--card)] border <%= activeProvider === status.id ? 'border-[var(--gold)]' : 'border-[var(--border)]' %> rounded-2xl p-5 shadow-sm">
       <div class="flex items-center justify-between mb-3">
         <span class="font-bold text-sm"><%= status.name %></span>
         <span class="px-2 py-0.5 text-[10px] font-bold rounded <%= connected ? 'bg-emerald-500/10 text-emerald-500' : 'bg-slate-500/10 text-[var(--text-4)]' %>"><%= connected ? 'Online' : 'ยังไม่เชื่อมต่อ' %></span>
@@ -98,7 +101,7 @@
   <% }) %>
 </div>
 <% if (slipcheckPoolInfo && slipcheckPoolInfo.accounts && slipcheckPoolInfo.accounts.length) { %>
-<div class="mb-6 rounded-2xl border border-[var(--gold)]/30 bg-[var(--card)] p-5 shadow-sm">
+<div data-slip-owner-pool class="mb-6 rounded-2xl border border-[var(--gold)]/30 bg-[var(--card)] p-5 shadow-sm">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
     <div><h3 class="font-bold">SlipCheck • โควตาราย API Key</h3><p class="text-xs text-[var(--text-4)] mt-1">ระบบใช้คีย์ตามลำดับทีละคีย์จนหมดโควตา แล้วจึงสลับไปคีย์ถัดไปอัตโนมัติ</p></div>
     <div class="text-right"><div class="text-xs text-[var(--text-4)]">คงเหลือรวม</div><div class="text-2xl font-extrabold text-[var(--gold-text)]"><%= Number(slipcheckPoolInfo.totalRemaining || 0).toLocaleString('th-TH') %> ครั้ง</div></div>
@@ -119,7 +122,7 @@
 
 <!-- Main-site monthly operating costs (not tenant/rented shop expenses) -->
 <% if (isMainSite) { %>
-<div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm mb-6">
+<div data-slip-owner-costs class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm mb-6">
   <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 mb-5">
     <div>
       <h2 class="text-lg font-bold text-[var(--text)]">💳 ค่าใช้จ่ายเว็บไซต์ของฉัน</h2>
@@ -174,8 +177,8 @@
 <% } %>
 
 <!-- Main Provider Configuration Form -->
-  <form id="own-slip-provider-form" action="/admin/slip-verification" method="POST" class="space-y-5 mb-6">
-  <div class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 sm:p-6">
+  <form id="own-slip-provider-form" data-slip-owner-form action="/admin/slip-verification" method="POST" class="space-y-5 mb-6">
+  <div data-slip-owner-selection class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 sm:p-6">
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
       <div>
         <h2 class="text-lg font-bold">ตั้งค่าตรวจสลิปอัตโนมัติ</h2>
@@ -202,7 +205,7 @@
     <% } %>
 
     <% const selectableProviders = ['slipcheck', 'rdcw', 'slip2go', 'xepht']; const selectedOwnProvider = selectableProviders.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck'; %>
-    <div id="own-provider-choice" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+    <div id="own-provider-choice" data-slip-owner-provider-choice class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
       <% const ownProviders = [
         ['slipcheck', '✅', 'SlipCheck', 'ฟรี 500 ครั้ง/เดือน'],
         ['rdcw', '🛡️', 'SlipRDCW', 'Client ID + Secret'],
@@ -213,7 +216,7 @@
         <label data-provider-card="<%= provider[0] %>" class="relative cursor-pointer rounded-xl border-2 p-4 transition <%= selectedOwnProvider === provider[0] ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--input)]/30' %>">
           <input type="radio" name="slipProvider" value="<%= provider[0] %>" class="sr-only" <%= selectedOwnProvider === provider[0] ? 'checked' : '' %> onchange="selectOwnProvider(this)">
           <span data-provider-check class="absolute right-3 top-3 w-5 h-5 rounded-full items-center justify-center text-[11px] font-bold bg-[var(--gold)] text-[var(--gold-contrast)] <%= selectedOwnProvider === provider[0] ? 'flex' : 'hidden' %>">✓</span>
-          <div class="text-2xl"><%= provider[1] %></div>
+          <% if (isMainSite) { %><span data-slip-owner-mark class="slip-owner-provider-mark" aria-hidden="true"><%= ({ slipcheck: 'SC', rdcw: 'RD', slip2go: 'S2', xepht: 'QR' })[provider[0]] %></span><% } else { %><div class="text-2xl"><%= provider[1] %></div><% } %>
           <div class="font-bold text-sm mt-2"><%= provider[2] %></div>
           <div class="text-[10px] text-[var(--text-4)] mt-1"><%= provider[3] %></div>
         </label>
@@ -222,7 +225,7 @@
     <button type="submit" class="mt-4 w-full sm:w-auto px-5 py-2.5 rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] font-bold text-sm">บันทึกค่ายที่เลือก</button>
   </div>
 
-  <div class="grid lg:grid-cols-2 gap-4">
+  <div data-slip-owner-settings-grid class="grid lg:grid-cols-2 gap-4">
     <div id="provider-settings-slipcheck" data-provider-settings="slipcheck" class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
       <div class="flex items-center justify-between"><h3 class="font-bold">✅ SlipCheck</h3><a href="https://mxrslip.lovable.app/auth" target="_blank" rel="noopener" class="text-xs text-[var(--gold-text)]">สมัครฟรี ↗</a></div>
       <label class="block text-xs text-[var(--text-3)]">API Key <% if (payment.slipcheckApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %>
@@ -268,7 +271,7 @@
     </div>
   </div>
 
-  <div class="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
+  <div data-slip-owner-guides class="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-5">
     <h3 class="font-bold text-sm mb-3">🖼️ คู่มือแบบรูปภาพ</h3>
     <div class="grid sm:grid-cols-2 gap-3">
       <% [['slipcheck-api.svg','คู่มือ SlipCheck'],['rdcw-api.svg','คู่มือ SlipRDCW'],['slip2go-api.svg','คู่มือ Slip2Go']].forEach(guide => { %>
@@ -279,7 +282,7 @@
     </div>
   </div>
 
-  <button type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] font-bold text-sm">บันทึกการตั้งค่าตรวจสลิป</button>
+  <button data-slip-owner-save type="submit" class="w-full sm:w-auto px-6 py-3 rounded-xl bg-[var(--gold)] text-[var(--gold-contrast)] font-bold text-sm">บันทึกการตั้งค่าตรวจสลิป</button>
 </form>
 
 <script>
@@ -330,3 +333,4 @@ async function testOwnProvider(provider) {
   }
 }
 </script>
+<% if (isMainSite) { %></div><% } %>
