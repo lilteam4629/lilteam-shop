@@ -144,7 +144,7 @@ router.use((req, res, next) => {
 router.use((req, res, next) => {
   if (req.method !== 'GET' || !usesExperimentalAdminUi(req)) return next();
   const path = req.path.replace(/\/+$/, '') || '/';
-  if (path === '/' || path === '/products' || path === '/scheduled-products' || path === '/filter-tags' || path === '/recommended-categories' || path === '/orders' || path === '/coupons' || path === '/users' || path === '/settings' || path === '/effects' || path === '/minigame' || path === '/minigame/live-catalog' || path === '/theme' || path === '/welcome-popup' || path === '/announcements' || /^\/orders\/[^/]+$/.test(path) || /^\/users\/[^/]+$/.test(path) || path === '/products/new' || /^\/products\/[^/]+\/edit$/.test(path)) return next();
+  if (path === '/' || path === '/products' || path === '/scheduled-products' || path === '/filter-tags' || path === '/recommended-categories' || path === '/home-sections' || path === '/orders' || path === '/coupons' || path === '/users' || path === '/settings' || path === '/effects' || path === '/minigame' || path === '/minigame/live-catalog' || path === '/theme' || path === '/welcome-popup' || path === '/announcements' || /^\/orders\/[^/]+$/.test(path) || /^\/users\/[^/]+$/.test(path) || path === '/products/new' || /^\/products\/[^/]+\/edit$/.test(path)) return next();
   const labels = {
     '/products/bulk-import': 'นำเข้าสินค้าเป็นชุด',
     '/home-sections': 'หมวดหมู่หน้าแรก',
@@ -1191,9 +1191,17 @@ router.post('/filter-tags/:id/edit', async (req, res) => {
 // picked/ordered list — replaces the old hardcoded "เกมมาใหม่" block.
 router.get('/home-sections', (req, res) => {
   const products = (store.data.products || []).filter(isHomeSectionSelectableProduct);
+  const homeSections = store.data.homeSections || [];
+  const experimentUi = usesExperimentalAdminUi(req);
+  if (experimentUi) {
+    res.locals.layout = 'layouts/admin-experiment';
+    return res.render('admin/home-sections-experiment', {
+      title: 'จัดหมวดหมู่หน้าแรก', active: 'home-sections', homeSections, products,
+      successMessages: req.flash('success'), errorMessages: req.flash('error'),
+    });
+  }
   res.render('admin/home-sections', {
-    title: 'จัดหมวดหมู่หน้าแรก', active: 'home-sections',
-    homeSections: store.data.homeSections || [], products,
+    title: 'จัดหมวดหมู่หน้าแรก', active: 'home-sections', homeSections, products,
   });
 });
 

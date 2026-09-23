@@ -1,0 +1,185 @@
+<%
+  const sectionRows = Array.isArray(homeSections) ? homeSections : [];
+  const selectableProducts = Array.isArray(products) ? products : [];
+  const shownCount = sectionRows.filter(section => section.enabled !== false).length;
+  const hiddenCount = sectionRows.length - shownCount;
+  const automaticCount = sectionRows.filter(section => section.mode !== 'manual').length;
+  const manualCount = sectionRows.length - automaticCount;
+  const notices = (successMessages || []).concat(errorMessages || []);
+%>
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-home-sections-v1.css') %>" />
+<style>.hsx-board{overflow:visible}.hsx-card:has(.hsx-edit-details[open]){position:relative;z-index:3}</style>
+
+<div class="experiment-app experiment-home-sections-page">
+  <div class="experiment-main">
+    <header class="experiment-topbar">
+      <div class="experiment-build-legend" aria-label="สถานะข้อมูล">
+        <span><i class="ready"></i> ข้อมูลร้านจริง</span>
+        <span><i></i> บันทึกอัตโนมัติเมื่อยืนยัน</span>
+      </div>
+      <span class="experiment-user-name"><%= currentUser && currentUser.username || 'ผู้ดูแลร้าน' %></span>
+    </header>
+
+    <main class="experiment-content hsx-content">
+      <section class="hsx-hero">
+        <div class="hsx-hero-copy">
+          <span class="experiment-kicker">หน้าร้าน · จัดวางสินค้า</span>
+          <h1>หมวดหมู่หน้าแรก</h1>
+          <p>จัดแถวสินค้าให้ตรงกับหน้าร้านของคุณ เลือกสินค้าเองหรือให้ระบบเรียงสินค้าใหม่ล่าสุด แล้วกำหนดลำดับที่ลูกค้าจะเห็น</p>
+        </div>
+        <div class="hsx-hero-actions">
+          <a class="experiment-button" href="/" target="_blank" rel="noopener">ดูหน้าร้าน <span aria-hidden="true">↗</span></a>
+          <button class="experiment-button primary" type="button" data-hsx-open-create><span aria-hidden="true">＋</span> สร้างหมวดหมู่</button>
+        </div>
+      </section>
+
+      <% if (notices.length) { %>
+        <div class="hsx-notices" aria-live="polite">
+          <% notices.forEach(message => { %><p class="hsx-notice <%= (errorMessages || []).includes(message) ? 'is-error' : 'is-success' %>"><span aria-hidden="true"><%= (errorMessages || []).includes(message) ? '!' : '✓' %></span><%= message %></p><% }) %>
+        </div>
+      <% } %>
+
+      <section class="hsx-stats" aria-label="สรุปหมวดหมู่หน้าแรก">
+        <article class="hsx-stat hsx-stat-total"><span>หมวดหมู่ทั้งหมด</span><strong><%= sectionRows.length %></strong><small>แถวสินค้าที่ตั้งค่าไว้</small></article>
+        <article class="hsx-stat"><span>กำลังแสดง</span><strong><%= shownCount %></strong><small>มองเห็นได้บนหน้าร้าน</small></article>
+        <article class="hsx-stat"><span>สินค้าใหม่อัตโนมัติ</span><strong><%= automaticCount %></strong><small>อัปเดตรายการล่าสุดให้</small></article>
+        <article class="hsx-stat"><span>เลือกสินค้าเอง</span><strong><%= manualCount %></strong><small><%= hiddenCount %> หมวดซ่อนอยู่</small></article>
+      </section>
+
+      <section class="hsx-board" aria-labelledby="hsx-board-title">
+        <div class="hsx-board-head">
+          <div><span class="hsx-board-mark" aria-hidden="true"></span><div><h2 id="hsx-board-title">ลำดับบนหน้าร้าน</h2><p>เลื่อนหมวดขึ้นหรือลงเพื่อเปลี่ยนตำแหน่งแถวสินค้า</p></div></div>
+          <span class="hsx-board-count"><b data-hsx-visible-count><%= sectionRows.length %></b> / <%= sectionRows.length %> หมวด</span>
+        </div>
+
+        <div class="hsx-toolbar">
+          <label class="hsx-search"><span aria-hidden="true">⌕</span><input type="search" placeholder="ค้นหาชื่อหมวดหมู่..." aria-label="ค้นหาหมวดหมู่" data-hsx-search></label>
+          <div class="hsx-filters" role="group" aria-label="กรองตามสถานะ">
+            <button type="button" class="is-active" data-hsx-filter="all" aria-pressed="true">ทั้งหมด <span><%= sectionRows.length %></span></button>
+            <button type="button" data-hsx-filter="enabled" aria-pressed="false">กำลังแสดง <span><%= shownCount %></span></button>
+            <button type="button" data-hsx-filter="disabled" aria-pressed="false">ซ่อนอยู่ <span><%= hiddenCount %></span></button>
+          </div>
+        </div>
+
+        <% if (!sectionRows.length) { %>
+          <div class="hsx-empty" data-hsx-empty>
+            <div class="hsx-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 8.5h16M6 8.5v10h12v-10M8 5.5h8M9 12h6M9 15h4"/></svg></div>
+            <span class="experiment-kicker">จัดชั้นวางสินค้า</span>
+            <h3>ยังไม่มีหมวดหมู่บนหน้าร้าน</h3>
+            <p>สร้างหมวดแรก แล้วเลือกสินค้าให้ลูกค้าเห็นเป็นแถวที่หาเจอง่าย</p>
+            <button class="experiment-button primary" type="button" data-hsx-open-create>＋ สร้างหมวดแรก</button>
+          </div>
+        <% } %>
+
+        <div class="hsx-list" data-hsx-list>
+          <% sectionRows.forEach((section, index) => {
+            const selectedIds = Array.isArray(section.productIds) ? section.productIds.map(String) : [];
+            const pickedProducts = selectableProducts.filter(product => selectedIds.includes(String(product.id)));
+            const previewProducts = section.mode === 'manual' ? pickedProducts : selectableProducts.slice(0, Math.max(1, Number(section.limit) || 5));
+            const isVisible = section.enabled !== false;
+          %>
+            <article class="hsx-card" data-hsx-card data-name="<%= String(section.title || '').toLocaleLowerCase('th-TH') %>" data-status="<%= isVisible ? 'enabled' : 'disabled' %>">
+              <div class="hsx-card-rank"><span>ลำดับ</span><strong><%= String(index + 1).padStart(2, '0') %></strong></div>
+              <div class="hsx-card-main">
+                <div class="hsx-card-title-row">
+                  <h3><%= section.title %></h3>
+                  <span class="hsx-state <%= isVisible ? 'is-on' : 'is-off' %>"><i></i><%= isVisible ? 'กำลังแสดง' : 'ซ่อนอยู่' %></span>
+                </div>
+                <div class="hsx-card-meta"><span class="hsx-mode <%= section.mode === 'manual' ? 'is-manual' : '' %>"><%= section.mode === 'manual' ? 'เลือกสินค้าเอง' : 'ใหม่ล่าสุดอัตโนมัติ' %></span><span><%= section.mode === 'manual' ? `${pickedProducts.length} รายการที่เลือก` : `${previewProducts.length} รายการ · จำกัด ${section.limit || 5}` %></span></div>
+                <div class="hsx-product-preview" aria-label="ตัวอย่างสินค้าในหมวด <%= section.title %>">
+                  <% previewProducts.slice(0, 6).forEach(product => { %>
+                    <span class="hsx-product-thumb" title="<%= product.title %>"><% if (product.images && product.images[0]) { %><img src="<%= product.images[0] %>" alt="<%= product.title %>" loading="lazy" onerror="this.hidden=true" /><% } else { %><span aria-hidden="true">◇</span><% } %></span>
+                  <% }); %>
+                  <% if (previewProducts.length > 6) { %><span class="hsx-product-more">+<%= previewProducts.length - 6 %></span><% } %>
+                  <% if (!previewProducts.length) { %><span class="hsx-no-products">ยังไม่มีสินค้าในแถวนี้</span><% } %>
+                </div>
+              </div>
+              <div class="hsx-card-actions">
+                <div class="hsx-move-actions" aria-label="เปลี่ยนลำดับหมวดหมู่">
+                  <form action="/admin/home-sections/<%= section.id %>/move" method="post"><input type="hidden" name="direction" value="up"><button class="hsx-icon-button" type="submit" aria-label="เลื่อน <%= section.title %> ขึ้น" title="เลื่อนขึ้น" <%= index === 0 ? 'disabled' : '' %>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 14 6-6 6 6"/></svg></button></form>
+                  <form action="/admin/home-sections/<%= section.id %>/move" method="post"><input type="hidden" name="direction" value="down"><button class="hsx-icon-button" type="submit" aria-label="เลื่อน <%= section.title %> ลง" title="เลื่อนลง" <%= index === sectionRows.length - 1 ? 'disabled' : '' %>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 10 6 6 6-6"/></svg></button></form>
+                </div>
+                <details class="hsx-edit-details">
+                  <summary class="experiment-button">แก้ไข</summary>
+                  <div class="hsx-edit-panel"><form action="/admin/home-sections/<%= section.id %>/edit" method="post" class="hsx-form">
+                    <div class="hsx-form-grid">
+                      <label class="hsx-field"><span>ชื่อหมวดหมู่</span><input name="title" value="<%= section.title %>" maxlength="100" required></label>
+                      <label class="hsx-field"><span>รูปแบบสินค้า</span><select name="mode" class="section-mode-select"><option value="newest" <%= section.mode !== 'manual' ? 'selected' : '' %>>สินค้าใหม่ล่าสุดอัตโนมัติ</option><option value="manual" <%= section.mode === 'manual' ? 'selected' : '' %>>เลือกสินค้าเอง</option></select></label>
+                      <label class="hsx-field section-limit-field" <%= section.mode === 'manual' ? 'hidden' : '' %>><span>จำนวนสินค้าที่แสดง</span><input type="number" name="limit" min="1" max="30" value="<%= section.limit || 5 %>"></label>
+                      <label class="hsx-field"><span>ลิงก์รูปแถวสินค้า <small>(ไม่บังคับ)</small></span><input type="url" name="imageUrl" value="<%= section.imageUrl || '' %>" placeholder="https://..."></label>
+                    </div>
+                    <%- include('partials/home-section-picker', { products: selectableProducts, selected: selectedIds, visible: section.mode === 'manual' }) %>
+                    <div class="hsx-form-actions"><button class="experiment-button" type="button" data-hsx-close-editor>ปิดการแก้ไข</button><button class="experiment-button primary" type="submit">บันทึกหมวดหมู่</button></div>
+                  </form></div>
+                </details>
+                <form action="/admin/home-sections/<%= section.id %>/toggle" method="post"><button class="experiment-button hsx-toggle-button" type="submit"><%= isVisible ? 'ซ่อนชั่วคราว' : 'เปิดแสดง' %></button></form>
+                <form action="/admin/home-sections/<%= section.id %>/delete" method="post" data-experiment-confirm="ลบหมวดหมู่ ‘<%= section.title %>’ ใช่หรือไม่? สินค้าในร้านจะไม่ถูกลบ"><button class="hsx-icon-button is-danger" type="submit" aria-label="ลบหมวด <%= section.title %>" title="ลบหมวดหมู่"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M6.5 7l1 13h9l1-13M9 7V4h6v3"/></svg></button></form>
+              </div>
+            </article>
+          <% }); %>
+          <div class="hsx-no-results" data-hsx-no-results hidden>ไม่พบหมวดหมู่ที่ตรงกับคำค้นหาหรือตัวกรองนี้</div>
+        </div>
+      </section>
+      <p class="hsx-footnote"><span aria-hidden="true">i</span> การเปลี่ยนแปลงนี้ใช้ข้อมูลหมวดหมู่และสินค้าของร้านหลัก · การลบหมวดจะไม่ลบสินค้า</p>
+    </main>
+  </div>
+</div>
+
+<dialog class="hsx-create-dialog" data-hsx-create-dialog aria-labelledby="hsx-create-title">
+  <div class="hsx-dialog-head"><div><span class="experiment-kicker">สร้างแถวสินค้าใหม่</span><h2 id="hsx-create-title">ตั้งค่าหมวดหมู่หน้าแรก</h2><p>เลือกวิธีจัดสินค้า แล้วบันทึกเพื่อเพิ่มแถวบนหน้าร้าน</p></div><button class="hsx-icon-button" type="button" data-hsx-close-create aria-label="ปิดหน้าต่าง">×</button></div>
+  <form action="/admin/home-sections" method="post" class="hsx-form hsx-create-form">
+    <label class="hsx-field"><span>ชื่อหมวดหมู่</span><input name="title" maxlength="100" required placeholder="เช่น สินค้าแนะนำ"></label>
+    <div class="hsx-form-grid">
+      <label class="hsx-field"><span>รูปแบบสินค้า</span><select name="mode" class="section-mode-select"><option value="newest">สินค้าใหม่ล่าสุดอัตโนมัติ</option><option value="manual">เลือกสินค้าเอง</option></select></label>
+      <label class="hsx-field section-limit-field"><span>จำนวนสินค้าที่แสดง</span><input type="number" name="limit" min="1" max="30" value="5"></label>
+      <label class="hsx-field"><span>ลิงก์รูปแถวสินค้า <small>(ไม่บังคับ)</small></span><input type="url" name="imageUrl" placeholder="https://..."></label>
+    </div>
+    <%- include('partials/home-section-picker', { products: selectableProducts, selected: [], visible: false }) %>
+    <div class="hsx-form-actions"><button class="experiment-button" type="button" data-hsx-close-create>ยกเลิก</button><button class="experiment-button primary" type="submit">สร้างหมวดหมู่</button></div>
+  </form>
+</dialog>
+
+<script>
+(function () {
+  var createDialog = document.querySelector('[data-hsx-create-dialog]');
+  document.querySelectorAll('[data-hsx-open-create]').forEach(function (button) { button.addEventListener('click', function () { if (createDialog && !createDialog.open) createDialog.showModal(); }); });
+  document.querySelectorAll('[data-hsx-close-create]').forEach(function (button) { button.addEventListener('click', function () { if (createDialog && createDialog.open) createDialog.close(); }); });
+  document.querySelectorAll('[data-hsx-close-editor]').forEach(function (button) { button.addEventListener('click', function () { var details = button.closest('details'); if (details) details.open = false; }); });
+
+  document.querySelectorAll('.hsx-form').forEach(function (form) {
+    var mode = form.querySelector('.section-mode-select');
+    var limit = form.querySelector('.section-limit-field');
+    var picker = form.querySelector('.section-products-field');
+    var search = form.querySelector('[data-product-search]');
+    var cards = Array.prototype.slice.call(form.querySelectorAll('[data-product-card]'));
+    var boxes = cards.map(function (card) { return card.querySelector('input[type="checkbox"]'); }).filter(Boolean);
+    var count = form.querySelector('[data-selection-count]');
+    function updateMode() { var manual = mode && mode.value === 'manual'; if (limit) limit.hidden = !!manual; if (picker) picker.hidden = !manual; }
+    function updateCount() { if (count) count.textContent = boxes.filter(function (box) { return box.checked; }).length + ' รายการที่เลือก'; }
+    function applySearch() { var query = (search && search.value || '').trim().toLocaleLowerCase('th-TH'); cards.forEach(function (card) { card.hidden = !!query && !(card.dataset.name || '').includes(query); }); }
+    if (mode) { mode.addEventListener('change', updateMode); updateMode(); }
+    if (search) search.addEventListener('input', applySearch);
+    boxes.forEach(function (box) { box.addEventListener('change', updateCount); });
+    var selectAll = form.querySelector('[data-select-all]');
+    if (selectAll) selectAll.addEventListener('click', function () { boxes.forEach(function (box) { if (!box.closest('[data-product-card]').hidden) box.checked = true; }); updateCount(); });
+    var clearAll = form.querySelector('[data-clear-all]');
+    if (clearAll) clearAll.addEventListener('click', function () { boxes.forEach(function (box) { box.checked = false; }); updateCount(); });
+    updateCount(); applySearch();
+  });
+
+  var searchInput = document.querySelector('[data-hsx-search]');
+  var categoryCards = Array.prototype.slice.call(document.querySelectorAll('[data-hsx-card]'));
+  var filter = 'all';
+  var visibleCount = document.querySelector('[data-hsx-visible-count]');
+  var noResults = document.querySelector('[data-hsx-no-results]');
+  function filterCategories() {
+    var query = (searchInput && searchInput.value || '').trim().toLocaleLowerCase('th-TH');
+    var visible = 0;
+    categoryCards.forEach(function (card) { var matches = (!query || (card.dataset.name || '').includes(query)) && (filter === 'all' || card.dataset.status === filter); card.hidden = !matches; if (matches) visible += 1; });
+    if (visibleCount) visibleCount.textContent = String(visible);
+    if (noResults) noResults.hidden = visible > 0 || categoryCards.length === 0;
+  }
+  if (searchInput) searchInput.addEventListener('input', filterCategories);
+  document.querySelectorAll('[data-hsx-filter]').forEach(function (button) { button.addEventListener('click', function () { filter = button.dataset.hsxFilter; document.querySelectorAll('[data-hsx-filter]').forEach(function (item) { var selected = item === button; item.classList.toggle('is-active', selected); item.setAttribute('aria-pressed', String(selected)); }); filterCategories(); }); });
+})();
+</script>

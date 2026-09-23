@@ -540,6 +540,45 @@ async function main() {
     await als.run(viewData, () => handler(req, res));
   }
   check('Updated admin pages render with migrated fixtures', () => assert.equal(pages, 14));
+  let experimentHomeSectionsView;
+  const homeSectionsHandler = admin.stack.find(layer => layer.route?.path === '/home-sections' && layer.route.methods.get).route.stack.at(-1).handle;
+  await als.run(viewData, () => homeSectionsHandler(
+    { query: { ui: 'experiment' }, tenantShop: null, flash: () => [] },
+    { locals: { layout: 'layouts/admin', settings: viewData.settings, currentUser: viewData.users[0], asset: value => '/' + value }, render(view, values) { experimentHomeSectionsView = { view, values }; } },
+  ));
+  const experimentFallback = admin.stack.find(layer => !layer.route && layer.handle.toString().includes('admin/experiment-placeholder'));
+  let homeSectionsPassedPlaceholder = false;
+  experimentFallback.handle(
+    { method: 'GET', path: '/home-sections', query: { ui: 'experiment' }, tenantShop: null },
+    { locals: {} },
+    () => { homeSectionsPassedPlaceholder = true; },
+  );
+  check('Experimental home sections bypass the generic placeholder middleware', () => assert.equal(homeSectionsPassedPlaceholder, true));
+  check('Main-shop home sections render the working experimental management page', () => {
+    assert.equal(experimentHomeSectionsView.view, 'admin/home-sections-experiment');
+    assert.equal(experimentHomeSectionsView.values.homeSections, viewData.homeSections);
+    const filename = path.join(root, 'src/views', experimentHomeSectionsView.view + '.ejs');
+    const locals = { settings: viewData.settings, currentUser: viewData.users[0], messages: { success: [], error: [] }, isMainSite: true,
+      rentWebsiteEnabled: false, persistentStorageEnabled: true, pendingTopupCount: 0, currentRequestUrl: 'https://fixture.test/admin/home-sections',
+      cartCount: 0, themeCss: '', asset: value => '/' + value, ...experimentHomeSectionsView.values };
+    const html = ejs.render(fs.readFileSync(filename, 'utf8'), locals, { filename });
+    assert.match(html, /หมวดหมู่หน้าแรก/);
+    assert.match(html, /data-hsx-open-create/);
+    assert.match(html, /data-hsx-search/);
+    assert.match(html, /admin\/home-sections\//);
+    const layoutFile = path.join(root, 'src/views/layouts/admin-experiment.ejs');
+    const page = ejs.render(fs.readFileSync(layoutFile, 'utf8'), { ...locals, body: html }, { filename: layoutFile });
+    assert.match(page, /data-experiment-confirm-dialog/);
+    assert.match(page, /จัดหมวดหมู่หน้าแรก/);
+  });
+  check('Tenant home sections remain on the legacy view even with an experiment query', () => {
+    let tenantView;
+    als.run(viewData, () => homeSectionsHandler(
+      { query: { ui: 'experiment' }, tenantShop: { id: 'tenant-fixture' }, flash: () => [] },
+      { locals: { layout: 'layouts/admin' }, render(view) { tenantView = view; } },
+    ));
+    assert.equal(tenantView, 'admin/home-sections');
+  });
   const tenantViewData = model.fixture();
   tenantViewData.settings.payment.slipApiMode = 'shared';
   const tenantHub = admin.stack.find(l => l.route?.path === '/slip-verification' && l.route.methods.get).route.stack.at(-1).handle;

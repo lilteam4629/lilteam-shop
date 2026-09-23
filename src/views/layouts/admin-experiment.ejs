@@ -68,7 +68,6 @@
       confirmDialog?.addEventListener('cancel', () => { pendingConfirmForm = null; });
       const pendingRoutes = [
         ['/admin/products/bulk-import', 'นำเข้าสินค้า'],
-        ['/admin/home-sections', 'หมวดหมู่หน้าแรก'],
         ['/admin/catalog-api', 'API สินค้าร้านหลัก'],
         ['/admin/storefront-models', 'โมเดลหน้าร้าน'],
         ['/admin/topups', 'เติมเงินและตรวจสอบ'],
@@ -258,6 +257,10 @@
           ready: ['แสดงประกาศที่เปิดอยู่บนหน้าแรกจริง', 'เพิ่มประกาศและเปิด/ซ่อนรายการจริงได้', 'ลบประกาศจริงจากหน้าจัดการเดิมได้'],
           pending: ['แก้ชื่อและข้อความพร้อมบันทึกจริง', 'ตั้งเวลาเริ่ม/หมดอายุประกาศ', 'จัดลำดับและดูสถิติการแสดงผล'],
         },
+        homeSections: {
+          ready: ['สร้างและแก้ไขแถวสินค้าบนหน้าร้าน', 'เลือกสินค้าเองหรือเรียงสินค้าใหม่ล่าสุด', 'จัดลำดับและซ่อน/แสดงหมวดหมู่'],
+          pending: [],
+        },
         placeholder: {
           ready: ['มีพื้นที่ทดลองและเมนูเข้าถึงได้', 'แยกจากระบบเก่าด้วย URL รุ่นทดลอง'],
           pending: ['ออกแบบหน้าการทำงานจริง', 'เชื่อมข้อมูลและการบันทึก', 'ทดสอบสิทธิ์และขั้นตอนใช้งาน'],
@@ -269,18 +272,19 @@
             : currentPath === '/admin/scheduled-products' ? 'scheduled'
               : currentPath === '/admin/filter-tags' ? 'filters'
                 : currentPath === '/admin/recommended-categories' ? 'recommendations'
-                  : /^\/admin\/orders\/[^/]+$/.test(currentPath) ? 'orderDetail'
-                    : currentPath === '/admin/orders' ? 'orders'
-                      : currentPath === '/admin/coupons' ? 'coupons'
-                        : currentPath === '/admin/settings' ? 'settings'
-                          : currentPath === '/admin/users' || /^\/admin\/users\/[^/]+$/.test(currentPath) ? 'users'
-                      : currentPath === '/admin/effects' ? 'effects'
-                        : currentPath === '/admin/minigame' ? 'minigame'
-                          : currentPath === '/admin/welcome-popup' ? 'welcomePopup'
-                            : currentPath === '/admin/announcements' ? 'announcements' : 'placeholder';
+                  : currentPath === '/admin/home-sections' ? 'homeSections'
+                    : /^\/admin\/orders\/[^/]+$/.test(currentPath) ? 'orderDetail'
+                      : currentPath === '/admin/orders' ? 'orders'
+                        : currentPath === '/admin/coupons' ? 'coupons'
+                          : currentPath === '/admin/settings' ? 'settings'
+                            : currentPath === '/admin/users' || /^\/admin\/users\/[^/]+$/.test(currentPath) ? 'users'
+                              : currentPath === '/admin/effects' ? 'effects'
+                                : currentPath === '/admin/minigame' ? 'minigame'
+                                  : currentPath === '/admin/welcome-popup' ? 'welcomePopup'
+                                    : currentPath === '/admin/announcements' ? 'announcements' : 'placeholder';
       const roadmapPreset = roadmapPresets[pageKey];
       const buildRoadmap = () => {
-        if (pageKey === 'settings' || pageKey === 'users' || pageKey === 'coupons' || pageKey === 'effects' || pageKey === 'minigame' || pageKey === 'announcements') return;
+        if (pageKey === 'settings' || pageKey === 'users' || pageKey === 'coupons' || pageKey === 'effects' || pageKey === 'minigame' || pageKey === 'announcements' || pageKey === 'homeSections') return;
         const content = document.querySelector('.experiment-content');
         if (!content || document.querySelector('[data-experiment-roadmap]') || document.querySelector('.orders-build-status') || document.querySelector('.users-build-status')) return;
         const ready = roadmapPreset.ready;
