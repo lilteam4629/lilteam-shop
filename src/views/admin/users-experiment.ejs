@@ -1,0 +1,92 @@
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-users-v1.css') %>" />
+<%
+  const experimentHref = (overrides = {}) => {
+    const values = { q, status, role, registered, pageSize, ...overrides };
+    const params = new URLSearchParams({ ui: 'experiment' });
+    Object.entries(values).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && String(value) !== '') params.set(key, String(value));
+    });
+    return `/admin/users?${params.toString()}`;
+  };
+  const roleLabel = value => value === 'admin' ? 'ผู้ดูแลระบบ' : 'สมาชิก';
+  const statusLabel = value => value === 'banned' ? 'ถูกระงับ' : 'ใช้งาน';
+  const initials = value => String(value || '?').trim().charAt(0).toUpperCase();
+%>
+<div class="experiment-app experiment-users-page">
+  <div class="experiment-main">
+    <header class="experiment-topbar">
+      <div class="experiment-build-legend"><span><i></i> ใช้งานได้</span><span><i class="pending"></i> รอทำ</span></div>
+      <button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน">◌</button>
+      <span class="experiment-user-name">admin</span>
+    </header>
+    <main class="experiment-content">
+      <section class="users-page-head">
+        <div>
+          <div class="experiment-kicker">ทดลองหน้าตาใหม่ · ผู้ใช้งาน & ลูกค้า</div>
+          <h1>จัดการสมาชิก</h1>
+          <p>ค้นหา ตรวจสอบสิทธิ์ และดูยอดเครดิตของสมาชิกจากพื้นที่เดียว</p>
+        </div>
+        <div class="users-head-actions">
+          <span class="users-page-status"><i></i> รุ่นทดลอง</span>
+          <button class="experiment-button primary" type="button" data-users-invite>+ เชิญสมาชิก</button>
+        </div>
+      </section>
+
+      <section class="users-kpis" aria-label="สรุปสมาชิก">
+        <div class="users-kpi users-kpi-primary"><span class="users-kpi-icon">◎</span><small>สมาชิกทั้งหมด</small><strong><%= memberCounts.all.toLocaleString('th-TH') %></strong><em>บัญชีในระบบ</em><span class="users-kpi-foot"><i></i> ข้อมูลล่าสุดจากร้าน</span></div>
+        <div class="users-kpi"><span class="users-kpi-icon mint">✓</span><small>กำลังใช้งาน</small><strong><%= memberCounts.active.toLocaleString('th-TH') %></strong><em>พร้อมเข้าใช้งาน</em><span class="users-kpi-foot"><i></i> สถานะปกติ</span></div>
+        <div class="users-kpi"><span class="users-kpi-icon blue">＋</span><small>สมัครวันนี้</small><strong><%= memberCounts.today.toLocaleString('th-TH') %></strong><em>สมาชิกใหม่ในวันนี้</em><span class="users-kpi-foot"><i></i> ตามเวลาไทย</span></div>
+        <div class="users-kpi"><span class="users-kpi-icon gold">฿</span><small>เครดิตรวม</small><strong>฿<%= Number(totalWalletBalance || 0).toLocaleString('th-TH') %></strong><em>ยอดเครดิตในระบบ</em><span class="users-kpi-foot"><i></i> อ่านจาก wallet</span></div>
+      </section>
+
+      <section class="users-workspace experiment-card">
+        <div class="users-workspace-head"><div><h2>สมาชิกในร้าน</h2><p><%= matchedCount.toLocaleString('th-TH') %> รายการที่ตรงกับตัวกรอง · กดชื่อเพื่อเปิดรายละเอียด</p></div><span class="users-live-badge"><i></i> เชื่อมฐานทดลอง</span></div>
+        <form class="users-toolbar" method="get" action="/admin/users">
+          <input type="hidden" name="ui" value="experiment" />
+          <label class="users-search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= q %>" placeholder="ค้นหาชื่อผู้ใช้หรืออีเมล..." aria-label="ค้นหาสมาชิก" /></label>
+          <label class="users-select-wrap"><span>สถานะ</span><select name="status" aria-label="กรองสถานะสมาชิก"><option value="">ทั้งหมด</option><option value="active" <%= status === 'active' ? 'selected' : '' %>>ใช้งาน</option><option value="banned" <%= status === 'banned' ? 'selected' : '' %>>ถูกระงับ</option></select></label>
+          <label class="users-select-wrap"><span>บทบาท</span><select name="role" aria-label="กรองบทบาทสมาชิก"><option value="">ทุกบทบาท</option><option value="customer" <%= role === 'customer' ? 'selected' : '' %>>สมาชิก</option><option value="admin" <%= role === 'admin' ? 'selected' : '' %>>ผู้ดูแลระบบ</option></select></label>
+          <button class="experiment-button primary users-search-button" type="submit">ค้นหา</button>
+          <% if (q || status || role || registered) { %><a class="users-clear-button" href="/admin/users?ui=experiment">ล้างตัวกรอง</a><% } %>
+        </form>
+        <div class="users-tabs" role="tablist" aria-label="มุมมองสมาชิก"><a class="users-tab <%= !status && !role && !registered ? 'active' : '' %>" href="<%= experimentHref({ status: '', role: '', registered: '', page: 1 }) %>">ทั้งหมด <b><%= memberCounts.all %></b></a><a class="users-tab <%= status === 'active' ? 'active' : '' %>" href="<%= experimentHref({ status: 'active', role: '', registered: '', page: 1 }) %>">ใช้งาน <b><%= memberCounts.active %></b></a><a class="users-tab <%= status === 'banned' ? 'active' : '' %>" href="<%= experimentHref({ status: 'banned', role: '', registered: '', page: 1 }) %>">ถูกระงับ <b><%= memberCounts.banned %></b></a><a class="users-tab <%= role === 'admin' ? 'active' : '' %>" href="<%= experimentHref({ role: 'admin', status: '', registered: '', page: 1 }) %>">ผู้ดูแลระบบ <b><%= memberCounts.admins %></b></a></div>
+        <div class="users-table-wrap">
+          <table class="users-table"><thead><tr><th>สมาชิก</th><th>บทบาท</th><th>เข้าร่วมเมื่อ</th><th>เครดิต</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody>
+            <% users.forEach(user => { const userStatus = user.status || 'active'; %>
+              <tr><td><div class="users-person"><span class="users-avatar <%= user.role === 'admin' ? 'admin' : '' %>"><%= initials(user.username) %></span><span><a href="/admin/users/<%= user.id %>?ui=experiment"><strong><%= user.username %></strong></a><small><%= user.email || 'ไม่ระบุอีเมล' %></small></span></div></td><td><span class="users-role <%= user.role === 'admin' ? 'admin' : '' %>"><%= roleLabel(user.role) %></span></td><td><span class="users-date"><%= new Date(user.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }) %></span><small class="users-time"><%= new Date(user.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %></small></td><td><strong class="users-credit">฿<%= Number(user.walletBalance || 0).toLocaleString('th-TH') %></strong></td><td><span class="users-status <%= userStatus === 'banned' ? 'banned' : 'active' %>"><i></i><%= statusLabel(userStatus) %></span></td><td><div class="users-row-actions"><a class="users-view-link" href="/admin/users/<%= user.id %>?ui=experiment">ดูรายละเอียด <span>→</span></a><% if (user.role !== 'admin') { %><form method="post" action="/admin/users/<%= user.id %>/toggle-ban" data-experiment-confirm="<%= userStatus === 'banned' ? 'ปลดระงับสมาชิกคนนี้หรือไม่?' : 'ระงับสมาชิกคนนี้หรือไม่?' %>"><button class="users-more-action" type="submit" aria-label="เปลี่ยนสถานะ <%= user.username %>">•••</button></form><% } %></div></td></tr>
+            <% }); %>
+            <% if (!users.length) { %><tr><td colspan="6"><div class="users-empty"><span>⌕</span><strong>ไม่พบสมาชิกที่ตรงกับตัวกรอง</strong><p>ลองค้นหาด้วยชื่อหรืออีเมลอื่น หรือกดล้างตัวกรอง</p><a class="experiment-button" href="/admin/users?ui=experiment">ดูสมาชิกทั้งหมด</a></div></td></tr><% } %>
+          </tbody></table>
+        </div>
+        <div class="users-table-foot"><span>แสดง <b><%= users.length ? ((page - 1) * pageSize) + 1 : 0 %>–<%= Math.min(page * pageSize, matchedCount) %></b> จาก <b><%= matchedCount %></b> รายการ</span><div class="users-pagination"><% if (page > 1) { %><a href="<%= experimentHref({ page: page - 1 }) %>" aria-label="หน้าก่อนหน้า">←</a><% } else { %><span class="disabled">←</span><% } %><strong>หน้า <%= page %> / <%= totalPages %></strong><% if (page < totalPages) { %><a href="<%= experimentHref({ page: page + 1 }) %>" aria-label="หน้าถัดไป">→</a><% } else { %><span class="disabled">→</span><% } %></div></div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<dialog class="users-invite-dialog" data-users-dialog aria-labelledby="users-dialog-title">
+  <form method="post" action="/admin/users/new" class="users-invite-form">
+    <div class="users-dialog-head"><div><span class="users-build-kicker">TEAM CONTROL · DEMO</span><h2 id="users-dialog-title">เพิ่มสมาชิกในฐานทดลอง</h2><p>สร้างบัญชีตัวอย่างเพื่อทดสอบสิทธิ์และสถานะในหน้านี้</p></div><button type="button" class="users-dialog-close" data-users-dialog-close aria-label="ปิดหน้าต่าง">×</button></div>
+    <label>ชื่อผู้ใช้<input name="username" required maxlength="100" placeholder="เช่น team-support" /></label>
+    <label>อีเมล<input name="email" type="email" required maxlength="254" placeholder="name@example.com" /></label>
+    <label>บทบาท<select name="role"><option value="customer">สมาชิก</option><option value="admin">ผู้ดูแลระบบ</option></select></label>
+    <div class="users-dialog-actions"><button type="button" class="experiment-button" data-users-dialog-close>ยกเลิก</button><button type="submit" class="experiment-button primary">สร้างสมาชิก</button></div>
+  </form>
+</dialog>
+<script>
+  (() => {
+    const dialog = document.querySelector('[data-users-dialog]');
+    const open = document.querySelector('[data-users-invite]');
+    const closes = document.querySelectorAll('[data-users-dialog-close]');
+    open?.addEventListener('click', () => dialog?.showModal());
+    closes.forEach(button => button.addEventListener('click', () => dialog?.close()));
+    dialog?.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    document.querySelectorAll('[data-users-roadmap-demo]').forEach(button => button.addEventListener('click', () => window.showExperimentToast?.(`${button.dataset.demoTitle} ยังอยู่ในคิวพัฒนา`)));
+    const exampleMessages = {
+      invite: 'ตัวอย่างอีเมลพร้อมตรวจแล้ว แต่ยังไม่ส่งออกไปหาสมาชิกจริง',
+      roles: 'ตารางสิทธิ์เป็นชุดพร้อมคุยต่อ แต่ยังไม่บันทึกบทบาทจริง',
+      audit: 'ประวัติการแก้ไขเป็นข้อมูลตัวอย่าง ยังไม่เก็บ audit log จริง',
+    };
+    document.querySelectorAll('[data-users-example]').forEach(button => button.addEventListener('click', () => window.showExperimentToast?.(exampleMessages[button.dataset.usersExample] || 'ฟังก์ชันนี้ยังอยู่ในคิวพัฒนา')));
+  })();
+</script>

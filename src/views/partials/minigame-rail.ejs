@@ -1,19 +1,21 @@
 <%
   const railCost = Number(cost) || 0;
   const railPrizes = (prizes || []).map(p => ({ name: p.name, image: p.image || null, isPrize: Boolean(p.isPrize) }));
+  const railCatalogEndpoint = typeof catalogEndpoint === 'undefined' ? '' : catalogEndpoint;
+  const railMainSiteExperience = typeof mainSiteExperience !== 'undefined' && mainSiteExperience === true;
 %>
-<div class="rail-game" data-prizes="<%= JSON.stringify(railPrizes) %>">
+<div class="rail-game<%= railMainSiteExperience ? ' rail-game--main-site' : '' %>" data-prizes="<%= JSON.stringify(railPrizes) %>"<% if (railCatalogEndpoint) { %> data-catalog-endpoint="<%= railCatalogEndpoint %>"<% } %>>
   <div class="rail-window">
-    <div class="rail-pointer rail-pointer-top">▼</div>
-    <div class="rail-pointer rail-pointer-bottom">▲</div>
-    <div class="rail-track"></div>
+    <div class="rail-pointer rail-pointer-top" aria-hidden="true">▼</div>
+    <div class="rail-pointer rail-pointer-bottom" aria-hidden="true">▲</div>
+    <div class="rail-track" aria-hidden="true"></div>
     <div class="rail-center" aria-hidden="true"></div>
   </div>
-  <div class="rail-result text-sm text-center"></div>
+  <div class="rail-result text-sm text-center" role="status" aria-live="polite" aria-atomic="true"></div>
   <% if (showLogin) { %>
     <a href="/login" class="rail-button block text-center">เข้าสู่ระบบเพื่อเล่น</a>
   <% } else { %>
-    <button type="button" class="rail-button rail-play w-full" data-endpoint="<%= endpoint %>">🎰 เริ่มเลื่อน (฿<%= railCost.toLocaleString() %>)</button>
+    <button type="button" class="rail-button rail-play w-full" data-endpoint="<%= endpoint %>"<% if (railCatalogEndpoint) { %> data-catalog-endpoint="<%= railCatalogEndpoint %>" disabled aria-describedby="mgx-live-catalog-status"<% } %>><% if (railMainSiteExperience) { %><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01M9 17h6"/></svg> เริ่มเลื่อน<% } else { %>🎰 เริ่มเลื่อน<% } %> (฿<%= railCost.toLocaleString() %>)</button>
     <p class="text-xs text-[var(--text-4)] text-center mt-2">เครดิตคงเหลือ: ฿<span class="rail-balance"><%= Number(balance || 0).toLocaleString() %></span></p>
   <% } %>
 </div>
@@ -41,15 +43,22 @@
   .rail-track{height:100%;display:flex;align-items:center;gap:14px;padding:16px 0;transform:translate3d(0,0,0);will-change:transform;backface-visibility:hidden}
   .rail-item{width:130px;height:136px;flex:0 0 130px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;padding:.6rem;border-radius:.9rem;border:1px solid var(--border-light);background:linear-gradient(160deg,color-mix(in srgb,var(--card) 92%,white 6%),var(--card));text-align:center;box-shadow:0 6px 14px -8px rgba(0,0,0,.45);contain:layout paint}
   .rail-item img{width:82px;height:82px;object-fit:contain;border-radius:.55rem;filter:drop-shadow(0 4px 10px rgba(0,0,0,.3))}
+  .rail-game--main-site .rail-item img{background:color-mix(in srgb,var(--card) 82%,white);filter:drop-shadow(0 4px 10px rgba(0,0,0,.22))}
   .rail-item-icon{font-size:2.7rem;line-height:1}
+  .rail-game--main-site .rail-item-icon{display:grid;place-items:center;width:64px;height:64px;color:var(--gold-text)}
+  .rail-game--main-site .rail-item-icon svg{width:48px;height:48px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .rail-item-name{width:100%;font-size:.72rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-2)}
 
   .rail-button{margin-top:1.1rem;padding:.8rem 1rem;border-radius:.8rem;background:linear-gradient(135deg,var(--gold),var(--gold-hover));color:var(--gold-contrast);font-weight:800;font-size:.95rem;box-shadow:0 10px 24px -10px color-mix(in srgb,var(--gold) 75%,transparent);transition:transform .15s,box-shadow .15s,opacity .15s}
+  .rail-game--main-site .rail-button{display:flex;align-items:center;justify-content:center;gap:.55rem;min-height:48px}
+  .rail-game--main-site .rail-button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .rail-button:hover{transform:translateY(-1px);box-shadow:0 14px 30px -12px color-mix(in srgb,var(--gold) 85%,transparent)}
   .rail-button:disabled{opacity:.55;cursor:not-allowed;transform:none}
   .rail-game.is-spinning .rail-pointer,.rail-game.is-spinning .rail-center{animation:none}
   .rail-game.is-spinning .rail-item img{filter:none}
   .rail-result{margin-top:.85rem;min-height:1.5rem}
+  .rail-game--main-site.is-spinning .rail-track{filter:saturate(1.08)}
+  .rail-game--main-site.is-spinning .rail-window{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent),0 0 22px color-mix(in srgb,var(--gold) 18%,transparent)}
   .rail-claim{margin-top:.5rem;padding:.55rem;border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:.65rem;background:color-mix(in srgb,var(--gold) 12%,transparent);color:var(--gold-text);font-size:1.25rem;font-weight:800;letter-spacing:.1em}
   .rail-contact-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;margin-top:.65rem;padding:.65rem .85rem;border-radius:.7rem;color:var(--text);background:var(--input);border:1px solid var(--border-light);font-size:.8rem;font-weight:700;transition:border-color .2s,color .2s,transform .15s}
   .rail-contact-btn:hover{color:var(--gold-text);border-color:var(--gold);transform:translateY(-1px)}
@@ -59,23 +68,39 @@
     .rail-center{width:110px}
     .rail-item{width:98px;height:110px;flex-basis:98px}
     .rail-item img{width:60px;height:60px}
+    .rail-game--main-site .rail-item-icon{width:52px;height:52px}
+    .rail-game--main-site .rail-item-icon svg{width:40px;height:40px}
     .rail-item-icon{font-size:2.1rem}
   }
+  @media (prefers-reduced-motion: reduce){.rail-game--main-site .rail-pointer,.rail-game--main-site .rail-center{animation:none!important}.rail-game--main-site .rail-button{transition:none}}
 </style>
 
 <script>
   document.querySelectorAll('.rail-game').forEach(function(game){
     if(game.dataset.bound==='1') return;
     game.dataset.bound='1';
-    const prizes=JSON.parse(game.dataset.prizes||'[]');
+    const mainSiteExperience=game.classList.contains('rail-game--main-site');
+    const catalogEndpoint=game.dataset.catalogEndpoint||'';
+    let prizes=JSON.parse(game.dataset.prizes||'[]');
+    if(catalogEndpoint)prizes=[];
     const track=game.querySelector('.rail-track');
     const button=game.querySelector('.rail-play');
     const result=game.querySelector('.rail-result');
     const balance=game.querySelector('.rail-balance');
+    function iconForItem(){
+      const ns='http://www.w3.org/2000/svg';
+      const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 48 48');svg.setAttribute('aria-hidden','true');
+      const path=document.createElementNS(ns,'path');path.setAttribute('d','M7 20h34v22H7zM4 13h40v9H4zM24 13v29M24 13c-2-7-11-11-14-6-3 5 5 9 14 6Zm0 0c2-7 11-11 14-6 3 5-5 9-14 6Z');svg.appendChild(path);return svg;
+    }
     function item(p){
       const el=document.createElement('div');el.className='rail-item';
-      if(p.image){const img=document.createElement('img');img.src=p.image;img.alt=p.name;el.appendChild(img)}
-      else{const icon=document.createElement('div');icon.className='rail-item-icon';icon.textContent=p.isPrize?'🎁':'💨';el.appendChild(icon)}
+      if(p.image){
+        if(!mainSiteExperience){const img=document.createElement('img');img.src=p.image;img.alt=p.name;el.appendChild(img)}
+        else {
+        const img=document.createElement('img');img.src=p.image;img.alt='';img.loading='eager';img.decoding='async';img.addEventListener('error',function(){const fallback=document.createElement('div');fallback.className='rail-item-icon';fallback.appendChild(iconForItem());img.replaceWith(fallback)},{once:true});el.appendChild(img);
+        }
+      } else if(mainSiteExperience){const icon=document.createElement('div');icon.className='rail-item-icon';icon.appendChild(iconForItem());el.appendChild(icon)}
+      else {const icon=document.createElement('div');icon.className='rail-item-icon';icon.textContent=p.isPrize?'🎁':'💨';el.appendChild(icon)}
       const name=document.createElement('div');name.className='rail-item-name';name.textContent=p.name;el.appendChild(name);return el;
     }
     let spinning=false,activeController=null,requestTimer=0,spinTimer=0;
@@ -91,9 +116,10 @@
     function seed(){
       track.innerHTML='';
       const count=16;
-      for(let i=0;i<count;i++)track.appendChild(item(prizes[i%prizes.length]||{name:'รางวัล',isPrize:true}));
+      for(let i=0;i<count;i++)track.appendChild(item(prizes.length ? (mainSiteExperience ? prizes[Math.floor(Math.random()*prizes.length)] : prizes[i%prizes.length]) : {name:catalogEndpoint?'กำลังโหลดสินค้าจริง…':'ยังไม่มีรางวัล'}));
       track.style.transition='none';
       track.style.transform='translate3d('+(centerIndexAt(Math.floor(count/2))||0)+'px,0,0)';
+      if(mainSiteExperience)void track.offsetWidth;
     }
     function releaseSpin(message,resetTrack){
       clearTimeout(requestTimer);clearTimeout(spinTimer);requestTimer=0;spinTimer=0;
@@ -104,6 +130,17 @@
       if(message)result.textContent=message;
     }
     seed();
+    if(catalogEndpoint&&button){
+      const catalogPreview=window.lilteamLiveCatalogPreview;
+      if(catalogPreview){
+        catalogPreview.load(catalogEndpoint).then(function(catalog){
+          if(!game.isConnected||!Array.isArray(catalog.products))return;
+          prizes=catalog.products.map(function(product){return {name:product.title,image:product.image||null,isPrize:true,productId:product.id,availableStock:product.availableStock}});
+          seed();button.disabled=!prizes.length;
+          if(result)result.textContent=prizes.length?'พร้อมทดลองจากสินค้าจริง '+prizes.length+' รายการ · ไม่ตัดสต็อก':'เว็บจริงไม่มีสินค้าพร้อมทดลอง';
+        }).catch(function(error){if(result)result.textContent=error.message||'อ่านสินค้าจริงไม่สำเร็จ';});
+      }else if(result){result.textContent='ตัวเชื่อมแค็ตตาล็อกจริงยังไม่พร้อม';}
+    }
     function handleRailResize(){if(!spinning&&game.isConnected)seed()}
     window.addEventListener('resize',handleRailResize);
     window.addEventListener('pageshow',function(event){if(event.persisted||(button&&button.disabled))releaseSpin('พร้อมเริ่มเลื่อนอีกครั้ง',true)});
@@ -112,26 +149,35 @@
     button.addEventListener('click',async function(){
       if(spinning||button.disabled)return;
       spinning=true;game.classList.add('is-spinning');button.disabled=true;button.setAttribute('aria-busy','true');result.textContent='กำลังสุ่ม...';seed();
-      activeController=new AbortController();requestTimer=setTimeout(function(){activeController&&activeController.abort()},10000);
-      let response,data;try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:activeController.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimer);requestTimer=0;activeController=null}
+      let response,data;if(catalogEndpoint){try{const catalog=await window.lilteamLiveCatalogPreview.load(catalogEndpoint);if(!Array.isArray(catalog.products)||!catalog.products.length)throw new Error('เว็บจริงไม่มีสินค้าพร้อมทดลอง');const product=catalog.products[Math.floor(Math.random()*catalog.products.length)];response={ok:true};data={prizeName:product.title,image:product.image,availableStock:product.availableStock,isWin:true,isPreview:true,fromLiveCatalog:true}}catch(e){response={ok:false};data={error:e.message||'อ่านสินค้าจริงไม่สำเร็จ'}}}else{activeController=new AbortController();requestTimer=setTimeout(function(){activeController&&activeController.abort()},10000);try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:activeController.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimer);requestTimer=0;activeController=null}}
       if(!response||!response.ok||!data){releaseSpin((data&&data.error)||'ระบบตอบช้า กรุณากดลองใหม่',false);return}
       const winner={name:data.prizeName,image:data.image||null,isPrize:data.isWin};
       const winnerIndex=20;const total=24;
       const sequence=[];for(let i=0;i<total;i++)sequence.push(i===winnerIndex?winner:(prizes[Math.floor(Math.random()*prizes.length)]||winner));
       track.innerHTML='';sequence.forEach(p=>track.appendChild(item(p)));
+      const reduceMotion=mainSiteExperience&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration=mainSiteExperience?(reduceMotion?120:3600):3600;
+      const start=centerIndexAt(8);
       const target=centerIndexAt(winnerIndex);
-      track.style.transition='transform 3.2s cubic-bezier(.12,.72,.08,1)';track.style.transform='translate3d('+target+'px,0,0)';
+      track.style.transition='none';track.style.transform='translate3d('+start+'px,0,0)';void track.offsetWidth;
+      requestAnimationFrame(function(){
+        if(!game.isConnected||!spinning)return;
+        track.style.transition='transform '+duration+'ms cubic-bezier(.12,.72,.08,1)';
+        void track.getBoundingClientRect();
+        requestAnimationFrame(function(){if(game.isConnected&&spinning)track.style.transform='translate3d('+target+'px,0,0)'})
+      });
       let completed=false;
       function completeSpin(){
         if(completed)return;completed=true;clearTimeout(spinTimer);spinTimer=0;
         spinning=false;game.classList.remove('is-spinning');
-        result.innerHTML='';const line=document.createElement('div');line.className=data.isWin?'text-emerald-400 font-medium':'text-[var(--text-3)]';line.textContent=data.isPreview?'ตัวอย่างผลสุ่ม: '+data.prizeName:(data.isWin?'ยินดีด้วย! ได้รับ '+data.prizeName:'ผลลัพธ์: '+data.prizeName);result.appendChild(line);
+        result.innerHTML='';const line=document.createElement('div');line.className=data.isWin?'text-emerald-400 font-medium':'text-[var(--text-3)]';line.textContent=data.fromLiveCatalog?'ตัวอย่างสินค้าจริง: '+data.prizeName+' · มีในสต็อก '+Number(data.availableStock||0).toLocaleString()+' (ไม่ตัดสต็อก)':data.isPreview?'ตัวอย่างผลสุ่ม: '+data.prizeName:(data.isWin?'ยินดีด้วย! ได้รับ '+data.prizeName:'ผลลัพธ์: '+data.prizeName);result.appendChild(line);
         if(data.isWin&&data.claimCode){const claim=document.createElement('div');claim.className='rail-claim';claim.textContent=data.claimCode;result.appendChild(claim)}
         if(data.isWin&&!data.isPreview){const contactBtn=document.createElement('a');contactBtn.href='/contact';contactBtn.className='rail-contact-btn';contactBtn.textContent='💬 ติดต่อร้านเพื่อรับรางวัล';result.appendChild(contactBtn)}
         if(balance&&typeof data.walletBalance==='number')balance.textContent=data.walletBalance.toLocaleString();button.disabled=false;button.removeAttribute('aria-busy');
       }
-      track.addEventListener('transitionend',completeSpin,{once:true});
-      spinTimer=setTimeout(completeSpin,3800);
+      const onTransitionEnd=event=>{if(event.target===track&&event.propertyName==='transform')completeSpin()};
+      track.addEventListener('transitionend',onTransitionEnd,{once:true});
+      spinTimer=setTimeout(completeSpin,mainSiteExperience?duration+450:3800);
     });
   });
 </script>

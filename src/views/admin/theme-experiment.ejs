@@ -1,0 +1,411 @@
+<%
+  const themeSeed = currentTheme || {};
+  const safeAccent = /^#[0-9a-fA-F]{6}$/.test(themeSeed.accent || '') ? themeSeed.accent : '#c8a63f';
+  const safeBgColor = /^#[0-9a-fA-F]{6}$/.test(themeSeed.bgColor || '') ? themeSeed.bgColor : '';
+%>
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-theme-v1.css') %>" />
+
+<div class="experiment-app theme-experiment-page" data-theme-experiment
+  data-seed-accent="<%= safeAccent %>"
+  data-seed-bg-preset="<%= themeSeed.bgPreset || 'warmDark' %>"
+  data-seed-bg-color="<%= safeBgColor %>"
+  data-seed-style="<%= themeSeed.style || 'normal' %>">
+  <div class="experiment-main">
+    <header class="experiment-topbar">
+      <div class="experiment-build-legend" aria-label="สถานะหน้าทดลองธีม">
+        <span><i class="ready"></i> ปรับตัวอย่างได้</span>
+        <span><i class="pending"></i> ยังไม่เปลี่ยนธีมร้าน</span>
+      </div>
+      <button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน">◌</button>
+      <span class="experiment-user-name">admin</span>
+    </header>
+
+    <main class="experiment-content theme-experiment-content">
+      <div class="experiment-page-head theme-page-head">
+        <div>
+          <div class="experiment-kicker">SHOP APPEARANCE · THEME STUDIO</div>
+          <h1>ธีมร้านค้า</h1>
+          <p>ปรับสีพื้นหลังและลูกเล่น แล้วดูตัวอย่างร้านก่อนตัดสินใจ</p>
+        </div>
+        <div class="theme-page-state" role="status" aria-live="polite" aria-atomic="true">
+          <span class="theme-state-dot"></span><span data-theme-save-state>ตัวอย่างจากธีมปัจจุบัน · แก้ได้โดยไม่เปลี่ยนร้าน</span>
+        </div>
+      </div>
+
+      <section class="theme-intro-card experiment-card" aria-labelledby="theme-intro-title">
+        <span class="theme-intro-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 0 18h1.5a1.5 1.5 0 0 0 0-3H12a2 2 0 0 1 0-4h2a7 7 0 0 0 0-14h-2Z"/><path d="M7.5 10h.01M9 6.5h.01M14 6h.01"/></svg>
+        </span>
+        <div class="theme-intro-copy">
+          <span class="theme-section-kicker">LOCAL THEME PREVIEW</span>
+          <h2 id="theme-intro-title">ลองธีมใหม่ได้อย่างปลอดภัย</h2>
+          <p>สีและลูกเล่นด้านล่างเปลี่ยนเฉพาะตัวอย่างหน้านี้ ปุ่มบันทึกจะเก็บฉบับทดลองไว้ในเบราว์เซอร์ ไม่ได้ส่งไปเปลี่ยนหน้าร้านจริง</p>
+        </div>
+        <span class="theme-local-badge"><i></i> แยกจากธีมร้านจริง</span>
+      </section>
+
+      <div class="theme-lab-layout">
+        <div class="theme-controls-column">
+          <section class="theme-control-card experiment-card" aria-labelledby="theme-accent-title">
+            <div class="theme-section-head">
+              <span class="theme-step-number">01</span>
+              <div><span class="theme-section-kicker">BRAND COLOR</span><h2 id="theme-accent-title">สีหลักของร้าน</h2><p>ใช้กับปุ่มสำคัญและจุดเน้นในตัวอย่าง</p></div>
+              <span class="theme-current-chip"><i data-theme-current-dot></i><span data-theme-current-accent><%= safeAccent %></span></span>
+            </div>
+            <fieldset class="theme-swatch-grid">
+              <legend class="theme-visually-hidden">เลือกสีหลัก</legend>
+              <% accentPresets.forEach((preset, index) => { %>
+                <label class="theme-accent-option" title="<%= preset.label %>">
+                  <input type="radio" name="themeAccent" value="<%= preset.color %>" data-theme-accent-preset="<%= preset.color %>" <%= safeAccent.toLowerCase() === preset.color.toLowerCase() ? 'checked' : '' %> />
+                  <span class="theme-accent-dot" style="--swatch:<%= preset.color %>" aria-hidden="true"></span>
+                  <span class="theme-accent-name"><%= preset.label %></span>
+                  <span class="theme-selected-mark" aria-hidden="true">✓</span>
+                </label>
+              <% }) %>
+            </fieldset>
+            <div class="theme-custom-color-row">
+              <label class="theme-custom-radio"><input type="radio" name="themeAccent" value="custom" data-theme-accent-custom-choice /><span>กำหนดสีเอง</span></label>
+              <label class="theme-color-picker-label" for="theme-custom-accent"><span>เลือกสี</span><input id="theme-custom-accent" type="color" value="<%= safeAccent %>" data-theme-custom-accent aria-label="กำหนดสีหลักเอง" /></label>
+            </div>
+          </section>
+
+          <section class="theme-control-card experiment-card" aria-labelledby="theme-background-title">
+            <div class="theme-section-head">
+              <span class="theme-step-number amber">02</span>
+              <div><span class="theme-section-kicker">SURFACE & CONTRAST</span><h2 id="theme-background-title">โทนพื้นหลัง</h2><p>เลือกชุดสีที่ใช้ได้ทั้งโหมดมืดและสว่าง</p></div>
+            </div>
+            <fieldset class="theme-background-grid">
+              <legend class="theme-visually-hidden">เลือกชุดสีพื้นหลัง</legend>
+              <% bgPresets.forEach((preset, index) => { %>
+                <label class="theme-background-option">
+                  <input type="radio" name="themeBackground" value="<%= preset.key %>" data-theme-bg-preset="<%= preset.key %>" <%= !safeBgColor && (themeSeed.bgPreset || 'warmDark') === preset.key ? 'checked' : '' %> />
+                  <span class="theme-background-copy"><strong><%= preset.label %></strong><small>คู่สีมืดและสว่าง</small></span>
+                  <span class="theme-background-swatches" aria-hidden="true">
+                    <span style="--sample-bg:<%= preset.preview.dark.bg %>;--sample-card:<%= preset.preview.dark.card %>;--sample-text:<%= preset.preview.dark.text %>"><i></i><b>มืด</b></span>
+                    <span style="--sample-bg:<%= preset.preview.light.bg %>;--sample-card:<%= preset.preview.light.card %>;--sample-text:<%= preset.preview.light.text %>"><i></i><b>สว่าง</b></span>
+                  </span>
+                  <span class="theme-selected-mark" aria-hidden="true">✓</span>
+                </label>
+              <% }) %>
+            </fieldset>
+            <div class="theme-custom-color-row background-custom-row">
+              <label class="theme-custom-radio"><input type="radio" name="themeBackground" value="custom" data-theme-bg-custom-choice <%= safeBgColor ? 'checked' : '' %> /><span>สร้างชุดสีจากสีที่เลือก</span></label>
+              <label class="theme-color-picker-label" for="theme-custom-background"><span>สีตั้งต้น</span><input id="theme-custom-background" type="color" value="<%= safeBgColor || '#365a4a' %>" data-theme-custom-bg aria-label="เลือกสีพื้นหลังเอง" /></label>
+            </div>
+            <% bgPresets.forEach(preset => { %>
+              <span hidden data-theme-bg-seed data-key="<%= preset.key %>" data-dark-bg="<%= preset.preview.dark.bg %>" data-dark-card="<%= preset.preview.dark.card %>" data-dark-text="<%= preset.preview.dark.text %>" data-light-bg="<%= preset.preview.light.bg %>" data-light-card="<%= preset.preview.light.card %>" data-light-text="<%= preset.preview.light.text %>"></span>
+            <% }) %>
+          </section>
+
+          <section class="theme-control-card experiment-card" aria-labelledby="theme-effects-title">
+            <div class="theme-section-head">
+              <span class="theme-step-number violet">03</span>
+              <div><span class="theme-section-kicker">FINISHING TOUCH</span><h2 id="theme-effects-title">ลูกเล่นพิเศษ</h2><p>ดูความรู้สึกของปุ่มและการ์ดในแต่ละแบบ</p></div>
+            </div>
+            <fieldset class="theme-effects-grid">
+              <legend class="theme-visually-hidden">เลือกลูกเล่น</legend>
+              <% styles.forEach(style => { %>
+                <label class="theme-effect-option">
+                  <input type="radio" name="themeStyle" value="<%= style.key %>" data-theme-style-choice="<%= style.key %>" <%= (themeSeed.style || 'normal') === style.key ? 'checked' : '' %> />
+                  <span class="theme-effect-demo" data-effect="<%= style.key %>"><i>LT</i><b>ปุ่มตัวอย่าง</b></span>
+                  <strong><%= style.label %></strong>
+                  <small><%= style.key === 'glow' ? 'เพิ่มแสงรอบจุดเด่น' : style.key === 'gradient' ? 'ไล่เฉดสีบนปุ่ม' : 'เรียบง่าย อ่านชัด' %></small>
+                  <span class="theme-selected-mark" aria-hidden="true">✓</span>
+                </label>
+              <% }) %>
+            </fieldset>
+          </section>
+        </div>
+
+        <aside class="theme-preview-column" aria-label="ตัวอย่างธีมหน้าร้าน">
+          <section class="theme-preview-card experiment-card" aria-labelledby="theme-preview-title">
+            <div class="theme-preview-heading">
+              <div><span class="theme-section-kicker">STORE PREVIEW · SAMPLE ONLY</span><h2 id="theme-preview-title">หน้าร้านตัวอย่าง</h2><p>ตัวอย่างจำลอง ไม่ได้โหลดหรือแก้ข้อมูลร้านจริง</p></div>
+              <span class="theme-preview-live"><i></i> แสดงทันที</span>
+            </div>
+            <div class="theme-mode-switch" role="group" aria-label="โหมดสีของตัวอย่าง">
+              <button type="button" data-theme-mode="dark" aria-pressed="true"><span aria-hidden="true">◐</span> มืด</button>
+              <button type="button" data-theme-mode="light" aria-pressed="false"><span aria-hidden="true">☼</span> สว่าง</button>
+            </div>
+
+            <div class="theme-store-preview" data-theme-store-preview data-mode="dark" data-style="normal">
+              <header class="theme-store-nav">
+                <span class="theme-store-logo" data-theme-logo>L</span>
+                <span class="theme-store-brand"><strong>LilTeam Shop</strong><small>หน้าร้านตัวอย่าง</small></span>
+                <span class="theme-store-menu"><i></i><i></i><i></i></span>
+              </header>
+              <div class="theme-store-content">
+                <div class="theme-store-kicker"><i></i> ตัวอย่างการแสดงสีและพื้นหลัง</div>
+                <h3>ธีมที่ใช่<br /><span>ในแบบของร้านคุณ</span></h3>
+                <p>ปรับสีหลักและโทนพื้นหลัง แล้วดูความต่างได้ทันที</p>
+                <div class="theme-store-actions"><button type="button" class="theme-demo-primary" data-theme-demo-primary>เลือกชมสินค้า <span aria-hidden="true">→</span></button><button type="button" class="theme-demo-secondary">ดูรายละเอียด</button></div>
+                <div class="theme-store-sample-card">
+                  <div class="theme-sample-art"><span>LT</span><i></i><i></i><i></i></div>
+                  <div class="theme-sample-product"><span class="theme-demo-label">ตัวอย่างสินค้า</span><strong>การ์ดสินค้าและสถานะ</strong><small>สีที่เลือกจะถูกจำลองในส่วนนี้</small><div><b data-theme-demo-price>ตัวอย่างราคา</b><span class="theme-demo-stock"><i></i> พร้อมขาย</span></div></div>
+                </div>
+                <div class="theme-store-proof"><span><i></i> ปุ่มหลัก</span><span><i></i> ข้อความ</span><span><i></i> การ์ด</span></div>
+              </div>
+            </div>
+            <div class="theme-preview-caption"><span aria-hidden="true">i</span><p>ตัวอย่างจำลองเฉพาะหน้าตา ไม่มีการเปลี่ยนสีบนหน้าร้านจนกว่าจะนำไปใช้ในระบบจริง</p></div>
+          </section>
+
+          <section class="theme-summary-card experiment-card" aria-label="สรุปค่าตัวอย่างที่เลือก">
+            <div><span>สีหลัก</span><strong data-theme-summary-accent><%= safeAccent %></strong></div>
+            <div><span>พื้นหลัง</span><strong data-theme-summary-background>—</strong></div>
+            <div><span>ลูกเล่น</span><strong data-theme-summary-style>—</strong></div>
+          </section>
+
+          <div class="theme-action-card experiment-card">
+            <div class="theme-action-copy"><strong>เก็บฉบับทดลอง</strong><span>บันทึกไว้ในเบราว์เซอร์นี้เท่านั้น</span></div>
+            <button class="experiment-button" type="button" data-theme-reset>คืนค่าตามร้าน</button>
+            <button class="experiment-button primary" type="button" data-theme-save>บันทึกตัวอย่าง</button>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  (() => {
+    const page = document.querySelector('[data-theme-experiment]');
+    if (!page) return;
+
+    const storageKey = 'lilteam_theme_experiment_v1';
+    const presetNodes = Array.from(page.querySelectorAll('[data-theme-bg-seed]'));
+    const accentRadios = Array.from(page.querySelectorAll('[data-theme-accent-preset]'));
+    const customAccentChoice = page.querySelector('[data-theme-accent-custom-choice]');
+    const customAccent = page.querySelector('[data-theme-custom-accent]');
+    const backgroundRadios = Array.from(page.querySelectorAll('[data-theme-bg-preset]'));
+    const customBackgroundChoice = page.querySelector('[data-theme-bg-custom-choice]');
+    const customBackground = page.querySelector('[data-theme-custom-bg]');
+    const styleRadios = Array.from(page.querySelectorAll('[data-theme-style-choice]'));
+    const preview = page.querySelector('[data-theme-store-preview]');
+    const saveState = page.querySelector('[data-theme-save-state]');
+    const isHex = value => /^#[0-9a-f]{6}$/i.test(String(value || ''));
+    const defaultState = {
+      accent: isHex(page.dataset.seedAccent) ? page.dataset.seedAccent : '#c8a63f',
+      bgPreset: page.dataset.seedBgPreset || 'warmDark',
+      bgColor: isHex(page.dataset.seedBgColor) ? page.dataset.seedBgColor : '',
+      style: page.dataset.seedStyle || 'normal',
+    };
+    const presetKeys = new Set(presetNodes.map(node => node.dataset.key));
+    const styleKeys = new Set(styleRadios.map(node => node.value));
+    let draft = { ...defaultState };
+    let previewMode = 'dark';
+    let savedDraftLoaded = false;
+    let dirty = false;
+
+    const normalize = value => {
+      if (!value || typeof value !== 'object') return { ...defaultState };
+      return {
+        accent: isHex(value.accent) ? value.accent : defaultState.accent,
+        bgPreset: presetKeys.has(value.bgPreset) ? value.bgPreset : defaultState.bgPreset,
+        bgColor: isHex(value.bgColor) ? value.bgColor : '',
+        style: styleKeys.has(value.style) ? value.style : defaultState.style,
+      };
+    };
+    try {
+      const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
+      if (stored && typeof stored === 'object') {
+        draft = normalize(stored);
+        savedDraftLoaded = true;
+      }
+    } catch (_) {}
+
+    const selected = (nodes, value) => nodes.find(node => node.value === value);
+    function syncControls() {
+      const accentPreset = selected(accentRadios, draft.accent);
+      accentRadios.forEach(node => { node.checked = node === accentPreset; });
+      customAccentChoice.checked = !accentPreset;
+      customAccent.value = draft.accent;
+
+      const bgPreset = selected(backgroundRadios, draft.bgPreset);
+      backgroundRadios.forEach(node => { node.checked = !draft.bgColor && node === bgPreset; });
+      customBackgroundChoice.checked = Boolean(draft.bgColor);
+      customBackground.value = draft.bgColor || '#365a4a';
+      styleRadios.forEach(node => { node.checked = node.value === draft.style; });
+    }
+
+    function hexToRgb(hex) {
+      const clean = String(hex).replace('#', '');
+      return [0, 2, 4].map(offset => parseInt(clean.slice(offset, offset + 2), 16));
+    }
+    function rgbToHex(rgb) {
+      return `#${rgb.map(channel => Math.max(0, Math.min(255, Math.round(channel))).toString(16).padStart(2, '0')).join('')}`;
+    }
+    function mixHex(a, b, amount) {
+      const left = hexToRgb(a), right = hexToRgb(b);
+      return rgbToHex(left.map((channel, index) => channel * (1 - amount) + right[index] * amount));
+    }
+    function linearChannel(value) {
+      const channel = value / 255;
+      return channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
+    }
+    function luminance(hex) {
+      const [r, g, b] = hexToRgb(hex).map(linearChannel);
+      return .2126 * r + .7152 * g + .0722 * b;
+    }
+    function contrastText(hex) {
+      const light = 1.05 / (luminance(hex) + .05);
+      const dark = (luminance(hex) + .05) / .05;
+      return dark >= light ? '#000000' : '#ffffff';
+    }
+    function readableAccentText(accent, surfaces) {
+      if (surfaces.every(surface => {
+        const ratio = (hexA, hexB) => {
+          const a = luminance(hexA), b = luminance(hexB);
+          return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+        };
+        return ratio(accent, surface) >= 4.5;
+      })) return accent;
+      const candidates = ['#ffffff', '#111111'];
+      return candidates.sort((a, b) => {
+        const minRatio = candidate => Math.min(...surfaces.map(surface => {
+          const x = luminance(candidate), y = luminance(surface);
+          return (Math.max(x, y) + .05) / (Math.min(x, y) + .05);
+        }));
+        return minRatio(b) - minRatio(a);
+      })[0];
+    }
+    function customPalette(hex, mode) {
+      const [r, g, b] = hexToRgb(hex).map(channel => channel / 255);
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const delta = max - min;
+      let hue = 0;
+      if (delta) {
+        if (max === r) hue = 60 * (((g - b) / delta) % 6);
+        else if (max === g) hue = 60 * ((b - r) / delta + 2);
+        else hue = 60 * ((r - g) / delta + 4);
+      }
+      hue = (hue + 360) % 360;
+      const hsl = (s, l) => `hsl(${hue} ${s}% ${l}%)`;
+      if (mode === 'dark') return {
+        bg: hsl(26, 8), card: hsl(24, 14), input: hsl(25, 17), border: hsl(25, 27),
+        text: '#f4f3f0', muted: '#bbb9b2',
+      };
+      return {
+        bg: hsl(28, 96), card: hsl(22, 100), input: hsl(28, 91), border: hsl(25, 82),
+        text: '#20221f', muted: '#5e625d',
+      };
+    }
+    function getPalette(mode) {
+      if (draft.bgColor) return customPalette(draft.bgColor, mode);
+      const preset = presetNodes.find(node => node.dataset.key === draft.bgPreset) || presetNodes[0];
+      const background = preset?.dataset || {};
+      const suffix = mode === 'dark' ? 'dark' : 'light';
+      const bg = background[`${suffix}Bg`] || (mode === 'dark' ? '#100e08' : '#faf6eb');
+      const card = background[`${suffix}Card`] || '#ffffff';
+      const text = background[`${suffix}Text`] || '#222222';
+      return {
+        bg, card, text,
+        input: mode === 'dark' ? mixHex(bg, card, .24) : mixHex(bg, '#000000', .035),
+        border: mode === 'dark' ? mixHex(bg, '#ffffff', .16) : mixHex(bg, '#000000', .12),
+        muted: mode === 'dark' ? mixHex(text, bg, .28) : mixHex(text, bg, .38),
+      };
+    }
+    function styleLabel(key) {
+      const item = styleRadios.find(node => node.value === key);
+      return item?.closest('.theme-effect-option')?.querySelector('strong')?.textContent?.trim() || key;
+    }
+    function backgroundLabel() {
+      if (draft.bgColor) return 'กำหนดเอง';
+      const item = backgroundRadios.find(node => node.value === draft.bgPreset);
+      return item?.closest('.theme-background-option')?.querySelector('strong')?.textContent?.trim() || 'ธีมร้าน';
+    }
+    function render() {
+      const palette = getPalette(previewMode);
+      preview.dataset.mode = previewMode;
+      preview.dataset.style = draft.style;
+      preview.style.setProperty('--demo-bg', palette.bg);
+      preview.style.setProperty('--demo-card', palette.card);
+      preview.style.setProperty('--demo-input', palette.input);
+      preview.style.setProperty('--demo-border', palette.border);
+      preview.style.setProperty('--demo-text', palette.text);
+      preview.style.setProperty('--demo-muted', palette.muted);
+      preview.style.setProperty('--demo-accent', draft.accent);
+      preview.style.setProperty('--demo-accent-contrast', contrastText(draft.accent));
+      preview.style.setProperty('--demo-accent-text', readableAccentText(draft.accent, [palette.bg, palette.card]));
+      page.querySelector('[data-theme-current-dot]').style.backgroundColor = draft.accent;
+      page.querySelector('[data-theme-current-accent]').textContent = draft.accent.toUpperCase();
+      page.querySelector('[data-theme-summary-accent]').textContent = draft.accent.toUpperCase();
+      page.querySelector('[data-theme-summary-background]').textContent = backgroundLabel();
+      page.querySelector('[data-theme-summary-style]').textContent = styleLabel(draft.style);
+      page.querySelectorAll('[data-theme-mode]').forEach(button => {
+        const active = button.dataset.themeMode === previewMode;
+        button.classList.toggle('is-active', active);
+        button.setAttribute('aria-pressed', String(active));
+      });
+      page.querySelector('.theme-page-state').dataset.dirty = String(dirty);
+      if (!dirty && saveState) saveState.textContent = savedDraftLoaded
+        ? 'โหลดฉบับทดลองที่บันทึกไว้ในเบราว์เซอร์นี้'
+        : 'ตัวอย่างจากธีมปัจจุบัน · แก้ได้โดยไม่เปลี่ยนร้าน';
+    }
+    function setDirty() {
+      dirty = true;
+      if (saveState) saveState.textContent = 'มีการเปลี่ยนแปลงในตัวอย่าง · ยังไม่ได้บันทึก';
+    }
+
+    page.querySelectorAll('input[name="themeAccent"]').forEach(input => input.addEventListener('change', () => {
+      if (!input.checked) return;
+      draft.accent = input.value === 'custom' ? customAccent.value : input.value;
+      setDirty();
+      render();
+    }));
+    customAccent.addEventListener('input', () => {
+      customAccentChoice.checked = true;
+      draft.accent = customAccent.value;
+      setDirty();
+      render();
+    });
+    page.querySelectorAll('input[name="themeBackground"]').forEach(input => input.addEventListener('change', () => {
+      if (!input.checked) return;
+      draft.bgColor = input.value === 'custom' ? customBackground.value : '';
+      if (input.value !== 'custom') draft.bgPreset = input.value;
+      setDirty();
+      render();
+    }));
+    customBackground.addEventListener('input', () => {
+      customBackgroundChoice.checked = true;
+      draft.bgColor = customBackground.value;
+      setDirty();
+      render();
+    });
+    styleRadios.forEach(input => input.addEventListener('change', () => {
+      if (!input.checked) return;
+      draft.style = input.value;
+      setDirty();
+      render();
+    }));
+    page.querySelectorAll('[data-theme-mode]').forEach(button => button.addEventListener('click', () => {
+      previewMode = button.dataset.themeMode;
+      render();
+    }));
+
+    page.querySelector('[data-theme-save]').addEventListener('click', () => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(draft));
+        dirty = false;
+        savedDraftLoaded = true;
+        page.querySelector('.theme-page-state').dataset.dirty = 'false';
+        saveState.textContent = 'บันทึกฉบับทดลองในเบราว์เซอร์แล้ว · ร้านจริงไม่เปลี่ยน';
+        window.showExperimentToast?.('บันทึกตัวอย่างธีมไว้ในเบราว์เซอร์นี้แล้ว');
+      } catch (_) {
+        saveState.textContent = 'บันทึกไม่ได้ · การเปลี่ยนแปลงยังแสดงในหน้านี้';
+      }
+    });
+    page.querySelector('[data-theme-reset]').addEventListener('click', () => {
+      if (!window.confirm('คืนตัวอย่างเป็นค่าธีมร้านปัจจุบัน และลบฉบับทดลองที่เก็บไว้ในเบราว์เซอร์นี้หรือไม่?')) return;
+      try { localStorage.removeItem(storageKey); } catch (_) {}
+      draft = { ...defaultState };
+      dirty = false;
+      savedDraftLoaded = false;
+      syncControls();
+      render();
+      window.showExperimentToast?.('คืนตัวอย่างตามธีมร้านปัจจุบันแล้ว');
+    });
+
+    syncControls();
+    render();
+  })();
+</script>

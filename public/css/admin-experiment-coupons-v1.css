@@ -1,0 +1,100 @@
+.coupons-page{display:grid;gap:16px;color:var(--ex-ink)}
+.coupons-page .experiment-page-head{margin-bottom:0;align-items:flex-end}
+.coupons-page .experiment-page-head h1{margin:0;font:700 29px var(--ex-display);letter-spacing:-.055em}
+.coupons-page .experiment-page-head p{margin-top:6px}
+.coupons-head-actions{display:flex;align-items:center;gap:9px}
+.coupons-data-badge,.coupons-live-badge{display:inline-flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid #cdebdc;border-radius:999px;color:#087a5b;background:#effaf5;font-size:10px;font-weight:800;white-space:nowrap}
+.coupons-data-badge i,.coupons-live-badge i{width:7px;height:7px;border-radius:50%;background:#22ae7e;box-shadow:0 0 0 3px #d8f3e7}
+.coupons-notice{display:flex;align-items:center;gap:9px;padding:11px 13px;border:1px solid #cdebdc;border-radius:11px;color:#087a5b;background:#effaf5;font-size:11px;font-weight:700}
+.coupons-notice>span{display:grid;place-items:center;width:22px;height:22px;border-radius:7px;background:#d8f3e7}
+.coupons-notice.error{border-color:#efc8cf;color:#a9354b;background:#fff2f4}
+.coupons-notice.error>span{background:#ffe0e6}
+.coupons-notice.warning{border-color:#f0dcae;color:#755116;background:#fff8e8}
+.coupons-notice.warning>span{background:#ffedc2;color:#805612}
+.coupons-build-status{overflow:hidden;border:1px solid #d8e7df;border-radius:15px;background:#fff;box-shadow:var(--ex-shadow)}
+.coupons-build-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:14px 17px 11px;background:linear-gradient(120deg,#f8fffc,#fffaf0)}
+.coupons-build-kicker,.coupons-section-kicker{color:var(--ex-green-dark);font-size:9px;font-weight:800;letter-spacing:.14em}
+.coupons-build-head h2{margin:4px 0 0;font:700 15px var(--ex-display);letter-spacing:-.04em}
+.coupons-build-head p{margin:4px 0 0;color:var(--ex-muted);font-size:10px}
+.coupons-build-count{padding:6px 9px;border:1px solid #f0dcae;border-radius:999px;color:#8f641b;background:#fff6df;font-size:10px;font-weight:800;white-space:nowrap}
+.coupons-build-count b{font-size:13px}
+.coupons-build-grid{display:grid;grid-template-columns:1.15fr 1fr;gap:10px;padding:0 17px 14px}
+.coupons-build-column{padding:11px 12px;border:1px solid #d8eee4;border-radius:11px;background:#fbfffd}
+.coupons-build-column.pending{border-color:#f1dfb5;background:#fffdf8}
+.coupons-build-column h3{display:flex;align-items:center;gap:7px;margin:0 0 8px;font-size:10px}
+.coupons-build-column h3 i{display:grid;place-items:center;width:19px;height:19px;border-radius:6px;color:#087a5b;background:#e2f7ec;font-size:11px;font-style:normal}
+.coupons-build-column.pending h3 i{color:#9a6412;background:#fff0c8}
+.coupons-build-column ul{display:grid;gap:5px;margin:0;padding:0;list-style:none}
+.coupons-build-column li{position:relative;padding-left:15px;color:#52615c;font-size:10px;line-height:1.5}
+.coupons-build-column li::before{position:absolute;left:1px;top:0;color:#20a879;font-weight:900;content:'✓'}
+.coupons-build-column.pending li::before{color:#c38a22;content:'·'}
+.coupons-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.coupons-kpi{position:relative;display:grid;gap:4px;min-width:0;min-height:123px;padding:15px 16px;border:1px solid var(--ex-line);border-radius:14px;background:#fff;box-shadow:var(--ex-shadow)}
+.coupons-kpi.primary{color:#fff;border-color:#0c8062;background:linear-gradient(135deg,#0e8164,#096b55)}
+.coupons-kpi-icon{position:absolute;top:13px;right:14px;display:grid;place-items:center;width:31px;height:31px;border-radius:10px;color:#fff;background:#ffffff25;font-size:16px;font-weight:800}
+.coupons-kpi-icon.mint{color:#087a5b;background:#e2f7ec}.coupons-kpi-icon.blue{color:#5365ae;background:#edf0ff}.coupons-kpi-icon.gold{color:#94620e;background:#fff2d4}
+.coupons-kpi small{color:var(--ex-muted);font-size:10px}.coupons-kpi.primary small{color:#d1f4e6}
+.coupons-kpi strong{font:700 25px var(--ex-display);letter-spacing:-.06em}.coupons-kpi em{color:var(--ex-muted);font-size:9px;font-style:normal}.coupons-kpi.primary em{color:#c1e8d8}
+.coupons-kpi-foot{display:flex;align-items:center;gap:6px;margin-top:4px;color:var(--ex-muted);font-size:9px}.coupons-kpi-foot i{width:6px;height:6px;border-radius:50%;background:#26b780}.coupons-kpi-foot.attention i{background:#e2a33b}
+.coupons-workspace-grid{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(285px,.8fr);gap:13px;align-items:start}
+.coupons-workspace{min-width:0;padding:0;overflow:hidden}
+.coupons-workspace-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:16px 17px 13px;border-bottom:1px solid #edf1ef}
+.coupons-workspace-head h2,.coupons-create-head h2{margin:3px 0 0;font:700 16px var(--ex-display);letter-spacing:-.04em}
+.coupons-workspace-head p,.coupons-create-head p{margin:4px 0 0;color:var(--ex-muted);font-size:10px}.coupons-workspace-head p b{color:var(--ex-ink)}
+.coupons-live-badge{padding:6px 8px;font-size:9px}
+.coupons-toolbar{display:flex;align-items:flex-end;gap:8px;padding:12px 17px 10px;border-bottom:1px solid #edf1ef;background:#fbfdfc}
+.coupons-search{display:flex;align-items:center;gap:8px;flex:1;min-width:145px;height:39px;padding:0 10px;border:1px solid var(--ex-line);border-radius:9px;color:var(--ex-muted);background:#fff}
+.coupons-search:focus-within{border-color:#8ed6bc;box-shadow:0 0 0 3px rgba(47,197,142,.12)}
+.coupons-search>span{font-size:17px}.coupons-search input{width:100%;min-width:0;border:0;outline:0;color:var(--ex-ink);background:transparent;font-size:10px}
+.coupons-filter{display:grid;gap:3px;color:var(--ex-muted);font-size:9px;font-weight:800}
+.coupons-filter select{height:39px;min-width:110px;padding:0 9px;border:1px solid var(--ex-line);border-radius:9px;color:var(--ex-ink);background:#fff;font-size:10px}
+.coupons-search-button{min-height:39px;padding:8px 12px;font-size:10px}.coupons-clear{align-self:center;color:var(--ex-green-dark);font-size:10px;font-weight:800;white-space:nowrap}
+.coupons-tabs{display:flex;gap:3px;padding:0 17px;border-bottom:1px solid var(--ex-line)}
+.coupons-tabs a{position:relative;display:inline-flex;align-items:center;gap:5px;min-height:42px;padding:0 11px;color:var(--ex-muted);font-size:10px;font-weight:800;white-space:nowrap}
+.coupons-tabs a:hover,.coupons-tabs a.active{color:var(--ex-green-dark)}.coupons-tabs a.active::after{position:absolute;right:10px;bottom:-1px;left:10px;height:2px;border-radius:2px;background:var(--ex-green);content:''}
+.coupons-tabs b{color:inherit;font-size:9px}
+.coupons-table-wrap{overflow-x:auto}.coupons-table{width:100%;min-width:690px;border-collapse:collapse;text-align:left}
+.coupons-table th{padding:11px 12px;color:#83928c;background:#fbfdfc;font-size:9px;font-weight:800;letter-spacing:.03em;white-space:nowrap}
+.coupons-table th:first-child,.coupons-table td:first-child{padding-left:17px}.coupons-table th:last-child,.coupons-table td:last-child{padding-right:14px}
+.coupons-table td{padding:12px;border-top:1px solid #edf1ef;color:var(--ex-ink);font-size:10px;vertical-align:middle}
+.coupons-table tbody tr{transition:background .16s ease}.coupons-table tbody tr:hover{background:#fbfefc}
+.coupons-code-cell{display:flex;align-items:center;gap:8px;min-width:180px}
+.coupons-code-mark{display:grid;place-items:center;width:30px;height:30px;flex:0 0 30px;border-radius:9px;color:#087a5b;background:#e5f8ef;font-weight:900}
+.coupons-code-cell>span:nth-child(2){min-width:0}.coupons-code-cell strong{display:block;max-width:130px;overflow:hidden;color:#15251f;font:700 11px 'IBM Plex Mono',monospace;text-overflow:ellipsis;white-space:nowrap}
+.coupons-code-cell small,.coupons-muted{display:block;margin-top:4px;color:var(--ex-muted);font-size:9px;white-space:nowrap}
+.coupons-copy{min-height:29px;margin-left:auto;padding:4px 7px;border:1px solid var(--ex-line);border-radius:7px;color:var(--ex-green-dark);background:#fff;font-size:9px;font-weight:800}
+.coupons-copy:hover{border-color:#9fd2bd;background:#f2fbf7}
+.coupons-discount{display:block;color:#087a5b;font:700 13px var(--ex-display);white-space:nowrap}
+.coupons-usage{display:flex;align-items:baseline;gap:4px;white-space:nowrap}.coupons-usage strong{font-size:11px}.coupons-usage span{color:var(--ex-muted);font-size:9px}
+.coupons-progress{width:82px;height:4px;margin-top:6px;overflow:hidden;border-radius:99px;background:#e9efec}.coupons-progress i{display:block;height:100%;border-radius:inherit;background:#1aae7b}
+.coupons-status{display:inline-flex;align-items:center;gap:5px;padding:5px 7px;border:1px solid #c8ecdd;border-radius:999px;color:#087a5b;background:#e9faf3;font-size:9px;font-weight:800;white-space:nowrap}
+.coupons-status i{width:5px;height:5px;border-radius:50%;background:#22ae7e}.coupons-status.inactive{border-color:#e2e8e5;color:#71807b;background:#f3f6f5}.coupons-status.inactive i{background:#9aa8a3}.coupons-status.exhausted{border-color:#f0dcae;color:#956318;background:#fff7e5}.coupons-status.exhausted i{background:#e2a33b}
+.coupons-created{color:#52615c;font-size:9px;white-space:nowrap}
+.coupons-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px}.coupons-row-actions form{margin:0}
+.coupons-action,.coupons-delete{min-height:31px;padding:5px 8px;border:1px solid var(--ex-line);border-radius:7px;color:#52615c;background:#fff;font-size:9px;font-weight:800;white-space:nowrap}
+.coupons-action:hover{border-color:#b9d7ca;color:#087a5b;background:#f2fbf7}.coupons-action.enable{border-color:#c8ecdd;color:#087a5b;background:#effaf5}
+.coupons-delete{color:#a9354b}.coupons-delete:hover{border-color:#efc8cf;background:#fff2f4}
+.coupons-empty{display:grid;justify-items:center;padding:48px 18px 44px;text-align:center;background:radial-gradient(circle at 50% 20%,rgba(233,250,243,.58),transparent 40%)}
+.coupons-empty-mark{display:grid;place-items:center;width:68px;height:68px;margin-bottom:13px;border:1px solid #cfe8dc;border-radius:22px;color:#087a5b;background:linear-gradient(145deg,#e9faf3,#fff8e8);font-size:30px}
+.coupons-empty h3{margin:7px 0 0;font:700 19px var(--ex-display);letter-spacing:-.04em}.coupons-empty p{max-width:400px;margin:6px 0 0;color:var(--ex-muted);font-size:10px;line-height:1.7}.coupons-empty .experiment-button{margin-top:15px}
+.coupons-workspace-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 17px;border-top:1px solid #edf1ef;color:var(--ex-muted);font-size:9px}.coupons-workspace-foot b{color:#52615c}
+.coupons-create-card{position:sticky;top:72px;padding:17px;scroll-margin-top:78px}
+.coupons-create-head{display:flex;align-items:center;gap:10px}.coupons-create-icon{display:grid;place-items:center;width:37px;height:37px;flex:0 0 37px;border:1px solid #cdebdc;border-radius:11px;color:#087a5b;background:#e9faf3;font-size:19px;font-weight:600}
+.coupons-create-head h2{font-size:15px}.coupons-create-head p{font-size:9px}
+.coupons-preview{display:grid;grid-template-columns:1fr auto;gap:4px 8px;margin:15px 0 14px;padding:12px;border:1px dashed #a7d8c3;border-radius:11px;background:linear-gradient(110deg,#f1fbf6,#fffaf0)}
+.coupons-preview-tag{grid-column:1/-1;color:var(--ex-muted);font-size:8px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+.coupons-preview strong{overflow:hidden;color:#087a5b;font:700 15px 'IBM Plex Mono',monospace;text-overflow:ellipsis;white-space:nowrap}.coupons-preview>span:last-child{align-self:center;color:#94620e;font-size:10px;font-weight:800;white-space:nowrap}
+.coupons-create-form{display:grid;gap:7px}.coupons-create-form label{margin-top:4px;color:#52615c;font-size:10px;font-weight:800}.coupons-create-form label b{color:#b33a53}.coupons-create-form label small{display:block;margin-top:3px;color:var(--ex-muted);font-size:8px;font-weight:500}
+.coupons-create-form input,.coupons-create-form select{width:100%;min-height:40px;padding:9px 10px;border:1px solid var(--ex-line);border-radius:9px;outline:0;color:var(--ex-ink);background:#fff;font-size:10px}
+.coupons-create-form input:focus,.coupons-create-form select:focus{border-color:#8ed6bc;box-shadow:0 0 0 3px rgba(47,197,142,.12)}
+.coupons-number-wrap{position:relative}.coupons-number-wrap input{padding-right:38px}.coupons-number-wrap>span{position:absolute;top:50%;right:11px;color:var(--ex-muted);font-size:10px;transform:translateY(-50%)}
+.coupons-field-help{margin-top:-4px;color:var(--ex-muted);font-size:8px}
+.coupons-create-note{display:flex;align-items:flex-start;gap:8px;margin-top:5px;padding:9px;border:1px solid #f0e0c1;border-radius:9px;color:#806226;background:#fffaf0}
+.coupons-create-note>span{display:grid;place-items:center;width:17px;height:17px;flex:0 0 17px;border-radius:50%;color:#fff;background:#c39a48;font-size:9px;font-weight:800}
+.coupons-create-note p{margin:0;font-size:9px;line-height:1.55}
+.coupons-submit{width:100%;min-height:42px;margin-top:5px;font-size:10px}
+.coupons-page .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:1100px){.coupons-workspace-grid{grid-template-columns:minmax(0,1.5fr) minmax(265px,.85fr)}.coupons-kpi{padding:13px}.coupons-table th,.coupons-table td{padding-inline:9px}}
+@media(max-width:900px){.coupons-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.coupons-workspace-grid{grid-template-columns:1fr}.coupons-create-card{position:static;order:-1}.coupons-create-form{grid-template-columns:1fr 1fr;column-gap:10px}.coupons-create-form label,.coupons-create-form input,.coupons-create-form select,.coupons-field-help,.coupons-number-wrap,.coupons-create-note,.coupons-submit{grid-column:span 2}.coupons-create-form label:nth-of-type(2),.coupons-create-form select:nth-of-type(1){grid-column:span 1}.coupons-create-form label:nth-of-type(3),.coupons-create-form .coupons-number-wrap{grid-column:span 1}}
+@media(max-width:700px){.coupons-page{gap:13px}.coupons-page .experiment-page-head{align-items:flex-start;flex-direction:column;gap:12px}.coupons-head-actions{width:100%;justify-content:space-between}.coupons-data-badge{font-size:9px}.coupons-build-head{align-items:flex-start;flex-direction:column}.coupons-build-grid{grid-template-columns:1fr;padding-inline:11px}.coupons-build-head{padding-inline:13px}.coupons-kpis{gap:8px}.coupons-kpi{min-height:112px;padding:12px}.coupons-kpi strong{font-size:21px}.coupons-kpi em,.coupons-kpi-foot{font-size:8px}.coupons-kpi-icon{top:10px;right:10px;width:27px;height:27px}.coupons-workspace-head{align-items:flex-start;flex-direction:column;padding-inline:13px}.coupons-toolbar{align-items:stretch;flex-wrap:wrap;padding-inline:13px}.coupons-search{flex-basis:100%}.coupons-filter{flex:1}.coupons-filter select{width:100%}.coupons-search-button{flex:0 0 auto}.coupons-clear{align-self:center}.coupons-tabs{overflow-x:auto;padding-inline:10px}.coupons-table{min-width:700px}.coupons-workspace-foot{align-items:flex-start;flex-direction:column;padding-inline:13px}.coupons-create-card{padding:14px}.coupons-create-form{grid-template-columns:1fr}.coupons-create-form label,.coupons-create-form input,.coupons-create-form select,.coupons-field-help,.coupons-number-wrap,.coupons-create-note,.coupons-submit,.coupons-create-form label:nth-of-type(2),.coupons-create-form select:nth-of-type(1),.coupons-create-form label:nth-of-type(3),.coupons-create-form .coupons-number-wrap{grid-column:1}.coupons-page .experiment-page-head h1{font-size:25px}}
+@media(prefers-reduced-motion:reduce){.coupons-table tbody tr{transition:none}}

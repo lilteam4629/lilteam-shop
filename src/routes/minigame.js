@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const store = require('../data/store');
 const { currentUser } = require('../middleware/auth');
-const { pickPrize } = require('../services/minigame');
+const { pickPrize, getPrizeImage } = require('../services/minigame');
 
 let minigameQueue = Promise.resolve();
 function runWithMinigameQueue(fn) {
@@ -65,7 +65,7 @@ router.post('/play', (req, res) => {
       res.json({
         ok: true,
         prizeName: prize.name,
-        image: prize.image || null,
+        image: req.tenantShop ? (prize.image || null) : getPrizeImage(prize, store.data.products),
         isWin,
         claimCode,
         walletBalance: user.walletBalance,

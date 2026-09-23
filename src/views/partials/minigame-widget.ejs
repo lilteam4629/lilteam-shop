@@ -5,12 +5,31 @@
   const mgCost = typeof cost === 'undefined' ? null : cost;
   const mgBalance = typeof balance === 'undefined' ? null : balance;
   const mgShowLogin = typeof showLogin !== 'undefined' && showLogin;
+  const mgCatalogEndpoint = typeof catalogEndpoint === 'undefined' ? '' : catalogEndpoint;
+  const mgMainSiteExperience = typeof mainSiteExperience !== 'undefined' && mainSiteExperience === true;
 %>
-<div class="mg-play-panel relative rounded-2xl p-6 flex flex-col items-center text-center gap-4">
+<div class="mg-play-panel relative rounded-2xl p-6 flex flex-col items-center text-center gap-4<%= mgMainSiteExperience ? ' mg-play-panel--main-site' : '' %>">
   <div class="mg-stage">
-    <div class="mg-box mg-box-el">🎁</div>
+    <% if (mgMainSiteExperience) { %>
+    <div class="mg-box-scene mg-box-scene-el" aria-hidden="true">
+      <span class="mg-box-aura"></span>
+      <div class="mg-box mg-box-el">
+        <span class="mg-box-lid"><i class="mg-box-bow"></i></span>
+        <span class="mg-box-body"><i class="mg-box-band-v"></i><i class="mg-box-band-h"></i></span>
+      </div>
+    </div>
+    <% } else { %>
+      <div class="mg-box mg-box-el">🎁</div>
+    <% } %>
     <div class="mg-card mg-card-el">
-      <div class="mg-card-icon mg-card-icon-el">🎉</div>
+      <% if (mgMainSiteExperience) { %>
+      <div class="mg-card-icon mg-card-icon-el" aria-hidden="true">
+        <svg class="mg-result-gift" viewBox="0 0 48 48"><path d="M7 20h34v22H7zM4 13h40v9H4zM24 13v29M24 13c-2-7-11-11-14-6-3 5 5 9 14 6Zm0 0c2-7 11-11 14-6 3 5-5 9-14 6Z"/></svg>
+        <svg class="mg-result-miss" viewBox="0 0 48 48"><path d="M24 5v8m0 22v8M5 24h8m22 0h8M10.5 10.5l5.7 5.7m15.6 15.6 5.7 5.7m0-27-5.7 5.7m-15.6 15.6-5.7 5.7"/><circle cx="24" cy="24" r="9"/></svg>
+      </div>
+      <% } else { %>
+        <div class="mg-card-icon mg-card-icon-el">🎉</div>
+      <% } %>
       <img class="mg-card-image mg-card-image-el hidden" alt="" />
       <div class="mg-card-name mg-card-name-el"></div>
     </div>
@@ -20,7 +39,7 @@
   <% if (mgShowLogin) { %>
     <a href="/login" class="mg-play-btn w-full block">เข้าสู่ระบบเพื่อเล่น</a>
   <% } else { %>
-    <button type="button" class="mg-play-btn mg-play-btn-el w-full" data-endpoint="<%= endpoint %>">
+    <button type="button" class="mg-play-btn mg-play-btn-el w-full" data-endpoint="<%= endpoint %>"<% if (mgCatalogEndpoint) { %> data-catalog-endpoint="<%= mgCatalogEndpoint %>" disabled aria-describedby="mgx-live-catalog-status"<% } %>>
       <%= ctaLabel %><% if (mgCost !== null) { %> (฿<%= mgCost.toLocaleString() %>)<% } %>
     </button>
     <% if (mgBalance !== null) { %>
@@ -34,16 +53,25 @@
     background: linear-gradient(160deg, var(--input), var(--card));
   }
   .mg-stage { position: relative; width: 100%; height: 220px; display: flex; align-items: center; justify-content: center; }
-  .mg-box {
-    font-size: 4.5rem; line-height: 1; cursor: default;
-    filter: drop-shadow(0 0 18px color-mix(in srgb, var(--gold) 45%, transparent));
-    animation: mg-float 2.6s ease-in-out infinite;
-  }
+  .mg-play-panel--main-site .mg-stage { perspective: 900px; }
+  .mg-box-scene { position: relative; display: grid; place-items: center; width: 142px; height: 126px; transform-style: preserve-3d; animation: mg-float 2.6s ease-in-out infinite; }
+  .mg-box-aura { position: absolute; inset: 18px 12px 6px; border-radius: 50%; background: color-mix(in srgb, var(--gold) 22%, transparent); filter: blur(22px); opacity: .55; transform: scale(.78); transition: opacity .3s ease, transform .3s ease; }
+  .mg-box { font-size: 4.5rem; line-height: 1; cursor: default; filter: drop-shadow(0 0 18px color-mix(in srgb, var(--gold) 45%, transparent)); animation: mg-float 2.6s ease-in-out infinite; }
+  .mg-play-panel--main-site .mg-box { position: relative; width: 112px; height: 96px; transform-style: preserve-3d; filter: drop-shadow(0 12px 13px color-mix(in srgb, var(--gold) 32%, transparent)); animation: none; }
+  .mg-box-body { position: absolute; inset: 27px 5px 2px; overflow: visible; border: 2px solid color-mix(in srgb, var(--gold) 72%, #fff); border-radius: 8px 8px 13px 13px; background: linear-gradient(145deg, color-mix(in srgb, var(--gold) 84%, #fff), var(--gold-hover)); box-shadow: inset 0 2px 4px #fff8; }
+  .mg-box-band-v { position: absolute; top: 0; bottom: 0; left: calc(50% - 8px); width: 16px; background: color-mix(in srgb, var(--gold-contrast) 24%, var(--gold)); box-shadow: inset 1px 0 #fff5, inset -1px 0 #0002; }
+  .mg-box-band-h { position: absolute; top: 19px; left: 0; right: 0; height: 13px; background: color-mix(in srgb, var(--gold-contrast) 20%, var(--gold)); box-shadow: inset 0 1px #fff5, inset 0 -1px #0002; }
+  .mg-box-lid { position: absolute; z-index: 2; top: 17px; left: 0; right: 0; height: 20px; border: 2px solid color-mix(in srgb, var(--gold) 78%, #fff); border-radius: 8px; background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 75%, #fff), var(--gold)); transform-origin: 50% 90%; backface-visibility: visible; box-shadow: 0 3px 6px #0002; }
+  .mg-box-bow { position: absolute; z-index: 3; top: -6px; left: 50%; width: 8px; height: 14px; border-radius: 50%; background: var(--gold-contrast); transform: translateX(-50%); box-shadow: -10px 0 0 -1px color-mix(in srgb, var(--gold-contrast) 75%, transparent), 10px 0 0 -1px color-mix(in srgb, var(--gold-contrast) 75%, transparent); }
+  .mg-box-scene.is-opening .mg-box-aura { opacity: 1; transform: scale(1.2); }
+  .mg-box-scene.is-opening { animation: mg-scene-burst .52s ease-out both; }
+  @keyframes mg-scene-burst { 0% { transform: scale(1); } 45% { transform: scale(1.14); } 100% { transform: scale(.92); } }
   @keyframes mg-float {
     0%, 100% { transform: translateY(0) scale(1); }
     50% { transform: translateY(-6px) scale(1.03); }
   }
   .mg-box.mg-shaking { animation: mg-shake .6s ease-in-out 2; }
+  .mg-play-panel--main-site .mg-box.mg-shaking { animation: mg-shake .5s ease-in-out 2; }
   @keyframes mg-shake {
     0%, 100% { transform: translate(0, 0) rotate(0); }
     20% { transform: translate(-6px, 0) rotate(-8deg); }
@@ -51,7 +79,12 @@
     60% { transform: translate(-5px, -3px) rotate(-6deg); }
     80% { transform: translate(5px, -3px) rotate(6deg); }
   }
+  .mg-play-panel--main-site .mg-box.mg-opening { animation: mg-box-pop .52s cubic-bezier(.22,.8,.24,1) both; }
+  .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid { animation: mg-lid-open .52s cubic-bezier(.18,.75,.25,1) both; }
+  @keyframes mg-box-pop { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(6px) scale(.96); } 100% { transform: translateY(15px) scale(.8); } }
+  @keyframes mg-lid-open { 0% { transform: translateY(0) rotateX(0) rotateZ(0); } 65% { transform: translateY(-18px) rotateX(-115deg) rotateZ(-7deg); } 100% { transform: translateY(-14px) rotateX(-105deg) rotateZ(-5deg); } }
   .mg-box.mg-hidden { opacity: 0; transform: scale(.4); transition: opacity .25s, transform .25s; }
+  .mg-play-panel--main-site .mg-box.mg-hidden { opacity: 0; transform: translateY(22px) scale(.48); transition: opacity .24s ease, transform .24s ease; }
 
   .mg-card {
     position: absolute; inset: 0;
@@ -64,6 +97,11 @@
     transition: opacity .45s ease, transform .45s cubic-bezier(.34,1.56,.64,1);
   }
   .mg-card-icon { font-size: 3.4rem; line-height: 1; filter: drop-shadow(0 0 14px color-mix(in srgb, var(--gold) 50%, transparent)); }
+  .mg-play-panel--main-site .mg-card-icon { display: grid; place-items: center; width: 64px; height: 64px; color: var(--gold-text); }
+  .mg-card-icon svg { display: block; width: 56px; height: 56px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+  .mg-card-icon .mg-result-miss { display: none; opacity: .7; }
+  .mg-card-icon.is-miss .mg-result-gift { display: none; }
+  .mg-card-icon.is-miss .mg-result-miss { display: block; }
   .mg-card-image {
     width: auto; height: auto;
     max-width: min(100%, 14rem); max-height: 11.5rem;
@@ -125,7 +163,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .mg-box, .mg-box.mg-shaking { animation: none; }
+    .mg-play-panel--main-site .mg-box-scene, .mg-play-panel--main-site .mg-box, .mg-play-panel--main-site .mg-box.mg-shaking, .mg-play-panel--main-site .mg-box.mg-opening, .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid, .mg-play-panel--main-site .mg-box-scene.is-opening { animation: none !important; transition-duration: .01ms !important; }
+    .mg-play-panel:not(.mg-play-panel--main-site) .mg-box, .mg-play-panel:not(.mg-play-panel--main-site) .mg-box.mg-shaking { animation: none; }
   }
 </style>
 
@@ -136,6 +175,8 @@
     panel.dataset.mgBound = '1';
 
     const box = panel.querySelector('.mg-box-el');
+    const boxScene = panel.querySelector('.mg-box-scene-el');
+    const mainSiteExperience = panel.classList.contains('mg-play-panel--main-site');
     const card = panel.querySelector('.mg-card-el');
     const cardIcon = panel.querySelector('.mg-card-icon-el');
     const cardImage = panel.querySelector('.mg-card-image-el');
@@ -144,12 +185,24 @@
     const resultEl = panel.querySelector('.mg-result-el');
     const balanceEl = panel.querySelector('.mg-balance-el');
     const confettiColors = ['#c8a63f', '#e2836f', '#93bfff', '#8fe3a3', '#f3ecd8'];
+    const catalogEndpoint = btn.dataset.catalogEndpoint || '';
     let activeController = null;
     let requestTimer = 0;
     let revealTimer = 0;
 
-    function tierIconFor(isWin) {
-      return isWin ? '🎁' : '💨';
+    if (catalogEndpoint) {
+      const catalogPreview = window.lilteamLiveCatalogPreview;
+      if (!catalogPreview) {
+        resultEl.textContent = 'ตัวเชื่อมแค็ตตาล็อกจริงยังไม่พร้อม';
+      } else {
+        catalogPreview.load(catalogEndpoint).then(catalog => {
+          if (!panel.isConnected || !Array.isArray(catalog.products) || !catalog.products.length) return;
+          btn.disabled = false;
+          resultEl.textContent = 'พร้อมทดลองจากสินค้าจริง ' + catalog.products.length + ' รายการ · ไม่ตัดสต็อก';
+        }).catch(error => {
+          if (panel.isConnected) resultEl.textContent = error.message || 'อ่านสินค้าจริงไม่สำเร็จ';
+        });
+      }
     }
 
     function burstConfetti() {
@@ -172,6 +225,12 @@
     function resetStage() {
       card.classList.remove('mg-revealed');
       box.classList.remove('mg-hidden');
+      box.classList.remove('mg-shaking', 'mg-opening');
+      if (boxScene) boxScene.classList.remove('is-opening');
+      if (mainSiteExperience) cardIcon.classList.remove('is-miss');
+      cardImage.onerror = null;
+      cardImage.removeAttribute('src');
+      cardImage.alt = '';
     }
 
     function releaseBusyState(message) {
@@ -181,7 +240,8 @@
       revealTimer = 0;
       if (activeController) activeController.abort();
       activeController = null;
-      box.classList.remove('mg-shaking');
+      box.classList.remove('mg-shaking', 'mg-opening');
+      if (boxScene) boxScene.classList.remove('is-opening');
       btn.disabled = false;
       btn.removeAttribute('aria-busy');
       if (message) resultEl.textContent = message;
@@ -202,39 +262,67 @@
       resetStage();
       box.classList.add('mg-shaking');
 
-      const minShakeMs = 900;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const minShakeMs = mainSiteExperience ? (reduceMotion ? 60 : 1000) : 900;
       const started = Date.now();
 
       let response, data;
-      activeController = new AbortController();
-      requestTimer = setTimeout(function () { activeController && activeController.abort(); }, 10000);
-      try {
-        response = await fetch(btn.dataset.endpoint, { method: 'POST', credentials: 'same-origin', signal: activeController.signal });
-        data = await response.json();
-      } catch (err) {
-        data = null;
-      } finally {
-        clearTimeout(requestTimer);
-        requestTimer = 0;
-        activeController = null;
+      if (catalogEndpoint) {
+        try {
+          const catalog = await window.lilteamLiveCatalogPreview.load(catalogEndpoint);
+          if (!Array.isArray(catalog.products) || !catalog.products.length) throw new Error('เว็บจริงไม่มีสินค้าพร้อมทดลอง');
+          const product = catalog.products[Math.floor(Math.random() * catalog.products.length)];
+          response = { ok: true };
+          data = { prizeName: product.title, image: product.image, availableStock: product.availableStock, isWin: true, isPreview: true, fromLiveCatalog: true };
+        } catch (err) {
+          response = { ok: false };
+          data = { error: err.message || 'อ่านสินค้าจริงไม่สำเร็จ' };
+        }
+      } else {
+        activeController = new AbortController();
+        requestTimer = setTimeout(function () { activeController && activeController.abort(); }, 10000);
+        try {
+          response = await fetch(btn.dataset.endpoint, { method: 'POST', credentials: 'same-origin', signal: activeController.signal });
+          data = await response.json();
+        } catch (err) {
+          data = null;
+        } finally {
+          clearTimeout(requestTimer);
+          requestTimer = 0;
+          activeController = null;
+        }
       }
 
       const elapsed = Date.now() - started;
       revealTimer = setTimeout(() => {
         revealTimer = 0;
-        box.classList.remove('mg-shaking');
         if (!response || !response.ok || !data) {
           releaseBusyState((data && data.error) || 'ระบบตอบช้า กรุณากดลองใหม่');
           return;
         }
 
-        box.classList.add('mg-hidden');
+        box.classList.remove('mg-shaking');
+        const finishReveal = () => {
+          revealTimer = 0;
+          if (mainSiteExperience) {
+            box.classList.remove('mg-opening');
+            boxScene.classList.remove('is-opening');
+          }
+          box.classList.add('mg-hidden');
+        if (mainSiteExperience) cardIcon.classList.toggle('is-miss', !data.isWin);
+        else cardIcon.textContent = data.isWin ? '🎁' : '💨';
         if (data.image) {
           cardImage.src = data.image;
+          cardImage.alt = 'รูปของรางวัล ' + data.prizeName;
+          cardImage.onerror = () => {
+            cardImage.classList.add('hidden');
+            cardIcon.classList.remove('hidden');
+          };
           cardImage.classList.remove('hidden');
           cardIcon.classList.add('hidden');
         } else {
-          cardIcon.textContent = tierIconFor(data.isWin);
+          if (mainSiteExperience) cardIcon.classList.toggle('is-miss', !data.isWin);
+          else cardIcon.textContent = data.isWin ? '🎁' : '💨';
           cardIcon.classList.remove('hidden');
           cardImage.classList.add('hidden');
         }
@@ -245,7 +333,9 @@
         resultEl.textContent = '';
         const resultLine = document.createElement('div');
         resultLine.className = data.isWin ? 'text-emerald-400 font-medium' : 'text-[var(--text-3)]';
-        resultLine.textContent = data.isPreview
+        resultLine.textContent = data.fromLiveCatalog
+          ? ('ตัวอย่างสินค้าจริง: ' + data.prizeName + ' · มีในสต็อก ' + Number(data.availableStock || 0).toLocaleString() + ' (ไม่ตัดสต็อก)')
+          : data.isPreview
           ? ('ตัวอย่างผลสุ่ม: ' + data.prizeName)
           : (data.isWin ? ('ยินดีด้วย! ได้รับ ' + data.prizeName) : ('ผลลัพธ์: ' + data.prizeName));
         resultEl.appendChild(resultLine);
@@ -270,8 +360,17 @@
           resultEl.appendChild(contactBtn);
         }
         if (balanceEl && typeof data.walletBalance === 'number') balanceEl.textContent = data.walletBalance.toLocaleString();
-        btn.disabled = false;
-        btn.removeAttribute('aria-busy');
+          btn.disabled = false;
+          btn.removeAttribute('aria-busy');
+        };
+        if (mainSiteExperience) {
+          box.classList.add('mg-opening');
+          boxScene.classList.add('is-opening');
+          revealTimer = setTimeout(finishReveal, reduceMotion ? 0 : 520);
+        } else {
+          box.classList.add('mg-hidden');
+          finishReveal();
+        }
       }, Math.max(0, minShakeMs - elapsed));
     });
   });

@@ -77,9 +77,9 @@
       <span>🎮</span><%= stats.gameCount %> สินค้า — พร้อมส่งทันทีหลังชำระเงิน
     </p>
     <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4">
-      <span class="bg-gradient-to-r from-[var(--gold)] via-[var(--text)] to-[var(--gold)] bg-clip-text text-transparent"><%= settings.shopName %></span>
+      <span class="bg-gradient-to-r from-[var(--gold)] via-[var(--text)] to-[var(--gold)] bg-clip-text text-transparent" data-storefront-preview-setting="shopName"><%= settings.shopName %></span>
     </h1>
-    <p class="text-[var(--text-3)] max-w-xl mx-auto"><%= settings.tagline %></p>
+    <p class="text-[var(--text-3)] max-w-xl mx-auto" data-storefront-preview-setting="tagline"><%= settings.tagline %></p>
   </div>
 
   <% if (newest.length) { %>
@@ -216,14 +216,13 @@
 @media(max-width:640px){.home-category-grid{display:grid!important;grid-template-columns:1fr!important;gap:12px!important;overflow:visible!important;padding-bottom:0}.home-category-card{display:block!important;width:100%!important;flex:none!important;scroll-snap-align:none}.home-category-image{width:100%!important}}
 </style>
 
-<% if (settings.showOpenHoursBar !== false) { %>
-<section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6">
+<section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
   <div class="hud-bar relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
     <div class="hud-bar-glow"></div>
     <div class="hud-bar-scan"></div>
     <span class="hud-icon hidden sm:flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[13px]">🕐</span>
     <div class="flex-1 relative h-5 overflow-hidden min-w-0 z-[1]">
-      <span class="marquee-track flex items-center gap-2 font-mono tracking-tight"><span class="sm:hidden">🕐</span> <%= settings.openHours %> &nbsp;&nbsp;<span class="text-[var(--gold-text)]">◆</span>&nbsp;&nbsp; <%= settings.tagline %></span>
+      <span class="marquee-track flex items-center gap-2 font-mono tracking-tight"><span class="sm:hidden">🕐</span> <span data-storefront-preview-setting="openHours"><%= settings.openHours %></span> &nbsp;&nbsp;<span class="text-[var(--gold-text)]">◆</span>&nbsp;&nbsp; <span data-storefront-preview-setting="tagline"><%= settings.tagline %></span></span>
     </div>
     <span class="hud-status inline-flex items-center gap-1.5 shrink-0 ml-2 pl-2.5 pr-3 py-1 rounded-full text-[11px] font-bold text-emerald-300 z-[1]">
       <span class="relative flex h-2 w-2 shrink-0">
@@ -234,7 +233,6 @@
     </span>
   </div>
 </section>
-<% } %>
 
 <% if (announcements.length) { %>
 <div class="store-announcements w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-2 space-y-2">
@@ -267,12 +265,19 @@
 <%
   const welcomePopup = settings.welcomePopup || {};
   const welcomePopupImages = Array.isArray(welcomePopup.images) ? welcomePopup.images : [];
-  const welcomePopupTitle = welcomePopup.showTitle !== false ? (welcomePopup.title || '') : '';
-  const welcomePopupContent = welcomePopup.showContent !== false ? (welcomePopup.content || '') : '';
+  const welcomePopupTitle = welcomePopup.showTitle !== false
+    ? (welcomePopup.title || (welcomePopupExperiment ? 'ยินดีต้อนรับ!' : ''))
+    : '';
+  const welcomePopupContent = welcomePopup.showContent !== false
+    ? (welcomePopup.content || (welcomePopupExperiment ? 'ขอบคุณที่ใช้บริการเว็บไซต์ของเรา' : ''))
+    : '';
+  const welcomePopupHasContent = welcomePopupImages.length || welcomePopupTitle || welcomePopupContent;
 %>
-<% if (welcomePopup.enabled && (welcomePopupImages.length || welcomePopupTitle || welcomePopupContent)) { %>
-<div id="welcome-popup" class="hidden fixed inset-0 z-[9998] items-center justify-center bg-black/70 backdrop-blur-sm p-4" data-popup-id="<%= welcomePopupImages.join('|') %>|<%= welcomePopupTitle %>|<%= welcomePopupContent %>">
-  <div class="relative w-full max-w-md bg-[var(--card)] border border-[var(--gold)]/40 rounded-2xl overflow-hidden shadow-2xl">
+<% if (welcomePopupExperiment) { %><link rel="stylesheet" href="<%= asset('css/storefront-welcome-popup-experiment-v1.css') %>" /><% } %>
+<% if ((welcomePopup.enabled && welcomePopupHasContent) || welcomePopupExperiment) { %>
+<div id="welcome-popup" class="hidden fixed inset-0 z-[9998] items-center justify-center bg-black/70 backdrop-blur-sm p-4<%= welcomePopupExperiment ? ' welcome-popup-redesign' : '' %>" data-popup-id="<%= welcomePopupImages.join('|') %>|<%= welcomePopupTitle %>|<%= welcomePopupContent %>" data-shop-name="<%= settings.shopName || 'LilTeam Shop' %>" data-shop-logo="<%= settings.branding && settings.branding.logoImage ? settings.branding.logoImage : '' %>"<% if (welcomePopupExperiment) { %> role="dialog" aria-modal="true"<% if (welcomePopupTitle) { %> aria-labelledby="welcome-popup-title"<% } else { %> aria-label="ป๊อปอัปต้อนรับ"<% } %><% if (welcomePopupContent) { %> aria-describedby="welcome-popup-description"<% } %> tabindex="-1"<% } %>>
+  <div class="relative w-full max-w-md bg-[var(--card)] border border-[var(--gold)]/40 rounded-2xl overflow-hidden shadow-2xl welcome-popup-dialog">
+    <% if (welcomePopupExperiment) { %><button type="button" class="welcome-popup-dismiss" data-welcome-popup-dismiss aria-label="ปิดป๊อปอัปต้อนรับ">×</button><% } %>
     <% if (welcomePopupImages.length) { %>
       <div class="welcome-popup-slider relative w-full aspect-square bg-[var(--input)] overflow-hidden">
         <% welcomePopupImages.forEach((image, index) => { %>
@@ -284,26 +289,205 @@
               <span class="welcome-popup-dot w-1.5 h-1.5 rounded-full <%= index === 0 ? 'bg-white' : 'bg-white/40' %> transition" data-index="<%= index %>"></span>
             <% }) %>
           </div>
+          <% if (welcomePopupExperiment) { %>
+            <button type="button" class="welcome-popup-carousel-toggle" data-welcome-popup-carousel-toggle aria-label="หยุดสลับรูปภาพ">
+              <svg data-carousel-pause viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" /></svg>
+              <svg data-carousel-play viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m8 5 12 7-12 7z" /></svg>
+            </button>
+          <% } %>
         <% } %>
       </div>
     <% } %>
     <% if (welcomePopupTitle || welcomePopupContent) { %>
-      <div class="p-5 text-center border-t border-[var(--border)]">
-        <% if (welcomePopupTitle) { %><h3 class="font-bold text-base text-[var(--text)] mb-1"><%= welcomePopupTitle %></h3><% } %>
-        <% if (welcomePopupContent) { %><p class="text-sm text-[var(--text-3)] leading-relaxed"><%= welcomePopupContent %></p><% } %>
+      <div class="p-5 text-center border-t border-[var(--border)] welcome-popup-copy<%= welcomePopupImages.length ? '' : ' welcome-popup-no-image' %>">
+        <% if (welcomePopupExperiment) { %><div class="welcome-popup-brand" aria-hidden="true"><span class="welcome-popup-brand-mark<%= settings.branding && settings.branding.logoImage ? ' has-logo' : '' %>"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="" /><% } else { %>L<% } %></span><span><%= settings.shopName || 'LilTeam Shop' %></span></div><% } %>
+        <% if (welcomePopupTitle) { %><h3 id="welcome-popup-title" class="font-bold text-base text-[var(--text)] mb-1"><%= welcomePopupTitle %></h3><% } %>
+        <% if (welcomePopupContent) { %><p id="welcome-popup-description" class="text-sm text-[var(--text-3)] leading-relaxed"><%= welcomePopupContent %></p><% } %>
       </div>
     <% } %>
-    <div class="flex divide-x divide-[var(--border)] border-t border-[var(--border)]">
-      <button type="button" id="welcome-popup-close" class="flex-1 py-3 text-sm font-medium text-[var(--text-2)] hover:bg-[var(--input)]">✕ เข้าสู่เว็บไซต์</button>
-      <button type="button" id="welcome-popup-mute" class="flex-1 py-3 text-sm font-medium text-[var(--coral)] hover:bg-[var(--input)]">🕐 ไม่แสดงผลอีกครั้งใน 1 วัน</button>
+    <div class="flex divide-x divide-[var(--border)] border-t border-[var(--border)] welcome-popup-actions">
+      <button type="button" id="welcome-popup-close" class="flex-1 py-3 text-sm font-medium text-[var(--text-2)] hover:bg-[var(--input)]"><% if (welcomePopupExperiment) { %><svg class="welcome-popup-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><% } else { %>✕ <% } %>เข้าสู่เว็บไซต์</button>
+      <button type="button" id="welcome-popup-mute" class="flex-1 py-3 text-sm font-medium text-[var(--coral)] hover:bg-[var(--input)]"><% if (welcomePopupExperiment) { %><svg class="welcome-popup-action-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><% } else { %>🕐 <% } %>ไม่แสดงผลอีกครั้งใน 1 วัน</button>
     </div>
   </div>
 </div>
 <script>
-  (function () {
+  (async function () {
     const modal = document.getElementById('welcome-popup');
     if (!modal) return;
-    const storageKey = 'lilteam_welcome_popup_mute_' + encodeURIComponent(modal.dataset.popupId).slice(0, 120);
+    const hostname = window.location.hostname;
+    const localHost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1';
+    const experimentPreview = modal.classList.contains('welcome-popup-redesign')
+      && localHost
+      && new URLSearchParams(window.location.search).get('welcomePopupExperiment') === '1';
+    const previewImageUrls = [];
+    if (experimentPreview) {
+      try {
+        const draft = JSON.parse(localStorage.getItem('lilteam_welcome_popup_experiment_v1') || 'null');
+        if (draft && draft.version >= 2) {
+          if (!draft.enabled) {
+            modal.remove();
+            return;
+          }
+
+          const references = Array.isArray(draft.images) ? draft.images : [];
+          const images = [];
+          const localReferences = references.filter((image) => image.source === 'local' && image.key);
+          if (localReferences.length && window.indexedDB) {
+            const database = await new Promise((resolve, reject) => {
+              const request = indexedDB.open('lilteam_welcome_popup_experiment', 1);
+              request.onupgradeneeded = () => {
+                if (!request.result.objectStoreNames.contains('images')) request.result.createObjectStore('images');
+              };
+              request.onsuccess = () => resolve(request.result);
+              request.onerror = () => reject(request.error);
+            });
+            try {
+              for (const reference of references) {
+                if (reference.source === 'local' && reference.key) {
+                  const blob = await new Promise((resolve, reject) => {
+                    const transaction = database.transaction('images', 'readonly');
+                    const request = transaction.objectStore('images').get(reference.key);
+                    request.onsuccess = () => resolve(request.result || null);
+                    request.onerror = () => reject(request.error);
+                  });
+                  if (blob) {
+                    const src = URL.createObjectURL(blob);
+                    previewImageUrls.push(src);
+                    images.push({ src, key: reference.key, name: reference.name || 'รูปทดลอง' });
+                  }
+                } else if (reference.source === 'url' && reference.src) {
+                  images.push({ src: reference.src, key: reference.src, name: reference.name || 'รูปหน้าร้าน' });
+                }
+              }
+            } finally {
+              database.close();
+            }
+          } else {
+            for (const reference of references) {
+              if (reference.source === 'url' && reference.src) images.push({ src: reference.src, key: reference.src, name: reference.name || 'รูปหน้าร้าน' });
+            }
+          }
+
+          const dialog = modal.querySelector('.welcome-popup-dialog');
+          const actions = modal.querySelector('.welcome-popup-actions');
+          let copy = modal.querySelector('.welcome-popup-copy');
+          if (!copy) {
+            copy = document.createElement('div');
+            copy.className = 'welcome-popup-copy';
+            dialog.insertBefore(copy, actions);
+          }
+          let brand = copy.querySelector('.welcome-popup-brand');
+          if (!brand) {
+            brand = document.createElement('div');
+            brand.className = 'welcome-popup-brand';
+            brand.setAttribute('aria-hidden', 'true');
+            const mark = document.createElement('span');
+            mark.className = 'welcome-popup-brand-mark';
+            if (modal.dataset.shopLogo) {
+              mark.classList.add('has-logo');
+              const logo = document.createElement('img');
+              logo.src = modal.dataset.shopLogo;
+              logo.alt = '';
+              mark.appendChild(logo);
+            } else {
+              mark.textContent = (modal.dataset.shopName || 'L').trim().charAt(0) || 'L';
+            }
+            const name = document.createElement('span');
+            name.textContent = modal.dataset.shopName || 'LilTeam Shop';
+            brand.append(mark, name);
+            copy.prepend(brand);
+          }
+          brand.querySelectorAll('.welcome-popup-brand-mark img').forEach((logo) => {
+            const useInitialFallback = () => {
+              const mark = logo.closest('.welcome-popup-brand-mark');
+              if (!mark) return;
+              mark.classList.remove('has-logo');
+              mark.replaceChildren(document.createTextNode((modal.dataset.shopName || 'L').trim().charAt(0) || 'L'));
+            };
+            logo.addEventListener('error', useInitialFallback, { once: true });
+            if (logo.complete && !logo.naturalWidth) useInitialFallback();
+          });
+
+          const title = draft.showTitle ? String(draft.title || '').trim() : '';
+          const content = draft.showContent ? String(draft.content || '').trim() : '';
+          let titleElement = copy.querySelector('#welcome-popup-title');
+          if (title && !titleElement) {
+            titleElement = document.createElement('h3');
+            titleElement.id = 'welcome-popup-title';
+            titleElement.className = 'font-bold text-base text-[var(--text)] mb-1';
+            copy.appendChild(titleElement);
+          }
+          if (titleElement) {
+            titleElement.textContent = title;
+            titleElement.hidden = !title;
+          }
+          let contentElement = copy.querySelector('#welcome-popup-description');
+          if (content && !contentElement) {
+            contentElement = document.createElement('p');
+            contentElement.id = 'welcome-popup-description';
+            contentElement.className = 'text-sm text-[var(--text-3)] leading-relaxed';
+            copy.appendChild(contentElement);
+          }
+          if (contentElement) {
+            contentElement.textContent = content;
+            contentElement.hidden = !content;
+          }
+          copy.classList.toggle('welcome-popup-no-image', images.length === 0);
+          if (title) modal.setAttribute('aria-labelledby', 'welcome-popup-title');
+          else {
+            modal.removeAttribute('aria-labelledby');
+            modal.setAttribute('aria-label', 'ป๊อปอัปต้อนรับ');
+          }
+          if (content) modal.setAttribute('aria-describedby', 'welcome-popup-description');
+          else modal.removeAttribute('aria-describedby');
+
+          let slider = modal.querySelector('.welcome-popup-slider');
+          if (!images.length) {
+            slider?.remove();
+          } else {
+            if (!slider) {
+              slider = document.createElement('div');
+              slider.className = 'welcome-popup-slider relative w-full aspect-square bg-[var(--input)] overflow-hidden';
+              dialog.insertBefore(slider, copy);
+            }
+            slider.replaceChildren();
+            images.forEach((image, index) => {
+              const slide = document.createElement('img');
+              slide.src = image.src;
+              slide.alt = '';
+              slide.className = `welcome-popup-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${index === 0 ? 'opacity-100' : 'opacity-0'}`;
+              slide.dataset.index = String(index);
+              slider.appendChild(slide);
+            });
+            if (images.length > 1) {
+              const dots = document.createElement('div');
+              dots.className = 'absolute bottom-2.5 left-0 right-0 flex items-center justify-center gap-1.5 z-10';
+              images.forEach((_, index) => {
+                const dot = document.createElement('span');
+                dot.className = `welcome-popup-dot w-1.5 h-1.5 rounded-full ${index === 0 ? 'bg-white' : 'bg-white/40'} transition`;
+                dot.dataset.index = String(index);
+                dots.appendChild(dot);
+              });
+              slider.appendChild(dots);
+              const toggle = document.createElement('button');
+              toggle.type = 'button';
+              toggle.className = 'welcome-popup-carousel-toggle';
+              toggle.dataset.welcomePopupCarouselToggle = '';
+              toggle.setAttribute('aria-label', 'หยุดสลับรูปภาพ');
+              toggle.innerHTML = '<svg data-carousel-pause viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" /></svg><svg data-carousel-play viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m8 5 12 7-12 7z" /></svg>';
+              slider.appendChild(toggle);
+            }
+          }
+          modal.dataset.popupId = JSON.stringify({ title, content, images: images.map((image) => image.key) });
+        }
+      } catch (_) {
+        // If local draft storage is unavailable, keep the server-rendered preview usable.
+      }
+      window.addEventListener('pagehide', () => previewImageUrls.forEach((src) => URL.revokeObjectURL(src)), { once: true });
+    }
+    const storageKey = (experimentPreview ? 'lilteam_welcome_popup_experiment_mute_' : 'lilteam_welcome_popup_mute_')
+      + encodeURIComponent(modal.dataset.popupId).slice(0, 120);
     try {
       const mutedUntil = Number(localStorage.getItem(storageKey) || 0);
       if (Date.now() < mutedUntil) return;
@@ -312,26 +496,113 @@
     modal.classList.add('flex');
     const close = document.getElementById('welcome-popup-close');
     const mute = document.getElementById('welcome-popup-mute');
-    if (close) close.addEventListener('click', function () { modal.remove(); });
+    const dismissButton = modal.querySelector('[data-welcome-popup-dismiss]');
+    const isRedesign = modal.classList.contains('welcome-popup-redesign');
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement;
+    if (isRedesign) document.body.style.overflow = 'hidden';
+    const dismiss = function () {
+      modal.remove();
+      document.removeEventListener('keydown', handlePopupKeydown);
+      if (isRedesign) {
+        document.body.style.overflow = previousBodyOverflow;
+        if (previousFocus && previousFocus !== document.body && previousFocus.isConnected && typeof previousFocus.focus === 'function') {
+          previousFocus.focus({ preventScroll: true });
+        }
+      }
+    };
+    const handlePopupKeydown = function (event) {
+      if (!modal.isConnected) return;
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        dismiss();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(modal.querySelectorAll('button:not([disabled]),a[href],input:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'))
+        .filter(element => element.getClientRects().length);
+      if (!focusable.length) {
+        event.preventDefault();
+        modal.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    if (close) close.addEventListener('click', dismiss);
+    if (dismissButton) dismissButton.addEventListener('click', dismiss);
     if (mute) mute.addEventListener('click', function () {
       try { localStorage.setItem(storageKey, String(Date.now() + 24 * 60 * 60 * 1000)); } catch (e) {}
-      modal.remove();
+      dismiss();
     });
-    modal.addEventListener('click', function (e) { if (e.target === modal) modal.remove(); });
+    modal.addEventListener('click', function (e) { if (e.target === modal) dismiss(); });
+    if (dismissButton && isRedesign) {
+      document.addEventListener('keydown', handlePopupKeydown);
+      dismissButton.focus();
+    }
 
     const slides = modal.querySelectorAll('.welcome-popup-slide');
     const dots = modal.querySelectorAll('.welcome-popup-dot');
     if (slides.length > 1) {
       let current = 0;
-      const popupTimer = setInterval(function () {
+      const carouselToggle = modal.querySelector('[data-welcome-popup-carousel-toggle]');
+      const reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let isPlaying = !reducedMotion;
+      let pointerInside = false;
+      let focusInside = isRedesign && modal.contains(document.activeElement);
+      let popupTimer = null;
+      const showNextSlide = function () {
         if (!modal.isConnected) { clearInterval(popupTimer); return; }
+        if (!isPlaying || pointerInside || focusInside) return;
         slides[current].classList.replace('opacity-100', 'opacity-0');
         if (dots[current]) dots[current].classList.replace('bg-white', 'bg-white/40');
         current = (current + 1) % slides.length;
         slides[current].classList.replace('opacity-0', 'opacity-100');
         if (dots[current]) dots[current].classList.replace('bg-white/40', 'bg-white');
-      }, 3500);
-      document.addEventListener('lilteam:page-unloading', function () { clearInterval(popupTimer); }, { once: true });
+      };
+      const syncCarouselToggle = function () {
+        if (!carouselToggle) return;
+        carouselToggle.setAttribute('aria-label', isPlaying ? 'หยุดสลับรูปภาพ' : 'เล่นสลับรูปภาพ');
+        const pauseIcon = carouselToggle.querySelector('[data-carousel-pause]');
+        const playIcon = carouselToggle.querySelector('[data-carousel-play]');
+        if (pauseIcon) pauseIcon.hidden = !isPlaying;
+        if (playIcon) playIcon.hidden = isPlaying;
+      };
+      const startCarousel = function () {
+        if (popupTimer) clearInterval(popupTimer);
+        isPlaying = true;
+        focusInside = false;
+        popupTimer = setInterval(showNextSlide, 3500);
+        syncCarouselToggle();
+      };
+      const pauseCarousel = function () {
+        if (popupTimer) clearInterval(popupTimer);
+        popupTimer = null;
+        isPlaying = false;
+        syncCarouselToggle();
+      };
+      if (isPlaying) popupTimer = setInterval(showNextSlide, 3500);
+      syncCarouselToggle();
+      if (carouselToggle) {
+        carouselToggle.addEventListener('click', function () {
+          if (isPlaying) pauseCarousel();
+          else startCarousel();
+        });
+        modal.addEventListener('pointerenter', function () { pointerInside = true; });
+        modal.addEventListener('pointerleave', function () { pointerInside = false; });
+        modal.addEventListener('focusin', function () { focusInside = true; });
+        modal.addEventListener('focusout', function (event) {
+          if (!modal.contains(event.relatedTarget)) focusInside = false;
+        });
+      }
+      document.addEventListener('lilteam:page-unloading', function () { if (popupTimer) clearInterval(popupTimer); }, { once: true });
     }
   })();
 </script>
@@ -585,6 +856,7 @@
         ctaLabel: '🎲 เปิดกล่อง',
         showLogin: !currentUser,
         balance: currentUser ? currentUser.walletBalance : null,
+        mainSiteExperience: typeof isMainSite !== 'undefined' && isMainSite,
       }) %>
     </div>
   </div>
@@ -747,6 +1019,7 @@
       prizes: railGamePrizes,
       showLogin: !currentUser,
       balance: currentUser ? currentUser.walletBalance : null,
+      mainSiteExperience: typeof isMainSite !== 'undefined' && isMainSite,
     }) %>
     <div class="mt-6">
       <h3 class="text-sm font-semibold text-[var(--text-2)] mb-3">🎁 รางวัลที่มีโอกาสได้รับ</h3>

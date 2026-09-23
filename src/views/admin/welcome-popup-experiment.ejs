@@ -1,0 +1,544 @@
+<%
+  const activePopup = popup || {};
+  const popupImages = Array.isArray(activePopup.images) ? activePopup.images : [];
+%>
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-welcome-popup-v1.css') %>" />
+
+<div class="experiment-app experiment-welcome-popup-page">
+  <div class="experiment-main">
+    <header class="experiment-topbar">
+      <div class="experiment-build-legend" aria-label="สถานะงานออกแบบ">
+        <span><i class="ready"></i> ทดลองได้</span>
+        <span><i class="pending"></i> ยังไม่บันทึกข้อมูลจริง</span>
+      </div>
+      <button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน">◌</button>
+      <span class="experiment-user-name">admin</span>
+    </header>
+
+    <main class="experiment-content">
+      <div class="experiment-page-head">
+        <div>
+          <div class="experiment-kicker">ทดลองหน้าตาใหม่ · STOREFRONT POPUP</div>
+          <h1>ป๊อปอัปต้อนรับ</h1>
+          <p>แก้ข้อความและรูป แล้วดูผลบนหน้าร้านจริงได้ทันที โดยไม่เปลี่ยนข้อมูลที่ลูกค้าเห็น</p>
+        </div>
+        <span class="welcome-popup-page-status"><i></i> ต้นแบบแยกจากข้อมูลจริง</span>
+      </div>
+
+      <div class="welcome-popup-workspace" data-popup-workspace>
+        <div class="welcome-popup-source-images" hidden aria-hidden="true">
+          <% popupImages.forEach((image, index) => { %>
+            <img data-server-popup-image data-name="รูปหน้าร้าน <%= index + 1 %>" src="<%= image %>" alt="" />
+          <% }) %>
+        </div>
+        <section class="welcome-popup-editor experiment-card" aria-labelledby="welcome-editor-title">
+          <div class="welcome-popup-card-heading">
+            <div class="welcome-popup-heading-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M4 5h16v12H9l-5 3V5Z"/><path d="M8 9h8M8 13h5"/></svg>
+            </div>
+            <div>
+              <span class="welcome-popup-eyebrow">CONTENT & DISPLAY</span>
+              <h2 id="welcome-editor-title">แก้ไขต้นแบบ</h2>
+              <p>ดูการเปลี่ยนแปลงในตัวอย่างด้านขวาได้ทันที</p>
+            </div>
+            <span class="welcome-popup-readiness" data-popup-ready-badge>กำลังโหลด</span>
+          </div>
+
+          <div class="welcome-popup-editor-body" data-popup-draft>
+            <label class="welcome-popup-enable-row" for="welcome-popup-enabled">
+              <span class="welcome-popup-field-copy">
+                <strong>เปิดป๊อปอัปต้อนรับ</strong>
+                <small>แสดงเมื่อมีคนเข้าหน้าร้าน ตามการทำงานปัจจุบัน</small>
+              </span>
+              <input id="welcome-popup-enabled" type="checkbox" role="switch" data-popup-enabled <%= activePopup.enabled ? 'checked' : '' %> />
+              <i aria-hidden="true"></i>
+            </label>
+
+            <div class="welcome-popup-section-label"><span>ข้อความบนป๊อปอัป</span><i></i></div>
+            <label class="welcome-popup-check-row" for="welcome-popup-show-title">
+              <input id="welcome-popup-show-title" type="checkbox" data-popup-show-title <%= activePopup.showTitle !== false ? 'checked' : '' %> />
+              <span><strong>แสดงหัวข้อ</strong><small>ยินดีต้อนรับ!</small></span>
+            </label>
+            <label class="welcome-popup-field" for="welcome-popup-title">
+              <span>หัวข้อแจ้งเตือน</span>
+              <input id="welcome-popup-title" type="text" value="<%= activePopup.title || 'ยินดีต้อนรับ!' %>" data-popup-title autocomplete="off" />
+            </label>
+
+            <label class="welcome-popup-check-row" for="welcome-popup-show-content">
+              <input id="welcome-popup-show-content" type="checkbox" data-popup-show-content <%= activePopup.showContent !== false ? 'checked' : '' %> />
+              <span><strong>แสดงข้อความ</strong><small>ข้อความต้อนรับที่อยู่ใต้หัวข้อ</small></span>
+            </label>
+            <label class="welcome-popup-field" for="welcome-popup-content">
+              <span>ข้อความประชาสัมพันธ์</span>
+              <textarea id="welcome-popup-content" rows="4" data-popup-content><%= activePopup.content || 'ขอบคุณที่ใช้บริการเว็บไซต์ของเรา' %></textarea>
+            </label>
+
+            <div class="welcome-popup-section-label"><span>รูปภาพสไลด์</span><i></i></div>
+            <p class="welcome-popup-helper">หน้าร้านจริงแสดงรูปเป็นสไลด์อัตโนมัติทุก 3.5 วินาที · เพิ่มหรือนำรูปออกที่นี่ได้เฉพาะตัวอย่าง</p>
+            <label class="welcome-popup-upload" for="welcome-popup-images">
+              <span class="welcome-popup-upload-icon" aria-hidden="true">＋</span>
+              <span><strong>เพิ่มรูปภาพในตัวอย่าง</strong><small>เลือก JPG, PNG หรือ WEBP ได้หลายรูป · ไม่อัปโหลดขึ้นระบบ</small></span>
+              <input id="welcome-popup-images" type="file" accept="image/*" multiple data-popup-files />
+            </label>
+            <div class="welcome-popup-image-list" data-popup-image-list aria-live="polite"></div>
+            <p class="welcome-popup-no-images" data-popup-no-images hidden>ยังไม่มีรูปภาพ · ป๊อปอัปจะแสดงเฉพาะข้อความเหมือนหน้าร้านจริง</p>
+
+            <div class="welcome-popup-behavior-note">
+              <span class="welcome-popup-info-mark" aria-hidden="true">i</span>
+              <span><strong>พฤติกรรมหน้าร้านปัจจุบัน</strong><br />ลูกค้าปิดเพื่อเข้าร้านได้ หรือเลือกพักการแสดงป๊อปอัป 1 วัน</span>
+            </div>
+
+            <div class="welcome-popup-editor-actions">
+              <button class="experiment-button primary" type="button" data-popup-save>บันทึกฉบับทดลอง</button>
+              <button class="experiment-button" type="button" data-popup-open-storefront>ดูหน้าร้านพร้อมรูป</button>
+              <button class="experiment-button" type="button" data-popup-reset>คืนค่าเริ่มต้น</button>
+            </div>
+            <p class="welcome-popup-save-state" data-popup-save-state role="status" aria-live="polite">การแก้ไขยังอยู่ในหน้า และยังไม่ถูกบันทึก</p>
+          </div>
+        </section>
+
+        <aside class="welcome-popup-preview-column">
+          <section class="welcome-popup-preview experiment-card" aria-labelledby="welcome-preview-title">
+            <div class="welcome-popup-preview-heading">
+              <div>
+                <span class="welcome-popup-eyebrow">LIVE STOREFRONT PREVIEW</span>
+                <h2 id="welcome-preview-title">ตัวอย่างหน้าร้านจริง</h2>
+                <p>พื้นหลังโหลดจากหน้าแรกปัจจุบัน · ป๊อปอัปจำลองตามค่าที่กำลังแก้</p>
+              </div>
+              <div class="welcome-popup-device-switch" role="group" aria-label="ขนาดตัวอย่างหน้าร้าน">
+                <button type="button" class="is-active" data-preview-device="desktop" aria-pressed="true">เดสก์ท็อป</button>
+                <button type="button" data-preview-device="mobile" aria-pressed="false">มือถือ</button>
+              </div>
+            </div>
+
+            <div class="welcome-popup-preview-stage" data-preview-stage data-viewport-mode="desktop">
+              <div class="welcome-popup-store-screen">
+                <iframe src="/?welcomePopupExperiment=1" title="หน้าร้าน LilTeam Shop ปัจจุบัน" loading="eager" sandbox="allow-scripts allow-same-origin" data-storefront-frame></iframe>
+                <div class="welcome-popup-preview-dim" data-preview-dim hidden></div>
+                <section class="welcome-popup-preview-modal" data-preview-modal role="dialog" aria-modal="true" aria-label="ตัวอย่างป๊อปอัปต้อนรับ" hidden>
+                  <button class="welcome-popup-preview-x" type="button" data-preview-x aria-label="ปิดป๊อปอัป">×</button>
+                  <div class="welcome-popup-preview-image" data-preview-image-wrap hidden>
+                    <img src="" alt="" data-preview-image />
+                    <div class="welcome-popup-preview-dots" data-preview-dots aria-label="ตำแหน่งรูปภาพ"></div>
+                  </div>
+                  <div class="welcome-popup-preview-copy" data-preview-copy hidden>
+                    <h3 data-preview-title></h3>
+                    <p data-preview-content></p>
+                  </div>
+                  <div class="welcome-popup-preview-footer">
+                    <button type="button" data-preview-close><svg class="welcome-popup-preview-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>เข้าสู่เว็บไซต์</button>
+                    <button type="button" data-preview-mute><svg class="welcome-popup-preview-action-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>ไม่แสดงผลอีกครั้งใน 1 วัน</button>
+                  </div>
+                </section>
+                <div class="welcome-popup-preview-empty" data-preview-empty hidden>
+                  <strong data-preview-empty-title>ป๊อปอัปปิดอยู่</strong>
+                  <span data-preview-empty-copy>เปิดสวิตช์ทางซ้ายเพื่อทดลองดูหน้าร้าน</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="welcome-popup-preview-tools">
+              <div class="welcome-popup-slide-controls">
+                <button type="button" data-preview-prev aria-label="ดูรูปก่อนหน้า">‹</button>
+                <span data-preview-image-count>ไม่มีรูป</span>
+                <button type="button" data-preview-next aria-label="ดูรูปถัดไป">›</button>
+              </div>
+              <button class="welcome-popup-reopen" type="button" data-preview-reopen>แสดงป๊อปอัปอีกครั้ง</button>
+            </div>
+            <p class="welcome-popup-preview-disclaimer">ปุ่มปิดและพัก 1 วันเป็นการจำลอง · บันทึกฉบับทดลองไว้ในเบราว์เซอร์นี้เท่านั้น</p>
+          </section>
+
+          <section class="welcome-popup-test-notes experiment-card" aria-labelledby="welcome-test-title">
+            <div class="welcome-popup-card-heading compact">
+              <div class="welcome-popup-heading-icon amber" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M12 3v18M5 8h10a3 3 0 0 1 0 6H8a3 3 0 0 0 0 6h11"/></svg>
+              </div>
+              <div><span class="welcome-popup-eyebrow">TEST CHECKLIST</span><h2 id="welcome-test-title">จุดที่ควรตรวจ</h2></div>
+            </div>
+            <ul>
+              <li><span>01</span><div><strong>รูปและข้อความไม่ล้นกรอบ</strong><small>ทดลองสลับเดสก์ท็อปและมือถือ</small></div></li>
+              <li><span>02</span><div><strong>สไลด์เปลี่ยนและหยุดได้</strong><small>ใช้ปุ่ม ‹ › เพื่อไล่ดูทีละรูป</small></div></li>
+              <li><span>03</span><div><strong>ปิดแล้วกลับมาเปิดดูได้</strong><small>ปุ่มในตัวอย่างไม่เปลี่ยนสถานะจริง</small></div></li>
+            </ul>
+          </section>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  (() => {
+    const page = document.querySelector('.experiment-welcome-popup-page');
+    const workspace = page?.querySelector('[data-popup-workspace]');
+    if (!workspace) return;
+
+    const enabled = workspace.querySelector('[data-popup-enabled]');
+    const showTitle = workspace.querySelector('[data-popup-show-title]');
+    const showContent = workspace.querySelector('[data-popup-show-content]');
+    const titleInput = workspace.querySelector('[data-popup-title]');
+    const contentInput = workspace.querySelector('[data-popup-content]');
+    const fileInput = workspace.querySelector('[data-popup-files]');
+    const imageList = workspace.querySelector('[data-popup-image-list]');
+    const emptyImageNote = workspace.querySelector('[data-popup-no-images]');
+    const saveState = workspace.querySelector('[data-popup-save-state]');
+    const readyBadge = workspace.querySelector('[data-popup-ready-badge]');
+    const stage = workspace.querySelector('[data-preview-stage]');
+    const frame = workspace.querySelector('[data-storefront-frame]');
+    const dim = workspace.querySelector('[data-preview-dim]');
+    const modal = workspace.querySelector('[data-preview-modal]');
+    const imageWrap = workspace.querySelector('[data-preview-image-wrap]');
+    const imageElement = workspace.querySelector('[data-preview-image]');
+    const dots = workspace.querySelector('[data-preview-dots]');
+    const copy = workspace.querySelector('[data-preview-copy]');
+    const previewTitle = workspace.querySelector('[data-preview-title]');
+    const previewContent = workspace.querySelector('[data-preview-content]');
+    const emptyState = workspace.querySelector('[data-preview-empty]');
+    const emptyTitle = workspace.querySelector('[data-preview-empty-title]');
+    const emptyCopy = workspace.querySelector('[data-preview-empty-copy]');
+    const imageCount = workspace.querySelector('[data-preview-image-count]');
+    const previousButton = workspace.querySelector('[data-preview-prev]');
+    const nextButton = workspace.querySelector('[data-preview-next]');
+    const draftKey = 'lilteam_welcome_popup_experiment_v1';
+    const draftDatabase = 'lilteam_welcome_popup_experiment';
+    const images = Array.from(workspace.querySelectorAll('[data-server-popup-image]')).map((image) => ({
+      src: image.currentSrc || image.src,
+      name: image.dataset.name || 'รูปหน้าร้าน',
+      source: 'store',
+    }));
+    let currentImage = 0;
+    let dismissedForPreview = false;
+    let previewMuted = false;
+    let savedDraft = null;
+    let restoreImagesPromise = Promise.resolve();
+
+    const openDraftDatabase = () => new Promise((resolve, reject) => {
+      if (!window.indexedDB) return reject(new Error('พื้นที่เก็บไฟล์ไม่พร้อมใช้งาน'));
+      const request = indexedDB.open(draftDatabase, 1);
+      request.onupgradeneeded = () => {
+        if (!request.result.objectStoreNames.contains('images')) request.result.createObjectStore('images');
+      };
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error || new Error('เปิดพื้นที่เก็บไฟล์ไม่สำเร็จ'));
+    });
+
+    const readDraftImage = async (key) => {
+      const database = await openDraftDatabase();
+      return new Promise((resolve, reject) => {
+        const transaction = database.transaction('images', 'readonly');
+        const request = transaction.objectStore('images').get(key);
+        request.onsuccess = () => resolve(request.result || null);
+        request.onerror = () => reject(request.error || new Error('อ่านรูปทดลองไม่สำเร็จ'));
+        transaction.oncomplete = () => database.close();
+        transaction.onerror = () => { database.close(); reject(transaction.error); };
+      });
+    };
+
+    try {
+      savedDraft = JSON.parse(localStorage.getItem(draftKey) || 'null');
+      if (savedDraft && savedDraft.version >= 1) {
+        enabled.checked = Boolean(savedDraft.enabled);
+        showTitle.checked = Boolean(savedDraft.showTitle);
+        showContent.checked = Boolean(savedDraft.showContent);
+        titleInput.value = typeof savedDraft.title === 'string' ? savedDraft.title : titleInput.value;
+        contentInput.value = typeof savedDraft.content === 'string' ? savedDraft.content : contentInput.value;
+        if (saveState) saveState.textContent = 'โหลดฉบับทดลองจากเบราว์เซอร์นี้แล้ว';
+      }
+    } catch (_) {
+      if (saveState) saveState.textContent = 'เบราว์เซอร์นี้ไม่อนุญาตให้เก็บฉบับทดลอง';
+    }
+
+    const effectiveTitle = () => showTitle.checked ? titleInput.value.trim() : '';
+    const effectiveContent = () => showContent.checked ? contentInput.value.trim() : '';
+    const hasPopupContent = () => enabled.checked && (images.length > 0 || effectiveTitle() || effectiveContent());
+    const setImage = (index) => {
+      if (!images.length) return;
+      currentImage = (index + images.length) % images.length;
+      imageElement.src = images[currentImage].src;
+      imageCount.textContent = `รูป ${currentImage + 1} / ${images.length}`;
+      previousButton.disabled = images.length < 2;
+      nextButton.disabled = images.length < 2;
+      dots.replaceChildren();
+      if (images.length > 1) {
+        images.forEach((_, dotIndex) => {
+          const dot = document.createElement('span');
+          dot.className = dotIndex === currentImage ? 'is-active' : '';
+          dot.setAttribute('aria-hidden', 'true');
+          dots.appendChild(dot);
+        });
+      }
+    };
+    const renderImageList = () => {
+      imageList.replaceChildren();
+      images.forEach((image, index) => {
+        const item = document.createElement('div');
+        item.className = 'welcome-popup-image-item';
+        const thumbnail = document.createElement('img');
+        thumbnail.src = image.src;
+        thumbnail.alt = '';
+        thumbnail.loading = 'lazy';
+        const details = document.createElement('span');
+        details.className = 'welcome-popup-image-details';
+        const name = document.createElement('strong');
+        name.textContent = image.name;
+        const source = document.createElement('small');
+        source.textContent = image.source === 'store' ? 'รูปที่ใช้อยู่บนหน้าร้าน' : 'รูปทดลอง · เก็บในเบราว์เซอร์นี้เท่านั้น';
+        details.append(name, source);
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'welcome-popup-image-remove';
+        remove.dataset.removePreviewImage = String(index);
+        remove.setAttribute('aria-label', `ซ่อน ${image.name} จากตัวอย่าง`);
+        remove.textContent = 'เอาออก';
+        item.append(thumbnail, details, remove);
+        imageList.appendChild(item);
+      });
+      emptyImageNote.hidden = images.length > 0;
+      imageWrap.hidden = images.length === 0;
+      previousButton.hidden = images.length < 2;
+      nextButton.hidden = images.length < 2;
+      if (images.length) setImage(Math.min(currentImage, images.length - 1));
+      else imageCount.textContent = 'ไม่มีรูป';
+    };
+    const render = () => {
+      const title = effectiveTitle();
+      const contentText = effectiveContent();
+      const hasText = Boolean(title || contentText);
+      const canShow = hasPopupContent();
+      const previewOpen = canShow && !dismissedForPreview;
+
+      previewTitle.textContent = title;
+      previewContent.textContent = contentText;
+      previewTitle.hidden = !title;
+      previewContent.hidden = !contentText;
+      copy.hidden = !hasText;
+      imageWrap.hidden = images.length === 0;
+      modal.hidden = !previewOpen;
+      dim.hidden = !previewOpen;
+      emptyState.hidden = previewOpen;
+      if (!enabled.checked) {
+        emptyTitle.textContent = 'ป๊อปอัปปิดอยู่';
+        emptyCopy.textContent = 'เปิดสวิตช์ทางซ้ายเพื่อทดลองดูหน้าร้าน';
+      } else if (!canShow) {
+        emptyTitle.textContent = 'ยังไม่มีเนื้อหาให้แสดง';
+        emptyCopy.textContent = 'เพิ่มหัวข้อ ข้อความ หรือรูปภาพอย่างน้อยหนึ่งรายการ';
+      } else if (previewMuted) {
+        emptyTitle.textContent = 'จำลองการพักการแสดงแล้ว';
+        emptyCopy.textContent = 'การพักนี้มีผลเฉพาะตัวอย่าง ไม่ได้ตั้งค่าให้หน้าร้านจริง';
+      } else {
+        emptyTitle.textContent = 'ตัวอย่างถูกปิดชั่วคราว';
+        emptyCopy.textContent = 'กด “แสดงป๊อปอัปอีกครั้ง” เพื่อเปิดดู';
+      }
+
+      if (canShow && images.length) setImage(Math.min(currentImage, images.length - 1));
+      readyBadge.textContent = canShow ? 'พร้อมแสดงตัวอย่าง' : enabled.checked ? 'เพิ่มเนื้อหาเพื่อเริ่ม' : 'ปิดอยู่';
+      readyBadge.classList.toggle('is-ready', canShow);
+      renderImageList();
+    };
+    const markChanged = () => {
+      dismissedForPreview = false;
+      previewMuted = false;
+      if (saveState) saveState.textContent = 'มีการแก้ไขฉบับทดลองที่ยังไม่ได้บันทึก';
+      render();
+    };
+
+    const saveDraft = async (openStorefront = false, quiet = false) => {
+      const saveButton = workspace.querySelector('[data-popup-save]');
+      const storefrontButton = workspace.querySelector('[data-popup-open-storefront]');
+      if (saveButton) saveButton.disabled = true;
+      if (storefrontButton) storefrontButton.disabled = true;
+      try {
+        await restoreImagesPromise;
+        const imageReferences = [];
+        const imageRecords = [];
+        for (const image of images) {
+          if (image.source === 'local') {
+            const key = image.key || `img_${crypto.randomUUID()}`;
+            let blob = image.blob;
+            if (!blob) {
+              const response = await fetch(image.src);
+              if (!response.ok) throw new Error(`อ่านรูป ${image.name} ไม่สำเร็จ`);
+              blob = await response.blob();
+            }
+            image.key = key;
+            image.blob = blob;
+            imageRecords.push({ key, blob });
+            imageReferences.push({ source: 'local', key, name: image.name });
+          } else {
+            imageReferences.push({ source: 'url', src: image.src, name: image.name });
+          }
+        }
+        const database = await openDraftDatabase();
+        try {
+          await new Promise((resolve, reject) => {
+            const transaction = database.transaction('images', 'readwrite');
+            const store = transaction.objectStore('images');
+            imageRecords.forEach(({ key, blob }) => store.put(blob, key));
+            transaction.oncomplete = resolve;
+            transaction.onerror = () => reject(transaction.error || new Error('บันทึกรูปทดลองไม่สำเร็จ'));
+            transaction.onabort = () => reject(transaction.error || new Error('บันทึกรูปทดลองไม่สำเร็จ'));
+          });
+        } finally {
+          database.close();
+        }
+        const draft = {
+          version: 2,
+          enabled: enabled.checked,
+          showTitle: showTitle.checked,
+          showContent: showContent.checked,
+          title: titleInput.value,
+          content: contentInput.value,
+          images: imageReferences,
+          savedAt: new Date().toISOString(),
+        };
+        localStorage.setItem(draftKey, JSON.stringify(draft));
+        savedDraft = draft;
+        try {
+          const cleanupDatabase = await openDraftDatabase();
+          try {
+            await new Promise((resolve, reject) => {
+              const transaction = cleanupDatabase.transaction('images', 'readwrite');
+              const store = transaction.objectStore('images');
+              store.clear();
+              imageRecords.forEach(({ key, blob }) => store.put(blob, key));
+              transaction.oncomplete = resolve;
+              transaction.onerror = () => reject(transaction.error);
+              transaction.onabort = () => reject(transaction.error);
+            });
+          } finally {
+            cleanupDatabase.close();
+          }
+        } catch (_) {
+          // A failed cleanup only leaves unused local files; the saved preview remains intact.
+        }
+        if (saveState) saveState.textContent = quiet
+          ? 'เก็บรูปทดลองไว้ในเบราว์เซอร์นี้แล้ว · ไม่กระทบหน้าร้านจริง'
+          : 'บันทึกฉบับทดลองไว้ในเบราว์เซอร์นี้แล้ว · ไม่กระทบหน้าร้านจริง';
+        if (openStorefront) window.location.assign('/?welcomePopupExperiment=1');
+      } catch (error) {
+        if (saveState) saveState.textContent = `บันทึกฉบับทดลองไม่ได้ · ${error.message || 'พื้นที่เก็บข้อมูลไม่พร้อม'}`;
+      } finally {
+        if (saveButton) saveButton.disabled = false;
+        if (storefrontButton) storefrontButton.disabled = false;
+      }
+    };
+
+    const restoreSavedImages = async (references) => {
+      if (!Array.isArray(references)) return;
+      const restored = [];
+      for (const image of references) {
+        if (image.source === 'local' && image.key) {
+          const blob = await readDraftImage(image.key);
+          if (blob) restored.push({ src: URL.createObjectURL(blob), blob, key: image.key, name: image.name || 'รูปทดลอง', source: 'local' });
+        } else if (image.source === 'url' && image.src) {
+          restored.push({ src: image.src, name: image.name || 'รูปหน้าร้าน', source: 'store' });
+        }
+      }
+      images.splice(0, images.length, ...restored);
+      currentImage = 0;
+      if (saveState) saveState.textContent = 'โหลดข้อความและรูปฉบับทดลองจากเบราว์เซอร์นี้แล้ว';
+      render();
+      syncSlideTimer();
+    };
+
+    workspace.querySelectorAll('[data-popup-enabled], [data-popup-show-title], [data-popup-show-content]').forEach((input) => input.addEventListener('change', markChanged));
+    titleInput.addEventListener('input', markChanged);
+    contentInput.addEventListener('input', markChanged);
+
+    fileInput.addEventListener('change', () => {
+      Array.from(fileInput.files || []).forEach((file) => {
+        images.push({ src: URL.createObjectURL(file), name: file.name, source: 'local' });
+      });
+      fileInput.value = '';
+      markChanged();
+      void saveDraft(false, true);
+    });
+    imageList.addEventListener('click', (event) => {
+      const button = event.target.closest('[data-remove-preview-image]');
+      if (!button) return;
+      const index = Number(button.dataset.removePreviewImage);
+      const [removedImage] = images.splice(index, 1);
+      if (removedImage?.source === 'local' && removedImage.src.startsWith('blob:')) URL.revokeObjectURL(removedImage.src);
+      currentImage = Math.max(0, currentImage - (index < currentImage ? 1 : 0));
+      markChanged();
+    });
+
+    previousButton.addEventListener('click', () => setImage(currentImage - 1));
+    nextButton.addEventListener('click', () => setImage(currentImage + 1));
+    const dismissPreview = (muted = false) => {
+      dismissedForPreview = true;
+      previewMuted = muted;
+      render();
+    };
+    workspace.querySelector('[data-preview-reopen]').addEventListener('click', () => {
+      dismissedForPreview = false;
+      previewMuted = false;
+      render();
+    });
+    workspace.querySelector('[data-preview-close]').addEventListener('click', () => {
+      dismissPreview(false);
+    });
+    workspace.querySelector('[data-preview-mute]').addEventListener('click', () => {
+      dismissPreview(true);
+    });
+    workspace.querySelector('[data-preview-x]').addEventListener('click', () => dismissPreview(false));
+    dim.addEventListener('click', () => {
+      dismissPreview(false);
+    });
+    workspace.querySelectorAll('[data-preview-device]').forEach((button) => button.addEventListener('click', () => {
+      const mode = button.dataset.previewDevice;
+      stage.dataset.viewportMode = mode;
+      workspace.querySelectorAll('[data-preview-device]').forEach((deviceButton) => {
+        const selected = deviceButton === button;
+        deviceButton.classList.toggle('is-active', selected);
+        deviceButton.setAttribute('aria-pressed', String(selected));
+      });
+    }));
+
+    workspace.querySelector('[data-popup-save]').addEventListener('click', () => { void saveDraft(); });
+    const openStorefrontButton = workspace.querySelector('[data-popup-open-storefront]');
+    const isLocalHost = ['localhost', '127.0.0.1', '::1'].includes(window.location.hostname);
+    if (!isLocalHost) openStorefrontButton.hidden = true;
+    openStorefrontButton.addEventListener('click', () => { void saveDraft(true); });
+    workspace.querySelector('[data-popup-reset]').addEventListener('click', () => {
+      if (!window.confirm('คืนค่าตัวอย่างจากข้อมูลหน้าร้านปัจจุบันหรือไม่? ฉบับทดลองที่เก็บในเบราว์เซอร์นี้จะถูกลบ')) return;
+      try { localStorage.removeItem(draftKey); } catch (_) {}
+      window.location.reload();
+    });
+
+    frame.addEventListener('load', () => {
+      try {
+        frame.contentDocument?.getElementById('welcome-popup')?.remove();
+      } catch (_) {}
+    });
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let slideTimer = null;
+    const syncSlideTimer = () => {
+      window.clearInterval(slideTimer);
+      if (!reduceMotion.matches && images.length > 1) {
+        slideTimer = window.setInterval(() => {
+          if (modal.hidden) return;
+          setImage(currentImage + 1);
+        }, 3500);
+      }
+    };
+    reduceMotion.addEventListener?.('change', syncSlideTimer);
+    window.addEventListener('pagehide', () => {
+      window.clearInterval(slideTimer);
+    }, { once: true });
+
+    workspace.querySelectorAll('[data-server-popup-image]').forEach((image) => image.remove());
+    if (savedDraft?.version >= 2 && Array.isArray(savedDraft.images)) {
+      restoreImagesPromise = restoreSavedImages(savedDraft.images).catch(() => {
+        if (saveState) saveState.textContent = 'อ่านรูปฉบับทดลองไม่ได้ · ลองเลือกรูปใหม่อีกครั้ง';
+      });
+    }
+    render();
+    syncSlideTimer();
+    window.addEventListener('pagehide', (event) => {
+      if (event.persisted) return;
+      images.filter((image) => image.source === 'local' && image.src.startsWith('blob:')).forEach((image) => URL.revokeObjectURL(image.src));
+    }, { once: true });
+  })();
+</script>

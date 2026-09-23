@@ -21,6 +21,7 @@ const { installRainDisabledEverywhere } = require('./services/tenant-features');
 const licenseRoutes = require('./routes/license');
 const internalApiRoutes = require('./routes/internal-api');
 const { tenantResolver, MAIN_DOMAIN } = require('./middleware/tenant');
+const { shouldRunStartupTenantRollouts } = require('./services/startup-policy');
 const license = require('./services/license');
 const discordBot = require('./services/discord-bot');
 const packageInfo = require('../package.json');
@@ -256,6 +257,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
+const HOST = process.env.HOST || undefined;
 let server = null;
 let shuttingDown = false;
 
@@ -273,7 +275,11 @@ async function initializeStore() {
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       await store.init();
-      await installRainDisabledEverywhere();
+      // This rollout writes tenant records, so local/test startup requires an
+      // explicit opt-in even when a shared database is configured.
+      if (shouldRunStartupTenantRollouts(process.env)) {
+        await installRainDisabledEverywhere();
+      }
       return;
     } catch (error) {
       console.error(`[store] initialization attempt ${attempt}/${attempts} failed:`, error.message);
@@ -289,9 +295,12 @@ process.on('SIGINT', () => shutdown('SIGINT'));
 
 initializeStore()
   .then(() => {
-    server = app.listen(PORT, () => {
-      console.log(`LilTeam Shop running at http://localhost:${PORT}`);
-    });
+    const onListening = () => {
+      console.log(`LilTeam Shop running at http://${HOST || 'localhost'}:${PORT}`);
+    };
+    server = HOST
+      ? app.listen(PORT, HOST, onListening)
+      : app.listen(PORT, onListening);
     server.keepAliveTimeout = 65000;
     server.headersTimeout = 66000;
     server.requestTimeout = 60000;

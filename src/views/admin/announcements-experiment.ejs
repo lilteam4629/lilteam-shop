@@ -1,0 +1,320 @@
+<%
+  const announcementSeeds = Array.isArray(announcements) ? announcements : [];
+%>
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-announcements-v1.css') %>" />
+
+<div class="experiment-app experiment-announcements-page">
+  <div class="experiment-main">
+    <header class="experiment-topbar">
+      <div class="experiment-build-legend" aria-label="สถานะของหน้าทดลอง">
+        <span><i class="ready"></i> ทดลองจัดการได้</span>
+        <span><i class="pending"></i> ยังไม่บันทึกเข้าระบบจริง</span>
+      </div>
+      <button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน">◌</button>
+      <span class="experiment-user-name">admin</span>
+    </header>
+
+    <main class="experiment-content">
+      <div class="experiment-page-head">
+        <div>
+          <div class="experiment-kicker">ทดลองหน้าตาใหม่ · STOREFRONT ANNOUNCEMENTS</div>
+          <h1>ป้ายประกาศ</h1>
+          <p>จัดการประกาศจากที่เดียว ค้นหารายการ แก้ไขสถานะ และบันทึกฉบับทดลองได้โดยไม่กระทบข้อมูลจริง</p>
+        </div>
+        <div class="announcement-head-actions">
+          <span class="announcement-save-state" data-announcement-save-state role="status" aria-live="polite"><i></i><span>ต้นแบบแยกจากข้อมูลจริง</span></span>
+          <button class="experiment-button" type="button" data-announcement-restore>คืนค่าข้อมูลร้าน</button>
+          <button class="experiment-button primary" type="button" data-announcement-save>บันทึกฉบับทดลอง</button>
+        </div>
+      </div>
+
+      <div class="announcement-seed-data" data-announcement-seeds hidden aria-hidden="true">
+        <% announcementSeeds.forEach(item => { %>
+          <div data-announcement-seed data-id="<%= item.id %>" data-title="<%= item.title %>" data-body="<%= item.body %>" data-active="<%= item.active ? 'true' : 'false' %>"></div>
+        <% }) %>
+      </div>
+
+      <section class="announcement-summary" aria-label="สรุปป้ายประกาศ">
+        <article class="announcement-stat-card">
+          <div class="announcement-stat-heading"><span>ทั้งหมด</span><span class="announcement-stat-art" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M9 5.5h10l5 5V26H9z"/><path d="M19 5.5v5h5M13 15h7M13 19h7M13 23h4"/></svg></span></div>
+          <strong data-announcement-total>0</strong><small>รายการในตัวอย่าง</small>
+        </article>
+        <article class="announcement-stat-card active">
+          <div class="announcement-stat-heading"><span>กำลังแสดง</span><span class="announcement-stat-art" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M6 14h5l9-6v16l-9-6H6z"/><path d="m11 18 2 7h5l-3-8M24 12a6 6 0 0 1 0 8"/></svg></span></div>
+          <strong data-announcement-active>0</strong><small>เห็นบนหน้าแรก</small>
+        </article>
+        <article class="announcement-stat-card hidden">
+          <div class="announcement-stat-heading"><span>ซ่อนอยู่</span><span class="announcement-stat-art" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="M4.5 16s4-7 11.5-7 11.5 7 11.5 7-4 7-11.5 7-11.5-7-11.5-7Z"/><circle cx="16" cy="16" r="3.5"/><path d="m8 25 16-18"/></svg></span></div>
+          <strong data-announcement-hidden>0</strong><small>ยังเก็บในฉบับทดลอง</small>
+        </article>
+        <div class="announcement-summary-note"><span aria-hidden="true">i</span><p>ข้อมูลจริงโหลดมาให้อ้างอิงเท่านั้น การแก้ไขในหน้านี้เก็บในเบราว์เซอร์และไม่เขียนทับร้าน</p></div>
+      </section>
+
+      <div class="announcement-workspace">
+        <section class="announcement-panel announcement-list-panel experiment-card" aria-labelledby="announcement-list-title">
+          <div class="announcement-board-pins" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="announcement-panel-heading">
+            <div class="announcement-heading-mark" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="m11 5-5 4H3v6h3l5 4V5Zm4.5 4a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/></svg>
+            </div>
+            <div><span class="announcement-eyebrow">LILTEAM NOTICE BOARD</span><h2 id="announcement-list-title">กระดานประกาศ</h2><p>เลือกการ์ดเพื่อแก้ไข หรือซ่อนจากตัวอย่าง</p></div>
+            <button class="experiment-button primary announcement-add-button" type="button" data-announcement-new><span aria-hidden="true">＋</span> เพิ่มประกาศ</button>
+          </div>
+
+          <label class="announcement-search" for="announcement-search-input">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m16 16 4.5 4.5"/></svg>
+            <input id="announcement-search-input" type="search" placeholder="ค้นหาหัวข้อหรือข้อความ" autocomplete="off" data-announcement-search />
+          </label>
+          <div class="announcement-list-filters" role="group" aria-label="กรองรายการประกาศ">
+            <button type="button" class="is-active" data-announcement-filter="all" aria-pressed="true">ทั้งหมด</button>
+            <button type="button" data-announcement-filter="active" aria-pressed="false">กำลังแสดง</button>
+            <button type="button" data-announcement-filter="hidden" aria-pressed="false">ซ่อนอยู่</button>
+          </div>
+          <div class="announcement-list" data-announcement-list role="list" aria-live="polite"></div>
+          <div class="announcement-list-empty" data-announcement-empty hidden>
+            <span aria-hidden="true">—</span><strong>ยังไม่มีรายการในมุมมองนี้</strong><small>เพิ่มประกาศหรือเปลี่ยนตัวกรองเพื่อดูรายการ</small>
+          </div>
+          <div class="announcement-list-foot"><span data-announcement-list-count>0 รายการ</span><span>การลบมีผลกับตัวอย่างนี้เท่านั้น</span></div>
+        </section>
+
+        <section class="announcement-panel announcement-editor experiment-card" aria-labelledby="announcement-editor-title">
+          <div class="announcement-panel-heading compact">
+            <div class="announcement-heading-mark amber" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>
+            </div>
+            <div><span class="announcement-eyebrow">LOCAL DRAFT EDITOR</span><h2 id="announcement-editor-title" data-announcement-editor-heading>เพิ่มประกาศตัวอย่าง</h2><p>แก้ไขและตรวจรายการในฉบับทดลองก่อนนำไปทำระบบจริง</p></div>
+            <button class="announcement-text-button" type="button" data-announcement-clear>ล้างฟอร์ม</button>
+          </div>
+
+          <form class="announcement-edit-form" data-announcement-form>
+            <label class="announcement-field" for="announcement-title-input">
+              <span>หัวข้อ <b>*</b></span>
+              <input id="announcement-title-input" type="text" maxlength="100" required placeholder="เช่น แจ้งเวลาปิดปรับปรุง" data-announcement-title />
+              <small><span data-title-count>0</span>/100 ตัวอักษร</small>
+            </label>
+            <label class="announcement-field" for="announcement-body-input">
+              <span>ข้อความประกาศ <b>*</b></span>
+              <textarea id="announcement-body-input" rows="3" maxlength="400" required placeholder="เขียนรายละเอียดที่ลูกค้าควรรู้" data-announcement-body></textarea>
+              <small><span data-body-count>0</span>/400 ตัวอักษร</small>
+            </label>
+            <label class="announcement-toggle-row" for="announcement-active-input">
+              <span><strong>แสดงบนหน้าร้าน</strong><small>ปิดเพื่อเก็บประกาศไว้โดยไม่แสดงในตัวอย่าง</small></span>
+              <input id="announcement-active-input" type="checkbox" role="switch" checked data-announcement-active />
+              <i aria-hidden="true"></i>
+            </label>
+            <div class="announcement-editor-actions">
+              <button class="experiment-button primary" type="submit" data-announcement-apply>เพิ่มในตัวอย่าง</button>
+              <span>ยังไม่ส่งไปบันทึกจริง</span>
+            </div>
+          </form>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+  (() => {
+    const page = document.querySelector('.experiment-announcements-page');
+    if (!page) return;
+
+    const storageKey = 'lilteam_announcements_experiment_v1';
+    const seeds = Array.from(page.querySelectorAll('[data-announcement-seed]')).map(node => ({
+      id: node.dataset.id || `store-${Math.random().toString(36).slice(2, 9)}`,
+      title: node.dataset.title || '',
+      body: node.dataset.body || '',
+      active: node.dataset.active === 'true',
+    }));
+    const titleInput = page.querySelector('[data-announcement-title]');
+    const bodyInput = page.querySelector('[data-announcement-body]');
+    const activeInput = page.querySelector('[data-announcement-active]');
+    const list = page.querySelector('[data-announcement-list]');
+    const empty = page.querySelector('[data-announcement-empty]');
+    const search = page.querySelector('[data-announcement-search]');
+    const form = page.querySelector('[data-announcement-form]');
+    const saveState = page.querySelector('[data-announcement-save-state] span');
+    const editorHeading = page.querySelector('[data-announcement-editor-heading]');
+    const submitButton = page.querySelector('[data-announcement-apply]');
+    let draft = seeds.map(item => ({ ...item }));
+    let selectedId = null;
+    let filter = 'all';
+    let dirty = false;
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || 'null');
+      if (Array.isArray(saved)) {
+        draft = saved.filter(item => item && typeof item === 'object').map((item, index) => ({
+          id: String(item.id || `draft-${index}`),
+          title: String(item.title || '').slice(0, 100),
+          body: String(item.body || '').slice(0, 400),
+          active: Boolean(item.active),
+        }));
+      }
+    } catch (_) {}
+
+    const setSaveState = (message, changed = dirty) => {
+      if (!saveState) return;
+      saveState.textContent = message;
+      saveState.closest('.announcement-save-state')?.classList.toggle('is-dirty', changed);
+    };
+    const markDirty = () => {
+      dirty = true;
+      setSaveState('มีการเปลี่ยนแปลง · ยังไม่บันทึกฉบับทดลอง', true);
+    };
+    const activeItems = items => items.filter(item => item.active && item.title.trim() && item.body.trim());
+
+    const fillEditor = item => {
+      selectedId = item ? item.id : null;
+      titleInput.value = item?.title || '';
+      bodyInput.value = item?.body || '';
+      activeInput.checked = item ? item.active : true;
+      editorHeading.textContent = item ? 'แก้ไขประกาศตัวอย่าง' : 'เพิ่มประกาศตัวอย่าง';
+      submitButton.textContent = item ? 'บันทึกการแก้ไขในตัวอย่าง' : 'เพิ่มในตัวอย่าง';
+      page.querySelector('[data-announcement-clear]').textContent = item ? 'ยกเลิกแก้ไข' : 'ล้างฟอร์ม';
+      updateCharacterCounts();
+      renderList();
+    };
+
+    const makeButton = (className, label, action, item) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = className;
+      button.textContent = label;
+      button.setAttribute('aria-label', `${label}: ${item.title || 'ประกาศไม่มีหัวข้อ'}`);
+      button.addEventListener('click', action);
+      return button;
+    };
+
+    function renderList() {
+      const query = (search.value || '').trim().toLocaleLowerCase('th');
+      const visibleItems = draft.filter(item => {
+        const matchesFilter = filter === 'all' || (filter === 'active' ? item.active : !item.active);
+        const matchesQuery = !query || `${item.title} ${item.body}`.toLocaleLowerCase('th').includes(query);
+        return matchesFilter && matchesQuery;
+      });
+      list.replaceChildren();
+      visibleItems.forEach(item => {
+        const row = document.createElement('article');
+        row.className = `announcement-list-item${item.id === selectedId ? ' is-selected' : ''}`;
+        row.setAttribute('role', 'listitem');
+
+        const select = document.createElement('button');
+        select.type = 'button';
+        select.className = 'announcement-list-select';
+        select.setAttribute('aria-label', `แก้ไขประกาศ ${item.title || 'ไม่มีหัวข้อ'}`);
+        const icon = document.createElement('span');
+        icon.className = 'announcement-list-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.innerHTML = '<svg viewBox="0 0 48 48"><rect x="8" y="7" width="31" height="35" rx="7" fill="#fff" stroke="#d9d5c9"/><path d="M14 13h12M14 17h8" stroke="#a29b89"/><path d="M14 25h5l10-6v17l-10-6h-5z" fill="#dcefe5" stroke="#176b51" stroke-linejoin="round"/><path d="M29 23l5-3v15l-5-3M19 30l2 7h5l-3-8" fill="#e9d8ad" stroke="#9d7836" stroke-linejoin="round"/><path d="M36 23a5 5 0 0 1 0 7" fill="none" stroke="#176b51" stroke-linecap="round"/></svg>';
+        const text = document.createElement('span');
+        text.className = 'announcement-list-copy';
+        const title = document.createElement('strong');
+        title.textContent = item.title || 'ยังไม่มีหัวข้อ';
+        const body = document.createElement('small');
+        body.textContent = item.body || 'ยังไม่มีข้อความ';
+        text.append(title, body);
+        const status = document.createElement('em');
+        status.className = item.active ? 'is-on' : 'is-off';
+        status.textContent = item.active ? 'แสดงอยู่' : 'ซ่อน';
+        select.append(icon, text, status);
+        select.addEventListener('click', () => fillEditor(item));
+
+        const actions = document.createElement('div');
+        actions.className = 'announcement-row-actions';
+        actions.append(
+          makeButton('announcement-row-action', item.active ? 'ซ่อน' : 'แสดง', () => {
+            item.active = !item.active;
+            if (item.id === selectedId) activeInput.checked = item.active;
+            markDirty();
+            renderList();
+            renderSummary();
+          }, item),
+          makeButton('announcement-row-delete', 'ลบ', () => {
+            if (!window.confirm('นำประกาศนี้ออกจากตัวอย่างเท่านั้น? ข้อมูลประกาศจริงจะไม่ถูกลบ')) return;
+            draft = draft.filter(entry => entry.id !== item.id);
+            if (selectedId === item.id) fillEditor(null);
+            markDirty();
+            renderList();
+            renderSummary();
+          }, item),
+        );
+        row.append(select, actions);
+        list.appendChild(row);
+      });
+      empty.hidden = visibleItems.length > 0;
+      page.querySelector('[data-announcement-list-count]').textContent = `${visibleItems.length} จาก ${draft.length} รายการ`;
+    }
+
+    function renderSummary() {
+      const showing = activeItems(draft).length;
+      page.querySelector('[data-announcement-total]').textContent = String(draft.length);
+      page.querySelector('[data-announcement-active]').textContent = String(showing);
+      page.querySelector('[data-announcement-hidden]').textContent = String(draft.length - showing);
+    }
+
+    function updateCharacterCounts() {
+      page.querySelector('[data-title-count]').textContent = String(titleInput.value.length);
+      page.querySelector('[data-body-count]').textContent = String(bodyInput.value.length);
+    }
+
+    page.querySelector('[data-announcement-new]').addEventListener('click', () => fillEditor(null));
+    page.querySelector('[data-announcement-clear]').addEventListener('click', () => fillEditor(null));
+    page.querySelectorAll('[data-announcement-filter]').forEach(button => button.addEventListener('click', () => {
+      filter = button.dataset.announcementFilter;
+      page.querySelectorAll('[data-announcement-filter]').forEach(option => {
+        const selected = option === button;
+        option.classList.toggle('is-active', selected);
+        option.setAttribute('aria-pressed', String(selected));
+      });
+      renderList();
+    }));
+    search.addEventListener('input', renderList);
+    titleInput.addEventListener('input', updateCharacterCounts);
+    bodyInput.addEventListener('input', updateCharacterCounts);
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      if (!form.reportValidity()) return;
+      const updated = {
+        id: selectedId || `demo-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`,
+        title: titleInput.value.trim(),
+        body: bodyInput.value.trim(),
+        active: activeInput.checked,
+      };
+      if (selectedId) draft = draft.map(item => item.id === selectedId ? updated : item);
+      else draft.unshift(updated);
+      selectedId = updated.id;
+      markDirty();
+      fillEditor(updated);
+      renderSummary();
+    });
+
+    page.querySelector('[data-announcement-save]').addEventListener('click', () => {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(draft));
+        dirty = false;
+        setSaveState('บันทึกฉบับทดลองไว้ในเบราว์เซอร์นี้แล้ว · ไม่กระทบข้อมูลจริง', false);
+      } catch (_) {
+        setSaveState('เบราว์เซอร์บันทึกตัวอย่างนี้ไม่ได้ · การเปลี่ยนแปลงยังอยู่ในหน้านี้', true);
+      }
+    });
+
+    page.querySelector('[data-announcement-restore]').addEventListener('click', () => {
+      if (!window.confirm('คืนรายการตามข้อมูลร้านปัจจุบัน? การแก้ไขตัวอย่างที่บันทึกไว้ในเบราว์เซอร์จะถูกล้าง')) return;
+      draft = seeds.map(item => ({ ...item }));
+      selectedId = null;
+      try { localStorage.removeItem(storageKey); } catch (_) {}
+      dirty = false;
+      fillEditor(null);
+      renderSummary();
+      setSaveState('คืนค่าตามข้อมูลร้านปัจจุบันแล้ว · ไม่มีการเขียนข้อมูลจริง', false);
+    });
+
+    fillEditor(null);
+    renderSummary();
+    renderList();
+    dirty = false;
+    setSaveState('ต้นแบบแยกจากข้อมูลจริง', false);
+  })();
+</script>

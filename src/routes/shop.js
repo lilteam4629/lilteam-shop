@@ -140,6 +140,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     : active.slice((page - 1) * HOME_PAGE_SIZE, page * HOME_PAGE_SIZE);
   return {
     title: 'หน้าแรก',
+    welcomePopupExperiment: false,
     stats: shopStats(req?.tenantShop ? 0 : remote.length),
     newest,
     homeSections,
@@ -181,7 +182,10 @@ router.get('/', (req, res) => {
     : 'shop/home';
   const tenantSlug = String(req.tenantShop?.slug || '').toLowerCase();
   const showAllProducts = UNPAGINATED_HOME_TENANTS.has(tenantSlug);
-  res.render(view, homeViewData(false, req.query.page, showAllProducts, req));
+  const viewData = homeViewData(false, req.query.page, showAllProducts, req);
+  const localExperimentHost = ['localhost', '127.0.0.1', '::1'].includes(String(req.hostname || '').toLowerCase());
+  viewData.welcomePopupExperiment = !req.tenantShop && localExperimentHost && req.query.welcomePopupExperiment === '1';
+  res.render(view, viewData);
 });
 
 router.get('/api/rangers-catalog', (req, res) => {

@@ -1,0 +1,346 @@
+/* Local-only treatment for the customer-facing welcome popup experiment. */
+#welcome-popup.welcome-popup-redesign{
+  padding: max(18px,env(safe-area-inset-top)) 14px max(18px,env(safe-area-inset-bottom));
+  background: rgba(8,20,16,.78);
+  -webkit-backdrop-filter: blur(7px);
+  backdrop-filter: blur(7px);
+}
+#welcome-popup.welcome-popup-redesign>.welcome-popup-dialog{
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(440px,100%);
+  max-width: 440px;
+  max-height: calc(100dvh - 36px);
+  overflow: auto;
+  border: 1px solid rgba(11,107,80,.26);
+  border-radius: 22px;
+  color: #17231f;
+  background: #fffdf7;
+  box-shadow: 0 28px 90px rgba(0,0,0,.42),0 0 0 5px rgba(255,255,255,.08);
+  scrollbar-width: thin;
+  scrollbar-color: #cadbd2 transparent;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-slider{
+  flex: none;
+  width: 100%;
+  max-height: min(64dvh,420px);
+  aspect-ratio: 1 / 1;
+  background: #e9eee9;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-slider img{object-fit: cover}
+#welcome-popup.welcome-popup-redesign .welcome-popup-copy{
+  padding: 17px 22px 16px;
+  border-top: 1px solid #e9e4d8;
+  background: #fffdf7;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-copy h3{
+  margin: 0 0 5px;
+  color: #17231f;
+  font-size: clamp(17px,4vw,20px);
+  line-height: 1.4;
+  letter-spacing: -.025em;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-copy p{
+  color: #59665f;
+  font-size: 14px;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-no-image{padding-top: 68px}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions{
+  display: flex;
+  gap: 9px;
+  padding: 12px 16px 16px;
+  border-top: 1px solid #e9e4d8;
+  background: #fffdf7;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button{
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 50px;
+  padding: 10px 13px;
+  border: 1px solid #d9e3dd;
+  border-radius: 12px;
+  color: #31443a;
+  background: #fff;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color .16s ease,border-color .16s ease,transform .16s ease;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button:first-child{
+  border-color: #0b6b50;
+  color: #fff;
+  background: #0b6b50;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button:first-child:hover{background:#095740;border-color:#095740}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button+button{
+  border-color: #eedfc9;
+  color: #76534d;
+  background: #fff8ed;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button+button:hover{background:#fff1dc;border-color:#e4c995}
+#welcome-popup.welcome-popup-redesign .welcome-popup-action-icon{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button:focus-visible,
+#welcome-popup.welcome-popup-redesign .welcome-popup-dismiss:focus-visible{
+  outline: 3px solid #37c69a;
+  outline-offset: 3px;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-dismiss{
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 2px solid #35c79b;
+  border-radius: 15px;
+  color: #293a33;
+  background: rgba(255,255,255,.97);
+  box-shadow: inset 0 0 0 3px #fff,0 3px 14px rgba(0,0,0,.2);
+  font: 400 23px/1 system-ui,-apple-system,"Segoe UI",sans-serif;
+  cursor: pointer;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-dismiss:hover{background:#f0fff8}
+@media(max-width:520px){
+  #welcome-popup.welcome-popup-redesign{padding-right:12px;padding-left:12px}
+  #welcome-popup.welcome-popup-redesign>.welcome-popup-dialog{width:min(440px,100%);max-height:calc(100dvh - max(36px,env(safe-area-inset-top) + env(safe-area-inset-bottom) + 24px));border-radius:18px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-slider{max-height:62dvh}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-copy{padding:14px 17px 13px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-copy h3{font-size:17px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-copy p{font-size:13px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-actions{display:flex;gap:7px;padding:10px 11px 12px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-actions button{min-height:50px;padding:8px 7px;font-size:12px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-dismiss{top:9px;right:9px;width:44px;height:44px}
+}
+@media(prefers-reduced-motion:reduce){#welcome-popup.welcome-popup-redesign .welcome-popup-actions button{transition:none}}
+
+/* Refined customer-facing welcome card: compact, branded, and comfortable on phones. */
+#welcome-popup.welcome-popup-redesign{
+  padding:max(16px,env(safe-area-inset-top)) 12px max(16px,env(safe-area-inset-bottom));
+  background:rgba(7,19,15,.76);
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+  animation:welcome-popup-scrim-in .18s ease-out both;
+  overscroll-behavior:contain;
+}
+#welcome-popup.welcome-popup-redesign>.welcome-popup-dialog{
+  width:min(460px,100%);
+  max-width:460px;
+  max-height:calc(100dvh - max(32px,env(safe-area-inset-top) + env(safe-area-inset-bottom) + 24px));
+  overflow:auto;
+  border:1px solid #d8e6de;
+  border-radius:20px;
+  color:#17231f;
+  background:#fffdf8;
+  box-shadow:0 28px 88px rgba(0,0,0,.42),0 0 0 1px rgba(255,255,255,.2);
+  animation:welcome-popup-card-in .24s cubic-bezier(.2,.8,.2,1) both;
+  scrollbar-width:thin;
+  scrollbar-color:#c9d9d0 transparent;
+}
+#welcome-popup.welcome-popup-redesign>.welcome-popup-dialog::before{
+  position:absolute;
+  inset:0 0 auto;
+  z-index:6;
+  height:4px;
+  background:linear-gradient(90deg,#0b6b50,#39bd91 52%,#e9bd68);
+  content:"";
+  pointer-events:none;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-slider{
+  flex:none;
+  width:100%;
+  max-height:min(58dvh,390px);
+  aspect-ratio:1/1;
+  background:#e9eee9;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-slider img{object-fit:cover}
+#welcome-popup.welcome-popup-redesign .welcome-popup-copy{
+  padding:18px 24px 20px;
+  border-top:1px solid #e8e5dc;
+  background:#fffdf8;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-copy.welcome-popup-no-image{
+  padding:22px 64px 20px;
+  border-top:0;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-brand{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:26px;
+  color:#087658;
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:.08em;
+  line-height:1.3;
+  text-transform:uppercase;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-brand-mark{
+  display:grid;
+  width:24px;
+  height:24px;
+  place-items:center;
+  border-radius:8px;
+  color:#fff;
+  background:#0b6b50;
+  box-shadow:0 3px 8px rgba(11,107,80,.2);
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:0;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-brand-mark.has-logo{width:34px;height:34px;padding:2px;border:1px solid #d8e6de;border-radius:10px;color:transparent;background:#fff;box-shadow:none}
+#welcome-popup.welcome-popup-redesign .welcome-popup-brand-mark img{display:block;width:100%;height:100%;border-radius:6px;object-fit:contain}
+#welcome-popup.welcome-popup-redesign .welcome-popup-copy h3{
+  margin:12px 0 5px;
+  color:#17231f;
+  font-size:clamp(20px,5vw,23px);
+  font-weight:800;
+  letter-spacing:-.035em;
+  line-height:1.3;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-copy p{
+  margin:0;
+  color:#52625a;
+  font-size:14px;
+  line-height:1.65;
+  overflow-wrap:anywhere;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions{
+  display:flex;
+  gap:10px;
+  padding:12px 14px 14px;
+  border-top:1px solid #e8e5dc;
+  background:#fff;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button{
+  display:inline-flex;
+  flex:1 1 0;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-width:0;
+  min-height:52px;
+  padding:10px 12px;
+  border:1px solid #d8e4dd;
+  border-radius:12px;
+  color:#34473e;
+  background:#fff;
+  font:inherit;
+  font-size:13px;
+  font-weight:750;
+  line-height:1.45;
+  text-align:center;
+  cursor:pointer;
+  touch-action:manipulation;
+  transition:background-color .16s ease,border-color .16s ease,box-shadow .16s ease;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button:first-child{
+  border-color:#0b6b50;
+  color:#fff;
+  background:#0b6b50;
+  box-shadow:0 3px 8px rgba(11,107,80,.16);
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button:first-child:hover{border-color:#095740;background:#095740}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button+button{
+  border-color:#ead9b7;
+  color:#70552b;
+  background:#fff9ed;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button+button:hover{border-color:#dfc48d;background:#fff3dc}
+#welcome-popup.welcome-popup-redesign .welcome-popup-action-icon{
+  width:17px;
+  height:17px;
+  flex:none;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:1.8;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-actions button:focus-visible,
+#welcome-popup.welcome-popup-redesign .welcome-popup-dismiss:focus-visible,
+#welcome-popup.welcome-popup-redesign .welcome-popup-carousel-toggle:focus-visible{
+  outline:3px solid #37c69a;
+  outline-offset:3px;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-dismiss{
+  top:10px;
+  right:10px;
+  width:44px;
+  height:44px;
+  border:1px solid #e0e8e3;
+  border-radius:13px;
+  color:#263830;
+  background:rgba(255,255,255,.97);
+  box-shadow:0 5px 16px rgba(15,35,26,.16);
+  font:400 23px/1 system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-dismiss:hover{background:#f1fbf6}
+#welcome-popup.welcome-popup-redesign .welcome-popup-carousel-toggle{
+  position:absolute;
+  top:11px;
+  left:11px;
+  z-index:4;
+  display:grid;
+  width:44px;
+  height:44px;
+  place-items:center;
+  border:1px solid rgba(255,255,255,.65);
+  border-radius:13px;
+  color:#fff;
+  background:rgba(14,34,26,.78);
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-backdrop-filter:blur(8px);
+  backdrop-filter:blur(8px);
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-carousel-toggle:hover{background:rgba(7,25,18,.94)}
+#welcome-popup.welcome-popup-redesign .welcome-popup-carousel-toggle svg{
+  width:19px;
+  height:19px;
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+#welcome-popup.welcome-popup-redesign .welcome-popup-carousel-toggle [data-carousel-play]{fill:currentColor;stroke:none}
+@keyframes welcome-popup-scrim-in{from{opacity:0}to{opacity:1}}
+@keyframes welcome-popup-card-in{from{opacity:0;transform:translateY(8px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:520px){
+  #welcome-popup.welcome-popup-redesign .welcome-popup-copy{padding:16px 18px 18px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-copy.welcome-popup-no-image{padding:20px 54px 18px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-actions{gap:8px;padding:10px 11px 12px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-actions button{min-height:52px;padding:9px 8px;font-size:13px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-dismiss{top:9px;right:9px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-carousel-toggle{top:9px;left:9px}
+}
+@media(max-width:380px){
+  #welcome-popup.welcome-popup-redesign .welcome-popup-copy.welcome-popup-no-image{padding-right:50px;padding-left:50px}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-actions{display:grid;grid-template-columns:1fr}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-actions button{width:100%;min-height:48px}
+}
+@media(max-height:560px) and (orientation:landscape){
+  #welcome-popup.welcome-popup-redesign{padding-top:max(8px,env(safe-area-inset-top));padding-bottom:max(8px,env(safe-area-inset-bottom))}
+  #welcome-popup.welcome-popup-redesign>.welcome-popup-dialog{max-height:calc(100dvh - max(16px,env(safe-area-inset-top) + env(safe-area-inset-bottom)))}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-slider{max-height:44dvh}
+}
+@media(prefers-reduced-motion:reduce){
+  #welcome-popup.welcome-popup-redesign,
+  #welcome-popup.welcome-popup-redesign>.welcome-popup-dialog{animation:none}
+  #welcome-popup.welcome-popup-redesign .welcome-popup-actions button,
+  #welcome-popup.welcome-popup-redesign .welcome-popup-slide{transition:none}
+}

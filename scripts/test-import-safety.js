@@ -20,9 +20,22 @@ function load(file, mocks = {}, extra = '') {
 async function main() {
   const appSource = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
   const storeSource = fs.readFileSync(path.join(root, 'src/data/store.js'), 'utf8');
+  const storeInitSource = storeSource.slice(storeSource.indexOf('async function init()'), storeSource.indexOf('async function healthCheck()'));
+  const { shouldRunStartupTenantRollouts } = require('../src/services/startup-policy');
+  check('Local startup cannot roll out changes to rented shops unless explicitly enabled', () => {
+    assert.equal(shouldRunStartupTenantRollouts({ NODE_ENV: 'development' }), false);
+    assert.equal(shouldRunStartupTenantRollouts({ NODE_ENV: 'test', MONGODB_URI: 'configured' }), false);
+    assert.equal(shouldRunStartupTenantRollouts({ NODE_ENV: 'production' }), true);
+    assert.equal(shouldRunStartupTenantRollouts({ NODE_ENV: 'production', SKIP_STARTUP_TENANT_ROLLOUTS: '1' }), false);
+    assert.equal(shouldRunStartupTenantRollouts({ NODE_ENV: 'development', ENABLE_STARTUP_TENANT_ROLLOUTS: '1' }), true);
+  });
   check('Production sessions reject the demo secret fallback', () => {
     assert.match(appSource, /NODE_ENV === 'production'[^\n]+configuredSessionSecret\.length < 32/);
     assert.match(appSource, /SESSION_SECRET must be configured/);
+  });
+  check('Startup receiving-account marker updates only the main shop record', () => {
+    assert.match(storeInitSource, /mongoCollection\.updateOne\(\s*\{\s*_id:\s*'main'/);
+    assert.doesNotMatch(storeInitSource, /mongoCollection\.updateMany\(/);
   });
   check('Regular request bodies have explicit size and parameter limits', () => {
     assert.match(appSource, /express\.urlencoded\(\{[^}]*limit:\s*['"]1mb['"][^}]*parameterLimit:\s*2000/s);
@@ -325,6 +338,100 @@ async function main() {
     '../services/discord-bot': { isConfigured: () => false, isReady: () => false },
     '../services/license': { isGateOn: () => false }, '../middleware/tenant': { MAIN_DOMAIN: 'fixture.test', MAIN_SITE_URL: 'https://fixture.test' },
   });
+  const { normalizeTenantAdminUi, usesExperimentalAdminUi } = require('../src/services/admin-ui-mode');
+  const defaultExperimentUi = admin.stack.find(layer => !layer.route && String(layer.handle).includes('Express exposes req.query as a getter')).handle;
+  const defaultMainRequest = { method: 'GET', path: '/settings', tenantShop: null };
+  Object.defineProperty(defaultMainRequest, 'query', { configurable: true, get() { return { q: 'preserved' }; } });
+  defaultExperimentUi(defaultMainRequest, { locals: {} }, () => {});
+  const defaultMainPostRequest = { method: 'POST', path: '/products/fixture/delete', tenantShop: null };
+  Object.defineProperty(defaultMainPostRequest, 'query', { configurable: true, get() { return {}; } });
+  defaultExperimentUi(defaultMainPostRequest, { locals: {} }, () => {});
+  const defaultTenantRequest = { method: 'GET', query: {}, path: '/settings', tenantShop: { id: 'tenant-ui-fixture' } };
+  defaultExperimentUi(defaultTenantRequest, { locals: {} }, () => {});
+  const defaultLegacyRequest = { method: 'GET', query: { ui: 'legacy' }, path: '/settings', tenantShop: null };
+  defaultExperimentUi(defaultLegacyRequest, { locals: {} }, () => {});
+  check('Only the main shop defaults to the experimental admin shell', () => {
+    assert.equal(defaultMainRequest.query.ui, 'experiment');
+    assert.equal(defaultMainRequest.query.q, 'preserved');
+    assert.equal(defaultMainPostRequest.query.ui, 'experiment');
+    assert.equal(defaultTenantRequest.query.ui, undefined);
+    assert.equal(defaultLegacyRequest.query.ui, 'legacy');
+  });
+  let tenantUiRedirect = '';
+  normalizeTenantAdminUi(
+    { method: 'GET', query: { ui: 'experiment', q: 'sample' }, tenantShop: { id: 'tenant-ui-fixture' }, originalUrl: '/admin/users?ui=experiment&q=sample' },
+    { redirect(status, url) { tenantUiRedirect = `${status}:${url}`; } },
+    () => assert.fail('tenant experiment GET should redirect before rendering'),
+  );
+  const tenantPostUi = { method: 'POST', query: { ui: 'experiment', q: 'sample' }, tenantShop: { id: 'tenant-ui-fixture' } };
+  let tenantPostContinued = false;
+  normalizeTenantAdminUi(tenantPostUi, {}, () => { tenantPostContinued = true; });
+  check('Tenant experiment URLs are normalized to the legacy UI without dropping other query data', () => {
+    assert.equal(tenantUiRedirect, '302:/admin/users?q=sample');
+    assert.equal(tenantPostContinued, true);
+    assert.equal(tenantPostUi.query.ui, 'legacy');
+    assert.equal(tenantPostUi.query.q, 'sample');
+    assert.equal(usesExperimentalAdminUi(tenantPostUi), false);
+    assert.equal(usesExperimentalAdminUi({ query: { ui: 'experiment' }, tenantShop: null }), true);
+  });
+  const settingsGet = admin.stack.find(layer => layer.route?.path === '/settings' && layer.route.methods.get).route.stack.at(-1).handle;
+  let settingsMainView = '';
+  let settingsTenantView = '';
+  settingsGet({ query: { ui: 'experiment' }, tenantShop: null }, { locals: {}, render(view) { settingsMainView = view; } });
+  settingsGet({ query: {}, tenantShop: { id: 'tenant-ui-fixture' } }, { locals: {}, render(view) { settingsTenantView = view; } });
+  check('Main settings use the redesign while tenant settings stay on the old template', () => {
+    assert.equal(settingsMainView, 'admin/settings-experiment');
+    assert.equal(settingsTenantView, 'admin/settings');
+  });
+  const usersList = admin.stack.find(layer => layer.route?.path === '/users' && layer.route.methods.get).route.stack.at(-1).handle;
+  const tenantUsersFixture = model.fixture();
+  tenantUsersFixture.users = [
+    { id: 'active-user', username: 'active', role: 'customer', status: 'active', walletBalance: 0, createdAt: new Date().toISOString() },
+    { id: 'banned-user', username: 'banned', role: 'customer', status: 'banned', walletBalance: 0, createdAt: new Date().toISOString() },
+  ];
+  let tenantUsersView;
+  await als.run(tenantUsersFixture, () => usersList(
+    { query: { status: 'banned', role: 'customer' }, tenantShop: { id: 'tenant-ui-fixture' } },
+    { locals: {}, render(view, values) { tenantUsersView = { view, ...values }; } },
+  ));
+  check('Experimental member filters do not change the tenant legacy member list', () => {
+    assert.equal(tenantUsersView.view, 'admin/users');
+    assert.equal(tenantUsersView.users.length, 2);
+  });
+  const liveCatalog = admin.stack.find(layer => layer.route?.path === '/minigame/live-catalog' && layer.route.methods.get).route.stack.at(-1).handle;
+  let tenantCatalogStatus = 0;
+  await liveCatalog(
+    { query: { ui: 'experiment' }, tenantShop: { id: 'tenant-ui-fixture' } },
+    { sendStatus(status) { tenantCatalogStatus = status; } },
+  );
+  check('Tenant administrators cannot access the main-site live catalog preview', () => assert.equal(tenantCatalogStatus, 404));
+  async function playImageFor(tenantShop) {
+    const prize = { id: 'prize', name: 'รางวัลทดสอบ', gameType: 'box', image: '/configured-prize.png', isPrize: true, stock: null };
+    const gameStore = {
+      data: {
+        settings: { miniGame: { boxEnabled: true, costPerPlay: 2 } },
+        miniGamePrizes: [prize], products: [{ id: 'product', title: 'รางวัลทดสอบ', images: ['/catalog-product.png'] }],
+        walletTransactions: [], miniGamePlays: [],
+      },
+      genId: () => 'fixture-id',
+      async save() {},
+    };
+    const minigameRoutes = load('src/routes/minigame.js', {
+      '../data/store': gameStore,
+      '../middleware/auth': { currentUser: request => request.user },
+      '../services/minigame': { pickPrize: () => prize, getPrizeImage: () => '/catalog-product.png' },
+    });
+    const play = minigameRoutes.stack.find(layer => layer.route?.path === '/play' && layer.route.methods.post).route.stack.at(-1).handle;
+    let result;
+    await play({ query: {}, tenantShop, user: { id: 'fixture-user', username: 'fixture', walletBalance: 20 } }, { json(value) { result = value; }, status() { return this; } });
+    return result.image;
+  }
+  const tenantPlayImage = await playImageFor({ id: 'tenant-ui-fixture' });
+  const mainPlayImage = await playImageFor(null);
+  check('Tenant minigame rewards keep their configured image while main rewards may resolve catalog images', () => {
+    assert.equal(tenantPlayImage, '/configured-prize.png');
+    assert.equal(mainPlayImage, '/catalog-product.png');
+  });
   const orderStatus = admin.stack.find(l => l.route?.path === '/orders/:id/status' && l.route.methods.post).route.stack.at(-1).handle;
   const orderStatusFixture = model.fixture();
   orderStatusFixture.orders = [{ id: 'order-status-fixture', status: 'pending', items: [] }];
@@ -395,6 +502,26 @@ async function main() {
   check('Removed provider cannot be tested through the API route', () => assert.equal(testedProvider.message, 'ไม่พบผู้ให้บริการที่ระบุ'));
   const viewData = model.fixture(); model.migrateFixture(viewData);
   const ejs = require('ejs');
+  const widgetTemplate = fs.readFileSync(path.join(root, 'src/views/partials/minigame-widget.ejs'), 'utf8');
+  const railTemplate = fs.readFileSync(path.join(root, 'src/views/partials/minigame-rail.ejs'), 'utf8');
+  const widgetLegacy = ejs.render(widgetTemplate, { endpoint: '/minigame/play', cost: 5, ctaLabel: 'เปิดกล่อง', showLogin: false, balance: 20, mainSiteExperience: false });
+  const widgetMain = ejs.render(widgetTemplate, { endpoint: '/minigame/play', cost: 5, ctaLabel: 'เปิดกล่อง', showLogin: false, balance: 20, mainSiteExperience: true });
+  const railBase = { endpoint: '/minigame/play?mode=rail', cost: 5, prizes: [{ name: 'รางวัล', image: null, isPrize: true }], showLogin: false, balance: 20 };
+  const railLegacy = ejs.render(railTemplate, { ...railBase, mainSiteExperience: false });
+  const railMain = ejs.render(railTemplate, { ...railBase, mainSiteExperience: true });
+  const widgetLegacyMarkup = widgetLegacy.split('<style>')[0];
+  const widgetMainMarkup = widgetMain.split('<style>')[0];
+  const railLegacyMarkup = railLegacy.split('<style>')[0];
+  const railMainMarkup = railMain.split('<style>')[0];
+  check('Storefront minigame redesign is rendered only for the main shop', () => {
+    assert.match(widgetLegacyMarkup, /class="mg-box mg-box-el">🎁/);
+    assert.doesNotMatch(widgetLegacyMarkup, /mg-box-scene-el|mg-result-gift/);
+    assert.match(widgetMainMarkup, /mg-play-panel--main-site/);
+    assert.match(widgetMainMarkup, /mg-box-scene-el|mg-result-gift/);
+    assert.doesNotMatch(railLegacyMarkup, /rail-game--main-site|<svg viewBox="0 0 24 24"/);
+    assert.match(railLegacyMarkup, /🎰 เริ่มเลื่อน/);
+    assert.match(railMainMarkup, /rail-game--main-site/);
+  });
   let pages = 0;
   for (const url of ['/', '/products', '/products/new', '/filter-tags', '/home-sections', '/scheduled-products', '/orders', '/users', '/topups', '/slip-verification', '/coupons', '/minigame', '/settings', '/appearance']) {
     const handler = admin.stack.find(l => l.route?.path === url && l.route.methods.get).route.stack.at(-1).handle;

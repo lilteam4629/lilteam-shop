@@ -1,11 +1,12 @@
 const express = require('express');
 const store = require('../data/store');
 const { requireAdmin } = require('../middleware/auth');
+const { usesExperimentalAdminUi } = require('../services/admin-ui-mode');
 
 const router = express.Router();
 router.use(requireAdmin);
 
-const effectsRedirect = req => req.query.ui === 'experiment' ? '/admin/effects?ui=experiment' : '/admin/effects';
+const effectsRedirect = req => usesExperimentalAdminUi(req) ? '/admin/effects?ui=experiment' : '/admin/effects';
 
 router.post('/effects/rain', async (req, res) => {
   const installed = Boolean(store.data.settings.systemModules?.rain);

@@ -1,0 +1,196 @@
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-minigame-v1.css') %>" />
+<%
+  const activePrizes = prizes.filter(prize => prize.active);
+  const enabledGameCount = [game.boxEnabled, game.railEnabled].filter(Boolean).length;
+  const percentTone = value => value === 100 ? 'good' : value > 100 ? 'over' : 'low';
+  const stockLabel = prize => prize.stock === null || prize.stock === undefined ? 'ไม่จำกัด' : Number(prize.stock).toLocaleString('th-TH');
+%>
+<div class="experiment-app mgx-app">
+  <%- include('../partials/admin-experiment-sidebar-effects') %>
+  <div class="experiment-main">
+    <header class="experiment-topbar">
+      <div class="mgx-topbar-context"><span class="mgx-live-dot" aria-hidden="true"></span> ข้อมูลมินิเกมของร้าน</div>
+      <button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg></button>
+      <span class="experiment-user-name">admin</span>
+    </header>
+    <main class="experiment-content mgx-content">
+      <section class="experiment-page-head mgx-page-head">
+        <div><div class="experiment-kicker">ทดลองหน้าตาใหม่ · ระบบเสริม</div><h1>จัดการมินิเกม</h1><p>ควบคุมเกมเปิดกล่องและเกมรางเลื่อน ตั้งค่ารางวัล ทดลองสุ่ม และตรวจสอบการส่งมอบจากหน้าเดียว</p></div>
+        <div class="experiment-actions"><a href="#mgx-preview" class="experiment-button primary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 9 6-9 6V6Z"/></svg> ทดลองเล่น</a><a href="#mgx-settings" class="experiment-button">ตั้งค่าเกม</a></div>
+      </section>
+
+      <section class="mgx-overview" aria-label="ภาพรวมมินิเกม">
+        <article class="experiment-card mgx-stat"><span class="mgx-stat-icon mint"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/><path d="m16 16 2 2 4-5"/></svg></span><div><small>เกมที่เปิดอยู่</small><strong><%= enabledGameCount %><span> / 2 เกม</span></strong></div></article>
+        <article class="experiment-card mgx-stat"><span class="mgx-stat-icon blue"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h16v12H4zM8 8V5h8v3M8 13h8"/></svg></span><div><small>รางวัลที่เปิดใช้</small><strong><%= activePrizes.length %><span> จาก <%= prizes.length %> รายการ</span></strong></div></article>
+        <article class="experiment-card mgx-stat"><span class="mgx-stat-icon amber"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg></span><div><small>รอส่งมอบรางวัล</small><strong><%= pendingDeliveryCount %><span> รายการ</span></strong></div></article>
+      </section>
+
+      <section class="mgx-game-switches" aria-label="สถานะเกม">
+        <% [['box', game.title || 'เกมเปิดกล่อง', game.description || 'สุ่มรับรางวัลจากกล่อง', game.boxEnabled, game.costPerPlay, 'box'], ['rail', game.railTitle || 'เกมรางเลื่อน', game.railDescription || 'เลื่อนแถบรางวัลแล้วลุ้นผล', game.railEnabled, game.railCostPerPlay, 'rail']].forEach(item => { %>
+          <article class="experiment-card mgx-game-switch <%= item[3] ? 'is-on' : '' %>">
+            <span class="mgx-game-icon <%= item[0] %>"><% if (item[0] === 'box') { %><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-5 9 5v9l-9 5-9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v9M8 5l9 5"/></svg><% } else { %><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM8 9v6m4-6v6m4-6v6"/><path d="M2 12h2m16 0h2"/></svg><% } %></span>
+            <div class="mgx-game-copy"><h2><%= item[1] %></h2><p><%= item[2] %></p><span class="mgx-game-cost">฿<%= Number(item[4] || 0).toLocaleString('th-TH') %> <small>ต่อครั้ง</small></span></div>
+            <div class="mgx-game-state"><span class="mgx-state-pill <%= item[3] ? 'on' : 'off' %>"><i></i><%= item[3] ? 'เปิดใช้งาน' : 'ปิดอยู่' %></span><form action="/admin/minigame/toggle?ui=experiment" method="post"><input type="hidden" name="gameType" value="<%= item[5] %>" /><button class="experiment-button small" type="submit" aria-label="<%= item[3] ? 'ปิด' : 'เปิด' %><%= item[1] %>"><%= item[3] ? 'ปิดเกม' : 'เปิดเกม' %></button></form></div>
+          </article>
+        <% }) %>
+      </section>
+
+      <section class="experiment-card mgx-distribution" aria-labelledby="mgx-distribution-title">
+        <div class="mgx-section-heading"><div><span class="mgx-eyebrow">REWARD DISTRIBUTION</span><h2 id="mgx-distribution-title">โอกาสออกรางวัล</h2><p>ยอดรวมคิดจากรางวัลที่เปิดใช้งาน แยกตามประเภทเกม</p></div><a class="mgx-text-link" href="#mgx-prizes">จัดการรายการรางวัล <span aria-hidden="true">→</span></a></div>
+        <div class="mgx-distribution-grid">
+          <% [['เกมเปิดกล่อง', totalPercent], ['เกมรางเลื่อน', railTotalPercent]].forEach(item => { %>
+            <div class="mgx-distribution-item"><div><strong><%= item[0] %></strong><b class="<%= percentTone(item[1]) %>"><%= Number(item[1]).toLocaleString('th-TH') %>%</b></div><div class="mgx-progress" role="img" aria-label="โอกาสรวม <%= item[0] %> <%= item[1] %> เปอร์เซ็นต์"><i class="<%= percentTone(item[1]) %>" style="width:<%= Math.max(0, Math.min(100, Number(item[1]))) %>%"></i></div><small class="<%= percentTone(item[1]) %>"><%= item[1] === 100 ? 'ครบ 100% แล้ว' : item[1] > 100 ? 'รวมเกิน 100% · ตรวจสอบตัวเลขรางวัล' : `ยังขาดอีก ${(100 - item[1]).toLocaleString('th-TH')}%` %></small></div>
+          <% }) %>
+        </div>
+      </section>
+
+      <section class="mgx-preview-section" id="mgx-preview" aria-labelledby="mgx-preview-title">
+        <div class="mgx-section-heading"><div><span class="mgx-eyebrow">SAFE PLAY TEST</span><h2 id="mgx-preview-title">ทดลองเล่น</h2><p>ใช้สินค้าจริงจากหน้าเว็บเพื่อตรวจรูปและเอฟเฟกต์เท่านั้น ไม่ใช้โอกาสรางวัลจริง ไม่หักเครดิตหรือเพิ่มประวัติ</p></div><span class="mgx-preview-safe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 2.8 7.8 7 10 4.2-2.2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg> ไม่กระทบเครดิต</span></div>
+        <div class="mgx-live-catalog-status" id="mgx-live-catalog-status" role="status" aria-live="polite" data-state="loading"><span class="mgx-live-catalog-dot" aria-hidden="true"></span><span>กำลังเชื่อมแค็ตตาล็อกสินค้าจริงจาก lilteam.site…</span></div>
+        <script>
+          (function () {
+            const endpoint = '/admin/minigame/live-catalog?ui=experiment';
+            const status = document.getElementById('mgx-live-catalog-status');
+            let pending = null;
+            const catalogPreview = {
+              load: function (url) {
+                if (!pending) {
+                  pending = fetch(url || endpoint, { method: 'GET', credentials: 'same-origin', cache: 'no-store', headers: { accept: 'application/json' } })
+                    .then(async function (response) {
+                      const payload = await response.json();
+                      if (!response.ok || !payload || payload.ok !== true || !Array.isArray(payload.products)) {
+                        throw new Error((payload && payload.error) || 'อ่านแค็ตตาล็อกเว็บจริงไม่สำเร็จ');
+                      }
+                      return payload;
+                    })
+                    .catch(function (error) { pending = null; throw error; });
+                }
+                return pending;
+              }
+            };
+            window.lilteamLiveCatalogPreview = catalogPreview;
+            if (status) {
+              catalogPreview.load(endpoint).then(function (catalog) {
+                status.dataset.state = 'ready';
+                status.querySelector('span:last-child').textContent = catalog.shopName + ' · ' + catalog.products.length + ' สินค้าที่มีรูปและสต็อก · โหลดเพื่อดูตัวอย่างเท่านั้น';
+              }).catch(function (error) {
+                status.dataset.state = 'error';
+                status.querySelector('span:last-child').textContent = error.message + ' · เกมทดลองจะไม่ใช้รายการตัวอย่างแทนสินค้าเว็บจริง';
+              });
+            }
+          })();
+        </script>
+        <div class="mgx-game-tabs" role="tablist" aria-label="เลือกเกมที่ต้องการทดลอง"><button class="mgx-game-tab is-active" type="button" role="tab" id="mgx-tab-box" aria-selected="true" aria-controls="mgx-panel-box" data-mgx-game-tab="box"><span class="mgx-game-tab-icon box"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-5 9 5v9l-9 5-9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v9"/></svg></span><span><strong><%= game.title || 'เกมเปิดกล่อง' %></strong><small>ทดลองสุ่มรางวัลจากกล่อง</small></span><span class="mgx-tab-arrow" aria-hidden="true">→</span></button><button class="mgx-game-tab" type="button" role="tab" id="mgx-tab-rail" aria-selected="false" aria-controls="mgx-panel-rail" data-mgx-game-tab="rail"><span class="mgx-game-tab-icon rail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM8 9v6m4-6v6m4-6v6"/></svg></span><span><strong><%= game.railTitle || 'เกมรางเลื่อน' %></strong><small>ทดลองเลื่อนดูผลรางวัล</small></span><span class="mgx-tab-arrow" aria-hidden="true">→</span></button></div>
+        <div class="mgx-preview-panel experiment-card" id="mgx-panel-box" role="tabpanel" aria-labelledby="mgx-tab-box" data-mgx-game-panel="box"><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.title || 'เกมเปิดกล่อง' %></h3><p>สุ่มแสดงสินค้าจริงที่มีรูปและสต็อกจากเว็บร้าน เพื่อดูเอฟเฟกต์เท่านั้น</p></div><span class="mgx-mode-tag">ตัวอย่างปลอดภัย</span></div><%- include('../partials/minigame-widget', { endpoint: '/admin/minigame/preview', catalogEndpoint: '/admin/minigame/live-catalog?ui=experiment', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> อ่านข้อมูลสินค้าจริงเท่านั้น · สุ่มตัวอย่างโอกาสเท่ากัน ไม่ใช่อัตรารางวัลจริง · ไม่ตัดเครดิต/สต็อกและไม่บันทึกข้อมูลลงเว็บจริง</p></div>
+        <div class="mgx-preview-panel experiment-card" id="mgx-panel-rail" role="tabpanel" aria-labelledby="mgx-tab-rail" data-mgx-game-panel="rail" hidden><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.railTitle || 'เกมรางเลื่อน' %></h3><p>ใช้รูปสินค้าจริงที่มีสต็อก แสดงบนรางและเลื่อนหยุดตรงช่องกลาง</p></div><span class="mgx-mode-tag">ตัวอย่างปลอดภัย</span></div><%- include('../partials/minigame-rail', { endpoint: '/admin/minigame/preview?mode=rail', catalogEndpoint: '/admin/minigame/live-catalog?ui=experiment', cost: 0, prizes: prizes.filter(prize => prize.active && (prize.gameType || 'box') === 'rail').map(prize => ({ ...prize, image: prize.resolvedImage || prize.image || null })), showLogin: false, balance: null }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> สุ่มตัวอย่างโอกาสเท่ากันเพื่อดูภาพและเอฟเฟกต์ ไม่ใช่อัตรารางวัลจริง · ไม่ตัดเครดิต/สต็อกและไม่บันทึกข้อมูลลงเว็บจริง</p></div>
+      </section>
+
+      <details class="experiment-card mgx-settings" id="mgx-settings">
+        <summary><span class="mgx-settings-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="m19.4 15 .1.1a1.7 1.7 0 1 1-2.4 2.4l-.1-.1a1.7 1.7 0 0 0-2.9 1.2v.2a1.7 1.7 0 1 1-3.4 0v-.2a1.7 1.7 0 0 0-2.9-1.2l-.1.1a1.7 1.7 0 1 1-2.4-2.4l.1-.1a1.7 1.7 0 0 0-1.2-2.9H4a1.7 1.7 0 1 1 0-3.4h.2a1.7 1.7 0 0 0 1.2-2.9l-.1-.1a1.7 1.7 0 1 1 2.4-2.4l.1.1a1.7 1.7 0 0 0 2.9-1.2V2a1.7 1.7 0 1 1 3.4 0v.2a1.7 1.7 0 0 0 2.9 1.2l.1-.1a1.7 1.7 0 1 1 2.4 2.4l-.1.1a1.7 1.7 0 0 0 1.2 2.9h.2a1.7 1.7 0 1 1 0 3.4h-.2a1.7 1.7 0 0 0-1.2 2.9Z"/></svg></span><span class="mgx-settings-summary"><strong>ตั้งค่าชื่อ คำอธิบาย และราคา</strong><small>แยกการตั้งค่าเกมเปิดกล่องกับเกมรางเลื่อน</small></span><span class="mgx-settings-toggle">ตั้งค่า <b aria-hidden="true">⌄</b></span></summary>
+        <form action="/admin/minigame/settings?ui=experiment" method="post" class="mgx-settings-form">
+          <fieldset><legend>เกมเปิดกล่อง</legend><label>ชื่อเกม<input name="title" value="<%= game.title %>" required maxlength="100" /></label><label>ราคาต่อครั้ง (บาท)<input name="costPerPlay" type="number" min="0" step="1" value="<%= game.costPerPlay %>" required /></label><label class="wide">คำอธิบาย<textarea name="description" rows="2"><%= game.description %></textarea></label></fieldset>
+          <fieldset><legend>เกมรางเลื่อน</legend><label>ชื่อเกม<input name="railTitle" value="<%= game.railTitle %>" required maxlength="100" /></label><label>ราคาต่อครั้ง (บาท)<input name="railCostPerPlay" type="number" min="0" step="1" value="<%= game.railCostPerPlay %>" required /></label><label class="wide">คำอธิบาย<textarea name="railDescription" rows="2"><%= game.railDescription %></textarea></label></fieldset>
+          <div class="mgx-save-row"><p>การกดบันทึกจะอัปเดตการตั้งค่ามินิเกมของร้าน</p><button class="experiment-button primary" type="submit">บันทึกการตั้งค่า</button></div>
+        </form>
+      </details>
+
+      <section class="experiment-card mgx-prize-section" id="mgx-prizes" aria-labelledby="mgx-prizes-title">
+        <div class="mgx-section-heading mgx-prize-heading"><div><span class="mgx-eyebrow">PRIZE INVENTORY</span><h2 id="mgx-prizes-title">จัดการของรางวัล</h2><p>รายการด้านล่างคือค่ารางวัลที่บันทึกในระบบเกม; ตัวอย่างเล่นด้านบนอ่านสินค้าจริงมาแสดงแยกกัน โดยไม่แก้รายการหรือสต็อก</p></div><a class="experiment-button primary" href="#mgx-add-prize"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> เพิ่มรางวัล</a></div>
+        <div class="mgx-prize-summary">
+          <div><strong><%= activePrizes.length %></strong><span>รางวัลเปิดใช้</span></div><div><strong><%= prizes.length - activePrizes.length %></strong><span>รางวัลปิดอยู่</span></div><div class="mgx-prize-summary-note">แก้ไขแล้วให้กด “บันทึก” ในการ์ดรางวัล<br />สถานะและสต็อกจะเปลี่ยนเมื่อกดยืนยันเท่านั้น</div>
+        </div>
+        <div class="mgx-toolbar"><label class="mgx-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input type="search" placeholder="ค้นหาชื่อรางวัล..." aria-label="ค้นหาของรางวัล" data-mgx-prize-search /></label><div class="mgx-filter-group" role="group" aria-label="กรองรายการของรางวัล"><button type="button" class="is-active" aria-pressed="true" data-mgx-prize-filter="all">ทั้งหมด <b><%= prizes.length %></b></button><button type="button" aria-pressed="false" data-mgx-prize-filter="box">เปิดกล่อง</button><button type="button" aria-pressed="false" data-mgx-prize-filter="rail">รางเลื่อน</button><button type="button" aria-pressed="false" data-mgx-prize-filter="paused">ปิดใช้</button></div></div>
+        <p class="mgx-filter-count" aria-live="polite"><span data-mgx-prize-count><%= prizes.length %></span> รายการ</p>
+        <div class="mgx-prize-layout">
+          <div class="mgx-prize-list" data-mgx-prize-list>
+            <% prizes.forEach(prize => { const gameType = prize.gameType || 'box'; const editId = `mgx-prize-${prize.id}`; const imageId = `mgx-image-${prize.id}`; %>
+              <article class="mgx-prize-card experiment-card" data-mgx-prize-card data-type="<%= gameType %>" data-active="<%= prize.active ? 'yes' : 'no' %>" data-search="<%= `${prize.name} ${gameType === 'rail' ? 'รางเลื่อน rail' : 'เปิดกล่อง box'}`.toLowerCase() %>">
+                <form id="<%= editId %>" action="/admin/minigame/prizes/<%= prize.id %>?ui=experiment" method="post"></form>
+                <div class="mgx-prize-card-head"><div class="mgx-prize-thumb"><% if (prize.resolvedImage || prize.image) { %><img src="<%= prize.resolvedImage || prize.image %>" alt="รูปของรางวัล <%= prize.name %>" loading="lazy" decoding="async" /> <% } else { %><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.5 5.2L20 11l-5.5 2.8L12 19l-2.5-5.2L4 11l5.5-2.8L12 3Z"/></svg><% } %></div><div class="mgx-prize-title"><span class="mgx-type-pill <%= gameType %>"><%= gameType === 'rail' ? 'เกมรางเลื่อน' : 'เกมเปิดกล่อง' %></span><span class="mgx-state-pill <%= prize.active ? 'on' : 'off' %>"><i></i><%= prize.active ? 'เปิดใช้' : 'ปิดใช้' %></span></div></div>
+                <label class="mgx-field">ชื่อของรางวัล<input form="<%= editId %>" name="name" value="<%= prize.name %>" required maxlength="120" /></label>
+                <div class="mgx-prize-fields"><label class="mgx-field">โอกาส (%)<input form="<%= editId %>" name="percent" type="number" min="0" max="100" step="0.1" value="<%= prize.percent %>" required /></label><label class="mgx-field">สต็อก<small>เว้นว่าง = ไม่จำกัด</small><input form="<%= editId %>" name="stock" type="number" min="0" value="<%= prize.stock === null || prize.stock === undefined ? '' : prize.stock %>" placeholder="ไม่จำกัด" /></label></div>
+                <label class="mgx-prize-check"><input form="<%= editId %>" type="checkbox" name="isPrize" <%= prize.isPrize ? 'checked' : '' %> /><span><strong>เป็นรางวัลจริง</strong><small>หากไม่เลือก จะเป็นผล “ไม่ได้รางวัล”</small></span></label>
+                <div class="mgx-prize-meta"><span>คงเหลือ <b><%= stockLabel(prize) %></b></span><span><%= prize.isPrize ? 'มีโค้ดรับรางวัล' : 'ไม่ออกโค้ด' %></span></div>
+                <div class="mgx-image-tools"><form id="<%= imageId %>" action="/admin/minigame/prizes/<%= prize.id %>/image?ui=experiment" method="post" enctype="multipart/form-data"></form><label for="<%= imageId %>-file">เปลี่ยนรูปภาพ</label><input id="<%= imageId %>-file" form="<%= imageId %>" type="file" name="image" accept="image/*" required /><button form="<%= imageId %>" type="submit" class="experiment-button small">อัปโหลดรูป</button><% if (prize.image) { %><form action="/admin/minigame/prizes/<%= prize.id %>/image/remove?ui=experiment" method="post"><button class="mgx-link-danger" type="submit">เอารูปออก</button></form><% } %></div>
+                <div class="mgx-prize-actions"><button form="<%= editId %>" type="submit" class="experiment-button primary small">บันทึกรางวัล</button><form action="/admin/minigame/prizes/<%= prize.id %>/toggle?ui=experiment" method="post"><button class="experiment-button small" type="submit"><%= prize.active ? 'ปิดใช้งาน' : 'เปิดใช้งาน' %></button></form><form action="/admin/minigame/prizes/<%= prize.id %>/delete?ui=experiment" method="post" data-experiment-confirm="ต้องการลบรางวัล &quot;<%= prize.name %>&quot; ใช่หรือไม่? การลบนี้ย้อนกลับไม่ได้"><button class="experiment-button small danger" type="submit">ลบรางวัล</button></form></div>
+              </article>
+            <% }) %>
+            <div class="mgx-prize-empty" data-mgx-prize-empty <%= prizes.length ? 'hidden' : '' %>><span class="mgx-empty-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.5 5.2L20 11l-5.5 2.8L12 19l-2.5-5.2L4 11l5.5-2.8L12 3Z"/></svg></span><strong><%= prizes.length ? 'ไม่พบรางวัลที่ตรงกับตัวกรอง' : 'ยังไม่มีของรางวัล' %></strong><p><%= prizes.length ? 'ลองเปลี่ยนคำค้นหาหรือตัวกรอง' : 'เพิ่มรายการแรกจากแบบฟอร์ม แล้วรางวัลจะปรากฏในเกมที่เลือก' %></p></div>
+          </div>
+          <aside class="experiment-card mgx-add-card" id="mgx-add-prize"><div class="mgx-add-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span><div><h3>เพิ่มของรางวัล</h3><p>เลือกเกมที่ต้องการเพิ่มรายการ</p></div></div><form action="/admin/minigame/prizes?ui=experiment" method="post" enctype="multipart/form-data" class="mgx-add-form"><label class="mgx-field">เกม<select name="gameType"><option value="box">เกมเปิดกล่อง</option><option value="rail">เกมรางเลื่อน</option></select></label><label class="mgx-field">ชื่อของรางวัล<input name="name" required maxlength="120" placeholder="เช่น เครดิต 100 บาท" /></label><label class="mgx-field">โอกาส (%)<input name="percent" type="number" min="0" max="100" step="0.1" required placeholder="เช่น 5 หรือ 12.5" /></label><label class="mgx-field">สต็อก<small>เว้นว่างหากไม่จำกัดจำนวน</small><input name="stock" type="number" min="0" placeholder="ไม่จำกัด" /></label><label class="mgx-prize-check"><input type="checkbox" name="isPrize" checked /><span><strong>เป็นรางวัลจริง</strong><small>ผู้เล่นได้รับโค้ดรับรางวัล</small></span></label><label class="mgx-field">รูปภาพ <small>ไม่บังคับ · JPG, PNG หรือ WebP</small><input type="file" name="image" accept="image/*" /></label><button class="experiment-button primary" type="submit"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> เพิ่มรางวัลลงระบบ</button></form></aside>
+        </div>
+      </section>
+
+      <section class="experiment-card mgx-history" aria-labelledby="mgx-history-title">
+        <div class="mgx-section-heading mgx-history-heading"><div><span class="mgx-eyebrow">PLAYER ACTIVITY</span><h2 id="mgx-history-title">ประวัติการเล่นและการรับรางวัล</h2><p>แสดงรายการล่าสุด และค้นหาได้จากชื่อผู้เล่นหรือโค้ดรับของ</p></div><span class="mgx-history-total">รอส่งมอบ <b><%= pendingDeliveryCount %></b></span></div>
+        <form method="get" action="/admin/minigame" class="mgx-history-search"><input type="hidden" name="ui" value="experiment" /><label class="mgx-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg><input type="search" name="q" value="<%= searchQuery %>" placeholder="ค้นหาชื่อผู้เล่นหรือโค้ด..." aria-label="ค้นหาประวัติการเล่น" /></label><button class="experiment-button primary" type="submit">ค้นหา</button><% if (searchQuery) { %><a class="experiment-button" href="/admin/minigame?ui=experiment">ล้าง</a><% } %></form>
+        <div class="mgx-history-filters" role="group" aria-label="กรองประวัติการเล่น"><button type="button" class="is-active" aria-pressed="true" data-mgx-history-filter="all">ทั้งหมด</button><button type="button" aria-pressed="false" data-mgx-history-filter="pending">รอส่งมอบ</button><button type="button" aria-pressed="false" data-mgx-history-filter="delivered">ส่งมอบแล้ว</button><button type="button" aria-pressed="false" data-mgx-history-filter="no-win">ไม่ได้รางวัล</button></div>
+        <div class="mgx-history-list" data-mgx-history-list>
+          <% recentPlays.forEach(play => { const state = !play.isWin ? 'no-win' : play.status === 'delivered' ? 'delivered' : 'pending'; %>
+            <article class="mgx-history-row" data-mgx-history-row data-state="<%= state %>" data-search="<%= `${play.username || ''} ${play.claimCode || ''} ${play.prizeName || ''}`.toLowerCase() %>"><div class="mgx-player-mark"><%= (play.username || '?').slice(0, 1).toUpperCase() %></div><div class="mgx-player-info"><strong><%= play.username || 'ไม่ทราบชื่อ' %></strong><small><%= play.gameMode === 'rail' ? 'เกมรางเลื่อน' : 'เกมเปิดกล่อง' %> · <%= new Date(play.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></small></div><div class="mgx-play-result"><strong class="<%= play.isWin ? 'is-win' : '' %>"><%= play.prizeName || '—' %></strong><small><%= play.claimCode ? `โค้ด ${play.claimCode}` : play.isWin ? 'ไม่มีโค้ด' : 'ไม่ได้รับรางวัล' %></small></div><span class="mgx-claim-state <%= state %>"><i></i><%= state === 'pending' ? 'รอส่งมอบ' : state === 'delivered' ? 'ส่งมอบแล้ว' : 'ไม่ได้รางวัล' %></span><% if (play.isWin) { %><form action="/admin/minigame/plays/<%= play.id %>/deliver?ui=experiment" method="post"><button class="experiment-button small <%= state === 'pending' ? 'primary' : '' %>" type="submit"><%= state === 'delivered' ? 'ยกเลิกส่งมอบ' : 'ยืนยันส่งมอบ' %></button></form><% } %></article>
+          <% }) %>
+          <div class="mgx-history-empty" data-mgx-history-empty <%= recentPlays.length ? 'hidden' : '' %>><strong><%= searchQuery ? 'ไม่พบประวัติที่ค้นหา' : 'ยังไม่มีประวัติการเล่น' %></strong><p><%= searchQuery ? 'ตรวจชื่อผู้เล่นหรือโค้ด แล้วลองค้นหาอีกครั้ง' : 'เมื่อมีผู้เล่น ระบบจะแสดงประวัติการเล่นและผลที่นี่' %></p></div>
+          <div class="mgx-history-empty" data-mgx-history-filter-empty hidden><strong>ไม่พบรายการในสถานะนี้</strong><p>เปลี่ยนตัวกรองเพื่อดูประวัติรายการอื่น</p></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <nav class="experiment-mobile-nav" aria-label="เมนูหลัก"><a href="/admin?ui=experiment"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 11 8-7 8 7v9h-6v-6h-4v6H4z"/></svg><span>ภาพรวม</span></a><a href="/admin/products?ui=experiment"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 7 8-4 8 4-8 4-8-4Zm0 0v10l8 4 8-4V7M12 11v10"/></svg><span>สินค้า</span></a><a href="/admin/minigame?ui=experiment" class="active" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 7v5l3 2"/></svg><span>มินิเกม</span></a><a href="/admin/orders?ui=experiment"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h12v16H6zM9 8h6M9 12h6M9 16h3"/></svg><span>คำสั่งซื้อ</span></a><a href="/admin/settings?ui=experiment"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 15a7 7 0 0 0 0-6l2-1-2-3-2 1a7 7 0 0 0-5-2l-1-2-3 2 1 2a7 7 0 0 0-2 5l-2 1 2 3 2-1a7 7 0 0 0 5 2l1 2 3-2-1-2Z"/></svg><span>ตั้งค่า</span></a></nav>
+</div>
+<script>
+  (() => {
+    const gameTabs = [...document.querySelectorAll('[data-mgx-game-tab]')];
+    const gamePanels = [...document.querySelectorAll('[data-mgx-game-panel]')];
+    const selectGameTab = tab => {
+      gameTabs.forEach(item => { const active = item === tab; item.classList.toggle('is-active', active); item.setAttribute('aria-selected', String(active)); });
+      gamePanels.forEach(panel => { panel.hidden = panel.dataset.mgxGamePanel !== tab.dataset.mgxGameTab; });
+      requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+    };
+    gameTabs.forEach((tab, index) => {
+      tab.addEventListener('click', () => selectGameTab(tab));
+      tab.addEventListener('keydown', event => {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+        event.preventDefault();
+        const nextIndex = event.key === 'Home' ? 0 : event.key === 'End' ? gameTabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : gameTabs.length - 1)) % gameTabs.length;
+        gameTabs[nextIndex].focus();
+        selectGameTab(gameTabs[nextIndex]);
+      });
+    });
+
+    const prizeCards = [...document.querySelectorAll('[data-mgx-prize-card]')];
+    const prizeSearch = document.querySelector('[data-mgx-prize-search]');
+    const prizeCount = document.querySelector('[data-mgx-prize-count]');
+    const prizeEmpty = document.querySelector('[data-mgx-prize-empty]');
+    let prizeFilter = 'all';
+    const filterPrizes = () => {
+      const query = (prizeSearch?.value || '').trim().toLowerCase();
+      let shown = 0;
+      prizeCards.forEach(card => {
+        const typeMatch = prizeFilter === 'all' || card.dataset.type === prizeFilter || (prizeFilter === 'paused' && card.dataset.active === 'no');
+        const searchMatch = !query || card.dataset.search.includes(query);
+        card.hidden = !(typeMatch && searchMatch);
+        if (!card.hidden) shown += 1;
+      });
+      if (prizeCount) prizeCount.textContent = shown;
+      if (prizeEmpty) prizeEmpty.hidden = shown !== 0;
+    };
+    prizeSearch?.addEventListener('input', filterPrizes);
+    document.querySelectorAll('[data-mgx-prize-filter]').forEach(button => button.addEventListener('click', () => {
+      prizeFilter = button.dataset.mgxPrizeFilter;
+      document.querySelectorAll('[data-mgx-prize-filter]').forEach(item => { const active = item === button; item.classList.toggle('is-active', active); item.setAttribute('aria-pressed', String(active)); });
+      filterPrizes();
+    }));
+
+    const historyRows = [...document.querySelectorAll('[data-mgx-history-row]')];
+    const historyEmpty = document.querySelector('[data-mgx-history-filter-empty]');
+    document.querySelectorAll('[data-mgx-history-filter]').forEach(button => button.addEventListener('click', () => {
+      const state = button.dataset.mgxHistoryFilter;
+      let shown = 0;
+      document.querySelectorAll('[data-mgx-history-filter]').forEach(item => { const active = item === button; item.classList.toggle('is-active', active); item.setAttribute('aria-pressed', String(active)); });
+      historyRows.forEach(row => { row.hidden = state !== 'all' && row.dataset.state !== state; if (!row.hidden) shown += 1; });
+      if (historyEmpty) historyEmpty.hidden = shown !== 0 || historyRows.length === 0;
+    }));
+
+    if (window.location.hash === '#mgx-settings') document.querySelector('#mgx-settings')?.setAttribute('open', '');
+  })();
+</script>

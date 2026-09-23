@@ -1,0 +1,149 @@
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-coupons-v1.css') %>" />
+<%
+  const couponHref = (nextStatus = status) => {
+    const params = new URLSearchParams();
+    if (q) params.set('q', q);
+    if (nextStatus) params.set('status', nextStatus);
+    return `/admin/coupons?${params.toString()}`;
+  };
+  const formatCouponDate = value => {
+    if (!value) return '—';
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' });
+  };
+%>
+<div class="experiment-app experiment-coupons-page">
+  <div class="experiment-main">
+    <header class="experiment-topbar">
+      <div class="experiment-build-legend" aria-label="สถานะงานออกแบบ"><span><i></i> ใช้งานได้</span><span><i class="pending"></i> รอทำ</span></div>
+      <button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน">◌</button>
+      <span class="experiment-user-name">admin</span>
+    </header>
+    <main class="experiment-content">
+      <section class="coupons-page">
+        <header class="experiment-page-head">
+          <div>
+            <div class="experiment-kicker">ทดลองหน้าตาใหม่ · โปรโมชั่น & สมาชิก</div>
+            <h1>คูปองส่วนลด</h1>
+            <p>สร้างและติดตามโค้ดส่วนลด พร้อมตรวจการใช้งานจากข้อมูลของร้าน</p>
+          </div>
+          <div class="coupons-head-actions">
+            <span class="coupons-data-badge"><i></i> เชื่อมข้อมูลร้านจริง</span>
+            <a class="experiment-button primary" href="#coupon-create">＋ สร้างคูปอง</a>
+          </div>
+        </header>
+
+        <div class="coupons-notice warning" role="note"><span aria-hidden="true">!</span><div>หน้านี้เปิดผ่าน localhost แต่เชื่อมกับฐานข้อมูลร้านจริง · การสร้าง เปิด/ปิด หรือลบคูปองจะบันทึกและมีผลทันที · ยังไม่ได้ deploy เว็บออนไลน์</div></div>
+        <% if (successMessages?.length) { successMessages.forEach(message => { %><div class="coupons-notice success" role="status"><span aria-hidden="true">✓</span><%= message %></div><% }); } %>
+        <% if (errorMessages?.length) { errorMessages.forEach(message => { %><div class="coupons-notice error" role="alert"><span aria-hidden="true">!</span><%= message %></div><% }); } %>
+
+        <section class="coupons-build-status" aria-labelledby="coupons-build-title">
+          <div class="coupons-build-head">
+            <div><span class="coupons-build-kicker">COUPON WORKSPACE · STORE DATA</span><h2 id="coupons-build-title">ระบบคูปองทำอะไรได้แล้ว และเหลืออะไร</h2><p>สถานะอิงจากฟังก์ชันที่เชื่อมอยู่จริง แยกส่วนที่ยังต้องพัฒนาต่อให้เห็นชัด</p></div>
+            <span class="coupons-build-count"><b>4</b>/7 พร้อมใช้</span>
+          </div>
+          <div class="coupons-build-grid">
+            <div class="coupons-build-column ready"><h3><i aria-hidden="true">✓</i> ใช้งานได้แล้ว</h3><ul><li>ดูคูปองและยอดใช้จากข้อมูลร้าน</li><li>สร้างโค้ดใหม่ พร้อมตรวจโค้ดซ้ำ</li><li>เปิดหรือปิดคูปอง และลบแบบยืนยันก่อน</li><li>ค้นหา กรองสถานะ และคัดลอกโค้ด</li></ul></div>
+            <div class="coupons-build-column pending"><h3><i aria-hidden="true">＋</i> ยังต้องทำ</h3><ul><li>กำหนดวันเริ่มและวันหมดอายุ</li><li>จำกัดสิทธิ์กับสินค้า หมวดหมู่ หรือสมาชิก</li><li>รายงานยอดใช้และส่วนลดแยกตามแคมเปญ</li></ul></div>
+          </div>
+        </section>
+
+        <section class="coupons-kpis" aria-label="สรุปคูปอง">
+          <article class="coupons-kpi primary"><span class="coupons-kpi-icon" aria-hidden="true">◇</span><small>คูปองทั้งหมด</small><strong><%= stats.total.toLocaleString('th-TH') %></strong><em>โค้ดในร้าน</em><span class="coupons-kpi-foot"><i></i> อ่านจากข้อมูลปัจจุบัน</span></article>
+          <article class="coupons-kpi"><span class="coupons-kpi-icon mint" aria-hidden="true">✓</span><small>เปิดใช้งาน</small><strong><%= stats.active.toLocaleString('th-TH') %></strong><em>พร้อมให้ลูกค้าใช้</em><span class="coupons-kpi-foot"><i></i> จากทั้งหมด <%= stats.total %> โค้ด</span></article>
+          <article class="coupons-kpi"><span class="coupons-kpi-icon blue" aria-hidden="true">↗</span><small>ใช้ไปแล้ว</small><strong><%= stats.uses.toLocaleString('th-TH') %></strong><em>จำนวนครั้งสะสม</em><span class="coupons-kpi-foot"><i></i> นับจากประวัติคูปอง</span></article>
+          <article class="coupons-kpi"><span class="coupons-kpi-icon gold" aria-hidden="true">!</span><small>ใกล้ครบโควตา</small><strong><%= stats.nearLimit.toLocaleString('th-TH') %></strong><em>ใช้สิทธิ์ไปแล้วตั้งแต่ 80%</em><span class="coupons-kpi-foot <%= stats.nearLimit ? 'attention' : '' %>"><i></i> <%= stats.nearLimit ? 'ตรวจสอบจำนวนคงเหลือ' : 'ยังไม่มีโค้ดใกล้เต็ม' %></span></article>
+        </section>
+
+        <div class="coupons-workspace-grid">
+          <section class="coupons-workspace experiment-card" aria-labelledby="coupons-list-title">
+            <div class="coupons-workspace-head"><div><span class="coupons-section-kicker">PROMOTION CENTER</span><h2 id="coupons-list-title">รายการคูปอง</h2><p>พบ <b><%= coupons.length.toLocaleString('th-TH') %></b> จาก <b><%= allCoupons.length.toLocaleString('th-TH') %></b> โค้ด</p></div><span class="coupons-live-badge"><i></i> ข้อมูลปัจจุบัน</span></div>
+            <form class="coupons-toolbar" action="/admin/coupons" method="get">
+              <input type="hidden" name="ui" value="experiment" />
+              <label class="coupons-search"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= q %>" placeholder="ค้นหารหัสคูปอง..." aria-label="ค้นหารหัสคูปอง" /></label>
+              <label class="coupons-filter"><span>สถานะ</span><select name="status" aria-label="กรองสถานะคูปอง"><option value="" <%= !status ? 'selected' : '' %>>ทั้งหมด</option><option value="active" <%= status === 'active' ? 'selected' : '' %>>เปิดใช้งาน</option><option value="inactive" <%= status === 'inactive' ? 'selected' : '' %>>ปิดอยู่</option></select></label>
+              <button class="experiment-button primary coupons-search-button" type="submit">ค้นหา</button>
+              <% if (q || status) { %><a class="coupons-clear" href="/admin/coupons">ล้างตัวกรอง</a><% } %>
+            </form>
+            <nav class="coupons-tabs" aria-label="ตัวกรองคูปอง"><a class="<%= !status ? 'active' : '' %>" href="<%= couponHref('') %>">ทั้งหมด <b><%= stats.total %></b></a><a class="<%= status === 'active' ? 'active' : '' %>" href="<%= couponHref('active') %>">เปิดใช้งาน <b><%= stats.active %></b></a><a class="<%= status === 'inactive' ? 'active' : '' %>" href="<%= couponHref('inactive') %>">ปิดอยู่ <b><%= stats.inactive %></b></a></nav>
+            <% if (coupons.length) { %>
+              <div class="coupons-table-wrap"><table class="coupons-table"><thead><tr><th>รหัสคูปอง</th><th>ส่วนลด</th><th>การใช้งาน</th><th>สถานะ</th><th>สร้างเมื่อ</th><th><span class="sr-only">การจัดการ</span></th></tr></thead><tbody>
+                <% coupons.forEach(coupon => {
+                  const used = Math.max(0, Number(coupon.usedCount) || 0);
+                  const limit = Math.max(0, Number(coupon.usageLimit) || 0);
+                  const ratio = limit ? Math.min(100, (used / limit) * 100) : 0;
+                  const exhausted = limit > 0 && used >= limit;
+                  const couponStatus = !coupon.active ? 'inactive' : exhausted ? 'exhausted' : 'active';
+                  const couponStatusLabel = !coupon.active ? 'ปิดใช้งาน' : exhausted ? 'ครบโควตา' : 'เปิดใช้งาน';
+                %>
+                  <tr>
+                    <td><div class="coupons-code-cell"><span class="coupons-code-mark" aria-hidden="true">%</span><span><strong><%= coupon.code %></strong><small><%= coupon.expiresAt ? `หมดอายุ ${formatCouponDate(coupon.expiresAt)}` : 'ไม่กำหนดวันหมดอายุ' %></small></span><button type="button" class="coupons-copy" data-copy-coupon="<%= coupon.code %>" aria-label="คัดลอกรหัส <%= coupon.code %>">คัดลอก</button></div></td>
+                    <td><strong class="coupons-discount"><%= Number(coupon.value || 0).toLocaleString('th-TH') %><%= coupon.type === 'percent' ? '%' : ' ฿' %></strong><small class="coupons-muted"><%= coupon.type === 'percent' ? 'ส่วนลดเปอร์เซ็นต์' : 'ส่วนลดจำนวนเงิน' %></small></td>
+                    <td><div class="coupons-usage"><strong><%= used.toLocaleString('th-TH') %></strong><span>/ <%= limit ? limit.toLocaleString('th-TH') : 'ไม่จำกัด' %> ครั้ง</span></div><% if (limit) { %><div class="coupons-progress" role="progressbar" aria-label="โควตาคูปอง <%= coupon.code %>" aria-valuemin="0" aria-valuemax="100" aria-valuenow="<%= Math.round(ratio) %>"><i style="width:<%= ratio %>%"></i></div><% } %></td>
+                    <td><span class="coupons-status <%= couponStatus %>"><i></i><%= couponStatusLabel %></span></td>
+                    <td><span class="coupons-created"><%= formatCouponDate(coupon.createdAt) %></span></td>
+                    <td><div class="coupons-row-actions"><form action="/admin/coupons/<%= encodeURIComponent(coupon.id) %>/toggle" method="post"><button class="coupons-action <%= coupon.active ? '' : 'enable' %>" type="submit"><%= coupon.active ? 'ปิดใช้' : 'เปิดใช้' %></button></form><form action="/admin/coupons/<%= encodeURIComponent(coupon.id) %>/delete" method="post" data-experiment-confirm="ยืนยันลบคูปอง <%= coupon.code %> หรือไม่? การลบนี้ย้อนคืนไม่ได้"><button class="coupons-delete" type="submit" aria-label="ลบคูปอง <%= coupon.code %>">ลบ</button></form></div></td>
+                  </tr>
+                <% }); %>
+              </tbody></table></div>
+            <% } else { %>
+              <div class="coupons-empty"><div class="coupons-empty-mark" aria-hidden="true">◇</div><span class="coupons-section-kicker"><%= allCoupons.length ? 'NO MATCHING COUPONS' : 'COUPON CENTER READY' %></span><h3><%= allCoupons.length ? 'ไม่พบคูปองที่ตรงกับตัวกรอง' : 'ยังไม่มีคูปองส่วนลด' %></h3><p><%= allCoupons.length ? 'ลองค้นหารหัสอื่นหรือเปลี่ยนสถานะที่เลือก' : 'สร้างโค้ดแรกของร้านได้จากแบบฟอร์ม แล้วรายการจะปรากฏที่นี่พร้อมสถานะและยอดใช้' %></p><% if (allCoupons.length && (q || status)) { %><a class="experiment-button" href="/admin/coupons">ล้างตัวกรอง</a><% } else if (!allCoupons.length) { %><a class="experiment-button primary" href="#coupon-create">สร้างคูปองแรก →</a><% } %></div>
+            <% } %>
+            <div class="coupons-workspace-foot"><span>การสร้างหรือเปลี่ยนสถานะจะบันทึกลงข้อมูลร้าน</span><span>รายการ <b><%= coupons.length %></b> / <b><%= allCoupons.length %></b></span></div>
+          </section>
+
+          <aside class="coupons-create-card experiment-card" id="coupon-create" aria-labelledby="coupon-create-title">
+            <div class="coupons-create-head"><span class="coupons-create-icon" aria-hidden="true">＋</span><div><span class="coupons-section-kicker">NEW PROMOTION</span><h2 id="coupon-create-title">สร้างคูปอง</h2><p>โค้ดจะเปิดใช้งานหลังบันทึก</p></div></div>
+            <div class="coupons-preview" aria-live="polite"><span class="coupons-preview-tag">ตัวอย่างโค้ด</span><strong data-coupon-preview-code>YOURCODE</strong><span data-coupon-preview-discount>ลด 0%</span></div>
+            <form class="coupons-create-form" action="/admin/coupons" method="post">
+              <label for="coupon-code-input">รหัสคูปอง <b>*</b><small>ระบบปรับเป็นตัวพิมพ์ใหญ่และไม่อนุญาตรหัสซ้ำ</small></label>
+              <input id="coupon-code-input" name="code" required maxlength="100" autocomplete="off" placeholder="เช่น LILTEAM20" aria-describedby="coupon-code-help" />
+              <span class="coupons-field-help" id="coupon-code-help">ใช้ชื่อที่จำง่ายสำหรับลูกค้า</span>
+              <label for="coupon-type-input">ประเภทส่วนลด</label>
+              <select id="coupon-type-input" name="type"><option value="percent">ลดเป็นเปอร์เซ็นต์ (%)</option><option value="fixed">ลดเป็นจำนวนเงิน (฿)</option></select>
+              <label for="coupon-value-input">มูลค่าส่วนลด <b>*</b></label>
+              <div class="coupons-number-wrap"><input id="coupon-value-input" name="value" type="number" required min="0.01" max="100" step="0.01" placeholder="20" /><span data-coupon-value-unit>%</span></div>
+              <label for="coupon-limit-input">จำกัดจำนวนครั้ง <small>เว้นว่างหรือใส่ 0 หากไม่จำกัด</small></label>
+              <input id="coupon-limit-input" name="usageLimit" type="number" min="0" step="1" placeholder="ไม่จำกัด" />
+              <div class="coupons-create-note"><span aria-hidden="true">i</span><p>ตั้งวันหมดอายุและเงื่อนไขสินค้าได้ในขั้นตอนพัฒนาถัดไป ขณะนี้คูปองใหม่ไม่มีวันหมดอายุ</p></div>
+              <button class="experiment-button primary coupons-submit" type="submit">บันทึกและเปิดใช้งาน →</button>
+            </form>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+<script>
+  (() => {
+    const codeInput = document.querySelector('#coupon-code-input');
+    const typeInput = document.querySelector('#coupon-type-input');
+    const valueInput = document.querySelector('#coupon-value-input');
+    const previewCode = document.querySelector('[data-coupon-preview-code]');
+    const previewDiscount = document.querySelector('[data-coupon-preview-discount]');
+    const valueUnit = document.querySelector('[data-coupon-value-unit]');
+    const updatePreview = () => {
+      if (previewCode) previewCode.textContent = codeInput?.value.trim().toUpperCase() || 'YOURCODE';
+      const isPercent = typeInput?.value !== 'fixed';
+      const value = Number(valueInput?.value) || 0;
+      if (previewDiscount) previewDiscount.textContent = `ลด ${value.toLocaleString('th-TH')}${isPercent ? '%' : ' ฿'}`;
+      if (valueUnit) valueUnit.textContent = isPercent ? '%' : '฿';
+      if (valueInput) {
+        if (isPercent) valueInput.max = '100';
+        else valueInput.removeAttribute('max');
+      }
+    };
+    codeInput?.addEventListener('input', updatePreview);
+    typeInput?.addEventListener('change', updatePreview);
+    valueInput?.addEventListener('input', updatePreview);
+    updatePreview();
+    document.querySelectorAll('[data-copy-coupon]').forEach(button => button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copyCoupon || '');
+        window.showExperimentToast?.(`คัดลอก ${button.dataset.copyCoupon} แล้ว`);
+      } catch (_) {
+        window.showExperimentToast?.('เบราว์เซอร์ไม่อนุญาตให้คัดลอก กรุณาเลือกโค้ดแล้วคัดลอก');
+      }
+    }));
+  })();
+</script>

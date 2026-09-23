@@ -57,7 +57,7 @@ assert.match(minigameWidget, /new AbortController\(\)[\s\S]{0,180}10000/, 'box p
 assert.match(minigameWidget, /pageshow[\s\S]{0,180}releaseBusyState/, 'box preview must recover from browser cache with an enabled button');
 assert.match(minigameRail, /\.rail-window{[^}]*overflow:hidden/, 'rail preview must clip its track inside the viewport');
 assert.match(minigameRail, /new AbortController\(\)[\s\S]{0,180}10000/, 'rail preview must time out a stalled request');
-assert.match(minigameRail, /transitionend['"],completeSpin/, 'rail preview must finish from the real transition event');
+assert.match(minigameRail, /addEventListener\(['"]transitionend['"],onTransitionEnd/, 'rail preview must finish from the real transition event');
 assert.match(minigameRail, /pageshow[\s\S]{0,180}releaseSpin/, 'rail preview must recover from browser cache with an enabled button');
 
 assert.match(filterPanel, /window\.location\.assign\(query\?['"]\/products\?tags=/, 'filter selection must navigate to a server-filtered listing');

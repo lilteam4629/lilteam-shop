@@ -3,7 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
-const { pickPrize } = require('../services/minigame');
+const { pickPrize, findProductForPrize, getPrizeImage, fetchLiveCatalogPreview } = require('../services/minigame');
+const { usesExperimentalAdminUi, normalizeTenantAdminUi } = require('../services/admin-ui-mode');
 const license = require('../services/license');
 const banks = require('../data/thai-banks');
 const slipok = require('../services/slipok');
@@ -109,6 +110,7 @@ const popupImageUpload = multer({
 });
 
 router.use(requireAdmin);
+router.use(normalizeTenantAdminUi);
 router.use((req, res, next) => {
   res.locals.layout = 'layouts/admin';
   res.locals.pendingTopupCount = store.data.topupRequests.filter(t => t.status === 'pending' || t.status === 'verifying').length;
@@ -120,16 +122,19 @@ router.use((req, res, next) => {
 // entry for the rebuilt sections. The legacy templates remain available when a
 // caller explicitly uses `?ui=legacy`.
 router.use((req, res, next) => {
-  if (req.method !== 'GET' || req.query.ui || !req.path.startsWith('/')) return next();
-  const path = req.path.replace(/\/+$/, '') || '/';
-  const experimentalPaths = new Set([
-    '/', '/products', '/products/new', '/scheduled-products', '/filter-tags', '/recommended-categories',
-    '/orders', '/settings', '/effects', '/home-sections', '/catalog-api', '/storefront-models',
-    '/topups', '/coupons', '/users', '/minigame', '/slip-verification', '/appearance', '/theme',
-    '/announcements', '/welcome-popup', '/products/bulk-import',
-  ]);
-  if (!experimentalPaths.has(path) && !/^\/orders\/[^/]+$/.test(path) && !/^\/products\/[^/]+\/edit$/.test(path)) return next();
-  req.query.ui = 'experiment';
+  const query = req.query;
+  if (req.tenantShop || query.ui) return next();
+  // Express exposes req.query as a getter that reparses the URL on each read.
+  // Mutating the returned object does not survive the next access, so install
+  // an own request-scoped query object for downstream routes and templates.
+  // Apply this to POSTs too so forms without a query parameter stay in the
+  // main shop's redesigned admin after saving or deleting.
+  Object.defineProperty(req, 'query', {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    value: { ...query, ui: 'experiment' },
+  });
   return next();
 });
 
@@ -137,9 +142,9 @@ router.use((req, res, next) => {
 // the user inside the experimental shell instead of silently falling back to
 // the legacy layout.
 router.use((req, res, next) => {
-  if (req.method !== 'GET' || req.query.ui !== 'experiment') return next();
+  if (req.method !== 'GET' || !usesExperimentalAdminUi(req)) return next();
   const path = req.path.replace(/\/+$/, '') || '/';
-  if (path === '/' || path === '/products' || path === '/scheduled-products' || path === '/filter-tags' || path === '/recommended-categories' || path === '/orders' || path === '/settings' || path === '/effects' || /^\/orders\/[^/]+$/.test(path) || path === '/products/new' || /^\/products\/[^/]+\/edit$/.test(path)) return next();
+  if (path === '/' || path === '/products' || path === '/scheduled-products' || path === '/filter-tags' || path === '/recommended-categories' || path === '/orders' || path === '/coupons' || path === '/users' || path === '/settings' || path === '/effects' || path === '/minigame' || path === '/minigame/live-catalog' || path === '/theme' || path === '/welcome-popup' || path === '/announcements' || /^\/orders\/[^/]+$/.test(path) || /^\/users\/[^/]+$/.test(path) || path === '/products/new' || /^\/products\/[^/]+\/edit$/.test(path)) return next();
   const labels = {
     '/products/bulk-import': 'นำเข้าสินค้าเป็นชุด',
     '/home-sections': 'หมวดหมู่หน้าแรก',
@@ -1459,7 +1464,9 @@ router.post('/rangers-catalog/items/:id/delete', requireSystemLab, async (req, r
 
 // ---------- Storefront color theme ----------
 router.get('/theme', (req, res) => {
-  res.render('admin/theme', {
+  const experimentUi = req.query.ui === 'experiment';
+  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
+  res.render(experimentUi ? 'admin/theme-experiment' : 'admin/theme', {
     title: 'ธีมสี', active: 'theme',
     currentTheme: store.data.settings.theme,
     accentPresets: theme.getAccentPresets(),
@@ -1656,6 +1663,9 @@ router.post('/orders/:id/status', async (req, res) => {
 router.get('/users', (req, res) => {
   const q = String(req.query.q || '').trim();
   const registered = req.query.registered === 'today' ? 'today' : '';
+  const experimentUi = usesExperimentalAdminUi(req);
+  const status = experimentUi && ['active', 'banned'].includes(req.query.status) ? req.query.status : '';
+  const role = experimentUi && ['admin', 'customer'].includes(req.query.role) ? req.query.role : '';
   const needle = q.toLocaleLowerCase('th-TH');
   const bangkokDay = date => new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -1664,6 +1674,8 @@ router.get('/users', (req, res) => {
   const matched = [...store.data.users]
     .filter(user => user.role === 'customer' || !registered)
     .filter(user => !registered || bangkokDay(new Date(user.createdAt)) === todayKey)
+    .filter(user => !status || (user.status || 'active') === status)
+    .filter(user => !role || (user.role || 'customer') === role)
     .filter(user => !needle
       || String(user.username || '').toLocaleLowerCase('th-TH').includes(needle)
       || String(user.email || '').toLocaleLowerCase('th-TH').includes(needle))
@@ -1678,6 +1690,24 @@ router.get('/users', (req, res) => {
   const users = matched.slice((page - 1) * pageSize, page * pageSize);
 
   const totalWalletBalance = store.data.users.reduce((sum, u) => sum + (Number(u.walletBalance) || 0), 0);
+
+  if (experimentUi) {
+    res.locals.layout = 'layouts/admin-experiment';
+    const allUsers = store.data.users;
+    const todayCustomers = allUsers.filter(user => user.role === 'customer' && bangkokDay(new Date(user.createdAt)) === todayKey).length;
+    return res.render('admin/users-experiment', {
+      title: 'จัดการสมาชิก', active: 'users', users, q, registered, status, role,
+      totalUsers: allUsers.length, totalWalletBalance, matchedCount: matched.length,
+      page, totalPages, pageSize, pageSizeOptions,
+      memberCounts: {
+        all: allUsers.length,
+        active: allUsers.filter(user => (user.status || 'active') === 'active').length,
+        banned: allUsers.filter(user => user.status === 'banned').length,
+        admins: allUsers.filter(user => user.role === 'admin').length,
+        today: todayCustomers,
+      },
+    });
+  }
 
   res.render('admin/users', {
     title: 'สมาชิก', active: 'users', users, q, registered,
@@ -1704,6 +1734,16 @@ router.get('/users/:id', (req, res) => {
     .filter(transaction => transaction.userId === user.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const paidOrders = orders.filter(order => order.status !== 'cancelled');
+
+  if (req.query.ui === 'experiment') {
+    res.locals.layout = 'layouts/admin-experiment';
+    return res.render('admin/user-detail-experiment', {
+      title: `สมาชิก ${user.username}`, active: 'users', user,
+      orders: orders.slice(0, 10), topups: topups.slice(0, 10), transactions: transactions.slice(0, 10),
+      orderCount: orders.length,
+      totalSpent: paidOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0),
+    });
+  }
 
   return res.render('admin/user-detail', {
     title: `สมาชิก ${user.username}`, active: 'users', user,
@@ -2185,8 +2225,35 @@ router.post('/topups/:id/delete', async (req, res) => {
 
 // ---------- Coupons ----------
 router.get('/coupons', (req, res) => {
+  if (req.query.ui === 'experiment') {
+    res.locals.layout = 'layouts/admin-experiment';
+    const allCoupons = Array.isArray(store.data.coupons) ? store.data.coupons : [];
+    const q = String(req.query.q || '').trim().slice(0, 100);
+    const status = ['active', 'inactive'].includes(req.query.status) ? req.query.status : '';
+    const normalizedQuery = q.toLocaleLowerCase('th-TH');
+    const coupons = allCoupons
+      .filter(coupon => !normalizedQuery || String(coupon.code || '').toLocaleLowerCase('th-TH').includes(normalizedQuery))
+      .filter(coupon => !status || (status === 'active' ? Boolean(coupon.active) : !coupon.active))
+      .sort((a, b) => (Date.parse(b.createdAt || '') || 0) - (Date.parse(a.createdAt || '') || 0));
+    const stats = {
+      total: allCoupons.length,
+      active: allCoupons.filter(coupon => Boolean(coupon.active)).length,
+      inactive: allCoupons.filter(coupon => !coupon.active).length,
+      uses: allCoupons.reduce((sum, coupon) => sum + Math.max(0, Number(coupon.usedCount) || 0), 0),
+      nearLimit: allCoupons.filter(coupon => {
+        const limit = Number(coupon.usageLimit) || 0;
+        return limit > 0 && (Number(coupon.usedCount) || 0) / limit >= 0.8;
+      }).length,
+    };
+    return res.render('admin/coupons-experiment', {
+      title: 'คูปองส่วนลด', active: 'coupons', coupons, allCoupons, stats, q, status,
+      successMessages: req.flash('success'), errorMessages: req.flash('error'),
+    });
+  }
   res.render('admin/coupons', { title: 'คูปองส่วนลด', active: 'coupons', coupons: store.data.coupons });
 });
+
+const couponsReturnPath = req => usesExperimentalAdminUi(req) ? '/admin/coupons?ui=experiment' : '/admin/coupons';
 
 router.post('/coupons', async (req, res) => {
   const { code, type, value, usageLimit } = req.body;
@@ -2199,7 +2266,7 @@ router.post('/coupons', async (req, res) => {
     || !Number.isInteger(couponUsageLimit) || couponUsageLimit < 0
     || store.data.coupons.some(coupon => String(coupon.code || '').toUpperCase() === couponCode)) {
     req.flash('error', 'กรุณาตรวจสอบรหัสคูปอง มูลค่า และจำนวนการใช้งาน (ห้ามซ้ำ)');
-    return res.redirect('/admin/coupons');
+    return res.redirect(couponsReturnPath(req));
   }
   store.data.coupons.push({
     id: store.genId(8), code: couponCode, type: couponType,
@@ -2208,29 +2275,42 @@ router.post('/coupons', async (req, res) => {
   });
   await store.save();
   req.flash('success', 'เพิ่มคูปองแล้ว');
-  res.redirect('/admin/coupons');
+  res.redirect(couponsReturnPath(req));
 });
 
 router.post('/coupons/:id/toggle', async (req, res) => {
   const coupon = store.data.coupons.find(c => c.id === req.params.id);
   if (coupon) { coupon.active = !coupon.active; await store.save(); }
-  res.redirect('/admin/coupons');
+  res.redirect(couponsReturnPath(req));
 });
 
 router.post('/coupons/:id/delete', async (req, res) => {
   store.data.coupons = store.data.coupons.filter(c => c.id !== req.params.id);
   await store.save();
   req.flash('success', 'ลบคูปองแล้ว');
-  res.redirect('/admin/coupons');
+  res.redirect(couponsReturnPath(req));
 });
 
 // ---------- Mini game ----------
+router.get('/minigame/live-catalog', async (req, res) => {
+  if (!usesExperimentalAdminUi(req)) return res.sendStatus(404);
+  try {
+    const catalog = await fetchLiveCatalogPreview();
+    res.set('Cache-Control', 'no-store');
+    res.json(catalog);
+  } catch (error) {
+    res.status(502).json({ ok: false, error: error.message || 'อ่านแค็ตตาล็อกจากเว็บจริงไม่สำเร็จ' });
+  }
+});
+
 router.get('/minigame', (req, res) => {
+  const isExperiment = req.query.ui === 'experiment';
   const totalPercent = type => store.data.miniGamePrizes
     .filter(p => p.active && (p.gameType || 'box') === type)
     .reduce((sum, p) => sum + Number(p.percent), 0);
   const searchQuery = (req.query.q || '').trim();
-  let plays = store.data.miniGamePlays;
+  const allPlays = store.data.miniGamePlays;
+  let plays = allPlays;
   if (searchQuery) {
     const needle = searchQuery.toLowerCase();
     plays = plays.filter(p =>
@@ -2238,12 +2318,17 @@ router.get('/minigame', (req, res) => {
       (p.claimCode || '').toLowerCase().includes(needle)
     );
   }
-  res.render('admin/minigame', {
+  if (isExperiment) res.locals.layout = 'layouts/admin-experiment';
+  res.render(isExperiment ? 'admin/minigame-experiment' : 'admin/minigame', {
     title: 'มินิเกม', active: 'minigame',
     game: store.data.settings.miniGame,
-    prizes: store.data.miniGamePrizes,
+    prizes: store.data.miniGamePrizes.map(prize => ({
+      ...prize,
+      resolvedImage: req.tenantShop ? (prize.image || null) : getPrizeImage(prize, store.data.products),
+    })),
     totalPercent: totalPercent('box'),
     railTotalPercent: totalPercent('rail'),
+    pendingDeliveryCount: allPlays.filter(play => play.isWin && play.status !== 'delivered').length,
     recentPlays: plays.slice(0, searchQuery ? 100 : 30),
     searchQuery,
   });
@@ -2295,8 +2380,10 @@ router.post('/minigame/prizes', (req, res) => {
         return res.redirect('/admin/minigame');
       }
     }
+    const linkedProduct = req.tenantShop ? null : findProductForPrize({ name: name.trim() }, store.data.products);
     store.data.miniGamePrizes.push({
       id: store.genId(8), gameType, name: name.trim(),
+      ...(req.tenantShop ? {} : { productId: linkedProduct ? String(linkedProduct.id) : null }),
       percent: Math.max(0, Math.min(100, Number(percent) || 0)),
       stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
       isPrize: req.body.isPrize === 'on',
@@ -2342,7 +2429,7 @@ router.post('/minigame/preview', (req, res) => {
   res.json({
     ok: true,
     prizeName: prize.name,
-    image: prize.image || null,
+    image: req.tenantShop ? (prize.image || null) : getPrizeImage(prize, store.data.products),
     isWin: Boolean(prize.isPrize),
     claimCode: null,
     isPreview: true,
@@ -2353,8 +2440,11 @@ router.post('/minigame/prizes/:id', async (req, res) => {
   const prize = store.data.miniGamePrizes.find(p => p.id === req.params.id);
   if (!prize) { req.flash('error', 'ไม่พบของรางวัลนี้'); return res.redirect('/admin/minigame'); }
   const { name, percent, stock } = req.body;
+  const updatedName = name && name.trim() ? name.trim() : prize.name;
+  const linkedProduct = req.tenantShop ? null : findProductForPrize({ name: updatedName }, store.data.products);
   Object.assign(prize, {
-    name: name && name.trim() ? name.trim() : prize.name,
+    name: updatedName,
+    ...(req.tenantShop ? {} : { productId: linkedProduct ? String(linkedProduct.id) : null }),
     percent: Math.max(0, Math.min(100, Number(percent) || 0)),
     stock: stock === '' || stock === undefined ? null : Math.max(0, parseInt(stock, 10) || 0),
     isPrize: req.body.isPrize === 'on',
@@ -2399,6 +2489,20 @@ router.post('/minigame/plays/:id/deliver', async (req, res) => {
 
 // ---------- Announcements ----------
 router.get('/announcements', (req, res) => {
+  if (req.query.ui === 'experiment') {
+    res.locals.layout = 'layouts/admin-experiment';
+    const announcements = Array.isArray(store.data.announcements) ? store.data.announcements : [];
+    return res.render('admin/announcements-experiment', {
+      title: 'ป้ายประกาศ',
+      active: 'announcements',
+      announcements: announcements.map(item => ({
+        id: String(item.id || ''),
+        title: String(item.title || ''),
+        body: String(item.body || ''),
+        active: Boolean(item.active),
+      })),
+    });
+  }
   res.render('admin/announcements', { title: 'ประกาศ', active: 'announcements', announcements: store.data.announcements });
 });
 
@@ -2427,6 +2531,14 @@ router.post('/announcements/:id/delete', async (req, res) => {
 
 // ---------- Welcome Popup (separate from the plain text announcement bars above) ----------
 router.get('/welcome-popup', (req, res) => {
+  if (req.query.ui === 'experiment') {
+    res.locals.layout = 'layouts/admin-experiment';
+    return res.render('admin/welcome-popup-experiment', {
+      title: 'ป๊อปอัปต้อนรับ',
+      active: 'welcome-popup',
+      popup: (store.data.settings && store.data.settings.welcomePopup) || {},
+    });
+  }
   res.render('admin/welcome-popup', { title: 'ป๊อปอัปต้อนรับ', active: 'welcome-popup' });
 });
 

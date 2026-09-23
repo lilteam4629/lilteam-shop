@@ -34,7 +34,9 @@ const tenantDbLoads = new Map();
 // mutations can never alter a developer's real local data file.
 const DB_PATH = process.env.NODE_ENV === 'test' && process.env.TEST_DB_PATH
   ? path.resolve(process.env.TEST_DB_PATH)
-  : path.join(__dirname, 'db.json');
+  : process.env.LOCAL_DB_PATH
+    ? path.resolve(process.env.LOCAL_DB_PATH)
+    : path.join(__dirname, 'db.json');
 const MONGODB_URI = process.env.MONGODB_URI;
 const MONGODB_DB_NAME = process.env.MONGODB_DB_NAME || 'lilteam_shop';
 
@@ -404,8 +406,8 @@ async function init() {
     mongoCollection = mongoDb.collection('app_data');
     mediaBucket = new GridFSBucket(mongoDb, { bucketName: 'media' });
 
-    await mongoCollection.updateMany(
-      { 'settings.payment.receivingAccountResetVersion': { $ne: 1 } },
+    await mongoCollection.updateOne(
+      { _id: 'main', 'settings.payment.receivingAccountResetVersion': { $ne: 1 } },
       { $set: {
         'settings.payment.receivingAccountResetVersion': 1,
       } }
