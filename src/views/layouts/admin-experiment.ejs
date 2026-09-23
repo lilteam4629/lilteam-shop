@@ -65,6 +65,7 @@
       const confirmTitle = document.getElementById('experiment-confirm-title');
       const confirmCancel = document.querySelector('[data-experiment-confirm-cancel]');
       const confirmSubmit = document.querySelector('[data-experiment-confirm-submit]');
+      const pendingAdminNotificationCount = <%= pendingAdminNotificationCount %>;
       let pendingConfirmForm = null;
       const showToast = (message) => {
         if (!toast) return;
