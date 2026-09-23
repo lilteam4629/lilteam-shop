@@ -1,37 +1,237 @@
-<div class="studio-page-head mb-6">
-  <div>
-    <span class="studio-page-kicker">ANNOUNCEMENT BAR</span>
-    <h1>ป้ายประกาศ</h1>
-    <p>จัดการแถบข้อความสั้นบนหน้าร้าน หน้านี้มีเฉพาะป้ายประกาศเท่านั้น</p>
-  </div>
-  <a href="/" target="_blank" rel="noopener" class="studio-secondary-action">ดูหน้าร้าน ↗</a>
-</div>
-<div class="grid lg:grid-cols-3 gap-6">
-  <div class="lg:col-span-2 space-y-3">
-    <% announcements.forEach(a => { %>
-      <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-        <div class="flex-1 min-w-0">
-          <div class="flex justify-between items-start gap-2 mb-1">
-            <span class="font-medium"><%= a.title %></span>
-            <span class="text-xs text-[var(--text-4)] shrink-0 whitespace-nowrap"><%= a.active ? '🟢 แสดงอยู่' : '⚪ ซ่อน' %></span>
-          </div>
-          <p class="text-sm text-[var(--text-3)] mb-3"><%= a.body %></p>
-          <div class="space-x-2">
-            <form action="/admin/announcements/<%= a.id %>/toggle" method="post" class="inline"><button class="text-[var(--gold-text)] text-xs"><%= a.active ? 'ซ่อน' : 'แสดง' %></button></form>
-            <form action="/admin/announcements/<%= a.id %>/delete" method="post" class="inline" onsubmit="return confirm('ลบประกาศนี้?')"><button class="text-rose-400 text-xs">ลบ</button></form>
+<%
+  const announcementItems = Array.isArray(announcements) ? announcements : [];
+  const announcementActiveCount = announcementItems.filter(item => item.active).length;
+  const announcementHiddenCount = announcementItems.length - announcementActiveCount;
+%>
+<link rel="stylesheet" href="<%= asset('css/admin-announcements-v2.css') %>" />
+
+<main class="announcement-admin-page" id="announcement-admin-page">
+  <header class="announcement-hero">
+    <div class="announcement-hero-copy">
+      <span class="announcement-kicker">STOREFRONT · CUSTOMER MESSAGES</span>
+      <h1>ป้ายประกาศ</h1>
+      <p>จัดการข้อความที่ต้องการแจ้งลูกค้า เลือกประกาศที่จะให้แสดงบนหน้าร้านได้จากที่เดียว</p>
+    </div>
+    <div class="announcement-hero-actions">
+      <a class="announcement-button announcement-button-secondary" href="/" target="_blank" rel="noopener">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-9 9"/><path d="M18 13v5a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>
+        ดูหน้าร้าน
+      </a>
+      <a class="announcement-button announcement-button-primary" href="#announcement-create">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        เพิ่มประกาศ
+      </a>
+    </div>
+  </header>
+
+  <section class="announcement-overview" aria-label="สรุปประกาศ">
+    <article class="announcement-metric">
+      <span class="announcement-metric-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v5h4M8 13h8M8 16h6"/></svg>
+      </span>
+      <div><span>ประกาศทั้งหมด</span><strong><%= announcementItems.length %></strong></div>
+    </article>
+    <article class="announcement-metric is-live">
+      <span class="announcement-metric-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M4 10v4h4l7 4V6l-7 4H4Z"/><path d="M8 14l1.5 5h3L11 13M18 9a5 5 0 0 1 0 6"/></svg>
+      </span>
+      <div><span>กำลังแสดง</span><strong><%= announcementActiveCount %></strong></div>
+    </article>
+    <article class="announcement-metric is-hidden">
+      <span class="announcement-metric-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M3 12s3.2-6 9-6 9 6 9 6-3.2 6-9 6-9-6-9-6Z"/><circle cx="12" cy="12" r="2.5"/><path d="m5 19 14-14"/></svg>
+      </span>
+      <div><span>ซ่อนอยู่</span><strong><%= announcementHiddenCount %></strong></div>
+    </article>
+    <aside class="announcement-overview-note">
+      <span class="announcement-note-mark" aria-hidden="true">i</span>
+      <p>ประกาศที่เปิดแสดงจะขึ้นบนหน้าร้านทันทีหลังบันทึก ส่วนรายการที่ซ่อนไว้ยังเก็บกลับมาเปิดได้ภายหลัง</p>
+    </aside>
+  </section>
+
+  <div class="announcement-workspace">
+    <section class="announcement-card announcement-list-card" aria-labelledby="announcement-list-title">
+      <div class="announcement-card-heading">
+        <span class="announcement-heading-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v5h4M8 13h8M8 16h6"/></svg>
+        </span>
+        <div class="announcement-heading-copy">
+          <span class="announcement-kicker">NOTICE BOARD</span>
+          <h2 id="announcement-list-title">รายการประกาศ</h2>
+          <p>เปิดหรือซ่อนรายการได้โดยไม่ต้องสร้างใหม่</p>
+        </div>
+        <span class="announcement-total-pill"><%= announcementItems.length %> รายการ</span>
+      </div>
+
+      <label class="announcement-search" for="announcement-search">
+        <svg aria-hidden="true" viewBox="0 0 24 24"><circle cx="10.8" cy="10.8" r="6.4"/><path d="m16 16 4.5 4.5"/></svg>
+        <input type="search" id="announcement-search" placeholder="ค้นหาหัวข้อหรือข้อความประกาศ" autocomplete="off" />
+        <kbd>/</kbd>
+      </label>
+
+      <div class="announcement-filters" role="group" aria-label="กรองประกาศตามสถานะ">
+        <button type="button" class="is-active" data-announcement-filter="all" aria-pressed="true">ทั้งหมด <span><%= announcementItems.length %></span></button>
+        <button type="button" data-announcement-filter="active" aria-pressed="false">กำลังแสดง <span><%= announcementActiveCount %></span></button>
+        <button type="button" data-announcement-filter="hidden" aria-pressed="false">ซ่อนอยู่ <span><%= announcementHiddenCount %></span></button>
+      </div>
+
+      <div class="announcement-list" data-announcement-list>
+        <% announcementItems.forEach((item) => { %>
+          <article class="announcement-row" data-announcement-row data-status="<%= item.active ? 'active' : 'hidden' %>" data-search="<%= `${item.title || ''} ${item.body || ''}`.toLocaleLowerCase('th') %>">
+            <div class="announcement-row-main">
+              <span class="announcement-row-symbol <%= item.active ? 'is-live' : '' %>" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="M4 10v4h4l7 4V6l-7 4H4Z"/><path d="M8 14l1.5 5h3L11 13M18 9a5 5 0 0 1 0 6"/></svg>
+              </span>
+              <div class="announcement-row-copy">
+                <div class="announcement-row-title-line">
+                  <h3><%= item.title || 'ไม่มีหัวข้อ' %></h3>
+                  <span class="announcement-status <%= item.active ? 'is-live' : 'is-hidden' %>"><i></i><%= item.active ? 'กำลังแสดง' : 'ซ่อนอยู่' %></span>
+                </div>
+                <p><%= item.body || '' %></p>
+              </div>
+            </div>
+            <div class="announcement-row-actions">
+              <form action="/admin/announcements/<%= item.id %>/toggle" method="post">
+                <button class="announcement-row-button" type="submit"><%= item.active ? 'ซ่อนประกาศ' : 'แสดงประกาศ' %></button>
+              </form>
+              <form action="/admin/announcements/<%= item.id %>/delete" method="post" data-experiment-confirm="ต้องการลบประกาศ ‘<%= item.title || 'ไม่มีหัวข้อ' %>’ หรือไม่? การลบนี้ย้อนกลับไม่ได้">
+                <button class="announcement-row-button is-danger" type="submit" aria-label="ลบประกาศ <%= item.title || 'ไม่มีหัวข้อ' %>">
+                  <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6m4-6v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>
+                  ลบ
+                </button>
+              </form>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+      <div class="announcement-empty" data-announcement-empty <%= announcementItems.length ? 'hidden' : '' %>>
+        <span class="announcement-empty-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M4 10v4h4l7 4V6l-7 4H4Z"/><path d="M18 9a5 5 0 0 1 0 6"/></svg>
+        </span>
+        <h3><%= announcementItems.length ? 'ไม่พบประกาศที่ตรงกับการค้นหา' : 'ยังไม่มีประกาศ' %></h3>
+        <p><%= announcementItems.length ? 'ลองค้นหาด้วยคำอื่น หรือเปลี่ยนตัวกรองสถานะ' : 'เพิ่มข้อความแรกเพื่อแจ้งข่าวสำคัญให้ลูกค้าทราบ' %></p>
+      </div>
+      <footer class="announcement-list-footer"><span data-announcement-visible-count><%= announcementItems.length %> รายการ</span><span>การเปลี่ยนสถานะจะบันทึกทันที</span></footer>
+    </section>
+
+    <div class="announcement-side-column">
+      <section class="announcement-card announcement-create-card" id="announcement-create" aria-labelledby="announcement-create-title">
+        <div class="announcement-card-heading">
+          <span class="announcement-heading-icon is-amber" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          </span>
+          <div class="announcement-heading-copy">
+            <span class="announcement-kicker">NEW MESSAGE</span>
+            <h2 id="announcement-create-title">เพิ่มประกาศ</h2>
+            <p>เขียนข้อความให้ลูกค้าเห็นบนหน้าร้าน</p>
           </div>
         </div>
-      </div>
-    <% }) %>
-    <% if (!announcements.length) { %><p class="text-[var(--text-4)] text-sm">ยังไม่มีประกาศ</p><% } %>
+
+        <form action="/admin/announcements" method="post" class="announcement-form" data-announcement-form>
+          <label class="announcement-field" for="announcement-title-input">
+            <span>หัวข้อ <b aria-hidden="true">*</b></span>
+            <input id="announcement-title-input" name="title" required placeholder="เช่น แจ้งเวลาปิดปรับปรุง" autocomplete="off" />
+          </label>
+          <label class="announcement-field" for="announcement-body-input">
+            <span>ข้อความประกาศ <b aria-hidden="true">*</b></span>
+            <textarea id="announcement-body-input" name="body" rows="4" required placeholder="ระบุรายละเอียดสั้น ๆ ที่ลูกค้าควรรู้"></textarea>
+            <small><span data-announcement-character-count>0</span> ตัวอักษร</small>
+          </label>
+          <div class="announcement-preview" aria-live="polite">
+            <div class="announcement-preview-top"><span><i></i> ตัวอย่างข้อความบนหน้าร้าน</span><span>LIVE PREVIEW</span></div>
+            <div class="announcement-preview-content"><strong data-announcement-preview-title>หัวข้อประกาศจะแสดงตรงนี้</strong><p data-announcement-preview-body>พิมพ์ข้อความด้านบนเพื่อดูตัวอย่างก่อนเพิ่มประกาศ</p></div>
+          </div>
+          <button class="announcement-button announcement-button-primary announcement-submit" type="submit">
+            <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+            เพิ่มประกาศบนหน้าร้าน
+          </button>
+          <p class="announcement-form-note">เมื่อเพิ่มแล้ว ประกาศจะเริ่มแสดงบนหน้าร้านทันที คุณสามารถซ่อนหรือเรียกกลับมาแสดงได้ทุกเมื่อ</p>
+        </form>
+      </section>
+
+      <aside class="announcement-tip">
+        <span aria-hidden="true">i</span>
+        <p><strong>แนะนำ:</strong> เขียนให้กระชับและใส่เฉพาะข้อมูลที่ลูกค้าต้องรู้ เช่น เวลาให้บริการ โปรโมชั่น หรือกำหนดการปิดร้าน</p>
+      </aside>
+    </div>
   </div>
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5">
-    <h3 class="font-semibold mb-3">เพิ่มประกาศ</h3>
-    <form action="/admin/announcements" method="post" class="space-y-3">
-      <input name="title" required placeholder="หัวข้อ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm" />
-      <textarea name="body" required rows="3" placeholder="เนื้อหาประกาศ" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2 text-sm"></textarea>
-      <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium rounded-lg py-2 text-sm">เพิ่มประกาศ</button>
-    </form>
-    <p class="text-xs text-[var(--text-4)] mt-3">ป้ายนี้จะแสดงเป็นแถบข้อความบนหน้าแรก บันทึกแล้วสามารถเปิดหรือซ่อนแต่ละรายการได้ทันที</p>
-  </div>
-</div>
+</main>
+
+<script>
+  (() => {
+    const page = document.getElementById('announcement-admin-page');
+    if (!page) return;
+
+    const search = page.querySelector('#announcement-search');
+    const rows = Array.from(page.querySelectorAll('[data-announcement-row]'));
+    const filters = Array.from(page.querySelectorAll('[data-announcement-filter]'));
+    const empty = page.querySelector('[data-announcement-empty]');
+    const visibleCount = page.querySelector('[data-announcement-visible-count]');
+    let currentFilter = 'all';
+
+    const updateList = () => {
+      const query = (search?.value || '').trim().toLocaleLowerCase('th');
+      let count = 0;
+      rows.forEach((row) => {
+        const matchesStatus = currentFilter === 'all' || row.dataset.status === currentFilter;
+        const matchesQuery = !query || (row.dataset.search || '').includes(query);
+        const shown = matchesStatus && matchesQuery;
+        row.hidden = !shown;
+        if (shown) count += 1;
+      });
+      if (empty) {
+        empty.hidden = count !== 0;
+        if (count === 0 && rows.length) {
+          empty.querySelector('h3').textContent = 'ไม่พบประกาศที่ตรงกับการค้นหา';
+          empty.querySelector('p').textContent = 'ลองค้นหาด้วยคำอื่น หรือเปลี่ยนตัวกรองสถานะ';
+        } else if (count === 0) {
+          empty.querySelector('h3').textContent = 'ยังไม่มีประกาศ';
+          empty.querySelector('p').textContent = 'เพิ่มข้อความแรกเพื่อแจ้งข่าวสำคัญให้ลูกค้าทราบ';
+        }
+      }
+      if (visibleCount) visibleCount.textContent = `${count} จาก ${rows.length} รายการ`;
+    };
+
+    search?.addEventListener('input', updateList);
+    filters.forEach((button) => button.addEventListener('click', () => {
+      currentFilter = button.dataset.announcementFilter || 'all';
+      filters.forEach((filter) => {
+        const selected = filter === button;
+        filter.classList.toggle('is-active', selected);
+        filter.setAttribute('aria-pressed', String(selected));
+      });
+      updateList();
+    }));
+
+    const title = page.querySelector('#announcement-title-input');
+    const body = page.querySelector('#announcement-body-input');
+    const previewTitle = page.querySelector('[data-announcement-preview-title]');
+    const previewBody = page.querySelector('[data-announcement-preview-body]');
+    const characterCount = page.querySelector('[data-announcement-character-count]');
+    const syncPreview = () => {
+      if (previewTitle) previewTitle.textContent = title?.value.trim() || 'หัวข้อประกาศจะแสดงตรงนี้';
+      if (previewBody) previewBody.textContent = body?.value.trim() || 'พิมพ์ข้อความด้านบนเพื่อดูตัวอย่างก่อนเพิ่มประกาศ';
+      if (characterCount) characterCount.textContent = String(body?.value.length || 0);
+    };
+    title?.addEventListener('input', syncPreview);
+    body?.addEventListener('input', syncPreview);
+    page.querySelector('[data-announcement-form]')?.addEventListener('submit', (event) => {
+      const button = event.currentTarget.querySelector('button[type="submit"]');
+      if (!event.currentTarget.reportValidity()) {
+        event.preventDefault();
+        return;
+      }
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.dataset.originalLabel = button.textContent.trim();
+      button.lastChild.textContent = ' กำลังเพิ่มประกาศ…';
+    });
+
+    page.addEventListener('keydown', (event) => {
+      if (event.key === '/' && !event.ctrlKey && !event.metaKey && !event.altKey && !['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) {
+        event.preventDefault();
+        search?.focus();
+      }
+    });
+  })();
+</script>
