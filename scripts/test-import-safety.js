@@ -411,7 +411,7 @@ async function main() {
   const productionPageTemplates = [
     ['/theme', 'admin/theme'],
     ['/announcements', 'admin/announcements'],
-    ['/welcome-popup', 'admin/welcome-popup'],
+    ['/welcome-popup', 'admin/welcome-popup-main'],
   ];
   check('Main theme, announcement, and welcome-popup routes use the database-backed screens', () => {
     for (const [routePath, expectedView] of productionPageTemplates) {
@@ -420,6 +420,25 @@ async function main() {
       als.run(model.fixture(), () => handler({ query: {}, tenantShop: null }, { render(view) { mainView = view; } }));
       assert.equal(mainView, expectedView, routePath);
     }
+  });
+  const welcomePopupHandler = admin.stack.find(layer => layer.route?.path === '/welcome-popup' && layer.route.methods.get).route.stack.at(-1).handle;
+  let tenantWelcomePopupView = '';
+  welcomePopupHandler({ tenantShop: { id: 'popup-tenant-fixture' } }, { render(view) { tenantWelcomePopupView = view; } });
+  check('Tenant welcome-popup administration keeps its existing screen', () => assert.equal(tenantWelcomePopupView, 'admin/welcome-popup'));
+  const popupFixture = model.fixture();
+  popupFixture.settings.welcomePopup = { enabled: true, showTitle: true, showContent: true, title: 'ยินดีต้อนรับร้านหลัก', content: 'ข้อความตัวอย่างจากข้อมูลร้าน', images: ['/media/welcome-fixture.webp'] };
+  const popupTemplatePath = path.join(root, 'src/views/admin/welcome-popup-main.ejs');
+  const popupHtml = require('ejs').render(fs.readFileSync(popupTemplatePath, 'utf8'), {
+    settings: popupFixture.settings, asset: value => '/' + value,
+  }, { filename: popupTemplatePath });
+  check('Main welcome popup redesign renders persisted content and keeps real upload/save fields', () => {
+    assert.match(popupHtml, /ยินดีต้อนรับร้านหลัก/);
+    assert.match(popupHtml, /\/media\/welcome-fixture\.webp/);
+    assert.match(popupHtml, /action="\/admin\/welcome-popup"/);
+    assert.match(popupHtml, /name="images"/);
+    assert.match(popupHtml, /name="removeImages"/);
+    assert.match(popupHtml, /name="enabled"/);
+    assert.match(popupHtml, /admin-welcome-popup-main-v1\.css/);
   });
   const usersList = admin.stack.find(layer => layer.route?.path === '/users' && layer.route.methods.get).route.stack.at(-1).handle;
   const tenantUsersFixture = model.fixture();

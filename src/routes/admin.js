@@ -2500,6 +2500,9 @@ router.post('/announcements/:id/delete', async (req, res) => {
 
 // ---------- Welcome Popup (separate from the plain text announcement bars above) ----------
 router.get('/welcome-popup', (req, res) => {
+  if (usesMainAdminUi(req)) {
+    return res.render('admin/welcome-popup-main', { title: 'ป๊อปอัปต้อนรับ', active: 'welcome-popup' });
+  }
   res.render('admin/welcome-popup', { title: 'ป๊อปอัปต้อนรับ', active: 'welcome-popup' });
 });
 
