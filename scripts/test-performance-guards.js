@@ -62,13 +62,14 @@ assert.match(minigameRail, /\.rail-window{[^}]*overflow:hidden/, 'rail preview m
 assert.match(minigameRail, /new AbortController\(\)[\s\S]{0,180}10000/, 'rail preview must time out a stalled request');
 assert.match(minigameRail, /addEventListener\(['"]transitionend['"],onTransitionEnd/, 'rail preview must finish from the real transition event');
 assert.match(minigameRail, /pageshow[\s\S]{0,180}releaseSpin/, 'rail preview must recover from browser cache with an enabled button');
-assert.match(minigameExperiment, /id="mgx-live-products"/, 'main admin minigame must expose the real product catalog before play');
-assert.match(minigameExperiment, /catalogPreview\.select\(product\.id\)/, 'admin can select a real product for both minigame previews');
-assert.match(minigameExperiment, /product\.availableStock/, 'real catalog cards must show live available stock');
-assert.match(minigameWidget, /lilteamLiveCatalogPreview\.pick\(catalog\.products\)/, 'box preview must honor the selected real product');
-assert.match(minigameRail, /lilteamLiveCatalogPreview\.pick\(catalog\.products\)/, 'rail preview must honor the selected real product');
-assert.match(minigameExperimentCss, /\.mgx-product-grid\{display:grid;grid-template-columns:repeat\(6/, 'live catalog cards must use a responsive grid');
-assert.match(minigameExperimentCss, /prefers-reduced-motion:reduce[^\n]*mgx-product-skeleton/, 'catalog loading animation must respect reduced motion');
+assert.doesNotMatch(minigameExperiment, /mgx-product-picker|mgx-live-products|LIVE STORE CATALOG/, 'the separate live catalog chooser must be removed from the minigame screen');
+assert.match(minigameExperiment, /class="mgx-live-catalog-status mgx-live-catalog-a11y" id="mgx-live-catalog-status"/, 'catalog connection status must remain available to assistive technology');
+assert.match(minigameExperiment, /catalogEndpoint: '\/admin\/minigame\/live-catalog'/, 'both preview games must keep using real store products');
+assert.doesNotMatch(minigameExperiment, /catalogPreview\.select\(/, 'minigame preview must use automatic random live products after removing the chooser');
+assert.equal((minigameExperiment.match(/class="mgx-game-tabs"/g) || []).length, 1, 'box and rail preview tabs must remain exactly once');
+assert.match(minigameWidget, /lilteamLiveCatalogPreview\.pick\(catalog\.products\)/, 'box preview must keep selecting a real product');
+assert.match(minigameRail, /lilteamLiveCatalogPreview\.pick\(catalog\.products\)/, 'rail preview must keep selecting a real product');
+assert.doesNotMatch(minigameExperimentCss, /\.mgx-product-picker|\.mgx-product-grid|\.mgx-product-card/, 'removed chooser styles must not remain in the minigame stylesheet');
 assert.match(minigameExperimentCss, /\.mgx-preview-panel \.mg-result-el\{[^}]*text-align:center/, 'box preview status must remain centered and readable');
 const liveCatalogFixture = buildLiveCatalogPreview({
   settings: { shopName: 'LILTeam Shop' },
