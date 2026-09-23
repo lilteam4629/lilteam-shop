@@ -15,6 +15,7 @@ const minigameWidget = read('src/views/partials/minigame-widget.ejs');
 const minigameRail = read('src/views/partials/minigame-rail.ejs');
 const minigameExperiment = read('src/views/admin/minigame-experiment.ejs');
 const minigameExperimentCss = read('public/css/admin-experiment-minigame-v1.css');
+const { buildLiveCatalogPreview } = require('../src/services/minigame');
 const filterPanel = read('src/views/partials/filter-panel.ejs');
 const productDetail = read('src/views/shop/product-detail.ejs');
 const productForm = read('src/views/admin/product-form.ejs');
@@ -69,6 +70,25 @@ assert.match(minigameRail, /lilteamLiveCatalogPreview\.pick\(catalog\.products\)
 assert.match(minigameExperimentCss, /\.mgx-product-grid\{display:grid;grid-template-columns:repeat\(6/, 'live catalog cards must use a responsive grid');
 assert.match(minigameExperimentCss, /prefers-reduced-motion:reduce[^\n]*mgx-product-skeleton/, 'catalog loading animation must respect reduced motion');
 assert.match(minigameExperimentCss, /\.mgx-preview-panel \.mg-result-el\{[^}]*text-align:center/, 'box preview status must remain centered and readable');
+const liveCatalogFixture = buildLiveCatalogPreview({
+  settings: { shopName: 'LILTeam Shop' },
+  products: [
+    { id: 'available-product', title: 'สินค้าพร้อมขาย', price: 125, status: 'active', images: ['https://cdn.example.test/product.webp'] },
+    { id: 'sold-out-product', title: 'สินค้าหมด', price: 50, status: 'active', images: ['https://cdn.example.test/sold.webp'] },
+    { id: 'inactive-product', title: 'สินค้าไม่แสดง', price: 50, status: 'inactive', images: ['https://cdn.example.test/inactive.webp'] },
+    { id: 'unsafe-image-product', title: 'รูปไม่ปลอดภัย', price: 50, status: 'active', images: ['http://cdn.example.test/insecure.jpg'] },
+  ],
+  stockItems: [
+    { productId: 'available-product', status: 'available', username: 'private-user', password: 'private-secret' },
+    { productId: 'available-product', status: 'sold', username: 'sold-user', password: 'sold-secret' },
+    { productId: 'sold-out-product', status: 'sold', username: 'sold-user', password: 'sold-secret' },
+  ],
+});
+assert.deepEqual(liveCatalogFixture.products, [{
+  id: 'available-product', title: 'สินค้าพร้อมขาย', price: 125,
+  image: 'https://cdn.example.test/product.webp', availableStock: 1,
+}], 'main admin preview must use active in-stock products and never expose stock credentials');
+assert.doesNotMatch(JSON.stringify(liveCatalogFixture), /private-user|private-secret|sold-user|sold-secret/, 'live preview payload must not contain stock credentials');
 
 assert.match(filterPanel, /window\.location\.assign\(query\?['"]\/products\?tags=/, 'filter selection must navigate to a server-filtered listing');
 assert.doesNotMatch(filterPanel, /if\(cards\.length\)\{apply\(\);return\}/, 'filter selection must not remain client-only');

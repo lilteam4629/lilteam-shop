@@ -37,10 +37,6 @@ function getPrizeImage(prize, products = []) {
   return product && Array.isArray(product.images) ? (product.images.find(Boolean) || null) : null;
 }
 
-const LIVE_CATALOG_URL = 'https://www.lilteam.site/internal/api/catalog/products';
-const LIVE_CATALOG_CACHE_MS = 30_000;
-let liveCatalogCache = null;
-
 function normalizeCatalogImage(value) {
   if (!value) return null;
   try {
@@ -51,61 +47,43 @@ function normalizeCatalogImage(value) {
   }
 }
 
-// Fetch only the real shop's public catalog feed. The source API deliberately
-// excludes stock credentials and returns products that currently have stock.
-// This preview cache is in-memory only; it never writes the source or local DB.
-async function fetchLiveCatalogPreview() {
-  if (liveCatalogCache && liveCatalogCache.expiresAt > Date.now()) return liveCatalogCache.data;
+// Build a read-only preview from the main shop's own data. Do not call the
+// protected server-to-server internal API from this user-facing admin route:
+// that endpoint correctly requires X-Internal-Secret and must stay private.
+function buildLiveCatalogPreview(data = {}) {
+  const productsSource = Array.isArray(data.products) ? data.products : [];
+  const stockItems = Array.isArray(data.stockItems) ? data.stockItems : [];
+  const availableByProduct = new Map();
+  stockItems.forEach(item => {
+    if (item?.status !== 'available') return;
+    const productId = String(item.productId || '');
+    if (productId) availableByProduct.set(productId, (availableByProduct.get(productId) || 0) + 1);
+  });
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-  try {
-    const response = await fetch(LIVE_CATALOG_URL, {
-      method: 'GET',
-      headers: { accept: 'application/json' },
-      redirect: 'error',
-      signal: controller.signal,
-    });
-    if (!response.ok) throw new Error(`เว็บจริงตอบกลับสถานะ ${response.status}`);
-
-    const payload = await response.json();
-    if (!payload || payload.ok !== true || !Array.isArray(payload.products)) {
-      throw new Error('รูปแบบข้อมูลจากแค็ตตาล็อกเว็บจริงไม่ถูกต้อง');
-    }
-
-    const products = payload.products.map(product => {
-      const id = String(product?.id || '').trim();
-      const title = String(product?.title || '').trim();
-      const availableStock = Math.max(0, Math.floor(Number(product?.availableStock) || 0));
-      const images = Array.isArray(product?.images) ? product.images : [];
-      const image = normalizeCatalogImage(images.find(value => typeof value === 'string' && value.trim()));
-      if (!id || !title || !image || availableStock < 1) return null;
-      return {
-        id,
-        title,
-        price: Math.max(0, Number(product.price) || 0),
-        image,
-        availableStock,
-      };
-    }).filter(Boolean);
-
-    if (!products.length) throw new Error('เว็บจริงยังไม่มีสินค้าที่พร้อมใช้ในการทดลอง');
-    const data = {
-      ok: true,
-      source: 'lilteam.site',
-      shopName: String(payload.shopName || 'LILTeam Shop'),
-      fetchedAt: new Date().toISOString(),
-      products,
+  const products = productsSource.filter(product => product?.status === 'active').map(product => {
+    const id = String(product.id || '').trim();
+    const title = String(product.title || '').trim();
+    const availableStock = availableByProduct.get(id) || 0;
+    const images = Array.isArray(product.images) ? product.images : [];
+    const image = normalizeCatalogImage(images.find(value => typeof value === 'string' && value.trim()));
+    if (!id || !title || !image || availableStock < 1) return null;
+    return {
+      id,
+      title,
+      price: Math.max(0, Number(product.price) || 0),
+      image,
+      availableStock,
     };
-    liveCatalogCache = { expiresAt: Date.now() + LIVE_CATALOG_CACHE_MS, data };
-    return data;
-  } catch (error) {
-    liveCatalogCache = null;
-    if (error?.name === 'AbortError') throw new Error('เชื่อมเว็บจริงไม่ทันเวลา กรุณาลองใหม่');
-    throw error;
-  } finally {
-    clearTimeout(timeout);
-  }
+  }).filter(Boolean);
+
+  if (!products.length) throw new Error('เว็บจริงยังไม่มีสินค้าที่มีรูปและสต็อกพร้อมใช้ในการทดลอง');
+  return {
+    ok: true,
+    source: 'lilteam.site',
+    shopName: String(data.settings?.shopName || 'LILTeam Shop'),
+    fetchedAt: new Date().toISOString(),
+    products,
+  };
 }
 
-module.exports = { pickPrize, findProductForPrize, getPrizeImage, fetchLiveCatalogPreview };
+module.exports = { pickPrize, findProductForPrize, getPrizeImage, buildLiveCatalogPreview };

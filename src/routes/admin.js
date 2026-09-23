@@ -3,7 +3,7 @@ const router = express.Router();
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
-const { pickPrize, findProductForPrize, getPrizeImage, fetchLiveCatalogPreview } = require('../services/minigame');
+const { pickPrize, findProductForPrize, getPrizeImage, buildLiveCatalogPreview } = require('../services/minigame');
 const { usesMainAdminUi, normalizeTenantAdminUi, normalizeMainAdminUi } = require('../services/admin-ui-mode');
 const license = require('../services/license');
 const banks = require('../data/thai-banks');
@@ -2278,7 +2278,7 @@ router.post('/coupons/:id/delete', async (req, res) => {
 router.get('/minigame/live-catalog', async (req, res) => {
   if (!usesMainAdminUi(req)) return res.sendStatus(404);
   try {
-    const catalog = await fetchLiveCatalogPreview();
+    const catalog = buildLiveCatalogPreview(store.platformData);
     res.set('Cache-Control', 'no-store');
     res.json(catalog);
   } catch (error) {
