@@ -35,7 +35,28 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-brand-sub { color: var(--ex-muted); font-size: 10px; margin-top: 2px; }
 .experiment-collapse { margin-left: auto; border: 0; background: transparent; color: var(--ex-muted); padding: 7px; border-radius: 8px; }
 .experiment-collapse:hover { background: #edf3f0; color: var(--ex-ink); }
-.experiment-sidebar-scroll { padding: 18px 12px 14px; overflow: auto; }
+.experiment-sidebar-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 18px 12px 14px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: #b6c5bf transparent;
+}
+.experiment-sidebar-scroll::-webkit-scrollbar { width: 8px; }
+.experiment-sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
+.experiment-sidebar-scroll::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: #b6c5bf;
+  background-clip: padding-box;
+}
+.experiment-sidebar-scroll::-webkit-scrollbar-thumb:hover { background: #82978e; background-clip: padding-box; }
+.experiment-sidebar-scroll::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
 .experiment-nav-group { margin: 0 0 20px; }
 .experiment-nav-label { padding: 0 10px 8px; color: #9aa8a3; font-size: 10px; font-weight: 800; letter-spacing: .05em; }
 .experiment-nav-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 44px; padding: 10px 11px; margin: 2px 0; border: 0; border-radius: 10px; color: #52615c; background: transparent; text-align: left; font-size: 13px; transition: background .18s ease, color .18s ease; }
