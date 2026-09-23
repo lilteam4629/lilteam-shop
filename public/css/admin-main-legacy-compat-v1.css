@@ -1,0 +1,7 @@
+.experiment-live-page-title{margin-right:auto;color:var(--ex-text);font-size:13px;font-weight:800}
+.experiment-legacy-content{--bg:#f3f6f5;--card:#fff;--border:#dbe5e1;--border-light:#e5ece9;--input:#f7f9f8;--brand:#08765f;--gold:#08765f;--gold-hover:#06634f;--gold-light:#e4f4ef;--gold-dark:#064f41;--gold-contrast:#fff;--gold-text:#075c4c;--gold-hover-text:#fff;--success:#087b58;--danger:#b52c43;--warning:#8b5908;--on-image:#fff;--text:#14231f;--text-2:#34443e;--text-3:#62736c;--text-4:#83918b;--coral:#a85f50;min-width:0}
+.experiment-legacy-content :where(img,video,canvas,svg){max-width:100%}
+.experiment-legacy-content :where(table){max-width:100%}
+.experiment-legacy-content :where(input,select,textarea,button){font:inherit}
+.experiment-legacy-content :where(button,a,input,select,textarea):focus-visible{outline:2px solid var(--gold-text);outline-offset:2px}
+@media(max-width:720px){.experiment-legacy-content :where(.overflow-x-auto){max-width:calc(100vw - 26px)}.experiment-legacy-content :where(.grid){min-width:0}}

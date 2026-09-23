@@ -338,6 +338,19 @@ async function main() {
     '../services/discord-bot': { isConfigured: () => false, isReady: () => false },
     '../services/license': { isGateOn: () => false }, '../middleware/tenant': { MAIN_DOMAIN: 'fixture.test', MAIN_SITE_URL: 'https://fixture.test' },
   });
+  const shellMiddleware = admin.stack.find(layer => !layer.route && String(layer.handle).includes('pendingTopupCount')).handle;
+  let mainShellLayout = '';
+  let tenantShellLayout = '';
+  const applyMainShell = { locals: {} };
+  const applyTenantShell = { locals: {} };
+  als.run(model.fixture(), () => shellMiddleware({ tenantShop: null }, applyMainShell, () => {}));
+  als.run(model.fixture(), () => shellMiddleware({ tenantShop: { id: 'tenant-shell-fixture' } }, applyTenantShell, () => {}));
+  mainShellLayout = applyMainShell.locals.layout;
+  tenantShellLayout = applyTenantShell.locals.layout;
+  check('Every main-shop admin route defaults to the unified shell while rental admins retain the old shell', () => {
+    assert.equal(mainShellLayout, 'layouts/admin-experiment');
+    assert.equal(tenantShellLayout, 'layouts/admin');
+  });
   const { normalizeMainAdminUi, normalizeTenantAdminUi, usesMainAdminUi } = require('../src/services/admin-ui-mode');
   const mainPostRequest = { method: 'POST', query: {}, tenantShop: null };
   let mainPostContinued = false;
@@ -548,6 +561,23 @@ async function main() {
   check('Removed provider cannot be tested through the API route', () => assert.equal(testedProvider.message, 'ไม่พบผู้ให้บริการที่ระบุ'));
   const viewData = model.fixture(); model.migrateFixture(viewData);
   const ejs = require('ejs');
+  const unifiedLayoutFile = path.join(root, 'src/views/layouts/admin-experiment.ejs');
+  const unifiedLocals = { title: 'API สินค้าร้านหลัก', active: 'catalog-api', settings: viewData.settings,
+    currentUser: viewData.users[0], pendingTopupCount: 0, asset: value => '/' + value, body: '<section>ข้อมูล API จริง</section>' };
+  const legacyCompatibilityPage = ejs.render(fs.readFileSync(unifiedLayoutFile, 'utf8'), unifiedLocals, { filename: unifiedLayoutFile });
+  check('Main legacy data pages are framed by one new sidebar without shop-theme colors', () => {
+    assert.match(legacyCompatibilityPage, /class="experiment-app" data-experiment-framed-page/);
+    assert.match(legacyCompatibilityPage, /class="experiment-legacy-content"/);
+    assert.match(legacyCompatibilityPage, /css\/tailwind\.generated\.css/);
+    assert.match(legacyCompatibilityPage, /admin-main-legacy-compat-v1\.css/);
+    assert.match(legacyCompatibilityPage, /API สินค้าร้านหลัก/);
+    assert.doesNotMatch(legacyCompatibilityPage, /id="admin-sidebar"/);
+    assert.doesNotMatch(legacyCompatibilityPage, /themeCss/);
+    const uploadScript = fs.readFileSync(path.join(root, 'public/js/admin-live-compat-v1.js'), 'utf8');
+    new vm.Script(uploadScript, { filename: 'admin-live-compat-v1.js' });
+    assert.match(uploadScript, /window\.lilteamDirectUploadFiles/);
+    assert.match(uploadScript, /data-table-search/);
+  });
   const widgetTemplate = fs.readFileSync(path.join(root, 'src/views/partials/minigame-widget.ejs'), 'utf8');
   const railTemplate = fs.readFileSync(path.join(root, 'src/views/partials/minigame-rail.ejs'), 'utf8');
   const widgetLegacy = ejs.render(widgetTemplate, { endpoint: '/minigame/play', cost: 5, ctaLabel: 'เปิดกล่อง', showLogin: false, balance: 20, mainSiteExperience: false });

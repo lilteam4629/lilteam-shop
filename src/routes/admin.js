@@ -113,7 +113,10 @@ router.use(requireAdmin);
 router.use(normalizeTenantAdminUi);
 router.use(normalizeMainAdminUi);
 router.use((req, res, next) => {
-  res.locals.layout = 'layouts/admin';
+  // Keep one admin shell throughout the main shop, including live routes that
+  // still use their established data-backed page body. Rental shops retain the
+  // existing admin shell and page styling.
+  res.locals.layout = usesMainAdminUi(req) ? 'layouts/admin-experiment' : 'layouts/admin';
   res.locals.pendingTopupCount = store.data.topupRequests.filter(t => t.status === 'pending' || t.status === 'verifying').length;
   res.locals.persistentStorageEnabled = store.isPersistent();
   next();
