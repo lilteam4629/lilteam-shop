@@ -16,6 +16,7 @@ const { effectiveSlipConfig } = require('../services/slip-config');
 const receiverProfiles = require('../services/receiver-profiles');
 const theme = require('../services/theme');
 const topupsService = require('../services/topups');
+const { adjustCustomerWallet, WalletAdjustmentError } = require('../services/admin-wallet-adjustment');
 const { getCloudUrl } = require('../services/cloud-url');
 const { requireAdmin } = require('../middleware/auth');
 const r2 = require('../services/r2');
@@ -1707,6 +1708,37 @@ router.get('/users/:id', (req, res) => {
 });
 
 router.post('/users/:id/wallet', async (req, res) => {
+  if (usesMainAdminUi(req)) {
+    let returnTo = '/admin/users';
+    try {
+      const requested = new URL(String(req.body?.returnTo || ''), 'http://admin.local');
+      if (requested.origin === 'http://admin.local' && requested.pathname === '/admin/users') {
+        returnTo = `${requested.pathname}${requested.search}`;
+      }
+    } catch (_) { /* Fall back to the member list. */ }
+
+    try {
+      const result = await store.transact(data => adjustCustomerWallet(data, {
+        userId: req.params.id,
+        adminUserId: req.session.userId,
+        operation: String(req.body?.operation || ''),
+        amount: req.body?.amount,
+        expectedBalance: req.body?.expectedBalance,
+        note: req.body?.note,
+      }));
+      const formatMoney = value => Number(value).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      req.flash('success', `${result.operation === 'add' ? 'เพิ่ม' : 'หัก'}เครดิตให้ ${result.username} แล้ว · ฿${formatMoney(result.previousBalance)} → ฿${formatMoney(result.balanceAfter)}`);
+    } catch (error) {
+      if (error instanceof WalletAdjustmentError) {
+        req.flash('error', error.message);
+      } else {
+        console.error('[admin] wallet adjustment failed:', error);
+        req.flash('error', 'บันทึกการปรับเครดิตไม่สำเร็จ กรุณาลองอีกครั้ง');
+      }
+    }
+    return res.redirect(returnTo);
+  }
+
   const amount = Number(req.body.amount);
   const user = store.data.users.find(u => u.id === req.params.id);
   if (!user) {
