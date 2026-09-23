@@ -1,0 +1,126 @@
+<%
+  const topupRows = Array.isArray(requests) ? requests : [];
+  const stats = requestStats || { total: 0, pending: 0, verifying: 0, approved: 0, rejected: 0, waitingAmount: 0, approvedAmount: 0 };
+  const reviewableCount = topupRows.filter(request => request.status === 'pending' || request.status === 'verifying').length;
+  const successNotices = successMessages || [];
+  const errorNotices = errorMessages || [];
+  const money = value => Number(value || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const dateTime = value => {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? 'ไม่ระบุเวลา' : date.toLocaleString('th-TH', { timeZone: 'Asia/Bangkok', dateStyle: 'medium', timeStyle: 'short' });
+  };
+  const methodName = method => method === 'truemoney_angpao' ? 'ซอง TrueMoney' : method === 'promptpay' ? 'พร้อมเพย์' : 'โอนธนาคาร';
+  const statusInfo = status => status === 'approved' ? { label: 'อนุมัติแล้ว', className: 'is-approved' }
+    : status === 'rejected' ? { label: 'ปฏิเสธแล้ว', className: 'is-rejected' }
+      : status === 'verifying' ? { label: 'กำลังตรวจสลิป', className: 'is-verifying' }
+        : { label: 'รอตรวจสอบ', className: 'is-pending' };
+  const publicSlipMessage = message => String(message || '').replace(/Slip\s*XEPHT/gi, 'ระบบตรวจสอบ').replace(/slip\.xepht\.com/gi, 'ระบบภายนอก').replace(/XEPHT/gi, 'ระบบตรวจสอบ');
+  const providerNames = { none: 'ปิดการตรวจอัตโนมัติ', slipok: 'SlipOK', slipcheck: 'SlipCheck', rdcw: 'SlipRDCW', slip2go: 'Slip2Go', xepht: 'ระบบตรวจสอบอัตโนมัติ' };
+  const currentProvider = providerNames[activeReceiverProvider] || activeReceiverProvider || 'ยังไม่ได้ตั้งค่า';
+  const bankAccount = String(receiverPayment && receiverPayment.bankAccountNumber || '');
+  const maskedBankAccount = bankAccount ? `${'•'.repeat(Math.max(0, bankAccount.length - 4))}${bankAccount.slice(-4)}` : '';
+  const filteredStatusLabel = status === 'pending' ? 'รอตรวจสอบ' : status === 'verifying' ? 'กำลังตรวจ' : status === 'approved' ? 'อนุมัติแล้ว' : status === 'rejected' ? 'ปฏิเสธแล้ว' : 'ทุกสถานะ';
+%>
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-topups-v1.css') %>" />
+
+<div class="experiment-app experiment-topups-page">
+  <div class="experiment-main">
+    <header class="experiment-topbar">
+
+      <span class="experiment-user-name"><%= currentUser && currentUser.username || 'ผู้ดูแลร้าน' %></span>
+    </header>
+
+    <main class="experiment-content tp-content">
+      <section class="tp-hero">
+        <div class="tp-hero-copy">
+          <span class="experiment-kicker">PAYMENT DESK · เติมเงินเข้าร้าน</span>
+          <h1>เติมเงินและตรวจสอบ</h1>
+          <p>ตรวจคำขอและหลักฐานโอนจากคิวเดียว อนุมัติแล้วระบบจะเติมยอดเข้ากระเป๋าลูกค้าทันที</p>
+        </div>
+        <div class="tp-hero-actions">
+          <a class="experiment-button" href="/" target="_blank" rel="noopener">ดูหน้าร้าน <span aria-hidden="true">↗</span></a>
+          <a class="experiment-button primary" href="/admin/topups/settings#bank">ตั้งค่ารับเงิน <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <% if (successNotices.length || errorNotices.length) { %>
+        <section class="tp-notices" aria-live="polite">
+          <% successNotices.forEach(message => { %><p class="tp-notice is-success"><span aria-hidden="true">✓</span><%= message %></p><% }); %>
+          <% errorNotices.forEach(message => { %><p class="tp-notice is-error" role="alert"><span aria-hidden="true">!</span><%= message %></p><% }); %>
+        </section>
+      <% } %>
+
+      <section class="tp-stats" aria-label="สรุปการเติมเงิน">
+        <article class="tp-stat tp-stat-queue"><div><span>รอตรวจสอบ</span><small>รวมรายการที่กำลังตรวจด้วย</small></div><strong><%= pendingCount %></strong><em>รายการ</em><div class="tp-stat-foot">ยอดรอพิจารณา <b>฿<%= money(stats.waitingAmount) %></b></div></article>
+        <article class="tp-stat"><div><span>กำลังตรวจสลิป</span><small>ระบบกำลังตรวจอัตโนมัติ</small></div><strong><%= stats.verifying %></strong><em>รายการ</em><div class="tp-stat-foot">แสดงสถานะล่าสุดของคำขอ</div></article>
+        <article class="tp-stat tp-stat-approved"><div><span>อนุมัติแล้ว</span><small>รายการในประวัติ</small></div><strong><%= stats.approved %></strong><em>รายการ</em><div class="tp-stat-foot">ยอดอนุมัติสะสม <b>฿<%= money(stats.approvedAmount) %></b></div></article>
+        <article class="tp-stat"><div><span>คำขอทั้งหมด</span><small>ทุกสถานะ</small></div><strong><%= stats.total %></strong><em>รายการ</em><div class="tp-stat-foot">ปฏิเสธแล้ว <b><%= stats.rejected %></b> รายการ</div></article>
+      </section>
+
+      <div class="tp-workspace">
+        <section class="tp-panel tp-requests" aria-labelledby="tp-requests-title">
+          <div class="tp-panel-head">
+            <div><span class="tp-section-kicker">REQUEST QUEUE</span><h2 id="tp-requests-title">คำขอเติมเงิน</h2><p>คิวตรวจสอบจะอยู่ด้านบน เรียงตามรายการล่าสุด</p></div>
+            <span class="tp-queue-pill"><i></i><b><%= pendingCount %></b> รอตรวจ</span>
+          </div>
+
+          <form class="tp-toolbar" method="get" action="/admin/topups">
+            <label class="tp-search"><span>ค้นหาคำขอ</span><input type="search" name="q" value="<%= q %>" placeholder="ชื่อผู้ใช้ อีเมล หรือรหัสอ้างอิง" autocomplete="off"></label>
+            <label class="tp-status-filter"><span>สถานะ</span><select name="status"><option value="" <%= !status ? 'selected' : '' %>>ทุกสถานะ</option><option value="pending" <%= status === 'pending' ? 'selected' : '' %>>รอตรวจสอบ</option><option value="verifying" <%= status === 'verifying' ? 'selected' : '' %>>กำลังตรวจสลิป</option><option value="approved" <%= status === 'approved' ? 'selected' : '' %>>อนุมัติแล้ว</option><option value="rejected" <%= status === 'rejected' ? 'selected' : '' %>>ปฏิเสธแล้ว</option></select></label>
+            <button class="experiment-button primary tp-search-submit" type="submit">ค้นหา</button>
+            <% if (q || status) { %><a class="tp-clear-filter" href="/admin/topups">ล้างตัวกรอง</a><% } %>
+          </form>
+
+          <div class="tp-list-caption"><span>ผลลัพธ์: <b><%= topupRows.length %></b> รายการ</span><span>ตัวกรองปัจจุบัน: <b><%= filteredStatusLabel %></b></span></div>
+          <div class="tp-request-list">
+            <% if (topupRows.length) { topupRows.forEach(request => { const currentStatus = statusInfo(request.status); const waiting = request.status === 'pending' || request.status === 'verifying'; const canRetry = request.slipCheck && (request.slipCheck.quotaExhausted || request.slipCheck.rateLimited || request.slipCheck.quotaMismatch || request.slipCheck.retryable || request.slipCheck.providerCode === 'verify_failed') && request.slipStorageId; %>
+              <article class="tp-request-card <%= waiting ? 'is-reviewable' : '' %>">
+                <div class="tp-request-topline">
+                  <div class="tp-request-ref"><span class="tp-ref-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5zM8 8h8M8 12h5M8 16h8"/></svg></span><div><strong>#<%= request.refCode || request.id %></strong><small><%= dateTime(request.createdAt) %></small></div></div>
+                  <div class="tp-request-amount"><small>ยอดแจ้งโอน</small><strong>฿<%= money(request.amount) %></strong></div>
+                </div>
+
+                <div class="tp-request-body">
+                  <% if (request.slipPath) { %><a class="tp-slip-thumb" href="<%= request.slipPath %>" target="_blank" rel="noopener" aria-label="เปิดดูสลิปของคำขอ <%= request.refCode || request.id %>"><img src="<%= request.slipPath %>" alt="สลิปโอนเงินของ <%= request.buyer && request.buyer.username || 'ผู้ใช้' %>" loading="lazy"><span>ดูสลิป</span></a><% } else { %><div class="tp-slip-empty" aria-label="ไม่มีไฟล์สลิป"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 13h7M9 17h5"/></svg><small>ไม่มีสลิป</small></div><% } %>
+                  <div class="tp-request-info">
+                    <div class="tp-buyer-line"><strong><%= request.buyer ? request.buyer.username : 'ไม่พบชื่อผู้ใช้' %></strong><span><%= request.buyer && request.buyer.email || 'ไม่มีอีเมล' %></span></div>
+                    <div class="tp-request-tags"><span class="tp-method"><%= methodName(request.method) %></span><span class="tp-status <%= currentStatus.className %>"><i></i><%= currentStatus.label %></span><% if (request.catalogApiTopup && request.tenantShopId) { %><span class="tp-partner">เติมกระเป๋าสินค้า API · <%= request.tenantShopName || request.tenantShopId %></span><% } %></div>
+                    <% if (request.slipCheck && request.slipCheck.message) { %><p class="tp-slip-result <%= request.slipCheck.quotaExhausted || request.slipCheck.rateLimited || request.slipCheck.quotaMismatch || request.slipCheck.retryable || request.slipCheck.providerCode === 'verify_failed' ? 'is-warning' : '' %>"><b><%= request.slipCheck.quotaExhausted ? 'โควตาตรวจสลิปหมด' : request.slipCheck.quotaMismatch ? 'โควตาตรวจสลิปไม่ตรงกัน' : request.slipCheck.rateLimited ? 'ระบบตรวจยังไม่พร้อม' : 'ผลตรวจอัตโนมัติ' %></b><span><%= publicSlipMessage(request.slipCheck.message) %><% if (request.slipCheck.providerCode || request.slipCheck.httpStatus) { %> · <%= request.slipCheck.providerCode || request.slipCheck.httpStatus %><% } %></span></p><% } %>
+                    <% if (request.reviewNote) { %><p class="tp-review-note">หมายเหตุ: <%= request.reviewNote %></p><% } %>
+                  </div>
+                </div>
+
+                <div class="tp-request-actions">
+                  <span class="tp-status <%= currentStatus.className %>"><i></i><%= currentStatus.label %></span>
+                  <div class="tp-action-buttons">
+                    <% if (canRetry) { %><form action="/admin/topups/<%= request.id %>/retry-slip" method="post"><button class="experiment-button tp-retry-action" type="submit">ตรวจสลิปอีกครั้ง</button></form><% } %>
+                    <% if (waiting) { %>
+                      <form action="/admin/topups/<%= request.id %>/approve" method="post" data-experiment-confirm="ยืนยันตรวจสลิปของ #<%= request.refCode || request.id %> แล้ว ยอด ฿<%= money(request.amount) %> ถูกต้องหรือไม่? ระบบจะเติมยอดเข้ากระเป๋าทันที"><button class="experiment-button primary tp-approve-action" type="submit">อนุมัติและเติมยอด</button></form>
+                      <form action="/admin/topups/<%= request.id %>/reject" method="post" data-experiment-confirm="ปฏิเสธคำขอเติมเงิน #<%= request.refCode || request.id %> ใช่หรือไม่?"><button class="experiment-button tp-reject-action" type="submit">ปฏิเสธ</button></form>
+                    <% } %>
+                    <% if (request.status !== 'approved') { %><form action="/admin/topups/<%= request.id %>/delete" method="post" data-experiment-confirm="ลบคำขอ #<%= request.refCode || request.id %> ถาวรหรือไม่? การลบไม่กระทบยอดเงินลูกค้า"><button class="tp-delete-action" type="submit" aria-label="ลบคำขอ <%= request.refCode || request.id %>">ลบ</button></form><% } %>
+                  </div>
+                </div>
+              </article>
+            <% }); } else { %>
+              <div class="tp-empty"><span class="tp-empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span><h3><%= q || status ? 'ไม่พบรายการที่ตรงกับตัวกรอง' : 'ยังไม่มีคำขอเติมเงิน' %></h3><p><%= q || status ? 'ลองเปลี่ยนคำค้นหาหรือล้างตัวกรอง แล้วค้นหาอีกครั้ง' : 'เมื่อมีลูกค้าแจ้งเติมเงิน รายการจะปรากฏในคิวนี้' %></p><% if (q || status) { %><a class="experiment-button" href="/admin/topups">ล้างตัวกรอง</a><% } %></div>
+            <% } %>
+          </div>
+        </section>
+
+        <aside class="tp-side-column">
+          <section class="tp-panel tp-payment-panel" aria-labelledby="tp-payment-title">
+            <div class="tp-panel-head"><div><span class="tp-section-kicker">PAYMENT CHANNELS</span><h2 id="tp-payment-title">ช่องทางรับเงิน</h2><p>ตรวจสถานะการตั้งค่าที่ใช้รับยอดจากลูกค้า</p></div><span class="tp-channel-ready"><i></i> ระบบจริง</span></div>
+            <div class="tp-channel-list">
+              <div class="tp-channel-row"><span class="tp-channel-icon bank" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 9h18M5 9v9m4-9v9m6-9v9m4-9v9M3 21h18M2 7l10-5 10 5"/></svg></span><span><b>บัญชีธนาคาร</b><small><%= maskedBankAccount ? `${receiverPayment.bankName || 'บัญชีรับโอน'} · ${maskedBankAccount}` : 'ยังไม่ได้ตั้งค่าบัญชีรับเงิน' %></small></span><a href="/admin/topups/settings#bank" aria-label="ตั้งค่าบัญชีธนาคารรับเงิน">จัดการ</a></div>
+              <div class="tp-channel-row"><span class="tp-channel-icon wallet" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6.5h15a2 2 0 0 1 2 2V19H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h13M2 8h19m-5 5h.01"/></svg></span><span><b>TrueMoney Wallet</b><small><%= payment.truemoneyEnabled && payment.truemoneyPhone ? `เปิดใช้งาน · •••• ${String(payment.truemoneyPhone).slice(-4)}` : 'ปิดใช้งานหรือยังไม่ตั้งค่า' %></small></span><a href="/admin/topups/settings#truemoney" aria-label="ตั้งค่า TrueMoney Wallet">จัดการ</a></div>
+              <div class="tp-channel-row"><span class="tp-channel-icon verify" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4 6v5c0 5 3.5 8 8 10 4.5-2 8-5 8-10V6l-8-3Z"/><path d="m8.5 12 2.3 2.3 4.8-5"/></svg></span><span><b>ตรวจสลิปอัตโนมัติ</b><small><%= currentProvider %></small></span><a href="/admin/topups/settings#autoverify" aria-label="ตั้งค่าการตรวจสลิปอัตโนมัติ">จัดการ</a></div>
+            </div>
+            <p class="tp-settings-note">การตั้งค่าบัญชีและผู้ให้บริการยังใช้ฟอร์มเดิมของร้าน เพื่อคงการบันทึกและอัปโหลดที่ใช้งานอยู่</p>
+          </section>
+          <section class="tp-review-guide"><span class="tp-guide-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 2.8 20h18.4L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg></span><div><b>ก่อนอนุมัติ</b><p>ตรวจชื่อผู้โอน ยอดเงิน และสลิปให้ตรงกัน การอนุมัติจะเติมยอดให้ลูกค้าทันที</p></div></section>
+        </aside>
+      </div>
+    </main>
+  </div>
+</div>

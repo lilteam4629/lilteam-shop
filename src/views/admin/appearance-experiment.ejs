@@ -1,0 +1,157 @@
+<%
+  const heroSettings = settings.hero || {};
+  const authAppearance = settings.authAppearance || {};
+  const storefrontAppearance = settings.storefrontAppearance || {};
+  const mediaCount = [settings.branding && settings.branding.logoImage, heroSettings.bannerImage,
+    storefrontAppearance.backgroundImage, authAppearance.backgroundImage].filter(Boolean).length;
+  const notices = [].concat(successMessages || [], errorMessages || []);
+%>
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-appearance-v1.css') %>" />
+
+<div class="experiment-app experiment-appearance-page">
+  <div class="experiment-main">
+    <header class="experiment-topbar">
+
+      <span class="experiment-user-name"><%= currentUser && currentUser.username || 'ผู้ดูแลร้าน' %></span>
+    </header>
+
+    <main class="experiment-content as-content">
+      <section class="as-hero">
+        <div class="as-hero-copy">
+          <span class="experiment-kicker">ASSET STUDIO · BRAND MEDIA</span>
+          <h1>รูปและแบนเนอร์</h1>
+          <p>จัดการภาพที่ใช้จริงบนหน้าร้าน โลโก้ แบนเนอร์ และภาพพื้นหลัง โดยไม่ปะปนกับการตั้งค่าสีหรือป้ายประกาศ</p>
+          <div class="as-hero-meta"><span class="as-live-pill"><i></i><%= mediaCount %> จาก 4 ส่วนมีรูปแล้ว</span><span>ไฟล์ถูกบันทึกในระบบร้าน</span></div>
+        </div>
+        <a class="experiment-button primary as-store-link" href="/">ดูหน้าร้าน <span aria-hidden="true">↗</span></a>
+      </section>
+
+      <% if (notices.length) { %>
+        <div class="as-notices" role="status" aria-live="polite">
+          <% notices.forEach(message => { const isError = (errorMessages || []).includes(message); %>
+            <p class="as-notice <%= isError ? 'is-error' : 'is-success' %>"><span aria-hidden="true"><%= isError ? '!' : '✓' %></span><%= message %></p>
+          <% }); %>
+        </div>
+      <% } %>
+
+      <section class="as-summary" aria-label="สถานะรูปภาพของร้าน">
+        <article class="as-summary-card"><span class="as-summary-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M8 15c2-5 6-5 8 0M9 9h.01M15 9h.01"/></svg></span><div><small>โลโก้เว็บไซต์</small><strong><%= settings.branding && settings.branding.logoImage ? 'อัปโหลดแล้ว' : 'ยังไม่มีรูป' %></strong></div></article>
+        <article class="as-summary-card"><span class="as-summary-icon is-gold" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m5 16 4-4 3 3 3-5 4 6"/></svg></span><div><small>หน้าแรก</small><strong><%= heroSettings.mode === 'banner' ? 'แสดงแบนเนอร์' : 'แสดงการ์ดสินค้า' %></strong></div></article>
+        <article class="as-summary-card"><span class="as-summary-icon is-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m5 17 5-5 3 3 2-2 4 4"/></svg></span><div><small>พื้นหลังหน้าร้าน</small><strong><%= storefrontAppearance.backgroundImage ? 'กำหนดรูปแล้ว' : 'ใช้สีธีมร้าน' %></strong></div></article>
+        <article class="as-summary-card"><span class="as-summary-icon is-violet" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8h6M8 17c.5-2 1.8-3 4-3s3.5 1 4 3"/><circle cx="12" cy="10.5" r="1.5"/></svg></span><div><small>หน้าเข้าสู่ระบบ</small><strong><%= authAppearance.backgroundImage ? 'กำหนดรูปแล้ว' : 'ใช้ภาพหน้าร้าน' %></strong></div></article>
+      </section>
+
+      <div class="as-section-heading"><div><span class="experiment-kicker">MEDIA LIBRARY</span><h2>สื่อของร้าน</h2><p>อัปโหลดภาพใหม่เพื่อแทนรูปปัจจุบัน หรือดูตัวอย่างก่อนบันทึก</p></div><label class="as-search"><span aria-hidden="true">⌕</span><input type="search" aria-label="ค้นหาประเภทสื่อ" placeholder="ค้นหาโลโก้ แบนเนอร์ หรือพื้นหลัง..." data-as-search></label></div>
+
+      <div class="as-grid" data-as-grid>
+        <article class="as-card as-card-logo" data-as-card data-search="โลโก้ website brand logo">
+          <header class="as-card-head"><div><span class="as-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M9 15c1-3.5 5-3.5 6 0M9 9h.01M15 9h.01"/></svg></span><div><h3>โลโก้เว็บไซต์</h3><p>ใช้ในเมนู ส่วนท้ายเว็บ และไอคอนแท็บ</p></div></div><span class="as-status <%= settings.branding && settings.branding.logoImage ? 'is-set' : '' %>"><i></i><%= settings.branding && settings.branding.logoImage ? 'มีรูปแล้ว' : 'ยังไม่ตั้งค่า' %></span></header>
+          <div class="as-preview as-preview-logo" data-as-preview>
+            <img src="<%= settings.branding && settings.branding.logoImage || '' %>" alt="ตัวอย่างโลโก้เว็บไซต์" data-as-image <%= settings.branding && settings.branding.logoImage ? '' : 'hidden' %>>
+            <div class="as-empty-preview" data-as-empty <%= settings.branding && settings.branding.logoImage ? 'hidden' : '' %>><span class="as-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><path d="M9 15c1-3.5 5-3.5 6 0M9 9h.01M15 9h.01"/></svg></span><strong>ตัวอย่างโลโก้</strong><small>แนะนำไฟล์สี่เหลี่ยม · PNG พื้นโปร่งใส</small></div>
+            <span class="as-preview-chip">แสดงผลจริงในร้าน</span>
+          </div>
+          <form class="as-upload-form" action="/admin/site-logo/upload" method="post" enctype="multipart/form-data" data-as-upload data-max-mb="4">
+            <label class="as-file-label" for="as-logo-file"><span>เลือกไฟล์โลโก้</span><small>PNG, JPG, WEBP, GIF หรือ SVG · ไม่เกิน 4 MB</small></label>
+            <input id="as-logo-file" type="file" name="logoImage" accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml" required data-as-file>
+            <p class="as-file-info" data-as-file-info aria-live="polite">ยังไม่ได้เลือกไฟล์</p><p class="as-file-error" data-as-file-error hidden></p>
+            <button class="experiment-button primary" type="submit">อัปโหลดโลโก้</button>
+          </form>
+        </article>
+
+        <article class="as-card as-card-hero" data-as-card data-search="แบนเนอร์ banner hero หน้าแรก home">
+          <header class="as-card-head"><div><span class="as-card-icon is-gold" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m5 16 4-4 3 3 3-5 4 6"/></svg></span><div><h3>แบนเนอร์หน้าหลัก</h3><p>เลือกภาพหลักเพื่อใช้แทนการ์ดเกมด้านบนของหน้าแรก</p></div></div><span class="as-status <%= heroSettings.bannerImage ? 'is-set' : '' %>"><i></i><%= heroSettings.bannerImage ? 'มีรูปแล้ว' : 'ยังไม่ตั้งค่า' %></span></header>
+          <div class="as-preview as-preview-banner" data-as-preview>
+            <img src="<%= heroSettings.bannerImage || '' %>" alt="ตัวอย่างแบนเนอร์หน้าหลัก" data-as-image <%= heroSettings.bannerImage ? '' : 'hidden' %>>
+            <div class="as-empty-preview" data-as-empty <%= heroSettings.bannerImage ? 'hidden' : '' %>><span class="as-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m5 16 4-4 3 3 3-5 4 6"/></svg></span><strong>ตัวอย่างแบนเนอร์หน้าหลัก</strong><small>แนะนำภาพแนวนอน อัตราส่วน 3:1</small></div>
+            <span class="as-preview-chip"><%= heroSettings.mode === 'banner' ? 'กำลังแสดงบนหน้าแรก' : 'บันทึกไว้ · ยังไม่แสดง' %></span>
+          </div>
+          <form class="as-upload-form" action="/admin/hero-banner/upload" method="post" enctype="multipart/form-data" data-as-upload data-max-mb="10">
+            <label class="as-file-label" for="as-hero-file"><span>เลือกรูปแบนเนอร์</span><small>ไฟล์รูปภาพ · แนะนำอัตราส่วน 3:1 · ไม่เกิน 10 MB</small></label>
+            <input id="as-hero-file" type="file" name="bannerImage" accept="image/*" required data-as-file>
+            <p class="as-file-info" data-as-file-info aria-live="polite">ยังไม่ได้เลือกไฟล์</p><p class="as-file-error" data-as-file-error hidden></p>
+            <button class="experiment-button primary" type="submit">อัปโหลดแบนเนอร์</button>
+          </form>
+          <form class="as-banner-settings" action="/admin/hero-banner/mode" method="post">
+            <label class="as-field"><span>ลิงก์เมื่อคลิกแบนเนอร์ <small>(ไม่บังคับ)</small></span><input type="text" name="bannerLink" value="<%= heroSettings.bannerLink || '' %>" placeholder="/products หรือ https://example.com"></label>
+            <fieldset><legend>รูปแบบส่วนบนหน้าแรก</legend><label><input type="radio" name="mode" value="default" <%= heroSettings.mode !== 'banner' ? 'checked' : '' %>><span><b>การ์ดเกมแบบเดิม</b><small>แสดงส่วนเกมตามปกติ</small></span></label><label><input type="radio" name="mode" value="banner" <%= heroSettings.mode === 'banner' ? 'checked' : '' %>><span><b>ใช้ภาพแบนเนอร์</b><small>ใช้ภาพแทนการ์ดเกม</small></span></label></fieldset>
+            <button class="experiment-button primary" type="submit">บันทึกรูปแบบหน้าแรก</button>
+          </form>
+        </article>
+
+        <article class="as-card" data-as-card data-search="พื้นหลังหน้าร้าน storefront background">
+          <header class="as-card-head"><div><span class="as-card-icon is-blue" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m5 17 5-5 3 3 2-2 4 4"/></svg></span><div><h3>พื้นหลังหน้าร้าน</h3><p>แสดงภาพครบทั้งใบโดยไม่ครอป</p></div></div><span class="as-status <%= storefrontAppearance.backgroundImage ? 'is-set' : '' %>"><i></i><%= storefrontAppearance.backgroundImage ? 'มีรูปแล้ว' : 'ใช้สีธีมร้าน' %></span></header>
+          <div class="as-preview as-preview-background" data-as-preview>
+            <img src="<%= storefrontAppearance.backgroundImage || '' %>" alt="ตัวอย่างพื้นหลังหน้าร้าน" data-as-image <%= storefrontAppearance.backgroundImage ? '' : 'hidden' %>>
+            <div class="as-empty-preview" data-as-empty <%= storefrontAppearance.backgroundImage ? 'hidden' : '' %>><span class="as-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m5 17 5-5 3 3 2-2 4 4"/></svg></span><strong>ยังไม่มีภาพพื้นหลัง</strong><small>ระบบจะใช้พื้นสีตามธีมร้าน</small></div>
+            <span class="as-preview-chip">ภาพเต็ม ไม่ตัดขอบ</span>
+          </div>
+          <div class="as-card-footer"><form class="as-upload-form" action="/admin/storefront-background/upload" method="post" enctype="multipart/form-data" data-as-upload data-max-mb="10">
+            <label class="as-file-label" for="as-storefront-file"><span>เลือกรูปพื้นหลัง</span><small>PNG, JPG หรือ WEBP · แนะนำ 1920 × 1080 px · ไม่เกิน 10 MB</small></label><input id="as-storefront-file" type="file" name="storefrontBackgroundImage" accept="image/png,image/jpeg,image/webp" required data-as-file><p class="as-file-info" data-as-file-info aria-live="polite">ยังไม่ได้เลือกไฟล์</p><p class="as-file-error" data-as-file-error hidden></p><button class="experiment-button primary" type="submit">อัปโหลดพื้นหลัง</button>
+          </form><% if (storefrontAppearance.backgroundImage) { %><form action="/admin/storefront-background/remove" method="post" data-experiment-confirm="ลบภาพพื้นหลังหน้าร้านและกลับไปใช้พื้นธีมปกติใช่หรือไม่?"><button class="experiment-button as-remove" type="submit">นำภาพออก</button></form><% } %></div>
+        </article>
+
+        <article class="as-card" data-as-card data-search="พื้นหลังเข้าสู่ระบบ สมัครสมาชิก login auth">
+          <header class="as-card-head"><div><span class="as-card-icon is-violet" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8h6M8 17c.5-2 1.8-3 4-3s3.5 1 4 3"/><circle cx="12" cy="10.5" r="1.5"/></svg></span><div><h3>พื้นหลังเข้าสู่ระบบ</h3><p>ใช้ภาพเดียวกันกับหน้าเข้าสู่ระบบและสมัครสมาชิก</p></div></div><span class="as-status <%= authAppearance.backgroundImage ? 'is-set' : '' %>"><i></i><%= authAppearance.backgroundImage ? 'มีรูปแล้ว' : 'ใช้ภาพหน้าร้าน' %></span></header>
+          <div class="as-preview as-preview-background" data-as-preview>
+            <img src="<%= authAppearance.backgroundImage || '' %>" alt="ตัวอย่างพื้นหลังหน้าเข้าสู่ระบบ" data-as-image <%= authAppearance.backgroundImage ? '' : 'hidden' %>>
+            <div class="as-empty-preview" data-as-empty <%= authAppearance.backgroundImage ? 'hidden' : '' %>><span class="as-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8h6M8 17c.5-2 1.8-3 4-3s3.5 1 4 3"/><circle cx="12" cy="10.5" r="1.5"/></svg></span><strong>ใช้ภาพพื้นหลังหน้าร้าน</strong><small>ตั้งภาพเฉพาะส่วนนี้ได้ทุกเมื่อ</small></div>
+            <span class="as-preview-chip">หน้าเข้าสู่ระบบ · สมัครสมาชิก</span>
+          </div>
+          <div class="as-card-footer"><form class="as-upload-form" action="/admin/auth-background/upload" method="post" enctype="multipart/form-data" data-as-upload data-max-mb="10">
+            <label class="as-file-label" for="as-auth-file"><span>เลือกรูปพื้นหลัง</span><small>PNG, JPG หรือ WEBP · ไม่เกิน 10 MB</small></label><input id="as-auth-file" type="file" name="authBackgroundImage" accept="image/png,image/jpeg,image/webp" required data-as-file><p class="as-file-info" data-as-file-info aria-live="polite">ยังไม่ได้เลือกไฟล์</p><p class="as-file-error" data-as-file-error hidden></p><button class="experiment-button primary" type="submit">อัปโหลดพื้นหลัง</button>
+          </form><% if (authAppearance.backgroundImage) { %><form action="/admin/auth-background/remove" method="post" data-experiment-confirm="นำภาพพื้นหลังเฉพาะหน้าเข้าสู่ระบบออก และกลับไปใช้พื้นหลังหน้าร้านใช่หรือไม่?"><button class="experiment-button as-remove" type="submit">กลับไปใช้ภาพหน้าร้าน</button></form><% } %></div>
+        </article>
+      </div>
+      <div class="as-no-results" data-as-no-results hidden>ไม่พบส่วนรูปภาพที่ตรงกับคำค้นหา</div>
+      <p class="as-note"><span aria-hidden="true">i</span> รูปที่อัปโหลดจะถูกเก็บในระบบร้าน ไม่หายเมื่อ Deploy · หน้านี้จัดการเฉพาะสื่อ ไม่เปลี่ยนธีมสีหรือข้อความประกาศ</p>
+    </main>
+  </div>
+</div>
+
+<script>
+(function () {
+  document.querySelectorAll('[data-as-upload]').forEach(function (form) {
+    var input = form.querySelector('[data-as-file]');
+    var preview = form.closest('[data-as-card]')?.querySelector('[data-as-preview]');
+    var image = preview?.querySelector('[data-as-image]');
+    var empty = preview?.querySelector('[data-as-empty]');
+    var info = form.querySelector('[data-as-file-info]');
+    var error = form.querySelector('[data-as-file-error]');
+    var submit = form.querySelector('button[type="submit"]');
+    var originalLabel = submit?.textContent.trim() || 'อัปโหลดรูป';
+    var maxBytes = (Number(form.dataset.maxMb) || 10) * 1024 * 1024;
+    var previewUrl = null;
+    function clearError() { if (error) { error.hidden = true; error.textContent = ''; } if (input) input.setCustomValidity(''); }
+    function showError(message) { if (error) { error.hidden = false; error.textContent = message; } if (input) input.setCustomValidity(message); }
+    input?.addEventListener('change', function () {
+      clearError();
+      var file = input.files && input.files[0];
+      if (!file) { if (info) info.textContent = 'ยังไม่ได้เลือกไฟล์'; return; }
+      if (!file.type || !file.type.startsWith('image/')) { showError('กรุณาเลือกไฟล์รูปภาพ'); input.value = ''; return; }
+      if (file.size > maxBytes) { showError('ไฟล์มีขนาดเกิน ' + form.dataset.maxMb + ' MB'); input.value = ''; return; }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      previewUrl = URL.createObjectURL(file);
+      if (image) { image.src = previewUrl; image.hidden = false; }
+      if (empty) empty.hidden = true;
+      if (info) info.textContent = file.name + ' · ' + Math.max(1, Math.round(file.size / 1024)) + ' KB · ตัวอย่างยังไม่บันทึก';
+    });
+    form.addEventListener('submit', function (event) {
+      if (input && !input.files.length) { event.preventDefault(); input.reportValidity(); return; }
+      if (input && input.files[0] && input.files[0].size > maxBytes) { event.preventDefault(); showError('ไฟล์มีขนาดเกิน ' + form.dataset.maxMb + ' MB'); input.reportValidity(); return; }
+      if (submit) { submit.disabled = true; submit.textContent = 'กำลังอัปโหลด…'; }
+    });
+    form.addEventListener('reset', function () { if (previewUrl) URL.revokeObjectURL(previewUrl); if (submit) { submit.disabled = false; submit.textContent = originalLabel; } });
+  });
+
+  var search = document.querySelector('[data-as-search]');
+  var cards = Array.prototype.slice.call(document.querySelectorAll('[data-as-card]'));
+  var noResults = document.querySelector('[data-as-no-results]');
+  search?.addEventListener('input', function () {
+    var query = (search.value || '').trim().toLocaleLowerCase('th-TH');
+    var visible = 0;
+    cards.forEach(function (card) { var matches = !query || (card.dataset.search || '').toLocaleLowerCase('th-TH').includes(query); card.hidden = !matches; if (matches) visible += 1; });
+    if (noResults) noResults.hidden = visible > 0;
+  });
+})();
+</script>

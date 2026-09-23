@@ -4,18 +4,15 @@
 <div class="experiment-app experiment-settings-page">
   <div class="experiment-main">
     <header class="experiment-topbar">
-      <div class="experiment-build-legend" aria-label="สถานะงานออกแบบ">
-        <span><i class="ready"></i> ใช้งานได้</span>
-        <span><i class="pending"></i> รอทำ</span>
-      </div>
-      <button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน">◌</button>
+
+
       <span class="experiment-user-name">admin</span>
     </header>
 
     <main class="experiment-content">
       <div class="experiment-page-head">
         <div>
-          <div class="experiment-kicker">ทดลองหน้าตาใหม่ · ตั้งค่าร้าน</div>
+          <div class="experiment-kicker">ตั้งค่าร้าน</div>
           <h1>ตั้งค่าร้านค้า</h1>
           <p>แก้ไขข้อมูลร้านค้าและช่องทางติดต่อ พร้อมดูตัวอย่างก่อนบันทึก</p>
         </div>
@@ -24,7 +21,7 @@
 
       <section class="settings-hero experiment-card" aria-labelledby="settings-hero-title">
         <div class="settings-hero-copy">
-          <span class="settings-eyebrow">STORE CONTROL CENTER · LOCAL PREVIEW</span>
+          <span class="settings-eyebrow">STORE CONTROL CENTER</span>
           <h2 id="settings-hero-title">จัดการหน้าร้านให้ครบจากที่เดียว</h2>
           <p>แก้ไขข้อมูลหน้าร้านและดูตัวอย่างการเปลี่ยนแปลงได้จากหน้านี้</p>
           <div class="settings-hero-actions">
@@ -41,16 +38,16 @@
       </section>
 
       <div class="settings-layout">
-        <form class="settings-form" action="/admin/settings?ui=experiment" method="post" data-settings-live-form>
+        <form class="settings-form" action="/admin/settings" method="post" data-settings-live-form>
           <section class="settings-panel experiment-card" id="settings-basic" aria-labelledby="settings-basic-title">
             <div class="settings-panel-head">
               <div class="settings-panel-icon green" aria-hidden="true">⌂</div>
               <div>
-                <span class="settings-section-label">ส่วนที่ทำแล้ว</span>
+                <span class="settings-section-label">ข้อมูลร้าน</span>
                 <h2 id="settings-basic-title">ข้อมูลร้านและแบรนด์</h2>
                 <p>ชื่อและคำโปรยที่ลูกค้าเห็นบนหน้าร้าน</p>
               </div>
-              <span class="settings-ready-badge">พร้อมใช้</span>
+              <span class="settings-ready-badge">กำลังใช้งาน</span>
             </div>
             <div class="settings-fields two-columns">
               <label>
@@ -70,11 +67,11 @@
             <div class="settings-panel-head">
               <div class="settings-panel-icon blue" aria-hidden="true">◷</div>
               <div>
-                <span class="settings-section-label">ส่วนที่ทำแล้ว</span>
+                <span class="settings-section-label">ข้อมูลร้าน</span>
                 <h2 id="settings-contact-title">เวลาและช่องทางติดต่อ</h2>
                 <p>กำหนดเวลาบริการและช่องทางที่ลูกค้าใช้ติดต่อร้าน</p>
               </div>
-              <span class="settings-ready-badge">พร้อมใช้</span>
+              <span class="settings-ready-badge">กำลังใช้งาน</span>
             </div>
             <div class="settings-fields two-columns">
               <label>

@@ -4,7 +4,7 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize, findProductForPrize, getPrizeImage, fetchLiveCatalogPreview } = require('../services/minigame');
-const { usesExperimentalAdminUi, normalizeTenantAdminUi } = require('../services/admin-ui-mode');
+const { usesMainAdminUi, normalizeTenantAdminUi, normalizeMainAdminUi } = require('../services/admin-ui-mode');
 const license = require('../services/license');
 const banks = require('../data/thai-banks');
 const slipok = require('../services/slipok');
@@ -111,68 +111,12 @@ const popupImageUpload = multer({
 
 router.use(requireAdmin);
 router.use(normalizeTenantAdminUi);
+router.use(normalizeMainAdminUi);
 router.use((req, res, next) => {
   res.locals.layout = 'layouts/admin';
   res.locals.pendingTopupCount = store.data.topupRequests.filter(t => t.status === 'pending' || t.status === 'verifying').length;
   res.locals.persistentStorageEnabled = store.isPersistent();
   next();
-});
-
-// Keep the browser on one admin shell by making the experimental UI the default
-// entry for the rebuilt sections. The legacy templates remain available when a
-// caller explicitly uses `?ui=legacy`.
-router.use((req, res, next) => {
-  const query = req.query;
-  if (req.tenantShop || query.ui) return next();
-  // Express exposes req.query as a getter that reparses the URL on each read.
-  // Mutating the returned object does not survive the next access, so install
-  // an own request-scoped query object for downstream routes and templates.
-  // Apply this to POSTs too so forms without a query parameter stay in the
-  // main shop's redesigned admin after saving or deleting.
-  Object.defineProperty(req, 'query', {
-    configurable: true,
-    enumerable: true,
-    writable: true,
-    value: { ...query, ui: 'experiment' },
-  });
-  return next();
-});
-
-// If a redesigned page links to a section that has not been rebuilt yet, keep
-// the user inside the experimental shell instead of silently falling back to
-// the legacy layout.
-router.use((req, res, next) => {
-  if (req.method !== 'GET' || !usesExperimentalAdminUi(req)) return next();
-  const path = req.path.replace(/\/+$/, '') || '/';
-  if (path === '/' || path === '/products' || path === '/scheduled-products' || path === '/filter-tags' || path === '/recommended-categories' || path === '/home-sections' || path === '/orders' || path === '/coupons' || path === '/users' || path === '/settings' || path === '/effects' || path === '/minigame' || path === '/minigame/live-catalog' || path === '/theme' || path === '/welcome-popup' || path === '/announcements' || /^\/orders\/[^/]+$/.test(path) || /^\/users\/[^/]+$/.test(path) || path === '/products/new' || /^\/products\/[^/]+\/edit$/.test(path)) return next();
-  const labels = {
-    '/products/bulk-import': 'นำเข้าสินค้าเป็นชุด',
-    '/home-sections': 'หมวดหมู่หน้าแรก',
-    '/catalog-api': 'API สินค้าร้านหลัก',
-    '/storefront-models': 'โมเดลหน้าร้าน',
-    '/scheduled-products': 'ตั้งเวลาเปิดขาย',
-    '/filter-tags': 'แท็กและจัดหมวดสินค้า',
-    '/recommended-categories': 'หมวดหมู่แนะนำ',
-    '/orders': 'คำสั่งซื้อ',
-    '/topups': 'เติมเงินและตรวจสอบ',
-    '/coupons': 'คูปองส่วนลด',
-    '/users': 'จัดการสมาชิก',
-    '/minigame': 'มินิเกม',
-    '/slip-verification': 'ตรวจสอบอัตโนมัติ',
-    '/appearance': 'รูปและแบนเนอร์',
-    '/theme': 'ธีมร้านค้า',
-    '/announcements': 'ป้ายประกาศ',
-    '/welcome-popup': 'ป๊อปอัปต้อนรับ',
-    '/effects': 'ลูกเล่นหน้าเว็บ',
-    '/settings': 'ตั้งค่าร้าน',
-  };
-  res.locals.layout = 'layouts/admin-experiment';
-  return res.render('admin/experiment-placeholder', {
-    title: labels[path] || 'หมวดทดลอง',
-    active: path.slice(1),
-    experimentLabel: labels[path] || 'หน้านี้',
-    experimentPath: path,
-  });
 });
 
 function slugify(str) {
@@ -268,8 +212,8 @@ router.get('/products/bulk-import/progress/:jobId', (req, res) => {
 
 // ---------- Dashboard ----------
 router.get('/', (req, res) => {
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
+  const mainAdminUi = usesMainAdminUi(req);
+  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
   const { orders, users, products, stockItems } = store.data;
   const paidOrders = orders.filter(order => order.status !== 'cancelled' && order.salesChannel !== 'catalog-api-fulfillment');
   const revenue = paidOrders.reduce((sum, o) => sum + o.total, 0);
@@ -325,7 +269,7 @@ router.get('/', (req, res) => {
   });
   const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
   const pendingTopups = store.data.topupRequests.filter(t => t.status === 'pending').length;
-  res.render(experimentUi ? 'admin/dashboard-experiment' : 'admin/dashboard', {
+  res.render(mainAdminUi ? 'admin/dashboard-experiment' : 'admin/dashboard', {
     title: 'แดชบอร์ด', active: 'dashboard',
     stats: {
       revenue,
@@ -605,8 +549,8 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
 }
 
 router.get('/products', (req, res) => {
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
+  const mainAdminUi = usesMainAdminUi(req);
+  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
   const filterTagById = new Map(store.data.filterTags.map(tag => [tag.id, tag]));
   const products = store.data.products.map(p => {
     const stockCount = store.data.stockItems.filter(s => s.productId === p.id && s.status === 'available').length;
@@ -617,7 +561,7 @@ router.get('/products', (req, res) => {
   // IDs remain in history but must not inflate the amount shown to the admin.
   const totalAvailableProductCount = products.reduce((sum, product) => sum + product.stockCount, 0);
   const totalProductPrice = products.reduce((sum, product) => sum + ((Number(product.price) || 0) * product.stockCount), 0);
-  res.render(experimentUi ? 'admin/products-experiment' : 'admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
+  res.render(mainAdminUi ? 'admin/products-experiment' : 'admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
 });
 
 router.post('/products/card-style', async (req, res) => {
@@ -628,7 +572,7 @@ router.post('/products/card-style', async (req, res) => {
 });
 
 router.get('/products/new', (req, res) => {
-  if (req.query.ui === 'experiment') {
+  if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
     return res.render('admin/product-schedule-form-experiment', { title: 'สร้างสินค้าแบบตั้งเวลา', active: 'products', product: null });
   }
@@ -636,11 +580,11 @@ router.get('/products/new', (req, res) => {
 });
 
 router.post('/products/new', (req, res) => {
-  const experimentUi = req.query.ui === 'experiment';
+  const mainAdminUi = usesMainAdminUi(req);
   productImageUpload.array('productImages', 10)(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
-      return res.redirect(experimentUi ? '/admin/products/new?ui=experiment' : '/admin/products/new');
+      return res.redirect('/admin/products/new');
     }
     try {
       const uploadedImages = [...directUploadUrls(req.body, 'productImages'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
@@ -651,11 +595,11 @@ router.post('/products/new', (req, res) => {
       };
       store.data.products.push(product);
       await store.save();
-      req.flash('success', experimentUi ? 'สร้างสินค้าแบบตั้งเวลาแล้ว' : 'เพิ่มสินค้าแล้ว');
-      res.redirect(experimentUi ? '/admin/scheduled-products?ui=experiment' : '/admin/products');
+      req.flash('success', mainAdminUi ? 'สร้างสินค้าแบบตั้งเวลาแล้ว' : 'เพิ่มสินค้าแล้ว');
+      res.redirect(mainAdminUi ? '/admin/scheduled-products' : '/admin/products');
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
-      res.redirect(experimentUi ? '/admin/products/new?ui=experiment' : '/admin/products/new');
+      res.redirect('/admin/products/new');
     }
   }));
 });
@@ -769,7 +713,7 @@ router.post('/products/bulk-import', (req, res) => {
 router.get('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
-  if (req.query.ui === 'experiment') {
+  if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
     return res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขเวลาขาย', active: 'scheduled-products', product });
   }
@@ -826,22 +770,22 @@ router.post('/products/bulk-price', async (req, res) => {
 router.post('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
-  const experimentUi = req.query.ui === 'experiment';
+  const mainAdminUi = usesMainAdminUi(req);
   productImageUpload.array('productImages', 10)(req, res, store.bindTenantContext(async (err) => {
     if (err) {
       req.flash('error', 'อัปโหลดรูปสินค้าไม่สำเร็จ (สูงสุด 10 รูป รูปละไม่เกิน 8MB)');
-      return res.redirect(`/admin/products/${product.id}/edit${experimentUi ? '?ui=experiment' : ''}`);
+      return res.redirect(`/admin/products/${product.id}/edit`);
     }
     try {
       const uploadedImages = [...directUploadUrls(req.body, 'productImages'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
       const fields = parseProductBody(req.body, uploadedImages, product.images || []);
       Object.assign(product, fields, { status: req.body.status || 'active' });
       await store.save();
-      req.flash('success', experimentUi ? 'บันทึกการตั้งเวลาแล้ว' : 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
-      res.redirect(experimentUi ? '/admin/scheduled-products?ui=experiment' : '/admin/products');
+      req.flash('success', mainAdminUi ? 'บันทึกการตั้งเวลาแล้ว' : 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
+      res.redirect(mainAdminUi ? '/admin/scheduled-products' : '/admin/products');
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
-      res.redirect(`/admin/products/${product.id}/edit${experimentUi ? '?ui=experiment' : ''}`);
+      res.redirect(`/admin/products/${product.id}/edit`);
     }
   }));
 });
@@ -851,7 +795,7 @@ router.post('/products/:id/delete', async (req, res) => {
   store.data.stockItems = store.data.stockItems.filter(s => s.productId !== req.params.id);
   await store.save();
   req.flash('success', 'ลบสินค้าแล้ว');
-      res.redirect(experimentUi ? '/admin/scheduled-products?ui=experiment' : '/admin/products');
+  res.redirect('/admin/products');
 });
 
 // Bulk-adds 1 sellable unit to every product that currently has zero stock,
@@ -937,11 +881,11 @@ router.post('/products/:id/copy', async (req, res) => {
   store.data.products.push(product);
   await store.save();
   req.flash('success', 'คัดลอกสินค้าแล้ว กรุณาตรวจสอบข้อมูลก่อนเปิดขาย');
-      res.redirect(`/admin/products/${product.id}/edit${experimentUi ? '?ui=experiment' : ''}`);
+  res.redirect(`/admin/products/${product.id}/edit`);
 });
 
 // ---------- Filter Tags ----------
-const filterTagsRedirect = req => req.query.ui === 'experiment' ? '/admin/filter-tags?ui=experiment' : '/admin/filter-tags';
+const filterTagsRedirect = () => '/admin/filter-tags';
 router.get('/filter-tags', (req, res) => {
   const filterTags = store.data.filterTags.map(t => ({
     ...t, productCount: store.data.products.filter(p => (p.filterTagIds || []).includes(t.id)).length,
@@ -953,9 +897,9 @@ router.get('/filter-tags', (req, res) => {
     status: p.status,
     filterTagIds: p.filterTagIds || [],
   }));
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(experimentUi ? 'admin/filter-tags-experiment' : 'admin/filter-tags', { title: experimentUi ? 'แท็กและจัดหมวดสินค้า' : 'ตัวกรองสินค้า', active: 'filter-tags', filterTags, products });
+  const mainAdminUi = usesMainAdminUi(req);
+  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
+  res.render(mainAdminUi ? 'admin/filter-tags-experiment' : 'admin/filter-tags', { title: mainAdminUi ? 'แท็กและจัดหมวดสินค้า' : 'ตัวกรองสินค้า', active: 'filter-tags', filterTags, products });
 });
 
 // Persist the order used by the admin library and storefront filter panel.
@@ -1192,8 +1136,8 @@ router.post('/filter-tags/:id/edit', async (req, res) => {
 router.get('/home-sections', (req, res) => {
   const products = (store.data.products || []).filter(isHomeSectionSelectableProduct);
   const homeSections = store.data.homeSections || [];
-  const experimentUi = usesExperimentalAdminUi(req);
-  if (experimentUi) {
+  const mainAdminUi = usesMainAdminUi(req);
+  if (mainAdminUi) {
     res.locals.layout = 'layouts/admin-experiment';
     return res.render('admin/home-sections-experiment', {
       title: 'จัดหมวดหมู่หน้าแรก', active: 'home-sections', homeSections, products,
@@ -1289,13 +1233,13 @@ router.post('/home-sections/:id/move', async (req, res) => {
   res.redirect('/admin/home-sections');
 });
 
-const recommendedCategoriesRedirect = req => req.query.ui === 'experiment' ? '/admin/recommended-categories?ui=experiment' : '/admin/recommended-categories';
+const recommendedCategoriesRedirect = () => '/admin/recommended-categories';
 router.get('/recommended-categories', (req, res) => {
   const categories = store.data.recommendedCategories || [];
   const products = (store.data.products || []).filter(p => p.status === 'active');
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(experimentUi ? 'admin/recommended-categories-experiment' : 'admin/recommended-categories', { title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories, products });
+  const mainAdminUi = usesMainAdminUi(req);
+  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
+  res.render(mainAdminUi ? 'admin/recommended-categories-experiment' : 'admin/recommended-categories', { title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories, products });
 });
 router.post('/recommended-categories', (req, res) => bannerUpload.single('image')(req, res, store.bindTenantContext(async err => {
   const title = String(req.body.title || '').trim();
@@ -1472,9 +1416,7 @@ router.post('/rangers-catalog/items/:id/delete', requireSystemLab, async (req, r
 
 // ---------- Storefront color theme ----------
 router.get('/theme', (req, res) => {
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(experimentUi ? 'admin/theme-experiment' : 'admin/theme', {
+  res.render('admin/theme', {
     title: 'ธีมสี', active: 'theme',
     currentTheme: store.data.settings.theme,
     accentPresets: theme.getAccentPresets(),
@@ -1513,7 +1455,7 @@ router.get('/scheduled-products', (req, res) => {
   const products = store.data.products
     .filter(product => product.publishAt)
     .sort((a, b) => String(a.publishAt).localeCompare(String(b.publishAt)));
-  if (req.query.ui === 'experiment') {
+  if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
     return res.render('admin/scheduled-products-experiment', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products });
   }
@@ -1524,14 +1466,14 @@ router.post('/scheduled-products/:id/clear', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) {
     req.flash('error', 'ไม่พบสินค้าที่ต้องการยกเลิกเวลาเปิดขาย');
-    return res.redirect('/admin/scheduled-products?ui=experiment');
+    return res.redirect('/admin/scheduled-products');
   }
   product.publishAt = '';
   product.eventBadge = '';
   product.eventDescription = '';
   await store.save();
   req.flash('success', `ยกเลิกเวลาเปิดขายของ ${product.title} แล้ว`);
-  res.redirect('/admin/scheduled-products?ui=experiment');
+  res.redirect('/admin/scheduled-products');
 });
 
 router.post('/products/:id/stock/settings', async (req, res) => {
@@ -1618,9 +1560,9 @@ router.get('/orders', (req, res) => {
         searchTerms: [o.id, buyer?.username, buyer?.email, ...itemSearchTerms].filter(Boolean).join(' '),
       };
     });
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(experimentUi ? 'admin/orders-experiment' : 'admin/orders', { title: 'คำสั่งซื้อ', active: 'orders', orders });
+  const mainAdminUi = usesMainAdminUi(req);
+  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
+  res.render(mainAdminUi ? 'admin/orders-experiment' : 'admin/orders', { title: 'คำสั่งซื้อ', active: 'orders', orders });
 });
 
 router.get('/orders/:id', (req, res) => {
@@ -1638,9 +1580,9 @@ router.get('/orders/:id', (req, res) => {
       importedFileCode: oi.importedFileCode || product?.internalNote || '',
     };
   });
-  const experimentUi = req.query.ui === 'experiment';
-  if (experimentUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(experimentUi ? 'admin/order-detail-experiment' : 'admin/order-detail', { title: `คำสั่งซื้อ #${order.id}`, active: 'orders', order, buyer, itemsWithCreds });
+  const mainAdminUi = usesMainAdminUi(req);
+  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
+  res.render(mainAdminUi ? 'admin/order-detail-experiment' : 'admin/order-detail', { title: `คำสั่งซื้อ #${order.id}`, active: 'orders', order, buyer, itemsWithCreds });
 });
 
 router.post('/orders/:id/status', async (req, res) => {
@@ -1664,16 +1606,16 @@ router.post('/orders/:id/status', async (req, res) => {
   } else if (order) {
     req.flash('error', 'สถานะคำสั่งซื้อไม่ถูกต้อง');
   }
-  res.redirect(`/admin/orders/${req.params.id}${req.query?.ui === 'experiment' ? '?ui=experiment' : ''}`);
+  res.redirect(`/admin/orders/${req.params.id}`);
 });
 
 // ---------- Users ----------
 router.get('/users', (req, res) => {
   const q = String(req.query.q || '').trim();
   const registered = req.query.registered === 'today' ? 'today' : '';
-  const experimentUi = usesExperimentalAdminUi(req);
-  const status = experimentUi && ['active', 'banned'].includes(req.query.status) ? req.query.status : '';
-  const role = experimentUi && ['admin', 'customer'].includes(req.query.role) ? req.query.role : '';
+  const mainAdminUi = usesMainAdminUi(req);
+  const status = mainAdminUi && ['active', 'banned'].includes(req.query.status) ? req.query.status : '';
+  const role = mainAdminUi && ['admin', 'customer'].includes(req.query.role) ? req.query.role : '';
   const needle = q.toLocaleLowerCase('th-TH');
   const bangkokDay = date => new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit',
@@ -1699,7 +1641,7 @@ router.get('/users', (req, res) => {
 
   const totalWalletBalance = store.data.users.reduce((sum, u) => sum + (Number(u.walletBalance) || 0), 0);
 
-  if (experimentUi) {
+  if (mainAdminUi) {
     res.locals.layout = 'layouts/admin-experiment';
     const allUsers = store.data.users;
     const todayCustomers = allUsers.filter(user => user.role === 'customer' && bangkokDay(new Date(user.createdAt)) === todayKey).length;
@@ -1743,7 +1685,7 @@ router.get('/users/:id', (req, res) => {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const paidOrders = orders.filter(order => order.status !== 'cancelled');
 
-  if (req.query.ui === 'experiment') {
+  if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
     return res.render('admin/user-detail-experiment', {
       title: `สมาชิก ${user.username}`, active: 'users', user,
@@ -1799,11 +1741,16 @@ router.post('/users/:id/toggle-ban', async (req, res) => {
 router.post('/users/new', async (req, res) => {
   const username = String(req.body.username || '').trim();
   const email = String(req.body.email || '').trim().toLowerCase();
-  const password = String(req.body.password || '123456');
+  const mainAdminUi = usesMainAdminUi(req);
+  const password = String(req.body.password || (mainAdminUi ? '' : '123456'));
   const role = req.body.role;
 
   if (!username || username.length > 100 || !email || email.length > 254 || !/^\S+@\S+\.\S+$/.test(email)) {
     req.flash('error', 'กรุณาระบุชื่อผู้ใช้และอีเมลให้ถูกต้อง');
+    return res.redirect('/admin/users');
+  }
+  if (mainAdminUi && password.length < 6) {
+    req.flash('error', 'รหัสผ่านเริ่มต้นต้องมีอย่างน้อย 6 ตัวอักษร');
     return res.redirect('/admin/users');
   }
 
@@ -1826,12 +1773,13 @@ router.post('/users/new', async (req, res) => {
 });
 
 // ---------- Top-up requests ----------
-router.get('/topups', async (req, res) => {
+async function renderTopupsPage(req, res) {
   const bankOptions = banks;
   const q = String(req.query.q || '').trim();
-  const status = ['pending', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : '';
+  const status = ['pending', 'verifying', 'approved', 'rejected'].includes(req.query.status) ? req.query.status : '';
   const needle = q.toLocaleLowerCase('th-TH');
-  const requests = [...store.data.topupRequests]
+  const allRequests = [...(store.data.topupRequests || [])];
+  const requests = allRequests
     .map(t => ({
       ...t,
       buyer: t.tenantShopId
@@ -1848,11 +1796,24 @@ router.get('/topups', async (req, res) => {
         || String(request.tenantShopId || '').toLocaleLowerCase('th-TH').includes(needle);
     })
     .sort((a, b) => {
-      if (a.status === 'pending' && b.status !== 'pending') return -1;
-      if (a.status !== 'pending' && b.status === 'pending') return 1;
+      const aPending = a.status === 'pending' || a.status === 'verifying';
+      const bPending = b.status === 'pending' || b.status === 'verifying';
+      if (aPending && !bPending) return -1;
+      if (!aPending && bPending) return 1;
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
-  const pendingCount = store.data.topupRequests.filter(t => t.status === 'pending' || t.status === 'verifying').length;
+  const pendingRequests = allRequests.filter(request => request.status === 'pending' || request.status === 'verifying');
+  const pendingCount = pendingRequests.length;
+  const requestStats = {
+    total: allRequests.length,
+    pending: allRequests.filter(request => request.status === 'pending').length,
+    verifying: allRequests.filter(request => request.status === 'verifying').length,
+    approved: allRequests.filter(request => request.status === 'approved').length,
+    rejected: allRequests.filter(request => request.status === 'rejected').length,
+    waitingAmount: pendingRequests.reduce((sum, request) => sum + (Number(request.amount) || 0), 0),
+    approvedAmount: allRequests.filter(request => request.status === 'approved').reduce((sum, request) => sum + (Number(request.amount) || 0), 0),
+  };
+  const mainAdminUi = usesMainAdminUi(req);
   const payment = store.data.settings.payment;
   const isTenant = Boolean(req.tenantShop);
   const sharedTenant = Boolean(isTenant && (payment.slipApiMode || 'shared') === 'shared');
@@ -1865,11 +1826,22 @@ router.get('/topups', async (req, res) => {
   const receiverPayment = receiverProfiles.view(payment, receiverProvider
     || availableReceiverProviders[0]
     || (receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck'));
+  if (mainAdminUi && req.path !== '/topups/settings') {
+    res.locals.layout = 'layouts/admin-experiment';
+    return res.render('admin/topups-experiment', {
+      title: 'เติมเงินและตรวจสอบ', active: 'topups', requests, pendingCount, requestStats, payment, receiverPayment,
+      receiverProvider, availableReceiverProviders, activeReceiverProvider: effective.slipProvider, banks: bankOptions, q, status,
+      successMessages: req.flash('success'), errorMessages: req.flash('error'),
+    });
+  }
   res.render('admin/topups', {
-    title: 'บัญชี', active: 'topups', requests, pendingCount, payment, receiverPayment,
+    title: req.path === '/topups/settings' ? 'ตั้งค่าช่องทางรับเงิน' : 'บัญชี', active: 'topups', requests, pendingCount, payment, receiverPayment,
     receiverProvider, availableReceiverProviders, activeReceiverProvider: effective.slipProvider, banks: bankOptions, q, status,
   });
-});
+}
+
+router.get('/topups', renderTopupsPage);
+router.get('/topups/settings', renderTopupsPage);
 
 // Slip Verification Hub & Provider Management.
 async function renderSlipVerificationHub(req, res) {
@@ -2233,7 +2205,7 @@ router.post('/topups/:id/delete', async (req, res) => {
 
 // ---------- Coupons ----------
 router.get('/coupons', (req, res) => {
-  if (req.query.ui === 'experiment') {
+  if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
     const allCoupons = Array.isArray(store.data.coupons) ? store.data.coupons : [];
     const q = String(req.query.q || '').trim().slice(0, 100);
@@ -2261,7 +2233,7 @@ router.get('/coupons', (req, res) => {
   res.render('admin/coupons', { title: 'คูปองส่วนลด', active: 'coupons', coupons: store.data.coupons });
 });
 
-const couponsReturnPath = req => usesExperimentalAdminUi(req) ? '/admin/coupons?ui=experiment' : '/admin/coupons';
+const couponsReturnPath = () => '/admin/coupons';
 
 router.post('/coupons', async (req, res) => {
   const { code, type, value, usageLimit } = req.body;
@@ -2301,7 +2273,7 @@ router.post('/coupons/:id/delete', async (req, res) => {
 
 // ---------- Mini game ----------
 router.get('/minigame/live-catalog', async (req, res) => {
-  if (!usesExperimentalAdminUi(req)) return res.sendStatus(404);
+  if (!usesMainAdminUi(req)) return res.sendStatus(404);
   try {
     const catalog = await fetchLiveCatalogPreview();
     res.set('Cache-Control', 'no-store');
@@ -2312,7 +2284,7 @@ router.get('/minigame/live-catalog', async (req, res) => {
 });
 
 router.get('/minigame', (req, res) => {
-  const isExperiment = req.query.ui === 'experiment';
+  const isMainAdmin = usesMainAdminUi(req);
   const totalPercent = type => store.data.miniGamePrizes
     .filter(p => p.active && (p.gameType || 'box') === type)
     .reduce((sum, p) => sum + Number(p.percent), 0);
@@ -2326,8 +2298,8 @@ router.get('/minigame', (req, res) => {
       (p.claimCode || '').toLowerCase().includes(needle)
     );
   }
-  if (isExperiment) res.locals.layout = 'layouts/admin-experiment';
-  res.render(isExperiment ? 'admin/minigame-experiment' : 'admin/minigame', {
+  if (isMainAdmin) res.locals.layout = 'layouts/admin-experiment';
+  res.render(isMainAdmin ? 'admin/minigame-experiment' : 'admin/minigame', {
     title: 'มินิเกม', active: 'minigame',
     game: store.data.settings.miniGame,
     prizes: store.data.miniGamePrizes.map(prize => ({
@@ -2497,20 +2469,6 @@ router.post('/minigame/plays/:id/deliver', async (req, res) => {
 
 // ---------- Announcements ----------
 router.get('/announcements', (req, res) => {
-  if (req.query.ui === 'experiment') {
-    res.locals.layout = 'layouts/admin-experiment';
-    const announcements = Array.isArray(store.data.announcements) ? store.data.announcements : [];
-    return res.render('admin/announcements-experiment', {
-      title: 'ป้ายประกาศ',
-      active: 'announcements',
-      announcements: announcements.map(item => ({
-        id: String(item.id || ''),
-        title: String(item.title || ''),
-        body: String(item.body || ''),
-        active: Boolean(item.active),
-      })),
-    });
-  }
   res.render('admin/announcements', { title: 'ประกาศ', active: 'announcements', announcements: store.data.announcements });
 });
 
@@ -2539,14 +2497,6 @@ router.post('/announcements/:id/delete', async (req, res) => {
 
 // ---------- Welcome Popup (separate from the plain text announcement bars above) ----------
 router.get('/welcome-popup', (req, res) => {
-  if (req.query.ui === 'experiment') {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/welcome-popup-experiment', {
-      title: 'ป๊อปอัปต้อนรับ',
-      active: 'welcome-popup',
-      popup: (store.data.settings && store.data.settings.welcomePopup) || {},
-    });
-  }
   res.render('admin/welcome-popup', { title: 'ป๊อปอัปต้อนรับ', active: 'welcome-popup' });
 });
 
@@ -2587,7 +2537,7 @@ router.post('/welcome-popup', (req, res) => {
 
 // ---------- Settings ----------
 router.get('/settings', (req, res) => {
-  if (req.query.ui === 'experiment') {
+  if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
     return res.render('admin/settings-experiment', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isGateOn() });
   }
@@ -2595,7 +2545,7 @@ router.get('/settings', (req, res) => {
 });
 
 router.get('/effects', (req, res) => {
-  if (req.query.ui === 'experiment') {
+  if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
     return res.render('admin/effects-experiment', { title: 'ลูกเล่นหน้าเว็บ', active: 'effects' });
   }
@@ -2603,6 +2553,13 @@ router.get('/effects', (req, res) => {
 });
 
 router.get('/appearance', (req, res) => {
+  if (usesMainAdminUi(req)) {
+    res.locals.layout = 'layouts/admin-experiment';
+    return res.render('admin/appearance-experiment', {
+      title: 'รูปและแบนเนอร์', active: 'appearance',
+      successMessages: req.flash('success'), errorMessages: req.flash('error'),
+    });
+  }
   res.render('admin/appearance', {
     title: 'รูปหน้าเว็บและโลโก้', active: 'appearance',
   });
@@ -2619,7 +2576,7 @@ function normalizeExternalLink(value) {
 }
 
 router.post('/settings', async (req, res) => {
-  const experimentUi = req.query.ui === 'experiment';
+  const mainAdminUi = usesMainAdminUi(req);
   const { shopName, tagline, contactLine, contactFacebook, contactMessenger, contactFacebookName, contactResponseTime, openHours } = req.body;
   Object.assign(store.data.settings, {
     shopName, tagline, contactLine,
@@ -2630,11 +2587,11 @@ router.post('/settings', async (req, res) => {
   });
   await store.save();
   req.flash('success', 'บันทึกการตั้งค่าแล้ว');
-  res.redirect(experimentUi ? '/admin/settings?ui=experiment' : '/admin/settings');
+  res.redirect('/admin/settings');
 });
 
 // ---------- Music player ----------
-const effectsRedirect = req => req.query.ui === 'experiment' ? '/admin/effects?ui=experiment' : '/admin/effects';
+const effectsRedirect = () => '/admin/effects';
 function parseTimeToSeconds(str) {
   if (!str) return 0;
   const s = str.trim();

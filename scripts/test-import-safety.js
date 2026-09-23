@@ -338,24 +338,23 @@ async function main() {
     '../services/discord-bot': { isConfigured: () => false, isReady: () => false },
     '../services/license': { isGateOn: () => false }, '../middleware/tenant': { MAIN_DOMAIN: 'fixture.test', MAIN_SITE_URL: 'https://fixture.test' },
   });
-  const { normalizeTenantAdminUi, usesExperimentalAdminUi } = require('../src/services/admin-ui-mode');
-  const defaultExperimentUi = admin.stack.find(layer => !layer.route && String(layer.handle).includes('Express exposes req.query as a getter')).handle;
-  const defaultMainRequest = { method: 'GET', path: '/settings', tenantShop: null };
-  Object.defineProperty(defaultMainRequest, 'query', { configurable: true, get() { return { q: 'preserved' }; } });
-  defaultExperimentUi(defaultMainRequest, { locals: {} }, () => {});
-  const defaultMainPostRequest = { method: 'POST', path: '/products/fixture/delete', tenantShop: null };
-  Object.defineProperty(defaultMainPostRequest, 'query', { configurable: true, get() { return {}; } });
-  defaultExperimentUi(defaultMainPostRequest, { locals: {} }, () => {});
-  const defaultTenantRequest = { method: 'GET', query: {}, path: '/settings', tenantShop: { id: 'tenant-ui-fixture' } };
-  defaultExperimentUi(defaultTenantRequest, { locals: {} }, () => {});
-  const defaultLegacyRequest = { method: 'GET', query: { ui: 'legacy' }, path: '/settings', tenantShop: null };
-  defaultExperimentUi(defaultLegacyRequest, { locals: {} }, () => {});
-  check('Only the main shop defaults to the experimental admin shell', () => {
-    assert.equal(defaultMainRequest.query.ui, 'experiment');
-    assert.equal(defaultMainRequest.query.q, 'preserved');
-    assert.equal(defaultMainPostRequest.query.ui, 'experiment');
-    assert.equal(defaultTenantRequest.query.ui, undefined);
-    assert.equal(defaultLegacyRequest.query.ui, 'legacy');
+  const { normalizeMainAdminUi, normalizeTenantAdminUi, usesMainAdminUi } = require('../src/services/admin-ui-mode');
+  const mainPostRequest = { method: 'POST', query: {}, tenantShop: null };
+  let mainPostContinued = false;
+  normalizeMainAdminUi(mainPostRequest, {}, () => { mainPostContinued = true; });
+  let mainUiRedirect = '';
+  normalizeMainAdminUi(
+    { method: 'GET', query: { ui: 'experiment', q: 'sample' }, tenantShop: null, originalUrl: '/admin/settings?ui=experiment&q=sample' },
+    { redirect(status, url) { mainUiRedirect = `${status}:${url}`; } },
+    () => assert.fail('main experiment query should redirect to the canonical production URL'),
+  );
+  check('The main admin uses the production UI without a mode query and keeps other filters on canonical URLs', () => {
+    assert.equal(usesMainAdminUi({ query: {}, tenantShop: null }), true);
+    assert.equal(usesMainAdminUi({ query: { ui: 'experiment' }, tenantShop: null }), true);
+    assert.equal(usesMainAdminUi({ query: {}, tenantShop: { id: 'tenant-ui-fixture' } }), false);
+    assert.equal(mainPostContinued, true);
+    assert.equal(mainUiRedirect, '302:/admin/settings?q=sample');
+    assert.deepEqual(mainPostRequest.query, {});
   });
   let tenantUiRedirect = '';
   normalizeTenantAdminUi(
@@ -371,17 +370,43 @@ async function main() {
     assert.equal(tenantPostContinued, true);
     assert.equal(tenantPostUi.query.ui, 'legacy');
     assert.equal(tenantPostUi.query.q, 'sample');
-    assert.equal(usesExperimentalAdminUi(tenantPostUi), false);
-    assert.equal(usesExperimentalAdminUi({ query: { ui: 'experiment' }, tenantShop: null }), true);
+    assert.equal(usesMainAdminUi(tenantPostUi), false);
+    assert.equal(usesMainAdminUi({ query: { ui: 'experiment' }, tenantShop: null }), true);
   });
   const settingsGet = admin.stack.find(layer => layer.route?.path === '/settings' && layer.route.methods.get).route.stack.at(-1).handle;
   let settingsMainView = '';
   let settingsTenantView = '';
-  settingsGet({ query: { ui: 'experiment' }, tenantShop: null }, { locals: {}, render(view) { settingsMainView = view; } });
+  settingsGet({ query: {}, tenantShop: null }, { locals: {}, render(view) { settingsMainView = view; } });
   settingsGet({ query: {}, tenantShop: { id: 'tenant-ui-fixture' } }, { locals: {}, render(view) { settingsTenantView = view; } });
-  check('Main settings use the redesign while tenant settings stay on the old template', () => {
+  check('Main settings use the production management screen while tenant settings stay on the old template', () => {
     assert.equal(settingsMainView, 'admin/settings-experiment');
     assert.equal(settingsTenantView, 'admin/settings');
+  });
+  const settingsPost = admin.stack.find(layer => layer.route?.path === '/settings' && layer.route.methods.post).route.stack.at(-1).handle;
+  const settingsFixture = model.fixture();
+  let settingsRedirect = '';
+  await als.run(settingsFixture, () => settingsPost(
+    { body: { shopName: 'Main Store', tagline: 'Real storefront', contactLine: '@main', contactFacebook: 'facebook.com/main', contactMessenger: 'm.me/main', contactFacebookName: 'Main', contactResponseTime: '5 นาที', openHours: '24 ชั่วโมง', showOpenHoursBar: 'on' },
+      flash() {} },
+    { redirect(pathname) { settingsRedirect = pathname; } },
+  ));
+  check('Main settings POST persists store data and returns to the canonical live page', () => {
+    assert.equal(settingsFixture.settings.shopName, 'Main Store');
+    assert.equal(settingsFixture.settings.contactFacebook, 'https://facebook.com/main');
+    assert.equal(settingsRedirect, '/admin/settings');
+  });
+  const productionPageTemplates = [
+    ['/theme', 'admin/theme'],
+    ['/announcements', 'admin/announcements'],
+    ['/welcome-popup', 'admin/welcome-popup'],
+  ];
+  check('Main theme, announcement, and welcome-popup routes use the database-backed screens', () => {
+    for (const [routePath, expectedView] of productionPageTemplates) {
+      const handler = admin.stack.find(layer => layer.route?.path === routePath && layer.route.methods.get).route.stack.at(-1).handle;
+      let mainView = '';
+      als.run(model.fixture(), () => handler({ query: {}, tenantShop: null }, { render(view) { mainView = view; } }));
+      assert.equal(mainView, expectedView, routePath);
+    }
   });
   const usersList = admin.stack.find(layer => layer.route?.path === '/users' && layer.route.methods.get).route.stack.at(-1).handle;
   const tenantUsersFixture = model.fixture();
@@ -469,6 +494,27 @@ async function main() {
     assert.equal(createUserFixture.users.length, 1);
     assert.match(duplicateEmailFlash, /อีเมลนี้ถูกใช้งานแล้ว/);
   });
+  const missingPasswordFixture = model.fixture();
+  missingPasswordFixture.users = [];
+  let missingPasswordFlash = '';
+  await als.run(missingPasswordFixture, () => createUser(
+    { body: { username: 'new-user', email: 'new@example.com' }, flash(type, message) { if (type === 'error') missingPasswordFlash = message; } },
+    { redirect() {} },
+  ));
+  check('Admin user creation requires a real password instead of silently assigning a default credential', () => {
+    assert.equal(missingPasswordFixture.users.length, 0);
+    assert.match(missingPasswordFlash, /อย่างน้อย 6 ตัวอักษร/);
+  });
+  const tenantPasswordFixture = model.fixture();
+  tenantPasswordFixture.users = [];
+  await als.run(tenantPasswordFixture, () => createUser(
+    { body: { username: 'tenant-user', email: 'tenant@example.com' }, tenantShop: { id: 'tenant-fixture' }, flash() {} },
+    { redirect() {} },
+  ));
+  check('Tenant member creation keeps its original password behavior unchanged', () => {
+    assert.equal(tenantPasswordFixture.users.length, 1);
+    assert.equal(typeof tenantPasswordFixture.users[0].passwordHash, 'string');
+  });
   const createCoupon = admin.stack.find(l => l.route?.path === '/coupons' && l.route.methods.post).route.stack.at(-1).handle;
   const createCouponFixture = model.fixture();
   createCouponFixture.coupons = [{ id: 'existing', code: 'SALE10', type: 'percent', value: 10, usageLimit: 0, usedCount: 0, active: true }];
@@ -543,18 +589,15 @@ async function main() {
   let experimentHomeSectionsView;
   const homeSectionsHandler = admin.stack.find(layer => layer.route?.path === '/home-sections' && layer.route.methods.get).route.stack.at(-1).handle;
   await als.run(viewData, () => homeSectionsHandler(
-    { query: { ui: 'experiment' }, tenantShop: null, flash: () => [] },
+    { query: {}, tenantShop: null, flash: () => [] },
     { locals: { layout: 'layouts/admin', settings: viewData.settings, currentUser: viewData.users[0], asset: value => '/' + value }, render(view, values) { experimentHomeSectionsView = { view, values }; } },
   ));
-  const experimentFallback = admin.stack.find(layer => !layer.route && layer.handle.toString().includes('admin/experiment-placeholder'));
-  let homeSectionsPassedPlaceholder = false;
-  experimentFallback.handle(
-    { method: 'GET', path: '/home-sections', query: { ui: 'experiment' }, tenantShop: null },
-    { locals: {} },
-    () => { homeSectionsPassedPlaceholder = true; },
-  );
-  check('Experimental home sections bypass the generic placeholder middleware', () => assert.equal(homeSectionsPassedPlaceholder, true));
-  check('Main-shop home sections render the working experimental management page', () => {
+  check('Main admin requests are not intercepted by the generic placeholder middleware', () => {
+    assert.equal(admin.stack.some(layer => !layer.route && layer.handle.toString().includes('admin/experiment-placeholder')), false);
+    assert.ok(admin.stack.some(layer => layer.route?.path === '/products/bulk-import'));
+    assert.ok(admin.stack.some(layer => layer.route?.path === '/catalog-api'));
+  });
+  check('Main-shop home sections render the working production management page without a mode query', () => {
     assert.equal(experimentHomeSectionsView.view, 'admin/home-sections-experiment');
     assert.equal(experimentHomeSectionsView.values.homeSections, viewData.homeSections);
     const filename = path.join(root, 'src/views', experimentHomeSectionsView.view + '.ejs');
@@ -579,6 +622,51 @@ async function main() {
     ));
     assert.equal(tenantView, 'admin/home-sections');
   });
+  const appearanceHandler = admin.stack.find(layer => layer.route?.path === '/appearance' && layer.route.methods.get).route.stack.at(-1).handle;
+  let mainAppearanceView;
+  await als.run(viewData, () => appearanceHandler(
+    { query: {}, tenantShop: null, flash: () => [] },
+    { locals: { layout: 'layouts/admin', settings: viewData.settings, currentUser: viewData.users[0], asset: value => '/' + value }, render(view, values) { mainAppearanceView = { view, values }; } },
+  ));
+  check('Main-shop appearance renders the redesigned real-media manager', () => {
+    assert.equal(mainAppearanceView.view, 'admin/appearance-experiment');
+    const filename = path.join(root, 'src/views', mainAppearanceView.view + '.ejs');
+    const locals = { settings: viewData.settings, currentUser: viewData.users[0], messages: { success: [], error: [] }, isMainSite: true,
+      rentWebsiteEnabled: false, persistentStorageEnabled: true, pendingTopupCount: 0, currentRequestUrl: 'https://fixture.test/admin/appearance',
+      cartCount: 0, themeCss: '', asset: value => '/' + value, ...mainAppearanceView.values };
+    const html = ejs.render(fs.readFileSync(filename, 'utf8'), locals, { filename });
+    assert.match(html, /โลโก้เว็บไซต์/);
+    assert.match(html, /แบนเนอร์หน้าหลัก/);
+    assert.match(html, /ภาพพื้นหลังหน้าร้าน/);
+    assert.match(html, /พื้นหลังหน้าเข้าสู่ระบบ/);
+    assert.match(html, /site-logo\/upload/);
+    assert.match(html, /hero-banner\/mode/);
+    for (const [index, match] of Array.from(html.matchAll(/<script>([\s\S]*?)<\/script>/g)).entries()) {
+      new vm.Script(match[1], { filename: `${filename}#script-${index + 1}` });
+    }
+    const layoutFile = path.join(root, 'src/views/layouts/admin-experiment.ejs');
+    const page = ejs.render(fs.readFileSync(layoutFile, 'utf8'), { ...locals, body: html }, { filename: layoutFile });
+    assert.match(page, /data-experiment-confirm-dialog/);
+    for (const [index, match] of Array.from(page.matchAll(/<script>([\s\S]*?)<\/script>/g)).entries()) {
+      new vm.Script(match[1], { filename: `${layoutFile}#script-${index + 1}` });
+    }
+  });
+  check('Tenant appearance remains on the original view', () => {
+    let tenantView;
+    appearanceHandler(
+      { query: { ui: 'experiment' }, tenantShop: { id: 'tenant-fixture' } },
+      { locals: { layout: 'layouts/admin' }, render(view) { tenantView = view; } },
+    );
+    assert.equal(tenantView, 'admin/appearance');
+  });
+  const rangersCatalogGuard = admin.stack.find(layer => layer.route?.path === '/rangers-catalog' && layer.route.methods.get).route.stack[0].handle;
+  let rangersMainDenied = false;
+  rangersCatalogGuard(
+    { tenantShop: null },
+    { status(code) { rangersMainDenied = code === 404; return this; }, render(view) { assert.equal(view, 'shop/404'); } },
+    () => { rangersMainDenied = false; },
+  );
+  check('Main-shop requests still receive a 404 from the System Lab catalog guard', () => assert.equal(rangersMainDenied, true));
   const tenantViewData = model.fixture();
   tenantViewData.settings.payment.slipApiMode = 'shared';
   const tenantHub = admin.stack.find(l => l.route?.path === '/slip-verification' && l.route.methods.get).route.stack.at(-1).handle;

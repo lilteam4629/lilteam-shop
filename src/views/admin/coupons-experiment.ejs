@@ -15,15 +15,15 @@
 <div class="experiment-app experiment-coupons-page">
   <div class="experiment-main">
     <header class="experiment-topbar">
-      <div class="experiment-build-legend" aria-label="สถานะงานออกแบบ"><span><i></i> ใช้งานได้</span><span><i class="pending"></i> รอทำ</span></div>
-      <button class="experiment-icon-button" data-experiment-notifications type="button" aria-label="ดูการแจ้งเตือน">◌</button>
+
+
       <span class="experiment-user-name">admin</span>
     </header>
     <main class="experiment-content">
       <section class="coupons-page">
         <header class="experiment-page-head">
           <div>
-            <div class="experiment-kicker">ทดลองหน้าตาใหม่ · โปรโมชั่น & สมาชิก</div>
+            <div class="experiment-kicker">โปรโมชั่น & สมาชิก</div>
             <h1>คูปองส่วนลด</h1>
             <p>สร้างและติดตามโค้ดส่วนลด พร้อมตรวจการใช้งานจากข้อมูลของร้าน</p>
           </div>
@@ -59,7 +59,7 @@
           <section class="coupons-workspace experiment-card" aria-labelledby="coupons-list-title">
             <div class="coupons-workspace-head"><div><span class="coupons-section-kicker">PROMOTION CENTER</span><h2 id="coupons-list-title">รายการคูปอง</h2><p>พบ <b><%= coupons.length.toLocaleString('th-TH') %></b> จาก <b><%= allCoupons.length.toLocaleString('th-TH') %></b> โค้ด</p></div><span class="coupons-live-badge"><i></i> ข้อมูลปัจจุบัน</span></div>
             <form class="coupons-toolbar" action="/admin/coupons" method="get">
-              <input type="hidden" name="ui" value="experiment" />
+
               <label class="coupons-search"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= q %>" placeholder="ค้นหารหัสคูปอง..." aria-label="ค้นหารหัสคูปอง" /></label>
               <label class="coupons-filter"><span>สถานะ</span><select name="status" aria-label="กรองสถานะคูปอง"><option value="" <%= !status ? 'selected' : '' %>>ทั้งหมด</option><option value="active" <%= status === 'active' ? 'selected' : '' %>>เปิดใช้งาน</option><option value="inactive" <%= status === 'inactive' ? 'selected' : '' %>>ปิดอยู่</option></select></label>
               <button class="experiment-button primary coupons-search-button" type="submit">ค้นหา</button>

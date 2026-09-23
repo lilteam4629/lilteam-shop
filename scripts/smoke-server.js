@@ -121,31 +121,41 @@ async function crawlAdmin(cookie) {
 
 async function checkBulkPrice(cookie) {
   const productsPage = await fetchOk('/admin/products', 'text/html', { cookie });
-  const product = productsPage.body.match(/class="[^"]*product-select[^"]*"[^>]*value="([^"]+)"[\s\S]*?data-price="([^"]+)"/);
+  const readProduct = (html, productId) => {
+    const inputs = [...html.matchAll(/<input\b[^>]*data-product-select[^>]*>/g)].map(match => match[0]);
+    const id = productId || inputs[0]?.match(/\bvalue="([^"]+)"/)?.[1];
+    if (!id) return null;
+    const priceButton = [...html.matchAll(/<button\b[^>]*data-products-price-edit[^>]*>/g)]
+      .map(match => match[0])
+      .find(button => button.includes(`data-product-id="${id}"`));
+    const price = priceButton?.match(/\bdata-price="([^"]+)"/)?.[1];
+    return price ? { id, price: Number(price) } : null;
+  };
+  const product = readProduct(productsPage.body);
   if (!product) throw new Error('admin products page does not expose selectable products for bulk pricing');
   const invalid = await request('/admin/products/bulk-price', {
     method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'operation=discount&scope=all&percentage=0',
   });
   if (invalid.statusCode !== 302 || invalid.headers.location !== '/admin/products') throw new Error(`invalid bulk price returned HTTP ${invalid.statusCode}`);
-  const originalPrice = Number(product[2]);
-  const validBody = new URLSearchParams({ operation: 'increase', scope: 'selected', percentage: '10', productIds: product[1] }).toString();
+  const originalPrice = product.price;
+  const validBody = new URLSearchParams({ operation: 'increase', scope: 'selected', percentage: '10', productIds: product.id }).toString();
   const valid = await request('/admin/products/bulk-price', {
     method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: validBody,
   });
   if (valid.statusCode !== 302 || valid.headers.location !== '/admin/products') throw new Error(`valid bulk price returned HTTP ${valid.statusCode}`);
   const updatedPage = await fetchOk('/admin/products', 'text/html', { cookie });
-  const updatedProduct = updatedPage.body.match(new RegExp(`class="[^"]*product-select[^"]*"[^>]*value="${product[1]}"[\\s\\S]*?data-price="([^"]+)"`));
+  const updatedProduct = readProduct(updatedPage.body, product.id);
   const expected = Math.round(originalPrice * 1.1);
-  if (!updatedProduct || Number(updatedProduct[1]) !== expected) throw new Error(`bulk price did not update ${originalPrice} to ${expected}`);
+  if (!updatedProduct || updatedProduct.price !== expected) throw new Error(`bulk price did not update ${originalPrice} to ${expected}`);
 }
 
-async function checkInstalledDisabledRainModule(cookie) {
+async function checkUninstalledRainModule(cookie) {
   const effects = await fetchOk('/admin/effects', 'text/html', { cookie });
-  if (!effects.body.includes('เพลงพื้นหลังหน้าเว็บ') || !effects.body.includes('เอฟเฟกต์หิมะตกหน้าเว็บ')) {
+  if (!effects.body.includes('เพลงพื้นหลังหน้าเว็บ') || !effects.body.includes('data-snow-toggle')) {
     throw new Error('standard storefront effects are missing from admin');
   }
-  if (!effects.body.includes('ระบบฝนตกหน้าเว็บ')) {
-    throw new Error('installed rain controls are missing from admin');
+  if (effects.body.includes('class="effects-rain-form"')) {
+    throw new Error('rain controls are visible even though the system module is not installed');
   }
   const update = await request('/admin/effects/rain', {
     method: 'POST',
@@ -198,7 +208,7 @@ async function checkStorefrontModels(cookie) {
 async function checkHomeSectionDelete(cookie) {
   const page = await fetchOk('/admin/home-sections', 'text/html', { cookie });
   const action = page.body.match(/action="(\/admin\/home-sections\/[^"/]+\/delete)"/)?.[1];
-  if (!action || !page.body.includes('hs-delete-button')) throw new Error('home section does not expose its delete action');
+  if (!action || !page.body.includes('hsx-icon-button is-danger')) throw new Error('home section does not expose its delete action');
 
   const editAction = page.body.match(/action="(\/admin\/home-sections\/[^"/]+\/edit)"/)?.[1];
   const productIds = [...page.body.matchAll(/name="productIds" value="([^"]+)"/g)]
@@ -229,7 +239,7 @@ async function checkHomeSectionDelete(cookie) {
 
 async function checkBulkFilterDelete(cookie) {
   const page = await fetchOk('/admin/filter-tags', 'text/html', { cookie });
-  const ids = [...page.body.matchAll(/data-filter-card[^>]*data-id="([^"]+)"/g)].map(match => match[1]).slice(0, 2);
+  const ids = [...page.body.matchAll(/data-filter-card\b[^>]*\bdata-filter-id="([^"]+)"/g)].map(match => match[1]).slice(0, 2);
   if (!ids.length) throw new Error('filter-tag page has no tags for bulk-delete smoke test');
   const response = await request('/admin/filter-tags/bulk-delete', {
     method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
@@ -309,7 +319,7 @@ async function run() {
     if (mainAdmin.body.includes('/admin/rangers-catalog')) throw new Error('System Lab catalog leaked into the main admin menu');
     const protectedCatalog = await request('/admin/rangers-catalog', { headers: { cookie } });
     if (protectedCatalog.statusCode !== 404) throw new Error(`main admin can access System Lab catalog (HTTP ${protectedCatalog.statusCode})`);
-    await checkInstalledDisabledRainModule(cookie);
+    await checkUninstalledRainModule(cookie);
     await checkStorefrontModels(cookie);
     await checkBulkFilterDelete(cookie);
     await checkHomeSectionDelete(cookie);

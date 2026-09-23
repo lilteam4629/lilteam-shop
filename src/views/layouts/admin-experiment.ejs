@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title><%= title %> | LILTeam Shop — Experimental UI</title>
-  <meta name="description" content="แดชบอร์ดจัดการร้านค้า LILTeam Shop รุ่นทดลอง" />
+  <title><%= title %> | LILTeam Shop</title>
+  <meta name="description" content="ระบบจัดการร้านค้า LILTeam Shop" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800&family=Rubik:wght@500;600;700&display=swap" rel="stylesheet" />
@@ -66,19 +66,6 @@
         else form.submit();
       });
       confirmDialog?.addEventListener('cancel', () => { pendingConfirmForm = null; });
-      const pendingRoutes = [
-        ['/admin/products/bulk-import', 'นำเข้าสินค้า'],
-        ['/admin/catalog-api', 'API สินค้าร้านหลัก'],
-        ['/admin/storefront-models', 'โมเดลหน้าร้าน'],
-        ['/admin/topups', 'เติมเงินและตรวจสอบ'],
-        ['/admin/users', 'จัดการสมาชิก'],
-        ['/admin/slip-verification', 'ตรวจสอบอัตโนมัติ'],
-        ['/admin/appearance', 'รูปและแบนเนอร์'],
-        ['/admin/theme', 'ธีมร้านค้า'],
-        ['/admin/welcome-popup', 'ป๊อปอัปต้อนรับ'],
-        ['/admin/settings', 'ตั้งค่าร้าน'],
-      ];
-      const pendingFor = (pathname) => pendingRoutes.find(([route]) => pathname === route || pathname.startsWith(`${route}/`));
       const sidebarScroll = document.querySelector('.experiment-sidebar-scroll');
       const extraNavGroups = [
         {
@@ -116,19 +103,11 @@
           const section = document.createElement('div');
           section.className = 'experiment-nav-group';
           section.dataset.experimentExtraNav = 'true';
-          section.innerHTML = `<div class="experiment-nav-label">${group.title}</div>${items.map(([href, label, icon]) => `<a class="experiment-nav-item" href="${href}" aria-label="${label} · รอทำ" data-experiment-pending="true">${icon}<span>${label}</span><em class="experiment-nav-status pending">รอทำ</em></a>`).join('')}`;
+          section.innerHTML = `<div class="experiment-nav-label">${group.title}</div>${items.map(([href, label, icon]) => `<a class="experiment-nav-item" href="${href}" aria-label="${label}">${icon}<span>${label}</span></a>`).join('')}`;
           sidebarScroll.appendChild(section);
         });
       }
-      sidebarScroll?.querySelectorAll('a[href="/admin/coupons?ui=experiment"]').forEach(link => link.setAttribute('href', '/admin/coupons'));
-      sidebarScroll?.querySelectorAll('a[href="/admin/effects"]').forEach(link => link.setAttribute('href', '/admin/effects?ui=experiment'));
-      sidebarScroll?.querySelectorAll('a[href="/admin/effects"], a[href^="/admin/effects?"]').forEach(link => {
-        link.removeAttribute('data-experiment-pending');
-        link.setAttribute('aria-label', 'ลูกเล่นหน้าเว็บ');
-        link.querySelector('.experiment-nav-status')?.remove();
-      });
       const currentPath = window.location.pathname.replace(/\/$/, '') || '/admin';
-      const isEffectsPage = currentPath === '/admin/effects';
       document.querySelectorAll('a[target="_blank"]').forEach(link => {
         try {
           const linkUrl = new URL(link.getAttribute('href'), window.location.origin);
@@ -145,188 +124,6 @@
           link.classList.toggle('active', matchesCurrent);
         } catch (_) {}
       });
-      document.querySelectorAll('a[href]').forEach((link) => {
-        let url;
-        try { url = new URL(link.getAttribute('href'), window.location.origin); } catch (_) { return; }
-        if (url.pathname === '/admin/settings' && link.closest('.experiment-nav-item')) {
-          link.removeAttribute('data-experiment-pending');
-          const accessibleLabel = link.getAttribute('aria-label');
-          if (accessibleLabel?.endsWith(' · รอทำ')) {
-            const cleanLabel = accessibleLabel.slice(0, -' · รอทำ'.length).trim();
-            if (cleanLabel) link.setAttribute('aria-label', cleanLabel);
-            else link.removeAttribute('aria-label');
-          }
-          link.querySelector('.experiment-nav-status')?.remove();
-          return;
-        }
-        const experimentProductFlow = url.pathname === '/admin/products/new' || (url.searchParams.get('ui') === 'experiment' && /^\/admin\/products\/[^/]+\/edit$/.test(url.pathname));
-        // Only the Effects page itself is ready; keep the pending markers on
-        // every other unfinished section even when the current page is Effects.
-        const pending = !experimentProductFlow && (pendingFor(url.pathname) || (url.pathname.startsWith('/admin/products/') && url.pathname !== '/admin/products'));
-        if (!pending) return;
-        link.dataset.experimentPending = 'true';
-        const accessibleLabel = link.getAttribute('aria-label') || link.textContent.trim();
-        link.setAttribute('aria-label', accessibleLabel.includes('รอทำ') ? accessibleLabel : `${accessibleLabel} · รอทำ`);
-        if (link.closest('.experiment-nav-item') && !link.querySelector('.experiment-nav-status')) {
-          const badge = document.createElement('em');
-          badge.className = 'experiment-nav-status pending';
-          badge.textContent = 'รอทำ';
-          link.appendChild(badge);
-        } else if (link.closest('.experiment-mobile-nav') && !link.querySelector('.experiment-mobile-pending')) {
-          const badge = document.createElement('em');
-          badge.className = 'experiment-mobile-pending';
-          badge.textContent = 'รอทำ';
-          (link.querySelector('span') || link).appendChild(badge);
-        } else if (link.classList.contains('experiment-button') && !link.querySelector('.experiment-inline-status')) {
-          const badge = document.createElement('em');
-          badge.className = 'experiment-inline-status pending';
-          badge.textContent = 'รอทำ';
-          link.appendChild(badge);
-        } else if (link.closest('.experiment-action-menu-panel') && !link.querySelector('.experiment-menu-status')) {
-          const badge = document.createElement('em');
-          badge.className = 'experiment-menu-status pending';
-          badge.textContent = 'รอทำ';
-          link.appendChild(badge);
-        }
-      });
-      const topbar = document.querySelector('.experiment-topbar');
-      if (!isEffectsPage && topbar && !topbar.querySelector('.experiment-build-legend')) {
-        const legend = document.createElement('div');
-        legend.className = 'experiment-build-legend';
-        legend.setAttribute('aria-label', 'สถานะงานออกแบบ');
-        legend.innerHTML = '<span><i class="ready"></i> ใช้งานได้</span><span><i class="pending"></i> รอทำ</span>';
-        topbar.insertBefore(legend, topbar.firstChild);
-      }
-      const placeholderKicker = document.querySelector('.experiment-placeholder-card .experiment-kicker');
-      if (placeholderKicker && !placeholderKicker.querySelector('.experiment-inline-status')) {
-        const badge = document.createElement('em');
-        badge.className = 'experiment-inline-status pending';
-        badge.textContent = 'รอทำ';
-        placeholderKicker.appendChild(badge);
-      }
-      const roadmapPresets = {
-        dashboard: {
-          ready: ['ดูยอดขายและสต๊อกสรุป', 'เปิดทางลัดไปหน้าที่ทำแล้ว', 'เห็นสถานะเมนูรอทำชัดเจน'],
-          pending: ['รายงานยอดขายแบบละเอียด', 'แจ้งเตือนและงานการเงิน', 'ตั้งค่าร้านและการตกแต่ง'],
-        },
-        products: {
-          ready: ['ค้นหาและกรองสินค้า', 'แก้ราคาและจัดการสต๊อก', 'เพิ่มสินค้าและตั้งเวลาเปิดขาย'],
-          pending: ['นำเข้าสินค้าเป็นชุด', 'ปรับราคา/สต๊อกหลายรายการ', 'ส่งออกข้อมูลสินค้า'],
-        },
-        productForm: {
-          ready: ['กรอกข้อมูลและอัปโหลดรูปสินค้า', 'บันทึกสินค้าใหม่หรือแก้ไขสินค้า', 'กำหนดราคาและสถานะการขาย'],
-          pending: ['นำเข้าข้อมูลจากไฟล์', 'จัดการคีย์สินค้าแบบชุด', 'ตรวจสอบประวัติการแก้ไข'],
-        },
-        scheduled: {
-          ready: ['ค้นหาและกรองรายการตั้งเวลา', 'แก้ไขเวลาหรือยกเลิกกำหนดเวลา', 'แสดงสถานะรอเวลา/ถึงเวลาแล้ว'],
-          pending: ['ตั้งเวลาหลายรายการพร้อมกัน', 'มุมมองปฏิทินและประวัติ', 'แจ้งเตือนก่อนถึงเวลาเปิดขาย'],
-        },
-        filters: {
-          ready: ['สร้าง แก้ไข ลบ และค้นหาแท็ก', 'ดูจำนวนสินค้าที่ผูกอยู่', 'ผูกสินค้าเข้ากับแท็ก'],
-          pending: ['เรียงลำดับแท็กบนหน้าร้าน', 'นำเข้า/ส่งออกแท็กเป็นชุด', 'ดูสถิติการใช้แท็ก'],
-        },
-        recommendations: {
-          ready: ['สร้างหมวดพร้อมภาพตัวอย่าง', 'เลือกสินค้าและเปิด/ปิดการแสดงผล', 'แก้ไขหรือลบหมวดหมู่'],
-          pending: ['ลากเรียงลำดับหมวดบนหน้าร้าน', 'ตั้งเวลาแสดงหมวดอัตโนมัติ', 'ดูตัวอย่างหน้าร้านทุกขนาดจอ'],
-        },
-        orders: {
-          ready: ['ค้นหาและกรองคำสั่งซื้อ', 'กรองสถานะทั้งหมด/รอ/สำเร็จ/ยกเลิก', 'เปิดรายละเอียดและเปลี่ยนสถานะ'],
-          pending: ['ส่งออก CSV / Excel', 'พิมพ์ใบเสร็จ / ใบส่งสินค้า', 'จัดการหลายรายการ / คืนเงิน'],
-        },
-        orderDetail: {
-          ready: ['ดูรายการสินค้าและข้อมูลผู้ซื้อ', 'ดูยอดรวมและสถานะคำสั่งซื้อ', 'เปลี่ยนสถานะจากหน้ารายละเอียด'],
-          pending: ['พิมพ์ใบเสร็จ / ใบส่งสินค้า', 'คืนเงินหรือยกเลิกรายการบางส่วน', 'เพิ่มโน้ตและประวัติการดำเนินการ'],
-        },
-        settings: {
-          ready: ['แก้ไขข้อมูลร้านและคำโปรย', 'ตั้งค่าเวลาเปิดบริการและช่องทางติดต่อ', 'ดูตัวอย่างร้านแบบสดก่อนบันทึก'],
-          pending: ['จัดการโลโก้และภาพแบนเนอร์', 'ตั้งค่าสีและธีมหน้าร้าน', 'ตั้งค่าการชำระเงินและตรวจสอบสลิป', 'จัดการป้ายประกาศ', 'ตั้งค่าป๊อปอัปต้อนรับ', 'กำหนดสิทธิ์ผู้ดูแลและการแจ้งเตือน'],
-        },
-        users: {
-          ready: ['ค้นหาชื่อผู้ใช้และอีเมล', 'กรองบทบาทและสถานะบัญชี', 'เปิดรายละเอียดสมาชิกและประวัติ'],
-          pending: ['ส่งคำเชิญทางอีเมลจริง', 'กำหนดสิทธิ์เป็นชุด', 'ประวัติการแก้ไขสิทธิ์'],
-        },
-        effects: {
-          ready: ['ตั้งค่าเพลง YouTube และช่วงเวลาเล่น', 'ปรับระดับเสียงพร้อมดูตัวอย่างทันที', 'เปิด/ปิดหิมะและระบบฝนที่ติดตั้งแล้ว'],
-          pending: ['พรีเซ็ตเอฟเฟกต์ตามเทศกาล', 'ตั้งเวลาเปิด/ปิดเอฟเฟกต์', 'ตัวควบคุมเอฟเฟกต์แยกตามอุปกรณ์'],
-        },
-        welcomePopup: {
-          ready: ['แก้ข้อความและดูผลทันทีบนหน้าร้านจริง', 'เปิด/ปิดหัวข้อและเนื้อหาได้แยกกัน', 'แสดงหลายภาพเป็นสไลด์พร้อมปิด/พักการแสดง 24 ชั่วโมง'],
-          pending: ['เชื่อมการบันทึกฉบับทดลองเข้าข้อมูลร้านจริง', 'ตั้งเวลาและกลุ่มลูกค้าที่เห็นป๊อปอัป', 'เพิ่มการควบคุมแป้นพิมพ์และโฟกัสในหน้าร้านจริง'],
-        },
-        announcements: {
-          ready: ['แสดงประกาศที่เปิดอยู่บนหน้าแรกจริง', 'เพิ่มประกาศและเปิด/ซ่อนรายการจริงได้', 'ลบประกาศจริงจากหน้าจัดการเดิมได้'],
-          pending: ['แก้ชื่อและข้อความพร้อมบันทึกจริง', 'ตั้งเวลาเริ่ม/หมดอายุประกาศ', 'จัดลำดับและดูสถิติการแสดงผล'],
-        },
-        homeSections: {
-          ready: ['สร้างและแก้ไขแถวสินค้าบนหน้าร้าน', 'เลือกสินค้าเองหรือเรียงสินค้าใหม่ล่าสุด', 'จัดลำดับและซ่อน/แสดงหมวดหมู่'],
-          pending: [],
-        },
-        placeholder: {
-          ready: ['มีพื้นที่ทดลองและเมนูเข้าถึงได้', 'แยกจากระบบเก่าด้วย URL รุ่นทดลอง'],
-          pending: ['ออกแบบหน้าการทำงานจริง', 'เชื่อมข้อมูลและการบันทึก', 'ทดสอบสิทธิ์และขั้นตอนใช้งาน'],
-        },
-      };
-      const pageKey = currentPath === '/admin' ? 'dashboard'
-        : currentPath === '/admin/products' ? 'products'
-          : currentPath === '/admin/products/new' || /^\/admin\/products\/[^/]+\/edit$/.test(currentPath) ? 'productForm'
-            : currentPath === '/admin/scheduled-products' ? 'scheduled'
-              : currentPath === '/admin/filter-tags' ? 'filters'
-                : currentPath === '/admin/recommended-categories' ? 'recommendations'
-                  : currentPath === '/admin/home-sections' ? 'homeSections'
-                    : /^\/admin\/orders\/[^/]+$/.test(currentPath) ? 'orderDetail'
-                      : currentPath === '/admin/orders' ? 'orders'
-                        : currentPath === '/admin/coupons' ? 'coupons'
-                          : currentPath === '/admin/settings' ? 'settings'
-                            : currentPath === '/admin/users' || /^\/admin\/users\/[^/]+$/.test(currentPath) ? 'users'
-                              : currentPath === '/admin/effects' ? 'effects'
-                                : currentPath === '/admin/minigame' ? 'minigame'
-                                  : currentPath === '/admin/welcome-popup' ? 'welcomePopup'
-                                    : currentPath === '/admin/announcements' ? 'announcements' : 'placeholder';
-      const roadmapPreset = roadmapPresets[pageKey];
-      const buildRoadmap = () => {
-        if (pageKey === 'settings' || pageKey === 'users' || pageKey === 'coupons' || pageKey === 'effects' || pageKey === 'minigame' || pageKey === 'announcements' || pageKey === 'homeSections') return;
-        const content = document.querySelector('.experiment-content');
-        if (!content || document.querySelector('[data-experiment-roadmap]') || document.querySelector('.orders-build-status') || document.querySelector('.users-build-status')) return;
-        const ready = roadmapPreset.ready;
-        const pending = roadmapPreset.pending;
-        const total = ready.length + pending.length;
-        const roadmap = document.createElement('section');
-        roadmap.className = 'experiment-build-roadmap';
-        roadmap.dataset.experimentRoadmap = 'true';
-        roadmap.setAttribute('aria-labelledby', 'experiment-roadmap-title');
-        const list = (items, type) => items.map((label, index) => type === 'ready'
-          ? `<li><span>${label}</span><em>พร้อมใช้</em></li>`
-          : `<li><span>${label}</span><button type="button" data-roadmap-demo data-demo-title="${label}">ดูตัวอย่าง</button></li>`).join('');
-        roadmap.innerHTML = `<div class="experiment-build-roadmap-head"><div><span class="experiment-build-roadmap-kicker">BUILD STATUS · ${pageKey.toUpperCase()}</span><h2 id="experiment-roadmap-title">หน้านี้ทำอะไรได้แล้ว และเหลืออะไร</h2><p>รายการนี้แสดงตามสถานะของหน้านี้ เพื่อให้ไล่แก้ได้ทีละจุด</p></div><span class="experiment-build-roadmap-progress"><b>${ready.length}</b>/${total} จุดพร้อมใช้</span></div><div class="experiment-build-roadmap-grid"><div class="experiment-build-column ready"><h3><i>✓</i> ทำแล้ว · ใช้ข้อมูลจริง</h3><ul>${list(ready, 'ready')}</ul></div><div class="experiment-build-column pending"><h3><i>＋</i> เหลือทำ · มีตัวอย่างให้ดู</h3><ul>${list(pending, 'pending')}</ul></div></div><div class="experiment-build-roadmap-foot"><span>ระบบเก่ายังอยู่ที่ URL เดิมและไม่ได้ถูกลบ</span><button type="button" data-roadmap-toggle>ซ่อนรายการนี้ ↑</button></div>`;
-        const pageHead = content.querySelector('.experiment-page-head');
-        const detail = content.querySelector('.order-detail-page');
-        const placeholder = content.querySelector('.experiment-placeholder-card');
-        if (pageHead) pageHead.insertAdjacentElement('afterend', roadmap);
-        else if (detail) detail.insertAdjacentElement('beforebegin', roadmap);
-        else if (placeholder) placeholder.insertAdjacentElement('beforebegin', roadmap);
-        else content.prepend(roadmap);
-        const toggle = roadmap.querySelector('[data-roadmap-toggle]');
-        toggle?.addEventListener('click', () => {
-          roadmap.classList.toggle('is-collapsed');
-          toggle.textContent = roadmap.classList.contains('is-collapsed') ? 'แสดงรายการนี้ ↓' : 'ซ่อนรายการนี้ ↑';
-        });
-        let dialog = document.querySelector('[data-experiment-roadmap-dialog]');
-        if (!dialog) {
-          dialog = document.createElement('dialog');
-          dialog.className = 'experiment-roadmap-dialog';
-          dialog.dataset.experimentRoadmapDialog = 'true';
-          dialog.innerHTML = '<div class="experiment-roadmap-dialog-head"><div><span class="experiment-build-roadmap-kicker">EXAMPLE PREVIEW</span><h2 data-roadmap-dialog-title>ตัวอย่างฟังก์ชัน</h2><p>หน้าตัวอย่างเพื่อเห็นตำแหน่งและรูปแบบก่อนพัฒนาจริง</p></div><button type="button" data-roadmap-dialog-close aria-label="ปิดตัวอย่าง">×</button></div><div class="experiment-roadmap-dialog-body"><div class="experiment-roadmap-mock-row"><span>↗</span><div><strong data-roadmap-dialog-code>#DEMO-001</strong><small>ตัวอย่างข้อมูล · ไม่กระทบข้อมูลจริง</small></div><em>ตัวอย่าง</em></div><div class="experiment-roadmap-placeholder"><span data-roadmap-dialog-message>ฟังก์ชันนี้ยังไม่เชื่อมกับระบบจริง</span><small>เมื่อเริ่มทำจริง ปุ่มจะทำงานกับข้อมูลจริงของหน้านี้</small></div></div><div class="experiment-roadmap-dialog-actions"><button class="experiment-button" type="button" data-roadmap-dialog-close>ปิด</button><a class="experiment-button primary" href="${window.location.pathname}${window.location.search}">กลับหน้าปัจจุบัน</a></div>';
-          document.body.appendChild(dialog);
-          dialog.querySelectorAll('[data-roadmap-dialog-close]').forEach(button => button.addEventListener('click', () => dialog.close()));
-          dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
-        }
-        roadmap.querySelectorAll('[data-roadmap-demo]').forEach(button => button.addEventListener('click', () => {
-          dialog.querySelector('[data-roadmap-dialog-title]').textContent = button.dataset.demoTitle || 'ตัวอย่างฟังก์ชัน';
-          dialog.querySelector('[data-roadmap-dialog-message]').textContent = `${button.dataset.demoTitle || 'ฟังก์ชันนี้'} ยังไม่เชื่อมกับระบบจริง`;
-          dialog.showModal();
-        }));
-      };
-      buildRoadmap();
       try {
         if (localStorage.getItem('lilteam_experiment_sidebar') === 'collapsed') root.classList.add('experiment-sidebar-collapsed');
       } catch (_) {}
@@ -362,16 +159,6 @@
           confirmDialog.showModal();
           confirmCancel.focus();
         });
-      });
-      document.addEventListener('click', function (event) {
-        if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-        var link = event.target.closest('a[href]');
-        if (!link) return;
-        var target;
-        try { target = new URL(link.getAttribute('href'), window.location.origin); } catch (_) { return; }
-        if (target.origin !== window.location.origin || !target.pathname.startsWith('/admin') || target.searchParams.has('ui') || link.dataset.experimentLegacy === 'true') return;
-        target.searchParams.set('ui', 'experiment');
-        link.href = target.pathname + target.search + target.hash;
       });
     })();
   </script>

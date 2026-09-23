@@ -1,8 +1,7 @@
-// Experimental admin screens are reserved for the platform's own shop.
-// Tenant shops keep their existing admin interface even if an experiment URL
-// is copied or bookmarked.
-function usesExperimentalAdminUi(req) {
-  return !req?.tenantShop && req?.query?.ui === 'experiment';
+// The redesigned, production admin is exclusive to the main shop. Tenant
+// shops intentionally continue to use the established admin interface.
+function usesMainAdminUi(req) {
+  return !req?.tenantShop;
 }
 
 function normalizeTenantAdminUi(req, res, next) {
@@ -24,4 +23,11 @@ function normalizeTenantAdminUi(req, res, next) {
   return next();
 }
 
-module.exports = { usesExperimentalAdminUi, normalizeTenantAdminUi };
+function normalizeMainAdminUi(req, res, next) {
+  if (!usesMainAdminUi(req) || !['GET', 'HEAD'].includes(req.method) || !req.query?.ui) return next();
+  const cleanUrl = new URL(req.originalUrl || req.url || req.path || '/admin', 'http://admin.local');
+  cleanUrl.searchParams.delete('ui');
+  return res.redirect(302, `${cleanUrl.pathname}${cleanUrl.search}${cleanUrl.hash}`);
+}
+
+module.exports = { usesMainAdminUi, normalizeTenantAdminUi, normalizeMainAdminUi };
