@@ -37,7 +37,28 @@
 
       <div class="experiment-summary"><div class="experiment-summary-item">ยอดขายรวมทั้งหมด <strong><%= money(stats.revenue) %></strong></div><div class="experiment-summary-item">อัตราเฉลี่ยต่อบิล <strong><%= money(averageOrder) %></strong></div><div class="experiment-summary-item">สินค้าในระบบ <strong><%= stats.productCount.toLocaleString('th-TH') %> รายการ</strong></div><div class="experiment-summary-item">สต๊อกพร้อมขาย <strong><%= stats.availableStock.toLocaleString('th-TH') %> รายการ</strong></div></div>
 
-      <% if (lowStockProducts.length) { %><section class="experiment-stock-alert" data-experiment-stock-alert><div class="experiment-alert-head"><div style="color:var(--ex-red)" aria-hidden="true">▲</div><div><strong>สินค้าสต๊อกใกล้หมด (<%= lowStockProducts.length %> รายการ)</strong><p>กดชื่อสินค้าเพื่อเปิดหน้าจัดการสต๊อกโดยตรง</p></div><div class="experiment-alert-tools"><button type="button" data-experiment-alert-toggle aria-expanded="false">ดูทั้งหมด</button></div></div><div class="experiment-alert-list"><% lowStockProducts.forEach(product => { %><a class="experiment-stock-chip" href="/admin/products/<%= product.id %>/stock"><%= product.title %> <em><%= (product.stockCount || 0) === 0 ? 'หมดแล้ว' : `${product.stockCount} เหลือ` %></em></a><% }) %></div></section><% } %>
+      <% if (lowStockProducts.length) { %>
+        <section class="experiment-stock-alert" data-experiment-stock-alert aria-labelledby="experiment-stock-alert-title">
+          <div class="experiment-alert-head">
+            <div aria-hidden="true">▲</div>
+            <div>
+              <strong id="experiment-stock-alert-title">สินค้าสต๊อกใกล้หมด (<%= lowStockProducts.length %> รายการ)</strong>
+              <p>กดชื่อสินค้าเพื่อเปิดหน้าจัดการสต๊อกโดยตรง</p>
+            </div>
+            <div class="experiment-alert-tools">
+              <button type="button" data-experiment-alert-toggle aria-expanded="false" aria-controls="experiment-stock-alert-list">ดูทั้งหมด</button>
+            </div>
+          </div>
+          <div class="experiment-alert-list" id="experiment-stock-alert-list">
+            <% lowStockProducts.forEach(product => { %>
+              <a class="experiment-stock-chip" href="/admin/products/<%= product.id %>/stock">
+                <span class="experiment-stock-chip-name" title="<%= product.title %>"><%= product.title %></span>
+                <em><%= (product.stockCount || 0) === 0 ? 'หมดแล้ว' : `${product.stockCount} เหลือ` %></em>
+              </a>
+            <% }) %>
+          </div>
+        </section>
+      <% } %>
 
       <section class="experiment-card experiment-luxury-menu" aria-labelledby="experiment-luxury-menu-title">
         <div class="experiment-luxury-ribbons" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
