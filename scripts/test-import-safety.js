@@ -421,6 +421,51 @@ async function main() {
       assert.equal(mainView, expectedView, routePath);
     }
   });
+  const themeGet = admin.stack.find(layer => layer.route?.path === '/theme' && layer.route.methods.get).route.stack.at(-1).handle;
+  const mainThemeFixture = model.fixture();
+  mainThemeFixture.settings.theme = { accent: '#c8a63f', bgPreset: 'warmDark', bgColor: '', style: 'normal' };
+  let mainThemeRender;
+  als.run(mainThemeFixture, () => themeGet({ tenantShop: null }, { render(view, values) { mainThemeRender = { view, values }; } }));
+  const tenantThemeFixture = model.fixture();
+  let tenantThemeRender;
+  als.run(tenantThemeFixture, () => themeGet({ tenantShop: { id: 'theme-tenant-fixture' } }, { render(view, values) { tenantThemeRender = { view, values }; } }));
+  const themeTemplatePath = path.join(root, 'src/views/admin/theme.ejs');
+  const themeEjs = require('ejs');
+  const renderTheme = render => themeEjs.render(fs.readFileSync(themeTemplatePath, 'utf8'), {
+    messages: { success: [], error: [] }, asset: value => '/' + value, ...render.values,
+  }, { filename: themeTemplatePath });
+  const mainThemeHtml = renderTheme(mainThemeRender);
+  const tenantThemeHtml = renderTheme(tenantThemeRender);
+  check('Main theme offers only an automatic pure black/white background while tenants retain all legacy options', () => {
+    assert.equal(mainThemeRender.view, 'admin/theme');
+    assert.equal(mainThemeRender.values.mainAdminUi, true);
+    assert.deepEqual(mainThemeRender.values.bgPresets.map(preset => preset.key), ['monochrome']);
+    assert.match(mainThemeHtml, /โหมดมืด/);
+    assert.match(mainThemeHtml, /#000000/);
+    assert.match(mainThemeHtml, /โหมดสว่าง/);
+    assert.match(mainThemeHtml, /#FFFFFF/);
+    assert.doesNotMatch(mainThemeHtml, /data-theme-bg-choice="custom"/);
+    assert.equal(tenantThemeRender.values.mainAdminUi, false);
+    assert.equal(tenantThemeRender.values.bgPresets.length, 6);
+    assert.match(tenantThemeHtml, /data-theme-bg-choice="custom"/);
+    assert.match(tenantThemeHtml, /สร้างชุดสีจากสีที่เลือก/);
+  });
+  const themePost = admin.stack.find(layer => layer.route?.path === '/theme' && layer.route.methods.post).route.stack.at(-1).handle;
+  const mainThemePostFixture = model.fixture();
+  await als.run(mainThemePostFixture, () => themePost(
+    { body: { accent: '#c8a63f', bgMode: 'custom', bgPreset: 'warmDark', bgColor: '#123456', style: 'normal' }, tenantShop: null, flash() {} },
+    { redirect() {} },
+  ));
+  const tenantThemePostFixture = model.fixture();
+  await als.run(tenantThemePostFixture, () => themePost(
+    { body: { accent: '#c8a63f', bgMode: 'preset', bgPreset: 'roseDark', style: 'normal' }, tenantShop: { id: 'theme-tenant-fixture' }, flash() {} },
+    { redirect() {} },
+  ));
+  check('Main theme save enforces monochrome but tenant theme save keeps its chosen legacy palette', () => {
+    assert.equal(mainThemePostFixture.settings.theme.bgPreset, 'monochrome');
+    assert.equal(mainThemePostFixture.settings.theme.bgColor, null);
+    assert.equal(tenantThemePostFixture.settings.theme.bgPreset, 'roseDark');
+  });
   const welcomePopupHandler = admin.stack.find(layer => layer.route?.path === '/welcome-popup' && layer.route.methods.get).route.stack.at(-1).handle;
   let tenantWelcomePopupView = '';
   welcomePopupHandler({ tenantShop: { id: 'popup-tenant-fixture' } }, { render(view) { tenantWelcomePopupView = view; } });

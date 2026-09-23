@@ -34,7 +34,14 @@ const BG_PRESETS = {
     dark: { bg: '#1e0b11', card: '#30121b', border: '#612436', borderLight: '#732b40', input: '#3c1621', text: '#f1eeef', text2: '#d6cdcf', text3: '#ac959c', text4: '#86656e' },
     light: { bg: '#faf0f2', card: '#ffffff', border: '#e8cad1', borderLight: '#dcabb6', input: '#f5e4e8', text: '#291016', text2: '#471c26', text3: '#6a3240', text4: '#8c485a' },
   },
+  monochrome: {
+    label: 'ขาว–ดำ (ตามโหมดหน้าร้าน)',
+    dark: { bg: '#000000', card: '#000000', border: '#3a3a3a', borderLight: '#505050', input: '#000000', text: '#ffffff', text2: '#e6e6e6', text3: '#c2c2c2', text4: '#a0a0a0' },
+    light: { bg: '#ffffff', card: '#ffffff', border: '#dedede', borderLight: '#c9c9c9', input: '#ffffff', text: '#000000', text2: '#1a1a1a', text3: '#404040', text4: '#666666' },
+  },
 };
+
+const MAIN_BG_PRESET_KEY = 'monochrome';
 
 const ACCENT_PRESETS = [
   { key: 'gold', label: 'ทอง (ค่าเริ่มต้น)', color: '#c8a63f' },
@@ -73,8 +80,12 @@ function getStyles() {
   return Object.entries(STYLE_LABELS).map(([key, label]) => ({ key, label }));
 }
 
-function getBgPresets() {
-  return Object.entries(BG_PRESETS).map(([key, p]) => ({
+function getBgPresets(options = {}) {
+  const entries = Object.entries(BG_PRESETS).filter(([key]) => {
+    if (options.mainShopOnly) return key === MAIN_BG_PRESET_KEY;
+    return options.includeMain || key !== MAIN_BG_PRESET_KEY;
+  });
+  return entries.map(([key, p]) => ({
     key,
     label: p.label,
     preview: {
@@ -319,6 +330,7 @@ function renderCss(theme) {
 
 module.exports = {
   getBgPresets,
+  MAIN_BG_PRESET_KEY,
   getAccentPresets,
   getStyles,
   renderCss,

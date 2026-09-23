@@ -15,7 +15,7 @@ function modeVariables(css) {
 }
 
 const accents = theme.getAccentPresets().map((item) => item.color).concat(['#000000', '#ffffff', '#050505', '#fafafa']);
-const backgrounds = theme.getBgPresets().map((item) => ({ bgPreset: item.key })).concat([
+const backgrounds = theme.getBgPresets({ includeMain: true }).map((item) => ({ bgPreset: item.key })).concat([
   { bgColor: '#000000' },
   { bgColor: '#ffffff' },
   { bgColor: '#064e3b' },
@@ -46,3 +46,14 @@ for (const background of backgrounds) {
 }
 
 console.log(`Theme contrast checks passed: ${checked} dark/light palette combinations`);
+
+const [darkMono, lightMono] = modeVariables(theme.renderCss({ bgPreset: theme.MAIN_BG_PRESET_KEY }));
+assert.equal(darkMono.bg, '#000000', 'main dark-mode page background must be pure black');
+assert.equal(darkMono.card, '#000000', 'main dark-mode card background must be pure black');
+assert.equal(darkMono.input, '#000000', 'main dark-mode input background must be pure black');
+assert.equal(lightMono.bg, '#ffffff', 'main light-mode page background must be pure white');
+assert.equal(lightMono.card, '#ffffff', 'main light-mode card background must be pure white');
+assert.equal(lightMono.input, '#ffffff', 'main light-mode input background must be pure white');
+assert.equal(theme.getBgPresets().some((item) => item.key === theme.MAIN_BG_PRESET_KEY), false, 'tenant preset list must not gain the main-only palette');
+assert.deepEqual(theme.getBgPresets({ mainShopOnly: true }).map((item) => item.key), [theme.MAIN_BG_PRESET_KEY]);
+console.log('Main-shop monochrome surfaces and tenant palette isolation passed');

@@ -4,6 +4,7 @@
 
   const form = page.querySelector('[data-theme-form]');
   const preview = page.querySelector('[data-theme-store-preview]');
+  const mainMono = page.dataset.mainMono === 'true';
   const accentPicker = page.querySelector('[data-theme-accent-picker]');
   const customAccent = page.querySelector('[data-theme-accent-custom]');
   const backgroundPicker = page.querySelector('[data-theme-background-picker]');
@@ -27,7 +28,9 @@
   };
   const presetKeys = new Set(presetNodes.map(node => node.dataset.key));
   const styleKeys = new Set(styleOptions.map(node => node.value));
-  let draft = { ...defaultState };
+  let draft = mainMono
+    ? { ...defaultState, bgPreset: page.dataset.mainBgPreset || presetNodes[0]?.dataset.key || 'monochrome', bgColor: '' }
+    : { ...defaultState };
   let previewMode = 'dark';
   let dirty = false;
 
@@ -225,8 +228,8 @@
 
     const backgroundPreset = backgroundOptions.find(option => option.value === draft.bgPreset);
     backgroundOptions.forEach(option => { option.checked = !draft.bgColor && option === backgroundPreset; });
-    customBackground.checked = Boolean(draft.bgColor);
-    backgroundPicker.value = draft.bgColor || '#365a4a';
+    if (customBackground) customBackground.checked = Boolean(draft.bgColor);
+    if (backgroundPicker) backgroundPicker.value = draft.bgColor || '#365a4a';
     backgroundMode.value = draft.bgColor ? 'custom' : 'preset';
     backgroundColor.value = draft.bgColor;
 
@@ -270,7 +273,7 @@
     updatePreview();
   }));
 
-  backgroundPicker.addEventListener('input', () => {
+  backgroundPicker?.addEventListener('input', () => {
     customBackground.checked = true;
     draft.bgColor = backgroundPicker.value;
     backgroundMode.value = 'custom';
@@ -296,7 +299,7 @@
 
   form.addEventListener('submit', () => {
     customAccent.value = accentPicker.value;
-    if (customBackground.checked) {
+    if (customBackground?.checked) {
       backgroundMode.value = 'custom';
       backgroundColor.value = backgroundPicker.value;
     }

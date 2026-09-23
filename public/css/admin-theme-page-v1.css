@@ -655,3 +655,71 @@
 @media (prefers-reduced-motion: reduce) {
   .admin-theme-page *, .admin-theme-page *::before, .admin-theme-page *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
 }
+
+/* The main shop uses a single neutral background system: black in dark mode,
+   white in light mode. Tenant theme cards above intentionally stay unchanged. */
+.admin-theme-page[data-main-mono="true"] .admin-theme-backgrounds-mono {
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option {
+  grid-template-columns: minmax(125px, 1fr) repeat(2, minmax(100px, .72fr));
+  align-items: stretch;
+  min-height: 96px;
+  padding: 10px;
+  border-color: #d5d5d5;
+  background: #fff;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option:hover {
+  border-color: #777;
+  background: #fff;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option:has(input:checked) {
+  border-color: #111;
+  background: #fff;
+  box-shadow: 0 0 0 2px rgb(0 0 0 / 8%);
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option .admin-theme-background-copy strong {
+  color: #111;
+  font-size: 13px;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option .admin-theme-background-copy small {
+  color: #555;
+  font-size: 11px;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #111;
+  border-radius: 9px;
+  font-size: 11px;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface.is-dark {
+  color: #fff;
+  background: #000;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface.is-light {
+  color: #000;
+  background: #fff;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface strong { font-size: 11px; }
+.admin-theme-page[data-main-mono="true"] .admin-theme-mono-surface code {
+  color: inherit;
+  font: 700 10px ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option .admin-theme-selected {
+  color: #fff;
+  background: #000;
+}
+@media (max-width: 620px) {
+  .admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-theme-page[data-main-mono="true"] .admin-theme-monochrome-option .admin-theme-background-copy {
+    grid-column: 1 / -1;
+    padding-right: 20px;
+  }
+}

@@ -1420,21 +1420,27 @@ router.post('/rangers-catalog/items/:id/delete', requireSystemLab, async (req, r
 
 // ---------- Storefront color theme ----------
 router.get('/theme', (req, res) => {
+  const mainAdminUi = usesMainAdminUi(req);
   res.render('admin/theme', {
     title: 'ธีมสี', active: 'theme',
     currentTheme: store.data.settings.theme,
     accentPresets: theme.getAccentPresets(),
-    bgPresets: theme.getBgPresets(),
+    bgPresets: theme.getBgPresets({ mainShopOnly: mainAdminUi }),
+    bgPreviewPresets: mainAdminUi ? theme.getBgPresets({ includeMain: true }) : undefined,
+    mainAdminUi,
     styles: theme.getStyles(),
   });
 });
 
 router.post('/theme', async (req, res) => {
   const accent = /^#[0-9a-fA-F]{6}$/.test(req.body.accent || '') ? req.body.accent : store.data.settings.theme.accent;
-  const bgMode = req.body.bgMode === 'custom' ? 'custom' : 'preset';
+  const mainAdminUi = usesMainAdminUi(req);
+  const bgMode = mainAdminUi ? 'preset' : (req.body.bgMode === 'custom' ? 'custom' : 'preset');
   let bgPreset = store.data.settings.theme.bgPreset;
   let bgColor = null;
-  if (bgMode === 'custom' && /^#[0-9a-fA-F]{6}$/.test(req.body.bgColor || '')) {
+  if (mainAdminUi) {
+    bgPreset = theme.MAIN_BG_PRESET_KEY;
+  } else if (bgMode === 'custom' && /^#[0-9a-fA-F]{6}$/.test(req.body.bgColor || '')) {
     bgColor = req.body.bgColor;
   } else {
     bgPreset = theme.getBgPresets().some(p => p.key === req.body.bgPreset) ? req.body.bgPreset : store.data.settings.theme.bgPreset;
