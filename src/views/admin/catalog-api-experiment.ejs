@@ -1,0 +1,302 @@
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-catalog-api-v1.css') %>" />
+<%
+  const catalogMoney = value => Number(value || 0).toLocaleString('th-TH', { maximumFractionDigits: 2 });
+  const catalogPendingTotal = Object.values(payoutLedger?.pending || {}).reduce((sum, amount) => sum + (Number(amount) || 0), 0);
+  const catalogPaidTotal = Object.values(payoutLedger?.paid || {}).reduce((sum, amount) => sum + (Number(amount) || 0), 0);
+  const catalogEnabledShops = shops.filter(shop => shop.config.enabled).length;
+  const catalogSelectedAvailable = sourceProducts.filter(product => config.featuredProductIds.includes(String(product.id))).length;
+  const catalogDate = value => value ? new Date(value).toLocaleString('th-TH', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Bangkok' }) : '—';
+%>
+<div class="experiment-app experiment-catalog-api-page">
+  <div class="experiment-main">
+    <header class="experiment-topbar"><span class="experiment-user-name">admin</span></header>
+    <main class="experiment-content">
+      <div class="catalog-api-page">
+        <header class="catalog-page-head">
+          <div>
+            <p class="catalog-kicker">PARTNER CATALOG · MAIN SHOP</p>
+            <h1>API สินค้าร้านหลัก</h1>
+            <p class="catalog-intro">เลือกสินค้าจากสต็อกจริงเพื่อส่งให้ร้านเช่า พร้อมติดตามยอดส่วนต่างและการโอนในหน้าเดียว</p>
+          </div>
+          <div class="catalog-head-actions">
+            <span class="catalog-live"><i></i> เชื่อมข้อมูลร้านจริง</span>
+            <a class="experiment-button primary" href="#catalog-products">จัดการสินค้า <span aria-hidden="true">↓</span></a>
+          </div>
+        </header>
+
+        <% if (messages?.success?.length) { messages.success.forEach(message => { %><div class="catalog-notice success" role="status"><span aria-hidden="true">✓</span><%= message %></div><% }); } %>
+        <% if (messages?.error?.length) { messages.error.forEach(message => { %><div class="catalog-notice error" role="alert"><span aria-hidden="true">!</span><%= message %></div><% }); } %>
+
+        <section class="catalog-flow-card" aria-label="การทำงานของ Partner API">
+          <div class="catalog-flow-copy"><span class="catalog-flow-icon" aria-hidden="true">↗</span><div><b>ข้อมูลและสต็อกยังอยู่ที่ร้านหลัก</b><p>ร้านเช่าเห็นเฉพาะสินค้าและราคาที่ตั้งไว้ · ลูกค้าชำระเงินเข้าร้านหลัก · ระบบแยกบันทึกส่วนต่างของแต่ละร้าน</p></div></div>
+          <div class="catalog-flow-steps"><span><i>01</i>เลือกสินค้า</span><b aria-hidden="true">→</b><span><i>02</i>ร้านเช่านำไปแสดง</span><b aria-hidden="true">→</b><span><i>03</i>ตรวจยอดและโอน</span></div>
+        </section>
+
+        <section class="catalog-stats" aria-label="ภาพรวม Partner API">
+          <article class="catalog-stat"><span class="catalog-stat-icon">▦</span><small>สินค้าพร้อมส่ง</small><strong><%= sourceProducts.length.toLocaleString('th-TH') %></strong><span>รายการจากสต็อกที่พร้อมขาย</span></article>
+          <article class="catalog-stat"><span class="catalog-stat-icon mint">✓</span><small>แสดงบนร้านเช่า</small><strong><%= catalogSelectedAvailable %><em> / 5</em></strong><span>จำนวนที่เลือกไว้ตอนนี้</span></article>
+          <article class="catalog-stat"><span class="catalog-stat-icon blue">⌂</span><small>ร้านที่เปิด API</small><strong><%= catalogEnabledShops %><em> / <%= shops.length %></em></strong><span>ร้านเช่าที่รับสินค้าจากร้านหลัก</span></article>
+          <article class="catalog-stat attention"><span class="catalog-stat-icon gold">฿</span><small>ส่วนต่างรอโอน</small><strong>฿<%= catalogMoney(catalogPendingTotal) %></strong><span>โอนยอดเต็มพร้อมแนบสลิป</span></article>
+        </section>
+
+        <section class="catalog-panel" id="catalog-products" aria-labelledby="catalog-products-title">
+          <div class="catalog-panel-head">
+            <div><span class="catalog-section-kicker">PRODUCT SELECTION</span><h2 id="catalog-products-title">สินค้า Partner ที่จะแสดง</h2><p>เลือกได้ไม่เกิน 5 รายการ · แสดงเฉพาะสินค้าที่เปิดขายและมีสต็อกพร้อม</p></div>
+            <span class="catalog-selection-rule">เลือกได้สูงสุด <b>5</b> รายการ</span>
+          </div>
+
+          <form action="/admin/catalog-api/settings" method="post" id="catalog-featured-form">
+            <div class="catalog-selector-layout">
+              <aside class="catalog-selection-panel" aria-labelledby="catalog-selection-title">
+                <div class="catalog-selection-panel-head"><div><span class="catalog-section-kicker">YOUR PARTNER PICKS</span><h3 id="catalog-selection-title">รายการที่เลือก</h3></div><span class="catalog-selection-count" aria-live="polite" aria-label="จำนวนสินค้าที่เลือก"><strong id="featuredApiCount"><%= catalogSelectedAvailable %></strong><i>/ 5</i></span></div>
+                <p class="catalog-selection-help">รายการเหล่านี้จะแสดงให้ร้านเช่าทุกแห่ง หลังจากกดบันทึก</p>
+                <div class="catalog-selection-progress" aria-hidden="true"><% for (let slot = 0; slot < 5; slot += 1) { %><i class="<%= slot < catalogSelectedAvailable ? 'filled' : '' %>" data-selection-slot="<%= slot %>"></i><% } %></div>
+                <ul id="catalog-selected-list" class="catalog-selection-list">
+                  <% sourceProducts.filter(product => config.featuredProductIds.includes(String(product.id))).forEach(product => { const selectedImage = product.images?.[0] || ''; %><li class="catalog-selection-item"><% if (selectedImage) { %><button type="button" class="catalog-selection-thumb" data-api-gallery data-title="<%= product.title %>" data-image="<%= selectedImage %>" aria-label="ดูรูปสินค้า <%= product.title %> ขนาดใหญ่"><img src="<%= selectedImage %>" alt="" loading="lazy" /><span aria-hidden="true">ดูรูป</span></button><% } else { %><span class="catalog-selection-thumb catalog-selection-no-image" aria-hidden="true">▧</span><% } %><span class="catalog-selection-item-copy"><strong><%= product.title %></strong><small>฿<%= catalogMoney(product.price) %></small></span><button type="button" class="catalog-selection-remove" data-remove-product-id="<%= product.id %>" aria-label="นำ <%= product.title %> ออกจากรายการ">×</button></li><% }) %>
+                  <% if (!catalogSelectedAvailable) { %><li class="catalog-selection-empty" data-selection-empty>เลือกสินค้าจากรายการเพื่อเริ่มต้น</li><% } %>
+                </ul>
+                <p class="catalog-selection-capacity" id="catalog-selection-capacity"><%= catalogSelectedAvailable < 5 ? `เลือกเพิ่มได้อีก ${5 - catalogSelectedAvailable} รายการ` : 'เลือกครบ 5 รายการแล้ว' %></p>
+                <button type="button" id="catalog-clear-selection" class="catalog-clear" <%= catalogSelectedAvailable ? '' : 'hidden' %>>ล้างรายการที่เลือก</button>
+              </div>
+
+              <div class="catalog-selector-main">
+                <div class="catalog-selector-toolbar">
+                  <label class="catalog-search"><span aria-hidden="true">⌕</span><input type="search" id="catalog-product-search" placeholder="ค้นหาชื่อสินค้าหรือรหัส..." autocomplete="off" aria-label="ค้นหาสินค้า Partner" /><kbd>/</kbd></label>
+                  <div class="catalog-selector-filters" role="group" aria-label="กรองรายการสินค้า">
+                    <button type="button" class="active" data-product-filter="all" aria-pressed="true">สินค้าทั้งหมด <b><%= sourceProducts.length %></b></button>
+                    <button type="button" data-product-filter="selected" aria-pressed="false">เลือกแล้ว <b data-filter-selected-count><%= catalogSelectedAvailable %></b></button>
+                  </div>
+                </div>
+
+                <div class="catalog-results-head"><span id="catalog-results-count">แสดง <%= sourceProducts.length %> จาก <%= sourceProducts.length %> รายการ</span><span>หน้า <b data-product-page-label>1</b> / <b data-product-page-total><%= Math.max(1, Math.ceil(sourceProducts.length / 24)) %></b></span></div>
+                <div class="catalog-max-note" id="catalog-max-note" role="status" hidden>เลือกครบ 5 รายการแล้ว · นำสินค้าออกจากรายการด้านข้างก่อน หากต้องการเลือกสินค้าใหม่</div>
+                <div class="catalog-product-grid" id="catalog-product-grid">
+                  <% sourceProducts.forEach(product => { const selected = config.featuredProductIds.includes(String(product.id)); const imageUrl = product.images?.[0] || ''; %>
+                    <article class="catalog-product-card" data-product-card data-product-search="<%= `${product.title || ''} ${product.id}`.toLocaleLowerCase('th-TH') %>" data-product-id="<%= product.id %>" data-product-title="<%= product.title %>" data-product-price="฿<%= catalogMoney(product.price) %>">
+                      <label class="catalog-product-select">
+                        <input type="checkbox" name="featuredProductIds" value="<%= product.id %>" <%= selected ? 'checked' : '' %> class="featured-api-checkbox" aria-label="เลือก <%= product.title %>" />
+                        <span class="catalog-product-image"><% if (imageUrl) { %><img src="<%= imageUrl %>" alt="" loading="lazy" /><% } else { %><span class="catalog-no-image" aria-hidden="true">▧</span><% } %></span>
+                        <span class="catalog-product-copy"><strong><%= product.title %></strong><small>รหัส <%= product.id %></small><span class="catalog-product-price">฿<%= catalogMoney(product.price) %></span></span>
+                        <span class="catalog-product-state"><i aria-hidden="true">✓</i><span>เลือกแล้ว</span></span>
+                      </label>
+                      <% if (imageUrl) { %><button type="button" class="catalog-image-open" data-api-gallery data-title="<%= product.title %>" data-image="<%= imageUrl %>" aria-label="กดดูรูปสินค้า <%= product.title %> ขนาดใหญ่" title="กดที่รูปเพื่อดูขนาดใหญ่"><span aria-hidden="true">ดูรูป</span></button><% } %>
+                    </article>
+                  <% }) %>
+                </div>
+                <% if (!sourceProducts.length) { %><div class="catalog-empty"><span aria-hidden="true">▦</span><b>ยังไม่มีสินค้าที่พร้อมส่ง</b><p>ต้องมีสินค้าเปิดขายและมีสต็อกพร้อมในร้านหลักก่อน สินค้าจึงจะแสดงให้เลือกที่นี่</p></div><% } else { %><div class="catalog-empty" id="catalog-product-empty" hidden><span aria-hidden="true">⌕</span><b>ไม่พบสินค้าที่ตรงกับตัวกรอง</b><p>ลองเปลี่ยนคำค้น หรือกลับไปดูสินค้าทั้งหมด</p><button type="button" class="experiment-button" data-reset-product-search>แสดงสินค้าทั้งหมด</button></div><% } %>
+                <nav class="catalog-pagination" aria-label="หน้ารายการสินค้า"><button type="button" data-product-prev disabled>← ก่อนหน้า</button><span>หน้า <b data-product-page-label>1</b> / <b data-product-page-total><%= Math.max(1, Math.ceil(sourceProducts.length / 24)) %></b></span><button type="button" data-product-next <%= sourceProducts.length <= 24 ? 'disabled' : '' %>>ถัดไป →</button></nav>
+              </div>
+            </div>
+            <div class="catalog-form-foot"><p>การเลือกสินค้าจะมีผลกับร้านเช่าทั้งหมดเมื่อบันทึก</p><button type="submit" class="experiment-button primary">บันทึกรายการ Partner <span aria-hidden="true">→</span></button></div>
+          </form>
+        </section>
+
+        <section class="catalog-panel" id="catalog-shops" aria-labelledby="catalog-shops-title">
+          <div class="catalog-panel-head"><div><span class="catalog-section-kicker">CONNECTED RENTAL SHOPS</span><h2 id="catalog-shops-title">ร้านเช่าที่เชื่อมต่อ</h2><p>สถานะและรูปแบบบวกราคาของแต่ละร้าน · ยอดชำระสินค้ากลับเข้าร้านหลัก</p></div><span class="catalog-total-badge"><b><%= shops.length %></b> ร้าน</span></div>
+          <% if (!shops.length) { %><div class="catalog-empty"><span aria-hidden="true">⌂</span><b>ยังไม่มีร้านเช่าเชื่อมต่อ</b><p>เมื่อมีร้านเช่าระบบจะแสดงสถานะและการตั้งค่าของร้านที่นี่</p></div><% } else { %>
+            <div class="catalog-shop-grid">
+              <% shops.forEach(shop => { const account = shop.payoutAccount || {}; const pending = Number(payoutByTenant[String(shop.id)] || 0); %>
+                <article class="catalog-shop-card">
+                  <div class="catalog-shop-head"><span class="catalog-shop-mark" aria-hidden="true">⌂</span><div class="catalog-shop-name"><h3><%= shop.name %></h3><span><%= shop.slug %></span></div><span class="catalog-status <%= shop.config.enabled ? 'on' : 'off' %>"><i></i><%= shop.config.enabled ? 'เปิด API' : 'ปิด API' %></span></div>
+                  <div class="catalog-shop-facts"><div><small>การบวกราคา</small><b><%= shop.config.markupMode === 'fixed' ? `+฿${catalogMoney(shop.config.markupValue)}` : `+${catalogMoney(shop.config.markupValue)}%` %></b></div><div><small>บัญชีรับส่วนต่าง</small><b><%= account.bankName || 'ยังไม่ตั้งค่า' %></b><span><%= account.bankAccountNumber || '—' %><%= account.bankAccountName ? ` · ${account.bankAccountName}` : '' %></span></div></div>
+                  <div class="catalog-shop-balance"><span>ส่วนต่างรอโอน</span><strong class="<%= pending > 0 ? 'pending' : '' %>">฿<%= catalogMoney(pending) %></strong></div>
+                </article>
+              <% }) %>
+            </div>
+          <% } %>
+        </section>
+
+        <section class="catalog-panel catalog-settlement" id="catalog-payouts" aria-labelledby="catalog-payouts-title">
+          <div class="catalog-panel-head"><div><span class="catalog-section-kicker">PARTNER SETTLEMENT</span><h2 id="catalog-payouts-title">โอนส่วนต่างให้ร้านเช่า</h2><p>ระบบคำนวณยอดค้างให้และบังคับโอนเต็มจำนวน · แนบสลิปเพื่อบันทึกหลักฐาน</p></div><span class="catalog-due-badge">ยอดค้างรวม <b>฿<%= catalogMoney(catalogPendingTotal) %></b></span></div>
+          <div class="catalog-settlement-summary"><span><i>฿</i><b>฿<%= catalogMoney(catalogPendingTotal) %></b><small>ยอดส่วนต่างที่ยังค้างโอน</small></span><span><i>✓</i><b>฿<%= catalogMoney(catalogPaidTotal) %></b><small>ยอดที่บันทึกว่าโอนแล้ว</small></span><span><i>⌂</i><b><%= payoutShops.length %></b><small>ร้านที่เปิดรับ Partner API</small></span></div>
+          <% if (!payoutShops.length) { %><div class="catalog-empty compact"><b>ยังไม่มีร้านที่เปิดใช้งาน API</b><p>เมื่อร้านเช่าเปิดรับสินค้า รายการสำหรับตรวจยอดและโอนจะแสดงที่นี่</p></div><% } else { %>
+            <div class="catalog-payout-grid">
+              <% payoutShops.forEach(shop => { const account = shop.payoutAccount || {}; const hasAccount = Boolean(account.bankAccountNumber && account.bankAccountName); const pending = Number(shop.pendingAmount || 0); %>
+                <article class="catalog-payout-card">
+                  <div class="catalog-payout-head"><div><h3><%= shop.name %></h3><span><%= shop.slug %> · <%= shop.config.markupMode === 'fixed' ? `บวก ฿${catalogMoney(shop.config.markupValue)}` : `บวก ${catalogMoney(shop.config.markupValue)}%` %></span></div><span class="catalog-account-status <%= hasAccount ? 'ready' : 'missing' %>"><i></i><%= hasAccount ? 'บัญชีพร้อมโอน' : 'ยังไม่มีบัญชี' %></span></div>
+                  <div class="catalog-payout-amount"><div><small>ยอดเต็มที่ต้องโอน</small><strong>฿<%= catalogMoney(pending) %></strong><span>โอนแล้ว ฿<%= catalogMoney(shop.paidAmount) %></span></div><div class="catalog-bank-detail"><b><%= account.bankName || 'ไม่ระบุธนาคาร' %></b><span><%= account.bankAccountNumber || 'ยังไม่ตั้งเลขบัญชี' %></span><small><%= account.bankAccountName || 'ยังไม่ระบุชื่อบัญชี' %></small></div></div>
+                  <% if (account.bankQrImage) { %><img src="<%= account.bankQrImage %>" alt="QR รับเงิน <%= shop.name %>" class="catalog-bank-qr" loading="lazy" /><% } %>
+                  <% if (pending > 0 && hasAccount) { %><form action="/admin/catalog-api/payouts" method="post" enctype="multipart/form-data" class="catalog-payout-form"><input type="hidden" name="tenantShopId" value="<%= shop.id %>" /><label>ยอดโอนเต็ม (แก้ไขไม่ได้)<input name="amount" value="<%= pending %>" readonly /></label><label>แนบสลิปการโอน<input type="file" name="slip" accept="image/jpeg,image/png,image/webp,image/gif" required /></label><button type="submit">บันทึกการโอน ฿<%= catalogMoney(pending) %></button></form><% } else if (!hasAccount) { %><p class="catalog-payout-message warning">ให้ร้านเช่าตั้งค่าธนาคารและชื่อบัญชีก่อน จึงจะบันทึกการโอนได้</p><% } else { %><p class="catalog-payout-message success">ไม่มียอดค้างโอน ร้านนี้ชำระครบแล้ว</p><% } %>
+                </article>
+              <% }) %>
+            </div>
+          <% } %>
+
+          <div class="catalog-history"><div class="catalog-history-head"><div><h3>ประวัติการโอน</h3><p>รายการที่บันทึกจากระบบ พร้อมเปิดดูสลิปแบบส่วนตัว</p></div><span><b><%= (payoutHistory || []).length %></b> รายการ · ยอดชำระแล้ว ฿<%= catalogMoney(catalogPaidTotal) %></span></div>
+            <div class="catalog-history-wrap"><table><thead><tr><th>วันที่</th><th>ร้าน Partner</th><th>ยอดโอน</th><th>บัญชี</th><th>หลักฐาน</th></tr></thead><tbody>
+              <% if (!(payoutHistory || []).length) { %><tr><td colspan="5" class="catalog-history-empty">ยังไม่มีประวัติการโอน</td></tr><% } %>
+              <% [...(payoutHistory || [])].reverse().forEach(payout => { %><tr><td><%= catalogDate(payout.transferredAt) %></td><td><b><%= payout.tenantShopName || payout.tenantShopId %></b></td><td class="catalog-history-money">฿<%= catalogMoney(payout.amount) %></td><td><%= payout.bankName || '—' %><small><%= payout.bankAccountNumber || '—' %> · <%= payout.bankAccountName || '—' %></small></td><td><% if (payout.slipStorageId) { %><button type="button" data-payout-slip data-title="สลิปโอน <%= payout.tenantShopName || payout.tenantShopId %> · ฿<%= catalogMoney(payout.amount) %>" data-slip-url="/admin/catalog-api/payouts/<%= payout.id %>/slip">ดูสลิป</button><% } else { %><span class="catalog-no-slip">ไม่มีสลิป</span><% } %></td></tr><% }) %>
+            </tbody></table></div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
+
+<dialog id="catalog-api-image-dialog" class="catalog-dialog"><div class="catalog-dialog-head"><strong id="catalog-api-image-title"></strong><button type="button" data-api-gallery-close aria-label="ปิดรูป">×</button></div><div class="catalog-dialog-image"><img id="catalog-api-image" src="" alt="" /></div></dialog>
+<dialog id="catalog-api-slip-dialog" class="catalog-dialog"><div class="catalog-dialog-head"><strong id="catalog-api-slip-title">สลิปการโอนส่วนต่าง</strong><button type="button" data-payout-slip-close aria-label="ปิดสลิป">×</button></div><div class="catalog-dialog-image"><img id="catalog-api-slip-image" src="" alt="สลิปการโอน" /></div></dialog>
+
+<script>
+  (() => {
+    const form = document.getElementById('catalog-featured-form');
+    if (!form) return;
+    const boxes = [...form.querySelectorAll('.featured-api-checkbox')];
+    const cards = [...form.querySelectorAll('[data-product-card]')];
+    const count = document.getElementById('featuredApiCount');
+    const selectedCountFilter = document.querySelector('[data-filter-selected-count]');
+    const selectedList = document.getElementById('catalog-selected-list');
+    const selectionCapacity = document.getElementById('catalog-selection-capacity');
+    const maxNote = document.getElementById('catalog-max-note');
+    const clearButton = document.getElementById('catalog-clear-selection');
+    const search = document.getElementById('catalog-product-search');
+    const empty = document.getElementById('catalog-product-empty');
+    const resultsCount = document.getElementById('catalog-results-count');
+    const prev = document.querySelector('[data-product-prev]');
+    const next = document.querySelector('[data-product-next]');
+    const pageSize = 24;
+    let filter = 'all';
+    let page = 0;
+    const getSelected = () => boxes.filter(box => box.checked);
+    const render = () => {
+      const selected = getSelected();
+      const query = (search?.value || '').trim().toLocaleLowerCase('th-TH');
+      const matching = cards.filter(card => {
+        const box = card.querySelector('input');
+        return (!query || card.dataset.productSearch.includes(query)) && (filter !== 'selected' || box.checked);
+      });
+      const pageCount = Math.max(1, Math.ceil(matching.length / pageSize));
+      page = Math.min(page, pageCount - 1);
+      const visibleStart = page * pageSize;
+      const visibleEnd = Math.min(matching.length, visibleStart + pageSize);
+      const pageCards = new Set(matching.slice(visibleStart, visibleEnd));
+      cards.forEach(card => {
+        const box = card.querySelector('input');
+        card.hidden = !pageCards.has(card);
+        box.disabled = !box.checked && selected.length >= 5;
+        card.classList.toggle('is-selected', box.checked);
+        card.classList.toggle('is-locked', box.disabled);
+      });
+      if (count) count.textContent = `${selected.length}/5`;
+      if (selectedCountFilter) selectedCountFilter.textContent = selected.length;
+      document.querySelectorAll('[data-selection-slot]').forEach((slot, index) => slot.classList.toggle('filled', index < selected.length));
+      if (clearButton) clearButton.hidden = !selected.length;
+      if (maxNote) maxNote.hidden = selected.length < 5;
+      if (selectionCapacity) selectionCapacity.textContent = selected.length < 5
+        ? `เลือกเพิ่มได้อีก ${5 - selected.length} รายการ`
+        : 'เลือกครบ 5 รายการแล้ว';
+      if (selectedList) {
+        selectedList.replaceChildren();
+        selected.forEach(box => {
+          const card = box.closest('[data-product-card]');
+          const item = document.createElement('li'); item.className = 'catalog-selection-item';
+          const sourceImage = card?.querySelector('.catalog-product-image img');
+          const thumb = document.createElement(sourceImage ? 'button' : 'span'); thumb.className = 'catalog-selection-thumb';
+          if (sourceImage) {
+            thumb.type = 'button'; thumb.dataset.apiGallery = '';
+            thumb.dataset.title = card?.dataset.productTitle || 'รูปสินค้า';
+            const image = document.createElement('img'); image.src = sourceImage.currentSrc || sourceImage.src;
+            image.alt = ''; image.loading = 'lazy'; thumb.dataset.image = image.src;
+            thumb.setAttribute('aria-label', `ดูรูปสินค้า ${card?.dataset.productTitle || ''} ขนาดใหญ่`);
+            const hint = document.createElement('span'); hint.setAttribute('aria-hidden', 'true'); hint.textContent = 'ดูรูป';
+            thumb.append(image, hint);
+          } else { thumb.classList.add('catalog-selection-no-image'); thumb.textContent = '▧'; thumb.setAttribute('aria-hidden', 'true'); }
+          const copy = document.createElement('span'); copy.className = 'catalog-selection-item-copy';
+          const productTitle = document.createElement('strong'); productTitle.textContent = card?.dataset.productTitle || 'สินค้า';
+          const productPrice = document.createElement('small'); productPrice.textContent = card?.dataset.productPrice || '';
+          copy.append(productTitle, productPrice);
+          const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'catalog-selection-remove';
+          remove.dataset.removeProductId = box.value; remove.textContent = '×';
+          remove.setAttribute('aria-label', `นำ ${card?.dataset.productTitle || 'สินค้า'} ออกจากรายการ`);
+          item.append(thumb, copy, remove); selectedList.append(item);
+        });
+        if (!selected.length) {
+          const item = document.createElement('li'); item.className = 'catalog-selection-empty';
+          item.dataset.selectionEmpty = ''; item.textContent = 'เลือกสินค้าจากรายการเพื่อเริ่มต้น';
+          selectedList.append(item);
+        }
+      }
+      if (resultsCount) resultsCount.textContent = matching.length
+        ? `แสดง ${visibleStart + 1}–${visibleEnd} จาก ${matching.length} รายการ`
+        : cards.length ? 'ไม่พบรายการที่ตรงกับตัวกรอง' : 'ยังไม่มีสินค้าที่พร้อมขาย';
+      document.querySelectorAll('[data-product-page-label]').forEach(node => node.textContent = page + 1);
+      document.querySelectorAll('[data-product-page-total]').forEach(node => node.textContent = pageCount);
+      if (prev) prev.disabled = page === 0 || !matching.length;
+      if (next) next.disabled = page >= pageCount - 1 || !matching.length;
+      if (empty) empty.hidden = matching.length > 0;
+    };
+    boxes.forEach(box => box.addEventListener('change', render));
+    search?.addEventListener('input', () => { page = 0; render(); });
+    document.querySelectorAll('[data-product-filter]').forEach(button => button.addEventListener('click', () => {
+      filter = button.dataset.productFilter;
+      page = 0;
+      document.querySelectorAll('[data-product-filter]').forEach(item => {
+        const active = item === button;
+        item.classList.toggle('active', active);
+        item.setAttribute('aria-pressed', String(active));
+      });
+      render();
+    }));
+    prev?.addEventListener('click', () => { page = Math.max(0, page - 1); render(); });
+    next?.addEventListener('click', () => { page += 1; render(); });
+    clearButton?.addEventListener('click', () => {
+      boxes.forEach(box => { box.checked = false; });
+      filter = 'all'; page = 0;
+      document.querySelectorAll('[data-product-filter]').forEach(item => {
+        const active = item.dataset.productFilter === 'all';
+        item.classList.toggle('active', active); item.setAttribute('aria-pressed', String(active));
+      });
+      render();
+    });
+    selectedList?.addEventListener('click', event => {
+      const button = event.target.closest('[data-remove-product-id]');
+      if (!button) return;
+      const box = boxes.find(item => item.value === button.dataset.removeProductId);
+      if (box) box.checked = false;
+      render();
+    });
+    document.querySelector('[data-reset-product-search]')?.addEventListener('click', () => {
+      if (search) search.value = '';
+      filter = 'all'; page = 0;
+      document.querySelectorAll('[data-product-filter]').forEach(item => {
+        const active = item.dataset.productFilter === 'all';
+        item.classList.toggle('active', active); item.setAttribute('aria-pressed', String(active));
+      });
+      render(); search?.focus();
+    });
+    document.addEventListener('keydown', event => {
+      if (event.key !== '/' || event.ctrlKey || event.metaKey || event.altKey || /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '')) return;
+      event.preventDefault(); search?.focus();
+    });
+    render();
+  })();
+  (() => {
+    const dialog = document.getElementById('catalog-api-image-dialog');
+    const image = document.getElementById('catalog-api-image');
+    const title = document.getElementById('catalog-api-image-title');
+    if (!dialog || !image || !title) return;
+    document.addEventListener('click', event => {
+      const button = event.target.closest('[data-api-gallery]');
+      if (!button) return;
+      if (!button.dataset.image) return;
+      image.src = button.dataset.image; image.alt = button.dataset.title || 'รูปสินค้า';
+      title.textContent = button.dataset.title || 'รูปสินค้า'; dialog.showModal();
+    });
+    dialog.querySelector('[data-api-gallery-close]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => { image.src = ''; });
+  })();
+  (() => {
+    const dialog = document.getElementById('catalog-api-slip-dialog');
+    const image = document.getElementById('catalog-api-slip-image');
+    const title = document.getElementById('catalog-api-slip-title');
+    if (!dialog || !image || !title) return;
+    document.querySelectorAll('[data-payout-slip]').forEach(button => button.addEventListener('click', () => {
+      image.src = button.dataset.slipUrl || ''; title.textContent = button.dataset.title || 'สลิปการโอนส่วนต่าง';
+      if (image.src) dialog.showModal();
+    }));
+    dialog.querySelector('[data-payout-slip-close]')?.addEventListener('click', () => dialog.close());
+    dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
+    dialog.addEventListener('close', () => { image.src = ''; });
+  })();
+</script>

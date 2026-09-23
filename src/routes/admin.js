@@ -379,7 +379,7 @@ router.get('/catalog-api', async (req, res) => {
       catalogSyndication.normalizeConfig(mainDb.settings || {}),
     )
     : [];
-  res.render('admin/catalog-api', {
+  res.render(usesMainAdminUi(req) ? 'admin/catalog-api-experiment' : 'admin/catalog-api', {
     title: 'API แคตตาล็อกร้านหลัก', active: 'catalog-api', tenantMode, config,
     sourceProducts, preview, shops, payoutByTenant, payoutLedger, payoutShops,
     payoutHistory: config.payouts || [],
