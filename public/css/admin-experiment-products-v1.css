@@ -11,7 +11,7 @@
 .experiment-products-page .experiment-filter:hover, .experiment-products-page .experiment-filter.active { color: var(--products-green-dark); background: var(--products-soft); border-color: #c9f1e2; }
 .experiment-products-page .experiment-count { display: inline-flex; align-items: center; gap: 6px; color: var(--ex-muted); font-size: 11px; white-space: nowrap; }
 .experiment-products-page .experiment-count i { width: 7px; height: 7px; border-radius: 50%; background: #32c898; }
-.experiment-products-page .experiment-product-list-card { overflow: hidden; }
+.experiment-products-page .experiment-product-list-card { overflow: hidden; container: product-list / inline-size; }
 .experiment-products-page .experiment-list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; border-bottom: 1px solid var(--ex-line); }
 .experiment-products-page .experiment-list-head h2 { margin: 0; font: 700 16px var(--ex-display); letter-spacing: -.03em; }
 .experiment-products-page .experiment-list-head p { margin: 4px 0 0; color: var(--ex-muted); font-size: 11px; }
@@ -122,15 +122,44 @@
   .experiment-products-page .experiment-count { justify-content: flex-end; }
   .experiment-products-page .experiment-list-head { align-items: flex-start; flex-direction: column; padding: 14px; }
   .experiment-products-page .experiment-product-table-head { display: none; }
-  .experiment-products-page .experiment-product-row { grid-template-columns: 22px minmax(0, 1fr); align-items: start; gap: 10px; min-height: 0; padding: 13px 14px; }
-  .experiment-products-page .experiment-product-main { align-items: flex-start; }
-  .experiment-products-page .experiment-product-thumb { width: 84px; height: 64px; }
-  .experiment-products-page .experiment-product-price, .experiment-products-page .experiment-stock-link, .experiment-products-page .experiment-status, .experiment-products-page .experiment-row-actions { grid-column: 2; justify-self: stretch; }
-  .experiment-products-page .experiment-product-price { display: flex; align-items: baseline; justify-content: space-between; padding-top: 4px; }
+  .experiment-products-page .experiment-product-row { grid-template-columns: 24px minmax(0, 1fr) max-content; grid-template-areas: "select product status" ". price stock" ". actions actions"; align-items: center; gap: 8px 9px; min-height: 0; padding: 12px; }
+  .experiment-products-page .experiment-check { grid-area: select; width: 24px; height: 24px; align-self: start; margin-top: 3px; }
+  .experiment-products-page .experiment-product-main { grid-area: product; align-items: center; gap: 9px; }
+  .experiment-products-page .experiment-product-thumb { width: 56px; height: 56px; border-radius: 10px; }
+  .experiment-products-page .experiment-product-copy strong { display: -webkit-box; white-space: normal; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .experiment-products-page .experiment-product-copy small, .experiment-products-page .experiment-product-tags { display: none; }
+  .experiment-products-page .experiment-product-price { grid-area: price; display: flex; min-width: 0; min-height: 44px; align-items: center; gap: 7px; }
+  .experiment-products-page .experiment-product-price button { min-height: 44px; }
+  .experiment-products-page .experiment-product-price::before { content: "ราคา"; color: var(--ex-muted); font-size: 10px; white-space: nowrap; }
+  .experiment-products-page .experiment-product-price strong { font-size: 14px; }
   .experiment-products-page .experiment-product-price del { margin-top: 0; }
-  .experiment-products-page .experiment-stock-link { justify-content: space-between; }
-  .experiment-products-page .experiment-status { display: inline-flex; width: max-content; }
-  .experiment-products-page .experiment-row-actions { justify-content: flex-start; padding-top: 2px; }
+  .experiment-products-page .experiment-stock-link { grid-area: stock; justify-self: end; justify-content: flex-end; min-height: 44px; gap: 5px; padding: 6px 8px; white-space: nowrap; }
+  .experiment-products-page .experiment-stock-link::before { content: "คงเหลือ"; color: var(--ex-muted); font-size: 10px; font-weight: 500; }
+  .experiment-products-page .experiment-status { grid-area: status; display: inline-flex; width: max-content; justify-self: end; font-size: 10px; }
+  .experiment-products-page .experiment-row-actions { grid-area: actions; justify-content: flex-end; padding-top: 6px; border-top: 1px solid #edf1ef; }
   .experiment-products-page .experiment-icon-action { width: 44px; height: 44px; }
+  .experiment-products-page .experiment-row-actions > a[aria-label^="จัดการสต๊อก"] { display: none; }
   .experiment-products-page .experiment-action-menu-panel { left: 0; right: auto; width: min(92vw, 300px); }
+}
+
+/* The list may live in a narrow app/browser pane while the viewport remains wide. */
+@container product-list (max-width: 680px) {
+  .experiment-products-page .experiment-product-table-head { display: none; }
+  .experiment-products-page .experiment-product-row { grid-template-columns: 24px minmax(0, 1fr) max-content; grid-template-areas: "select product status" ". price stock" ". actions actions"; align-items: center; gap: 8px 9px; min-height: 0; padding: 12px; }
+  .experiment-products-page .experiment-check { grid-area: select; width: 24px; height: 24px; align-self: start; margin-top: 3px; }
+  .experiment-products-page .experiment-product-main { grid-area: product; align-items: center; gap: 9px; }
+  .experiment-products-page .experiment-product-thumb { width: 56px; height: 56px; border-radius: 10px; }
+  .experiment-products-page .experiment-product-copy strong { display: -webkit-box; white-space: normal; line-height: 1.35; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .experiment-products-page .experiment-product-copy small, .experiment-products-page .experiment-product-tags { display: none; }
+  .experiment-products-page .experiment-product-price { grid-area: price; display: flex; min-width: 0; min-height: 44px; align-items: center; gap: 7px; }
+  .experiment-products-page .experiment-product-price button { min-height: 44px; }
+  .experiment-products-page .experiment-product-price::before { content: "ราคา"; color: var(--ex-muted); font-size: 10px; white-space: nowrap; }
+  .experiment-products-page .experiment-product-price strong { font-size: 14px; }
+  .experiment-products-page .experiment-product-price del { margin-top: 0; }
+  .experiment-products-page .experiment-stock-link { grid-area: stock; justify-self: end; justify-content: flex-end; min-height: 44px; gap: 5px; padding: 6px 8px; white-space: nowrap; }
+  .experiment-products-page .experiment-stock-link::before { content: "คงเหลือ"; color: var(--ex-muted); font-size: 10px; font-weight: 500; }
+  .experiment-products-page .experiment-status { grid-area: status; display: inline-flex; width: max-content; justify-self: end; font-size: 10px; }
+  .experiment-products-page .experiment-row-actions { grid-area: actions; justify-content: flex-end; padding-top: 6px; border-top: 1px solid #edf1ef; }
+  .experiment-products-page .experiment-icon-action { width: 44px; height: 44px; }
+  .experiment-products-page .experiment-row-actions > a[aria-label^="จัดการสต๊อก"] { display: none; }
 }
