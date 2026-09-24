@@ -1,0 +1,523 @@
+/* Main-shop-only finance settings refresh. Tenant admin pages keep their current UI. */
+.admin-topups-owner {
+  --finance-green: #087a5b;
+  --finance-green-strong: #06664d;
+  --finance-green-soft: #153b2f;
+  --finance-line: #3c4c44;
+  --finance-muted: #b1c0b8;
+  --finance-on-soft: #eaf8f1;
+  --finance-shadow: 0 14px 36px rgba(17, 46, 34, .055);
+}
+
+html.light .admin-topups-owner {
+  --finance-green-soft: #eaf8f1;
+  --finance-line: #d9e6df;
+  --finance-muted: #52645b;
+  --finance-on-soft: #075c44;
+}
+
+.admin-topups-owner > .space-y-6 {
+  width: min(100%, 1510px);
+  margin-inline: auto;
+  gap: 20px;
+}
+
+.admin-topups-owner .admin-finance-header {
+  align-items: center;
+  padding: 18px 22px;
+  border: 1px solid var(--finance-line);
+  border-radius: 18px;
+  background: linear-gradient(115deg, var(--card), color-mix(in srgb, var(--card) 88%, #e8f5ee));
+  box-shadow: var(--finance-shadow);
+}
+
+.admin-topups-owner .admin-finance-title {
+  gap: 12px;
+  font-size: clamp(22px, 2vw, 29px);
+  line-height: 1.3;
+  letter-spacing: -.035em;
+}
+
+.admin-topups-owner .admin-finance-title-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #c9e8d8;
+  border-radius: 14px;
+  color: var(--finance-green);
+  background: var(--finance-green-soft);
+}
+
+.admin-topups-owner .admin-finance-title-icon svg {
+  width: 23px;
+  height: 23px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-topups-owner .admin-finance-header > div:first-child > p {
+  max-width: 760px;
+  margin-top: 7px;
+  color: var(--finance-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.admin-topups-owner .admin-finance-pending {
+  min-height: 42px;
+  padding-inline: 13px;
+  border-color: #f1d79f;
+  border-radius: 999px;
+  color: #79500b;
+  background: #fff8e8;
+  font-size: 12px;
+}
+
+.admin-topups-owner .admin-finance-pending.is-clear {
+  border-color: #c5e7d5;
+  color: #096548;
+  background: #eef9f3;
+}
+
+.admin-topups-owner .admin-finance-tabs {
+  gap: 8px;
+  padding: 0 0 10px;
+  border-color: var(--finance-line);
+  scrollbar-width: thin;
+  scrollbar-color: #bdcfc5 transparent;
+}
+
+.admin-topups-owner .admin-finance-tabs .topup-tab-btn {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 14px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: var(--finance-muted);
+  background: transparent;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.35;
+  white-space: nowrap;
+  transition: color .16s ease, background-color .16s ease, border-color .16s ease;
+}
+
+.admin-topups-owner .admin-finance-tabs .topup-tab-btn:hover {
+  border-color: var(--finance-line);
+  color: var(--finance-green-strong);
+  background: color-mix(in srgb, var(--card) 82%, var(--finance-green-soft));
+}
+
+.admin-topups-owner .admin-finance-tabs .topup-tab-btn[aria-selected="true"] {
+  border-color: #b8e0cb;
+  color: var(--finance-on-soft);
+  background: var(--finance-green-soft);
+  box-shadow: inset 0 -2px 0 var(--finance-green);
+  font-weight: 700;
+}
+
+.admin-topups-owner .admin-finance-tabs .topup-tab-btn:focus-visible,
+.admin-topups-owner .admin-provider-option:focus-visible,
+.admin-topups-owner .admin-bank-settings :is(input, select, button, a):focus-visible {
+  outline: 3px solid rgba(8, 122, 91, .35);
+  outline-offset: 2px;
+}
+
+.admin-topups-owner .admin-finance-tab-icon {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  color: var(--finance-green);
+  background: color-mix(in srgb, var(--card) 70%, var(--finance-green-soft));
+}
+
+.admin-topups-owner .admin-finance-tab-icon svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-topups-owner .admin-finance-tabs .topup-tab-btn[aria-selected="true"] .admin-finance-tab-icon {
+  color: #fff;
+  background: var(--finance-green);
+}
+
+.admin-topups-owner .admin-finance-tabs .topup-tab-btn > span:not(.admin-finance-tab-icon) {
+  line-height: 1.35;
+}
+
+.admin-topups-owner .admin-finance-tabs .topup-tab-btn > span:not(.admin-finance-tab-icon) span {
+  display: inline-flex;
+  min-width: 20px;
+  min-height: 20px;
+  align-items: center;
+  justify-content: center;
+  margin-left: 4px;
+  border-radius: 999px;
+  color: #79500b;
+  background: #fff0cc;
+  font-size: 11px;
+}
+
+.admin-topups-owner .topup-tab-content[role="tabpanel"]:focus-visible {
+  outline: 3px solid rgba(8, 122, 91, .25);
+  outline-offset: 4px;
+}
+
+.admin-topups-owner .admin-bank-settings {
+  width: min(100%, 1120px);
+  margin-inline: auto;
+  padding: clamp(18px, 3vw, 30px);
+  border-color: var(--finance-line);
+  border-radius: 20px;
+  background: var(--card);
+  box-shadow: var(--finance-shadow);
+  gap: 20px;
+}
+
+.admin-topups-owner .admin-bank-settings > .flex.items-center.gap-3 {
+  min-height: 64px;
+  padding-bottom: 17px;
+  border-color: var(--finance-line);
+}
+
+.admin-topups-owner .admin-bank-title-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 13px;
+  color: var(--finance-green);
+  background: var(--finance-green-soft);
+}
+
+.admin-topups-owner .admin-bank-title-icon svg,
+.admin-topups-owner .admin-bank-section-icon,
+.admin-topups-owner .admin-finance-save svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-topups-owner .admin-bank-section-icon {
+  color: var(--finance-green);
+}
+
+.admin-topups-owner .admin-bank-settings h2 {
+  font-size: 18px;
+  letter-spacing: -.02em;
+}
+
+.admin-topups-owner .admin-bank-settings p {
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.admin-topups-owner .admin-provider-picker {
+  padding: 18px;
+  border-color: var(--finance-line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--card) 91%, var(--finance-green-soft));
+}
+
+.admin-topups-owner .admin-provider-picker-head {
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.admin-topups-owner .admin-provider-picker-head h3 {
+  color: var(--text);
+  font-size: 16px;
+  letter-spacing: -.015em;
+}
+
+.admin-topups-owner .admin-provider-picker-head p {
+  margin-top: 4px;
+  color: var(--finance-muted);
+  font-size: 12px;
+}
+
+.admin-topups-owner .admin-provider-picker-head > a {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border: 1px solid var(--finance-line);
+  border-radius: 10px;
+  color: var(--finance-green-strong);
+  background: var(--card);
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-topups-owner .admin-provider-picker-head > a:hover {
+  border-color: #9fd4b8;
+  background: var(--finance-green-soft);
+}
+
+.admin-topups-owner .admin-provider-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.admin-topups-owner .admin-provider-option {
+  position: relative;
+  min-width: 0;
+  min-height: 76px;
+  padding: 12px 13px;
+  border: 1px solid var(--finance-line) !important;
+  border-radius: 13px;
+  color: var(--text);
+  background: var(--card) !important;
+  text-decoration: none;
+  transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+
+.admin-topups-owner .admin-provider-option:hover {
+  border-color: #8cc9aa !important;
+  background: var(--finance-green-soft) !important;
+  box-shadow: 0 5px 15px rgba(17, 46, 34, .06);
+}
+
+.admin-topups-owner .admin-provider-option.is-active {
+  border-color: #a9d9bf !important;
+  background: var(--finance-green-soft) !important;
+}
+
+.admin-topups-owner .admin-provider-option.is-editing {
+  border-color: var(--finance-green) !important;
+  box-shadow: 0 0 0 3px rgba(8, 122, 91, .1);
+}
+
+.admin-topups-owner .admin-provider-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid #d8e9df;
+  border-radius: 12px;
+  color: var(--finance-green);
+  background: var(--finance-green-soft);
+}
+
+.admin-topups-owner .admin-provider-icon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-topups-owner .admin-provider-copy {
+  display: grid;
+  min-width: 0;
+  flex: 1 1 auto;
+  gap: 4px;
+}
+
+.admin-topups-owner .admin-provider-copy b {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-topups-owner .admin-provider-copy small {
+  overflow: hidden;
+  color: var(--finance-muted);
+  font-size: 11px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-topups-owner .admin-provider-status {
+  display: inline-flex;
+  min-height: 26px;
+  flex: 0 0 auto;
+  align-items: center;
+  padding: 4px 8px;
+  border: 1px solid #e1e8e4;
+  border-radius: 999px;
+  color: #52645b;
+  background: #f6f8f7;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.admin-topups-owner .admin-provider-status.is-active {
+  border-color: #c8e9d7;
+  color: #075f45;
+  background: #eaf8f1;
+}
+
+.admin-topups-owner .admin-provider-arrow {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  color: #62736b;
+}
+
+.admin-topups-owner .admin-provider-arrow svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.admin-topups-owner .admin-provider-editor-head {
+  min-height: 44px;
+  padding: 3px 0;
+}
+
+.admin-topups-owner .admin-provider-editor-head a {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+}
+
+.admin-topups-owner .admin-provider-help {
+  border-color: #cfe4f0;
+  border-radius: 12px;
+  background: #f4faff;
+  color: #35566a;
+  font-size: 13px;
+  line-height: 1.65;
+}
+
+.admin-topups-owner .admin-bank-transfer {
+  padding: 20px;
+  border-color: var(--finance-line);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--card) 92%, #f0f5f2);
+}
+
+.admin-topups-owner .admin-bank-transfer h3 {
+  font-size: 15px;
+}
+
+.admin-topups-owner .admin-bank-grid {
+  gap: 14px;
+}
+
+.admin-topups-owner .admin-bank-transfer label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+
+.admin-topups-owner .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) {
+  min-height: 46px;
+  padding: 10px 12px;
+  border-color: #d4e1da;
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--card);
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.admin-topups-owner .admin-bank-transfer input[type="file"] {
+  min-height: 46px;
+  padding: 7px;
+  border: 1px dashed #bfd3c8;
+  border-radius: 10px;
+  background: var(--card);
+  font-size: 12px;
+}
+
+.admin-topups-owner .admin-bank-transfer :is(input, select):focus {
+  border-color: #49a986;
+  box-shadow: 0 0 0 3px rgba(8, 122, 91, .12);
+}
+
+.admin-topups-owner .admin-finance-save-row {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 0;
+}
+
+.admin-topups-owner .admin-finance-save {
+  display: inline-flex;
+  min-width: 210px;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 18px;
+  border: 1px solid var(--finance-green-strong);
+  border-radius: 11px;
+  color: #fff;
+  background: var(--finance-green);
+  box-shadow: 0 5px 12px rgba(8, 122, 91, .16);
+  font-size: 13px;
+}
+
+.admin-topups-owner .admin-finance-save:hover {
+  background: var(--finance-green-strong);
+}
+
+@media (max-width: 760px) {
+  .admin-topups-owner > .space-y-6 { gap: 15px; }
+  .admin-topups-owner .admin-finance-header { align-items: flex-start; padding: 16px; }
+  .admin-topups-owner .admin-finance-title { font-size: 22px; }
+  .admin-topups-owner .admin-finance-tabs { margin-inline: -3px; }
+  .admin-topups-owner .admin-finance-tabs .topup-tab-btn { min-height: 48px; padding: 8px 11px; font-size: 12px; }
+  .admin-topups-owner .admin-bank-settings { padding: 17px; gap: 16px; }
+  .admin-topups-owner .admin-provider-picker { padding: 14px; }
+  .admin-topups-owner .admin-bank-transfer { padding: 15px; }
+}
+
+@media (max-width: 520px) {
+  .admin-topups-owner .admin-finance-header { gap: 12px; }
+  .admin-topups-owner .admin-finance-title { align-items: flex-start; font-size: 20px; }
+  .admin-topups-owner .admin-finance-title-icon { width: 40px; height: 40px; }
+  .admin-topups-owner .admin-finance-pending { min-height: 40px; align-self: flex-start; }
+  .admin-topups-owner .admin-provider-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-topups-owner .admin-provider-option { min-height: 72px; padding: 10px; }
+  .admin-topups-owner .admin-provider-icon { width: 38px; height: 38px; }
+  .admin-topups-owner .admin-provider-status { font-size: 9px; }
+  .admin-topups-owner .admin-provider-picker-head { align-items: flex-start; }
+  .admin-topups-owner .admin-provider-picker-head > a { min-height: 40px; }
+  .admin-topups-owner .admin-provider-editor-head { align-items: flex-start; flex-direction: column; }
+  .admin-topups-owner .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) { font-size: 16px; }
+  .admin-topups-owner .admin-finance-save-row,
+  .admin-topups-owner .admin-finance-save { width: 100%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-topups-owner .admin-finance-tabs .topup-tab-btn,
+  .admin-topups-owner .admin-provider-option { transition: none; }
+}

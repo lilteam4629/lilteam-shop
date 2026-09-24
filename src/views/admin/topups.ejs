@@ -1,4 +1,5 @@
-<div class="admin-workspace-view workspace-topups">
+<% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-topups-owner-v1.css') %>" /><% } %>
+<div class="admin-workspace-view workspace-topups <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-topups-owner' : '' %>">
 <% const publicSlipMessage = (message) => String(message || '')
   .replace(/Slip\s*XEPHT/gi, 'ระบบตรวจสอบ')
   .replace(/slip\.xepht\.com/gi, 'ระบบภายนอก')
@@ -7,7 +8,7 @@
 <div class="space-y-6">
 
   <!-- Page Header -->
-  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+  <div class="admin-finance-header flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <div class="flex items-center gap-2 text-xs text-[var(--text-4)] mb-1">
         <a href="/admin" class="text-[var(--gold-text)] hover:underline font-semibold">แอดมิน</a>
@@ -15,8 +16,11 @@
         <span>การเงิน</span>
       </div>
 
-      <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] flex items-center gap-2">
-        <span>💰 จัดการเติมเงิน, บัญชีรับเงิน & ตรวจสลิป</span>
+      <h1 class="admin-finance-title text-xl sm:text-2xl font-bold tracking-tight text-[var(--text)] flex items-center gap-2">
+        <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+        <span class="admin-finance-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7.5h18v12H3zM3 10.5h18M7 15.5h4M6 4.5h12"/></svg></span>
+        <span>จัดการเติมเงิน, บัญชีรับเงิน & ตรวจสลิป</span>
+        <% } else { %><span>💰 จัดการเติมเงิน, บัญชีรับเงิน & ตรวจสลิป</span><% } %>
       </h1>
       <p class="text-xs text-[var(--text-4)] mt-0.5">รวมศูนย์ระบบการเงิน: รายการตรวจสอบสลิป, บัญชีธนาคาร, ซองของขวัญ TrueMoney และระบบตรวจสลิปอัตโนมัติ</p>
     </div>
@@ -24,12 +28,12 @@
     <div class="flex items-center gap-2.5">
       <% const pendingCount = requests.filter(r => r.status === 'pending').length; %>
       <% if (pendingCount > 0) { %>
-        <div class="bg-amber-500/15 border border-amber-500/30 text-amber-400 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5">
+        <div class="admin-finance-pending bg-amber-500/15 border border-amber-500/30 text-amber-400 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5" <%- isMainSite ? 'role="status"' : '' %>>
           <span class="w-2 h-2 rounded-full bg-amber-400"></span>
           <span>รอตรวจสอบ <%= pendingCount %> รายการ</span>
         </div>
       <% } else { %>
-        <div class="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5">
+        <div class="admin-finance-pending is-clear bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5" <%- isMainSite ? 'role="status"' : '' %>>
           <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
           <span>ไม่มีรายการค้างตรวจ</span>
         </div>
@@ -38,27 +42,35 @@
   </div>
 
   <!-- Subsystem Navigation Tabs -->
-  <div class="flex border-b border-[var(--border)] gap-2 overflow-x-auto pb-px">
-    <button type="button" onclick="switchTopupTab('requests')" id="topup-tab-btn-requests" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-sm transition border-[var(--gold)] text-[var(--gold-text)] bg-[var(--gold)]/5 rounded-t-xl">
-      <span class="text-base">📋</span>
+  <div class="admin-finance-tabs flex border-b border-[var(--border)] gap-2 overflow-x-auto pb-px" <%- isMainSite ? 'role="tablist" aria-label="ส่วนจัดการระบบรับเงิน"' : '' %>>
+    <button type="button" <%- isMainSite ? 'role="tab" aria-selected="true" aria-controls="topup-tab-content-requests" tabindex="0"' : '' %> onclick="switchTopupTab('requests')" id="topup-tab-btn-requests" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-sm transition border-[var(--gold)] text-[var(--gold-text)] bg-[var(--gold)]/5 rounded-t-xl">
+      <% if (isMainSite) { %>
+      <span class="admin-finance-tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4h10v17H5V6h2M9 3h6v3H9zM8 11h6M8 15h6"/></svg></span>
+      <% } else { %><span class="text-base">📋</span><% } %>
       <span>รายการเติมเงิน & สลิป</span>
       <% if (pendingCount > 0) { %>
         <span class="text-[10px] bg-[var(--gold)] text-[var(--gold-contrast)] font-bold px-1.5 py-0.2 rounded-full"><%= pendingCount %></span>
       <% } %>
     </button>
-    <button type="button" onclick="switchTopupTab('bank')" id="topup-tab-btn-bank" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
-      <span class="text-base">💳</span>
+    <button type="button" <%- isMainSite ? 'role="tab" aria-selected="false" aria-controls="topup-tab-content-bank" tabindex="-1"' : '' %> onclick="switchTopupTab('bank')" id="topup-tab-btn-bank" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
+      <% if (isMainSite) { %>
+      <span class="admin-finance-tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M7 15h4"/></svg></span>
+      <% } else { %><span class="text-base">💳</span><% } %>
       <span>บัญชีธนาคารรับเงิน</span>
     </button>
-    <button type="button" onclick="switchTopupTab('truemoney')" id="topup-tab-btn-truemoney" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
-      <span class="text-base">🧧</span>
+    <button type="button" <%- isMainSite ? 'role="tab" aria-selected="false" aria-controls="topup-tab-content-truemoney" tabindex="-1"' : '' %> onclick="switchTopupTab('truemoney')" id="topup-tab-btn-truemoney" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
+      <% if (isMainSite) { %>
+      <span class="admin-finance-tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 6V4h10v2M3 10h18M8 15h.01"/></svg></span>
+      <% } else { %><span class="text-base">🧧</span><% } %>
       <span>ซองของขวัญ TrueMoney</span>
       <% if (payment.truemoneyEnabled !== false && payment.truemoneyPhone) { %>
         <span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded">เปิด</span>
       <% } %>
     </button>
-    <button type="button" onclick="switchTopupTab('autoverify')" id="topup-tab-btn-autoverify" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
-      <span class="text-base">🤖</span>
+    <button type="button" <%- isMainSite ? 'role="tab" aria-selected="false" aria-controls="topup-tab-content-autoverify" tabindex="-1"' : '' %> onclick="switchTopupTab('autoverify')" id="topup-tab-btn-autoverify" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
+      <% if (isMainSite) { %>
+      <span class="admin-finance-tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 7.7 7.5 9.5 4.4-1.8 7.5-4.9 7.5-9.5V6z"/><path d="m8.5 12 2.3 2.3 4.8-4.8"/></svg></span>
+      <% } else { %><span class="text-base">🤖</span><% } %>
       <span><%= isMainSite ? 'ตรวจสลิปอัตโนมัติ & แจ้งเตือน' : 'แจ้งเตือนการเติมเงิน' %></span>
     </button>
   </div>
@@ -66,7 +78,7 @@
   <!-- ========================================== -->
   <!-- TAB 1: รายการเติมเงิน & ตรวจสลิป (Requests) -->
   <!-- ========================================== -->
-  <div id="topup-tab-content-requests" class="topup-tab-content space-y-6">
+  <div id="topup-tab-content-requests" class="topup-tab-content space-y-6" <%- isMainSite ? 'role="tabpanel" aria-labelledby="topup-tab-btn-requests" tabindex="0"' : '' %>>
 
     <!-- Search & Filter Bar -->
     <form method="get" action="/admin/topups" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3">
@@ -265,8 +277,8 @@
   <!-- ========================================== -->
   <!-- TAB 2: บัญชีธนาคารสำหรับโอนเงิน -->
   <!-- ========================================== -->
-  <div id="topup-tab-content-bank" class="topup-tab-content hidden space-y-6">
-    <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
+  <div id="topup-tab-content-bank" class="topup-tab-content hidden space-y-6" <%- isMainSite ? 'role="tabpanel" aria-labelledby="topup-tab-btn-bank" tabindex="0"' : '' %>>
+    <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="admin-bank-settings bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
       <% if (receiverProvider) { %><input type="hidden" name="receiverProvider" value="<%= receiverProvider %>" /><% } %>
 
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
@@ -275,8 +287,10 @@
       <input type="hidden" name="topupWebhookUrl" value="<%= payment.topupWebhookUrl || '' %>" />
 
       <div class="flex items-center gap-3 pb-4 border-b border-[var(--border)]">
-        <div class="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-lg">
-          💳
+        <div class="admin-bank-title-icon w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold text-lg" <%- isMainSite ? 'aria-hidden="true"' : '' %>>
+          <% if (isMainSite) { %>
+          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M7 15h4"/></svg>
+          <% } else { %>💳<% } %>
         </div>
         <div>
           <h2 class="text-base font-bold text-[var(--text)]">ตั้งค่าบัญชีธนาคาร</h2>
@@ -284,8 +298,8 @@
         </div>
       </div>
 
-      <div class="rounded-2xl border border-[var(--border)] bg-[var(--input)]/30 p-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+      <div class="admin-provider-picker rounded-2xl border border-[var(--border)] bg-[var(--input)]/30 p-4">
+        <div class="admin-provider-picker-head flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
           <div>
             <h3 class="font-bold text-sm">ค่ายที่ใช้ตรวจสลิป</h3>
             <p class="text-[11px] text-[var(--text-4)]">บัญชีรับเงินด้านล่างเป็นของร้านนี้ ใช้กับค่ายที่เลือกได้โดยไม่ปนกับร้านอื่น</p>
@@ -293,24 +307,36 @@
           <a href="/admin/slip-verification" class="text-xs font-bold text-[var(--gold-text)]">ตั้งค่าค่ายตรวจสลิป →</a>
         </div>
         <% const receiverProviders = [['slipcheck','✅','SlipCheck'],['rdcw','🛡️','SlipRDCW'],['slip2go','🔎','Slip2Go'],['xepht','🌐','ระบบตรวจสอบอัตโนมัติ']].filter(item => availableReceiverProviders.includes(item[0])); %>
-        <div class="flex flex-col gap-2">
+        <div class="admin-provider-grid flex flex-col gap-2">
           <% receiverProviders.forEach(item => { const isActiveReceiverProvider = activeReceiverProvider === item[0]; const editingProvider = receiverProvider === item[0]; %>
-            <a href="/admin/topups/settings?receiverProvider=<%= item[0] %>#bank" class="flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition hover:border-[var(--gold)] <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
+            <a href="/admin/topups/settings?receiverProvider=<%= item[0] %>#bank" <%- isMainSite ? `aria-current="${editingProvider ? 'page' : 'false'}" aria-label="${item[2]}${isActiveReceiverProvider ? ' กำลังใช้งาน' : ' ยังไม่ได้เลือกใช้งาน'}${editingProvider ? ' กำลังแก้ไข' : ''}"` : '' %> class="admin-provider-option <%= isActiveReceiverProvider ? 'is-active' : '' %> <%= editingProvider ? 'is-editing' : '' %> flex items-center gap-3 rounded-xl border-2 px-4 py-3 transition hover:border-[var(--gold)] <%= editingProvider ? 'border-[var(--gold)] bg-[var(--gold)]/10' : 'border-[var(--border)] bg-[var(--card)]' %>">
+              <% if (isMainSite) { %>
+              <span class="admin-provider-icon" aria-hidden="true">
+                <% if (item[0] === 'slipcheck') { %><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m7.5 12 3 3 6-6"/></svg>
+                <% } else if (item[0] === 'rdcw') { %><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 7.7 7.5 9.5 4.4-1.8 7.5-4.9 7.5-9.5V6z"/><path d="m8.5 12 2.3 2.3 4.8-4.8"/></svg>
+                <% } else if (item[0] === 'slip2go') { %><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg>
+                <% } else { %><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18M5.5 6.5h13M5.5 17.5h13"/></svg><% } %>
+              </span>
+              <span class="admin-provider-copy"><b><%= item[2] %></b><small><%= isActiveReceiverProvider ? 'ผู้ให้บริการที่กำลังใช้งาน' : 'ตั้งค่าบัญชีรับเงินสำหรับค่ายนี้' %></small></span>
+              <span class="admin-provider-status <%= isActiveReceiverProvider ? 'is-active' : '' %>"><%= isActiveReceiverProvider ? 'ใช้งานอยู่' : 'ยังไม่เลือก' %></span>
+              <span class="admin-provider-arrow" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></span>
+              <% } else { %>
               <div class="w-10 h-10 shrink-0 rounded-xl bg-[var(--input)] flex items-center justify-center text-xl"><%= item[1] %></div>
               <div class="min-w-0 flex-1"><div class="text-sm font-bold"><%= item[2] %></div><div class="text-[10px] <%= isActiveReceiverProvider ? 'text-emerald-500' : 'text-[var(--text-4)]' %>"><%= isActiveReceiverProvider ? 'กำลังใช้งาน • กดเข้าไปแก้ไข' : 'กดเข้าไปกรอกข้อมูลของค่ายนี้' %></div></div>
               <div class="text-[var(--text-4)] text-lg">›</div>
+              <% } %>
             </a>
           <% }) %>
         </div>
       </div>
 
       <% if (receiverProvider) { %>
-      <div class="flex items-center justify-between gap-3">
+      <div class="admin-provider-editor-head flex items-center justify-between gap-3">
         <a href="/admin/topups/settings#bank" class="text-xs font-bold text-[var(--gold-text)]">← กลับไปเลือกค่าย</a>
         <span class="text-xs text-[var(--text-4)]">กำลังกรอกข้อมูลสำหรับ <b class="text-[var(--text)]"><%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go',xepht:'ระบบตรวจสอบอัตโนมัติ'})[receiverProvider] %></b></span>
       </div>
 
-      <div class="rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-[var(--text-3)]">
+      <div class="admin-provider-help rounded-xl border border-sky-500/30 bg-sky-500/5 px-4 py-3 text-xs text-[var(--text-3)]">
         <% if (receiverProvider === 'slipcheck') { %>SlipCheck ส่งชื่อผู้รับและธนาคารกลับมา ระบบจะตรวจจากชื่อผู้รับ ส่วนเบอร์/เลขบัญชีและ QR ใช้แสดงให้ลูกค้าโอน
         <% } else if (receiverProvider === 'rdcw') { %>SlipRDCW ไม่มีหน้าลงทะเบียนบัญชีผ่าน API ระบบจะใช้ชื่อและเลขผู้รับที่กรอกหน้านี้เทียบกับผลตรวจ
         <% } else if (receiverProvider === 'slip2go') { %>Slip2Go รองรับชื่อ เลขผู้รับ และประเภทบัญชี ระบบจะใช้ข้อมูลหน้านี้สร้างเงื่อนไขตรวจของค่ายนี้
@@ -323,12 +349,12 @@
         const otherBanks = banks;
         const primaryBank = banks.find(b => b.nameTh === receiverPayment.bankName);
       %>
-      <div class="bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
+      <div class="admin-bank-transfer bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
         <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
-          <span>🏦 ช่องทาง โอนผ่านบัญชีธนาคาร</span>
+          <% if (isMainSite) { %><svg class="admin-bank-section-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18M2 9h20"/></svg><span>ช่องทางโอนผ่านบัญชีธนาคาร</span><% } else { %><span>🏦 ช่องทาง โอนผ่านบัญชีธนาคาร</span><% } %>
         </h3>
 
-        <div class="grid sm:grid-cols-3 gap-4">
+        <div class="admin-bank-grid grid sm:grid-cols-3 gap-4">
           <div>
             <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคาร *</label>
             <% if (otherBanks.length) { %>
@@ -354,7 +380,7 @@
           </div>
         </div>
 
-        <div class="grid sm:grid-cols-2 gap-4">
+        <div class="admin-bank-grid grid sm:grid-cols-2 gap-4">
           <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีภาษาอังกฤษ (ถ้ามี)</label><input name="bankAccountNameEn" value="<%= receiverPayment.bankAccountNameEn || '' %>" placeholder="เช่น AURAPONG SONGTIM" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs" /></div>
           <div><label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ประเภทบัญชี</label><select name="bankAccountType" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs"><option value="NATURAL" <%= receiverPayment.bankAccountType !== 'JURISTIC' ? 'selected' : '' %>>บุคคลธรรมดา</option><option value="JURISTIC" <%= receiverPayment.bankAccountType === 'JURISTIC' ? 'selected' : '' %>>นิติบุคคล</option></select></div>
         </div>
@@ -375,9 +401,12 @@
         </div>
       </div>
 
-      <div class="pt-2">
-        <button type="submit" class="bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
-          💾 บันทึกและใช้ข้อมูลของ <%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go',xepht:'ระบบตรวจสอบอัตโนมัติ'})[receiverProvider] %>
+      <div class="admin-finance-save-row pt-2">
+        <button type="submit" class="admin-finance-save bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold px-6 py-2.5 rounded-xl text-xs shadow-md transition active:scale-95">
+          <% if (isMainSite) { %>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3h12l4 4v14H3V3zM7 3v6h10V3M7 21v-8h10v8"/></svg>
+          <span>บันทึกและใช้ข้อมูลของ <%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go',xepht:'ระบบตรวจสอบอัตโนมัติ'})[receiverProvider] %></span>
+          <% } else { %>💾 บันทึกและใช้ข้อมูลของ <%= ({slipcheck:'SlipCheck',rdcw:'SlipRDCW',slip2go:'Slip2Go',xepht:'ระบบตรวจสอบอัตโนมัติ'})[receiverProvider] %><% } %>
         </button>
       </div>
       <% } %>
@@ -388,7 +417,7 @@
   <!-- ========================================== -->
   <!-- TAB 3: ซองของขวัญ TrueMoney Wallet (Angpao) -->
   <!-- ========================================== -->
-  <div id="topup-tab-content-truemoney" class="topup-tab-content hidden space-y-6">
+  <div id="topup-tab-content-truemoney" class="topup-tab-content hidden space-y-6" <%- isMainSite ? 'role="tabpanel" aria-labelledby="topup-tab-btn-truemoney" tabindex="0"' : '' %>>
     <form action="/admin/topups/payment-settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
 
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
@@ -455,7 +484,7 @@
   <!-- ========================================== -->
   <!-- TAB 4: ตรวจสลิปอัตโนมัติ & Discord Webhook -->
   <!-- ========================================== -->
-  <div id="topup-tab-content-autoverify" class="topup-tab-content hidden space-y-6">
+  <div id="topup-tab-content-autoverify" class="topup-tab-content hidden space-y-6" <%- isMainSite ? 'role="tabpanel" aria-labelledby="topup-tab-btn-autoverify" tabindex="0"' : '' %>>
     <form action="/admin/topups/payment-settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
 
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
@@ -529,6 +558,10 @@
 <script>
   function switchTopupTab(tabId) {
     document.querySelectorAll('.topup-tab-btn').forEach(btn => {
+      <% if (isMainSite) { %>
+      btn.setAttribute('aria-selected', String(btn.id === 'topup-tab-btn-' + tabId));
+      btn.tabIndex = btn.id === 'topup-tab-btn-' + tabId ? 0 : -1;
+      <% } %>
       btn.classList.remove('border-[var(--gold)]', 'text-[var(--gold-text)]', 'bg-[var(--gold)]/5', 'font-bold');
       btn.classList.add('border-transparent', 'text-[var(--text-3)]', 'font-semibold');
     });
@@ -565,6 +598,23 @@
       switchTopupTab(hash);
     }
   })();
+
+  <% if (isMainSite) { %>
+  document.querySelector('[role="tablist"]')?.addEventListener('keydown', event => {
+    const tabs = [...document.querySelectorAll('.topup-tab-btn')];
+    const currentIndex = tabs.indexOf(document.activeElement);
+    if (currentIndex < 0) return;
+    let nextIndex = currentIndex;
+    if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+    else if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+    else if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = tabs.length - 1;
+    else return;
+    event.preventDefault();
+    tabs[nextIndex].focus();
+    switchTopupTab(tabs[nextIndex].id.replace('topup-tab-btn-', ''));
+  });
+  <% } %>
 </script>
 
 </div>
