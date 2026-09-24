@@ -84,7 +84,7 @@ body:has(#site-page-shell.storefront-owner-home-v7) > div > footer {
   color: #f8f6f2;
   background:
     radial-gradient(ellipse at 71% 17%, color-mix(in srgb, var(--gold) 22%, transparent), transparent 33%),
-    linear-gradient(128deg, #09111f 0%, #10182c 40%, #191325 78%, #0b101a 100%);
+    linear-gradient(128deg, #09111f 0%, #10182c 40%, #191325 78%, #0b101a 100%) !important;
   box-shadow: 0 34px 90px -58px #000, inset 0 1px 0 rgba(255,255,255,.18);
   perspective: 1500px;
   transform-style: preserve-3d;
@@ -242,7 +242,7 @@ body:has(#site-page-shell.storefront-owner-home-v7) > div > footer {
   max-width: 440px;
   margin-top: 25px;
   color: #fff !important;
-  font-size: clamp(34px, 5vw, 67px) !important;
+  font-size: clamp(32px, 3.8vw, 52px) !important;
   font-weight: 950 !important;
   line-height: .99 !important;
   letter-spacing: -.052em !important;
@@ -455,7 +455,7 @@ body:has(#site-page-shell.storefront-owner-home-v7) > div > footer {
   position: absolute;
   z-index: 4;
   right: 2%;
-  bottom: -27px;
+  bottom: -82px;
   display: grid;
   grid-template-columns: 58px minmax(0, 1fr) 28px;
   align-items: center;
