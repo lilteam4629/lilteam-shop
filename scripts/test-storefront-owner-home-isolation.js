@@ -10,8 +10,7 @@ const home = read('src/views/shop/home.ejs');
 const css = read('public/css/storefront-owner-home-v7.css');
 const redesignCss = read('public/css/storefront-owner-home-v14.css');
 const gameWorldCss = read('public/css/storefront-owner-home-v15.css');
-const immersiveCss = read('public/css/storefront-owner-home-v16.css');
-const immersiveJs = read('public/js/storefront-owner-home-v16.js');
+const cinematicCss = read('public/css/storefront-owner-home-v17.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
   'the redesign must be enabled for the main store only');
@@ -19,22 +18,24 @@ assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\
   'the owner stylesheet must be available for seamless navigation on the main site');
 assert.doesNotMatch(layout, /storefront-owner-home-v(?:8|9|10|11|14|15)\.css/,
   'superseded main-home design layers must no longer be loaded');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v16\.css/,
-  'the immersive design stylesheet must only load on the owner storefront');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v16\.js/,
-  'the 3D interaction script must only load on the owner storefront');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v17\.css/,
+  'the cinematic design stylesheet must only load on the owner storefront');
+assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,
+  'the replaced 3D scene stylesheet and script must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
   'the rejected oversized banner treatment must no longer load');
-assert.match(home, /if \(ownerHomeV16\) \{ %><div class="owner-home-v16-layout"/,
+assert.match(home, /if \(ownerHomeV17\) \{ %><div class="owner-home-v17-layout"/,
   'the new content layout must be wrapped only for the main store');
-assert.match(home, /if \(ownerHomeV16\) \{ %><\/div><% \}/,
+assert.match(home, /if \(ownerHomeV17\) \{ %><\/div><% \}/,
   'the main-store layout wrapper must close before the shared lower page modules');
-assert.match(home, /ownerHomeV16 && settings\.hero\.mode === 'banner' && settings\.hero\.bannerImage/,
-  'the immersive banner scene must only render for the main shop when its banner exists');
-assert.match(home, /data-owner-scene[\s\S]*?data-scene-motion-toggle/,
-  'the owner scene must provide motion control');
-assert.match(home, /banner-sparkle img/,
-  'the real uploaded banner must remain in the immersive display');
+assert.match(home, /ownerHomeV17\) \{ %>[\s\S]*?ownerHomeBanner = settings\.hero && settings\.hero\.mode === 'banner' \? settings\.hero\.bannerImage : null/,
+  'the new cinematic hero must use the configured real shop banner when available');
+assert.match(home, /class="owner-home-v17-banner-link"[\s\S]*?<img src="<%= ownerHomeBanner %>"[\s\S]*?fetchpriority="high"/,
+  'the uploaded banner must remain visible and load with high priority');
+assert.match(home, /FEATURED DROP|สินค้าเข้าใหม่/,
+  'the hero without a banner must feature actual catalog products instead of sample media');
+assert.doesNotMatch(home, /owner-home-v16|data-scene-motion-toggle|anime/i,
+  'the retired 3D scene and unrelated reference media must not remain in the live homepage template');
 assert.doesNotMatch(home, /storefront-banner-index/,
   'the rejected side rail must not render around the main-store banner');
 assert.match(layout, /id="site-page-shell"[^\n]*storefrontOwnerHomeV7/,
@@ -114,26 +115,24 @@ assert.match(gameWorldCss, /var\(--gold\)/,
   'the atmosphere may change, but active accents must continue to use the saved shop theme');
 assert.ok(gameWorldRuleCount > 0, 'the Pinterest-inspired style must contain scoped homepage rules');
 
-const immersiveStylesheet = postcss.parse(immersiveCss, { from: 'storefront-owner-home-v16.css' });
-let immersiveRuleCount = 0;
-immersiveStylesheet.walkRules(rule => {
+const cinematicStylesheet = postcss.parse(cinematicCss, { from: 'storefront-owner-home-v17.css' });
+let cinematicRuleCount = 0;
+cinematicStylesheet.walkRules(rule => {
   if (rule.parent && rule.parent.type === 'atrule' && /keyframes$/i.test(rule.parent.name)) return;
-  immersiveRuleCount += 1;
+  cinematicRuleCount += 1;
   for (const selector of rule.selectors) {
     assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7'),
-      `immersive homepage selector must be isolated from tenant shops: ${selector}`);
+      `cinematic homepage selector must be isolated from tenant shops: ${selector}`);
   }
 });
-assert.match(immersiveCss, /\.owner-home-v16-screen \.banner-sparkle img\s*\{[\s\S]*?object-fit:\s*contain\s*!important/,
-  'the owner banner image must remain uncropped inside the 3D display');
-assert.match(immersiveCss, /prefers-reduced-motion:\s*reduce/,
-  'the ambient scene must respect reduced-motion preferences');
-assert.match(immersiveCss, /var\(--gold\)/,
-  'the stadium treatment must use the selected store theme accent');
-assert.match(immersiveJs, /prefers-reduced-motion/,
-  'the 3D pointer interaction must disable itself for reduced motion');
-assert.match(immersiveJs, /pointermove/,
-  'the 3D display must respond to pointer position');
-assert.ok(immersiveRuleCount > 0, 'the immersive design must include scoped owner-only rules');
+assert.match(cinematicCss, /\.owner-home-v17-banner-link\s*\{[\s\S]*?aspect-ratio:\s*16\s*\/\s*7[\s\S]*?\}[\s\S]*?\.owner-home-v17-banner-link img\s*\{[\s\S]*?object-fit:\s*contain/,
+  'the new hero must display the uploaded banner completely without cropping');
+assert.match(cinematicCss, /prefers-reduced-motion:\s*reduce/,
+  'the cinematic homepage must respect reduced-motion preferences');
+assert.match(cinematicCss, /var\(--gold\)/,
+  'the cinematic homepage must retain the selected shop theme accent');
+assert.match(cinematicCss, /body:has\(#site-page-shell\.storefront-owner-home-v7\)/,
+  'the navigation theme must only change when the main homepage is active');
+assert.ok(cinematicRuleCount > 0, 'the cinematic design must include scoped owner-only rules');
 
-console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + immersiveRuleCount} scoped CSS rules).`);
+console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount} scoped CSS rules).`);
