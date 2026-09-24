@@ -367,12 +367,14 @@
   .experiment-catalog-api-page .catalog-selector-layout {
     grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
+    justify-items: stretch;
   }
 
   .experiment-catalog-api-page .catalog-selection-panel {
     position: static;
     width: 100%;
     max-width: none;
+    justify-self: stretch;
   }
 
   .experiment-catalog-api-page .catalog-selection-list {
