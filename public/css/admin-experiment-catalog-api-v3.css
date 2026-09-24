@@ -1,0 +1,31 @@
+/* Fresh URL override to make the responsive selector layout cache-safe. */
+@media (min-width: 851px) {
+  .experiment-catalog-api-page .catalog-selector-layout {
+    grid-template-columns: minmax(290px, 340px) minmax(0, 1fr);
+    align-items: start;
+    justify-items: stretch;
+  }
+
+  .experiment-catalog-api-page .catalog-selection-panel {
+    position: sticky;
+    top: 76px;
+    width: 100%;
+    max-width: none;
+    justify-self: stretch;
+  }
+}
+
+@media (max-width: 850px) {
+  .experiment-catalog-api-page .catalog-selector-layout {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    justify-items: stretch;
+  }
+
+  .experiment-catalog-api-page .catalog-selection-panel {
+    position: static;
+    width: 100%;
+    max-width: none;
+    justify-self: stretch;
+  }
+}
