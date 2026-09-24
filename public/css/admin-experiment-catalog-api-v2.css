@@ -366,6 +366,7 @@
 @media (max-width: 1050px) {
   .experiment-catalog-api-page .catalog-selector-layout {
     grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
   }
 
   .experiment-catalog-api-page .catalog-selection-panel {
