@@ -1,4 +1,5 @@
 <link rel="stylesheet" href="<%= asset('css/admin-experiment-catalog-api-v1.css') %>" />
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-catalog-api-v2.css') %>" />
 <%
   const catalogMoney = value => Number(value || 0).toLocaleString('th-TH', { maximumFractionDigits: 2 });
   const catalogPendingTotal = Object.values(payoutLedger?.pending || {}).reduce((sum, amount) => sum + (Number(amount) || 0), 0);
