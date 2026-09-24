@@ -33,10 +33,24 @@
   data-seed-style="<%= safeStyle %>">
   <header class="admin-theme-heading">
     <div>
-      <span class="admin-theme-kicker">STORE APPEARANCE · BRAND THEME</span>
+      <span class="admin-theme-kicker"><%= mainThemePage ? 'THEME BOARD · STORE LOOK' : 'STORE APPEARANCE · BRAND THEME' %></span>
       <h1>ธีมร้านค้า</h1>
       <p>เลือกสีและบรรยากาศของร้าน พร้อมดูตัวอย่างทั้งโหมดมืดและสว่างก่อนบันทึก</p>
     </div>
+    <% if (mainThemePage) { %>
+      <span class="admin-theme-board-art" aria-hidden="true">
+        <svg viewBox="0 0 116 92" focusable="false">
+          <rect x="11" y="16" width="94" height="67" rx="13" fill="#fff" stroke="#dfe5e1" />
+          <path d="M58 30c-15 0-27 10-27 23 0 12 9 21 21 21 5 0 8-2 11-6 2-3 4-4 8-3 11 2 19-4 19-14 0-12-13-21-32-21Z" fill="var(--admin-brand-soft, #f3f7f4)" stroke="var(--admin-brand-fill, #087a5b)" stroke-width="2" stroke-linejoin="round" />
+          <circle cx="43" cy="48" r="4" fill="var(--admin-brand-fill, #087a5b)" />
+          <circle cx="54" cy="40" r="3.5" fill="var(--admin-brand-readable, #176548)" />
+          <circle cx="66" cy="41" r="3.5" fill="var(--admin-brand-fill, #087a5b)" opacity=".62" />
+          <path d="m78 17 10 10-18 18-8-2 1-8 15-18Z" fill="#fff" stroke="#78857e" stroke-width="2" stroke-linejoin="round" />
+          <path d="m63 35 8 8m7-26 10 10" stroke="var(--admin-brand-fill, #087a5b)" stroke-width="2" stroke-linecap="round" />
+          <path d="m91 57 2.3 5.7L99 65l-5.7 2.3L91 73l-2.3-5.7L83 65l5.7-2.3L91 57Z" fill="var(--admin-brand-fill, #087a5b)" opacity=".72" />
+        </svg>
+      </span>
+    <% } %>
     <div class="admin-theme-current" data-theme-page-state data-dirty="false" role="status" aria-live="polite" aria-atomic="true">
       <span class="admin-theme-state-dot" aria-hidden="true"></span>
       <span data-theme-save-state>ค่าปัจจุบันของร้าน</span>
