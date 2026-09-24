@@ -1,0 +1,478 @@
+/* Main-store effects studio: playful game-menu cards with brand-driven accents. */
+html.admin-main-site .experiment-effects-page {
+  --effects-accent: var(--admin-brand-fill, #0f9f76);
+  --effects-accent-ink: var(--admin-brand-readable, #087a5b);
+  --effects-accent-soft: var(--admin-brand-soft, #e9faf3);
+  --effects-accent-border: var(--admin-brand-border, #ccefe0);
+  --effects-paper: #fffdf8;
+  --effects-paper-edge: #e8dfcd;
+  --effects-ink: #17231f;
+  --effects-muted: #64736d;
+}
+
+html.admin-main-site .experiment-effects-page .experiment-content {
+  width: min(1500px, 100%);
+  padding: 28px clamp(16px, 3vw, 40px) 48px;
+}
+
+html.admin-main-site .experiment-effects-page .experiment-page-head {
+  position: relative;
+  align-items: center;
+  min-height: 112px;
+  margin: 0 0 14px;
+  padding: 20px 23px;
+  overflow: hidden;
+  border: 1px solid var(--effects-paper-edge);
+  border-radius: 20px;
+  background: linear-gradient(112deg, #fff 0%, var(--effects-paper) 72%, color-mix(in srgb, var(--effects-accent) 8%, #fffdf8) 100%);
+  box-shadow: 0 7px 18px rgba(48, 42, 27, .045), inset 0 1px 0 #fff;
+}
+
+html.admin-main-site .experiment-effects-page .experiment-page-head::after {
+  position: absolute;
+  top: -8px;
+  right: 28%;
+  width: 15px;
+  height: 30px;
+  border: 1px solid color-mix(in srgb, var(--effects-accent) 40%, #b9a982);
+  border-radius: 0 0 7px 7px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--effects-accent) 60%, #fff), var(--effects-accent) 55%, color-mix(in srgb, var(--effects-accent) 72%, #765d3d));
+  box-shadow: 0 3px 5px rgba(30, 34, 29, .14);
+  content: "";
+  opacity: .9;
+}
+
+html.admin-main-site .experiment-effects-page .experiment-kicker,
+html.admin-main-site .experiment-effects-page .effects-eyebrow {
+  color: var(--effects-accent-ink);
+  font-size: 10px;
+  letter-spacing: .14em;
+}
+
+html.admin-main-site .experiment-effects-page .experiment-page-head h1 {
+  color: var(--effects-ink);
+  font-size: clamp(25px, 3vw, 34px);
+  letter-spacing: -.045em;
+}
+
+html.admin-main-site .experiment-effects-page .experiment-page-head p {
+  margin-top: 5px;
+  color: var(--effects-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+html.admin-main-site .experiment-effects-page .experiment-page-head .experiment-button {
+  position: relative;
+  z-index: 1;
+  min-height: 44px;
+  padding-inline: 15px;
+  border: 1px solid var(--effects-paper-edge);
+  border-radius: 12px;
+  color: var(--effects-ink);
+  background: #fff;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--effects-paper-edge) 75%, transparent);
+}
+
+html.admin-main-site .experiment-effects-page .experiment-page-head .experiment-button:hover {
+  border-color: var(--effects-accent-border);
+  color: var(--effects-accent-ink);
+  background: var(--effects-accent-soft);
+}
+
+html.admin-main-site .experiment-effects-page .experiment-page-status-note {
+  margin: 0 0 17px;
+  padding: 11px 14px;
+  border: 1px solid color-mix(in srgb, #d0a24d 32%, var(--effects-paper-edge));
+  border-radius: 13px;
+  color: #5d5037;
+  background: linear-gradient(110deg, #fff8e8, #fffdf8);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+html.admin-main-site .experiment-effects-page .experiment-page-status-note strong { color: #3f3524; }
+
+html.admin-main-site .experiment-effects-page .effects-preview {
+  position: relative;
+  margin-bottom: 16px;
+  padding: 19px;
+  overflow: visible;
+  border: 1px solid var(--effects-paper-edge);
+  border-radius: 23px;
+  background: linear-gradient(135deg, #fff 0%, #fffdf8 100%);
+  box-shadow: 0 10px 24px rgba(48, 42, 27, .055), inset 0 1px 0 #fff;
+}
+
+html.admin-main-site .experiment-effects-page .effects-preview::before {
+  position: absolute;
+  top: -7px;
+  left: 21%;
+  width: 35px;
+  height: 14px;
+  border: 1px solid color-mix(in srgb, var(--effects-accent) 26%, #c9b98f);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--effects-accent) 22%, #fff0c8);
+  content: "";
+  transform: rotate(-3deg);
+}
+
+html.admin-main-site .experiment-effects-page .effects-preview-top {
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+html.admin-main-site .experiment-effects-page .effects-preview-top h2 {
+  margin-top: 3px;
+  color: var(--effects-ink);
+  font-size: 20px;
+  letter-spacing: -.035em;
+}
+
+html.admin-main-site .experiment-effects-page .effects-preview-top p {
+  margin-top: 4px;
+  color: var(--effects-muted);
+  font-size: 11px;
+}
+
+html.admin-main-site .experiment-effects-page .effects-preview-live {
+  min-height: 34px;
+  padding: 7px 11px;
+  border-color: var(--effects-accent-border);
+  color: var(--effects-accent-ink);
+  background: var(--effects-accent-soft);
+  font-size: 10px;
+}
+
+html.admin-main-site .experiment-effects-page .effects-preview-live i,
+html.admin-main-site .experiment-effects-page .music-dot.on {
+  background: var(--effects-accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--effects-accent) 17%, transparent);
+}
+
+html.admin-main-site .experiment-effects-page .effects-stage {
+  min-height: clamp(250px, 27vw, 330px);
+  border: 1px solid color-mix(in srgb, var(--effects-accent) 36%, #27344a);
+  border-radius: 19px;
+  background:
+    radial-gradient(ellipse at 82% 15%, color-mix(in srgb, var(--effects-accent) 37%, transparent), transparent 36%),
+    linear-gradient(145deg, #172438 0%, color-mix(in srgb, var(--effects-accent) 74%, #26344a) 56%, #29364a 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.16), 0 5px 0 color-mix(in srgb, var(--effects-paper-edge) 78%, transparent);
+}
+
+html.admin-main-site .experiment-effects-page .effects-stage-glow {
+  right: -5%;
+  bottom: -60%;
+  left: 29%;
+  height: 250px;
+  background: color-mix(in srgb, var(--effects-accent) 42%, transparent);
+  filter: blur(38px);
+}
+
+html.admin-main-site .experiment-effects-page .effects-store-chrome {
+  min-height: 48px;
+  padding: 9px 14px;
+  border-bottom-color: rgba(255,255,255,.2);
+  color: #fff;
+  font-size: 11px;
+}
+
+html.admin-main-site .experiment-effects-page .effects-store-logo {
+  width: 29px;
+  height: 29px;
+  border: 2px solid rgba(255,255,255,.7);
+  border-radius: 10px;
+  color: var(--admin-brand-contrast, #fff);
+  background: var(--effects-accent);
+  box-shadow: 0 3px 8px rgba(0,0,0,.18);
+}
+
+html.admin-main-site .experiment-effects-page .effects-store-nav { color: rgba(255,255,255,.82); font-size: 10px; }
+html.admin-main-site .experiment-effects-page .effects-store-cart { min-height: 30px; padding: 6px 10px; border-color: rgba(255,255,255,.46); font-size: 9px; }
+
+html.admin-main-site .experiment-effects-page .effects-stage-body {
+  padding: 32px 20px 76px;
+  text-shadow: 0 2px 12px rgba(0,0,0,.22);
+}
+
+html.admin-main-site .experiment-effects-page .effects-stage-kicker {
+  color: #fff;
+  font-size: 9px;
+  letter-spacing: .2em;
+}
+
+html.admin-main-site .experiment-effects-page .effects-stage-body strong {
+  max-width: 100%;
+  margin-top: 5px;
+  color: #fff;
+  font-size: clamp(28px, 4vw, 44px);
+  letter-spacing: -.055em;
+  overflow-wrap: anywhere;
+}
+
+html.admin-main-site .experiment-effects-page .effects-stage-body > span {
+  color: rgba(255,255,255,.9);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+html.admin-main-site .experiment-effects-page .effects-stage-cards {
+  position: absolute;
+  z-index: 2;
+  bottom: 18px;
+  left: 50%;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin: 0;
+  transform: translateX(-50%);
+}
+
+html.admin-main-site .experiment-effects-page .effects-stage-cards span {
+  position: relative;
+  display: grid;
+  grid-template-rows: 1fr 5px;
+  gap: 5px;
+  width: clamp(58px, 8vw, 104px);
+  height: 47px;
+  padding: 6px;
+  border: 1px solid rgba(255,255,255,.43);
+  border-radius: 11px;
+  background: linear-gradient(145deg, rgba(255,255,255,.28), rgba(255,255,255,.09));
+  box-shadow: 0 7px 15px rgba(5,14,28,.24), inset 0 1px 0 rgba(255,255,255,.35);
+  transform: rotate(-5deg);
+}
+
+html.admin-main-site .experiment-effects-page .effects-stage-cards span:nth-child(2) {
+  height: 57px;
+  border-color: color-mix(in srgb, var(--effects-accent) 62%, #fff);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--effects-accent) 48%, #fff), rgba(255,255,255,.13));
+  transform: translateY(-5px) rotate(2deg);
+}
+
+html.admin-main-site .experiment-effects-page .effects-stage-cards span:nth-child(3) { transform: rotate(5deg); }
+html.admin-main-site .experiment-effects-page .effects-stage-cards i { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.85); border-radius: 50%; background: var(--effects-accent); }
+html.admin-main-site .experiment-effects-page .effects-stage-cards span:nth-child(2) i { background: #d8a449; }
+html.admin-main-site .experiment-effects-page .effects-stage-cards span:nth-child(3) i { background: #8c82d8; }
+html.admin-main-site .experiment-effects-page .effects-stage-cards b { width: 63%; height: 4px; border-radius: 9px; background: rgba(255,255,255,.7); }
+
+html.admin-main-site .experiment-effects-page .effects-stage-badge {
+  right: 12px;
+  bottom: 12px;
+  padding: 7px 10px;
+  border: 1px solid rgba(255,255,255,.32);
+  color: #fff;
+  background: rgba(18, 28, 44, .82);
+  font-size: 9px;
+}
+
+html.admin-main-site .experiment-effects-page .effects-preview-foot {
+  align-items: center;
+  margin-top: 13px;
+  font-size: 10px;
+}
+
+html.admin-main-site .experiment-effects-page .effects-preview-foot > span:first-child {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid var(--effects-paper-edge);
+  border-radius: 10px;
+  background: var(--effects-paper);
+}
+
+html.admin-main-site .experiment-effects-page .effects-stat-row { gap: 12px; margin-bottom: 17px; }
+
+html.admin-main-site .experiment-effects-page .effects-stat-row > div {
+  position: relative;
+  min-height: 82px;
+  padding: 15px;
+  overflow: hidden;
+  border: 1px solid var(--effects-paper-edge);
+  border-radius: 17px;
+  background: linear-gradient(135deg, #fff, var(--effects-paper));
+  box-shadow: 0 5px 13px rgba(48, 42, 27, .04), inset 0 1px 0 #fff;
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+
+html.admin-main-site .experiment-effects-page .effects-stat-row > div:hover {
+  transform: translateY(-2px);
+  border-color: var(--effects-accent-border);
+  box-shadow: 0 9px 18px rgba(48, 42, 27, .075);
+}
+
+html.admin-main-site .experiment-effects-page .effects-stat-icon {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--effects-accent-border);
+  border-radius: 13px;
+  color: var(--effects-accent-ink);
+  background: var(--effects-accent-soft);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--effects-accent) 12%, transparent);
+}
+
+html.admin-main-site .experiment-effects-page .effects-stat-icon svg,
+html.admin-main-site .experiment-effects-page .effects-panel-icon svg { width: 19px; height: 19px; }
+html.admin-main-site .experiment-effects-page .effects-stat-icon.blue,
+html.admin-main-site .experiment-effects-page .effects-panel-icon.blue { border-color: #d8d8f2; color: #555fae; background: #f0efff; }
+html.admin-main-site .experiment-effects-page .effects-stat-icon.gold { border-color: #edd9ab; color: #815a19; background: #fff4dc; }
+html.admin-main-site .experiment-effects-page .effects-stat-row small { color: var(--effects-muted); font-size: 11px; }
+html.admin-main-site .experiment-effects-page .effects-stat-row strong { color: var(--effects-ink); font-size: 13px; }
+
+html.admin-main-site .experiment-effects-page .effects-settings-grid { gap: 16px; }
+
+html.admin-main-site .experiment-effects-page .effects-panel {
+  position: relative;
+  padding: 20px;
+  border: 1px solid var(--effects-paper-edge);
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fff, var(--effects-paper));
+  box-shadow: 0 8px 19px rgba(48, 42, 27, .05), inset 0 1px 0 #fff;
+}
+
+html.admin-main-site .experiment-effects-page .effects-panel::before {
+  position: absolute;
+  top: -6px;
+  right: 19%;
+  width: 31px;
+  height: 12px;
+  border: 1px solid color-mix(in srgb, var(--effects-accent) 26%, #c9b98f);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--effects-accent) 20%, #fff0c8);
+  content: "";
+  transform: rotate(2deg);
+}
+
+html.admin-main-site .experiment-effects-page .effects-panel-head { align-items: center; gap: 11px; margin-bottom: 19px; }
+html.admin-main-site .experiment-effects-page .effects-panel-icon {
+  width: 42px;
+  height: 42px;
+  flex-basis: 42px;
+  border: 1px solid var(--effects-accent-border);
+  border-radius: 14px;
+  color: var(--effects-accent-ink);
+  background: var(--effects-accent-soft);
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--effects-accent) 12%, transparent);
+}
+
+html.admin-main-site .experiment-effects-page .effects-panel-head h2 { color: var(--effects-ink); font-size: 17px; }
+html.admin-main-site .experiment-effects-page .effects-panel-head p { margin-top: 3px; color: var(--effects-muted); font-size: 11px; line-height: 1.5; }
+html.admin-main-site .experiment-effects-page .effects-ready { padding: 6px 9px; border: 1px solid var(--effects-accent-border); border-radius: 999px; color: var(--effects-accent-ink); background: var(--effects-accent-soft); font-size: 10px; }
+html.admin-main-site .experiment-effects-page .effects-form { gap: 15px; }
+html.admin-main-site .experiment-effects-page .effects-form label,
+html.admin-main-site .experiment-effects-page .effects-rain-form label { gap: 7px; color: #303c37; font-size: 12px; }
+html.admin-main-site .experiment-effects-page .effects-form label > small { color: var(--effects-muted); font-size: 10px; line-height: 1.5; }
+
+html.admin-main-site .experiment-effects-page .effects-form input:not([type="range"]),
+html.admin-main-site .experiment-effects-page .effects-form select,
+html.admin-main-site .experiment-effects-page .effects-rain-form input[type="color"],
+html.admin-main-site .experiment-effects-page .effects-rain-form select {
+  min-height: 46px;
+  border: 1px solid color-mix(in srgb, var(--effects-paper-edge) 70%, #d7e1dc);
+  border-radius: 12px;
+  color: var(--effects-ink);
+  background: #fff;
+  font-size: 13px;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+html.admin-main-site .experiment-effects-page .effects-form input:focus-visible,
+html.admin-main-site .experiment-effects-page .effects-rain-form input:focus-visible,
+html.admin-main-site .experiment-effects-page .effects-rain-form select:focus-visible {
+  border-color: var(--effects-accent);
+  outline: 3px solid color-mix(in srgb, var(--effects-accent) 25%, transparent);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+html.admin-main-site .experiment-effects-page .effects-form input[type="range"] { accent-color: var(--effects-accent); }
+html.admin-main-site .experiment-effects-page .effects-range-label b { color: var(--effects-accent-ink); }
+
+html.admin-main-site .experiment-effects-page .effects-toggle,
+html.admin-main-site .experiment-effects-page .effects-effect-row {
+  border: 1px solid color-mix(in srgb, var(--effects-paper-edge) 76%, var(--effects-accent-border));
+  border-radius: 14px;
+  background: #fff;
+}
+
+html.admin-main-site .experiment-effects-page .effects-toggle {
+  min-height: 66px;
+  padding: 13px 14px;
+  cursor: pointer;
+  transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
+}
+
+html.admin-main-site .experiment-effects-page .effects-toggle:has(input:checked),
+html.admin-main-site .experiment-effects-page .effects-effect-row:has(.effects-switch input:checked) {
+  border-color: var(--effects-accent-border);
+  background: color-mix(in srgb, var(--effects-accent-soft) 48%, #fff);
+}
+
+html.admin-main-site .experiment-effects-page .effects-toggle strong { color: var(--effects-ink); font-size: 12px; }
+html.admin-main-site .experiment-effects-page .effects-toggle small { color: var(--effects-muted); font-size: 10px; }
+html.admin-main-site .experiment-effects-page .effects-toggle i,
+html.admin-main-site .experiment-effects-page .effects-switch i { width: 46px; height: 26px; flex-basis: 46px; background: #e8e8e3; }
+html.admin-main-site .experiment-effects-page .effects-switch { display: flex !important; width: 48px; height: 48px; align-items: center; justify-content: center; }
+html.admin-main-site .experiment-effects-page .effects-toggle i::after,
+html.admin-main-site .experiment-effects-page .effects-switch i::after { top: 3px; left: 3px; width: 20px; height: 20px; }
+html.admin-main-site .experiment-effects-page .effects-toggle input:checked + i,
+html.admin-main-site .experiment-effects-page .effects-switch input:checked + i { background: var(--effects-accent); }
+html.admin-main-site .experiment-effects-page .effects-toggle input:checked + i::after,
+html.admin-main-site .experiment-effects-page .effects-switch input:checked + i::after { transform: translateX(20px); }
+html.admin-main-site .experiment-effects-page .effects-toggle input:focus-visible + i,
+html.admin-main-site .experiment-effects-page .effects-switch input:focus-visible + i { outline: 3px solid var(--effects-accent); outline-offset: 3px; }
+
+html.admin-main-site .experiment-effects-page .effects-effect-list { gap: 11px; }
+html.admin-main-site .experiment-effects-page .effects-effect-row { min-height: 68px; padding: 13px; }
+html.admin-main-site .experiment-effects-page .effects-effect-row strong { color: var(--effects-ink); font-size: 12px; }
+html.admin-main-site .experiment-effects-page .effects-effect-row small { color: var(--effects-muted); font-size: 10px; }
+html.admin-main-site .experiment-effects-page .effects-effect-art { width: 40px; height: 40px; flex-basis: 40px; border: 1px solid #dfdef4; border-radius: 13px; }
+html.admin-main-site .experiment-effects-page .effects-effect-art svg { width: 20px; height: 20px; }
+html.admin-main-site .experiment-effects-page .rain-art { border-color: var(--effects-accent-border); color: var(--effects-accent-ink); background: var(--effects-accent-soft); }
+html.admin-main-site .experiment-effects-page .effects-inline-link { min-height: 42px; padding: 0 10px; border-radius: 10px; color: var(--effects-accent-ink); }
+html.admin-main-site .experiment-effects-page .effects-inline-link:hover { background: var(--effects-accent-soft); }
+html.admin-main-site .experiment-effects-page .effects-rain-form { padding: 14px; border-color: var(--effects-accent-border); border-radius: 14px; background: color-mix(in srgb, var(--effects-accent-soft) 38%, #fff); }
+html.admin-main-site .experiment-effects-page .effects-form .experiment-button,
+html.admin-main-site .experiment-effects-page .effects-rain-form .experiment-button { min-height: 46px; border: 1px solid var(--effects-accent); border-radius: 12px; color: var(--admin-brand-contrast, #fff); background: var(--effects-accent); font-size: 12px; font-weight: 800; box-shadow: 0 4px 0 color-mix(in srgb, var(--effects-accent) 22%, transparent); }
+html.admin-main-site .experiment-effects-page .effects-form .experiment-button:hover,
+html.admin-main-site .experiment-effects-page .effects-rain-form .experiment-button:hover { background: var(--admin-brand-hover, var(--effects-accent)); }
+
+html.admin-main-site .experiment-effects-page :where(a, button, input, select, label):focus-visible { outline-color: var(--effects-accent); }
+
+@media (max-width: 700px) {
+  html.admin-main-site .experiment-effects-page .experiment-content { padding: 18px 13px 30px; }
+  html.admin-main-site .experiment-effects-page .experiment-page-head { align-items: flex-start; padding: 18px 15px; }
+  html.admin-main-site .experiment-effects-page .experiment-page-head::after { right: 25%; }
+  html.admin-main-site .experiment-effects-page .experiment-page-head .experiment-actions { width: 100%; }
+  html.admin-main-site .experiment-effects-page .experiment-page-head .experiment-button { width: 100%; justify-content: center; }
+  html.admin-main-site .experiment-effects-page .effects-preview { padding: 14px; border-radius: 18px; }
+  html.admin-main-site .experiment-effects-page .effects-stage { min-height: 265px; border-radius: 15px; }
+  html.admin-main-site .experiment-effects-page .effects-store-nav { display: none; }
+  html.admin-main-site .experiment-effects-page .effects-stage-body { padding: 34px 12px 80px; }
+  html.admin-main-site .experiment-effects-page .effects-stage-body > span { max-width: 32ch; }
+  html.admin-main-site .experiment-effects-page .effects-stage-cards { gap: 7px; bottom: 16px; }
+  html.admin-main-site .experiment-effects-page .effects-stage-cards span { width: 62px; height: 42px; }
+  html.admin-main-site .experiment-effects-page .effects-stage-cards span:nth-child(2) { height: 49px; }
+  html.admin-main-site .experiment-effects-page .effects-stage-badge { right: 8px; bottom: 8px; max-width: 108px; font-size: 8px; }
+  html.admin-main-site .experiment-effects-page .effects-panel { padding: 16px; border-radius: 17px; }
+  html.admin-main-site .experiment-effects-page .effects-panel-head { flex-wrap: wrap; }
+  html.admin-main-site .experiment-effects-page .effects-panel-head > div { flex-basis: calc(100% - 56px); }
+}
+
+@media (max-width: 390px) {
+  html.admin-main-site .experiment-effects-page .effects-stage-badge { max-width: 85px; }
+  html.admin-main-site .experiment-effects-page .effects-stage-cards span { width: 52px; height: 38px; }
+  html.admin-main-site .experiment-effects-page .effects-stage-cards span:nth-child(2) { height: 44px; }
+  html.admin-main-site .experiment-effects-page .effects-rain-form { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html.admin-main-site .experiment-effects-page *,
+  html.admin-main-site .experiment-effects-page *::before,
+  html.admin-main-site .experiment-effects-page *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+  html.admin-main-site .experiment-effects-page .effects-stat-row > div:hover { transform: none; }
+}
