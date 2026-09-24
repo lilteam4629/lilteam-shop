@@ -57,7 +57,7 @@
 <% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2 && !ownerHomeV16) { %>
   <%- include('../partials/locker-hero', { newest, stats, settings, filterTags, publicPreview: typeof publicPreview !== 'undefined' ? publicPreview : false }) %>
 <% } else if (ownerHomeV16 && settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
-  <section class="storefront-hero-banner owner-home-v16-scene" data-owner-scene data-scene-motion="playing" aria-label="หน้าหลักร้าน LilTeam">
+  <section class="storefront-hero-banner owner-home-v16-scene" style="background:radial-gradient(ellipse at 71% 17%,color-mix(in srgb,var(--gold) 22%,transparent),transparent 33%),linear-gradient(128deg,#09111f 0%,#10182c 40%,#191325 78%,#0b101a 100%)!important" data-owner-scene data-scene-motion="playing" aria-label="หน้าหลักร้าน LilTeam">
       <div class="owner-home-v16-world" aria-hidden="true">
         <span class="owner-home-v16-atmosphere owner-home-v16-atmosphere--one"></span>
         <span class="owner-home-v16-atmosphere owner-home-v16-atmosphere--two"></span>
