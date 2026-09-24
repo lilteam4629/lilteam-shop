@@ -109,6 +109,39 @@ body.storefront-owner-home-page :is(a, button, input, select, summary):focus-vis
   outline-offset: 3px;
 }
 
+/* The redesigned welcome dialog is loaded from a shared legacy stylesheet.
+   Re-theme its action buttons only on the main shop homepage. */
+body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-dialog {
+  border-color: color-mix(in srgb, var(--gold) 46%, var(--border)) !important;
+}
+body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions {
+  border-color: var(--border) !important;
+  background: color-mix(in srgb, var(--card) 96%, var(--gold) 4%) !important;
+}
+body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button {
+  border-color: var(--border-light) !important;
+  color: var(--text-2) !important;
+  background: var(--input) !important;
+}
+body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button:first-child {
+  border-color: var(--gold) !important;
+  color: var(--gold-contrast) !important;
+  background: var(--gold) !important;
+  box-shadow: 0 8px 20px -14px color-mix(in srgb, var(--gold) 85%, transparent) !important;
+}
+body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button:first-child:hover {
+  border-color: var(--gold-hover) !important;
+  background: var(--gold-hover) !important;
+}
+body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button + button:hover {
+  border-color: color-mix(in srgb, var(--gold) 48%, var(--border)) !important;
+  background: color-mix(in srgb, var(--gold) 10%, var(--card)) !important;
+}
+body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button:focus-visible,
+body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-dismiss:focus-visible {
+  outline-color: var(--gold) !important;
+}
+
 @media (max-width: 900px) {
   #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell,
   body.storefront-owner-home-page :is(.store-status-section, .store-announcements, .event-update, .latest-orders-section, .store-filter-section, .store-product-gallery, .store-content-section),
