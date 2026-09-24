@@ -71,6 +71,8 @@ assert.match(redesignCss, /\.owner-home-v14-layout\s*\{[\s\S]*?display:\s*flex/,
   'the main homepage content must receive an intentional new section order');
 assert.doesNotMatch(redesignCss, /#(?:00(?:ff|cc)91|34cf91|34d399|10b981)\b/i,
   'the redesign must not hardcode green accents over the selected shop theme');
+assert.match(redesignCss, /\.ready-glow\s*\{[\s\S]*?background:\s*color-mix\(in srgb, var\(--gold\)/,
+  'available-product badges must use the selected shop accent instead of fixed green');
 assert.ok(redesignRuleCount > 0, 'the owner-only homepage redesign should contain scoped CSS rules');
 
 console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount} scoped CSS rules).`);
