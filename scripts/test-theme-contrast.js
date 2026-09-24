@@ -1,6 +1,8 @@
 'use strict';
 
 const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
 const theme = require('../src/services/theme');
 
 function variablesFrom(block) {
@@ -23,6 +25,39 @@ const backgrounds = theme.getBgPresets({ includeMain: true }).map((item) => ({ b
 ]);
 
 let checked = 0;
+for (const accent of accents) {
+  const adminCss = theme.renderAdminAccentCss({ accent });
+  const fill = adminCss.match(/--admin-brand-fill:\s*(#[0-9a-f]{6})/i)?.[1];
+  const text = adminCss.match(/--admin-brand-readable:\s*(#[0-9a-f]{6})/i)?.[1];
+  const contrast = adminCss.match(/--admin-brand-contrast:\s*(#[0-9a-f]{6})/i)?.[1];
+  assert.match(adminCss, /^html\.admin-main-site\s*\{/,
+    'admin accent variables must be scoped to the main-site root');
+  assert(fill && text && contrast, `admin accent tokens missing for ${accent}`);
+  assert(theme.contrastRatio(fill, '#ffffff') >= 4.5,
+    `admin accent fill is not readable with white controls: ${accent}`);
+  assert(theme.contrastRatio(text, '#ffffff') >= 4.5,
+    `admin accent text is not readable on white surfaces: ${accent}`);
+  assert(theme.contrastRatio(contrast, fill) >= 4.5,
+    `admin accent foreground is not readable on its fill: ${accent}`);
+  assert.doesNotMatch(adminCss, /--(?:bg|card|text):/,
+    'admin accent CSS must not overwrite the separate admin surface palette');
+}
+
+const experimentLayout = fs.readFileSync(path.join(__dirname, '../src/views/layouts/admin-experiment.ejs'), 'utf8');
+const legacyLayout = fs.readFileSync(path.join(__dirname, '../src/views/layouts/admin.ejs'), 'utf8');
+const experimentCss = fs.readFileSync(path.join(__dirname, '../public/css/admin-experiment-v1.css'), 'utf8');
+const couponCss = fs.readFileSync(path.join(__dirname, '../public/css/admin-experiment-coupons-v1.css'), 'utf8');
+assert.match(experimentLayout, /admin-main-site/);
+assert.match(experimentLayout, /adminBrandCss/);
+assert.match(legacyLayout, /admin-main-site/);
+assert.match(legacyLayout, /adminBrandCss/);
+assert.match(experimentCss, /--ex-green:\s*var\(--admin-brand-fill,/);
+assert.match(experimentCss, /--ex-green-dark:\s*var\(--admin-brand-readable,/);
+assert.match(experimentCss, /--ex-green-soft:\s*var\(--admin-brand-soft,/);
+assert.match(couponCss, /coupons-live-badge\{[^}]*color:#087a5b/s,
+  'semantic live status color should remain independent of the brand accent');
+console.log('Main admin accent wiring and tenant/status boundaries passed');
+
 for (const background of backgrounds) {
   for (const accent of accents) {
     for (const vars of modeVariables(theme.renderCss({ ...background, accent }))) {

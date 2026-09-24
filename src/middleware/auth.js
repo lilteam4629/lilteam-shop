@@ -37,6 +37,7 @@ function attachUser(req, res, next) {
   };
   res.locals.navFilterTags = Array.isArray(store.data.filterTags) ? store.data.filterTags : [];
   res.locals.themeCss = theme.renderCss(store.data.settings.theme);
+  res.locals.adminBrandCss = theme.renderAdminAccentCss(store.data.settings.theme);
   next();
 }
 

@@ -343,12 +343,47 @@ function renderCss(theme) {
     ${extra}`;
 }
 
+// The main admin has its own light interface, but the brand accent selected
+// in the theme settings should still be shared with it. Keep these variables
+// scoped to the owner site's document root so tenant admin pages continue to
+// use their existing independent palette.
+function renderAdminAccentCss(theme) {
+  const accent = (theme && /^#[0-9a-fA-F]{6}$/.test(theme.accent))
+    ? theme.accent
+    : ACCENT_PRESETS[0].color;
+  const surfaces = ['#f6f8f8', '#ffffff', '#f5f8f6'];
+  // Admin components use white labels on many filled controls. Keep a 4.5:1
+  // minimum so every preset remains readable even when the chosen swatch is
+  // pale (for example champagne or yellow).
+  const accentFill = visibleAccentOn(accent, surfaces, 4.5);
+  const accentHover = relativeLuminance(accentFill) < 0.5
+    ? lighten(accentFill, 0.14)
+    : darken(accentFill, 0.12);
+  const accentStrong = darken(accentFill, 0.42);
+  const accentText = readableAccentOn(accent, surfaces);
+
+  return `html.admin-main-site {
+    --admin-brand-accent: ${accent};
+    --admin-brand-fill: ${accentFill};
+    --admin-brand-hover: ${accentHover};
+    --admin-brand-strong: ${accentStrong};
+    --admin-brand-readable: ${accentText};
+    --admin-brand-contrast: ${contrastTextFor(accentFill)};
+    --admin-brand-soft: color-mix(in srgb, ${accentFill} 10%, #ffffff);
+    --admin-brand-border: color-mix(in srgb, ${accentFill} 28%, #ffffff);
+    --ex-green: ${accentFill};
+    --ex-green-dark: ${accentText};
+    --ex-green-soft: color-mix(in srgb, ${accentFill} 10%, #ffffff);
+  }`;
+}
+
 module.exports = {
   getBgPresets,
   MAIN_BG_PRESET_KEY,
   getAccentPresets,
   getStyles,
   renderCss,
+  renderAdminAccentCss,
   // Exported for the theme regression checks. Keeping the colour maths in one
   // place prevents tests and production CSS from drifting apart.
   contrastRatio,

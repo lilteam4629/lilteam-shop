@@ -4,9 +4,9 @@
   --ex-ink: #14201d;
   --ex-muted: #71807b;
   --ex-line: #e2e9e6;
-  --ex-green: #0f9f76;
-  --ex-green-dark: #087a5b;
-  --ex-green-soft: #e9faf3;
+  --ex-green: var(--admin-brand-fill, #0f9f76);
+  --ex-green-dark: var(--admin-brand-readable, #087a5b);
+  --ex-green-soft: var(--admin-brand-soft, #e9faf3);
   --ex-orange: #e87822;
   --ex-orange-soft: #fff4e7;
   --ex-red: #c2415a;
@@ -24,7 +24,7 @@ body.experiment-admin { margin: 0; background: var(--ex-bg); color: var(--ex-ink
 body.experiment-admin button, body.experiment-admin input { font: inherit; }
 body.experiment-admin button, body.experiment-admin a { cursor: pointer; }
 body.experiment-admin a { color: inherit; text-decoration: none; }
-body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offset: 3px; }
+body.experiment-admin :focus-visible { outline: 3px solid var(--admin-brand-border, #5ee0b5); outline-offset: 3px; }
 
 .experiment-app { min-height: 100vh; }
 .experiment-sidebar { position: fixed; inset: 0 auto 0 0; z-index: 20; width: 244px; display: flex; flex-direction: column; background: var(--ex-sidebar); border-right: 1px solid var(--ex-line); transition: width .2s ease, transform .2s ease; }
@@ -79,7 +79,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-topbar { height: 58px; display: flex; align-items: center; justify-content: flex-end; gap: 9px; padding: 0 28px; background: rgba(255,255,255,.88); border-bottom: 1px solid var(--ex-line); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(12px); }
 .experiment-build-legend { display: flex; align-items: center; gap: 13px; margin-right: auto; color: var(--ex-muted); font-size: 10px; }
 .experiment-build-legend span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
-.experiment-build-legend i { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: #2fc58e; }
+.experiment-build-legend i { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: var(--admin-brand-fill, #2fc58e); }
 .experiment-build-legend i.pending { background: #e2a33b; }
 .experiment-icon-button { width: 38px; height: 38px; display: grid; place-items: center; position: relative; border: 1px solid var(--ex-line); border-radius: 10px; color: var(--ex-muted); background: var(--ex-surface); }
 .experiment-icon-button:hover { color: var(--ex-ink); border-color: #b7c9c1; background: #f4faf7; }
@@ -106,7 +106,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-page-head p, .experiment-panel-head p { margin: 7px 0 0; color: var(--ex-muted); font-size: 12px; }
 .experiment-page-status-note { margin: -8px 0 14px; padding: 9px 12px; border: 1px solid #f1dfb5; border-radius: 10px; color: #806226; background: #fffaf0; font-size: 10px; }
 .experiment-page-status-note strong { color: #614a16; }
-.experiment-build-roadmap { overflow: hidden; margin: -8px 0 18px; border: 1px solid #d8e7df; border-radius: 16px; background: #fff; box-shadow: var(--ex-shadow); }
+.experiment-build-roadmap { overflow: hidden; margin: -8px 0 18px; border: 1px solid var(--admin-brand-border, #d8e7df); border-radius: 16px; background: #fff; box-shadow: var(--ex-shadow); }
 .experiment-build-roadmap.is-collapsed .experiment-build-roadmap-grid { display: none; }
 .experiment-build-roadmap-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; padding: 15px 17px 12px; background: linear-gradient(135deg, #fbfffd, #fffaf1); }
 .experiment-build-roadmap-kicker { color: var(--ex-green-dark); font-size: 9px; font-weight: 800; letter-spacing: .14em; }
@@ -118,16 +118,16 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-build-column { padding: 11px 12px; border: 1px solid #e7efeb; border-radius: 12px; background: #fbfefc; }
 .experiment-build-column.pending { border-color: #f0e0c1; background: #fffdf8; }
 .experiment-build-column h3 { display: flex; align-items: center; gap: 6px; margin: 0 0 7px; color: var(--ex-ink); font-size: 10px; }
-.experiment-build-column h3 i { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; color: #087a5b; background: #dff6eb; font-size: 11px; font-style: normal; }
+.experiment-build-column h3 i { display: grid; place-items: center; width: 18px; height: 18px; border-radius: 6px; color: var(--admin-brand-readable, #087a5b); background: var(--admin-brand-soft, #dff6eb); font-size: 11px; font-style: normal; }
 .experiment-build-column.pending h3 i { color: #9a6412; background: #fff0c8; }
 .experiment-build-column ul { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
 .experiment-build-column li { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 25px; color: #52615c; font-size: 10px; }
-.experiment-build-column li em { padding: 3px 6px; border-radius: 999px; color: #087a5b; background: #e9faf3; font-size: 8px; font-style: normal; font-weight: 800; white-space: nowrap; }
+.experiment-build-column li em { padding: 3px 6px; border-radius: 999px; color: var(--admin-brand-readable, #087a5b); background: var(--admin-brand-soft, #e9faf3); font-size: 8px; font-style: normal; font-weight: 800; white-space: nowrap; }
 .experiment-build-column li button { min-height: 27px; padding: 4px 7px; border: 1px solid #eedbaa; border-radius: 7px; color: #9a6412; background: #fff5dc; font-size: 8px; font-weight: 800; white-space: nowrap; }
 .experiment-build-column li button:hover { border-color: #cfaa5d; background: #ffefc8; }
 .experiment-build-roadmap-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 17px; border-top: 1px solid #edf1ef; color: var(--ex-muted); font-size: 9px; }
 .experiment-build-roadmap-foot button { border: 0; color: var(--ex-green-dark); background: transparent; font-size: 9px; font-weight: 800; }
-.experiment-roadmap-dialog { width: min(560px, calc(100vw - 26px)); padding: 0; overflow: hidden; border: 1px solid #d6e7df; border-radius: 21px; color: var(--ex-ink); background: #fff; box-shadow: 0 28px 80px rgba(15,45,36,.25); }
+.experiment-roadmap-dialog { width: min(560px, calc(100vw - 26px)); padding: 0; overflow: hidden; border: 1px solid var(--admin-brand-border, #d6e7df); border-radius: 21px; color: var(--ex-ink); background: #fff; box-shadow: 0 28px 80px rgba(15,45,36,.25); }
 .experiment-roadmap-dialog::backdrop { background: rgba(20,32,29,.42); backdrop-filter: blur(8px) saturate(.86); }
 .experiment-roadmap-dialog-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 20px 21px 15px; border-bottom: 1px solid #edf2ef; background: linear-gradient(135deg, #fbfffd, #fffaf1); }
 .experiment-roadmap-dialog-head h2 { margin: 4px 0 0; font: 700 20px var(--ex-display); letter-spacing: -.05em; }
@@ -135,7 +135,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-roadmap-dialog-head > button { width: 34px; height: 34px; border: 1px solid var(--ex-line); border-radius: 9px; color: var(--ex-muted); background: #fff; font-size: 18px; }
 .experiment-roadmap-dialog-body { padding: 19px 21px; }
 .experiment-roadmap-mock-row { display: flex; align-items: center; gap: 10px; padding: 11px; border: 1px solid var(--ex-line); border-radius: 12px; background: #fbfefc; }
-.experiment-roadmap-mock-row > span { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; color: var(--ex-green-dark); background: #e9faf3; font-weight: 800; }
+.experiment-roadmap-mock-row > span { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 9px; color: var(--ex-green-dark); background: var(--admin-brand-soft, #e9faf3); font-weight: 800; }
 .experiment-roadmap-mock-row div { flex: 1; min-width: 0; }
 .experiment-roadmap-mock-row strong { display: block; font: 700 11px 'IBM Plex Mono', monospace; }
 .experiment-roadmap-mock-row small { display: block; margin-top: 3px; color: var(--ex-muted); font-size: 9px; }
@@ -149,7 +149,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-button:hover { border-color: #aec1b8; background: #f1f7f4; }
 .experiment-button.primary { color: #fff; background: var(--ex-ink); border-color: var(--ex-ink); }
 .experiment-button.primary:hover { background: #263b35; }
-.experiment-button.ghost { color: var(--ex-green-dark); background: var(--ex-green-soft); border-color: #c9f1e2; }
+.experiment-button.ghost { color: var(--ex-green-dark); background: var(--ex-green-soft); border-color: var(--admin-brand-border, #c9f1e2); }
 .experiment-button.small { min-height: 38px; padding: 8px 10px; font-size: 11px; }
 .experiment-grid { display: grid; gap: 14px; }
 .experiment-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -163,7 +163,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-kpi-value.green { color: var(--ex-green); }
 .experiment-kpi-note { display: flex; align-items: center; gap: 5px; margin-top: 8px; color: var(--ex-muted); font-size: 10px; }
 .experiment-kpi.primary { color: #fff; background: var(--ex-green-dark); border-color: var(--ex-green-dark); }
-.experiment-kpi.primary .experiment-kpi-label, .experiment-kpi.primary .experiment-kpi-note { color: #e2fff4; }
+.experiment-kpi.primary .experiment-kpi-label, .experiment-kpi.primary .experiment-kpi-note { color: var(--admin-brand-contrast, #e2fff4); }
 .experiment-kpi.primary .experiment-kpi-icon { color: #fff; background: rgba(255,255,255,.18); }
 .experiment-kpi.primary .experiment-kpi-value { color: #fff; }
 .experiment-summary { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; align-items: center; padding: 12px 2px 2px; }
@@ -176,7 +176,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-luxury-eyebrow { color: #a07842; font-size: 9px; font-weight: 800; letter-spacing: .15em; }
 .experiment-luxury-menu-head h2 { margin: 5px 0 0; color: #624b2e; font: 700 25px var(--ex-display); letter-spacing: -.05em; }
 .experiment-luxury-menu-head p { margin: 5px 0 0; color: #8f795d; font-size: 11px; }
-.experiment-luxury-mark { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #d7bd95; border-radius: 13px; color: #fff; background: linear-gradient(145deg, #0f8060, #bc984f); font: 800 15px var(--ex-display); letter-spacing: .08em; transform: rotate(4deg); box-shadow: 0 6px 13px rgba(100, 72, 35, .16); }
+.experiment-luxury-mark { display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid #d7bd95; border-radius: 13px; color: #fff; background: linear-gradient(145deg, var(--admin-brand-fill, #0f8060), #bc984f); font: 800 15px var(--ex-display); letter-spacing: .08em; transform: rotate(4deg); box-shadow: 0 6px 13px rgba(100, 72, 35, .16); }
 .experiment-luxury-mark img { width: 30px; height: 30px; object-fit: contain; border-radius: 8px; }
 .experiment-luxury-grid { position: relative; z-index: 1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
 .experiment-luxury-card { position: relative; min-height: 150px; display: flex; flex-direction: column; align-items: flex-start; overflow: hidden; padding: 15px; border: 1px solid rgba(173, 133, 79, .25); border-radius: 16px; color: #634a2b; background: rgba(255,255,255,.62); box-shadow: inset 0 1px 0 rgba(255,255,255,.8), 0 8px 16px rgba(106, 74, 31, .06); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
@@ -185,7 +185,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-luxury-card-icon { display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 11px; border: 1px solid rgba(160, 117, 60, .26); border-radius: 12px; color: #9a6f36; background: #f6e8cf; }
 .experiment-luxury-card:nth-child(2) .experiment-luxury-card-icon { color: #a2674e; background: #f9ddd0; }
 .experiment-luxury-card:nth-child(3) .experiment-luxury-card-icon { color: #867044; background: #f6e8a8; }
-.experiment-luxury-card:nth-child(4) .experiment-luxury-card-icon { color: #5c785e; background: #dcebd4; }
+.experiment-luxury-card:nth-child(4) .experiment-luxury-card-icon { color: #5c785e; background: var(--admin-brand-soft, #dcebd4); }
 .experiment-luxury-card-icon svg { width: 23px; height: 23px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.6; }
 .experiment-luxury-code { color: #a1835b; font: 800 8px 'IBM Plex Mono', monospace; letter-spacing: .08em; }
 .experiment-luxury-card strong { margin-top: 5px; color: #624b2e; font: 700 15px var(--ex-display); letter-spacing: -.03em; }
@@ -213,7 +213,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-stock-alert.expanded .experiment-alert-list { max-height: min(58vh, 520px); overflow-y: auto; overscroll-behavior: contain; padding: 1px 4px 3px 1px; scrollbar-gutter: stable; }
 .experiment-stock-chip { display: inline-flex; align-items: center; gap: 5px; max-width: 100%; min-height: 27px; padding: 3px 6px 3px 8px; border: 1px solid #d78a99; border-radius: 7px; color: #fff; background: #a94359; font-size: 10px; font-weight: 700; }
 .experiment-stock-chip:hover { border-color: #98354c; background: #96394f; }
-.experiment-stock-chip:focus-visible { outline: 3px solid #5ee0b5; outline-offset: 2px; }
+.experiment-stock-chip:focus-visible { outline: 3px solid var(--admin-brand-border, #5ee0b5); outline-offset: 2px; }
 .experiment-stock-chip-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .experiment-stock-chip em { flex: 0 0 auto; padding: 2px 5px; border-radius: 5px; color: #8e3449; background: #fff3f4; font-size: 9px; font-style: normal; }
 .experiment-chart-card { min-height: 310px; }
@@ -226,10 +226,10 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-chart-day:nth-child(2n) .experiment-chart-bar { background: var(--ex-green-dark); }
 .experiment-product-list { display: grid; gap: 8px; }
 .experiment-product { display: flex; align-items: center; gap: 10px; padding: 10px; border: 1px solid var(--ex-line); border-radius: 11px; }
-.experiment-product:hover { border-color: #bde4d6; background: #fbfffd; }
+.experiment-product:hover { border-color: var(--admin-brand-border, #bde4d6); background: #fbfffd; }
 .experiment-rank { width: 23px; height: 23px; display: grid; place-items: center; border-radius: 8px; background: #f2f5f4; color: #53625d; font: 700 11px var(--ex-display); }
 .experiment-product:first-child .experiment-rank { background: #ffb21a; color: #382000; }
-.experiment-product-art { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; color: #0d6f54; background: #d9f4e9; font: 700 10px var(--ex-display); }
+.experiment-product-art { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 9px; color: var(--admin-brand-readable, #0d6f54); background: var(--admin-brand-soft, #d9f4e9); font: 700 10px var(--ex-display); }
 .experiment-product-info { flex: 1; min-width: 0; }
 .experiment-product-info strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; }
 .experiment-product-info small { display: block; color: var(--ex-muted); margin-top: 2px; font-size: 10px; }
@@ -250,7 +250,7 @@ body.experiment-admin :focus-visible { outline: 3px solid #5ee0b5; outline-offse
 .experiment-mobile-nav { display: none; }
 .experiment-toast { position: fixed; right: 20px; bottom: 20px; z-index: 40; max-width: 320px; padding: 12px 14px; border-radius: 11px; color: #fff; background: var(--ex-ink); font-size: 12px; opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
 .experiment-toast.show { opacity: 1; transform: translateY(0); }
-.experiment-confirm-dialog { width: min(92vw, 430px); margin: auto; padding: 0; overflow: hidden; border: 1px solid #dbe7e1; border-radius: 22px; color: var(--ex-ink); background: #fff; box-shadow: 0 28px 80px rgba(15,45,36,.25); }
+.experiment-confirm-dialog { width: min(92vw, 430px); margin: auto; padding: 0; overflow: hidden; border: 1px solid var(--admin-brand-border, #dbe7e1); border-radius: 22px; color: var(--ex-ink); background: #fff; box-shadow: 0 28px 80px rgba(15,45,36,.25); }
 .experiment-confirm-dialog::backdrop { background: rgba(20,32,29,.48); backdrop-filter: blur(5px); }
 .experiment-confirm-head { display: flex; align-items: flex-start; gap: 13px; padding: 22px 22px 16px; border-bottom: 1px solid #edf2ef; background: linear-gradient(135deg, #fbfefc, #fff); }
 .experiment-confirm-icon { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 13px; color: #a36a12; background: #fff1d5; }

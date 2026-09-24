@@ -1,16 +1,16 @@
-.experiment-products-page { --products-green: #0f8060; --products-green-dark: #086248; --products-soft: #edf8f3; }
+.experiment-products-page { --products-green: var(--admin-brand-fill, #0f8060); --products-green-dark: var(--admin-brand-readable, #086248); --products-soft: var(--admin-brand-soft, #edf8f3); }
 .experiment-products-page .experiment-page-head { align-items: center; }
 .experiment-products-page .experiment-page-head h1 { font-size: 30px; }
 .experiment-products-page .experiment-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; margin-bottom: 14px; }
 .experiment-products-page .experiment-search-wrap { position: relative; flex: 1; max-width: 420px; }
 .experiment-products-page .experiment-search { width: 100%; min-height: 42px; padding: 10px 13px 10px 36px; border: 1px solid var(--ex-line); border-radius: 10px; color: var(--ex-ink); background: var(--ex-surface); font-size: 12px; }
-.experiment-products-page .experiment-search:focus { border-color: var(--products-green); outline: none; box-shadow: 0 0 0 3px rgba(15,128,96,.12); }
+.experiment-products-page .experiment-search:focus { border-color: var(--products-green); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-brand-fill, rgb(15, 128, 96)) 12%, transparent); }
 .experiment-products-page .experiment-search-icon { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--ex-muted); pointer-events: none; }
 .experiment-products-page .experiment-filter-tabs { display: flex; gap: 5px; align-items: center; }
 .experiment-products-page .experiment-filter { min-height: 38px; padding: 8px 10px; border: 1px solid transparent; border-radius: 9px; color: var(--ex-muted); background: transparent; font-size: 11px; font-weight: 700; }
-.experiment-products-page .experiment-filter:hover, .experiment-products-page .experiment-filter.active { color: var(--products-green-dark); background: var(--products-soft); border-color: #c9f1e2; }
+.experiment-products-page .experiment-filter:hover, .experiment-products-page .experiment-filter.active { color: var(--products-green-dark); background: var(--products-soft); border-color: var(--admin-brand-border, #c9f1e2); }
 .experiment-products-page .experiment-count { display: inline-flex; align-items: center; gap: 6px; color: var(--ex-muted); font-size: 11px; white-space: nowrap; }
-.experiment-products-page .experiment-count i { width: 7px; height: 7px; border-radius: 50%; background: #32c898; }
+.experiment-products-page .experiment-count i { width: 7px; height: 7px; border-radius: 50%; background: var(--admin-brand-fill, #32c898); }
 .experiment-products-page .experiment-product-list-card { overflow: hidden; container: product-list / inline-size; }
 .experiment-products-page .experiment-list-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 15px 18px; border-bottom: 1px solid var(--ex-line); }
 .experiment-products-page .experiment-list-head h2 { margin: 0; font: 700 16px var(--ex-display); letter-spacing: -.03em; }
@@ -35,7 +35,7 @@
 .experiment-products-page .experiment-product-price button { padding: 0; border: 0; color: inherit; background: transparent; font: inherit; text-align: left; }
 .experiment-products-page .experiment-product-price button:hover { text-decoration: underline; text-decoration-style: dashed; text-underline-offset: 4px; }
 .experiment-products-page .experiment-product-price del { display: block; margin-top: 4px; color: var(--ex-red); font-size: 10px; }
-.experiment-products-page .experiment-stock-link { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 7px 10px; border: 1px solid #d8e5de; border-radius: 10px; color: var(--products-green-dark); background: #f8fcfa; font-size: 11px; font-weight: 800; }
+.experiment-products-page .experiment-stock-link { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 7px 10px; border: 1px solid var(--admin-brand-border, #d8e5de); border-radius: 10px; color: var(--products-green-dark); background: #f8fcfa; font-size: 11px; font-weight: 800; }
 .experiment-products-page .experiment-stock-link:hover { border-color: var(--products-green); background: var(--products-soft); }
 .experiment-products-page .experiment-stock-link.empty { color: #a14c60; border-color: #efd1d9; background: #fff3f5; }
 .experiment-products-page .experiment-status { justify-self: start; }
@@ -64,18 +64,18 @@
 .experiment-products-page .experiment-bulk-button-icon { width: 17px; height: 17px; flex: 0 0 auto; color: #53635d; }
 .experiment-products-page .experiment-bulk-button-chevron { width: 14px; height: 14px; flex: 0 0 auto; margin-left: 1px; color: #53635d; transition: transform .18s ease; }
 .experiment-products-page .experiment-bulk-button[aria-expanded="true"] .experiment-bulk-button-chevron { transform: rotate(180deg); }
-.experiment-products-page .experiment-action-menu-panel { position: absolute; top: calc(100% + 8px); right: 0; z-index: 25; width: min(344px, calc(100vw - 28px)); padding: 8px; border: 1px solid #d8e6df; border-radius: 17px; background: rgba(255,255,255,.98); box-shadow: 0 22px 56px rgba(15,45,36,.18); }
+.experiment-products-page .experiment-action-menu-panel { position: absolute; top: calc(100% + 8px); right: 0; z-index: 25; width: min(344px, calc(100vw - 28px)); padding: 8px; border: 1px solid var(--admin-brand-border, #d8e6df); border-radius: 17px; background: rgba(255,255,255,.98); box-shadow: 0 22px 56px rgba(15,45,36,.18); }
 .experiment-products-page .experiment-action-menu-panel[hidden] { display: none; }
 .experiment-products-page .experiment-action-menu-panel form { margin: 0; }
 .experiment-products-page .experiment-action-menu-panel .experiment-menu-item { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 63px; padding: 9px 10px; border: 0; border-radius: 12px; color: var(--ex-ink); background: transparent; font-size: 11px; text-align: left; text-decoration: none; transition: background .16s ease, transform .16s ease; }
-.experiment-products-page .experiment-action-menu-panel .experiment-menu-item:hover { background: #eef8f3; transform: translateX(2px); }
-.experiment-products-page .experiment-action-menu-panel .experiment-menu-item:focus-visible { outline: 3px solid rgba(31,117,87,.2); outline-offset: -2px; }
+.experiment-products-page .experiment-action-menu-panel .experiment-menu-item:hover { background: var(--admin-brand-soft, #eef8f3); transform: translateX(2px); }
+.experiment-products-page .experiment-action-menu-panel .experiment-menu-item:focus-visible { outline: 3px solid color-mix(in srgb, var(--admin-brand-fill, rgb(31, 117, 87)) 20%, transparent); outline-offset: -2px; }
 .experiment-products-page .experiment-action-menu-panel .experiment-menu-item-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 34px; border-radius: 11px; }
 .experiment-products-page .experiment-action-menu-panel .experiment-menu-item-icon svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
 .experiment-products-page .experiment-action-menu-panel .experiment-menu-item-icon.import { color: #b56b1b; background: #fff2dd; }
 .experiment-products-page .experiment-action-menu-panel .experiment-menu-item-icon.price { color: #6271aa; background: #eef0ff; }
-.experiment-products-page .experiment-action-menu-panel .experiment-menu-item-icon.stock { color: #24745a; background: #e4f6ed; }
-.experiment-products-page .experiment-action-menu-panel .experiment-menu-item-icon.active { color: #fff; background: #20765a; }
+.experiment-products-page .experiment-action-menu-panel .experiment-menu-item-icon.stock { color: var(--admin-brand-readable, #24745a); background: var(--admin-brand-soft, #e4f6ed); }
+.experiment-products-page .experiment-action-menu-panel .experiment-menu-item-icon.active { color: #fff; background: var(--admin-brand-fill, #20765a); }
 .experiment-products-page .experiment-action-menu-panel .experiment-menu-item-copy { min-width: 0; flex: 1; }
 .experiment-products-page .experiment-action-menu-panel .experiment-menu-item-copy strong { display: block; overflow: hidden; color: #18372d; font-size: 11px; font-weight: 800; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
 .experiment-products-page .experiment-action-menu-panel .experiment-menu-item-copy small { display: block; margin-top: 3px; overflow: hidden; color: #71827b; font-size: 9px; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
@@ -83,7 +83,7 @@
 .experiment-products-page .experiment-action-menu-panel .experiment-menu-status { flex: 0 0 auto; margin-left: 2px; padding: 4px 7px; border-radius: 999px; color: #9b6b18; background: #fff4d9; font-size: 8px; font-weight: 800; line-height: 1; }
 
 /* Dialogs live outside the app wrapper when the browser promotes them to the top layer. */
-.experiment-modal { width: min(92vw, 500px); max-height: min(86vh, 620px); margin: auto; padding: 0; overflow: hidden; border: 1px solid #dbe7e1; border-radius: 20px; color: var(--ex-ink); background: #fff; box-shadow: 0 28px 80px rgba(15,45,36,.24); }
+.experiment-modal { width: min(92vw, 500px); max-height: min(86vh, 620px); margin: auto; padding: 0; overflow: hidden; border: 1px solid var(--admin-brand-border, #dbe7e1); border-radius: 20px; color: var(--ex-ink); background: #fff; box-shadow: 0 28px 80px rgba(15,45,36,.24); }
 .experiment-modal::backdrop { background: rgba(20,32,29,.48); backdrop-filter: blur(4px); }
 .experiment-modal form { margin: 0; }
 .experiment-modal .experiment-modal-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; padding: 22px 22px 18px; border-bottom: 1px solid var(--ex-line); background: linear-gradient(135deg, #fbfefc, #fff); }
@@ -94,8 +94,8 @@
 .experiment-modal .experiment-modal-body { padding: 21px 22px 22px; }
 .experiment-modal .experiment-modal-body > label { display: block; margin: 0 0 15px; color: #50615a; font-size: 11px; font-weight: 800; }
 .experiment-modal .experiment-modal-body > label + label { margin-top: 2px; }
-.experiment-modal .experiment-modal-body input, .experiment-modal .experiment-modal-body select { display: block; width: 100%; min-height: 44px; margin-top: 7px; padding: 10px 12px; border: 1px solid #dbe7e1; border-radius: 10px; outline: none; color: var(--ex-ink); background: #fbfdfc; font-size: 13px; }
-.experiment-modal .experiment-modal-body input:focus, .experiment-modal .experiment-modal-body select:focus { border-color: var(--products-green); background: #fff; box-shadow: 0 0 0 3px rgba(15,128,96,.12); }
+.experiment-modal .experiment-modal-body input, .experiment-modal .experiment-modal-body select { display: block; width: 100%; min-height: 44px; margin-top: 7px; padding: 10px 12px; border: 1px solid var(--admin-brand-border, #dbe7e1); border-radius: 10px; outline: none; color: var(--ex-ink); background: #fbfdfc; font-size: 13px; }
+.experiment-modal .experiment-modal-body input:focus, .experiment-modal .experiment-modal-body select:focus { border-color: var(--products-green); background: #fff; box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-brand-fill, rgb(15, 128, 96)) 12%, transparent); }
 .experiment-modal .experiment-modal-body select { appearance: none; background-image: linear-gradient(45deg, transparent 50%, #6a7b73 50%), linear-gradient(135deg, #6a7b73 50%, transparent 50%); background-position: calc(100% - 17px) 19px, calc(100% - 12px) 19px; background-size: 5px 5px, 5px 5px; background-repeat: no-repeat; }
 .experiment-modal [data-products-bulk-error], .experiment-modal [data-products-price-error] { margin: -2px 0 0; padding: 9px 10px; border: 1px solid #f0cbd2; border-radius: 9px; color: #a24357 !important; background: #fff3f5; font-size: 11px !important; line-height: 1.45; }
 .experiment-modal .experiment-modal-actions { display: flex; justify-content: flex-end; gap: 9px; margin-top: 21px; padding-top: 17px; border-top: 1px solid #eef2f0; }

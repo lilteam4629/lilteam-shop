@@ -1,5 +1,5 @@
 .welcome-live-content{width:min(1480px,100%);display:grid;gap:20px}
-.welcome-live-content :focus-visible{outline:3px solid rgba(15,159,118,.55);outline-offset:3px}
+.welcome-live-content :focus-visible{outline:3px solid color-mix(in srgb,var(--admin-brand-fill,#0f9f76) 55%,transparent);outline-offset:3px}
 .welcome-live-hero{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:24px 27px;border:1px solid #d9e8e0;border-radius:20px;background:radial-gradient(circle at 94% 4%,rgba(220,243,232,.76),transparent 30%),linear-gradient(115deg,#fff 0%,#fffdf7 100%);box-shadow:0 12px 34px rgba(24,53,41,.06)}
 .welcome-live-hero h1{margin:2px 0 0;color:#14241e;font:700 clamp(25px,2.7vw,34px)/1.15 'Nunito Sans',system-ui,sans-serif;letter-spacing:-.045em}
 .welcome-live-hero p{margin:8px 0 0;color:#64756c;font-size:13px;line-height:1.6}
@@ -37,7 +37,7 @@
 .welcome-live-fieldset legend{margin-bottom:8px;color:#34483e;font-size:12px;font-weight:800}
 .welcome-live-visibility{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
 .welcome-live-visibility label{display:flex;align-items:center;gap:10px;min-width:0;min-height:61px;padding:10px;border:1px solid #e2ebe6;border-radius:12px;background:#fbfdfc;cursor:pointer}
-.welcome-live-visibility input{width:19px;height:19px;flex:none;accent-color:#087a5b}
+.welcome-live-visibility input{width:19px;height:19px;flex:none;accent-color:var(--admin-brand-fill,#087a5b)}
 .welcome-live-visibility label>span{display:grid;gap:3px;min-width:0}.welcome-live-visibility strong{color:#2c4036;font-size:11px}.welcome-live-visibility small{color:#77857e;font-size:10px;line-height:1.35}
 .welcome-live-field{display:grid;gap:7px;margin-top:13px;color:#32483d;font-size:12px;font-weight:800}
 .welcome-live-field input,.welcome-live-field textarea{width:100%;min-width:0;min-height:46px;padding:10px 12px;border:1px solid #dce8e2;border-radius:11px;color:#17271f;background:#fcfefd;font:500 14px/1.55 'Nunito Sans',system-ui,sans-serif;outline:none;resize:vertical}

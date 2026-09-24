@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" class="<%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 <head>
   <% const protectedSlipPage = ['slip-verification', 'api-providers'].includes(typeof active === 'undefined' ? '' : active); %>
   <% const referenceEnabled = !protectedSlipPage; %>
@@ -48,6 +48,7 @@
   <% if (referenceEnabled) { %><link rel="stylesheet" href="<%= asset('css/admin-mobile-v1.css') %>" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
+    <%- typeof adminBrandCss !== 'undefined' ? adminBrandCss : '' %>
     html.theme-switching, html.theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece) {
       transition: none !important;
       animation: none !important;

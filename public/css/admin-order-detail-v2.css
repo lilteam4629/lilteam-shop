@@ -1,9 +1,9 @@
 .order-detail-page {
   --order-ink: #14201d;
   --order-muted: #5b6d64;
-  --order-line: #dfe9e4;
-  --order-green: #087a5b;
-  --order-green-soft: #eaf7f1;
+  --order-line: var(--admin-brand-fill, #dfe9e4);
+  --order-green: var(--admin-brand-fill, #087a5b);
+  --order-green-soft: var(--admin-brand-soft, #eaf7f1);
   --order-amber: #835610;
   --order-amber-soft: #fff6df;
   --order-red: #a33b4c;
@@ -15,18 +15,18 @@
   font-family: 'Nunito Sans', system-ui, sans-serif;
 }
 .order-detail-page *, .order-detail-page *::before, .order-detail-page *::after { box-sizing: border-box; }
-.order-detail-page :where(a, button, select):focus-visible { outline: 3px solid #15966e; outline-offset: 3px; }
+.order-detail-page :where(a, button, select):focus-visible { outline: 3px solid var(--admin-brand-fill, #15966e); outline-offset: 3px; }
 .order-detail-page svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
 .order-detail-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; }
 .order-detail-heading-copy { min-width: 0; }
 .order-detail-back { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; margin: -3px 0 12px; color: var(--order-green); font-size: 12px; font-weight: 800; text-decoration: none; }
 .order-detail-back svg { width: 16px; height: 16px; }
-.order-detail-back:hover { color: #055c43; text-decoration: underline; text-underline-offset: 3px; }
+.order-detail-back:hover { color: var(--admin-brand-readable, #055c43); text-decoration: underline; text-underline-offset: 3px; }
 .order-detail-kicker, .order-section-kicker { display: block; color: var(--order-green); font-size: 9px; font-weight: 800; letter-spacing: .13em; line-height: 1.4; }
 .order-detail-title-line { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
 .order-detail-title { min-width: 0; margin: 4px 0 0; color: var(--order-ink); font: 700 clamp(24px,2.4vw,32px)/1.2 'Rubik','Nunito Sans',sans-serif; letter-spacing: -.05em; overflow-wrap: anywhere; }
-.order-detail-title span { color: #31483e; font-variant-numeric: tabular-nums; }
+.order-detail-title span { color: var(--admin-brand-readable, #31483e); font-variant-numeric: tabular-nums; }
 .order-detail-sub { display: flex; align-items: center; gap: 7px; margin: 7px 0 0; color: var(--order-muted); font-size: 11px; line-height: 1.5; }
 .order-detail-sub svg { width: 15px; height: 15px; flex: 0 0 auto; }
 .order-status-badge { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 0 11px; border: 1px solid #f0dfb6; border-radius: 999px; color: var(--order-amber); background: var(--order-amber-soft); font-size: 10px; font-weight: 800; white-space: nowrap; }
@@ -45,18 +45,18 @@
 .order-panel { min-width: 0; padding: 19px; border: 1px solid var(--order-line); border-radius: 16px; background: #fff; box-shadow: 0 8px 24px rgba(15,45,36,.035); }
 .order-section-heading { display: flex; align-items: center; gap: 11px; margin-bottom: 16px; }
 .order-section-heading.compact { margin-bottom: 14px; }
-.order-section-icon { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 auto; border: 1px solid #ccebdc; border-radius: 12px; color: var(--order-green); background: var(--order-green-soft); }
+.order-section-icon { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 auto; border: 1px solid var(--admin-brand-border, #ccebdc); border-radius: 12px; color: var(--order-green); background: var(--order-green-soft); }
 .order-section-icon.is-blue { border-color: #d6e4f4; color: #446d9c; background: #f0f6fc; }
-.order-section-icon.is-green { border-color: #ccebdc; color: var(--order-green); background: var(--order-green-soft); }
+.order-section-icon.is-green { border-color: var(--admin-brand-border, #ccebdc); color: var(--order-green); background: var(--order-green-soft); }
 .order-section-icon.is-amber { border-color: #f0dfb6; color: var(--order-amber); background: var(--order-amber-soft); }
 .order-section-heading h2 { margin: 2px 0 0; color: var(--order-ink); font: 700 16px/1.3 'Rubik','Nunito Sans',sans-serif; letter-spacing: -.03em; }
 .order-section-kicker { font-size: 8px; }
-.order-count-pill { margin-left: auto; padding: 6px 9px; border: 1px solid #dfe9e4; border-radius: 999px; color: #496056; background: #f7faf8; font-size: 10px; font-weight: 800; white-space: nowrap; }
+.order-count-pill { margin-left: auto; padding: 6px 9px; border: 1px solid var(--admin-brand-border, #dfe9e4); border-radius: 999px; color: #496056; background: #f7faf8; font-size: 10px; font-weight: 800; white-space: nowrap; }
 
 .order-items-list { display: grid; gap: 10px; }
 .order-item-card { min-width: 0; padding: 14px; border: 1px solid #e5ece8; border-radius: 13px; background: #fcfefd; }
 .order-item-main { display: grid; grid-template-columns: 24px 92px minmax(0,1fr) auto; align-items: start; gap: 11px; }
-.order-item-index { display: grid; place-items: center; width: 24px; height: 24px; margin-top: 3px; border-radius: 7px; color: #087a5b; background: #e9f7f0; font: 800 9px 'Rubik',sans-serif; font-variant-numeric: tabular-nums; }
+.order-item-index { display: grid; place-items: center; width: 24px; height: 24px; margin-top: 3px; border-radius: 7px; color: var(--admin-brand-readable, #087a5b); background: var(--admin-brand-soft, #e9f7f0); font: 800 9px 'Rubik',sans-serif; font-variant-numeric: tabular-nums; }
 .order-item-image { display: grid; place-items: center; width: 92px; height: 70px; overflow: hidden; border: 1px solid var(--order-line); border-radius: 10px; background: #f2f7f4; text-decoration: none; }
 .order-item-image img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .order-item-image.is-empty { color: #72827a; }
@@ -67,7 +67,7 @@
 .order-item-price { min-width: 63px; padding-top: 2px; text-align: right; }
 .order-item-price small { display: block; color: var(--order-muted); font-size: 9px; }
 .order-item-price strong { display: block; margin-top: 3px; color: var(--order-green); font: 700 14px/1.2 'Rubik','Nunito Sans',sans-serif; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.order-fulfillment-note { display: flex; align-items: flex-start; gap: 9px; margin: 12px 0 0 35px; padding: 10px 11px; border: 1px solid #dfe9e4; border-radius: 10px; color: #42564d; background: #fff; }
+.order-fulfillment-note { display: flex; align-items: flex-start; gap: 9px; margin: 12px 0 0 35px; padding: 10px 11px; border: 1px solid var(--admin-brand-border, #dfe9e4); border-radius: 10px; color: #42564d; background: #fff; }
 .order-fulfillment-note.is-contact { border-color: #f0dfb6; color: #694b19; background: #fffaf0; }
 .order-fulfillment-note.is-ready { border-color: #ccebdc; color: #176348; background: #f3fbf7; }
 .order-fulfillment-note.is-pending { border-color: #e5e9e7; color: #57665f; background: #f7f9f8; }
@@ -76,18 +76,18 @@
 .order-fulfillment-note > span:last-child { display: grid; gap: 3px; min-width: 0; }
 .order-fulfillment-note strong { font-size: 10px; line-height: 1.5; }
 .order-fulfillment-note small { color: inherit; font-size: 10px; line-height: 1.55; opacity: .88; white-space: pre-line; overflow-wrap: anywhere; }
-.order-empty-items { display: grid; justify-items: center; gap: 5px; padding: 30px 16px; border: 1px dashed #d9e6df; border-radius: 12px; color: var(--order-muted); text-align: center; background: #fbfdfc; }
+.order-empty-items { display: grid; justify-items: center; gap: 5px; padding: 30px 16px; border: 1px dashed var(--admin-brand-border, #d9e6df); border-radius: 12px; color: var(--order-muted); text-align: center; background: #fbfdfc; }
 .order-empty-items strong { color: var(--order-ink); font-size: 12px; }
 .order-empty-items span { font-size: 10px; }
 
 .order-side-stack { display: grid; gap: 14px; }
 .order-buyer-line { display: flex; align-items: center; gap: 11px; min-width: 0; }
-.orders-avatar { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 auto; border: 1px solid #cfe9dd; border-radius: 50%; color: #087a5b; background: #effaf5; font: 800 13px 'Rubik',sans-serif; text-transform: uppercase; }
+.orders-avatar { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 auto; border: 1px solid var(--admin-brand-border, #cfe9dd); border-radius: 50%; color: var(--admin-brand-readable, #087a5b); background: var(--admin-brand-soft, #effaf5); font: 800 13px 'Rubik',sans-serif; text-transform: uppercase; }
 .order-buyer-copy { display: grid; gap: 3px; min-width: 0; }
 .order-buyer-copy strong { color: var(--order-ink); font-size: 12px; overflow-wrap: anywhere; }
 .order-buyer-copy small { color: var(--order-muted); font-size: 10px; overflow-wrap: anywhere; }
 .order-summary-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 10px 0; color: var(--order-muted); font-size: 11px; }
-.order-summary-row strong { color: #354a40; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.order-summary-row strong { color: var(--admin-brand-readable, #354a40); font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .order-summary-row.is-discount strong { color: var(--order-green); }
 .order-summary-row.total { margin-top: 3px; padding-top: 14px; border-top: 1px solid var(--order-line); color: var(--order-ink); font-weight: 800; }
 .order-summary-row.total strong { color: var(--order-green); font: 700 23px/1.2 'Rubik','Nunito Sans',sans-serif; letter-spacing: -.04em; }

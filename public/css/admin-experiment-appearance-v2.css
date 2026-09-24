@@ -38,7 +38,7 @@
 .as-banner-details > summary::-webkit-details-marker { display: none; }
 .as-banner-details > summary::after { content: "+"; display: grid; place-items: center; width: 24px; height: 24px; border: 1px solid var(--ex-line); border-radius: 8px; color: var(--ex-green-dark); background: #fff; font-size: 16px; }
 .as-banner-details[open] > summary::after { content: "−"; }
-.as-banner-details > summary:focus-visible { outline: 3px solid rgba(15,159,118,.5); outline-offset: 2px; }
+.as-banner-details > summary:focus-visible { outline: 3px solid color-mix(in srgb, var(--admin-brand-fill, rgb(15, 159, 118)) 50%, transparent); outline-offset: 2px; }
 .as-banner-details .as-banner-settings { margin: 0; padding: 12px; border-top: 1px solid var(--ex-line); }
 .as-banner-details-panel { margin: 14px 0 0; overflow: hidden; box-shadow: var(--ex-shadow); }
 .as-banner-details-panel > summary { min-height: 60px; padding: 8px 16px; }

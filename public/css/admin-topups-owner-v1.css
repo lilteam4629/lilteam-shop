@@ -1,19 +1,19 @@
 /* Main-shop-only finance settings refresh. Tenant admin pages keep their current UI. */
 .admin-topups-owner {
-  --finance-green: #087a5b;
-  --finance-green-strong: #06664d;
+  --finance-green: var(--admin-brand-fill, #087a5b);
+  --finance-green-strong: var(--admin-brand-readable, #06664d);
   --finance-green-soft: #153b2f;
   --finance-line: #3c4c44;
   --finance-muted: #b1c0b8;
-  --finance-on-soft: #eaf8f1;
+  --finance-on-soft: var(--admin-brand-soft, #eaf8f1);
   --finance-shadow: 0 14px 36px rgba(17, 46, 34, .055);
 }
 
 html.light .admin-topups-owner {
-  --finance-green-soft: #eaf8f1;
-  --finance-line: #d9e6df;
+  --finance-green-soft: var(--admin-brand-soft, #eaf8f1);
+  --finance-line: var(--admin-brand-fill, #d9e6df);
   --finance-muted: #52645b;
-  --finance-on-soft: #075c44;
+  --finance-on-soft: var(--admin-brand-soft, #075c44);
 }
 
 .admin-topups-owner > .space-y-6 {
@@ -27,7 +27,7 @@ html.light .admin-topups-owner {
   padding: 18px 22px;
   border: 1px solid var(--finance-line);
   border-radius: 18px;
-  background: linear-gradient(115deg, var(--card), color-mix(in srgb, var(--card) 88%, #e8f5ee));
+  background: linear-gradient(115deg, var(--card), color-mix(in srgb, var(--card) 88%, var(--admin-brand-soft, #e8f5ee)));
   box-shadow: var(--finance-shadow);
 }
 
@@ -44,7 +44,7 @@ html.light .admin-topups-owner {
   height: 44px;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid #c9e8d8;
+  border: 1px solid var(--admin-brand-border, #c9e8d8);
   border-radius: 14px;
   color: var(--finance-green);
   background: var(--finance-green-soft);
@@ -116,7 +116,7 @@ html.light .admin-topups-owner {
 }
 
 .admin-topups-owner .admin-finance-tabs .topup-tab-btn[aria-selected="true"] {
-  border-color: #b8e0cb;
+  border-color: var(--admin-brand-border, #b8e0cb);
   color: var(--finance-on-soft);
   background: var(--finance-green-soft);
   box-shadow: inset 0 -2px 0 var(--finance-green);
@@ -126,7 +126,7 @@ html.light .admin-topups-owner {
 .admin-topups-owner .admin-finance-tabs .topup-tab-btn:focus-visible,
 .admin-topups-owner .admin-provider-option:focus-visible,
 .admin-topups-owner .admin-bank-settings :is(input, select, button, a):focus-visible {
-  outline: 3px solid rgba(8, 122, 91, .35);
+  outline: 3px solid color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 35%, transparent);
   outline-offset: 2px;
 }
 
@@ -174,7 +174,7 @@ html.light .admin-topups-owner {
 }
 
 .admin-topups-owner .topup-tab-content[role="tabpanel"]:focus-visible {
-  outline: 3px solid rgba(8, 122, 91, .25);
+  outline: 3px solid color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 25%, transparent);
   outline-offset: 4px;
 }
 
@@ -293,7 +293,7 @@ html.light .admin-topups-owner {
 }
 
 .admin-topups-owner .admin-provider-option:hover {
-  border-color: #8cc9aa !important;
+  border-color: var(--admin-brand-fill, #8cc9aa) !important;
   background: var(--finance-green-soft) !important;
   box-shadow: 0 5px 15px rgba(17, 46, 34, .06);
 }
@@ -305,7 +305,7 @@ html.light .admin-topups-owner {
 
 .admin-topups-owner .admin-provider-option.is-editing {
   border-color: var(--finance-green) !important;
-  box-shadow: 0 0 0 3px rgba(8, 122, 91, .1);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 10%, transparent);
 }
 
 .admin-topups-owner .admin-provider-icon {
@@ -314,7 +314,7 @@ html.light .admin-topups-owner {
   height: 42px;
   flex: 0 0 auto;
   place-items: center;
-  border: 1px solid #d8e9df;
+  border: 1px solid var(--admin-brand-border, #d8e9df);
   border-radius: 12px;
   color: var(--finance-green);
   background: var(--finance-green-soft);
@@ -441,7 +441,7 @@ html.light .admin-topups-owner {
 .admin-topups-owner .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) {
   min-height: 46px;
   padding: 10px 12px;
-  border-color: #d4e1da;
+  border-color: var(--admin-brand-border, #d4e1da);
   border-radius: 10px;
   color: var(--text);
   background: var(--card);
@@ -459,8 +459,8 @@ html.light .admin-topups-owner {
 }
 
 .admin-topups-owner .admin-bank-transfer :is(input, select):focus {
-  border-color: #49a986;
-  box-shadow: 0 0 0 3px rgba(8, 122, 91, .12);
+  border-color: var(--admin-brand-fill, #49a986);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 12%, transparent);
 }
 
 .admin-topups-owner .admin-finance-save-row {
@@ -481,7 +481,7 @@ html.light .admin-topups-owner {
   border-radius: 11px;
   color: #fff;
   background: var(--finance-green);
-  box-shadow: 0 5px 12px rgba(8, 122, 91, .16);
+  box-shadow: 0 5px 12px color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 16%, transparent);
   font-size: 13px;
 }
 

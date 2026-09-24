@@ -1,6 +1,6 @@
 /* Main-shop home-section editor refresh. The tenant shop keeps its own view. */
 .hsx-content{max-width:1520px}
-.hsx-content :focus-visible,.hsx-edit-dialog :focus-visible,.hsx-create-dialog :focus-visible{outline:3px solid rgba(15,159,118,.56);outline-offset:3px}
+.hsx-content :focus-visible,.hsx-edit-dialog :focus-visible,.hsx-create-dialog :focus-visible{outline:3px solid color-mix(in srgb, var(--admin-brand-fill, rgb(15, 159, 118)) 56%, transparent);outline-offset:3px}
 .hsx-card{gap:17px;padding:19px 22px}
 .hsx-card-rank{min-width:52px;padding:10px 6px}
 .hsx-card-rank span,.hsx-card-meta,.hsx-no-products{font-size:10px}
@@ -10,7 +10,7 @@
 .hsx-card-actions{gap:8px}
 .hsx-card-actions .experiment-button,.hsx-toggle-button{min-height:40px;padding-inline:13px;font-size:11px}
 .hsx-icon-button{width:40px;height:40px}
-.hsx-edit-dialog{width:min(980px,calc(100vw - 40px));max-width:none;height:min(850px,90dvh);max-height:90dvh;padding:0;overflow:hidden;border:1px solid #d2e4db;border-radius:20px;color:var(--ex-ink);background:#fff;box-shadow:0 28px 90px rgba(16,45,35,.28)}
+.hsx-edit-dialog{width:min(980px,calc(100vw - 40px));max-width:none;height:min(850px,90dvh);max-height:90dvh;padding:0;overflow:hidden;border:1px solid var(--admin-brand-border, #d2e4db);border-radius:20px;color:var(--ex-ink);background:#fff;box-shadow:0 28px 90px rgba(16,45,35,.28)}
 .hsx-edit-dialog[open]{display:grid;grid-template-rows:auto minmax(0,1fr)}
 .hsx-edit-dialog::backdrop{background:rgba(15,31,25,.6);backdrop-filter:blur(4px)}
 .hsx-edit-dialog .hsx-dialog-head{align-items:center;padding:19px 24px;background:linear-gradient(120deg,#f3fbf7 0%,#fffaf0 100%)}

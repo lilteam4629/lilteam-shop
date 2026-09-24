@@ -2,11 +2,11 @@
   --theme-ink: #17231f;
   --theme-muted: #60716a;
   --theme-subtle: #819089;
-  --theme-border: #dce7e2;
+  --theme-border: var(--admin-brand-border, #dce7e2);
   --theme-surface: #fff;
   --theme-soft: #f7faf8;
-  --theme-green: #087a5b;
-  --theme-green-soft: #edf8f3;
+  --theme-green: var(--admin-brand-fill, #087a5b);
+  --theme-green-soft: var(--admin-brand-soft, #edf8f3);
   --theme-amber: #9b6410;
   --theme-amber-soft: #fff7e6;
   --theme-violet: #5b54a5;
@@ -24,7 +24,7 @@
 .admin-theme-page input { font: inherit; }
 .admin-theme-page button { touch-action: manipulation; }
 .admin-theme-page :where(button, input, label):focus-visible {
-  outline: 3px solid #36a982;
+  outline: 3px solid var(--admin-brand-fill, #36a982);
   outline-offset: 3px;
 }
 .admin-theme-page [hidden] { display: none !important; }
@@ -65,10 +65,10 @@
   min-height: 38px;
   max-width: 100%;
   padding: 8px 12px;
-  border: 1px solid #cde7d9;
+  border: 1px solid var(--admin-brand-border, #cde7d9);
   border-radius: 999px;
-  color: #176548;
-  background: #f1faf5;
+  color: var(--admin-brand-readable, #176548);
+  background: var(--admin-brand-soft, #f1faf5);
   font-size: 11px;
   font-weight: 800;
   white-space: nowrap;
@@ -97,10 +97,10 @@
   gap: 9px;
   margin: 0 0 14px;
   padding: 11px 13px;
-  border: 1px solid #cce8d9;
+  border: 1px solid var(--admin-brand-border, #cce8d9);
   border-radius: 11px;
-  color: #145f43;
-  background: #f0faf4;
+  color: var(--admin-brand-readable, #145f43);
+  background: var(--admin-brand-soft, #f0faf4);
   font-size: 13px;
   line-height: 1.5;
 }
@@ -136,7 +136,7 @@
   width: 38px;
   height: 38px;
   flex: 0 0 auto;
-  border: 1px solid #cfeadd;
+  border: 1px solid var(--admin-brand-border, #cfeadd);
   border-radius: 12px;
   color: var(--theme-green);
   background: var(--theme-green-soft);
@@ -216,8 +216,8 @@
   touch-action: manipulation;
   transition: border-color .16s ease, background .16s ease;
 }
-.admin-theme-swatch-option:hover { border-color: #d9e7e0; background: #f8fbf9; }
-.admin-theme-swatch-option:has(input:checked) { border-color: #83cda8; background: #f0faf5; }
+.admin-theme-swatch-option:hover { border-color: var(--admin-brand-border, #d9e7e0); background: #f8fbf9; }
+.admin-theme-swatch-option:has(input:checked) { border-color: var(--admin-brand-fill, #83cda8); background: var(--admin-brand-soft, #f0faf5); }
 .admin-theme-swatch-option input,
 .admin-theme-background-option input,
 .admin-theme-effect-option input {
@@ -233,7 +233,7 @@
 .admin-theme-background-option:focus-within,
 .admin-theme-effect-option:focus-within,
 .admin-theme-custom-radio:focus-within,
-.admin-theme-picker-label:focus-within { outline: 3px solid #36a982; outline-offset: 2px; }
+.admin-theme-picker-label:focus-within { outline: 3px solid var(--admin-brand-fill, #36a982); outline-offset: 2px; }
 .admin-theme-swatch {
   display: grid;
   place-items: center;
@@ -276,12 +276,12 @@
   align-items: center;
   gap: 8px;
   min-height: 42px;
-  color: #344940;
+  color: var(--admin-brand-readable, #344940);
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
 }
-.admin-theme-custom-radio input { width: 17px; height: 17px; margin: 0; accent-color: #087a5b; }
+.admin-theme-custom-radio input { width: 17px; height: 17px; margin: 0; accent-color: var(--admin-brand-fill, #087a5b); }
 .admin-theme-picker-label {
   display: inline-flex;
   align-items: center;
@@ -296,7 +296,7 @@
   width: 48px;
   height: 44px;
   padding: 4px;
-  border: 1px solid #d6e1dc;
+  border: 1px solid var(--admin-brand-border, #d6e1dc);
   border-radius: 9px;
   background: #fff;
   cursor: pointer;
@@ -318,7 +318,7 @@
   transition: border-color .16s ease, background .16s ease;
 }
 .admin-theme-background-option:hover { border-color: #b8d9c8; background: #f8fcfa; }
-.admin-theme-background-option:has(input:checked) { border-color: #65b989; background: #f0faf5; box-shadow: 0 0 0 2px rgb(32 175 123 / 8%); }
+.admin-theme-background-option:has(input:checked) { border-color: var(--admin-brand-fill, #65b989); background: var(--admin-brand-soft, #f0faf5); box-shadow: 0 0 0 2px color-mix(in srgb, var(--admin-brand-fill, rgb(32, 175, 123)) 14%, transparent); }
 .admin-theme-background-copy { display: grid; gap: 4px; min-width: 0; }
 .admin-theme-background-copy strong { color: #25372f; font-size: 12px; line-height: 1.35; overflow-wrap: anywhere; }
 .admin-theme-background-copy small { color: #67776f; font-size: 10px; line-height: 1.35; }
@@ -347,7 +347,7 @@
   height: 17px;
   border-radius: 50%;
   color: white;
-  background: #087a5b;
+  background: var(--admin-brand-fill, #087a5b);
   font-size: 10px;
   font-weight: 900;
   opacity: 0;
@@ -372,15 +372,15 @@
   transition: border-color .16s ease, background .16s ease;
 }
 .admin-theme-effect-option:hover { border-color: #b8d9c8; background: #f8fcfa; }
-.admin-theme-effect-option:has(input:checked) { border-color: #65b989; background: #f0faf5; }
-.admin-theme-effect-option > strong { padding-right: 17px; color: #2c4037; font-size: 12px; }
+.admin-theme-effect-option:has(input:checked) { border-color: var(--admin-brand-fill, #65b989); background: var(--admin-brand-soft, #f0faf5); }
+.admin-theme-effect-option > strong { padding-right: 17px; color: var(--admin-brand-readable, #2c4037); font-size: 12px; }
 .admin-theme-effect-sample {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   min-height: 48px;
-  border: 1px solid #e2ebe6;
+  border: 1px solid var(--admin-brand-border, #e2ebe6);
   border-radius: 8px;
   background: #f5f8f6;
 }
@@ -396,8 +396,8 @@
   font-style: normal;
 }
 .admin-theme-effect-sample b { color: #31443b; font-size: 10px; }
-.admin-theme-effect-sample[data-effect="glow"] i { box-shadow: 0 0 12px rgb(15 159 118 / 50%); }
-.admin-theme-effect-sample[data-effect="gradient"] i { background: linear-gradient(120deg, #11845f, #30bc8b, #11684e); }
+.admin-theme-effect-sample[data-effect="glow"] i { box-shadow: 0 0 12px color-mix(in srgb, var(--admin-brand-fill, rgb(15, 159, 118)) 14%, transparent); }
+.admin-theme-effect-sample[data-effect="gradient"] i { background: linear-gradient(120deg, var(--admin-brand-fill, #11845f), var(--admin-brand-fill, #30bc8b), var(--admin-brand-fill, #11684e)); }
 .admin-theme-effect-option .admin-theme-selected { top: 8px; right: 8px; }
 
 .admin-theme-preview-column { position: sticky; top: 76px; display: grid; gap: 11px; min-width: 0; }
@@ -444,7 +444,7 @@
   cursor: pointer;
 }
 .admin-theme-mode-switch button:hover { background: #eaf2ee; }
-.admin-theme-mode-switch button[aria-pressed="true"] { border-color: #c8e6d6; color: #087a5b; background: white; box-shadow: 0 2px 7px rgb(20 32 29 / 7%); }
+.admin-theme-mode-switch button[aria-pressed="true"] { border-color: var(--admin-brand-border, #c8e6d6); color: var(--admin-brand-readable, #087a5b); background: white; box-shadow: 0 2px 7px rgb(20 32 29 / 7%); }
 .admin-theme-store {
   overflow: hidden;
   border: 1px solid var(--demo-border, #dce5df);
@@ -537,7 +537,7 @@
 .admin-theme-product-info > div { display: flex; align-items: center; justify-content: space-between; gap: 6px; width: 100%; margin-top: 4px; }
 .admin-theme-product-info > div > b { color: var(--demo-accent-text, #087a5b); font-size: 13px; }
 .admin-theme-product-info > div > span { display: inline-flex; align-items: center; gap: 5px; color: var(--demo-muted, #6b7b73); font-size: 9px; white-space: nowrap; }
-.admin-theme-product-info > div > span i { width: 6px; height: 6px; border-radius: 50%; background: #26895c; }
+.admin-theme-product-info > div > span i { width: 6px; height: 6px; border-radius: 50%; background: var(--admin-brand-fill, #26895c); }
 .admin-theme-preview-caption { display: flex; align-items: flex-start; gap: 8px; margin-top: 11px; padding: 9px 10px; border: 1px dashed #e8d9b6; border-radius: 9px; color: #625237; background: #fffaf0; }
 .admin-theme-preview-caption > span { display: grid; place-items: center; width: 18px; height: 18px; flex: 0 0 auto; border-radius: 50%; color: #80540f; background: #ffedc7; font-size: 11px; font-weight: 900; }
 .admin-theme-preview-caption p { margin: 0; font-size: 11px; line-height: 1.5; }
@@ -558,14 +558,14 @@
   justify-content: space-between;
   gap: 14px;
   padding: 11px 13px;
-  border: 1px solid #dce7e2;
+  border: 1px solid var(--admin-brand-border, #dce7e2);
   border-radius: 13px;
   background: rgb(255 255 255 / 96%);
   box-shadow: 0 8px 24px rgb(20 45 35 / 10%);
   backdrop-filter: blur(12px);
 }
 .admin-theme-action-copy { display: grid; gap: 3px; min-width: 0; }
-.admin-theme-action-copy strong { color: #31463c; font-size: 12px; }
+.admin-theme-action-copy strong { color: var(--admin-brand-readable, #31463c); font-size: 12px; }
 .admin-theme-action-copy span { color: #6b7b73; font-size: 11px; }
 .admin-theme-save {
   display: inline-flex;
@@ -575,17 +575,17 @@
   min-width: 160px;
   min-height: 46px;
   padding: 0 17px;
-  border: 1px solid #08684f;
+  border: 1px solid var(--admin-brand-fill, #08684f);
   border-radius: 10px;
   color: #fff;
-  background: #087a5b;
-  box-shadow: 0 3px 8px rgb(8 122 91 / 18%);
+  background: var(--admin-brand-fill, #087a5b);
+  box-shadow: 0 3px 8px color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 14%, transparent);
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
   transition: background .16s ease, box-shadow .16s ease;
 }
-.admin-theme-save:hover { background: #06664c; box-shadow: 0 5px 12px rgb(8 122 91 / 22%); }
+.admin-theme-save:hover { background: var(--admin-brand-fill, #06664c); box-shadow: 0 5px 12px color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 14%, transparent); }
 .admin-theme-save:disabled { opacity: .65; cursor: wait; }
 .admin-theme-save svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
@@ -694,7 +694,7 @@
   min-width: 0;
   min-height: 58px;
   padding: 8px 22px 8px 8px;
-  border: 1px solid #dce4e0;
+  border: 1px solid var(--admin-brand-border, #dce4e0);
   border-radius: 9px;
   background: #fff;
   cursor: pointer;
@@ -711,7 +711,7 @@
   box-shadow: 0 0 0 2px rgb(0 0 0 / 8%);
 }
 .admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice:focus-within {
-  outline: 3px solid #36a982;
+  outline: 3px solid var(--admin-brand-fill, #36a982);
   outline-offset: 2px;
 }
 .admin-theme-page[data-main-mono="true"] .admin-theme-mono-choice input {
