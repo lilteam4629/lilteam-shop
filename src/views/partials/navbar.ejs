@@ -1,5 +1,5 @@
 <% const mainSiteNav = typeof isMainSite !== 'undefined' && isMainSite; %>
-<header class="store-nav sticky top-0 z-50">
+<header class="store-nav sticky top-0 z-50<%= mainSiteNav ? ' store-nav--main' : '' %>">
   <svg class="ui-icon-sprite" aria-hidden="true">
     <symbol id="ui-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></symbol>
     <symbol id="ui-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></symbol>
