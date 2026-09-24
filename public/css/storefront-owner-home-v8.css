@@ -109,36 +109,45 @@ body.storefront-owner-home-page :is(a, button, input, select, summary):focus-vis
   outline-offset: 3px;
 }
 
-/* The redesigned welcome dialog is loaded from a shared legacy stylesheet.
-   Re-theme its action buttons only on the main shop homepage. */
-body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-dialog {
+/* The welcome dialog is loaded from a shared legacy stylesheet. Target its
+   stable button IDs so the owner theme reliably wins the older green rules. */
+body.storefront-owner-home-page #welcome-popup .welcome-popup-dialog {
   border-color: color-mix(in srgb, var(--gold) 46%, var(--border)) !important;
 }
-body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions {
+body.storefront-owner-home-page #welcome-popup .welcome-popup-actions {
   border-color: var(--border) !important;
   background: color-mix(in srgb, var(--card) 96%, var(--gold) 4%) !important;
 }
-body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button {
+body.storefront-owner-home-page #welcome-popup .welcome-popup-actions button {
   border-color: var(--border-light) !important;
   color: var(--text-2) !important;
   background: var(--input) !important;
 }
-body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button:first-child {
+body.storefront-owner-home-page #welcome-popup #welcome-popup-close {
   border-color: var(--gold) !important;
   color: var(--gold-contrast) !important;
   background: var(--gold) !important;
+  background-color: var(--gold) !important;
   box-shadow: 0 8px 20px -14px color-mix(in srgb, var(--gold) 85%, transparent) !important;
 }
-body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button:first-child:hover {
+body.storefront-owner-home-page #welcome-popup #welcome-popup-close:hover {
   border-color: var(--gold-hover) !important;
   background: var(--gold-hover) !important;
+  background-color: var(--gold-hover) !important;
 }
-body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button + button:hover {
+body.storefront-owner-home-page #welcome-popup #welcome-popup-mute {
+  border-color: var(--border-light) !important;
+  color: var(--text-2) !important;
+  background: var(--input) !important;
+  background-color: var(--input) !important;
+}
+body.storefront-owner-home-page #welcome-popup #welcome-popup-mute:hover {
   border-color: color-mix(in srgb, var(--gold) 48%, var(--border)) !important;
   background: color-mix(in srgb, var(--gold) 10%, var(--card)) !important;
+  background-color: color-mix(in srgb, var(--gold) 10%, var(--card)) !important;
 }
-body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-actions button:focus-visible,
-body.storefront-owner-home-page #welcome-popup.welcome-popup-redesign .welcome-popup-dismiss:focus-visible {
+body.storefront-owner-home-page #welcome-popup .welcome-popup-actions button:focus-visible,
+body.storefront-owner-home-page #welcome-popup .welcome-popup-dismiss:focus-visible {
   outline-color: var(--gold) !important;
 }
 
