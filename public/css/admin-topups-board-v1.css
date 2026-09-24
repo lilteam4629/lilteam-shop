@@ -265,3 +265,290 @@
   .admin-topups-owner .admin-finance-tabs .topup-tab-btn,
   .admin-topups-owner .topup-request-card { transition: none; transform: none; }
 }
+
+/* Bank-receiving settings: a paper-backed setup sheet using this shop's theme. */
+.admin-topups-owner .admin-bank-settings {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border: 1px solid var(--finance-board-line) !important;
+  background: linear-gradient(145deg, var(--card) 0%, var(--card) 72%, var(--finance-board-softer) 100%) !important;
+  box-shadow: var(--finance-board-shadow), inset 0 1px 0 color-mix(in srgb, var(--card) 78%, white) !important;
+}
+
+.admin-topups-owner .admin-bank-settings::before {
+  position: absolute;
+  z-index: 2;
+  top: -10px;
+  left: 18%;
+  width: 15px;
+  height: 32px;
+  border: 2px solid #a8844e;
+  border-bottom-color: transparent;
+  border-radius: 9px 9px 6px 6px;
+  background: linear-gradient(90deg, #bd995e, #e0c17f 48%, #b58b4c);
+  box-shadow: 0 2px 4px rgba(62, 45, 19, .16);
+  content: "";
+  pointer-events: none;
+}
+
+.admin-topups-owner .admin-bank-settings > .flex.items-center.gap-3 {
+  position: relative;
+  padding-bottom: 18px;
+  border-color: var(--finance-board-line) !important;
+}
+
+.admin-topups-owner .admin-bank-title-icon,
+.admin-topups-owner .admin-bank-section-icon {
+  color: var(--finance-board-accent-text) !important;
+}
+.admin-topups-owner .admin-bank-title-icon {
+  border: 1px solid var(--finance-board-line);
+  background: var(--finance-board-soft) !important;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--finance-board-accent) 16%, transparent);
+}
+.admin-topups-owner .admin-bank-settings > .flex.items-center.gap-3 p {
+  max-width: 680px;
+  color: var(--text-3);
+}
+
+.admin-topups-owner .admin-provider-picker {
+  position: relative;
+  padding: 19px;
+  border: 1px solid var(--finance-board-line) !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, var(--finance-board-softer), var(--card) 65%) !important;
+  box-shadow: 0 5px 15px color-mix(in srgb, var(--text) 4%, transparent);
+}
+.admin-topups-owner .admin-provider-picker::before {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 42px;
+  height: 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 34%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--gold) 22%, var(--card));
+  content: "";
+  transform: translateX(-50%) rotate(-2deg);
+  pointer-events: none;
+}
+.admin-topups-owner .admin-provider-picker-head { gap: 12px; }
+.admin-topups-owner .admin-provider-picker-head h3 {
+  font-size: 16px;
+  letter-spacing: -.015em;
+}
+.admin-topups-owner .admin-provider-picker-head p {
+  max-width: 720px;
+  color: var(--text-3);
+  line-height: 1.65;
+}
+.admin-topups-owner .admin-provider-picker-head > a {
+  border-color: var(--finance-board-line);
+  color: var(--finance-board-accent-text);
+  background: var(--card);
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
+}
+.admin-topups-owner .admin-provider-picker-head > a:hover {
+  border-color: var(--gold);
+  background: var(--finance-board-soft);
+  transform: translateY(-1px);
+}
+
+.admin-topups-owner .admin-provider-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 11px;
+}
+.admin-topups-owner .admin-provider-option,
+.admin-topups-owner .admin-provider-option.is-active,
+.admin-topups-owner .admin-provider-option.is-active.is-editing {
+  min-height: 84px;
+  border: 1px solid var(--finance-board-line) !important;
+  border-radius: 13px !important;
+  color: var(--text) !important;
+  background: var(--card) !important;
+  box-shadow: 0 2px 7px color-mix(in srgb, var(--text) 3%, transparent);
+}
+.admin-topups-owner .admin-provider-option:hover {
+  border-color: color-mix(in srgb, var(--gold) 62%, var(--border)) !important;
+  background: var(--finance-board-softer) !important;
+  box-shadow: 0 6px 15px color-mix(in srgb, var(--text) 7%, transparent);
+  transform: translateY(-1px);
+}
+/* Active provider = theme-tinted paper; editing provider = stronger theme outline. */
+.admin-topups-owner .admin-provider-option.is-active {
+  border-color: color-mix(in srgb, var(--gold) 45%, var(--finance-board-line)) !important;
+  background: color-mix(in srgb, var(--gold) 8%, var(--card)) !important;
+  box-shadow: inset 4px 0 0 var(--gold), 0 3px 10px color-mix(in srgb, var(--text) 4%, transparent);
+}
+.admin-topups-owner .admin-provider-option.is-active .admin-provider-copy b,
+.admin-topups-owner .admin-provider-option.is-active .admin-provider-copy small {
+  color: var(--text) !important;
+}
+.admin-topups-owner .admin-provider-option.is-editing {
+  border: 2px solid var(--gold) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 18%, transparent), 0 4px 12px color-mix(in srgb, var(--text) 5%, transparent) !important;
+}
+.admin-topups-owner .admin-provider-option.is-active.is-editing {
+  background: color-mix(in srgb, var(--gold) 11%, var(--card)) !important;
+}
+.admin-topups-owner .admin-provider-icon {
+  border-color: var(--finance-board-line);
+  color: var(--finance-board-accent-text);
+  background: var(--finance-board-soft);
+}
+.admin-topups-owner .admin-provider-option.is-active .admin-provider-icon {
+  border-color: color-mix(in srgb, var(--gold) 32%, var(--finance-board-line));
+  color: var(--finance-board-accent-text);
+  background: var(--card);
+}
+.admin-topups-owner .admin-provider-status {
+  border-color: var(--finance-board-line);
+  color: var(--text-3);
+  background: var(--finance-board-softer);
+}
+/* Status stays semantic green; selection/highlight follows the store theme. */
+.admin-topups-owner .admin-provider-status.is-active {
+  border-color: color-mix(in srgb, var(--success, #087a5b) 24%, var(--card));
+  color: var(--success, #087a5b);
+  background: color-mix(in srgb, var(--success, #087a5b) 9%, var(--card));
+}
+.admin-topups-owner .admin-provider-arrow { color: var(--text-3); }
+.admin-topups-owner .admin-provider-option:focus-visible,
+.admin-topups-owner .admin-provider-picker-head > a:focus-visible,
+.admin-topups-owner .admin-provider-editor-head a:focus-visible,
+.admin-topups-owner .admin-bank-settings :is(input, select, button, a):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold) 58%, transparent);
+  outline-offset: 3px;
+}
+
+.admin-topups-owner .admin-provider-editor-head {
+  min-height: 48px;
+  padding: 7px 10px;
+  border: 1px dashed var(--finance-board-line);
+  border-radius: 11px;
+  background: var(--finance-board-softer);
+}
+.admin-topups-owner .admin-provider-editor-head a {
+  color: var(--finance-board-accent-text);
+  font-weight: 700;
+}
+.admin-topups-owner .admin-provider-help {
+  border-color: var(--finance-board-line) !important;
+  border-inline-start: 4px solid var(--gold);
+  border-radius: 11px !important;
+  color: var(--text-2) !important;
+  background: var(--finance-board-softer) !important;
+  line-height: 1.7;
+}
+
+.admin-topups-owner .admin-bank-transfer {
+  padding: clamp(16px, 2vw, 22px);
+  border-color: var(--finance-board-line) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(145deg, var(--finance-board-softer), var(--card) 52%) !important;
+}
+.admin-topups-owner .admin-bank-transfer > h3 {
+  min-height: 38px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--finance-board-line);
+  font-size: 15px;
+}
+.admin-topups-owner .admin-bank-transfer > h3 svg {
+  width: 21px;
+  height: 21px;
+}
+.admin-topups-owner .admin-bank-grid { gap: 13px; }
+.admin-topups-owner .admin-bank-transfer label {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.admin-topups-owner .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) {
+  min-width: 0;
+  min-height: 48px;
+  border: 1px solid var(--finance-board-line) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+  background: var(--card) !important;
+  box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text) 3%, transparent);
+}
+.admin-topups-owner .admin-bank-transfer :is(input, select)::placeholder {
+  color: var(--text-4);
+  opacity: 1;
+}
+.admin-topups-owner .admin-bank-transfer :is(input, select):hover {
+  border-color: color-mix(in srgb, var(--gold) 38%, var(--border)) !important;
+}
+.admin-topups-owner .admin-bank-transfer :is(input, select):focus-visible {
+  border-color: var(--gold) !important;
+  outline: 3px solid color-mix(in srgb, var(--gold) 20%, transparent);
+  outline-offset: 1px;
+  box-shadow: none;
+}
+.admin-topups-owner .admin-bank-transfer input[type="file"] {
+  min-height: 48px;
+  padding: 7px;
+  border: 1px dashed var(--finance-board-line);
+  border-radius: 10px;
+  color: var(--text-2);
+  background: var(--card);
+}
+.admin-topups-owner .admin-bank-transfer input[type="file"]::file-selector-button {
+  min-height: 32px;
+  margin-right: 9px;
+  padding: 5px 10px;
+  border: 1px solid var(--finance-board-line);
+  border-radius: 7px;
+  color: var(--finance-board-accent-text);
+  background: var(--finance-board-soft);
+  font: inherit;
+  font-weight: 700;
+}
+.admin-topups-owner .admin-bank-transfer img[alt="QR ธนาคาร"] {
+  border: 1px solid var(--finance-board-line);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.admin-topups-owner .admin-finance-save-row { padding-top: 0; }
+.admin-topups-owner .admin-finance-save {
+  min-height: 50px;
+  min-width: min(100%, 260px);
+  border: 1px solid var(--finance-board-accent-hover) !important;
+  border-radius: 11px !important;
+  color: var(--finance-board-accent-contrast) !important;
+  background: var(--finance-board-accent) !important;
+  box-shadow: 0 5px 13px color-mix(in srgb, var(--gold) 20%, transparent) !important;
+  font-size: 13px;
+}
+.admin-topups-owner .admin-finance-save:hover {
+  border-color: var(--finance-board-accent-hover) !important;
+  background: var(--finance-board-accent-hover) !important;
+  transform: translateY(-1px);
+}
+.admin-topups-owner .admin-finance-save:active { transform: translateY(0); }
+
+@media (max-width: 760px) {
+  .admin-topups-owner .admin-bank-settings { padding: 18px; gap: 16px; }
+  .admin-topups-owner .admin-bank-settings::before { left: 25%; }
+  .admin-topups-owner .admin-provider-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-topups-owner .admin-bank-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-topups-owner .admin-provider-option { min-height: 76px; }
+}
+@media (max-width: 520px) {
+  .admin-topups-owner .admin-bank-settings { padding: 16px 13px; }
+  .admin-topups-owner .admin-provider-picker { padding: 15px 12px; }
+  .admin-topups-owner .admin-provider-option { gap: 9px; padding: 10px; }
+  .admin-topups-owner .admin-provider-copy b { font-size: 14px; }
+  .admin-topups-owner .admin-provider-copy small { white-space: normal; }
+  .admin-topups-owner .admin-provider-status { font-size: 10px; }
+  .admin-topups-owner .admin-provider-icon { width: 38px; height: 38px; }
+  .admin-topups-owner .admin-provider-editor-head { align-items: flex-start; flex-direction: column; }
+  .admin-topups-owner .admin-finance-save-row,
+  .admin-topups-owner .admin-finance-save { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-topups-owner .admin-provider-option,
+  .admin-topups-owner .admin-provider-picker-head > a,
+  .admin-topups-owner .admin-finance-save { transition: none; transform: none; }
+}
