@@ -10,9 +10,9 @@
 <div class="model-studio-page">
   <header class="experiment-page-head model-studio-page-head">
     <div>
-      <span class="experiment-kicker">STORE LOOKBOOK · LILTEAM SHOP</span>
-      <h1>เลือกหน้าตาร้านในแบบของคุณ</h1>
-      <p>ลองดูบรรยากาศของแต่ละแบบ แล้วเลือกใช้กับหน้าร้านหลักได้ทันที</p>
+      <span class="experiment-kicker">STORE RADAR · LILTEAM SHOP</span>
+      <h1>เลือกสไตล์หน้าร้าน</h1>
+      <p>ดูภาพรวมของแต่ละโมเดล เลือกแบบที่ชอบ แล้วบันทึกเพื่อใช้กับหน้าร้านหลัก</p>
     </div>
     <a href="/" class="experiment-button model-studio-store-link">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 4l9 6.5M5.5 9v10h13V9M9 19v-6h6v6"/></svg>
@@ -49,8 +49,8 @@
 
   <form action="/admin/storefront-models" method="post" class="model-studio-form" data-model-studio-form data-current-model="<%= currentModel %>">
     <fieldset>
-      <legend>โมเดลหน้าร้าน</legend>
-      <p class="model-studio-field-hint">เลือกจากรูปแบบที่มีให้ใช้งานจริง · การเปลี่ยนจะยังไม่เผยแพร่จนกว่าจะกดบันทึก</p>
+      <legend>เลือกแบบที่ใช่</legend>
+      <p class="model-studio-field-hint">เลือกจาก 2 รูปแบบที่เปิดใช้งานได้จริง · สินค้าและข้อมูลร้านไม่เปลี่ยน จนกว่าจะกดบันทึก</p>
 
       <div class="model-studio-grid">
         <label class="model-studio-option <%= availableCurrentModel === 'classic' ? 'is-current' : '' %>" data-model-option data-model-value="classic" data-model-name="โมเดลมาตรฐาน">
