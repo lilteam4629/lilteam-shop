@@ -7,6 +7,7 @@ const read = relative => fs.readFileSync(path.join(__dirname, '..', relative), '
 const route = read('src/routes/shop.js');
 const layout = read('src/views/layouts/main.ejs');
 const home = read('src/views/shop/home.ejs');
+const productCard = read('src/views/partials/product-card.ejs');
 const css = read('public/css/storefront-owner-home-v7.css');
 const redesignCss = read('public/css/storefront-owner-home-v14.css');
 const gameWorldCss = read('public/css/storefront-owner-home-v15.css');
@@ -20,6 +21,8 @@ assert.doesNotMatch(layout, /storefront-owner-home-v(?:8|9|10|11|14|15)\.css/,
   'superseded main-home design layers must no longer be loaded');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v20\.css/,
   'the new media-storefront stylesheet must only load on the owner storefront');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v21\.css/,
+  'the new readable product-card layer must only load on the owner storefront');
 assert.doesNotMatch(layout, /storefront-owner-home-v18\.css/,
   'the superseded split hero styling must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,
@@ -40,6 +43,12 @@ assert.match(home, /id="latest-orders"[\s\S]*?latestOrders\.forEach\(order => \{
   'the sidebar latest-orders destination must use the real order rail');
 assert.match(home, /newest\.slice\(0, 6\)\.forEach\(\(product, index\) => \{/,
   'the new horizontal shelf must render actual newest products, not reference/demo items');
+assert.equal((home.match(/ownerHomeProductCard: ownerHomeV20/g) || []).length, 2,
+  'both main-store product grids must opt in to the new product-card design without affecting tenants');
+assert.match(productCard, /if \(useOwnerHomeShowcase\) \{ %>[\s\S]*?owner-home-v21-product-card[\s\S]*?owner-home-v21-name[\s\S]*?owner-home-v21-price-values[\s\S]*?owner-home-v21-stock-row/,
+  'the homepage card must show a distinct title, price, and live inventory count');
+assert.match(productCard, /owner-home-v21-media[\s\S]*?width="960" height="540"/,
+  'the new card must reserve image space and preserve the full product image');
 assert.doesNotMatch(home, /owner-home-v17-hero-shell|owner-home-v17-visual|owner-home-v17-banner-frame/,
   'the former split-text and framed-screen hero must be removed from the active homepage template');
 assert.doesNotMatch(home, /owner-home-v16|data-scene-motion-toggle|anime/i,
@@ -155,4 +164,26 @@ assert.match(cinematicCss, /body:has\(#site-page-shell\.storefront-owner-home-v7
   'the navigation theme must only change when the main homepage is active');
 assert.ok(cinematicRuleCount > 0, 'the media-storefront design must include scoped owner-only rules');
 
-console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount} scoped CSS rules).`);
+const productCardCss = read('public/css/storefront-owner-home-v21.css');
+const productCardStylesheet = postcss.parse(productCardCss, { from: 'storefront-owner-home-v21.css' });
+let productCardRuleCount = 0;
+productCardStylesheet.walkRules(rule => {
+  productCardRuleCount += 1;
+  for (const selector of rule.selectors) {
+    assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7') && selector.includes('.owner-home-v20-shell'),
+      `product-card style could affect a tenant or non-home page: ${selector}`);
+  }
+});
+assert.match(productCardCss, /\.owner-home-v21-media\s*>\s*img\s*\{[^}]*object-fit:\s*contain/s,
+  'product images must remain fully visible without cropping');
+assert.match(productCardCss, /\.owner-home-v21-price-values\s*>\s*strong\s*\{[^}]*font-size:\s*clamp\(19px/s,
+  'the live price must be prominent and readable');
+assert.match(productCardCss, /\.owner-home-v21-stock-row\s*>\s*strong\s*\{[^}]*font-size:\s*13px/s,
+  'the live stock count must have a clear visual hierarchy');
+assert.match(productCardCss, /var\(--gold\)/,
+  'the new card must retain the shop accent for its primary action');
+assert.doesNotMatch(productCardCss, /#(?:00ff91|10b981|34d399)\b/i,
+  'the new card must not introduce unrelated green accents');
+assert.ok(productCardRuleCount > 0, 'the new product-card layer must have owner-home scoped rules');
+
+console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount + productCardRuleCount} scoped CSS rules).`);

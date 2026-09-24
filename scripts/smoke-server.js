@@ -321,6 +321,9 @@ async function run() {
     if (!['background: var(--bg)', 'background: var(--card)', 'color: var(--text)', 'color: var(--gold-text)'].every(token => ownerHomeV20Css.body.includes(token))) throw new Error('main shop homepage is not using the saved storefront theme tokens');
     if (/--(?:gold|bg|card|input|border|text):\s*#[0-9a-f]{3,8}/i.test(ownerHomeV20Css.body)) throw new Error('main shop homepage overrides the saved storefront theme palette');
     if (!home.body.includes('owner-home-v20-hero') || !home.body.includes('owner-home-v20-product-rail') || !home.body.includes('owner-home-v20-sidebar')) throw new Error('main home is missing its sidebar, real-data hero, or product rail');
+    if (!home.body.includes('/css/storefront-owner-home-v21.css') || !home.body.includes('owner-home-v21-product-card') || !home.body.includes('owner-home-v21-stock-row')) throw new Error('main home is missing the new clear-image, price, and stock product cards');
+    const ownerHomeV21Css = await fetchOk('/css/storefront-owner-home-v21.css', 'text/css');
+    if (!/\.owner-home-v21-media\s*>\s*img\s*\{[^}]*object-fit:\s*contain/s.test(ownerHomeV21Css.body)) throw new Error('main shop product images are cropped');
     if (home.body.includes('cdn.tailwindcss.com')) throw new Error('home still loads the Tailwind browser compiler');
     if (!home.body.includes('data-seamless-navigation="true"')) throw new Error('home is missing persistent navigation for uninterrupted music');
     if (!home.body.includes('/js/interaction-performance-v1.js')) throw new Error('home is missing shared interaction performance helpers');

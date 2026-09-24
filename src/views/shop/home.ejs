@@ -817,7 +817,7 @@
       <section id="home-section-<%= section.id %>" class="scroll-mt-28">
       <%- include('../partials/section-hud-header', { icon: '✨', title: section.title, subtitle: '', href: null }) %>
       <div class="product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4 mb-10">
-        <% section.products.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
+        <% section.products.forEach(p => { %><%- include('../partials/product-card', { p, ownerHomeProductCard: ownerHomeV20 }) %><% }) %>
       </div>
       </section>
     <% }) %>
@@ -835,7 +835,7 @@
   </div>
   <div class="all-products-grid product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4">
     <% if (products.length) { %>
-      <% products.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
+      <% products.forEach(p => { %><%- include('../partials/product-card', { p, ownerHomeProductCard: ownerHomeV20 }) %><% }) %>
     <% } else { %>
       <% [1,2,3,4,5].forEach(n => { %><%- include('../partials/example-product-card', { n }) %><% }) %>
     <% } %>

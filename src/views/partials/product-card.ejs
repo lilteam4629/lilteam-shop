@@ -5,9 +5,44 @@
   const flashInitial = (Math.floor(flashSeconds / 86400) ? Math.floor(flashSeconds / 86400) + 'ว ' : '') + [Math.floor((flashSeconds % 86400) / 3600), Math.floor((flashSeconds % 3600) / 60), flashSeconds % 60].map(n => String(n).padStart(2, '0')).join(':');
   const crossedPrice = p.flashSaleActive ? p.regularPrice : p.originalPrice;
   const isFan = typeof compact !== 'undefined' && compact;
+  const useOwnerHomeShowcase = typeof ownerHomeProductCard !== 'undefined' && ownerHomeProductCard && !isFan;
   const useClassic = isFan || !(typeof settings !== 'undefined' && settings.productCardStyle === 'natural');
 %>
-<% if (useClassic) { %>
+<% if (useOwnerHomeShowcase) { %>
+<a href="/game/<%= p.slug %>" data-product-id="<%= p.id %>" data-stock="<%= soldOut ? 'sold' : 'available' %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
+  class="owner-home-v21-product-card filterable-card group" aria-label="<%= p.title %> ราคา <%= p.price.toLocaleString() %> บาท, <%= soldOut ? 'สินค้าหมด' : `คงเหลือ ${p.stockCount.toLocaleString()} ชิ้น` %>">
+  <div class="owner-home-v21-media">
+    <% if (p.images && p.images[0]) { %>
+      <img src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low" />
+    <% } else { %>
+      <span class="owner-home-v21-image-fallback" aria-hidden="true"><%= String(p.title || 'L').trim().charAt(0).toUpperCase() %></span>
+    <% } %>
+    <% if (p.flashSaleActive) { %><span class="owner-home-v21-image-tag">ลดพิเศษ</span><% } else if (p.flashSaleUpcoming) { %><span class="owner-home-v21-image-tag">เร็ว ๆ นี้</span><% } %>
+    <% if (p.isSyndicated) { %><span class="owner-home-v21-partner-tag">Partner</span><% } %>
+  </div>
+  <div class="owner-home-v21-details">
+    <h3 class="owner-home-v21-name"><%= p.title %></h3>
+    <div class="owner-home-v21-price-row">
+      <span class="owner-home-v21-label">ราคาขาย</span>
+      <div class="owner-home-v21-price-values">
+        <strong>฿<%= p.price.toLocaleString() %><small>.00</small></strong>
+        <% if (crossedPrice > p.price) { %><del>฿<%= crossedPrice.toLocaleString() %>.00</del><% } %>
+      </div>
+    </div>
+    <div class="owner-home-v21-stock-row" data-stock-state="<%= soldOut ? 'sold' : 'available' %>">
+      <span class="owner-home-v21-label">คงเหลือ</span>
+      <% if (soldOut) { %><strong>หมด</strong><% } else { %><strong><%= p.stockCount.toLocaleString() %><small> ชิ้น</small></strong><% } %>
+    </div>
+    <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
+      <div class="owner-home-v21-countdown">
+        <span><%= p.flashSaleActive ? 'โปรโมชันเหลือเวลา' : 'เริ่มโปรโมชันใน' %></span>
+        <strong class="flash-countdown" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>><%= flashInitial %></strong>
+      </div>
+    <% } %>
+    <span class="owner-home-v21-buy"><%= soldOut ? 'ดูรายละเอียดสินค้า' : 'เลือกสินค้า' %><i aria-hidden="true">→</i></span>
+  </div>
+</a>
+<% } else if (useClassic) { %>
 <!-- Classic card: price/title overlaid on the image with a glow scrim, ring border, shimmer.
      The decorative rotated "fan" carousel (isFan) always crops to a fixed 3:4 frame since it
      needs uniform card sizes; the regular grid shows the image at its full natural size —
