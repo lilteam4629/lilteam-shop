@@ -52,7 +52,7 @@
 <% } %>
 
 <% const ownerHomeV14 = typeof isMainSite !== 'undefined' && isMainSite; %>
-<% if (ownerHomeV14) { %><div class="owner-home-v14-layout" data-owner-home-layout="matchday-editorial"><% } %>
+<% if (ownerHomeV14) { %><div class="owner-home-v14-layout" data-owner-home-layout="matchday-game-world"><% } %>
 
 <% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2) { %>
   <%- include('../partials/locker-hero', { newest, stats, settings, filterTags, publicPreview: typeof publicPreview !== 'undefined' ? publicPreview : false }) %>

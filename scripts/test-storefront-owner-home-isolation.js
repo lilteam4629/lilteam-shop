@@ -9,6 +9,7 @@ const layout = read('src/views/layouts/main.ejs');
 const home = read('src/views/shop/home.ejs');
 const css = read('public/css/storefront-owner-home-v7.css');
 const redesignCss = read('public/css/storefront-owner-home-v14.css');
+const gameWorldCss = read('public/css/storefront-owner-home-v15.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
   'the redesign must be enabled for the main store only');
@@ -16,6 +17,8 @@ assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\
   'the owner stylesheet must be available for seamless navigation on the main site');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v14\.css/,
   'the full homepage redesign must only load on the owner homepage');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v15\.css/,
+  'the game-world style must only load on the owner homepage');
 assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
   'the rejected oversized banner treatment must no longer load');
 assert.match(home, /if \(ownerHomeV14\) \{ %><div class="owner-home-v14-layout"/,
@@ -75,4 +78,30 @@ assert.match(redesignCss, /\.ready-glow\s*\{[\s\S]*?background:\s*color-mix\(in 
   'available-product badges must use the selected shop accent instead of fixed green');
 assert.ok(redesignRuleCount > 0, 'the owner-only homepage redesign should contain scoped CSS rules');
 
-console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount} scoped CSS rules).`);
+const gameWorldStylesheet = postcss.parse(gameWorldCss, { from: 'storefront-owner-home-v15.css' });
+let gameWorldRuleCount = 0;
+gameWorldStylesheet.walkRules(rule => {
+  gameWorldRuleCount += 1;
+  for (const selector of rule.selectors) {
+    assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7'),
+      `game-world selector must include the main-store homepage scope: ${selector}`);
+    const explicitlyHomepageScoped = selector.includes('.owner-home-v14-layout')
+      || selector === '#site-page-shell.storefront-owner-home-v7'
+      || selector.startsWith('body:has(#site-page-shell.storefront-owner-home-v7)')
+      || selector.startsWith('body.storefront-global-background #site-page-shell.storefront-owner-home-v7')
+      || selector.includes('> .store-content-section');
+    assert.ok(explicitlyHomepageScoped,
+      `game-world styles may target only the owner home, its navbar/footer, or lower home modules: ${selector}`);
+  }
+});
+assert.match(gameWorldCss, /\.store-nav--main\s*\{[\s\S]*?background:\s*rgba\(17,\s*13,\s*22,\s*\.96\)/,
+  'the owner homepage should carry the cinematic dark game-menu direction into its main navigation');
+assert.match(gameWorldCss, /\.owner-home-v14-hero\s*\{[\s\S]*?grid-template-columns:\s*minmax\(250px,\s*\.68fr\)\s+minmax\(0,\s*1\.65fr\)/,
+  'the dark game-inspired homepage must retain its editorial split hero');
+assert.match(gameWorldCss, /\.banner-sparkle img\s*\{[\s\S]*?height:\s*auto\s*!important[\s\S]*?object-fit:\s*contain\s*!important/,
+  'the main banner must stay fully visible without cropping');
+assert.match(gameWorldCss, /var\(--gold\)/,
+  'the atmosphere may change, but active accents must continue to use the saved shop theme');
+assert.ok(gameWorldRuleCount > 0, 'the Pinterest-inspired style must contain scoped homepage rules');
+
+console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount} scoped CSS rules).`);
