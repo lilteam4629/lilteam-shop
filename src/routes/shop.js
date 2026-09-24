@@ -187,6 +187,9 @@ router.get('/', (req, res) => {
   const localExperimentHost = ['localhost', '127.0.0.1', '::1'].includes(String(req.hostname || '').toLowerCase());
   viewData.welcomePopupExperiment = !req.tenantShop && localExperimentHost && req.query.welcomePopupExperiment === '1';
   viewData.welcomePopupRedesign = !req.tenantShop;
+  // Apply the owner's homepage refresh only on the platform's main store.
+  // Tenant storefronts keep the existing markup, assets, and interactions.
+  viewData.storefrontOwnerHomeV7 = !req.tenantShop;
   res.render(view, viewData);
 });
 

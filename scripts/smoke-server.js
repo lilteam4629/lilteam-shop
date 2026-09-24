@@ -311,12 +311,17 @@ async function run() {
     await fetchOk('/health', 'application/json');
     const home = await fetchOk('/', 'text/html');
     if (!home.body.includes('/css/tailwind.generated.css')) throw new Error('home is missing the precompiled Tailwind stylesheet');
+    if (!home.body.includes('class="relative flex-1 storefront-owner-home-v7"')) throw new Error('main home is missing its page-scoped redesign marker');
+    if (!home.body.includes('/css/storefront-owner-home-v7.css')) throw new Error('main home is missing its isolated redesign stylesheet');
+    const ownerHomeCss = await fetchOk('/css/storefront-owner-home-v7.css', 'text/css');
+    if (!ownerHomeCss.body.includes('#site-page-shell.storefront-owner-home-v7 .banner-sparkle')) throw new Error('owner homepage styles are not scoped to the replaceable page shell');
     if (home.body.includes('cdn.tailwindcss.com')) throw new Error('home still loads the Tailwind browser compiler');
     if (!home.body.includes('data-seamless-navigation="true"')) throw new Error('home is missing persistent navigation for uninterrupted music');
     if (!home.body.includes('/js/interaction-performance-v1.js')) throw new Error('home is missing shared interaction performance helpers');
     if (!home.body.includes("menu.addEventListener('click'")) throw new Error('mobile navigation does not close when a menu link is selected');
     await fetchOk('/products', 'text/html');
     const productDetail = await fetchOk('/game/shadow-realm-chronicles', 'text/html');
+    if (productDetail.body.includes('class="relative flex-1 storefront-owner-home-v7"')) throw new Error('the owner homepage marker leaked into another storefront page');
     if (!productDetail.body.includes('ตัวที่มีในไอดีนี้') || !productDetail.body.includes('แนะนำ')) {
       throw new Error('product detail is missing its assigned filter information');
     }

@@ -660,7 +660,7 @@
   <div class="latest-orders-heading"><span class="latest-orders-heading-icon"><svg><use href="#ui-clock"/></svg></span><div><h2>รายการสั่งซื้อล่าสุด</h2><p>Latest order list</p></div></div>
   <div class="latest-orders-shell">
     <div class="latest-orders-track">
-      <% for (let duplicate = 0; duplicate < 2; duplicate++) { %>
+      <% for (let duplicate = 0; duplicate < (typeof isMainSite !== 'undefined' && isMainSite ? 1 : 2); duplicate++) { %>
         <div class="latest-orders-group" <%- duplicate ? 'aria-hidden="true"' : '' %>>
           <% latestOrders.forEach(order => { %>
             <a href="<%= order.slug ? '/game/' + order.slug : '/products' %>" class="latest-order-card">
