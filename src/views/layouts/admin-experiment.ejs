@@ -23,8 +23,9 @@
   <% } %>
   <link rel="stylesheet" href="<%= asset('css/admin-experiment-v1.css') %>" />
   <style><%- typeof adminBrandCss !== 'undefined' ? adminBrandCss : '' %></style>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-main-neutral-borders-v1.css') %>" /><% } %>
 </head>
-<body class="experiment-admin admin-site <%= typeof isMainSite !== 'undefined' && isMainSite && active === 'welcome-popup' ? 'admin-main-site' : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite && active === 'announcements' ? 'main-admin-announcements' : '' %>">
+<body class="experiment-admin admin-site <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite && active === 'welcome-popup' ? 'admin-main-site' : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite && active === 'announcements' ? 'main-admin-announcements' : '' %>">
   <div id="experiment-canonical-sidebar-template" hidden><%- include('../partials/admin-experiment-sidebar-effects') %></div>
   <% if (hasBuiltAdminShell) { %>
     <%- normalizedAdminBody %>

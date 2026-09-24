@@ -143,6 +143,7 @@
       animation: toast-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-main-neutral-borders-v1.css') %>" /><% } %>
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--gold-contrast)] admin-site <%= referenceEnabled ? `admin-reference-ui admin-page-${active || 'page'}` : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 

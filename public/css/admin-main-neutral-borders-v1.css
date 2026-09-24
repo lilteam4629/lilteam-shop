@@ -1,0 +1,24 @@
+/* Main-shop back office only. Important declarations in this first layer also
+   beat page-level !important border colors; tenant/rental pages never load it. */
+@layer admin-main-neutral-borders {
+  body.admin-site.admin-main-site :where(*, *::before, *::after) {
+    border-color: var(--border) !important;
+  }
+
+  /* Selected/editing states sometimes use inset shadows as accent-colored edges. */
+  body.admin-site.admin-main-site
+    :where([aria-selected="true"], [aria-pressed="true"], [data-state="active"], .is-active, .is-selected, .is-editing, .selected, .active) {
+    box-shadow: 0 0 0 1px var(--border) !important;
+  }
+
+  /* Keep keyboard focus visible, but neutral rather than accent-colored. */
+  body.admin-site.admin-main-site :where(:focus, :focus-visible, :focus-within) {
+    outline-color: var(--text-2) !important;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--border) 70%, transparent) !important;
+  }
+
+  body.admin-site.admin-main-site :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+    outline: 3px solid var(--text-2) !important;
+    outline-offset: 3px !important;
+  }
+}
