@@ -23,10 +23,18 @@ let ruleCount = 0;
 stylesheet.walkRules(rule => {
   ruleCount += 1;
   for (const selector of rule.selectors) {
-    assert.ok(selector.trim().startsWith('#site-page-shell.storefront-owner-home-v7 '),
+    assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7'),
       `unscoped rule could affect rental shops: ${selector}`);
   }
 });
+const shellBackground = stylesheet.nodes.find(node =>
+  node.type === 'rule' && node.selector === '#site-page-shell.storefront-owner-home-v7');
+assert.ok(shellBackground, 'the home shell must have an explicit opaque background to cover uploaded page art');
+assert.ok(shellBackground.nodes.some(node => node.prop === 'background-color' && node.important),
+  'the shell background must override the shared layout background treatment');
+const uploadedBackgroundOverride = stylesheet.nodes.find(node =>
+  node.type === 'rule' && node.selector === 'body.storefront-global-background #site-page-shell.storefront-owner-home-v7');
+assert.ok(uploadedBackgroundOverride, 'uploaded backgrounds must not show through this homepage');
 assert.ok(ruleCount > 0, 'the owner-only stylesheet should contain the redesign rules');
 
 console.log(`Owner homepage isolation checks passed (${ruleCount} scoped CSS rules).`);

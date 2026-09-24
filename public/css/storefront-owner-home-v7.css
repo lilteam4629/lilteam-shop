@@ -1,8 +1,22 @@
 /* Main-store homepage refresh. Loaded only for the platform owner's `/` route. */
-#site-page-shell.storefront-owner-home-v7 #site-page-shell {
-  background:
+/* The uploaded theme artwork is applied to `body`; make this home shell an
+   opaque canvas so decorative players never show through the content. */
+#site-page-shell.storefront-owner-home-v7 {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--bg) !important;
+  background-image:
     radial-gradient(ellipse at 12% 0%, color-mix(in srgb, #4388ff 8%, transparent), transparent 34rem),
-    linear-gradient(180deg, color-mix(in srgb, var(--card) 25%, var(--bg)), var(--bg) 34rem);
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 25%, var(--bg)), var(--bg) 34rem) !important;
+}
+/* The base layout adds a later, more-specific transparent background when a
+   store has a page background configured. Keep this owner-home override
+   scoped to the replaceable home shell. */
+body.storefront-global-background #site-page-shell.storefront-owner-home-v7 {
+  background-color: var(--bg) !important;
+  background-image:
+    radial-gradient(ellipse at 12% 0%, color-mix(in srgb, #4388ff 8%, transparent), transparent 34rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 25%, var(--bg)), var(--bg) 34rem) !important;
 }
 
 #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner {
@@ -17,7 +31,8 @@
 }
 #site-page-shell.storefront-owner-home-v7 .banner-sparkle {
   overflow: hidden;
-  aspect-ratio: 2.65 / 1;
+  height: clamp(280px, 31vw, 460px);
+  aspect-ratio: auto;
   border: 1px solid color-mix(in srgb, #8dbdff 48%, var(--border)) !important;
   border-radius: clamp(16px, 2vw, 28px) !important;
   background: #08152c;
@@ -224,7 +239,7 @@
   #site-page-shell.storefront-owner-home-v7 .store-product-gallery,
   #site-page-shell.storefront-owner-home-v7 .store-content-section,
   #site-page-shell.storefront-owner-home-v7 .home-category-rail { width: calc(100% - 24px) !important; }
-  #site-page-shell.storefront-owner-home-v7 .banner-sparkle { aspect-ratio: auto; border-radius: 16px !important; }
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle { height: auto; min-height: 0; aspect-ratio: auto; border-radius: 16px !important; }
   #site-page-shell.storefront-owner-home-v7 .banner-sparkle img { height: auto !important; max-height: min(68svh, 480px); object-fit: contain !important; }
   #site-page-shell.storefront-owner-home-v7 .home-category-rail { margin-top: 14px; padding: 14px; border-radius: 16px; }
   #site-page-shell.storefront-owner-home-v7 .home-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 9px !important; }
