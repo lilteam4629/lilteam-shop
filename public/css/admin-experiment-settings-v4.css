@@ -1,0 +1,470 @@
+/* Main-shop settings: paper studio. Loaded only by settings-experiment.ejs. */
+.experiment-settings-page {
+  --settings-accent: var(--admin-brand-fill, var(--ex-green-dark));
+  --settings-accent-ink: var(--admin-brand-readable, var(--ex-ink));
+  --settings-paper: #fdfbf7;
+  --settings-line: var(--ex-line, #e2e9e6);
+  --settings-surface: var(--ex-surface, #fff);
+}
+
+.experiment-settings-page .experiment-content {
+  max-width: 1540px;
+  padding-bottom: 48px;
+}
+
+.experiment-settings-page .experiment-page-head {
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.experiment-settings-page .experiment-page-head h1 {
+  font-size: clamp(27px, 2.5vw, 36px);
+  letter-spacing: -.055em;
+}
+
+.experiment-settings-page .experiment-page-head p {
+  max-width: 720px;
+  margin-top: 7px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.experiment-settings-page .settings-save-state {
+  min-height: 42px;
+  padding: 9px 13px;
+  border: 1px solid var(--settings-line);
+  border-radius: 13px;
+  color: var(--ex-ink);
+  background: var(--settings-surface);
+  box-shadow: 0 4px 12px rgba(24, 29, 25, .04);
+  font-size: 11px;
+}
+
+.experiment-settings-page .settings-save-state i {
+  background: var(--settings-accent);
+  box-shadow: none;
+}
+
+.experiment-settings-page .settings-hero {
+  position: relative;
+  min-height: 176px;
+  margin: 0 0 18px;
+  padding: 25px 28px;
+  overflow: hidden;
+  border: 1px solid var(--settings-line);
+  border-radius: 20px;
+  background: var(--settings-paper);
+  box-shadow: 0 12px 32px rgba(24, 29, 25, .045);
+}
+
+.experiment-settings-page .settings-hero::before {
+  position: absolute;
+  top: 0;
+  left: 30px;
+  width: 54px;
+  height: 7px;
+  border-radius: 0 0 5px 5px;
+  background: color-mix(in srgb, var(--settings-accent) 72%, #b89663);
+  content: "";
+}
+
+.experiment-settings-page .settings-hero::after {
+  right: 34px;
+  bottom: -126px;
+  width: 250px;
+  height: 250px;
+  border-color: var(--settings-line);
+  opacity: .72;
+}
+
+.experiment-settings-page .settings-hero-copy { max-width: 790px; }
+
+.experiment-settings-page .settings-eyebrow {
+  color: var(--settings-accent-ink);
+  font-size: 10px;
+  letter-spacing: .16em;
+}
+
+.experiment-settings-page .settings-hero h2 {
+  margin-top: 8px;
+  color: var(--ex-ink);
+  font-size: clamp(22px, 2.1vw, 29px);
+  letter-spacing: -.045em;
+}
+
+.experiment-settings-page .settings-hero p {
+  max-width: 680px;
+  margin-top: 7px;
+  color: var(--ex-muted);
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+.experiment-settings-page .settings-hero-actions { margin-top: 16px; }
+
+.experiment-settings-page .settings-hero-actions .experiment-button {
+  min-height: 44px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  background: var(--settings-accent);
+  box-shadow: none;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.experiment-settings-page .settings-hero-actions .experiment-button:hover {
+  filter: brightness(.95);
+  transform: translateY(-1px);
+}
+
+.experiment-settings-page .settings-hero-mark {
+  width: 78px;
+  height: 78px;
+  flex-basis: 78px;
+  border: 1px solid var(--settings-line);
+  border-radius: 19px;
+  color: var(--settings-accent-ink);
+  background: var(--settings-surface);
+  box-shadow: 0 9px 18px rgba(24, 29, 25, .08);
+  transform: rotate(2deg);
+}
+
+.experiment-settings-page .settings-hero-mark img {
+  border-radius: inherit;
+  background: var(--settings-surface);
+}
+
+.experiment-settings-page .settings-layout {
+  grid-template-columns: minmax(0, 1.14fr) minmax(350px, .86fr);
+  align-items: start;
+  gap: 18px;
+}
+
+.experiment-settings-page .settings-form {
+  gap: 16px;
+  min-width: 0;
+}
+
+.experiment-settings-page .settings-panel,
+.experiment-settings-page .settings-preview {
+  position: relative;
+  border: 1px solid var(--settings-line);
+  border-radius: 18px;
+  background: var(--settings-surface);
+  box-shadow: 0 9px 25px rgba(24, 29, 25, .04);
+}
+
+.experiment-settings-page .settings-panel {
+  padding: 22px;
+  overflow: visible;
+}
+
+.experiment-settings-page .settings-panel::before {
+  position: absolute;
+  top: -1px;
+  left: 25px;
+  width: 42px;
+  height: 5px;
+  border-radius: 0 0 4px 4px;
+  background: var(--settings-accent);
+  content: "";
+  opacity: .78;
+}
+
+.experiment-settings-page .settings-panel-head {
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.experiment-settings-page .settings-panel-icon {
+  width: 44px;
+  height: 44px;
+  flex-basis: 44px;
+  border: 0;
+  border-radius: 13px;
+  color: var(--settings-accent-ink);
+  background: color-mix(in srgb, var(--settings-accent) 11%, var(--settings-paper));
+  transform: rotate(-2deg);
+}
+
+.experiment-settings-page .settings-panel-icon.green,
+.experiment-settings-page .settings-panel-icon.blue,
+.experiment-settings-page .settings-panel-icon.gold {
+  color: var(--settings-accent-ink);
+  background: color-mix(in srgb, var(--settings-accent) 11%, var(--settings-paper));
+}
+
+.experiment-settings-page .settings-panel-icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.experiment-settings-page .settings-section-label {
+  color: var(--settings-accent-ink);
+  font-size: 9px;
+  letter-spacing: .14em;
+}
+
+.experiment-settings-page .settings-panel-head h2 {
+  color: var(--ex-ink);
+  font-size: 17px;
+  letter-spacing: -.035em;
+}
+
+.experiment-settings-page .settings-panel-head p {
+  color: var(--ex-muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+
+.experiment-settings-page .settings-ready-badge {
+  padding: 6px 9px;
+  border: 1px solid var(--settings-line);
+  border-radius: 999px;
+  color: var(--ex-ink);
+  background: #f6f4ef;
+  font-size: 9px;
+}
+
+.experiment-settings-page .settings-fields {
+  gap: 17px 16px;
+}
+
+.experiment-settings-page .settings-fields label { gap: 7px; }
+
+.experiment-settings-page .settings-fields label > span {
+  color: var(--ex-ink);
+  font-size: 12px;
+  font-weight: 750;
+}
+
+.experiment-settings-page .settings-fields label b { color: #a54236; }
+
+.experiment-settings-page .settings-fields input {
+  min-height: 48px;
+  padding: 11px 13px;
+  border: 1px solid var(--settings-line);
+  border-radius: 12px;
+  color: var(--ex-ink);
+  background: #fff;
+  font-size: 13px;
+  transition: box-shadow .16s ease, background-color .16s ease;
+}
+
+.experiment-settings-page .settings-fields input:hover { background: #fdfcf9; }
+
+.experiment-settings-page .settings-fields input:focus,
+.experiment-settings-page .settings-fields input:focus-visible {
+  border-color: var(--settings-line);
+  outline: 2px solid var(--ex-ink);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+.experiment-settings-page .settings-fields input::placeholder { color: #818681; }
+
+.experiment-settings-page .settings-field-hint {
+  color: var(--ex-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.experiment-settings-page .settings-toggle-row {
+  min-height: 70px;
+  margin-top: 18px;
+  padding: 14px 15px;
+  border: 1px solid var(--settings-line);
+  border-radius: 13px;
+  background: #faf9f5;
+}
+
+.experiment-settings-page .settings-toggle-row strong {
+  color: var(--ex-ink);
+  font-size: 12px;
+}
+
+.experiment-settings-page .settings-toggle-row small {
+  color: var(--ex-muted);
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.experiment-settings-page .settings-toggle-row input {
+  accent-color: var(--settings-accent);
+}
+
+.experiment-settings-page .settings-toggle-row input:focus-visible {
+  outline: 2px solid var(--ex-ink);
+  outline-offset: 3px;
+}
+
+.experiment-settings-page .settings-form-actions {
+  position: sticky;
+  bottom: 12px;
+  z-index: 9;
+  min-height: 68px;
+  padding: 10px 12px;
+  border: 1px solid var(--settings-line);
+  border-radius: 15px;
+  background: color-mix(in srgb, var(--settings-surface) 96%, transparent);
+  box-shadow: 0 10px 28px rgba(24, 29, 25, .12);
+  backdrop-filter: blur(10px);
+}
+
+.experiment-settings-page .settings-form-actions > span {
+  max-width: 330px;
+  color: var(--ex-muted);
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.experiment-settings-page .settings-form-actions .experiment-button,
+.experiment-settings-page .settings-hero-actions .experiment-button {
+  transition: filter .16s ease, transform .16s ease;
+}
+
+.experiment-settings-page .settings-form-actions .experiment-button {
+  min-height: 46px;
+  padding: 0 19px;
+  border: 0;
+  border-radius: 12px;
+  color: #fff;
+  background: var(--settings-accent);
+  box-shadow: none;
+  font-size: 12px;
+}
+
+.experiment-settings-page .settings-form-actions .experiment-button:hover {
+  filter: brightness(.95);
+  transform: translateY(-1px);
+}
+
+.experiment-settings-page .settings-preview-column {
+  position: sticky;
+  top: 74px;
+  gap: 14px;
+  min-width: 0;
+}
+
+.experiment-settings-page .settings-preview { padding: 18px; }
+
+.experiment-settings-page .settings-preview-head {
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+
+.experiment-settings-page .settings-preview-head span {
+  color: var(--settings-accent-ink);
+  font-size: 9px;
+  letter-spacing: .13em;
+}
+
+.experiment-settings-page .settings-preview-head strong {
+  color: var(--ex-ink);
+  font-size: 17px;
+}
+
+.experiment-settings-page .settings-preview-head > i {
+  border: 1px solid var(--settings-line);
+  color: var(--ex-ink);
+  background: #f6f4ef;
+  font-size: 9px;
+}
+
+.experiment-settings-page .settings-preview-head > i b { background: var(--settings-accent); }
+
+.experiment-settings-page .settings-preview-mode { gap: 7px; }
+
+.experiment-settings-page .settings-preview-mode button {
+  min-width: 108px;
+  min-height: 44px;
+  border: 1px solid var(--settings-line);
+  border-radius: 11px;
+  color: var(--ex-ink);
+  background: var(--settings-surface);
+  font-size: 11px;
+}
+
+.experiment-settings-page .settings-preview-mode button:hover { background: #f6f4ef; }
+
+.experiment-settings-page .settings-preview-mode button.is-active {
+  border-color: var(--settings-line);
+  color: #fff;
+  background: var(--settings-accent);
+}
+
+.experiment-settings-page .settings-preview-mode button:focus-visible {
+  outline: 2px solid var(--ex-ink);
+  outline-offset: 3px;
+}
+
+.experiment-settings-page .settings-storefront-stage {
+  height: clamp(470px, 63vh, 700px);
+  border: 1px solid var(--settings-line);
+  border-radius: 14px;
+  background: #f2f1ec;
+}
+
+.experiment-settings-page .settings-storefront-frame {
+  border: 0;
+  background: var(--settings-surface);
+}
+
+.experiment-settings-page .settings-storefront-frame[data-preview-mode="mobile"] {
+  border: 1px solid var(--settings-line);
+  border-top: 0;
+  border-bottom: 0;
+  box-shadow: 0 7px 20px rgba(24, 29, 25, .1);
+}
+
+.experiment-settings-page .settings-preview-note {
+  margin-top: 12px;
+  color: var(--ex-muted);
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+.experiment-settings-page :where(a, button, input):focus-visible {
+  outline-color: var(--ex-ink);
+}
+
+@media (max-width: 1180px) {
+  .experiment-settings-page .settings-layout { grid-template-columns: 1fr; }
+  .experiment-settings-page .settings-preview-column { position: static; }
+  .experiment-settings-page .settings-storefront-stage { height: clamp(500px, 68vh, 700px); }
+}
+
+@media (max-width: 700px) {
+  .experiment-settings-page .experiment-content { padding-right: 14px; padding-left: 14px; }
+  .experiment-settings-page .experiment-page-head { align-items: flex-start; flex-direction: column; }
+  .experiment-settings-page .settings-save-state { max-width: 100%; }
+  .experiment-settings-page .settings-hero { min-height: 0; padding: 19px 17px; }
+  .experiment-settings-page .settings-hero::before { left: 19px; }
+  .experiment-settings-page .settings-hero-mark { width: 55px; height: 55px; flex-basis: 55px; border-radius: 15px; }
+  .experiment-settings-page .settings-hero h2 { font-size: 21px; }
+  .experiment-settings-page .settings-hero p { max-width: 100%; font-size: 11px; }
+  .experiment-settings-page .settings-panel { padding: 17px 15px; }
+  .experiment-settings-page .settings-panel-head { align-items: flex-start; flex-wrap: wrap; }
+  .experiment-settings-page .settings-panel-head > div:nth-child(2) { flex: 1; min-width: 180px; }
+  .experiment-settings-page .settings-ready-badge { margin-left: auto; }
+  .experiment-settings-page .settings-fields.two-columns { grid-template-columns: 1fr; }
+  .experiment-settings-page .settings-form-actions { align-items: stretch; flex-direction: column; bottom: 8px; }
+  .experiment-settings-page .settings-form-actions > span { max-width: none; }
+  .experiment-settings-page .settings-form-actions .experiment-button { width: 100%; }
+  .experiment-settings-page .settings-preview { padding: 15px; }
+  .experiment-settings-page .settings-preview-head { align-items: flex-start; flex-wrap: wrap; }
+  .experiment-settings-page .settings-storefront-stage { height: clamp(430px, 62svh, 580px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .experiment-settings-page *,
+  .experiment-settings-page *::before,
+  .experiment-settings-page *::after {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+  }
+}
