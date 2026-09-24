@@ -143,8 +143,14 @@ assert.match(cinematicCss, /\.owner-home-v20-hero-content\s*\{[\s\S]*?z-index:\s
   'hero copy and actions must layer above the complete banner artwork');
 assert.match(cinematicCss, /prefers-reduced-motion:\s*reduce/,
   'the cinematic homepage must respect reduced-motion preferences');
-assert.match(cinematicCss, /--gold:\s*#8958e8/,
-  'the new reference-driven media style must use violet accents');
+assert.match(cinematicCss, /background:\s*var\(--bg\)/,
+  'the media storefront must follow the background selected in the shop theme');
+assert.match(cinematicCss, /background:\s*var\(--card\)/,
+  'the media storefront cards must follow the surfaces selected in the shop theme');
+assert.match(cinematicCss, /color:\s*var\(--gold-text\)/,
+  'the media storefront accents must follow the accent selected in the shop theme');
+assert.doesNotMatch(cinematicCss, /--(?:gold|bg|card|input|border|text):\s*#[0-9a-f]{3,8}/i,
+  'the owner homepage must not replace the saved shop theme with a fixed palette');
 assert.match(cinematicCss, /body:has\(#site-page-shell\.storefront-owner-home-v7\s+\.owner-home-v20-shell\)/,
   'the navigation theme must only change when the main homepage is active');
 assert.ok(cinematicRuleCount > 0, 'the media-storefront design must include scoped owner-only rules');
