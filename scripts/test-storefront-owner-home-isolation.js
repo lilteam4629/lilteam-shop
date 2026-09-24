@@ -8,16 +8,16 @@ const route = read('src/routes/shop.js');
 const layout = read('src/views/layouts/main.ejs');
 const home = read('src/views/shop/home.ejs');
 const css = read('public/css/storefront-owner-home-v7.css');
-const bannerCss = read('public/css/storefront-owner-home-v12.css');
+const bannerCss = read('public/css/storefront-owner-home-v13.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
   'the redesign must be enabled for the main store only');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*?storefront-owner-home-v7\.css/,
   'the owner stylesheet must be available for seamless navigation on the main site');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v12\.css/,
-  'the editorial banner stylesheet must only load on the owner homepage');
-assert.match(home, /class="storefront-banner-index" aria-hidden="true"/,
-  'the main-store banner index should stay outside the banner artwork');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v13\.css/,
+  'the full-bleed banner stylesheet must only load on the owner homepage');
+assert.doesNotMatch(home, /storefront-banner-index/,
+  'the rejected side rail must not render around the main-store banner');
 assert.match(layout, /id="site-page-shell"[^\n]*storefrontOwnerHomeV7/,
   'the homepage scope must travel with the replaceable page shell');
 assert.match(home, /duplicate < \(typeof isMainSite !== 'undefined' && isMainSite \? 1 : 2\)/,
@@ -55,6 +55,8 @@ assert.match(bannerCss, /object-fit:\s*contain\s*!important/,
   'the full banner artwork must never be crop-filled');
 assert.match(bannerCss, /height:\s*auto\s*!important/,
   'the banner must keep its intrinsic aspect ratio');
+assert.match(bannerCss, /\.storefront-hero-banner\s*>\s*\.banner-hero-shell\s*\{[\s\S]*?width:\s*100%\s*!important/,
+  'the banner image must use the full available page width');
 assert.ok(bannerRuleCount > 0, 'the owner-only editorial banner needs scoped CSS rules');
 
 console.log(`Owner homepage isolation checks passed (${ruleCount + bannerRuleCount} scoped CSS rules).`);

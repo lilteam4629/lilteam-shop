@@ -56,13 +56,6 @@
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
   <section class="storefront-hero-banner">
     <div class="banner-hero-shell w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
-      <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
-        <div class="storefront-banner-index" aria-hidden="true">
-          <span class="storefront-banner-index__label"><%= settings.shopName || 'LILTeam Shop' %></span>
-          <strong class="storefront-banner-index__number">01</strong>
-          <span class="storefront-banner-index__foot">STORE / FEATURE</span>
-        </div>
-      <% } %>
       <% if (settings.hero.bannerLink) { %>
         <a href="<%= settings.hero.bannerLink %>"
           class="banner-sparkle group block overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]

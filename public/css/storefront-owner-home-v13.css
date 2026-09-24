@@ -1,0 +1,107 @@
+/* Main store banner v13 — full-bleed stadium broadcast.
+   No side rail or poster frame: the configured artwork is the whole hero,
+   shown at its own ratio over a deep arena stage with shop-color signal lines. */
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner {
+  position: relative !important;
+  isolation: isolate !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  background:
+    radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--gold) 16%, transparent), transparent 64%),
+    linear-gradient(180deg, #09121d 0%, #050a10 100%) !important;
+}
+
+/* Broadcast signal rails stay outside the picture itself. */
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner::before,
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner::after {
+  content: '' !important;
+  position: absolute !important;
+  z-index: 2 !important;
+  right: 0 !important;
+  left: 0 !important;
+  height: 2px !important;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--gold) 20%, transparent) 8%,
+    var(--gold) 50%,
+    color-mix(in srgb, var(--gold) 20%, transparent) 92%,
+    transparent 100%) !important;
+  pointer-events: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner::before { top: 0 !important; }
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner::after { bottom: 0 !important; opacity: .72 !important; }
+
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell {
+  display: block !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle {
+  display: block !important;
+  width: 100% !important;
+  max-width: 2000px !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  margin: 0 auto !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+}
+
+/* Natural image dimensions + contain guarantees every edge of the upload remains visible. */
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle img {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  aspect-ratio: auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  transform: none !important;
+  filter: none !important;
+  transition: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle:focus-visible {
+  outline: 3px solid var(--gold) !important;
+  outline-offset: -5px !important;
+}
+
+@media (max-width: 700px) {
+  #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner::before,
+  #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner::after {
+    height: 1px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner,
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle,
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle img {
+    animation: none !important;
+    transition: none !important;
+  }
+}
