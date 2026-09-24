@@ -371,6 +371,8 @@
 
   .experiment-catalog-api-page .catalog-selection-panel {
     position: static;
+    width: 100%;
+    max-width: none;
   }
 
   .experiment-catalog-api-page .catalog-selection-list {
