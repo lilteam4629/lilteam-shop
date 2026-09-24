@@ -1,0 +1,144 @@
+/* Main-shop hero v11: Eclipse Portal.
+   A soft orbital aperture replaces the rectangular matchday frame. It keeps
+   the configured artwork and derives its glow from the active shop palette. */
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner {
+  position: relative !important;
+  isolation: isolate !important;
+  padding: clamp(32px, 4vw, 58px) 0 clamp(14px, 2vw, 28px) !important;
+  background:
+    radial-gradient(ellipse at 50% 44%, color-mix(in srgb, var(--gold) 10%, transparent) 0, transparent 66%) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell {
+  position: relative !important;
+  isolation: isolate !important;
+  width: min(1540px, calc(100% - 52px)) !important;
+  padding: clamp(14px, 1.8vw, 26px) !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Fine orbital track: a theme-tinted ellipse that floats around the artwork. */
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell::before {
+  content: '' !important;
+  position: absolute !important;
+  z-index: 0 !important;
+  inset: 4% -1.5% 5% !important;
+  border: 1px solid color-mix(in srgb, var(--gold) 58%, transparent) !important;
+  border-radius: 50% !important;
+  box-shadow: 0 0 0 9px color-mix(in srgb, var(--gold) 7%, transparent) !important;
+  transform: rotate(-3deg) !important;
+  pointer-events: none !important;
+}
+
+/* Small orbiting accent, deliberately decorative and never over the image. */
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell::after {
+  content: '' !important;
+  position: absolute !important;
+  z-index: 2 !important;
+  top: 1% !important;
+  left: 8% !important;
+  width: clamp(11px, 1.15vw, 17px) !important;
+  aspect-ratio: 1 !important;
+  border: 2px solid var(--card) !important;
+  border-radius: 50% !important;
+  background: var(--gold) !important;
+  box-shadow: 0 0 0 6px color-mix(in srgb, var(--gold) 15%, transparent), 0 0 25px color-mix(in srgb, var(--gold) 60%, transparent) !important;
+  pointer-events: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle {
+  position: relative !important;
+  z-index: 1 !important;
+  display: block !important;
+  height: clamp(230px, 31vw, 470px) !important;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--gold) 56%, var(--border)) !important;
+  border-radius: clamp(28px, 4vw, 58px) clamp(92px, 12vw, 172px) clamp(42px, 5.5vw, 78px) clamp(92px, 12vw, 172px) !important;
+  background: var(--card) !important;
+  box-shadow:
+    0 0 0 7px color-mix(in srgb, var(--card) 90%, transparent),
+    0 0 0 8px color-mix(in srgb, var(--gold) 34%, transparent),
+    0 26px 62px -36px color-mix(in srgb, var(--text) 56%, transparent) !important;
+  transition: transform 480ms cubic-bezier(.2, .8, .2, 1), box-shadow 480ms ease, filter 480ms ease !important;
+}
+
+/* Lens flare replaces the old badge and scoreboard strip with a quiet sheen. */
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle::before {
+  content: '' !important;
+  display: block !important;
+  position: absolute !important;
+  z-index: 2 !important;
+  inset: 0 !important;
+  border-radius: inherit !important;
+  background: linear-gradient(118deg, transparent 0 44%, color-mix(in srgb, var(--card) 19%, transparent) 50%, transparent 56% 100%) !important;
+  opacity: .2 !important;
+  pointer-events: none !important;
+  transition: opacity 480ms ease !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle::after {
+  content: none !important;
+  display: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  transition: transform 700ms cubic-bezier(.2, .8, .2, 1), filter 700ms ease !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle:focus-visible {
+  outline: 3px solid var(--gold) !important;
+  outline-offset: 8px !important;
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle:hover {
+    transform: translateY(-3px) scale(1.004) !important;
+    filter: saturate(1.04) !important;
+  }
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle:hover::before { opacity: .72 !important; }
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle:hover img { transform: scale(1.012) !important; }
+}
+
+@media (max-width: 700px) {
+  #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner { padding-top: 27px !important; }
+  #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell {
+    width: calc(100% - 24px) !important;
+    padding: 12px 7px !important;
+  }
+  #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell::before {
+    inset: 7% -1% !important;
+    border-width: 1px !important;
+  }
+  #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell::after {
+    top: 0.5% !important;
+    left: 12% !important;
+    width: 11px !important;
+  }
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle {
+    height: auto !important;
+    min-height: 0 !important;
+    border-radius: 23px 58px 28px 58px !important;
+  }
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle img {
+    height: auto !important;
+    max-height: min(68svh, 480px) !important;
+    object-fit: contain !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle,
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle::before,
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle img {
+    transition: none !important;
+  }
+}
