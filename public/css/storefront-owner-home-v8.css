@@ -1,0 +1,123 @@
+/* Theme harmony layer for the owner's main-home refresh (storefront-owner-home-v7).
+   Every accent is derived from the shop's saved theme, never a fixed hue. */
+body.storefront-owner-home-page {
+  --owner-home-shadow: 0 22px 60px -38px color-mix(in srgb, var(--text) 24%, transparent);
+  --owner-home-line: color-mix(in srgb, var(--gold) 24%, var(--border));
+}
+
+#site-page-shell.storefront-owner-home-v7 {
+  background-color: var(--bg) !important;
+  background-image:
+    radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--gold) 9%, transparent), transparent 34rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 3%, var(--bg)), var(--bg) 34rem) !important;
+}
+
+body.storefront-global-background #site-page-shell.storefront-owner-home-v7 {
+  background-color: var(--bg) !important;
+  background-image:
+    radial-gradient(ellipse at 12% 0%, color-mix(in srgb, var(--gold) 9%, transparent), transparent 34rem),
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 3%, var(--bg)), var(--bg) 34rem) !important;
+}
+
+body.storefront-owner-home-page .store-nav {
+  border-bottom: 1px solid var(--owner-home-line);
+  background: color-mix(in srgb, var(--bg) 91%, transparent);
+  box-shadow: 0 8px 30px -24px color-mix(in srgb, var(--text) 42%, transparent);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+body.storefront-owner-home-page .store-nav__inner { min-height: 70px; }
+body.storefront-owner-home-page .store-nav__brand strong { letter-spacing: -.025em; }
+body.storefront-owner-home-page .store-nav__links a,
+body.storefront-owner-home-page .store-nav__category-link {
+  transition: color .18s ease, background-color .18s ease, border-color .18s ease;
+}
+body.storefront-owner-home-page .store-nav__links a:hover,
+body.storefront-owner-home-page .store-nav__category-link:hover { color: var(--gold-text); }
+
+#site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell {
+  width: min(1480px, calc(100% - 48px)) !important;
+}
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle {
+  border-color: color-mix(in srgb, var(--gold) 48%, var(--border)) !important;
+  background: color-mix(in srgb, var(--gold) 8%, var(--card));
+  box-shadow: var(--owner-home-shadow), 0 0 0 5px color-mix(in srgb, var(--gold) 7%, transparent) !important;
+}
+#site-page-shell.storefront-owner-home-v7 .banner-sparkle:after { display: none !important; }
+
+#site-page-shell.storefront-owner-home-v7 .modern-fan-hero {
+  background:
+    radial-gradient(ellipse at 50% 72%, color-mix(in srgb, var(--gold) 11%, transparent), transparent 58%),
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 4%, var(--bg)), var(--bg)) !important;
+}
+#site-page-shell.storefront-owner-home-v7 .modern-fan-card:before {
+  border-color: color-mix(in srgb, var(--gold) 32%, var(--border));
+  background: linear-gradient(145deg, color-mix(in srgb, var(--gold) 9%, var(--card)), var(--card) 72%);
+}
+
+#site-page-shell.storefront-owner-home-v7 .home-category-icon {
+  background: color-mix(in srgb, var(--gold) 11%, var(--card));
+  color: var(--gold-text);
+}
+#site-page-shell.storefront-owner-home-v7 .home-category-head > a {
+  border-color: var(--owner-home-line);
+}
+#site-page-shell.storefront-owner-home-v7 .home-category-card:hover {
+  border-color: color-mix(in srgb, var(--gold) 58%, var(--border)) !important;
+  box-shadow: 0 12px 28px -22px color-mix(in srgb, var(--gold) 42%, transparent) !important;
+}
+#site-page-shell.storefront-owner-home-v7 .home-category-image {
+  background: color-mix(in srgb, var(--gold) 6%, var(--input)) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .latest-orders-heading-icon {
+  border-color: var(--owner-home-line);
+  background: color-mix(in srgb, var(--gold) 9%, var(--card));
+  color: var(--gold-text);
+}
+#site-page-shell.storefront-owner-home-v7 .latest-orders-shell {
+  border-color: var(--owner-home-line);
+  background: color-mix(in srgb, var(--card) 97%, transparent) !important;
+  box-shadow: var(--owner-home-shadow);
+}
+#site-page-shell.storefront-owner-home-v7 .latest-order-card:hover {
+  border-color: color-mix(in srgb, var(--gold) 58%, var(--border));
+  background: color-mix(in srgb, var(--gold) 6%, var(--card)) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .store-filter-section #filterWidget {
+  border-color: var(--owner-home-line) !important;
+  box-shadow: var(--owner-home-shadow) !important;
+}
+#site-page-shell.storefront-owner-home-v7 .store-product-gallery {
+  border-color: var(--owner-home-line) !important;
+  box-shadow: var(--owner-home-shadow);
+}
+#site-page-shell.storefront-owner-home-v7 .all-products-grid .premium-natural-card,
+#site-page-shell.storefront-owner-home-v7 .store-product-gallery .product-grid .premium-natural-card {
+  box-shadow: 0 10px 28px -24px color-mix(in srgb, var(--text) 42%, transparent);
+}
+#site-page-shell.storefront-owner-home-v7 .all-products-grid .premium-natural-card:hover,
+#site-page-shell.storefront-owner-home-v7 .store-product-gallery .product-grid .premium-natural-card:hover {
+  border-color: color-mix(in srgb, var(--gold) 65%, var(--border)) !important;
+  box-shadow: 0 16px 34px -25px color-mix(in srgb, var(--gold) 42%, transparent);
+}
+
+body.storefront-owner-home-page :is(a, button, input, select, summary):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold) 78%, var(--bg)) !important;
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell,
+  body.storefront-owner-home-page :is(.store-status-section, .store-announcements, .event-update, .latest-orders-section, .store-filter-section, .store-product-gallery, .store-content-section),
+  body.storefront-owner-home-page .home-category-rail { width: calc(100% - 32px) !important; }
+}
+
+@media (max-width: 640px) {
+  #site-page-shell.storefront-owner-home-v7 .storefront-hero-banner > .banner-hero-shell,
+  body.storefront-owner-home-page :is(.store-status-section, .store-announcements, .event-update, .latest-orders-section, .store-filter-section, .store-product-gallery, .store-content-section),
+  body.storefront-owner-home-page .home-category-rail { width: calc(100% - 24px) !important; }
+  #site-page-shell.storefront-owner-home-v7 .banner-sparkle { border-radius: 16px !important; }
+}

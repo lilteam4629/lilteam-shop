@@ -51,6 +51,7 @@
   <link rel="stylesheet" href="<%= asset('css/storefront-auth-v1.css') %>" />
   <link rel="stylesheet" href="<%= asset('css/scroll-motion-v1.css') %>" />
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v7.css') %>" /> <% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v8.css') %>" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
 
@@ -183,7 +184,7 @@
     }
   </style>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %>">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %>">
   <div id="page-loading-overlay" aria-hidden="true">
     <div class="loading-ring">
       <% if (settings.branding && settings.branding.logoImage) { %>
