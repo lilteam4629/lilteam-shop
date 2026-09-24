@@ -10,7 +10,7 @@ const home = read('src/views/shop/home.ejs');
 const css = read('public/css/storefront-owner-home-v7.css');
 const redesignCss = read('public/css/storefront-owner-home-v14.css');
 const gameWorldCss = read('public/css/storefront-owner-home-v15.css');
-const cinematicCss = read('public/css/storefront-owner-home-v19.css');
+const cinematicCss = read('public/css/storefront-owner-home-v20.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
   'the redesign must be enabled for the main store only');
@@ -18,22 +18,26 @@ assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\
   'the owner stylesheet must be available for seamless navigation on the main site');
 assert.doesNotMatch(layout, /storefront-owner-home-v(?:8|9|10|11|14|15)\.css/,
   'superseded main-home design layers must no longer be loaded');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v19\.css/,
-  'the new cinema/catalog stylesheet must only load on the owner storefront');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v20\.css/,
+  'the new media-storefront stylesheet must only load on the owner storefront');
 assert.doesNotMatch(layout, /storefront-owner-home-v18\.css/,
   'the superseded split hero styling must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,
   'the replaced 3D scene stylesheet and script must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
   'the rejected oversized banner treatment must no longer load');
-assert.match(home, /if \(ownerHomeV19\) \{ %><div class="owner-home-v19-layout" data-owner-home-layout="neko-flix-store"/,
-  'the new content layout must be wrapped only for the main store');
-assert.match(home, /if \(ownerHomeV19\) \{ %><\/div><% \}/,
-  'the main-store layout wrapper must close before the shared lower page modules');
-assert.match(home, /ownerHomeV19\) \{ %>[\s\S]*?ownerHomeBanner = settings\.hero && settings\.hero\.mode === 'banner' \? settings\.hero\.bannerImage : null/,
+assert.match(home, /if \(ownerHomeV20\) \{[\s\S]*?<div class="owner-home-v20-shell" data-owner-home-layout="media-storefront">[\s\S]*?<aside class="owner-home-v20-sidebar"[\s\S]*?<div class="owner-home-v20-main">/,
+  'the new sidebar/content layout must be wrapped only for the main store');
+assert.match(home, /if \(ownerHomeV20\) \{ %><\/div><\/div><% \}/,
+  'the main-store sidebar and content wrapper must close before shared lower page modules');
+assert.match(home, /ownerHomeV20\) \{ %>[\s\S]*?ownerHomeBanner = settings\.hero && settings\.hero\.mode === 'banner' \? settings\.hero\.bannerImage : null/,
   'the new banner-first hero must use the configured real shop banner');
-assert.match(home, /class="owner-home-v19-artwork"[\s\S]*?<a href="<%= settings\.hero\.bannerLink %>" aria-label=[\s\S]*?<img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high"/,
+assert.match(home, /class="owner-home-v20-artwork"[\s\S]*?<a href="<%= settings\.hero\.bannerLink %>" aria-label=[\s\S]*?<img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high"/,
   'the uploaded banner must remain visible and load with high priority');
+assert.match(home, /recommendedCategories\.slice\(0, 6\)\.forEach\(category => \{[\s\S]*?\/products\?recommended=<%= encodeURIComponent\(category\.id\) %>/,
+  'the sidebar must only link to real shop categories');
+assert.match(home, /id="latest-orders"[\s\S]*?latestOrders\.forEach\(order => \{/,
+  'the sidebar latest-orders destination must use the real order rail');
 assert.match(home, /newest\.slice\(0, 6\)\.forEach\(\(product, index\) => \{/,
   'the new horizontal shelf must render actual newest products, not reference/demo items');
 assert.doesNotMatch(home, /owner-home-v17-hero-shell|owner-home-v17-visual|owner-home-v17-banner-frame/,
@@ -119,7 +123,7 @@ assert.match(gameWorldCss, /var\(--gold\)/,
   'the atmosphere may change, but active accents must continue to use the saved shop theme');
 assert.ok(gameWorldRuleCount > 0, 'the Pinterest-inspired style must contain scoped homepage rules');
 
-const cinematicStylesheet = postcss.parse(cinematicCss, { from: 'storefront-owner-home-v19.css' });
+const cinematicStylesheet = postcss.parse(cinematicCss, { from: 'storefront-owner-home-v20.css' });
 let cinematicRuleCount = 0;
 cinematicStylesheet.walkRules(rule => {
   if (rule.parent && rule.parent.type === 'atrule' && /keyframes$/i.test(rule.parent.name)) return;
@@ -129,20 +133,20 @@ cinematicStylesheet.walkRules(rule => {
       `new cinema/catalog homepage selector must be isolated from tenant shops: ${selector}`);
   }
 });
-assert.match(cinematicCss, /\.owner-home-v19-artwork img\s*\{[\s\S]*?object-fit:\s*contain[\s\S]*?object-position:\s*center/,
+assert.match(cinematicCss, /\.owner-home-v20-artwork img\s*\{[\s\S]*?object-fit:\s*contain[\s\S]*?object-position:\s*center/,
   'the banner must preserve its whole image without cropping');
-assert.match(cinematicCss, /\.owner-home-v19-hero\s*\{[\s\S]*?min-height:\s*525px/,
-  'the homepage must use the new cinematic full-image feature rather than the old compact banner');
-assert.match(cinematicCss, /\.owner-home-v19-layout\s*>\s*\.owner-home-v19-section\s*\{\s*order:\s*5/,
-  'the new real-product poster rail must be part of the homepage section order');
-assert.match(cinematicCss, /\.owner-home-v19-hero-content\s*\{[\s\S]*?z-index:\s*2/,
+assert.match(cinematicCss, /\.owner-home-v20-shell\s*\{[\s\S]*?grid-template-columns:\s*220px minmax\(0, 1fr\)/,
+  'the homepage must use a persistent sidebar beside its content');
+assert.match(cinematicCss, /\.owner-home-v20-hero\s*\{[\s\S]*?grid-template-columns:\s*minmax\(225px, \.74fr\) minmax\(0, 1\.36fr\)/,
+  'the hero must use a compact split layout with the banner visible in full');
+assert.match(cinematicCss, /\.owner-home-v20-hero-content\s*\{[\s\S]*?z-index:\s*2/,
   'hero copy and actions must layer above the complete banner artwork');
 assert.match(cinematicCss, /prefers-reduced-motion:\s*reduce/,
   'the cinematic homepage must respect reduced-motion preferences');
-assert.match(cinematicCss, /var\(--gold\)/,
-  'the cinematic homepage must retain the selected shop theme accent');
-assert.match(cinematicCss, /body:has\(#site-page-shell\.storefront-owner-home-v7(?:\s|\))/,
+assert.match(cinematicCss, /--gold:\s*#8958e8/,
+  'the new reference-driven media style must use violet accents');
+assert.match(cinematicCss, /body:has\(#site-page-shell\.storefront-owner-home-v7\s+\.owner-home-v20-shell\)/,
   'the navigation theme must only change when the main homepage is active');
-assert.ok(cinematicRuleCount > 0, 'the cinematic design must include scoped owner-only rules');
+assert.ok(cinematicRuleCount > 0, 'the media-storefront design must include scoped owner-only rules');
 
 console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount} scoped CSS rules).`);
