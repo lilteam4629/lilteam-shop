@@ -552,3 +552,286 @@
   .admin-topups-owner .admin-provider-picker-head > a,
   .admin-topups-owner .admin-finance-save { transition: none; transform: none; }
 }
+
+/* TrueMoney and payment-alert tabs: keep the finance setup in one paper-ledger style. */
+.admin-topups-owner #topup-tab-content-truemoney > form,
+.admin-topups-owner #topup-tab-content-autoverify > form {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  padding: clamp(18px, 3vw, 30px) !important;
+  border: 1px solid var(--finance-board-line) !important;
+  border-radius: 20px !important;
+  background: linear-gradient(145deg, var(--card) 0%, var(--card) 74%, var(--finance-board-softer) 100%) !important;
+  box-shadow: var(--finance-board-shadow), inset 0 1px 0 color-mix(in srgb, var(--card) 78%, white) !important;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form::before,
+.admin-topups-owner #topup-tab-content-autoverify > form::before {
+  position: absolute;
+  z-index: 2;
+  top: -10px;
+  left: 18%;
+  width: 15px;
+  height: 32px;
+  border: 2px solid #a8844e;
+  border-bottom-color: transparent;
+  border-radius: 9px 9px 6px 6px;
+  background: linear-gradient(90deg, #bd995e, #e0c17f 48%, #b58b4c);
+  box-shadow: 0 2px 4px rgba(62, 45, 19, .16);
+  content: "";
+  pointer-events: none;
+}
+
+/* TrueMoney: clear enable state, wallet number, and usage note. */
+.admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type {
+  min-height: 70px;
+  padding-bottom: 18px;
+  border-color: var(--finance-board-line) !important;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type > div:first-child {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--finance-board-line);
+  border-radius: 14px;
+  color: var(--finance-board-accent-text);
+  background: var(--finance-board-soft) !important;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--gold) 16%, transparent);
+  font-size: 22px;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type h2 {
+  font-size: clamp(17px, 2vw, 20px);
+  letter-spacing: -.02em;
+  line-height: 1.35;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type p {
+  max-width: 720px;
+  margin-top: 4px;
+  color: var(--text-3);
+  line-height: 1.65;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) {
+  position: relative;
+  padding: clamp(15px, 2.2vw, 22px) !important;
+  border: 1px solid var(--finance-board-line) !important;
+  border-radius: 16px !important;
+  background: linear-gradient(135deg, var(--finance-board-softer), var(--card) 64%) !important;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2)::before,
+.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2)::before {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 42px;
+  height: 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 34%, transparent);
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--gold) 22%, var(--card));
+  content: "";
+  transform: translateX(-50%) rotate(-2deg);
+  pointer-events: none;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:first-of-type {
+  min-height: 76px;
+  gap: 18px;
+  padding: 15px 17px !important;
+  border-color: var(--finance-board-line) !important;
+  border-radius: 12px !important;
+  background: var(--card) !important;
+}
+.admin-topups-owner #topup-tab-content-truemoney #tm_enabled:focus-visible + div {
+  outline: 3px solid color-mix(in srgb, var(--gold) 54%, transparent);
+  outline-offset: 3px;
+}
+.admin-topups-owner #topup-tab-content-truemoney #tm_enabled + div {
+  min-width: 44px;
+  min-height: 26px;
+  border-color: var(--finance-board-line) !important;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) label {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.55;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) label[for="tm_enabled"] {
+  color: var(--text);
+  font-size: 15px;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(2) {
+  max-width: 540px;
+  padding: 2px 4px;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(2) > label:first-child {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) input[name="truemoneyPhone"] {
+  min-height: 50px;
+  border: 1px solid var(--finance-board-line) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+  background: var(--card) !important;
+  font-size: 16px;
+  letter-spacing: .04em;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) input[name="truemoneyPhone"]:focus-visible,
+.admin-topups-owner #topup-tab-content-autoverify > form input[name="topupWebhookUrl"]:focus-visible {
+  border-color: var(--gold) !important;
+  outline: 3px solid color-mix(in srgb, var(--gold) 22%, transparent);
+  outline-offset: 1px;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(2) > p {
+  margin-top: 7px;
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(3) {
+  position: relative;
+  padding: 18px 16px 14px !important;
+  border: 1px dashed var(--finance-board-line) !important;
+  border-radius: 12px !important;
+  color: var(--text-2) !important;
+  background: color-mix(in srgb, var(--gold) 5%, var(--card)) !important;
+  font-size: 13px;
+  line-height: 1.75;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(3) > div:first-child {
+  margin-bottom: 5px;
+  color: var(--finance-board-accent-text) !important;
+  font-size: 14px;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(3),
+.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(3) {
+  padding-top: 0 !important;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(3) button,
+.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(3) button {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 19px !important;
+  border: 1px solid var(--finance-board-accent-hover) !important;
+  border-radius: 11px !important;
+  color: var(--finance-board-accent-contrast) !important;
+  background: var(--finance-board-accent) !important;
+  box-shadow: 0 5px 13px color-mix(in srgb, var(--gold) 20%, transparent) !important;
+  font-size: 13px !important;
+  font-weight: 700;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(3) button:hover,
+.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(3) button:hover {
+  background: var(--finance-board-accent-hover) !important;
+  transform: translateY(-1px);
+}
+
+/* Verification summary card and Discord notification settings. */
+.admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type {
+  position: relative;
+  overflow: visible;
+  padding: 20px !important;
+  border: 1px solid var(--finance-board-line) !important;
+  border-inline-start: 5px solid var(--gold) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(120deg, var(--finance-board-soft), var(--card) 68%) !important;
+  box-shadow: 0 5px 14px color-mix(in srgb, var(--text) 4%, transparent) !important;
+}
+.admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type > div.flex.items-center.gap-3\.5 > div:first-child {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 auto;
+  border: 1px solid var(--finance-board-line);
+  border-radius: 13px;
+  color: var(--finance-board-accent-text) !important;
+  background: var(--card) !important;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--gold) 15%, transparent);
+}
+.admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type a {
+  min-height: 46px;
+  justify-content: center;
+  border: 1px solid var(--finance-board-accent-hover) !important;
+  border-radius: 10px !important;
+  color: var(--finance-board-accent-contrast) !important;
+  background: var(--finance-board-accent) !important;
+  box-shadow: 0 4px 11px color-mix(in srgb, var(--gold) 18%, transparent) !important;
+}
+.admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type a:hover {
+  background: var(--finance-board-accent-hover) !important;
+  transform: translateY(-1px);
+}
+.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) {
+  position: relative;
+  padding: 19px !important;
+  border: 1px solid var(--finance-board-line) !important;
+  border-radius: 15px !important;
+  background: linear-gradient(145deg, var(--finance-board-softer), var(--card) 70%) !important;
+}
+.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) h3 {
+  min-height: 34px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--finance-board-line);
+  font-size: 15px;
+}
+.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) > p {
+  max-width: 760px;
+  color: var(--text-3);
+  font-size: 13px;
+  line-height: 1.65;
+}
+.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) label {
+  color: var(--text-2);
+  font-size: 13px;
+  font-weight: 650;
+}
+.admin-topups-owner #topup-tab-content-autoverify > form input[name="topupWebhookUrl"] {
+  min-height: 50px;
+  border: 1px solid var(--finance-board-line) !important;
+  border-radius: 10px !important;
+  color: var(--text) !important;
+  background: var(--card) !important;
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.admin-topups-owner #topup-tab-content-autoverify > form input[name="topupWebhookUrl"]::placeholder {
+  color: var(--text-4);
+  opacity: 1;
+}
+.admin-topups-owner #topup-tab-content-truemoney > form :is(button, a):focus-visible,
+.admin-topups-owner #topup-tab-content-autoverify > form :is(button, a):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold) 56%, transparent);
+  outline-offset: 3px;
+}
+
+@media (max-width: 760px) {
+  .admin-topups-owner #topup-tab-content-truemoney > form,
+  .admin-topups-owner #topup-tab-content-autoverify > form { padding: 18px !important; }
+  .admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type { align-items: flex-start; }
+}
+@media (max-width: 520px) {
+  .admin-topups-owner #topup-tab-content-truemoney > form,
+  .admin-topups-owner #topup-tab-content-autoverify > form { padding: 16px 13px !important; }
+  .admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type { align-items: flex-start; }
+  .admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type > div:first-child { width: 42px; height: 42px; }
+  .admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) { padding: 13px !important; }
+  .admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:first-of-type { align-items: flex-start; gap: 12px; padding: 13px !important; }
+  .admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(3) button,
+  .admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(3) button { width: 100%; }
+  .admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type { padding: 15px !important; }
+  .admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type > div.flex.items-center.gap-3\.5 { align-items: flex-start; }
+  .admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type a { width: 100%; }
+  .admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) { padding: 14px !important; }
+  .admin-topups-owner #topup-tab-content-autoverify > form input[name="topupWebhookUrl"] { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-topups-owner #topup-tab-content-truemoney > form button,
+  .admin-topups-owner #topup-tab-content-autoverify > form :is(button, a) { transition: none; transform: none; }
+}
