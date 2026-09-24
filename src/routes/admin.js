@@ -17,6 +17,7 @@ const receiverProfiles = require('../services/receiver-profiles');
 const theme = require('../services/theme');
 const topupsService = require('../services/topups');
 const { adjustCustomerWallet, WalletAdjustmentError } = require('../services/admin-wallet-adjustment');
+const { collectCatalogApiMembers } = require('../services/admin-catalog-wallet-members');
 const { getCloudUrl } = require('../services/cloud-url');
 const { requireAdmin } = require('../middleware/auth');
 const r2 = require('../services/r2');
@@ -1631,28 +1632,48 @@ router.post('/orders/:id/status', async (req, res) => {
 });
 
 // ---------- Users ----------
-router.get('/users', (req, res) => {
+router.get('/users', async (req, res) => {
   const q = String(req.query.q || '').trim();
   const registered = req.query.registered === 'today' ? 'today' : '';
   const mainAdminUi = usesMainAdminUi(req);
+  const source = mainAdminUi && req.query.source === 'api' ? 'api' : 'store';
   const status = mainAdminUi && ['active', 'banned'].includes(req.query.status) ? req.query.status : '';
-  const role = mainAdminUi && ['admin', 'customer'].includes(req.query.role) ? req.query.role : '';
+  const role = mainAdminUi && source === 'store' && ['admin', 'customer'].includes(req.query.role) ? req.query.role : '';
   const needle = q.toLocaleLowerCase('th-TH');
   const bangkokDay = date => new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit',
   }).format(date);
   const todayKey = bangkokDay(new Date());
-  const matched = [...store.data.users]
+  let sourceUsers = [...store.data.users];
+  let apiShops = [];
+  let shopFilter = '';
+  if (mainAdminUi && source === 'api') {
+    sourceUsers = await collectCatalogApiMembers({
+      platformData: store.platformData,
+      loadTenantDb: shopId => store.loadTenantDb(shopId),
+    });
+    apiShops = [...new Map(sourceUsers.map(user => [user.tenantShopId, {
+      id: user.tenantShopId, name: user.shopName,
+    }])).values()].sort((a, b) => a.name.localeCompare(b.name, 'th'));
+    const requestedShop = String(req.query.shop || '').trim();
+    if (apiShops.some(shop => String(shop.id) === requestedShop)) shopFilter = requestedShop;
+  }
+  const matched = sourceUsers
     .filter(user => user.role === 'customer' || !registered)
-    .filter(user => !registered || bangkokDay(new Date(user.createdAt)) === todayKey)
+    .filter(user => !registered || (user.createdAt && bangkokDay(new Date(user.createdAt)) === todayKey))
     .filter(user => !status || (user.status || 'active') === status)
     .filter(user => !role || (user.role || 'customer') === role)
+    .filter(user => !shopFilter || String(user.tenantShopId) === shopFilter)
     .filter(user => !needle
       || String(user.username || '').toLocaleLowerCase('th-TH').includes(needle)
-      || String(user.email || '').toLocaleLowerCase('th-TH').includes(needle))
-    .sort((a, b) => registered
-      ? new Date(b.createdAt) - new Date(a.createdAt)
-      : String(a.username || '').localeCompare(String(b.username || ''), 'th'));
+      || String(user.email || '').toLocaleLowerCase('th-TH').includes(needle)
+      || (source === 'api' && `${user.shopName || ''} ${user.shopSlug || ''}`.toLocaleLowerCase('th-TH').includes(needle)))
+    .sort((a, b) => source === 'api'
+      ? (String(a.shopName || '').localeCompare(String(b.shopName || ''), 'th')
+        || String(a.username || '').localeCompare(String(b.username || ''), 'th'))
+      : (registered
+        ? new Date(b.createdAt) - new Date(a.createdAt)
+        : String(a.username || '').localeCompare(String(b.username || ''), 'th')));
 
   const pageSizeOptions = [10, 25, 50, 100];
   const pageSize = pageSizeOptions.includes(Number(req.query.pageSize)) ? Number(req.query.pageSize) : 10;
@@ -1660,23 +1681,30 @@ router.get('/users', (req, res) => {
   const page = Math.min(totalPages, Math.max(1, Number(req.query.page) || 1));
   const users = matched.slice((page - 1) * pageSize, page * pageSize);
 
-  const totalWalletBalance = store.data.users.reduce((sum, u) => sum + (Number(u.walletBalance) || 0), 0);
+  const allUsers = sourceUsers;
+  const totalWalletBalance = source === 'api'
+    ? allUsers.reduce((sum, user) => sum + (Number(user.catalogWalletBalance) || 0), 0)
+    : store.data.users.reduce((sum, user) => sum + (Number(user.walletBalance) || 0), 0);
 
   if (mainAdminUi) {
     res.locals.layout = 'layouts/admin-experiment';
-    const allUsers = store.data.users;
-    const todayCustomers = allUsers.filter(user => user.role === 'customer' && bangkokDay(new Date(user.createdAt)) === todayKey).length;
+    const platformUsers = source === 'api' ? store.data.users : allUsers;
+    const todayCustomers = allUsers.filter(user => user.role === 'customer'
+      && user.createdAt && bangkokDay(new Date(user.createdAt)) === todayKey).length;
     return res.render('admin/users-experiment', {
-      title: 'จัดการสมาชิก', active: 'users', users, q, registered, status, role,
+      title: source === 'api' ? 'ลูกค้า API' : 'จัดการสมาชิก', active: 'users', users, q, registered, status, role,
+      source, apiShops, shopFilter,
       totalUsers: allUsers.length, totalWalletBalance, matchedCount: matched.length,
       page, totalPages, pageSize, pageSizeOptions,
       memberCounts: {
         all: allUsers.length,
         active: allUsers.filter(user => (user.status || 'active') === 'active').length,
         banned: allUsers.filter(user => user.status === 'banned').length,
-        admins: allUsers.filter(user => user.role === 'admin').length,
+        admins: source === 'api' ? 0 : allUsers.filter(user => user.role === 'admin').length,
         today: todayCustomers,
+        shops: source === 'api' ? new Set(allUsers.map(user => user.tenantShopId)).size : 0,
       },
+      platformMemberCount: platformUsers.length,
     });
   }
 
@@ -1778,6 +1806,56 @@ router.post('/users/:id/wallet', async (req, res) => {
   });
   req.flash('success', `กำหนดยอดเงินเป็น ฿${amount.toLocaleString()} สำเร็จ`);
   res.redirect('/admin/users');
+});
+
+router.post('/users/api/:shopId/:id/wallet', async (req, res) => {
+  if (!usesMainAdminUi(req)) return res.redirect('/admin/users');
+
+  let returnTo = '/admin/users?source=api';
+  try {
+    const requested = new URL(String(req.body?.returnTo || ''), 'http://admin.local');
+    if (requested.origin === 'http://admin.local' && requested.pathname === '/admin/users') {
+      returnTo = `${requested.pathname}${requested.search}`;
+    }
+  } catch (_) { /* Keep the API-customer list as the safe fallback. */ }
+
+  try {
+    const shopId = String(req.params.shopId || '');
+    const admin = store.platformData.users.find(user => String(user.id) === String(req.session.userId));
+    const adjustment = data => adjustCustomerWallet(data, {
+      userId: req.params.id,
+      adminUserId: req.session.userId,
+      adminUsername: admin?.username,
+      walletType: 'catalog',
+      tenantShopId: shopId === 'main' ? undefined : shopId,
+      operation: String(req.body?.operation || ''),
+      amount: req.body?.amount,
+      expectedBalance: req.body?.expectedBalance,
+      note: req.body?.note,
+    });
+
+    let result;
+    if (shopId === 'main') {
+      result = await store.runOnPlatform(() => store.transact(adjustment));
+    } else {
+      const shop = (store.platformData.shops || []).find(item => String(item.id) === shopId);
+      if (!shop) throw new WalletAdjustmentError('ไม่พบร้าน API นี้ กรุณารีเฟรชหน้าแล้วลองอีกครั้ง');
+      const tenantDb = await store.loadTenantDb(shop.id);
+      if (!tenantDb) throw new WalletAdjustmentError('ไม่พบข้อมูลร้าน API นี้ จึงยังปรับยอดไม่ได้');
+      result = await store.runInTenant(shop.id, tenantDb, () => store.transact(adjustment));
+    }
+
+    const formatMoney = value => Number(value).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    req.flash('success', `${result.operation === 'add' ? 'เพิ่ม' : 'หัก'}เครดิต API ให้ ${result.username} แล้ว · ฿${formatMoney(result.previousBalance)} → ฿${formatMoney(result.balanceAfter)}`);
+  } catch (error) {
+    if (error instanceof WalletAdjustmentError) {
+      req.flash('error', error.message);
+    } else {
+      console.error('[admin] API wallet adjustment failed:', error);
+      req.flash('error', 'บันทึกการปรับเครดิต API ไม่สำเร็จ กรุณาลองอีกครั้ง');
+    }
+  }
+  return res.redirect(returnTo);
 });
 
 router.post('/users/:id/toggle-ban', async (req, res) => {

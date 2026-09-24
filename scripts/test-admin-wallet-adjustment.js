@@ -6,6 +6,7 @@ const {
   parseMoneyCents,
   WalletAdjustmentError,
 } = require('../src/services/admin-wallet-adjustment');
+const { collectCatalogApiMembers } = require('../src/services/admin-catalog-wallet-members');
 
 function fixture(balance = 25) {
   return {
@@ -66,9 +67,70 @@ rejectWithoutMutation({ userId: 'admin-1' }, 'เฉพาะบัญชีส�
 rejectWithoutMutation({ userId: 'missing' }, 'ไม่พบสมาชิก');
 rejectWithoutMutation({ note: 'x' }, 'เหตุผล');
 
+const apiWalletData = {
+  users: [
+    { id: 'tenant-admin', username: 'shop-owner', role: 'admin', walletBalance: 0, catalogWalletBalance: 500 },
+    { id: 'api-customer', username: 'api-buyer', role: 'customer', walletBalance: 77, catalogWalletBalance: 12.5 },
+  ],
+  walletTransactions: [],
+};
+const apiCredited = adjustCustomerWallet(apiWalletData, {
+  ...fixed, userId: 'api-customer', adminUserId: 'admin-1', adminUsername: 'owner',
+  walletType: 'catalog', tenantShopId: 'tenant-1', amount: '2.50', expectedBalance: '12.50',
+  transactionId: 'catalog-wallet-test-1',
+});
+assert.equal(apiCredited.balanceAfter, 15);
+assert.equal(apiWalletData.users[1].catalogWalletBalance, 15);
+assert.equal(apiWalletData.users[1].walletBalance, 77, 'API adjustment must not change the normal storefront wallet');
+assert.equal(apiWalletData.users[0].catalogWalletBalance, 500, 'API admins must not be eligible for wallet adjustment');
+assert.equal(apiWalletData.walletTransactions[0].type, 'catalog-adjust');
+assert.equal(apiWalletData.walletTransactions[0].catalogApiTopup, true);
+assert.equal(apiWalletData.walletTransactions[0].tenantShopId, 'tenant-1');
+assert.equal(apiWalletData.walletTransactions[0].adminUserId, 'admin-1');
+assert.match(apiWalletData.walletTransactions[0].note, /owner เพิ่มเครดิต API: ชดเชยยอดที่ตกหล่น/);
+assert.throws(() => adjustCustomerWallet(apiWalletData, {
+  ...fixed, userId: 'api-customer', walletType: 'catalog', operation: 'subtract', amount: '16',
+  expectedBalance: '15.00', transactionId: 'catalog-wallet-test-invalid',
+}), error => error instanceof WalletAdjustmentError && error.message.includes('เครดิตไม่พอ'));
+
+(async () => {
+const apiMembers = await collectCatalogApiMembers({
+  platformData: {
+    settings: { shopName: 'LiTeam Shop' },
+    users: [
+      { id: 'main-api', username: 'main-api', role: 'customer', walletBalance: 90, catalogWalletBalance: 8, createdAt: '2026-09-01T00:00:00.000Z' },
+      { id: 'main-pending', username: 'pending', role: 'customer', walletBalance: 0, catalogWalletBalance: 0, createdAt: '2026-09-02T00:00:00.000Z' },
+      { id: 'main-regular', username: 'regular', role: 'customer', walletBalance: 90, catalogWalletBalance: 0, createdAt: '2026-09-03T00:00:00.000Z' },
+      { id: 'main-admin', username: 'admin', role: 'admin', walletBalance: 0, catalogWalletBalance: 900, createdAt: '2026-09-04T00:00:00.000Z' },
+    ],
+    walletTransactions: [{ userId: 'main-api', type: 'catalog-topup' }, { userId: 'main-regular', type: 'topup' }],
+    topupRequests: [
+      { catalogApiTopup: true, userId: 'main-pending' },
+      { catalogApiTopup: true, tenantShopId: 'tenant-1', tenantUserId: 'shared-id' },
+    ],
+    shops: [{ id: 'tenant-1', name: 'ร้านหนึ่ง', slug: 'shop-one' }, { id: 'tenant-2', name: 'ร้านสอง', slug: 'shop-two' }],
+  },
+  loadTenantDb: async shopId => shopId === 'tenant-1' ? {
+    users: [
+      { id: 'shop-admin', username: 'shop-admin', role: 'admin', catalogWalletBalance: 300 },
+      { id: 'shared-id', username: 'buyer-one', role: 'customer', email: 'one@example.test', walletBalance: 41, catalogWalletBalance: 14, createdAt: '2026-09-05T00:00:00.000Z' },
+    ],
+    walletTransactions: [{ userId: 'shared-id', type: 'catalog-purchase' }],
+  } : {
+    users: [{ id: 'shared-id', username: 'buyer-two', role: 'customer', walletBalance: 41, catalogWalletBalance: 0, createdAt: '2026-09-06T00:00:00.000Z' }],
+    walletTransactions: [{ userId: 'shared-id', type: 'catalog-purchase' }],
+  },
+});
+assert.deepEqual(apiMembers.map(member => `${member.tenantShopId}:${member.id}`), [
+  'main:main-api', 'main:main-pending', 'tenant-1:shared-id', 'tenant-2:shared-id',
+]);
+assert.equal(apiMembers.find(member => member.tenantShopId === 'tenant-1').catalogWalletBalance, 14);
+assert.equal(apiMembers.find(member => member.tenantShopId === 'tenant-1').apiTransactionCount, 1);
+assert.ok(!apiMembers.some(member => member.id === 'main-regular' || member.id === 'main-admin' || member.id === 'shop-admin'));
+
 const usersView = ejs.render(fs.readFileSync(require.resolve('../src/views/admin/users-experiment.ejs'), 'utf8'), {
   asset: path => `/${path}`,
-  q: '', status: '', role: '', registered: '', pageSize: 10,
+  q: '', status: '', role: '', registered: '', pageSize: 10, source: 'store', shopFilter: '', apiShops: [], platformMemberCount: 2,
   users: [
     { id: 'user-1', username: 'member', email: 'member@example.com', role: 'customer', status: 'active', walletBalance: 25, createdAt: '2026-09-01T00:00:00.000Z' },
     { id: 'admin-1', username: 'owner', email: 'owner@example.com', role: 'admin', status: 'active', walletBalance: 0, createdAt: '2026-09-01T00:00:00.000Z' },
@@ -80,5 +142,24 @@ assert.equal((usersView.match(/<button\b[^>]*\bdata-users-adjust\b/g) || []).len
 assert.match(usersView, /name="expectedBalance"/);
 assert.match(usersView, /name="operation"/);
 assert.match(usersView, /name="note"/);
+assert.match(usersView, /ลูกค้าเติม API/);
 
-console.log('Admin wallet adjustment checks passed: member-only control, add/subtract, audit ledger, stale balance, and validation');
+const apiUsersView = ejs.render(fs.readFileSync(require.resolve('../src/views/admin/users-experiment.ejs'), 'utf8'), {
+  asset: path => `/${path}`,
+  q: '', status: '', role: '', registered: '', pageSize: 10, source: 'api', shopFilter: 'tenant-1',
+  apiShops: [{ id: 'main', name: 'LiTeam Shop' }, { id: 'tenant-1', name: 'ร้านหนึ่ง' }], platformMemberCount: 2,
+  users: [{ id: 'buyer-1', tenantShopId: 'tenant-1', username: 'api-buyer', email: 'buyer@example.test', role: 'customer', status: 'active', shopName: 'ร้านหนึ่ง', shopSlug: 'shop-one', createdAt: '2026-09-05T00:00:00.000Z', catalogWalletBalance: 14, apiTransactionCount: 2 }],
+  matchedCount: 1, totalWalletBalance: 14, page: 1, totalPages: 1, pageSizeOptions: [10, 25, 50, 100],
+  memberCounts: { all: 1, active: 1, banned: 0, admins: 0, today: 0, shops: 1 },
+});
+assert.match(apiUsersView, /data-wallet-scope="catalog"/);
+assert.match(apiUsersView, /data-shop-id="tenant-1"/);
+assert.match(apiUsersView, /ยอดกระเป๋า API/);
+assert.match(apiUsersView, /14\.00/);
+assert.match(apiUsersView, /กระเป๋าสินค้า API/);
+
+console.log('Admin wallet checks passed: storefront/API wallet isolation, tenant-scoped member discovery, audited adjustment, stale balance, and validation');
+})().catch(error => {
+  console.error(error);
+  process.exitCode = 1;
+});

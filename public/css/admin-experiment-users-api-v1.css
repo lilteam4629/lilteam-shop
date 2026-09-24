@@ -1,0 +1,26 @@
+html.admin-main-site .experiment-users-page .users-audience-tabs{display:flex;gap:8px;align-items:center;padding:12px 18px;border-bottom:1px solid var(--ex-line);background:#fff}
+html.admin-main-site .experiment-users-page .users-audience-tabs a{display:inline-flex;align-items:center;gap:8px;min-height:42px;padding:0 13px;border:1px solid var(--ex-line);border-radius:10px;color:var(--ex-muted);background:#fff;font-size:10px;font-weight:800;transition:color .16s ease,border-color .16s ease,background .16s ease}
+html.admin-main-site .experiment-users-page .users-audience-tabs a:hover{border-color:var(--admin-brand-border,#d8e7df);color:var(--admin-brand-readable,var(--ex-ink));background:var(--admin-brand-soft,#f4f8f6)}
+html.admin-main-site .experiment-users-page .users-audience-tabs a.active{border-color:var(--admin-brand-fill,var(--ex-line));color:var(--admin-brand-contrast,#fff);background:var(--admin-brand-fill,var(--ex-ink));box-shadow:0 4px 12px color-mix(in srgb,var(--admin-brand-fill,var(--ex-ink)) 16%,transparent)}
+html.admin-main-site .experiment-users-page .users-audience-tabs b{display:grid;place-items:center;min-width:24px;height:22px;padding:0 6px;border-radius:999px;color:var(--admin-brand-readable,var(--ex-ink));background:var(--admin-brand-soft,#f4f8f6);font-size:9px}
+html.admin-main-site .experiment-users-page .users-audience-tabs a.active b{color:var(--admin-brand-contrast,#fff);background:color-mix(in srgb,var(--admin-brand-fill,var(--ex-ink)) 70%,#fff 30%)}
+html.admin-main-site .experiment-users-page .users-audience-tabs a:focus-visible,html.admin-main-site .experiment-users-page .users-api-table button:focus-visible{outline:3px solid color-mix(in srgb,var(--admin-brand-fill,#7b573b) 32%,transparent);outline-offset:2px}
+html.admin-main-site .experiment-users-page .users-api-table{min-width:900px}
+html.admin-main-site .experiment-users-page .users-api-table th:nth-child(1){min-width:205px}
+html.admin-main-site .experiment-users-page .users-api-table th:nth-child(2){min-width:150px}
+html.admin-main-site .experiment-users-page .users-api-table th:nth-child(4){min-width:140px}
+html.admin-main-site .experiment-users-page .users-api-table th:nth-child(6){min-width:135px}
+html.admin-main-site .experiment-users-page .users-api-shop{display:block;max-width:180px;overflow:hidden;color:var(--ex-ink);font-size:10px;font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+html.admin-main-site .experiment-users-page .users-api-shop-slug{display:block;margin-top:4px;color:var(--ex-muted);font-size:9px}
+html.admin-main-site .experiment-users-page .users-api-table .users-credit{color:var(--admin-brand-readable,var(--ex-ink));font-variant-numeric:tabular-nums}
+html.admin-main-site .experiment-users-page .users-api-table .users-row-actions{min-width:115px}
+html.admin-main-site .experiment-users-page .users-api-table .users-adjust-button{min-height:40px;padding-inline:12px}
+html.admin-main-site .experiment-users-page .users-tab.active{color:var(--admin-brand-readable,var(--ex-ink))}
+html.admin-main-site .experiment-users-page .users-tab.active:after{background:var(--admin-brand-fill,var(--ex-ink))}
+html.admin-main-site .experiment-users-page .users-status.active{color:var(--admin-brand-readable,var(--ex-ink));background:var(--admin-brand-soft,#f4f8f6)}
+html.admin-main-site .experiment-users-page .users-status.active i{background:var(--admin-brand-fill,var(--ex-ink))}
+html.admin-main-site .experiment-users-page .users-view-link,html.admin-main-site .experiment-users-page .users-person a:hover strong{color:var(--admin-brand-readable,var(--ex-ink))}
+html.admin-main-site .experiment-users-page .users-empty>span{color:var(--admin-brand-readable,var(--ex-ink));background:var(--admin-brand-soft,#f4f8f6)}
+html.admin-main-site .experiment-users-page .users-pagination a:hover{border-color:var(--admin-brand-border,var(--ex-line));color:var(--admin-brand-readable,var(--ex-ink));background:var(--admin-brand-soft,#f4f8f6)}
+@media(max-width:680px){html.admin-main-site .experiment-users-page .users-audience-tabs{padding:10px 12px;overflow-x:auto}html.admin-main-site .experiment-users-page .users-audience-tabs a{flex:0 0 auto}}
+@media(prefers-reduced-motion:reduce){html.admin-main-site .experiment-users-page .users-audience-tabs a{transition:none}}

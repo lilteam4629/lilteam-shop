@@ -25,6 +25,9 @@ function parseMoneyCents(value, { allowZero = false } = {}) {
 function adjustCustomerWallet(data, {
   userId,
   adminUserId,
+  adminUsername,
+  walletType = 'store',
+  tenantShopId,
   operation,
   amount,
   expectedBalance,
@@ -35,6 +38,12 @@ function adjustCustomerWallet(data, {
   if (!['add', 'subtract'].includes(operation)) {
     throw new WalletAdjustmentError('เลือกรายการเพิ่มหรือลดเครดิตก่อนบันทึก');
   }
+
+  const isCatalogWallet = walletType === 'catalog';
+  if (!isCatalogWallet && walletType !== 'store') {
+    throw new WalletAdjustmentError('ไม่รู้จักประเภทกระเป๋าเงินที่ต้องการปรับ');
+  }
+  const balanceField = isCatalogWallet ? 'catalogWalletBalance' : 'walletBalance';
 
   const amountCents = parseMoneyCents(amount);
   const expectedCents = parseMoneyCents(expectedBalance, { allowZero: true });
@@ -49,7 +58,7 @@ function adjustCustomerWallet(data, {
     throw new WalletAdjustmentError('ปรับเครดิตได้เฉพาะบัญชีสมาชิก ไม่สามารถปรับบัญชีผู้ดูแลได้');
   }
 
-  const current = user.walletBalance == null ? 0 : Number(user.walletBalance);
+  const current = user[balanceField] == null ? 0 : Number(user[balanceField]);
   if (!Number.isFinite(current) || current < 0 || !Number.isSafeInteger(Math.round(current * 100))) {
     throw new WalletAdjustmentError('ยอดเครดิตปัจจุบันไม่ถูกต้อง กรุณาตรวจสอบข้อมูลสมาชิก');
   }
@@ -64,22 +73,23 @@ function adjustCustomerWallet(data, {
   if (!Number.isSafeInteger(nextCents)) throw new WalletAdjustmentError('ยอดเครดิตใหม่สูงเกินกว่าระบบรองรับ');
 
   const admin = (data.users || []).find(item => String(item.id) === String(adminUserId));
-  const actor = String(admin?.username || adminUserId || 'ผู้ดูแลระบบ').slice(0, 100);
+  const actor = String(adminUsername || admin?.username || adminUserId || 'ผู้ดูแลระบบ').slice(0, 100);
   const delta = deltaCents / 100;
   const previousBalance = previousCents / 100;
   const balanceAfter = nextCents / 100;
 
-  user.walletBalance = balanceAfter;
+  user[balanceField] = balanceAfter;
   data.walletTransactions ||= [];
   data.walletTransactions.push({
     id: transactionId,
     userId: user.id,
-    type: 'adjust',
+    type: isCatalogWallet ? 'catalog-adjust' : 'adjust',
+    ...(isCatalogWallet ? { catalogApiTopup: true, ...(tenantShopId ? { tenantShopId: String(tenantShopId) } : {}) } : {}),
     amount: delta,
     previousBalance,
     balanceAfter,
     adminUserId: String(adminUserId || ''),
-    note: `ผู้ดูแล ${actor} ${operation === 'add' ? 'เพิ่ม' : 'หัก'}เครดิต: ${reason}`,
+    note: `ผู้ดูแล ${actor} ${operation === 'add' ? 'เพิ่ม' : 'หัก'}${isCatalogWallet ? 'เครดิต API' : 'เครดิต'}: ${reason}`,
     createdAt: now,
   });
 

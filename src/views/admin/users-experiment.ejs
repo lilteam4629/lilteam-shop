@@ -1,8 +1,9 @@
 <link rel="stylesheet" href="<%= asset('css/admin-experiment-users-v1.css') %>" />
 <link rel="stylesheet" href="<%= asset('css/admin-experiment-users-wallet-v1.css') %>" />
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-users-api-v1.css') %>" />
 <%
   const experimentHref = (overrides = {}) => {
-    const values = { q, status, role, registered, pageSize, ...overrides };
+    const values = { q, status, role, registered, pageSize, source, shop: shopFilter, ...overrides };
     const params = new URLSearchParams();
     Object.entries(values).forEach(([key, value]) => {
       if (value !== undefined && value !== null && String(value) !== '') params.set(key, String(value));
@@ -24,50 +25,62 @@
       <section class="users-page-head">
         <div>
           <div class="experiment-kicker">ผู้ใช้งาน & ลูกค้า</div>
-          <h1>จัดการสมาชิก</h1>
-          <p>ค้นหา ตรวจสอบสิทธิ์ และดูยอดเครดิตของสมาชิกจากพื้นที่เดียว</p>
+          <h1><%= source === 'api' ? 'ลูกค้าเติมเงิน API' : 'จัดการสมาชิก' %></h1>
+          <p><%= source === 'api' ? 'แยกกระเป๋าสินค้า API ตามร้าน พร้อมปรับยอดและเก็บประวัติ' : 'ค้นหา ตรวจสอบสิทธิ์ และดูยอดเครดิตของสมาชิกจากพื้นที่เดียว' %></p>
         </div>
         <div class="users-head-actions">
-          <span class="users-page-status"><i></i> ระบบสมาชิก</span>
-          <button class="experiment-button primary" type="button" data-users-invite>+ เพิ่มสมาชิก</button>
+          <span class="users-page-status"><i></i> <%= source === 'api' ? 'กระเป๋าสินค้า API' : 'ระบบสมาชิก' %></span>
+          <% if (source !== 'api') { %><button class="experiment-button primary" type="button" data-users-invite>+ เพิ่มสมาชิก</button><% } %>
         </div>
       </section>
 
       <section class="users-kpis" aria-label="สรุปสมาชิก">
-        <div class="users-kpi users-kpi-primary"><span class="users-kpi-icon">◎</span><small>สมาชิกทั้งหมด</small><strong><%= memberCounts.all.toLocaleString('th-TH') %></strong><em>บัญชีในระบบ</em><span class="users-kpi-foot"><i></i> ข้อมูลล่าสุดจากร้าน</span></div>
+        <div class="users-kpi users-kpi-primary"><span class="users-kpi-icon">◎</span><small><%= source === 'api' ? 'ลูกค้า API ทั้งหมด' : 'สมาชิกทั้งหมด' %></small><strong><%= memberCounts.all.toLocaleString('th-TH') %></strong><em><%= source === 'api' ? 'แยกตามร้านที่เติมหรือใช้ API' : 'บัญชีในระบบ' %></em><span class="users-kpi-foot"><i></i> ข้อมูลล่าสุดจากร้าน</span></div>
         <div class="users-kpi"><span class="users-kpi-icon mint">✓</span><small>กำลังใช้งาน</small><strong><%= memberCounts.active.toLocaleString('th-TH') %></strong><em>พร้อมเข้าใช้งาน</em><span class="users-kpi-foot"><i></i> สถานะปกติ</span></div>
-        <div class="users-kpi"><span class="users-kpi-icon blue">＋</span><small>สมัครวันนี้</small><strong><%= memberCounts.today.toLocaleString('th-TH') %></strong><em>สมาชิกใหม่ในวันนี้</em><span class="users-kpi-foot"><i></i> ตามเวลาไทย</span></div>
-        <div class="users-kpi"><span class="users-kpi-icon gold">฿</span><small>เครดิตรวม</small><strong>฿<%= Number(totalWalletBalance || 0).toLocaleString('th-TH') %></strong><em>ยอดเครดิตในระบบ</em><span class="users-kpi-foot"><i></i> อ่านจาก wallet</span></div>
+        <div class="users-kpi"><span class="users-kpi-icon blue">＋</span><small><%= source === 'api' ? 'ร้านที่มีลูกค้า API' : 'สมัครวันนี้' %></small><strong><%= (source === 'api' ? memberCounts.shops : memberCounts.today).toLocaleString('th-TH') %></strong><em><%= source === 'api' ? 'ร้านที่พบประวัติ API' : 'สมาชิกใหม่ในวันนี้' %></em><span class="users-kpi-foot"><i></i> <%= source === 'api' ? 'แยกกระเป๋าตามร้าน' : 'ตามเวลาไทย' %></span></div>
+        <div class="users-kpi"><span class="users-kpi-icon gold">฿</span><small><%= source === 'api' ? 'ยอด API คงเหลือรวม' : 'เครดิตรวม' %></small><strong>฿<%= Number(totalWalletBalance || 0).toLocaleString('th-TH') %></strong><em><%= source === 'api' ? 'ไม่รวมเครดิตหน้าร้านปกติ' : 'ยอดเครดิตในระบบ' %></em><span class="users-kpi-foot"><i></i> <%= source === 'api' ? 'อ่านจากกระเป๋า API' : 'อ่านจาก wallet' %></span></div>
       </section>
 
       <section class="users-workspace experiment-card">
-        <div class="users-workspace-head"><div><h2>สมาชิกในร้าน</h2><p><%= matchedCount.toLocaleString('th-TH') %> รายการที่ตรงกับตัวกรอง · กดชื่อเพื่อเปิดรายละเอียด</p></div><span class="users-live-badge"><i></i> ข้อมูลสมาชิกจริง</span></div>
+        <nav class="users-audience-tabs" aria-label="เลือกประเภทบัญชี">
+          <a class="<%= source === 'store' ? 'active' : '' %>" href="<%= experimentHref({ source: 'store', status: '', role: '', registered: '', shop: '', page: 1 }) %>">สมาชิกหน้าร้าน <b><%= platformMemberCount.toLocaleString('th-TH') %></b></a>
+          <a class="<%= source === 'api' ? 'active' : '' %>" href="<%= experimentHref({ source: 'api', status: '', role: '', registered: '', shop: '', page: 1 }) %>">ลูกค้าเติม API <b><%= source === 'api' ? memberCounts.all.toLocaleString('th-TH') : 'ดู' %></b></a>
+        </nav>
+        <div class="users-workspace-head"><div><h2><%= source === 'api' ? 'ลูกค้ากระเป๋าสินค้า API' : 'สมาชิกในร้าน' %></h2><p><%= matchedCount.toLocaleString('th-TH') %> รายการที่ตรงกับตัวกรอง<%= source === 'api' ? ' · คนเดียวกันคนละร้านจะแสดงแยกบัญชี' : ' · กดชื่อเพื่อเปิดรายละเอียด' %></p></div><span class="users-live-badge"><i></i> <%= source === 'api' ? 'ข้อมูลจากร้านหลักและร้าน API' : 'ข้อมูลสมาชิกจริง' %></span></div>
         <form class="users-toolbar" method="get" action="/admin/users">
-
+          <% if (source === 'api') { %><input type="hidden" name="source" value="api" /><% } %>
           <label class="users-search-wrap"><span aria-hidden="true">⌕</span><input type="search" name="q" value="<%= q %>" placeholder="ค้นหาชื่อผู้ใช้หรืออีเมล..." aria-label="ค้นหาสมาชิก" /></label>
           <label class="users-select-wrap"><span>สถานะ</span><select name="status" aria-label="กรองสถานะสมาชิก"><option value="">ทั้งหมด</option><option value="active" <%= status === 'active' ? 'selected' : '' %>>ใช้งาน</option><option value="banned" <%= status === 'banned' ? 'selected' : '' %>>ถูกระงับ</option></select></label>
-          <label class="users-select-wrap"><span>บทบาท</span><select name="role" aria-label="กรองบทบาทสมาชิก"><option value="">ทุกบทบาท</option><option value="customer" <%= role === 'customer' ? 'selected' : '' %>>สมาชิก</option><option value="admin" <%= role === 'admin' ? 'selected' : '' %>>ผู้ดูแลระบบ</option></select></label>
+          <% if (source === 'api') { %><label class="users-select-wrap"><span>ร้าน</span><select name="shop" aria-label="กรองตามร้าน"><option value="">ทุกร้าน</option><% apiShops.forEach(shop => { %><option value="<%= shop.id %>" <%= String(shopFilter) === String(shop.id) ? 'selected' : '' %>><%= shop.name %></option><% }) %></select></label><% } else { %><label class="users-select-wrap"><span>บทบาท</span><select name="role" aria-label="กรองบทบาทสมาชิก"><option value="">ทุกบทบาท</option><option value="customer" <%= role === 'customer' ? 'selected' : '' %>>สมาชิก</option><option value="admin" <%= role === 'admin' ? 'selected' : '' %>>ผู้ดูแลระบบ</option></select></label><% } %>
           <button class="experiment-button primary users-search-button" type="submit">ค้นหา</button>
-          <% if (q || status || role || registered) { %><a class="users-clear-button" href="/admin/users">ล้างตัวกรอง</a><% } %>
+          <% if (q || status || role || registered || shopFilter) { %><a class="users-clear-button" href="<%= experimentHref({ q: '', status: '', role: '', registered: '', shop: '', page: 1 }) %>">ล้างตัวกรอง</a><% } %>
         </form>
-        <div class="users-tabs" role="tablist" aria-label="มุมมองสมาชิก"><a class="users-tab <%= !status && !role && !registered ? 'active' : '' %>" href="<%= experimentHref({ status: '', role: '', registered: '', page: 1 }) %>">ทั้งหมด <b><%= memberCounts.all %></b></a><a class="users-tab <%= status === 'active' ? 'active' : '' %>" href="<%= experimentHref({ status: 'active', role: '', registered: '', page: 1 }) %>">ใช้งาน <b><%= memberCounts.active %></b></a><a class="users-tab <%= status === 'banned' ? 'active' : '' %>" href="<%= experimentHref({ status: 'banned', role: '', registered: '', page: 1 }) %>">ถูกระงับ <b><%= memberCounts.banned %></b></a><a class="users-tab <%= role === 'admin' ? 'active' : '' %>" href="<%= experimentHref({ role: 'admin', status: '', registered: '', page: 1 }) %>">ผู้ดูแลระบบ <b><%= memberCounts.admins %></b></a></div>
+        <div class="users-tabs" aria-label="กรองรายชื่อ"><a class="users-tab <%= !status && !role && !registered ? 'active' : '' %>" href="<%= experimentHref({ status: '', role: '', registered: '', page: 1 }) %>">ทั้งหมด <b><%= memberCounts.all %></b></a><a class="users-tab <%= status === 'active' ? 'active' : '' %>" href="<%= experimentHref({ status: 'active', role: '', page: 1 }) %>">ใช้งาน <b><%= memberCounts.active %></b></a><a class="users-tab <%= status === 'banned' ? 'active' : '' %>" href="<%= experimentHref({ status: 'banned', role: '', page: 1 }) %>">ถูกระงับ <b><%= memberCounts.banned %></b></a><% if (source === 'store') { %><a class="users-tab <%= role === 'admin' ? 'active' : '' %>" href="<%= experimentHref({ role: 'admin', status: '', registered: '', page: 1 }) %>">ผู้ดูแลระบบ <b><%= memberCounts.admins %></b></a><% } %></div>
         <div class="users-table-wrap">
-          <table class="users-table"><thead><tr><th>สมาชิก</th><th>บทบาท</th><th>เข้าร่วมเมื่อ</th><th>เครดิต</th><th>สถานะ</th><th>จัดการ</th></tr></thead><tbody>
+          <table class="users-table <%= source === 'api' ? 'users-api-table' : '' %>"><thead><tr><th>สมาชิก</th><% if (source === 'api') { %><th>ร้าน API</th><th>เข้าร่วมเมื่อ</th><th>ยอดกระเป๋า API</th><th>สถานะ</th><th>จัดการ</th><% } else { %><th>บทบาท</th><th>เข้าร่วมเมื่อ</th><th>เครดิต</th><th>สถานะ</th><th>จัดการ</th><% } %></tr></thead><tbody>
             <% users.forEach(user => { const userStatus = user.status || 'active'; %>
               <tr>
-                <td><div class="users-person"><span class="users-avatar <%= user.role === 'admin' ? 'admin' : '' %>"><%= initials(user.username) %></span><span><a href="/admin/users/<%= user.id %>"><strong><%= user.username %></strong></a><small><%= user.email || 'ไม่ระบุอีเมล' %></small></span></div></td>
-                <td><span class="users-role <%= user.role === 'admin' ? 'admin' : '' %>"><%= roleLabel(user.role) %></span></td>
-                <td><span class="users-date"><%= new Date(user.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }) %></span><small class="users-time"><%= new Date(user.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %></small></td>
-                <td><strong class="users-credit">฿<%= Number(user.walletBalance || 0).toLocaleString('th-TH') %></strong></td>
+                <td><div class="users-person"><span class="users-avatar <%= user.role === 'admin' ? 'admin' : '' %>"><%= initials(user.username) %></span><span><% if (source === 'api') { %><strong><%= user.username %></strong><% } else { %><a href="/admin/users/<%= user.id %>"><strong><%= user.username %></strong></a><% } %><small><%= user.email || 'ไม่ระบุอีเมล' %></small></span></div></td>
+                <% if (source === 'api') { %>
+                  <td><span class="users-api-shop"><%= user.shopName %></span><small class="users-api-shop-slug"><%= user.shopSlug || 'หน้าร้านหลัก' %></small></td>
+                  <td><% if (user.createdAt) { %><span class="users-date"><%= new Date(user.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }) %></span><small class="users-time"><%= new Date(user.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %></small><% } else { %><span class="users-time">—</span><% } %></td>
+                  <td><strong class="users-credit">฿<%= Number(user.catalogWalletBalance || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong><small class="users-time"><%= Number(user.apiTransactionCount || 0).toLocaleString('th-TH') %> รายการ API</small></td>
+                <% } else { %>
+                  <td><span class="users-role <%= user.role === 'admin' ? 'admin' : '' %>"><%= roleLabel(user.role) %></span></td>
+                  <td><span class="users-date"><%= new Date(user.createdAt).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Bangkok' }) %></span><small class="users-time"><%= new Date(user.createdAt).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %></small></td>
+                  <td><strong class="users-credit">฿<%= Number(user.walletBalance || 0).toLocaleString('th-TH') %></strong></td>
+                <% } %>
                 <td><span class="users-status <%= userStatus === 'banned' ? 'banned' : 'active' %>"><i></i><%= statusLabel(userStatus) %></span></td>
                 <td><div class="users-row-actions">
-                  <% if ((user.role || 'customer') === 'customer') { %><button class="users-adjust-button" type="button" data-users-adjust data-user-id="<%= user.id %>" data-user-name="<%= user.username %>" data-user-balance="<%= Number(user.walletBalance || 0).toFixed(2) %>">ปรับเครดิต</button><% } %>
-                  <a class="users-view-link" href="/admin/users/<%= user.id %>">รายละเอียด <span>→</span></a>
-                  <% if (user.role !== 'admin') { %><form method="post" action="/admin/users/<%= user.id %>/toggle-ban" data-experiment-confirm="<%= userStatus === 'banned' ? 'ปลดระงับสมาชิกคนนี้หรือไม่?' : 'ระงับสมาชิกคนนี้หรือไม่?' %>"><button class="users-more-action" type="submit" aria-label="เปลี่ยนสถานะ <%= user.username %>">•••</button></form><% } %>
+                  <% if (source === 'api') { %><button class="users-adjust-button" type="button" data-users-adjust data-wallet-scope="catalog" data-shop-id="<%= user.tenantShopId %>" data-user-id="<%= user.id %>" data-user-name="<%= user.username %>" data-user-balance="<%= Number(user.catalogWalletBalance || 0).toFixed(2) %>" data-user-shop="<%= user.shopName %>">ปรับยอด API</button><% } else { %>
+                    <% if ((user.role || 'customer') === 'customer') { %><button class="users-adjust-button" type="button" data-users-adjust data-wallet-scope="store" data-user-id="<%= user.id %>" data-user-name="<%= user.username %>" data-user-balance="<%= Number(user.walletBalance || 0).toFixed(2) %>">ปรับเครดิต</button><% } %>
+                    <a class="users-view-link" href="/admin/users/<%= user.id %>">รายละเอียด <span>→</span></a>
+                    <% if (user.role !== 'admin') { %><form method="post" action="/admin/users/<%= user.id %>/toggle-ban" data-experiment-confirm="<%= userStatus === 'banned' ? 'ปลดระงับสมาชิกคนนี้หรือไม่?' : 'ระงับสมาชิกคนนี้หรือไม่?' %>"><button class="users-more-action" type="submit" aria-label="เปลี่ยนสถานะ <%= user.username %>">•••</button></form><% } %>
+                  <% } %>
                 </div></td>
               </tr>
             <% }); %>
-            <% if (!users.length) { %><tr><td colspan="6"><div class="users-empty"><span>⌕</span><strong>ไม่พบสมาชิกที่ตรงกับตัวกรอง</strong><p>ลองค้นหาด้วยชื่อหรืออีเมลอื่น หรือกดล้างตัวกรอง</p><a class="experiment-button" href="/admin/users">ดูสมาชิกทั้งหมด</a></div></td></tr><% } %>
+            <% if (!users.length) { %><tr><td colspan="6"><div class="users-empty"><span>⌕</span><strong><%= source === 'api' ? 'ยังไม่พบลูกค้าที่เติมหรือใช้กระเป๋า API' : 'ไม่พบสมาชิกที่ตรงกับตัวกรอง' %></strong><p><%= source === 'api' ? 'เมื่อมีรายการเติมเงินหรือใช้สินค้า API รายชื่อจะแสดงแยกตามร้านที่นี่' : 'ลองค้นหาด้วยชื่อหรืออีเมลอื่น หรือกดล้างตัวกรอง' %></p><a class="experiment-button" href="<%= experimentHref({ q: '', status: '', role: '', registered: '', shop: '', page: 1 }) %>"><%= source === 'api' ? 'ดูรายการ API ทั้งหมด' : 'ดูสมาชิกทั้งหมด' %></a></div></td></tr><% } %>
           </tbody></table>
         </div>
         <div class="users-table-foot"><span>แสดง <b><%= users.length ? ((page - 1) * pageSize) + 1 : 0 %>–<%= Math.min(page * pageSize, matchedCount) %></b> จาก <b><%= matchedCount %></b> รายการ</span><div class="users-pagination"><% if (page > 1) { %><a href="<%= experimentHref({ page: page - 1 }) %>" aria-label="หน้าก่อนหน้า">←</a><% } else { %><span class="disabled">←</span><% } %><strong>หน้า <%= page %> / <%= totalPages %></strong><% if (page < totalPages) { %><a href="<%= experimentHref({ page: page + 1 }) %>" aria-label="หน้าถัดไป">→</a><% } else { %><span class="disabled">→</span><% } %></div></div>
@@ -88,8 +101,8 @@
 </dialog>
 <dialog class="users-wallet-dialog" data-users-wallet-dialog aria-labelledby="users-wallet-title" aria-describedby="users-wallet-description">
   <form method="post" action="/admin/users" class="users-wallet-form" data-users-wallet-form>
-    <div class="users-dialog-head"><div><span class="users-build-kicker">ปรับเครดิต · บันทึกประวัติทุกครั้ง</span><h2 id="users-wallet-title">ปรับเครดิตสมาชิก</h2><p id="users-wallet-description">ตรวจสอบชื่อสมาชิก ยอดก่อนและหลัง แล้วระบุเหตุผลก่อนยืนยัน</p></div><button type="button" class="users-dialog-close" data-wallet-close aria-label="ปิดหน้าต่างปรับเครดิต">×</button></div>
-    <div class="users-wallet-member"><span class="users-avatar" data-wallet-avatar aria-hidden="true">?</span><div><strong data-wallet-name>สมาชิก</strong><small>ยอดปัจจุบัน <b data-wallet-current></b></small></div></div>
+    <div class="users-dialog-head"><div><span class="users-build-kicker" data-wallet-kicker>ปรับเครดิต · บันทึกประวัติทุกครั้ง</span><h2 id="users-wallet-title" data-wallet-title>ปรับเครดิตสมาชิก</h2><p id="users-wallet-description">ตรวจสอบชื่อสมาชิก ยอดก่อนและหลัง แล้วระบุเหตุผลก่อนยืนยัน</p></div><button type="button" class="users-dialog-close" data-wallet-close aria-label="ปิดหน้าต่างปรับเครดิต">×</button></div>
+    <div class="users-wallet-member"><span class="users-avatar" data-wallet-avatar aria-hidden="true">?</span><div><strong data-wallet-name>สมาชิก</strong><small><span data-wallet-balance-label>ยอดปัจจุบัน</span> <b data-wallet-current></b><span data-wallet-shop></span></small></div></div>
     <input type="hidden" name="expectedBalance" data-wallet-expected />
     <input type="hidden" name="returnTo" value="<%= experimentHref() %>" />
     <label class="users-wallet-field">รายการ<select name="operation" data-wallet-operation required><option value="add">เพิ่มเครดิต</option><option value="subtract">หักเครดิต</option></select></label>
@@ -113,12 +126,17 @@
     const walletForm = document.querySelector('[data-users-wallet-form]');
     const walletName = document.querySelector('[data-wallet-name]');
     const walletAvatar = document.querySelector('[data-wallet-avatar]');
+    const walletTitle = document.querySelector('[data-wallet-title]');
+    const walletKicker = document.querySelector('[data-wallet-kicker]');
+    const walletBalanceLabel = document.querySelector('[data-wallet-balance-label]');
+    const walletCurrent = document.querySelector('[data-wallet-current]');
+    const walletShop = document.querySelector('[data-wallet-shop]');
     const walletExpected = document.querySelector('[data-wallet-expected]');
     const walletOperation = document.querySelector('[data-wallet-operation]');
     const walletAmount = document.querySelector('[data-wallet-amount]');
     const walletError = document.querySelector('[data-wallet-error]');
     const walletSubmit = document.querySelector('[data-wallet-submit]');
-    let activeMember = { name: '', balance: 0 };
+    let activeMember = { name: '', balance: 0, scope: 'store', shopName: '' };
     const formatMoney = value => `฿${new Intl.NumberFormat('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value)}`;
     const updateWalletPreview = () => {
       const amount = Number(walletAmount?.value);
@@ -138,10 +156,24 @@
     document.querySelectorAll('[data-users-adjust]').forEach(button => button.addEventListener('click', () => {
       if (!walletDialog || !walletForm) return;
       const userId = button.dataset.userId || '';
-      activeMember = { name: button.dataset.userName || 'สมาชิก', balance: Number(button.dataset.userBalance) || 0 };
-      walletForm.action = `/admin/users/${encodeURIComponent(userId)}/wallet`;
+      const isCatalogWallet = button.dataset.walletScope === 'catalog';
+      const shopId = button.dataset.shopId || '';
+      activeMember = {
+        name: button.dataset.userName || 'สมาชิก',
+        balance: Number(button.dataset.userBalance) || 0,
+        scope: isCatalogWallet ? 'catalog' : 'store',
+        shopName: button.dataset.userShop || '',
+      };
+      walletForm.action = isCatalogWallet
+        ? `/admin/users/api/${encodeURIComponent(shopId)}/${encodeURIComponent(userId)}/wallet`
+        : `/admin/users/${encodeURIComponent(userId)}/wallet`;
       if (walletName) walletName.textContent = activeMember.name;
       if (walletAvatar) walletAvatar.textContent = activeMember.name.trim().charAt(0).toUpperCase() || '?';
+      if (walletTitle) walletTitle.textContent = isCatalogWallet ? 'ปรับยอดกระเป๋า API' : 'ปรับเครดิตสมาชิก';
+      if (walletKicker) walletKicker.textContent = isCatalogWallet ? 'เครดิตสินค้า API · แยกร้าน · บันทึกประวัติทุกครั้ง' : 'ปรับเครดิต · บันทึกประวัติทุกครั้ง';
+      if (walletBalanceLabel) walletBalanceLabel.textContent = isCatalogWallet ? 'ยอดกระเป๋าสินค้า API' : 'ยอดปัจจุบัน';
+      if (walletCurrent) walletCurrent.textContent = formatMoney(activeMember.balance);
+      if (walletShop) walletShop.textContent = activeMember.shopName ? ` · ${activeMember.shopName}` : '';
       if (walletExpected) walletExpected.value = activeMember.balance.toFixed(2);
       if (walletOperation) walletOperation.value = 'add';
       if (walletAmount) walletAmount.value = '';
@@ -168,7 +200,9 @@
       const operationLabel = walletOperation.value === 'subtract' ? 'หักเครดิต' : 'เพิ่มเครดิต';
       const delta = walletOperation.value === 'subtract' ? -preview.amount : preview.amount;
       const reason = walletForm.elements.note.value.trim();
-      const summary = `ยืนยัน${operationLabel}ให้ ${activeMember.name}?\nยอดเดิม ${formatMoney(activeMember.balance)}\nยอดหลังปรับ ${formatMoney(activeMember.balance + delta)}\nเหตุผล: ${reason}`;
+      const walletNameLabel = activeMember.scope === 'catalog' ? 'เครดิตสินค้า API' : 'เครดิตหน้าร้าน';
+      const shopLine = activeMember.shopName ? `\nร้าน ${activeMember.shopName}` : '';
+      const summary = `ยืนยัน${operationLabel}${activeMember.scope === 'catalog' ? ' API' : ''}ให้ ${activeMember.name}?${shopLine}\nกระเป๋า ${walletNameLabel}\nยอดเดิม ${formatMoney(activeMember.balance)}\nยอดหลังปรับ ${formatMoney(activeMember.balance + delta)}\nเหตุผล: ${reason}`;
       if (!window.confirm(summary)) event.preventDefault();
       else if (walletSubmit) {
         walletSubmit.disabled = true;
