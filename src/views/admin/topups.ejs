@@ -1,4 +1,5 @@
 <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-topups-owner-v1.css') %>" /><% } %>
+<% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-topups-board-v1.css') + '&board=1' %>" /><% } %>
 <div class="admin-workspace-view workspace-topups <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-topups-owner' : '' %>">
 <% const publicSlipMessage = (message) => String(message || '')
   .replace(/Slip\s*XEPHT/gi, 'ระบบตรวจสอบ')
