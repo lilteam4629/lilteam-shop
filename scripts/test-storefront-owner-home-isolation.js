@@ -10,21 +10,31 @@ const home = read('src/views/shop/home.ejs');
 const css = read('public/css/storefront-owner-home-v7.css');
 const redesignCss = read('public/css/storefront-owner-home-v14.css');
 const gameWorldCss = read('public/css/storefront-owner-home-v15.css');
+const immersiveCss = read('public/css/storefront-owner-home-v16.css');
+const immersiveJs = read('public/js/storefront-owner-home-v16.js');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
   'the redesign must be enabled for the main store only');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*?storefront-owner-home-v7\.css/,
   'the owner stylesheet must be available for seamless navigation on the main site');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v14\.css/,
-  'the full homepage redesign must only load on the owner homepage');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v15\.css/,
-  'the game-world style must only load on the owner homepage');
+assert.doesNotMatch(layout, /storefront-owner-home-v(?:8|9|10|11|14|15)\.css/,
+  'superseded main-home design layers must no longer be loaded');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v16\.css/,
+  'the immersive design stylesheet must only load on the owner storefront');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v16\.js/,
+  'the 3D interaction script must only load on the owner storefront');
 assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
   'the rejected oversized banner treatment must no longer load');
-assert.match(home, /if \(ownerHomeV14\) \{ %><div class="owner-home-v14-layout"/,
+assert.match(home, /if \(ownerHomeV16\) \{ %><div class="owner-home-v16-layout"/,
   'the new content layout must be wrapped only for the main store');
-assert.match(home, /if \(ownerHomeV14\) \{ %><\/div><% \}/,
+assert.match(home, /if \(ownerHomeV16\) \{ %><\/div><% \}/,
   'the main-store layout wrapper must close before the shared lower page modules');
+assert.match(home, /ownerHomeV16 && settings\.hero\.mode === 'banner' && settings\.hero\.bannerImage/,
+  'the immersive banner scene must only render for the main shop when its banner exists');
+assert.match(home, /data-owner-scene[\s\S]*?data-scene-motion-toggle/,
+  'the owner scene must provide motion control');
+assert.match(home, /banner-sparkle img/,
+  'the real uploaded banner must remain in the immersive display');
 assert.doesNotMatch(home, /storefront-banner-index/,
   'the rejected side rail must not render around the main-store banner');
 assert.match(layout, /id="site-page-shell"[^\n]*storefrontOwnerHomeV7/,
@@ -104,4 +114,26 @@ assert.match(gameWorldCss, /var\(--gold\)/,
   'the atmosphere may change, but active accents must continue to use the saved shop theme');
 assert.ok(gameWorldRuleCount > 0, 'the Pinterest-inspired style must contain scoped homepage rules');
 
-console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount} scoped CSS rules).`);
+const immersiveStylesheet = postcss.parse(immersiveCss, { from: 'storefront-owner-home-v16.css' });
+let immersiveRuleCount = 0;
+immersiveStylesheet.walkRules(rule => {
+  if (rule.parent && rule.parent.type === 'atrule' && /keyframes$/i.test(rule.parent.name)) return;
+  immersiveRuleCount += 1;
+  for (const selector of rule.selectors) {
+    assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7'),
+      `immersive homepage selector must be isolated from tenant shops: ${selector}`);
+  }
+});
+assert.match(immersiveCss, /\.owner-home-v16-screen \.banner-sparkle img\s*\{[\s\S]*?object-fit:\s*contain\s*!important/,
+  'the owner banner image must remain uncropped inside the 3D display');
+assert.match(immersiveCss, /prefers-reduced-motion:\s*reduce/,
+  'the ambient scene must respect reduced-motion preferences');
+assert.match(immersiveCss, /var\(--gold\)/,
+  'the stadium treatment must use the selected store theme accent');
+assert.match(immersiveJs, /prefers-reduced-motion/,
+  'the 3D pointer interaction must disable itself for reduced motion');
+assert.match(immersiveJs, /pointermove/,
+  'the 3D display must respond to pointer position');
+assert.ok(immersiveRuleCount > 0, 'the immersive design must include scoped owner-only rules');
+
+console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + immersiveRuleCount} scoped CSS rules).`);

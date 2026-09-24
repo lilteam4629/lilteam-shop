@@ -51,12 +51,7 @@
   <link rel="stylesheet" href="<%= asset('css/storefront-auth-v1.css') %>" />
   <link rel="stylesheet" href="<%= asset('css/scroll-motion-v1.css') %>" />
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v7.css') %>" /> <% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v8.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v9.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v10.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v11.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v14.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v15.css') %>" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v16.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-main-v2.css') %>" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
@@ -893,6 +888,7 @@
   })();
 </script>
   <script src="<%= asset('js/scroll-motion-v1.js') %>" defer></script>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><script src="<%= asset('js/storefront-owner-home-v16.js') %>" defer></script><% } %>
   <script src="<%= asset('js/interaction-performance-v1.js') %>" defer></script>
 </body>
 </html>

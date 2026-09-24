@@ -51,38 +51,84 @@
 </style>
 <% } %>
 
-<% const ownerHomeV14 = typeof isMainSite !== 'undefined' && isMainSite; %>
-<% if (ownerHomeV14) { %><div class="owner-home-v14-layout" data-owner-home-layout="matchday-game-world"><% } %>
+<% const ownerHomeV16 = typeof isMainSite !== 'undefined' && isMainSite; %>
+<% if (ownerHomeV16) { %><div class="owner-home-v16-layout" data-owner-home-layout="immersive-3d-matchday"><% } %>
 
-<% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2) { %>
+<% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2 && !ownerHomeV16) { %>
   <%- include('../partials/locker-hero', { newest, stats, settings, filterTags, publicPreview: typeof publicPreview !== 'undefined' ? publicPreview : false }) %>
+<% } else if (ownerHomeV16 && settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
+  <section class="storefront-hero-banner owner-home-v16-scene" data-owner-scene data-scene-motion="playing" aria-label="หน้าหลักร้าน LilTeam">
+      <div class="owner-home-v16-world" aria-hidden="true">
+        <span class="owner-home-v16-atmosphere owner-home-v16-atmosphere--one"></span>
+        <span class="owner-home-v16-atmosphere owner-home-v16-atmosphere--two"></span>
+        <span class="owner-home-v16-atmosphere owner-home-v16-atmosphere--three"></span>
+        <span class="owner-home-v16-stadium-ring"></span>
+        <span class="owner-home-v16-stands"></span>
+        <span class="owner-home-v16-pitch"><i></i></span>
+        <span class="owner-home-v16-light owner-home-v16-light--left"></span>
+        <span class="owner-home-v16-light owner-home-v16-light--right"></span>
+        <span class="owner-home-v16-particles"></span>
+      </div>
+      <div class="owner-home-v16-inner">
+        <div class="owner-home-v16-copy">
+          <span class="owner-home-v16-kicker"><i></i> LILTEAM · MATCHDAY WORLD</span>
+          <h1><%= settings.shopName || 'LILTeam Shop' %><span>เกมของคุณ เริ่มที่นี่</span></h1>
+          <p><%= settings.tagline || 'เลือกไอเทมที่ใช่ แล้วลงสนามในแบบของคุณ' %></p>
+          <div class="owner-home-v16-stats"><strong><%= productTotal %></strong><span>ไอเทมพร้อมให้เลือก</span><b aria-hidden="true"></b><span class="owner-home-v16-live"><i></i> สนามเปิดแล้ว</span></div>
+          <div class="owner-home-v16-actions">
+            <a class="owner-home-v16-primary" href="#home-catalog">เข้าสู่ตลาดสินค้า <span aria-hidden="true">↗</span></a>
+            <a class="owner-home-v16-secondary" href="/products">สำรวจสินค้า</a>
+          </div>
+          <div class="owner-home-v16-index" aria-hidden="true"><span>01</span><i></i><span>WORLD / STORE</span></div>
+        </div>
+        <div class="owner-home-v16-display" data-scene-display>
+          <span class="owner-home-v16-display-shadow" aria-hidden="true"></span>
+          <span class="owner-home-v16-display-side" aria-hidden="true"></span>
+          <div class="owner-home-v16-screen">
+            <div class="banner-hero-shell">
+              <% if (settings.hero.bannerLink) { %>
+                <a href="<%= settings.hero.bannerLink %>" class="banner-sparkle group block">
+                  <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %> — ภาพแบนเนอร์ร้าน" fetchpriority="high" decoding="async" />
+                </a>
+              <% } else { %>
+                <div class="banner-sparkle"><img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %> — ภาพแบนเนอร์ร้าน" fetchpriority="high" decoding="async" /></div>
+              <% } %>
+            </div>
+            <span class="owner-home-v16-screen-label"><i></i> LIVE MATCHDAY / <%= String(productTotal).padStart(3, '0') %></span>
+          </div>
+          <% if (newest && newest.length) { const featured = newest[0]; %>
+            <a class="owner-home-v16-feature" href="/game/<%= featured.slug %>" aria-label="ดูสินค้า <%= featured.title %>">
+              <img src="<%= featured.images[0] %>" alt="" loading="lazy" decoding="async" />
+              <span><small>FEATURED DROP</small><b><%= featured.title %></b><strong>฿<%= featured.price.toLocaleString() %></strong></span>
+              <i aria-hidden="true">↗</i>
+            </a>
+          <% } %>
+          <div class="owner-home-v16-depth-mark" aria-hidden="true">3D<br><small>WORLD</small></div>
+        </div>
+      </div>
+      <button class="owner-home-v16-motion" type="button" data-scene-motion-toggle aria-pressed="false" aria-label="หยุดภาพเคลื่อนไหวของฉาก"><span aria-hidden="true">Ⅱ</span><span>หยุดฉาก</span></button>
+      <span class="owner-home-v16-scroll" aria-hidden="true">SCROLL TO EXPLORE <i></i></span>
+  </section>
+<% } else if (ownerHomeV16) { %>
+  <section class="owner-home-v16-scene owner-home-v16-scene--catalog" data-owner-scene data-scene-motion="playing" aria-label="หน้าหลักร้าน LilTeam">
+    <div class="owner-home-v16-world" aria-hidden="true"><span class="owner-home-v16-atmosphere owner-home-v16-atmosphere--one"></span><span class="owner-home-v16-atmosphere owner-home-v16-atmosphere--two"></span><span class="owner-home-v16-atmosphere owner-home-v16-atmosphere--three"></span><span class="owner-home-v16-stadium-ring"></span><span class="owner-home-v16-stands"></span><span class="owner-home-v16-pitch"><i></i></span><span class="owner-home-v16-light owner-home-v16-light--left"></span><span class="owner-home-v16-light owner-home-v16-light--right"></span><span class="owner-home-v16-particles"></span></div>
+    <div class="owner-home-v16-inner">
+      <div class="owner-home-v16-copy"><span class="owner-home-v16-kicker"><i></i> LILTEAM · MATCHDAY WORLD</span><h1><%= settings.shopName || 'LILTeam Shop' %><span>เกมของคุณ เริ่มที่นี่</span></h1><p><%= settings.tagline || 'เลือกไอเทมที่ใช่ แล้วลงสนามในแบบของคุณ' %></p><div class="owner-home-v16-stats"><strong><%= productTotal %></strong><span>ไอเทมพร้อมให้เลือก</span><b aria-hidden="true"></b><span class="owner-home-v16-live"><i></i> สนามเปิดแล้ว</span></div><div class="owner-home-v16-actions"><a class="owner-home-v16-primary" href="#home-catalog">เข้าสู่ตลาดสินค้า <span aria-hidden="true">↗</span></a><a class="owner-home-v16-secondary" href="/products">สำรวจสินค้า</a></div><div class="owner-home-v16-index" aria-hidden="true"><span>01</span><i></i><span>WORLD / STORE</span></div></div>
+      <div class="owner-home-v16-display owner-home-v16-product-scene" data-scene-display><span class="owner-home-v16-display-shadow" aria-hidden="true"></span><span class="owner-home-v16-display-side" aria-hidden="true"></span><div class="owner-home-v16-product-stack"><% (newest || []).slice(0, 3).forEach((featured, index) => { %><a class="owner-home-v16-product-card" style="--card-depth:<%= index %>" href="/game/<%= featured.slug %>"><img src="<%= featured.images[0] %>" alt="<%= featured.title %>" loading="<%= index === 0 ? 'eager' : 'lazy' %>" decoding="async" /><span><small>FEATURED DROP</small><b><%= featured.title %></b><strong>฿<%= featured.price.toLocaleString() %></strong></span></a><% }) %><span class="owner-home-v16-product-orbit" aria-hidden="true"></span></div><div class="owner-home-v16-depth-mark" aria-hidden="true">3D<br><small>WORLD</small></div></div>
+    </div>
+    <button class="owner-home-v16-motion" type="button" data-scene-motion-toggle aria-pressed="false" aria-label="หยุดภาพเคลื่อนไหวของฉาก"><span aria-hidden="true">Ⅱ</span><span>หยุดฉาก</span></button><span class="owner-home-v16-scroll" aria-hidden="true">SCROLL TO EXPLORE <i></i></span>
+  </section>
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
   <section class="storefront-hero-banner">
-    <% if (ownerHomeV14) { %>
-    <div class="owner-home-v14-hero">
-      <div class="owner-home-v14-hero-copy">
-        <span class="owner-home-v14-eyebrow">MAIN STORE <i></i> MATCHDAY EDITION</span>
-        <h1><%= settings.shopName || 'LILTeam Shop' %></h1>
-        <p><%= settings.tagline || 'เลือกชมสินค้าและข้อเสนอจากร้านได้ที่นี่' %></p>
-        <div class="owner-home-v14-hero-count"><strong><%= productTotal %></strong><span>รายการในร้าน</span></div>
-        <a class="owner-home-v14-hero-link" href="#home-catalog">เลือกดูสินค้า <span aria-hidden="true">↘</span></a>
-      </div>
-    <% } %>
     <div class="banner-hero-shell w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
       <% if (settings.hero.bannerLink) { %>
-        <a href="<%= settings.hero.bannerLink %>"
-          class="banner-sparkle group block overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]
-                 transition-all duration-300 hover:border-[var(--gold)]/60 hover:shadow-[0_0_50px_-10px_color-mix(in_srgb,var(--gold)_50%,transparent)]">
-          <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" fetchpriority="high" decoding="async"
-            class="w-full object-cover transition duration-500 group-hover:scale-[1.02] group-hover:brightness-105" />
+        <a href="<%= settings.hero.bannerLink %>" class="banner-sparkle group block overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)] transition-all duration-300 hover:border-[var(--gold)]/60 hover:shadow-[0_0_50px_-10px_color-mix(in_srgb,var(--gold)_50%,transparent)]">
+          <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" fetchpriority="high" decoding="async" class="w-full object-cover transition duration-500 group-hover:scale-[1.02] group-hover:brightness-105" />
         </a>
       <% } else { %>
-        <div class="banner-sparkle overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]">
-          <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" fetchpriority="high" decoding="async" class="w-full object-cover" />
-        </div>
+        <div class="banner-sparkle overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]"><img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" fetchpriority="high" decoding="async" class="w-full object-cover" /></div>
       <% } %>
     </div>
-    <% if (ownerHomeV14) { %></div><% } %>
   </section>
 <% } else { %>
 <section class="modern-fan-hero border-b border-[var(--border)] overflow-hidden">
@@ -801,7 +847,7 @@
 </section>
 <script>(function(){const grid=document.querySelector('.all-products-grid'),search=document.getElementById('homeCatalogSearch'),buttons=[...document.querySelectorAll('[data-home-stock]')];if(!grid)return;let stock='all';const cards=[...grid.querySelectorAll('.filterable-card')];function apply(){const term=(search?.value||'').trim().toLocaleLowerCase('th-TH');cards.forEach(card=>{const matchesText=!term||(card.dataset.title||'').toLocaleLowerCase('th-TH').includes(term);const matchesStock=stock==='all'||card.dataset.stock===stock;card.toggleAttribute('hidden',!(matchesText&&matchesStock));});}search?.addEventListener('input',apply);buttons.forEach(button=>button.addEventListener('click',()=>{stock=button.dataset.homeStock||'all';buttons.forEach(item=>{const active=item===button;item.classList.toggle('is-active',active);item.setAttribute('aria-pressed',String(active));});apply();}));buttons.forEach(item=>item.setAttribute('aria-pressed',String(item.classList.contains('is-active'))));apply();})();</script>
 
-<% if (ownerHomeV14) { %></div><% } %>
+<% if (ownerHomeV16) { %></div><% } %>
 
 <%
   const boxGamePrizes = miniGamePrizes.filter(p => (p.gameType || 'box') === 'box');
