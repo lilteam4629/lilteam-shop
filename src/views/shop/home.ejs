@@ -51,41 +51,43 @@
 </style>
 <% } %>
 
-<% const ownerHomeV18 = typeof isMainSite !== 'undefined' && isMainSite; %>
-<% if (ownerHomeV18) { %><div class="owner-home-v18-layout" data-owner-home-layout="cinema-catalog"><% } %>
+<% const ownerHomeV19 = typeof isMainSite !== 'undefined' && isMainSite; %>
+<% if (ownerHomeV19) { %><div class="owner-home-v19-layout" data-owner-home-layout="neko-flix-store"><% } %>
 
-<% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2 && !ownerHomeV18) { %>
+<% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2 && !ownerHomeV19) { %>
   <%- include('../partials/locker-hero', { newest, stats, settings, filterTags, publicPreview: typeof publicPreview !== 'undefined' ? publicPreview : false }) %>
-<% } else if (ownerHomeV18) { %>
+<% } else if (ownerHomeV19) { %>
   <%
     const ownerHomeBanner = settings.hero && settings.hero.mode === 'banner' ? settings.hero.bannerImage : null;
   %>
-  <section class="owner-home-v18-feature" aria-labelledby="owner-home-v18-title">
-    <div class="owner-home-v18-kicker"><span></span> LILTEAM SHOP <i>·</i> THE MAIN STORE</div>
+  <%
+    const ownerHomeFeatured = (newest || [])[0] || null;
+  %>
+  <section class="owner-home-v19-hero" aria-labelledby="owner-home-v19-title">
     <% if (ownerHomeBanner) { %>
-      <div class="owner-home-v18-artwork">
+      <div class="owner-home-v19-artwork">
         <% if (settings.hero.bannerLink) { %>
-          <a href="<%= settings.hero.bannerLink %>" class="owner-home-v18-banner-link" aria-label="เปิดแบนเนอร์หน้าร้าน">
-            <img src="<%= ownerHomeBanner %>" alt="<%= settings.shopName || 'LILTeam Shop' %> — แบนเนอร์หน้าร้าน" fetchpriority="high" decoding="async" />
-          </a>
+          <a href="<%= settings.hero.bannerLink %>" aria-label="เปิดแบนเนอร์ร้าน <%= settings.shopName %>"><img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high" decoding="async" /></a>
         <% } else { %>
-          <div class="owner-home-v18-banner-link">
-            <img src="<%= ownerHomeBanner %>" alt="<%= settings.shopName || 'LILTeam Shop' %> — แบนเนอร์หน้าร้าน" fetchpriority="high" decoding="async" />
-          </div>
+          <img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high" decoding="async" />
         <% } %>
       </div>
     <% } %>
-    <div class="owner-home-v18-feature-info">
-      <div class="owner-home-v18-brand-copy">
-        <p>OFFICIAL STORE <span>·</span> <%= Number(productTotal || 0).toLocaleString() %> รายการ</p>
-        <h1 id="owner-home-v18-title"><%= settings.shopName || 'LILTeam Shop' %></h1>
-        <div class="owner-home-v18-tagline"><%= settings.tagline || 'เลือกไอเทมที่ชอบ แล้วพร้อมลงสนามในแบบของคุณ' %></div>
+    <div class="owner-home-v19-hero-content">
+      <p class="owner-home-v19-eyebrow"><span></span> LILTEAM SHOP <i>·</i> FEATURED STORE</p>
+      <h1 id="owner-home-v19-title"><%= settings.shopName || 'LILTeam Shop' %></h1>
+      <p class="owner-home-v19-description"><%= settings.tagline || 'เลือกสินค้าที่ใช่ พร้อมลุยในแบบของคุณ' %></p>
+      <div class="owner-home-v19-meta">
+        <span class="owner-home-v19-meta-accent"><%= Number(productTotal || 0).toLocaleString() %> รายการ</span>
+        <% if (settings.openHours) { %><span><%= settings.openHours %></span><% } %>
+        <% if (ownerHomeFeatured) { %><span>สินค้าใหม่ · <%= ownerHomeFeatured.title %></span><% } %>
       </div>
-      <div class="owner-home-v18-actions">
-        <a class="owner-home-v18-primary" href="#home-catalog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg> เลือกดูสินค้า</a>
-        <a class="owner-home-v18-secondary" href="/help">วิธีสั่งซื้อ</a>
+      <div class="owner-home-v19-actions">
+        <a class="owner-home-v19-primary" href="#home-catalog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg> เลือกสินค้า</a>
+        <a class="owner-home-v19-secondary" href="/help">วิธีสั่งซื้อ</a>
       </div>
     </div>
+    <div class="owner-home-v19-hero-note"><span></span> LILTEAM MAIN STORE <i>·</i> <%= Number(productTotal || 0).toLocaleString() %> รายการ</div>
   </section>
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
   <section class="storefront-hero-banner">
@@ -157,18 +159,20 @@
 </section>
 <% } %>
 
-<% if (ownerHomeV18 && newest && newest.length) { %>
-  <section class="owner-home-v18-arrivals" aria-labelledby="owner-home-v18-arrivals-title">
-    <div class="owner-home-v18-section-head">
-      <div><p>JUST LANDED <span>·</span> FROM THE REAL CATALOG</p><h2 id="owner-home-v18-arrivals-title">สินค้าเข้าใหม่</h2></div>
-      <a href="#home-catalog">ดูสินค้าทั้งหมด <span aria-hidden="true">↗</span></a>
+<% if (ownerHomeV19 && newest && newest.length) { %>
+  <section class="owner-home-v19-section" id="owner-home-v19-trending" aria-labelledby="owner-home-v19-trending-title">
+    <div class="owner-home-v19-section-head">
+      <div><h2 id="owner-home-v19-trending-title">สินค้าเข้าใหม่</h2><p>อัปเดตล่าสุดจากรายการสินค้าจริงของร้าน</p></div>
+      <a href="#home-catalog">ดูทั้งหมด <span aria-hidden="true">→</span></a>
     </div>
-    <div class="owner-home-v18-arrivals-rail">
+    <div class="owner-home-v19-product-rail" aria-label="สินค้าเข้าใหม่">
       <% newest.slice(0, 6).forEach((product, index) => { %>
-        <a class="owner-home-v18-arrival-card" href="/game/<%= product.slug %>">
-          <span class="owner-home-v18-arrival-image"><% if (product.images && product.images[0]) { %><img src="<%= product.images[0] %>" alt="" loading="<%= index === 0 ? 'eager' : 'lazy' %>" decoding="async" /><% } else { %><span aria-hidden="true">◇</span><% } %></span>
-          <span class="owner-home-v18-arrival-copy"><small>NEW IN STORE</small><b><%= product.title %></b><strong>฿<%= Number(product.price || 0).toLocaleString() %></strong></span>
-          <span class="owner-home-v18-arrival-arrow" aria-hidden="true">↗</span>
+        <a class="owner-home-v19-product-card" href="/game/<%= product.slug %>">
+          <span class="owner-home-v19-poster">
+            <% if (product.images && product.images[0]) { %><img src="<%= product.images[0] %>" alt="<%= product.title %>" loading="<%= index === 0 ? 'eager' : 'lazy' %>" decoding="async" /><% } else { %><span class="owner-home-v19-poster-fallback" aria-hidden="true">L</span><% } %>
+            <span class="owner-home-v19-poster-tag">สินค้าใหม่</span>
+          </span>
+          <span class="owner-home-v19-product-info"><b><%= product.title %></b><strong>฿<%= Number(product.price || 0).toLocaleString() %></strong></span>
         </a>
       <% }) %>
     </div>
@@ -834,7 +838,7 @@
 </section>
 <script>(function(){const grid=document.querySelector('.all-products-grid'),search=document.getElementById('homeCatalogSearch'),buttons=[...document.querySelectorAll('[data-home-stock]')];if(!grid)return;let stock='all';const cards=[...grid.querySelectorAll('.filterable-card')];function apply(){const term=(search?.value||'').trim().toLocaleLowerCase('th-TH');cards.forEach(card=>{const matchesText=!term||(card.dataset.title||'').toLocaleLowerCase('th-TH').includes(term);const matchesStock=stock==='all'||card.dataset.stock===stock;card.toggleAttribute('hidden',!(matchesText&&matchesStock));});}search?.addEventListener('input',apply);buttons.forEach(button=>button.addEventListener('click',()=>{stock=button.dataset.homeStock||'all';buttons.forEach(item=>{const active=item===button;item.classList.toggle('is-active',active);item.setAttribute('aria-pressed',String(active));});apply();}));buttons.forEach(item=>item.setAttribute('aria-pressed',String(item.classList.contains('is-active'))));apply();})();</script>
 
-<% if (ownerHomeV18) { %></div><% } %>
+<% if (ownerHomeV19) { %></div><% } %>
 
 <%
   const boxGamePrizes = miniGamePrizes.filter(p => (p.gameType || 'box') === 'box');

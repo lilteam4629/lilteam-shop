@@ -313,8 +313,12 @@ async function run() {
     if (!home.body.includes('/css/tailwind.generated.css')) throw new Error('home is missing the precompiled Tailwind stylesheet');
     if (!home.body.includes('class="relative flex-1 storefront-owner-home-v7"')) throw new Error('main home is missing its page-scoped redesign marker');
     if (!home.body.includes('/css/storefront-owner-home-v7.css')) throw new Error('main home is missing its isolated redesign stylesheet');
+    if (!home.body.includes('data-owner-home-layout="neko-flix-store"') || !home.body.includes('/css/storefront-owner-home-v19.css')) throw new Error('main home is missing the new NekoFlix-inspired shop layout');
     const ownerHomeCss = await fetchOk('/css/storefront-owner-home-v7.css', 'text/css');
     if (!/#site-page-shell\.storefront-owner-home-v7\s*\{[^}]*background-color:\s*var\(--bg\)\s*!important/s.test(ownerHomeCss.body)) throw new Error('owner homepage background does not cover the shared storefront artwork');
+    const ownerHomeV19Css = await fetchOk('/css/storefront-owner-home-v19.css', 'text/css');
+    if (!/\.owner-home-v19-artwork img\s*\{[^}]*object-fit:\s*contain/s.test(ownerHomeV19Css.body)) throw new Error('main shop banner is not shown in full');
+    if (!home.body.includes('owner-home-v19-hero') || !home.body.includes('owner-home-v19-product-rail')) throw new Error('main home is missing its real-data hero or product rail');
     if (home.body.includes('cdn.tailwindcss.com')) throw new Error('home still loads the Tailwind browser compiler');
     if (!home.body.includes('data-seamless-navigation="true"')) throw new Error('home is missing persistent navigation for uninterrupted music');
     if (!home.body.includes('/js/interaction-performance-v1.js')) throw new Error('home is missing shared interaction performance helpers');
