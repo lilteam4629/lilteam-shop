@@ -11,6 +11,15 @@ body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store
   --gold-text: #b99aff;
   --gold-contrast: #fff;
   --gold-hover: #7545cf;
+  --bg: #09080d;
+  --card: #14121b;
+  --input: #100e16;
+  --border: #292532;
+  --border-light: #373142;
+  --text: #f4f1fb;
+  --text-2: #d2cddd;
+  --text-3: #a49caf;
+  --text-4: #827a8f;
   min-height: 70px;
   border-bottom: 1px solid #282431 !important;
   background: rgba(9, 8, 13, .97) !important;
