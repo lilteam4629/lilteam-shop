@@ -365,3 +365,17 @@ body.admin-main-site .announcement-tip strong { color: #493817; }
   body.admin-main-site .announcement-overview-note { border-radius: 13px; }
   body.admin-main-site .announcement-row:nth-child(n) { border-left-width: 3px; }
 }
+/* Keep notice-board edges neutral; the shop accent is reserved for fills and text. */
+body.admin-main-site .announcement-admin-page,
+body.admin-main-site .announcement-admin-page *,
+body.admin-main-site .announcement-admin-page *::before,
+body.admin-main-site .announcement-admin-page *::after {
+  border-color: #e5e7eb !important;
+}
+body.admin-main-site .announcement-admin-page :focus,
+body.admin-main-site .announcement-admin-page :focus-visible,
+body.admin-main-site .announcement-search:focus-within {
+  outline: 2px solid #6b7280 !important;
+  outline-offset: 2px !important;
+  box-shadow: none !important;
+}
