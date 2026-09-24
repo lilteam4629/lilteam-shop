@@ -8,14 +8,20 @@ const route = read('src/routes/shop.js');
 const layout = read('src/views/layouts/main.ejs');
 const home = read('src/views/shop/home.ejs');
 const css = read('public/css/storefront-owner-home-v7.css');
-const bannerCss = read('public/css/storefront-owner-home-v13.css');
+const redesignCss = read('public/css/storefront-owner-home-v14.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
   'the redesign must be enabled for the main store only');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*?storefront-owner-home-v7\.css/,
   'the owner stylesheet must be available for seamless navigation on the main site');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v13\.css/,
-  'the full-bleed banner stylesheet must only load on the owner homepage');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v14\.css/,
+  'the full homepage redesign must only load on the owner homepage');
+assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
+  'the rejected oversized banner treatment must no longer load');
+assert.match(home, /if \(ownerHomeV14\) \{ %><div class="owner-home-v14-layout"/,
+  'the new content layout must be wrapped only for the main store');
+assert.match(home, /if \(ownerHomeV14\) \{ %><\/div><% \}/,
+  'the main-store layout wrapper must close before the shared lower page modules');
 assert.doesNotMatch(home, /storefront-banner-index/,
   'the rejected side rail must not render around the main-store banner');
 assert.match(layout, /id="site-page-shell"[^\n]*storefrontOwnerHomeV7/,
@@ -42,21 +48,29 @@ const uploadedBackgroundOverride = stylesheet.nodes.find(node =>
 assert.ok(uploadedBackgroundOverride, 'uploaded backgrounds must not show through this homepage');
 assert.ok(ruleCount > 0, 'the owner-only stylesheet should contain the redesign rules');
 
-const bannerStylesheet = postcss.parse(bannerCss, { from: 'storefront-owner-home-v12.css' });
-let bannerRuleCount = 0;
-bannerStylesheet.walkRules(rule => {
-  bannerRuleCount += 1;
+const redesignStylesheet = postcss.parse(redesignCss, { from: 'storefront-owner-home-v14.css' });
+let redesignRuleCount = 0;
+redesignStylesheet.walkRules(rule => {
+  redesignRuleCount += 1;
   for (const selector of rule.selectors) {
     assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7'),
-      `unscoped banner rule could affect rental shops: ${selector}`);
+      `unscoped redesign rule could affect rental shops: ${selector}`);
+    if (!selector.includes('.owner-home-v14-layout')) {
+      assert.ok(selector.includes('> .store-content-section'),
+        `non-layout rule must be scoped to known main-home modules: ${selector}`);
+    }
   }
 });
-assert.match(bannerCss, /object-fit:\s*contain\s*!important/,
-  'the full banner artwork must never be crop-filled');
-assert.match(bannerCss, /height:\s*auto\s*!important/,
-  'the banner must keep its intrinsic aspect ratio');
-assert.match(bannerCss, /\.storefront-hero-banner\s*>\s*\.banner-hero-shell\s*\{[\s\S]*?width:\s*100%\s*!important/,
-  'the banner image must use the full available page width');
-assert.ok(bannerRuleCount > 0, 'the owner-only editorial banner needs scoped CSS rules');
+assert.match(redesignCss, /\.banner-sparkle img\s*\{[\s\S]*?height:\s*auto\s*!important/,
+  'the smaller banner must keep its intrinsic aspect ratio');
+assert.match(redesignCss, /\.banner-sparkle img\s*\{[\s\S]*?object-fit:\s*contain\s*!important/,
+  'the banner artwork must remain fully visible');
+assert.match(redesignCss, /\.banner-sparkle\s*\{[\s\S]*?max-width:\s*1120px\s*!important/,
+  'the banner width must be capped so it no longer dominates the page');
+assert.match(redesignCss, /\.owner-home-v14-layout\s*\{[\s\S]*?display:\s*flex/,
+  'the main homepage content must receive an intentional new section order');
+assert.doesNotMatch(redesignCss, /#(?:00(?:ff|cc)91|34cf91|34d399|10b981)\b/i,
+  'the redesign must not hardcode green accents over the selected shop theme');
+assert.ok(redesignRuleCount > 0, 'the owner-only homepage redesign should contain scoped CSS rules');
 
-console.log(`Owner homepage isolation checks passed (${ruleCount + bannerRuleCount} scoped CSS rules).`);
+console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount} scoped CSS rules).`);

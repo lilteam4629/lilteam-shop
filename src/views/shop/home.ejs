@@ -51,6 +51,9 @@
 </style>
 <% } %>
 
+<% const ownerHomeV14 = typeof isMainSite !== 'undefined' && isMainSite; %>
+<% if (ownerHomeV14) { %><div class="owner-home-v14-layout" data-owner-home-layout="matchday-editorial"><% } %>
+
 <% if (typeof heroPreviewV2 !== 'undefined' && heroPreviewV2) { %>
   <%- include('../partials/locker-hero', { newest, stats, settings, filterTags, publicPreview: typeof publicPreview !== 'undefined' ? publicPreview : false }) %>
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
@@ -734,7 +737,7 @@
 </section>
 <% } %>
 
-<section class="store-product-gallery w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
+<section id="home-catalog" class="store-product-gallery w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
   <% if (homeSections.length) { %>
     <% homeSections.forEach(section => { %>
       <section id="home-section-<%= section.id %>" class="scroll-mt-28">
@@ -786,6 +789,8 @@
   <% } %>
 </section>
 <script>(function(){const grid=document.querySelector('.all-products-grid'),search=document.getElementById('homeCatalogSearch'),buttons=[...document.querySelectorAll('[data-home-stock]')];if(!grid)return;let stock='all';const cards=[...grid.querySelectorAll('.filterable-card')];function apply(){const term=(search?.value||'').trim().toLocaleLowerCase('th-TH');cards.forEach(card=>{const matchesText=!term||(card.dataset.title||'').toLocaleLowerCase('th-TH').includes(term);const matchesStock=stock==='all'||card.dataset.stock===stock;card.toggleAttribute('hidden',!(matchesText&&matchesStock));});}search?.addEventListener('input',apply);buttons.forEach(button=>button.addEventListener('click',()=>{stock=button.dataset.homeStock||'all';buttons.forEach(item=>{const active=item===button;item.classList.toggle('is-active',active);item.setAttribute('aria-pressed',String(active));});apply();}));buttons.forEach(item=>item.setAttribute('aria-pressed',String(item.classList.contains('is-active'))));apply();})();</script>
+
+<% if (ownerHomeV14) { %></div><% } %>
 
 <%
   const boxGamePrizes = miniGamePrizes.filter(p => (p.gameType || 'box') === 'box');
