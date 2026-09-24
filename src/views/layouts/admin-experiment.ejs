@@ -24,7 +24,7 @@
   <link rel="stylesheet" href="<%= asset('css/admin-experiment-v1.css') %>" />
   <style><%- typeof adminBrandCss !== 'undefined' ? adminBrandCss : '' %></style>
 </head>
-<body class="experiment-admin admin-site">
+<body class="experiment-admin admin-site <%= typeof isMainSite !== 'undefined' && isMainSite && active === 'announcements' ? 'main-admin-announcements' : '' %>">
   <div id="experiment-canonical-sidebar-template" hidden><%- include('../partials/admin-experiment-sidebar-effects') %></div>
   <% if (hasBuiltAdminShell) { %>
     <%- normalizedAdminBody %>
