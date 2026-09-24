@@ -40,32 +40,113 @@
 #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .storefront-hero-banner {
   position: relative !important;
   isolation: isolate !important;
-  padding: clamp(28px, 4vw, 48px) 0 12px !important;
+  padding: clamp(22px, 3vw, 34px) 0 12px !important;
   border: 0 !important;
   background: transparent !important;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .storefront-hero-banner::before {
-  display: block !important;
-  width: min(1120px, 100%) !important;
-  margin: 0 auto 10px !important;
-  color: var(--gold-text) !important;
-  content: 'MATCHDAY  /  LILTEAM SHOP' !important;
-  font: 800 10px/1.2 'JetBrains Mono', monospace !important;
-  letter-spacing: .2em !important;
+  display: none !important;
+  content: none !important;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .storefront-hero-banner::after,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .banner-hero-shell::before,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .banner-hero-shell::after,
 #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .banner-sparkle::before,
 #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .banner-sparkle::after {
   display: none !important;
   content: none !important;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .storefront-hero-banner > .banner-hero-shell {
-  width: min(1120px, 100%) !important;
-  max-width: 1120px !important;
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero {
+  display: grid !important;
+  grid-template-columns: minmax(265px, .76fr) minmax(0, 1.62fr) !important;
+  align-items: center !important;
+  gap: clamp(14px, 2vw, 26px) !important;
+  width: min(1180px, 100%) !important;
   margin: 0 auto !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-copy {
+  position: relative !important;
+  min-width: 0 !important;
+  padding: clamp(20px, 2.6vw, 34px) clamp(16px, 2vw, 25px) !important;
+  border-left: 3px solid var(--gold) !important;
+  background: color-mix(in srgb, var(--gold) 7%, var(--card)) !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-eyebrow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  color: var(--gold-text) !important;
+  font: 800 9px/1.3 'JetBrains Mono', monospace !important;
+  letter-spacing: .15em !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-eyebrow i {
+  width: 5px !important;
+  height: 5px !important;
+  border-radius: 50% !important;
+  background: var(--gold) !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-copy h1 {
+  margin-top: 19px !important;
+  color: var(--text) !important;
+  font-size: clamp(24px, 2.5vw, 34px) !important;
+  font-weight: 950 !important;
+  line-height: 1.14 !important;
+  letter-spacing: -.045em !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-copy p {
+  max-width: 310px !important;
+  margin-top: 10px !important;
+  color: var(--text-3) !important;
+  font-size: 12px !important;
+  line-height: 1.65 !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-count {
+  display: flex !important;
+  align-items: baseline !important;
+  gap: 7px !important;
+  margin-top: 20px !important;
+  padding-top: 12px !important;
+  border-top: 1px solid var(--home-v14-line) !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-count strong {
+  color: var(--gold-text) !important;
+  font-size: 22px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-count span {
+  color: var(--text-4) !important;
+  font-size: 10px !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-link {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 18px !important;
+  min-height: 38px !important;
+  margin-top: 17px !important;
+  padding: 0 13px !important;
+  border: 1px solid var(--gold) !important;
+  border-radius: 5px !important;
+  background: var(--gold) !important;
+  color: var(--gold-contrast) !important;
+  font-size: 11px !important;
+  font-weight: 850 !important;
+  text-decoration: none !important;
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-link:hover {
+  background: var(--gold-hover) !important;
+  border-color: var(--gold-hover) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .storefront-hero-banner > .banner-hero-shell {
+  width: 100% !important;
+  max-width: none !important;
+  min-width: 0 !important;
+  margin: 0 !important;
   padding: 0 !important;
   overflow: visible !important;
   border: 0 !important;
@@ -77,7 +158,7 @@
 #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .banner-sparkle {
   display: block !important;
   width: 100% !important;
-  max-width: 1120px !important;
+  max-width: none !important;
   height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
@@ -472,7 +553,12 @@
 @media (max-width: 700px) {
   #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout { width: calc(100% - 24px); }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .storefront-hero-banner { padding-top: 20px !important; }
-  #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .storefront-hero-banner::before { font-size: 8px !important; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-copy { padding: 17px 15px !important; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-copy h1 { margin-top: 10px !important; font-size: 25px !important; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-copy p { margin-top: 6px !important; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-count { display: none !important; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .owner-home-v14-hero-link { min-height: 34px !important; margin-top: 10px !important; }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .banner-sparkle { border-radius: 7px !important; }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .home-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v14-layout .home-category-card {

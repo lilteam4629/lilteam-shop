@@ -58,6 +58,16 @@
   <%- include('../partials/locker-hero', { newest, stats, settings, filterTags, publicPreview: typeof publicPreview !== 'undefined' ? publicPreview : false }) %>
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
   <section class="storefront-hero-banner">
+    <% if (ownerHomeV14) { %>
+    <div class="owner-home-v14-hero">
+      <div class="owner-home-v14-hero-copy">
+        <span class="owner-home-v14-eyebrow">MAIN STORE <i></i> MATCHDAY EDITION</span>
+        <h1><%= settings.shopName || 'LILTeam Shop' %></h1>
+        <p><%= settings.tagline || 'เลือกชมสินค้าและข้อเสนอจากร้านได้ที่นี่' %></p>
+        <div class="owner-home-v14-hero-count"><strong><%= productTotal %></strong><span>รายการในร้าน</span></div>
+        <a class="owner-home-v14-hero-link" href="#home-catalog">เลือกดูสินค้า <span aria-hidden="true">↘</span></a>
+      </div>
+    <% } %>
     <div class="banner-hero-shell w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
       <% if (settings.hero.bannerLink) { %>
         <a href="<%= settings.hero.bannerLink %>"
@@ -72,6 +82,7 @@
         </div>
       <% } %>
     </div>
+    <% if (ownerHomeV14) { %></div><% } %>
   </section>
 <% } else { %>
 <section class="modern-fan-hero border-b border-[var(--border)] overflow-hidden">

@@ -65,8 +65,8 @@ assert.match(redesignCss, /\.banner-sparkle img\s*\{[\s\S]*?height:\s*auto\s*!im
   'the smaller banner must keep its intrinsic aspect ratio');
 assert.match(redesignCss, /\.banner-sparkle img\s*\{[\s\S]*?object-fit:\s*contain\s*!important/,
   'the banner artwork must remain fully visible');
-assert.match(redesignCss, /\.banner-sparkle\s*\{[\s\S]*?max-width:\s*1120px\s*!important/,
-  'the banner width must be capped so it no longer dominates the page');
+assert.match(redesignCss, /\.owner-home-v14-hero\s*\{[\s\S]*?grid-template-columns:\s*minmax\(265px,\s*\.76fr\)\s+minmax\(0,\s*1\.62fr\)[\s\S]*?width:\s*min\(1180px,\s*100%\)/,
+  'the banner must sit in a compact split hero rather than dominate a full-width row');
 assert.match(redesignCss, /\.owner-home-v14-layout\s*\{[\s\S]*?display:\s*flex/,
   'the main homepage content must receive an intentional new section order');
 assert.doesNotMatch(redesignCss, /#(?:00(?:ff|cc)91|34cf91|34d399|10b981)\b/i,
