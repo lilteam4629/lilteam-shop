@@ -14,7 +14,7 @@
         <div>
           <span class="experiment-kicker">STOREFRONT · WELCOME EXPERIENCE</span>
           <h1>ป๊อปอัปต้อนรับ</h1>
-          <p>จัดการข้อความและภาพสไลด์ที่ลูกค้าเห็นเมื่อเข้าหน้าร้าน ดูตัวอย่างได้ก่อนบันทึก</p>
+          <p>จัดการข้อความและภาพสไลด์ที่ลูกค้าเห็นเมื่อเข้าหน้าร้าน การเปลี่ยนแปลงจะมีผลหลังบันทึก</p>
         </div>
         <div class="welcome-live-hero-actions">
           <span class="welcome-live-status <%= popup.enabled ? 'is-active' : '' %>" data-welcome-status><i></i><span><%= popup.enabled ? 'กำลังแสดงบนหน้าร้าน' : 'ปิดการแสดงอยู่' %></span></span>
@@ -24,8 +24,8 @@
 
       <section class="welcome-live-stats" aria-label="สรุปป๊อปอัปต้อนรับ">
         <article><span class="welcome-live-stat-icon" aria-hidden="true">◉</span><div><small>สถานะ</small><strong data-welcome-stat-status><%= popup.enabled ? 'เปิดใช้งาน' : 'ปิดไว้' %></strong></div></article>
-        <article><span class="welcome-live-stat-icon is-violet" aria-hidden="true">▧</span><div><small>ภาพสไลด์ที่บันทึก</small><strong><%= popupImages.length %> รูป</strong></div></article>
-        <article><span class="welcome-live-stat-icon is-amber" aria-hidden="true">Aa</span><div><small>ข้อความที่แสดง</small><strong><%= (popup.showTitle !== false ? 1 : 0) + (popup.showContent !== false ? 1 : 0) %> ส่วน</strong></div></article>
+        <article><span class="welcome-live-stat-icon" aria-hidden="true">▧</span><div><small>ภาพสไลด์ที่บันทึก</small><strong><%= popupImages.length %> รูป</strong></div></article>
+        <article><span class="welcome-live-stat-icon" aria-hidden="true">Aa</span><div><small>ข้อความที่แสดง</small><strong><%= (popup.showTitle !== false ? 1 : 0) + (popup.showContent !== false ? 1 : 0) %> ส่วน</strong></div></article>
       </section>
 
       <form action="/admin/welcome-popup" method="post" enctype="multipart/form-data" class="welcome-live-form" data-welcome-form>
@@ -53,12 +53,11 @@
             <label class="welcome-live-field" for="welcome-live-title"><span>หัวข้อป๊อปอัป</span><input id="welcome-live-title" type="text" name="title" maxlength="200" value="<%= popupTitle %>" data-welcome-title autocomplete="off" /></label>
             <label class="welcome-live-field" for="welcome-live-content"><span>ข้อความประชาสัมพันธ์</span><textarea id="welcome-live-content" name="content" rows="5" maxlength="5000" data-welcome-content><%= popupContent %></textarea><small>ข้อความจะแสดงใต้หัวข้อในหน้าต่างต้อนรับ</small></label>
 
-            <div class="welcome-live-preview-note"><span aria-hidden="true">i</span><p>ตัวอย่างด้านขวาอัปเดตตามค่าที่แก้ และยังไม่เปลี่ยนหน้าร้านจนกว่าจะกดบันทึก</p></div>
           </section>
 
           <section class="welcome-live-card welcome-live-media" aria-labelledby="welcome-live-media-title">
             <header class="welcome-live-card-head">
-              <span class="welcome-live-card-icon is-violet" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg></span>
+              <span class="welcome-live-card-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9" r="1.5"/><path d="m21 15-5-5L5 20"/></svg></span>
               <div><span class="welcome-live-eyebrow">SLIDE GALLERY</span><h2 id="welcome-live-media-title">รูปภาพสไลด์</h2><p>เพิ่มได้หลายรูป ภาพจะหมุนสลับบนป๊อปอัปของหน้าร้าน</p></div>
               <span class="welcome-live-count" data-welcome-image-count><%= popupImages.length %> รูป</span>
             </header>
@@ -85,28 +84,6 @@
               <div class="welcome-live-gallery" data-welcome-gallery hidden></div>
             <% } %>
 
-            <div class="welcome-live-preview" aria-labelledby="welcome-live-preview-title">
-              <div class="welcome-live-preview-head"><div><span class="welcome-live-eyebrow">LIVE PREVIEW</span><h3 id="welcome-live-preview-title">ตัวอย่างป๊อปอัป</h3></div><span class="welcome-live-preview-tag" data-welcome-preview-status><i></i><span><%= popup.enabled ? 'พร้อมแสดง' : 'ปิดอยู่' %></span></span></div>
-              <div class="welcome-live-preview-stage" data-welcome-preview>
-                <div class="welcome-live-store-hint" aria-hidden="true"><span></span><span></span><span></span></div>
-                <article class="welcome-live-popup-card" data-welcome-preview-card>
-                  <div class="welcome-live-preview-art" data-welcome-preview-art>
-                    <img src="" alt="ตัวอย่างภาพป๊อปอัป" data-welcome-preview-image hidden />
-                    <div class="welcome-live-preview-placeholder" data-welcome-preview-placeholder><span aria-hidden="true">▧</span><strong>เพิ่มภาพสไลด์</strong><small>ภาพที่เลือกจะแสดงตรงนี้</small></div>
-                    <button type="button" class="welcome-live-slide-button is-prev" aria-label="ดูภาพก่อนหน้า" data-welcome-prev>‹</button>
-                    <button type="button" class="welcome-live-slide-button is-next" aria-label="ดูภาพถัดไป" data-welcome-next>›</button>
-                    <div class="welcome-live-dots" data-welcome-dots aria-label="ตำแหน่งภาพสไลด์"></div>
-                  </div>
-                  <div class="welcome-live-preview-copy" data-welcome-preview-copy>
-                    <h4 data-welcome-preview-title><%= popupTitle %></h4>
-                    <p data-welcome-preview-content><%= popupContent %></p>
-                  </div>
-                  <div class="welcome-live-preview-actions" aria-hidden="true"><span>เข้าสู่เว็บไซต์ <b>→</b></span><span>ไม่แสดงอีก 1 วัน</span></div>
-                </article>
-                <div class="welcome-live-preview-disabled" data-welcome-preview-disabled hidden><span aria-hidden="true">◌</span><strong>ป๊อปอัปปิดอยู่</strong><small>เปิดสวิตช์ด้านซ้ายเพื่อแสดงตัวอย่าง</small></div>
-              </div>
-              <p class="welcome-live-preview-caption">ตัวอย่างนี้เป็นการจำลองการจัดวาง · บันทึกแล้วจึงมีผลกับหน้าร้าน</p>
-            </div>
           </section>
         </div>
 
@@ -126,19 +103,7 @@
   if (!form) return;
 
   var enabled = form.querySelector('[data-welcome-enabled]');
-  var showTitle = form.querySelector('[data-welcome-show-title]');
-  var showContent = form.querySelector('[data-welcome-show-content]');
-  var title = form.querySelector('[data-welcome-title]');
-  var content = form.querySelector('[data-welcome-content]');
   var fileInput = form.querySelector('[data-welcome-files]');
-  var previewImage = form.querySelector('[data-welcome-preview-image]');
-  var placeholder = form.querySelector('[data-welcome-preview-placeholder]');
-  var previewTitle = form.querySelector('[data-welcome-preview-title]');
-  var previewContent = form.querySelector('[data-welcome-preview-content]');
-  var previewCopy = form.querySelector('[data-welcome-preview-copy]');
-  var previewCard = form.querySelector('[data-welcome-preview-card]');
-  var previewDisabled = form.querySelector('[data-welcome-preview-disabled]');
-  var previewStatus = form.querySelector('[data-welcome-preview-status]');
   var pageStatus = page.querySelector('[data-welcome-status]');
   var statStatus = page.querySelector('[data-welcome-stat-status]');
   var fileSummary = form.querySelector('[data-welcome-file-summary]');
@@ -146,73 +111,21 @@
   var keptCount = form.querySelector('[data-welcome-kept-count]');
   var gallery = form.querySelector('[data-welcome-gallery]');
   var galleryEmpty = form.querySelector('[data-welcome-gallery-empty]');
-  var dots = form.querySelector('[data-welcome-dots]');
   var saveState = form.querySelector('[data-welcome-save-state]');
   var saveIndicator = form.querySelector('[data-welcome-save-indicator]');
   var saveButton = form.querySelector('[data-welcome-save]');
-  var previousButton = form.querySelector('[data-welcome-prev]');
-  var nextButton = form.querySelector('[data-welcome-next]');
   var selectedFiles = [];
-  var objectUrls = [];
-  var imageIndex = 0;
 
-  function getImages() {
-    var existing = Array.from(form.querySelectorAll('[data-welcome-existing-image]')).filter(function (img) {
-      var remove = img.closest('.welcome-live-image-card')?.querySelector('[data-welcome-remove]');
-      return remove && !remove.checked;
-    }).map(function (img) { return { src: img.currentSrc || img.src, name: img.alt }; });
-    return existing.concat(selectedFiles.map(function (file, index) { return { src: objectUrls[index], name: file.name }; }));
-  }
-  function setPreviewImage(images) {
-    if (!images.length) {
-      previewImage.hidden = true;
-      previewImage.removeAttribute('src');
-      placeholder.hidden = false;
-      previousButton.hidden = true;
-      nextButton.hidden = true;
-      dots.replaceChildren();
-      return;
-    }
-    imageIndex = ((imageIndex % images.length) + images.length) % images.length;
-    previewImage.hidden = false;
-    placeholder.hidden = true;
-    previewImage.alt = images[imageIndex].name || 'ภาพป๊อปอัป';
-    previewImage.src = images[imageIndex].src;
-    previousButton.hidden = images.length < 2;
-    nextButton.hidden = images.length < 2;
-    dots.replaceChildren();
-    if (images.length > 1) images.forEach(function (_, index) {
-      var dot = document.createElement('button');
-      dot.type = 'button';
-      dot.className = index === imageIndex ? 'is-active' : '';
-      dot.setAttribute('aria-label', 'ดูรูปที่ ' + (index + 1));
-      dot.setAttribute('aria-current', index === imageIndex ? 'true' : 'false');
-      dot.addEventListener('click', function () { imageIndex = index; render(); });
-      dots.appendChild(dot);
-    });
-  }
   function render() {
-    var images = getImages();
     var isEnabled = enabled.checked;
-    var hasTitle = showTitle.checked && title.value.trim();
-    var hasContent = showContent.checked && content.value.trim();
-    previewTitle.textContent = title.value.trim() || 'ยินดีต้อนรับ!';
-    previewContent.textContent = content.value.trim() || 'ขอบคุณที่ใช้บริการเว็บไซต์ของเรา';
-    previewTitle.hidden = !showTitle.checked;
-    previewContent.hidden = !showContent.checked;
-    previewCopy.hidden = !hasTitle && !hasContent;
-    previewCard.hidden = !isEnabled;
-    previewDisabled.hidden = isEnabled;
-    previewStatus.classList.toggle('is-active', isEnabled);
-    previewStatus.querySelector('span').textContent = isEnabled ? 'พร้อมแสดง' : 'ปิดอยู่';
     pageStatus.classList.toggle('is-active', isEnabled);
     pageStatus.querySelector('span').textContent = isEnabled ? 'กำลังแสดงบนหน้าร้าน' : 'ปิดการแสดงอยู่';
     statStatus.textContent = isEnabled ? 'เปิดใช้งาน' : 'ปิดไว้';
-    imageCount.textContent = images.length + ' รูป';
+    var imageTotal = form.querySelectorAll('[data-welcome-remove]:not(:checked)').length + selectedFiles.length;
+    imageCount.textContent = imageTotal + ' รูป';
     if (keptCount) keptCount.textContent = form.querySelectorAll('[data-welcome-remove]:not(:checked)').length + ' รูป';
-    if (galleryEmpty) galleryEmpty.hidden = images.length > 0;
+    if (galleryEmpty) galleryEmpty.hidden = imageTotal > 0;
     if (gallery) gallery.classList.toggle('has-removals', !!form.querySelector('[data-welcome-remove]:checked'));
-    setPreviewImage(images);
   }
   function markDirty() {
     saveState.textContent = 'มีการแก้ไขที่ยังไม่ได้บันทึก';
@@ -220,15 +133,8 @@
   }
   form.addEventListener('input', function () { render(); markDirty(); });
   form.addEventListener('change', function () { render(); markDirty(); });
-  form.querySelectorAll('[data-welcome-remove]').forEach(function (checkbox) { checkbox.addEventListener('change', function () { imageIndex = 0; render(); }); });
-  previousButton.addEventListener('click', function () { imageIndex -= 1; render(); });
-  nextButton.addEventListener('click', function () { imageIndex += 1; render(); });
-  previewImage.addEventListener('error', function () { previewImage.hidden = true; placeholder.hidden = false; });
-
   if (fileInput) fileInput.addEventListener('change', function () {
-    objectUrls.forEach(function (url) { URL.revokeObjectURL(url); });
     selectedFiles = Array.from(fileInput.files || []);
-    objectUrls = selectedFiles.map(function (file) { return URL.createObjectURL(file); });
     var invalid = selectedFiles.length > 20 || selectedFiles.some(function (file) { return file.size > 8 * 1024 * 1024; });
     fileInput.setCustomValidity(selectedFiles.length > 20 ? 'เลือกภาพได้สูงสุด 20 รูปต่อครั้ง' : selectedFiles.some(function (file) { return file.size > 8 * 1024 * 1024; }) ? 'แต่ละรูปต้องมีขนาดไม่เกิน 8 MB' : '');
     if (selectedFiles.length) {
@@ -239,7 +145,6 @@
       fileSummary.textContent = 'ยังไม่ได้เลือกไฟล์ใหม่';
       fileSummary.classList.remove('is-error');
     }
-    imageIndex = 0;
     render();
     markDirty();
   });
@@ -264,7 +169,6 @@
     saveButton.setAttribute('aria-busy', 'true');
     saveButton.querySelector('span').textContent = 'กำลังบันทึก…';
   });
-  window.addEventListener('pagehide', function () { objectUrls.forEach(function (url) { URL.revokeObjectURL(url); }); });
   render();
 })();
 </script>
