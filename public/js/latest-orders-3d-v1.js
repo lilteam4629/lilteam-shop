@@ -15,7 +15,6 @@
     var original = track && track.querySelector('.latest-orders-group');
     if (!shell || !track || !original) return;
 
-    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     var visible = false;
     var userPaused = false;
     var resizeFrame = 0;
@@ -50,19 +49,13 @@
     }
 
     function update() {
-      var reduced = reducedMotion.matches;
-      var motionAllowed = !reduced;
-      shell.classList.toggle('is-visible', visible && !document.hidden && motionAllowed);
-      shell.classList.toggle('is-user-paused', userPaused || !motionAllowed);
+      shell.classList.toggle('is-visible', visible && !document.hidden);
+      shell.classList.toggle('is-user-paused', userPaused);
     }
 
     function pauseForInteraction() {
-      if (reducedMotion.matches || userPaused) return;
+      if (userPaused) return;
       userPaused = true;
-      update();
-    }
-
-    function onMotionChange() {
       update();
     }
 
@@ -96,8 +89,6 @@
     shell.addEventListener('wheel', pauseForInteraction, { passive: true });
     shell.addEventListener('keydown', onShellKeydown);
     document.addEventListener('visibilitychange', update);
-    if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', onMotionChange);
-    else reducedMotion.addListener(onMotionChange);
 
     scheduleMeasure();
     update();
@@ -111,8 +102,6 @@
       shell.removeEventListener('wheel', pauseForInteraction);
       shell.removeEventListener('keydown', onShellKeydown);
       document.removeEventListener('visibilitychange', update);
-      if (reducedMotion.removeEventListener) reducedMotion.removeEventListener('change', onMotionChange);
-      else reducedMotion.removeListener(onMotionChange);
     };
   }
 
