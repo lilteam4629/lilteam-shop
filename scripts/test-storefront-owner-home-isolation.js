@@ -31,18 +31,20 @@ assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,
   'the replaced 3D scene stylesheet and script must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
   'the rejected oversized banner treatment must no longer load');
-assert.match(home, /if \(ownerHomeV20\) \{[\s\S]*?<div class="owner-home-v20-shell" data-owner-home-layout="media-storefront">[\s\S]*?<aside class="owner-home-v20-sidebar"[\s\S]*?<div class="owner-home-v20-main">/,
-  'the new sidebar/content layout must be wrapped only for the main store');
+assert.match(home, /if \(ownerHomeV20\) \{[\s\S]*?<div class="owner-home-v20-shell" data-owner-home-layout="media-storefront">[\s\S]*?<div class="owner-home-v20-main">/,
+  'the full-width content layout must be wrapped only for the main store');
+assert.doesNotMatch(home, /owner-home-v20-sidebar|owner-home-v20-nav/,
+  'the removed main-store sidebar must not render or remain as dead navigation');
 assert.match(home, /if \(ownerHomeV20\) \{ %><\/div><\/div><% \}/,
-  'the main-store sidebar and content wrapper must close before shared lower page modules');
+  'the main-store content wrapper must close before shared lower page modules');
 assert.match(home, /ownerHomeV20\) \{ %>[\s\S]*?ownerHomeBanner = settings\.hero && settings\.hero\.mode === 'banner' \? settings\.hero\.bannerImage : null/,
   'the new banner-first hero must use the configured real shop banner');
 assert.match(home, /class="owner-home-v20-artwork"[\s\S]*?<a href="<%= settings\.hero\.bannerLink %>" aria-label=[\s\S]*?<img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high"/,
   'the uploaded banner must remain visible and load with high priority');
-assert.match(home, /recommendedCategories\.slice\(0, 6\)\.forEach\(category => \{[\s\S]*?\/products\?recommended=<%= encodeURIComponent\(category\.id\) %>/,
-  'the sidebar must only link to real shop categories');
+assert.match(home, /recommendedCategories\.forEach\(category => \{[\s\S]*?class="home-category-card" href="\/products\?recommended=<%= encodeURIComponent\(category\.id\) %>/,
+  'real shop categories must remain available in the homepage category rail');
 assert.match(home, /id="latest-orders"[\s\S]*?latestOrders\.forEach\(order => \{/,
-  'the sidebar latest-orders destination must use the real order rail');
+  'the main homepage order rail must use live order data');
 assert.match(home, /newest\.slice\(0, 6\)\.forEach\(\(product, index\) => \{/,
   'the new horizontal shelf must render actual newest products, not reference/demo items');
 assert.equal((home.match(/ownerHomeProductCard: ownerHomeV20/g) || []).length, 2,
@@ -156,8 +158,10 @@ cinematicStylesheet.walkRules(rule => {
 });
 assert.match(cinematicCss, /\.owner-home-v20-artwork img\s*\{[\s\S]*?object-fit:\s*contain[\s\S]*?object-position:\s*center/,
   'the banner must preserve its whole image without cropping');
-assert.match(cinematicCss, /\.owner-home-v20-shell\s*\{[\s\S]*?grid-template-columns:\s*220px minmax\(0, 1fr\)/,
-  'the homepage must use a persistent sidebar beside its content');
+assert.match(cinematicCss, /\.owner-home-v20-shell\s*\{[\s\S]*?width:\s*min\(1580px, 100%\)[\s\S]*?grid-template-columns:\s*minmax\(0, 1fr\)/,
+  'the homepage content must use the available width without a sidebar column');
+assert.doesNotMatch(cinematicCss, /owner-home-v20-sidebar|owner-home-v20-nav/,
+  'the removed sidebar must not leave unused sidebar styling in the main-store stylesheet');
 assert.match(cinematicCss, /\.owner-home-v20-hero\s*\{[\s\S]*?grid-template-columns:\s*minmax\(225px, \.74fr\) minmax\(0, 1\.36fr\)/,
   'the hero must use a compact split layout with the banner visible in full');
 assert.match(cinematicCss, /\.owner-home-v20-hero-content\s*\{[\s\S]*?z-index:\s*2/,

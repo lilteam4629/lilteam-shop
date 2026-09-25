@@ -54,29 +54,6 @@
 <% const ownerHomeV20 = typeof isMainSite !== 'undefined' && isMainSite; %>
 <% if (ownerHomeV20) { %>
 <div class="owner-home-v20-shell" data-owner-home-layout="media-storefront">
-  <aside class="owner-home-v20-sidebar" aria-label="เมนูร้านค้า">
-    <a class="owner-home-v20-brand" href="/" aria-label="<%= settings.shopName || 'LILTeam Shop' %> หน้าแรก">
-      <span class="owner-home-v20-brand-mark">L</span>
-      <span><b><%= settings.shopName || 'LILTeam Shop' %></b><small>OFFICIAL STORE</small></span>
-    </a>
-    <nav class="owner-home-v20-nav" aria-label="นำทางหน้าร้าน">
-      <p class="owner-home-v20-nav-label">หน้าร้าน</p>
-      <a class="is-active" href="#home-top"><i aria-hidden="true">⌂</i> หน้าแรก</a>
-      <% if (newest && newest.length) { %><a href="#home-new-arrivals"><i aria-hidden="true">✦</i> สินค้าเข้าใหม่</a><% } %>
-      <a href="#home-catalog"><i aria-hidden="true">▦</i> สินค้าทั้งหมด</a>
-      <% if (latestOrders && latestOrders.length) { %><a href="#latest-orders"><i aria-hidden="true">◷</i> รายการล่าสุด</a><% } %>
-      <% if (recommendedCategories && recommendedCategories.length) { %>
-        <p class="owner-home-v20-nav-label owner-home-v20-categories-label">หมวดหมู่</p>
-        <% recommendedCategories.slice(0, 6).forEach(category => { %>
-          <a class="owner-home-v20-category-link" href="/products?recommended=<%= encodeURIComponent(category.id) %>"><i aria-hidden="true">◇</i><span><%= category.title %></span></a>
-        <% }) %>
-      <% } %>
-    </nav>
-    <div class="owner-home-v20-sidebar-foot">
-      <span class="owner-home-v20-live-dot"></span><span>เลือกชมสินค้าในร้าน</span>
-      <a href="/help">วิธีสั่งซื้อ <b aria-hidden="true">↗</b></a>
-    </div>
-  </aside>
   <div class="owner-home-v20-main">
 <% } %>
 
