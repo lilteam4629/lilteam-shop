@@ -204,6 +204,23 @@ assert.doesNotMatch(productCardCss, /#(?:00ff91|10b981|34d399)\b/i,
   'the new card must not introduce unrelated green accents');
 assert.ok(productCardRuleCount > 0, 'the new product-card layer must have owner-home scoped rules');
 
+const heroV23Css = read('public/css/storefront-owner-home-hero-v23.css');
+const heroV23Stylesheet = postcss.parse(heroV23Css, { from: 'storefront-owner-home-hero-v23.css' });
+let heroV23RuleCount = 0;
+heroV23Stylesheet.walkRules(rule => {
+  if (rule.parent && rule.parent.type === 'atrule' && /keyframes$/i.test(rule.parent.name)) return;
+  heroV23RuleCount += 1;
+  for (const selector of rule.selectors) {
+    assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7'),
+      `new homepage hero styling could leak to a rental storefront: ${selector}`);
+  }
+});
+assert.match(heroV23Css, /owner-home-v23-hero:not\(\.owner-home-v20-hero--no-art\).*owner-home-v20-artwork:not\(\.owner-home-v23-spotlight\)[\s\S]*?rotateY\(-6deg\)/,
+  'the configured banner must receive the new 3D treatment too');
+assert.match(heroV23Css, /owner-home-v23-banner-float[\s\S]*?prefers-reduced-motion:\s*reduce/,
+  'the 3D banner motion must respect reduced-motion preferences');
+assert.ok(heroV23RuleCount > 0, 'the v23 hero layer must have owner-home scoped rules');
+
 const mainProductCssStart = ownerBaseCss.indexOf('/* Main-store product cards:');
 assert.notEqual(mainProductCssStart, -1, 'main-store product-card rules must be present');
 const mainProductCss = ownerBaseCss.slice(mainProductCssStart);
@@ -257,4 +274,4 @@ const navbarV3Link = layoutHtml.split(/\r?\n/).find(line => line.includes('store
 assert.ok(navbarV3Link.includes('isMainSite') && navbarV3Link.includes('if ('),
   'the new header stylesheet must only load on the main store');
 
-console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount + productCardRuleCount + mainNavbarRuleCount} scoped CSS rules).`);
+console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount + productCardRuleCount + heroV23RuleCount + mainNavbarRuleCount} scoped CSS rules).`);

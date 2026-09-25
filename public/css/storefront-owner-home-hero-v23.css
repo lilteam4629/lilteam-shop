@@ -1,4 +1,102 @@
 /* Main storefront spotlight: make the empty hero column show a real catalog item. */
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-eyebrow {
+  width: fit-content;
+  padding: 7px 11px;
+  border: 1px solid color-mix(in srgb, var(--gold) 30%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gold) 7%, var(--card));
+  box-shadow: inset 0 1px rgba(255,255,255,.35);
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-hero-content h1 {
+  text-shadow: 0 12px 28px color-mix(in srgb, var(--gold) 13%, transparent);
+}
+
+/* The configured shop banner also gets the new dimensional treatment. */
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) {
+  z-index: 0;
+  isolation: isolate;
+  padding: clamp(7px, 1vw, 12px);
+  overflow: visible;
+  border: 1px solid color-mix(in srgb, var(--gold) 48%, var(--border));
+  border-radius: clamp(17px, 2vw, 25px);
+  background: linear-gradient(145deg, color-mix(in srgb, var(--card) 82%, var(--gold)), var(--card) 45%, color-mix(in srgb, var(--input) 78%, var(--gold)));
+  box-shadow: 0 28px 48px -25px rgba(0,0,0,.65), 0 12px 35px -25px color-mix(in srgb, var(--gold) 70%, transparent), inset 0 1px rgba(255,255,255,.42);
+  transform: perspective(1350px) rotateY(-6deg) rotateX(2deg) translateZ(0);
+  transform-style: preserve-3d;
+  animation: owner-home-v23-banner-float 8s ease-in-out infinite;
+  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease, border-color .25s ease;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight)::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 10% 5% -9% 8%;
+  border-radius: inherit;
+  background: color-mix(in srgb, var(--gold) 35%, transparent);
+  filter: blur(28px);
+  opacity: .42;
+  transform: translateZ(-24px);
+  pointer-events: none;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight)::after {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: 8px;
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: clamp(11px, 1.4vw, 17px);
+  background: linear-gradient(118deg, transparent 34%, rgba(255,255,255,.2) 48%, transparent 59%);
+  background-size: 220% 100%;
+  background-position: 130% 0;
+  animation: owner-home-v23-banner-glint 8s ease-in-out infinite;
+  pointer-events: none;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight):hover {
+  border-color: var(--gold-text);
+  box-shadow: 0 34px 58px -25px rgba(0,0,0,.68), 0 15px 42px -24px color-mix(in srgb, var(--gold) 82%, transparent), inset 0 1px rgba(255,255,255,.5);
+  transform: perspective(1350px) rotateY(-1deg) rotateX(0) translateY(-5px);
+  animation-play-state: paused;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) > img,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) > a {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
+  border-radius: clamp(11px, 1.4vw, 17px);
+  box-shadow: 0 14px 28px -20px rgba(0,0,0,.68);
+  transform: translateZ(13px);
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) > a:focus-visible {
+  outline: 3px solid var(--gold-text);
+  outline-offset: 5px;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-hero-note {
+  right: clamp(13px, 2vw, 22px);
+  bottom: clamp(13px, 2vw, 22px);
+  padding: 8px 11px;
+  border-color: color-mix(in srgb, var(--gold) 30%, var(--border));
+  border-radius: 999px;
+  box-shadow: 0 8px 20px rgba(0,0,0,.22);
+}
+
+@keyframes owner-home-v23-banner-glint {
+  0%, 22% { background-position: 130% 0; }
+  52%, 100% { background-position: -130% 0; }
+}
+
+@keyframes owner-home-v23-banner-float {
+  0%, 100% { transform: perspective(1350px) rotateY(-6deg) rotateX(2deg) translateY(0); }
+  50% { transform: perspective(1350px) rotateY(-3deg) rotateX(1deg) translateY(-7px); }
+}
+
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork.owner-home-v23-spotlight {
   position: relative;
   z-index: 1;
@@ -149,6 +247,11 @@
 }
 
 @media (max-width: 860px) {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) {
+    transform: perspective(1200px) rotateY(-3deg) rotateX(1deg);
+    animation-duration: 10s;
+  }
+
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork.owner-home-v23-spotlight {
     grid-column: 1 !important;
     grid-row: 1 !important;
@@ -161,6 +264,15 @@
 }
 
 @media (max-width: 560px) {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) {
+    padding: 6px;
+    border-radius: 16px;
+    transform: none;
+    animation: none;
+  }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight):hover { transform: translateY(-2px); }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight)::after { inset: 7px; }
+
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork.owner-home-v23-spotlight {
     min-height: 226px;
     padding: 11px;
@@ -172,6 +284,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork:not(.owner-home-v23-spotlight) { transform: none; animation: none; transition: none; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork:not(.owner-home-v23-spotlight)::after { animation: none; }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-artwork.owner-home-v23-spotlight,
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-artwork.owner-home-v23-spotlight:hover { transform: none; transition: none; }
 }
