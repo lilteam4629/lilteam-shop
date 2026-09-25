@@ -22,6 +22,9 @@
 .experiment-products-page .experiment-product-row:hover { background: #fbfefc; }
 .experiment-products-page .experiment-product-row[hidden] { display: none; }
 .experiment-products-page .experiment-check { width: 18px; height: 18px; accent-color: var(--products-green); }
+.experiment-products-page .experiment-select-all-head { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; }
+.experiment-products-page .experiment-select-all-head input { width: 18px; height: 18px; margin: 0; accent-color: var(--products-green); cursor: pointer; }
+.experiment-products-page .experiment-select-all-head input:focus-visible { outline: 2px solid var(--products-green); outline-offset: 3px; }
 .experiment-products-page .experiment-product-main { display: flex; align-items: center; gap: 12px; min-width: 0; }
 .experiment-products-page .experiment-product-thumb { width: 96px; height: 70px; flex: 0 0 auto; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--ex-line); border-radius: 11px; color: var(--products-green-dark); background: var(--products-soft); font-weight: 800; }
 .experiment-products-page .experiment-product-thumb img { width: 100%; height: 100%; object-fit: cover; }
