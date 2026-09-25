@@ -808,3 +808,25 @@
   :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__account-name,
   :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__chevron { display: none !important; }
 }
+
+/* Give utility controls the same clear button affordance as top-up. */
+@media (min-width: 1101px) {
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__theme,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__cart {
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    color: var(--gold-contrast) !important;
+    background: var(--gold) !important;
+    transition: transform .18s ease, background-color .18s ease !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__theme:hover,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__cart:hover {
+    color: var(--gold-contrast) !important;
+    background: var(--gold-hover, var(--gold)) !important;
+    transform: translateY(-1px) !important;
+  }
+}
