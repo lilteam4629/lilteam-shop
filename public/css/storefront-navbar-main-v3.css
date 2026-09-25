@@ -724,8 +724,10 @@
     transform: translateY(-1px) !important;
   }
 
-  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__theme,
-  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__cart {
+  html body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) header.store-nav.store-nav--main .store-nav__actions .store-nav__theme,
+  html body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) header.store-nav.store-nav--main .store-nav__actions .store-nav__cart,
+  html body:has(.store-nav--main) header.store-nav.store-nav--main .store-nav__actions .store-nav__theme,
+  html body:has(.store-nav--main) header.store-nav.store-nav--main .store-nav__actions .store-nav__cart {
     width: 38px !important;
     height: 38px !important;
     border: 0 !important;
@@ -758,7 +760,7 @@
     height: 32px !important;
     border-radius: 8px !important;
     color: var(--gold-contrast) !important;
-    background: var(--gold) !important;
+    background-color: var(--gold) !important;
     font-size: 15px !important;
   }
 
@@ -823,10 +825,12 @@
     transition: transform .18s ease, background-color .18s ease !important;
   }
 
-  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__theme:hover,
-  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__cart:hover {
+  html body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) header.store-nav.store-nav--main .store-nav__actions .store-nav__theme:hover,
+  html body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) header.store-nav.store-nav--main .store-nav__actions .store-nav__cart:hover,
+  html body:has(.store-nav--main) header.store-nav.store-nav--main .store-nav__actions .store-nav__theme:hover,
+  html body:has(.store-nav--main) header.store-nav.store-nav--main .store-nav__actions .store-nav__cart:hover {
     color: var(--gold-contrast) !important;
-    background: var(--gold-hover, var(--gold)) !important;
+    background-color: var(--gold-hover, var(--gold)) !important;
     transform: translateY(-1px) !important;
   }
 }
