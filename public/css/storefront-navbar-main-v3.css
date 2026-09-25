@@ -605,3 +605,206 @@
 
   .store-nav--main .store-nav__actions { gap: 7px !important; }
 }
+
+/* Main shop navigation redesign: wordmark / open text navigation / wallet desk.
+   This deliberately removes the previous segmented-pills treatment. */
+@media (min-width: 1101px) {
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main {
+    min-height: 74px !important;
+    border-top: 3px solid var(--gold) !important;
+    border-bottom: 1px solid var(--border) !important;
+    background: var(--card) !important;
+    box-shadow: 0 8px 22px color-mix(in srgb, var(--text) 7%, transparent) !important;
+    backdrop-filter: none !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__inner {
+    display: grid !important;
+    grid-template-columns: minmax(150px, .8fr) minmax(0, 1fr) auto !important;
+    align-items: stretch !important;
+    gap: clamp(16px, 2vw, 30px) !important;
+    width: min(1480px, calc(100% - 64px)) !important;
+    min-height: 71px !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__brand {
+    align-self: center !important;
+    justify-self: start !important;
+    gap: 10px !important;
+    padding: 0 !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__brand img {
+    height: 38px !important;
+    max-width: min(140px, 15vw) !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__brand strong { display: none !important; }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__links {
+    align-self: stretch !important;
+    justify-content: center !important;
+    gap: clamp(16px, 1.9vw, 28px) !important;
+    height: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__links > a,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__category-link {
+    position: relative !important;
+    align-self: stretch !important;
+    min-height: 44px !important;
+    height: auto !important;
+    padding: 0 1px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: var(--text-2) !important;
+    background: transparent !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    transition: color .18s ease !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__links > a svg,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__category-link > svg { display: none !important; }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__links > a::after {
+    position: absolute !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    height: 3px !important;
+    border-radius: 3px 3px 0 0 !important;
+    background: var(--gold) !important;
+    content: "" !important;
+    opacity: 0 !important;
+    transform: scaleX(.45) !important;
+    transition: transform .2s ease, opacity .2s ease !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__links > a.is-active,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__links > a:hover,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__category-link:hover,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__category[open] > .store-nav__category-link {
+    color: var(--text) !important;
+    background: transparent !important;
+  }
+
+  body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main .store-nav__links > a[href="/"]::after { opacity: 1 !important; transform: scaleX(1) !important; }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__links > a:is(.is-active, :hover)::after {
+    opacity: 1 !important;
+    transform: scaleX(1) !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__actions {
+    align-self: center !important;
+    gap: 6px !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__desktop-topup {
+    min-height: 40px !important;
+    margin-right: 6px !important;
+    padding: 0 13px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    color: var(--gold-contrast) !important;
+    background: var(--gold) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    transition: transform .18s ease, background-color .18s ease !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__desktop-topup:hover {
+    color: var(--gold-contrast) !important;
+    background: var(--gold-hover, var(--gold)) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__theme,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__cart {
+    width: 38px !important;
+    height: 38px !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    color: var(--text-2) !important;
+    background: var(--bg) !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__theme:hover,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__cart:hover {
+    color: var(--gold-text) !important;
+    background: var(--gold-soft, var(--input)) !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__wallet {
+    min-height: 42px !important;
+    gap: 9px !important;
+    padding: 0 5px 0 13px !important;
+    border: 0 !important;
+    border-radius: 10px !important;
+    color: var(--bg) !important;
+    background: var(--text) !important;
+    font-size: 12px !important;
+    font-variant-numeric: tabular-nums !important;
+    font-weight: 700 !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__wallet b {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 8px !important;
+    color: var(--gold-contrast) !important;
+    background: var(--gold) !important;
+    font-size: 15px !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__account summary {
+    height: 42px !important;
+    gap: 8px !important;
+    margin-left: 8px !important;
+    padding: 0 0 0 12px !important;
+    border: 0 !important;
+    border-left: 1px solid var(--border) !important;
+    border-radius: 0 !important;
+    color: var(--text-2) !important;
+    background: transparent !important;
+    font-size: 12px !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__account summary:hover,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__account[open] summary {
+    color: var(--text) !important;
+    background: transparent !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__avatar {
+    width: 34px !important;
+    height: 34px !important;
+    border-radius: 50% !important;
+    color: var(--gold-contrast) !important;
+    background: var(--gold) !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main :is(a, button, summary):focus-visible {
+    outline: 2px solid var(--gold-text) !important;
+    outline-offset: 3px !important;
+  }
+}
+
+@media (min-width: 1101px) and (max-width: 1320px) {
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__inner {
+    grid-template-columns: minmax(100px, .55fr) minmax(0, 1fr) auto !important;
+    gap: 12px !important;
+    width: calc(100% - 32px) !important;
+  }
+
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__links { gap: clamp(10px, 1.4vw, 18px) !important; }
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__links > a,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__category-link { font-size: 12px !important; }
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__account-name,
+  :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__chevron { display: none !important; }
+}
