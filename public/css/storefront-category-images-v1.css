@@ -63,7 +63,7 @@
   max-width: 100% !important;
   height: auto !important;
   min-height: 0 !important;
-  aspect-ratio: auto !important;
+  aspect-ratio: 3 / 1 !important;
   overflow: visible !important;
   border: 0 !important;
   border-radius: 0 !important;
@@ -76,14 +76,14 @@
   display: block !important;
   width: 100% !important;
   max-width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
   max-height: none !important;
   border: 0 !important;
   border-radius: 0 !important;
   outline: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  object-fit: contain !important;
+  object-fit: cover !important;
   object-position: center !important;
 }
 
