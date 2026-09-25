@@ -438,3 +438,170 @@
   .store-nav--main .store-nav__search { display: none !important; }
   .store-nav--main .store-nav__actions { grid-column: 3 !important; }
 }
+
+/* Give the primary store navigation a distinct brand / browse / account rhythm. */
+@media (min-width: 1101px) {
+  .store-nav--main {
+    min-height: 68px !important;
+    border-bottom: 1px solid var(--border) !important;
+    background: var(--card) !important;
+    box-shadow: 0 4px 16px color-mix(in srgb, var(--text) 5%, transparent) !important;
+  }
+
+  .store-nav--main .store-nav__inner {
+    grid-template-columns: minmax(120px, 1fr) auto auto !important;
+    gap: clamp(12px, 1.5vw, 22px) !important;
+    width: min(1440px, calc(100% - 48px)) !important;
+    min-height: 68px !important;
+  }
+
+  .store-nav--main .store-nav__brand {
+    justify-self: start !important;
+    padding: 5px 0 !important;
+  }
+
+  .store-nav--main .store-nav__brand img {
+    max-width: min(132px, 18vw) !important;
+    height: 38px !important;
+  }
+
+  .store-nav--main .store-nav__links {
+    justify-content: center !important;
+    gap: 2px !important;
+    height: auto !important;
+    padding: 4px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 14px !important;
+    background: var(--bg) !important;
+  }
+
+  .store-nav--main .store-nav__links > a,
+  .store-nav--main .store-nav__category-link {
+    min-height: 38px !important;
+    height: 38px !important;
+    padding: 0 10px !important;
+    border: 1px solid transparent !important;
+    border-radius: 10px !important;
+    color: var(--text-2) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    transition: color .16s ease, background-color .16s ease, border-color .16s ease !important;
+  }
+
+  .store-nav--main .store-nav__links > a svg,
+  .store-nav--main .store-nav__category-link > svg {
+    width: 14px !important;
+    height: 14px !important;
+    color: var(--text-3) !important;
+  }
+
+  .store-nav--main .store-nav__links > a.is-active,
+  .store-nav--main .store-nav__links > a:hover,
+  .store-nav--main .store-nav__category-link:hover,
+  .store-nav--main .store-nav__category[open] > .store-nav__category-link {
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+    background: var(--card) !important;
+  }
+
+  .store-nav--main .store-nav__links > a.is-active svg,
+  .store-nav--main .store-nav__links > a:hover svg,
+  .store-nav--main .store-nav__category-link:hover > svg {
+    color: var(--gold-text) !important;
+  }
+
+  .store-nav--main .store-nav__category-link > span {
+    margin-left: 1px !important;
+  }
+
+  .store-nav--main .store-nav__actions {
+    gap: 9px !important;
+  }
+
+  .store-nav--main .store-nav__round,
+  .store-nav--main .store-nav__theme {
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 14px !important;
+    background: var(--card) !important;
+  }
+
+  .store-nav--main .store-nav__round:hover,
+  .store-nav--main .store-nav__theme:hover {
+    border-color: color-mix(in srgb, var(--gold) 45%, var(--border)) !important;
+    color: var(--gold-text) !important;
+    background: var(--bg) !important;
+  }
+
+  .store-nav--main .store-nav__desktop-topup {
+    min-height: 38px !important;
+    padding: 0 11px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 10px !important;
+    color: var(--text) !important;
+    background: var(--bg) !important;
+  }
+
+  .store-nav--main .store-nav__wallet {
+    padding-left: 11px !important;
+    border-radius: 14px !important;
+    background: var(--card) !important;
+  }
+
+  .store-nav--main .store-nav__wallet b {
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 10px !important;
+    font-size: 13px !important;
+  }
+
+  .store-nav--main .store-nav__account summary {
+    min-width: 40px !important;
+    height: 42px !important;
+    padding: 0 8px !important;
+    border: 1px solid transparent !important;
+    border-radius: 14px !important;
+  }
+
+  .store-nav--main .store-nav__account summary:hover,
+  .store-nav--main .store-nav__account[open] summary {
+    border-color: var(--border) !important;
+    color: var(--text) !important;
+    background: var(--bg) !important;
+  }
+
+  .store-nav--main .store-nav__avatar {
+    width: 30px !important;
+    height: 30px !important;
+  }
+
+  .store-nav--main :is(a, button, summary):focus-visible {
+    outline: 2px solid var(--gold-text) !important;
+    outline-offset: 2px !important;
+  }
+}
+
+@media (min-width: 1180px) and (max-width: 1280px) {
+  .store-nav--main .store-nav__account-name,
+  .store-nav--main .store-nav__chevron { display: inline !important; }
+}
+
+@media (min-width: 1101px) and (max-width: 1179px) {
+  .store-nav--main .store-nav__account-name,
+  .store-nav--main .store-nav__chevron { display: none !important; }
+}
+
+@media (min-width: 1101px) and (max-width: 1280px) {
+  .store-nav--main .store-nav__inner {
+    grid-template-columns: minmax(108px, .8fr) auto auto !important;
+    gap: 10px !important;
+    width: calc(100% - 28px) !important;
+  }
+
+  .store-nav--main .store-nav__links { gap: 1px !important; }
+
+  .store-nav--main .store-nav__links > a,
+  .store-nav--main .store-nav__category-link { padding-inline: 7px !important; }
+
+  .store-nav--main .store-nav__actions { gap: 7px !important; }
+}
