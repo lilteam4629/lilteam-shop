@@ -781,7 +781,7 @@
 <% if (latestOrders && latestOrders.length) { %>
 <% const isOwnerLatestRail = typeof isMainSite !== 'undefined' && isMainSite; %>
 <section class="latest-orders-section storefront-control-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-5" id="latest-orders" <%- isOwnerLatestRail ? 'data-latest-orders' : '' %>>
-  <div class="latest-orders-heading"><span class="latest-orders-heading-icon" aria-hidden="true"><svg><use href="#ui-clock"/></svg></span><div class="<%= isOwnerLatestRail ? 'latest-orders-heading-copy' : '' %>"><h2>รายการสั่งซื้อล่าสุด</h2><p><%= isOwnerLatestRail ? 'เลือกการ์ดเพื่อดูรายละเอียดสินค้า' : 'Latest order list' %></p></div><% if (isOwnerLatestRail) { %><button type="button" class="latest-orders-toggle" data-latest-orders-toggle aria-controls="latest-orders-rail" aria-pressed="false" aria-label="พักการเลื่อนอัตโนมัติ"><svg aria-hidden="true" viewBox="0 0 20 20" fill="none"><path d="M6.5 5.5v9m7-9v9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>พักการเลื่อน</span></button><% } %></div>
+  <div class="latest-orders-heading"><span class="latest-orders-heading-icon" aria-hidden="true"><svg><use href="#ui-clock"/></svg></span><div class="<%= isOwnerLatestRail ? 'latest-orders-heading-copy' : '' %>"><h2>รายการสั่งซื้อล่าสุด</h2><p><%= isOwnerLatestRail ? 'เลือกการ์ดเพื่อดูรายละเอียดสินค้า' : 'Latest order list' %></p></div></div>
   <div class="latest-orders-shell" <%- isOwnerLatestRail ? 'id="latest-orders-rail" tabindex="0" aria-label="รายการสั่งซื้อล่าสุด เลื่อนดูได้"' : '' %>>
     <div class="latest-orders-track">
       <% for (let duplicate = 0; duplicate < (typeof isMainSite !== 'undefined' && isMainSite ? 1 : 2); duplicate++) { %>
@@ -851,13 +851,6 @@
     @keyframes latest-orders-scroll { to { transform: translateX(calc(-50% - .275rem)); } }
   }
   #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-heading { align-items: center; }
-  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-toggle {
-    flex: 0 0 auto; margin-left: auto; padding: 7px 11px; border: 1px solid var(--border-light);
-    border-radius: 999px; background: var(--card); color: var(--text-2); font-size: 11px;
-    font-weight: 700; line-height: 1.2; cursor: pointer; white-space: nowrap;
-  }
-  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-toggle:hover { border-color: var(--gold); color: var(--text); }
-  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-toggle:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 3px; }
   #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-shell {
     overflow-x: auto !important; overflow-y: hidden !important; scrollbar-width: none;
     -ms-overflow-style: none; touch-action: pan-x; scroll-behavior: auto !important;
@@ -876,7 +869,6 @@
   }
   @media (prefers-reduced-motion: reduce) {
     #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-track { scroll-behavior: auto !important; }
-    #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-toggle { cursor: default; }
   }
 </style>
 <% } %>

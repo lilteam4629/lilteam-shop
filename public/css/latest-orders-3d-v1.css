@@ -51,37 +51,11 @@
   text-shadow: none !important;
 }
 
-#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 38px;
-  padding: 8px 12px;
-  flex: none;
-  border: 1px solid var(--orders-line);
-  border-radius: 10px;
-  background: color-mix(in srgb, var(--gold) 8%, var(--card));
-  color: var(--text);
-  font-size: 11px;
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  transition: background .18s ease, border-color .18s ease, transform .18s ease;
-}
-#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle svg { width: 16px; height: 16px; flex: none; }
-#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle:hover {
-  background: color-mix(in srgb, var(--gold) 16%, var(--card));
-  border-color: var(--gold);
-  transform: translateY(-1px);
-}
-#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle:focus-visible,
 #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell:focus-visible,
 #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:focus-visible {
   outline: 3px solid var(--gold) !important;
   outline-offset: 3px !important;
 }
-#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle:disabled { opacity: .7; cursor: default; transform: none; }
 
 #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell {
   position: relative;
@@ -213,8 +187,6 @@
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading-icon { width: 36px !important; height: 36px !important; flex-basis: 36px !important; border-radius: 10px !important; }
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading h2 { font-size: 17px !important; }
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading p { font-size: 10px !important; }
-  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle { min-height: 36px; width: 36px; padding: 8px; }
-  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell { padding: 15px 10px 18px !important; border-radius: 14px !important; }
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-track,
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-group { gap: 10px !important; }
@@ -228,15 +200,6 @@
 @media (prefers-reduced-motion: reduce) {
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell { overflow-x: auto !important; scrollbar-width: thin; }
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-track { animation: none !important; will-change: auto !important; }
-  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-motion-opt-in { overflow-x: hidden !important; }
-  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-motion-opt-in.is-user-paused { overflow-x: auto !important; }
-  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-motion-opt-in .latest-orders-track {
-    animation: latest-orders-3d-run var(--latest-orders-duration, 32s) linear infinite !important;
-    animation-play-state: paused !important;
-  }
-  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-motion-opt-in.is-visible:not(.is-user-paused):not(:hover):not(:focus-within) .latest-orders-track {
-    animation-play-state: running !important;
-  }
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card,
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:hover,
   #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:focus-visible { transform: perspective(750px) rotateX(4deg) translateY(0) !important; transition: none; }
