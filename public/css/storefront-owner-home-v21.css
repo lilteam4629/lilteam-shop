@@ -22,7 +22,7 @@
   position: relative;
   display: grid;
   width: 100%;
-  aspect-ratio: 1.06;
+  aspect-ratio: 16 / 9;
   place-items: center;
   overflow: hidden;
   padding: 0;
@@ -32,7 +32,7 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   object-position: center;
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-image-fallback {

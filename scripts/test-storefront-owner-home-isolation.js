@@ -174,8 +174,10 @@ productCardStylesheet.walkRules(rule => {
       `product-card style could affect a tenant or non-home page: ${selector}`);
   }
 });
-assert.match(productCardCss, /\.owner-home-v21-media\s*>\s*img\s*\{[^}]*object-fit:\s*cover/s,
-  'product artwork must fill the image-first preview without distortion');
+assert.match(productCardCss, /\.owner-home-v21-media\s*\{[^}]*aspect-ratio:\s*16\s*\/\s*9/s,
+  'product artwork preview must follow the wide source image ratio');
+assert.match(productCardCss, /\.owner-home-v21-media\s*>\s*img\s*\{[^}]*object-fit:\s*contain/s,
+  'product artwork must remain fully visible without cropping or distortion');
 assert.match(productCardCss, /\.owner-home-v21-price-values\s*>\s*strong\s*\{[^}]*font-size:\s*clamp\(20px/s,
   'the live price must be prominent and readable');
 assert.match(productCardCss, /\.owner-home-v21-stock-badge\s+strong\s*\{[^}]*font-size:\s*11px/s,
