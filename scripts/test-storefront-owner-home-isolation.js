@@ -186,4 +186,28 @@ assert.doesNotMatch(productCardCss, /#(?:00ff91|10b981|34d399)\b/i,
   'the new card must not introduce unrelated green accents');
 assert.ok(productCardRuleCount > 0, 'the new product-card layer must have owner-home scoped rules');
 
-console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount + productCardRuleCount} scoped CSS rules).`);
+const mainNavbarCss = read('public/css/storefront-navbar-main-v3.css');
+const mainNavbarStylesheet = postcss.parse(mainNavbarCss, { from: 'storefront-navbar-main-v3.css' });
+let mainNavbarRuleCount = 0;
+mainNavbarStylesheet.walkRules(rule => {
+  mainNavbarRuleCount += 1;
+  for (const selector of rule.selectors) {
+    assert.ok(selector.startsWith('.store-nav--main'),
+      `the redesigned navigation must only apply to the main shop: ${selector}`);
+  }
+});
+assert.match(mainNavbarCss, /grid-template-columns:\s*minmax\(165px, auto\) minmax\(0, 1fr\) 44px auto/,
+  'the redesigned header must keep brand, centered navigation, search, and actions in one row');
+assert.match(mainNavbarCss, /background:\s*var\(--gold\)/,
+  'header action colors must follow the accent selected in the admin theme');
+assert.match(mainNavbarCss, /background:\s*var\(--card\)/,
+  'header surfaces must follow the background selected in the admin theme');
+assert.doesNotMatch(mainNavbarCss, /#[0-9a-f]{3,8}/i,
+  'the redesigned header must not introduce a fixed palette');
+assert.ok(mainNavbarRuleCount > 0, 'the main-store header redesign must include isolated styles');
+const layoutHtml = read('src/views/layouts/main.ejs');
+const navbarV3Link = layoutHtml.split(/\r?\n/).find(line => line.includes('storefront-navbar-main-v3.css')) || '';
+assert.ok(navbarV3Link.includes('isMainSite') && navbarV3Link.includes('if ('),
+  'the new header stylesheet must only load on the main store');
+
+console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount + productCardRuleCount + mainNavbarRuleCount} scoped CSS rules).`);

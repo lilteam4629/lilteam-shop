@@ -1,0 +1,181 @@
+/* Main storefront navigation refresh based on the supplied compact header.
+   Every color comes from the shop theme selected in the admin. */
+@media (min-width: 1101px) {
+.store-nav--main {
+  min-height: 68px !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, var(--gold) 18%) !important;
+  background: color-mix(in srgb, var(--card) 96%, transparent) !important;
+  box-shadow: 0 8px 26px color-mix(in srgb, var(--bg) 12%, transparent) !important;
+  color: var(--text) !important;
+  backdrop-filter: blur(18px);
+}
+
+.store-nav--main .store-nav__inner {
+  grid-template-columns: minmax(165px, auto) minmax(0, 1fr) 44px auto !important;
+  gap: clamp(12px, 1.45vw, 24px) !important;
+  width: min(1480px, calc(100% - 48px)) !important;
+  min-height: 68px !important;
+}
+
+.store-nav--main .store-nav__brand {
+  gap: 10px !important;
+  color: var(--text) !important;
+  font-size: 17px !important;
+  letter-spacing: -.035em !important;
+}
+
+.store-nav--main .store-nav__brand img,
+.store-nav--main .store-nav__logo-fallback {
+  width: 40px !important;
+  height: 40px !important;
+  flex-basis: 40px !important;
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border)) !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--gold) 13%, var(--card)) !important;
+}
+
+.store-nav--main .store-nav__logo-fallback {
+  color: var(--gold-contrast) !important;
+  background: var(--gold) !important;
+}
+
+.store-nav--main .store-nav__links {
+  justify-content: center !important;
+  gap: 4px !important;
+}
+
+.store-nav--main .store-nav__links > a,
+.store-nav--main .store-nav__category-link {
+  position: relative !important;
+  min-height: 43px !important;
+  height: 43px !important;
+  gap: 8px !important;
+  padding-inline: 11px !important;
+  border-radius: 10px !important;
+  color: var(--text-2) !important;
+  background: transparent !important;
+  font-size: 11px !important;
+  transition: color .16s ease, background-color .16s ease !important;
+}
+
+.store-nav--main .store-nav__links > a svg,
+.store-nav--main .store-nav__category-link > svg {
+  width: 17px !important;
+  height: 17px !important;
+  color: var(--text-3) !important;
+  transition: color .16s ease !important;
+}
+
+.store-nav--main .store-nav__links > a:is(:hover, .is-active),
+.store-nav--main .store-nav__category-link:hover,
+.store-nav--main .store-nav__category[open] > .store-nav__category-link {
+  color: var(--gold-text) !important;
+  background: color-mix(in srgb, var(--gold) 8%, var(--card)) !important;
+}
+
+.store-nav--main .store-nav__links > a.is-active::after {
+  position: absolute;
+  right: 12px;
+  bottom: 2px;
+  left: 12px;
+  height: 2px;
+  border-radius: 99px;
+  background: var(--gold);
+  content: '';
+}
+
+.store-nav--main .store-nav__links > a:is(:hover, .is-active) svg,
+.store-nav--main .store-nav__category-link:hover > svg {
+  color: var(--gold-text) !important;
+}
+
+.store-nav--main .store-nav__search,
+.store-nav--main .store-nav__round,
+.store-nav--main .store-nav__theme {
+  width: 42px !important;
+  height: 42px !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: 12px !important;
+  color: var(--text-2) !important;
+  background: color-mix(in srgb, var(--card) 92%, var(--input)) !important;
+  transition: border-color .16s ease, color .16s ease, background-color .16s ease, transform .16s ease !important;
+}
+
+.store-nav--main .store-nav__search:focus-within,
+.store-nav--main .store-nav__round:hover,
+.store-nav--main .store-nav__theme:hover {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--border-light)) !important;
+  color: var(--gold-text) !important;
+  background: color-mix(in srgb, var(--gold) 7%, var(--card)) !important;
+  transform: translateY(-1px);
+}
+
+.store-nav--main .store-nav__desktop-topup,
+.store-nav--main .store-nav__login {
+  min-height: 42px !important;
+  height: 42px !important;
+  padding-inline: 13px !important;
+  border: 1px solid var(--gold) !important;
+  border-radius: 11px !important;
+  color: var(--gold-contrast) !important;
+  background: var(--gold) !important;
+  box-shadow: 0 5px 16px color-mix(in srgb, var(--gold) 18%, transparent) !important;
+}
+
+.store-nav--main .store-nav__desktop-topup:hover,
+.store-nav--main .store-nav__login:hover {
+  border-color: var(--gold-hover) !important;
+  color: var(--gold-hover-text, var(--gold-contrast)) !important;
+  background: var(--gold-hover) !important;
+}
+
+.store-nav--main .store-nav__wallet {
+  height: 42px !important;
+  padding: 4px 5px 4px 11px !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: 12px !important;
+  color: var(--text) !important;
+  background: var(--card) !important;
+}
+
+.store-nav--main .store-nav__wallet b,
+.store-nav--main .store-nav__avatar {
+  color: var(--gold-contrast) !important;
+  background: var(--gold) !important;
+}
+
+.store-nav--main .store-nav__wallet b {
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 9px !important;
+}
+
+.store-nav--main .store-nav__avatar {
+  width: 34px !important;
+  height: 34px !important;
+  border-radius: 10px !important;
+}
+
+.store-nav--main :where(a, button, summary):focus-visible {
+  outline: 2px solid var(--gold) !important;
+  outline-offset: 3px !important;
+}
+}
+
+@media (min-width: 1101px) and (max-width: 1280px) {
+  .store-nav--main .store-nav__inner {
+    grid-template-columns: minmax(140px, auto) minmax(0, 1fr) 40px auto !important;
+    gap: 9px !important;
+    width: calc(100% - 32px) !important;
+  }
+
+  .store-nav--main .store-nav__brand { gap: 8px !important; font-size: 14px !important; }
+  .store-nav--main .store-nav__brand img,
+  .store-nav--main .store-nav__logo-fallback { width: 36px !important; height: 36px !important; flex-basis: 36px !important; }
+  .store-nav--main .store-nav__links { gap: 0 !important; }
+  .store-nav--main .store-nav__links > a,
+  .store-nav--main .store-nav__category-link { gap: 5px !important; padding-inline: 6px !important; font-size: 10px !important; }
+  .store-nav--main .store-nav__actions { gap: 5px !important; }
+  .store-nav--main .store-nav__desktop-topup { padding-inline: 9px !important; }
+  .store-nav--main .store-nav__account-name { display: none !important; }
+}
