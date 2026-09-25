@@ -1,0 +1,243 @@
+/* Recent orders: a shallow display shelf with raised, readable product tickets. */
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section {
+  --orders-line: color-mix(in srgb, var(--gold) 28%, var(--border));
+  --orders-shadow: color-mix(in srgb, var(--text) 18%, transparent);
+  padding-top: clamp(20px, 3vw, 36px) !important;
+}
+
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin-bottom: 14px !important;
+}
+
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading-icon {
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 44px !important;
+  width: 44px !important;
+  height: 44px !important;
+  border: 1px solid color-mix(in srgb, var(--gold) 55%, var(--border)) !important;
+  border-radius: 13px !important;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--gold) 28%, var(--card)), var(--card) 62%) !important;
+  color: var(--gold-text) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--gold) 36%, transparent), 0 6px 12px -7px var(--orders-shadow) !important;
+  transform: rotate(-4deg);
+}
+
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading-icon svg {
+  width: 19px !important;
+  height: 19px !important;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading-copy { min-width: 0; flex: 1; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading h2 {
+  color: var(--text) !important;
+  font-size: clamp(19px, 2vw, 24px) !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -.02em;
+  text-shadow: none !important;
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading p {
+  margin-top: 3px;
+  color: var(--text-2) !important;
+  font-size: 12px !important;
+  line-height: 1.3;
+  text-shadow: none !important;
+}
+
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 8px 12px;
+  flex: none;
+  border: 1px solid var(--orders-line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--gold) 8%, var(--card));
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle svg { width: 16px; height: 16px; flex: none; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle:hover {
+  background: color-mix(in srgb, var(--gold) 16%, var(--card));
+  border-color: var(--gold);
+  transform: translateY(-1px);
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle:focus-visible,
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell:focus-visible,
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:focus-visible {
+  outline: 3px solid var(--gold) !important;
+  outline-offset: 3px !important;
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle:disabled { opacity: .7; cursor: default; transform: none; }
+
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden !important;
+  padding: 18px 14px 23px !important;
+  border: 1px solid var(--orders-line) !important;
+  border-radius: 18px !important;
+  background:
+    radial-gradient(ellipse at 18% -40%, color-mix(in srgb, var(--gold) 17%, transparent), transparent 64%),
+    linear-gradient(180deg, color-mix(in srgb, var(--gold) 5%, var(--card)), var(--card) 65%, color-mix(in srgb, var(--gold) 9%, var(--input))) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--gold) 24%, transparent), 0 12px 28px -21px var(--orders-shadow) !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  scrollbar-width: none;
+  touch-action: pan-x pan-y;
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell::-webkit-scrollbar { display: none; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-user-paused {
+  overflow-x: auto !important;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) transparent;
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-user-paused::-webkit-scrollbar { display: block; height: 6px; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-user-paused::-webkit-scrollbar-thumb { border-radius: 999px; background: var(--gold); }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--card), transparent 3%, transparent 97%, var(--card));
+  opacity: .68;
+}
+
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-track {
+  display: flex;
+  align-items: stretch;
+  width: max-content;
+  gap: 14px !important;
+  animation: latest-orders-3d-run var(--latest-orders-duration, 32s) linear infinite !important;
+  animation-play-state: paused !important;
+  translate: 0 0;
+  will-change: auto;
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-visible:not(.is-user-paused):not(:hover):not(:focus-within) .latest-orders-track {
+  animation-play-state: running !important;
+  will-change: translate;
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell:active .latest-orders-track {
+  animation-play-state: paused !important;
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-group { display: flex; gap: 14px !important; }
+
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 12px !important;
+  width: clamp(255px, 26vw, 318px) !important;
+  min-height: 105px !important;
+  padding: 12px 13px !important;
+  overflow: visible;
+  border: 1px solid color-mix(in srgb, var(--gold) 31%, var(--border)) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(145deg, color-mix(in srgb, var(--gold) 11%, var(--card)), var(--card) 43%, color-mix(in srgb, var(--gold) 5%, var(--input))) !important;
+  color: var(--text);
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--gold) 27%, transparent),
+    0 4px 0 -2px color-mix(in srgb, var(--gold) 28%, var(--border)),
+    0 12px 18px -11px var(--orders-shadow) !important;
+  transform: perspective(750px) rotateX(4deg) translateY(0) !important;
+  transform-origin: center bottom;
+  transform-style: preserve-3d;
+  transition: transform .24s cubic-bezier(.16, 1, .3, 1), border-color .2s ease, box-shadow .24s ease;
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card::before {
+  content: '';
+  position: absolute;
+  inset: 1px 13px auto;
+  height: 1px;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--gold) 68%, transparent), transparent);
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:hover,
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:focus-visible {
+  border-color: var(--gold) !important;
+  box-shadow:
+    inset 0 1px 0 color-mix(in srgb, var(--gold) 45%, transparent),
+    0 5px 0 -2px color-mix(in srgb, var(--gold) 44%, var(--border)),
+    0 19px 26px -14px var(--orders-shadow) !important;
+  transform: perspective(750px) rotateX(0deg) translateY(-4px) !important;
+}
+
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-image-wrap {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: 0 0 68px;
+  width: 68px !important;
+  height: 72px !important;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--gold) 38%, var(--border)) !important;
+  border-radius: 10px !important;
+  background: color-mix(in srgb, var(--gold) 7%, var(--input)) !important;
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--gold) 23%, transparent), 0 6px 12px -9px var(--orders-shadow);
+  transform: translateZ(8px);
+}
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-image { width: 100%; height: 100%; object-fit: cover; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-image-wrap > svg { width: 23px; height: 23px; fill: none; stroke: var(--gold-text); stroke-width: 1.8; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-copy { display: flex; flex: 1; min-width: 0; flex-direction: column; transform: translateZ(5px); }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-title { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; color: var(--text); font-size: 14px; font-weight: 750; line-height: 1.35; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-amount { display: block; margin-top: 4px; color: var(--gold-text); font-size: 18px; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-meta { display: flex; align-items: center; gap: 4px; min-width: 0; overflow: hidden; margin-top: 8px; color: var(--text-2); font-size: 10px; line-height: 1.2; white-space: nowrap; text-overflow: ellipsis; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-meta svg { width: 12px; height: 12px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-arrow { width: 16px; height: 16px; flex: none; margin-left: auto; color: var(--gold-text); opacity: .7; transform: translateZ(8px); }
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:hover .latest-order-arrow,
+#site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:focus-visible .latest-order-arrow { opacity: 1; }
+
+@keyframes latest-orders-3d-run {
+  to { translate: var(--latest-orders-offset, -50%) 0; }
+}
+
+@media (max-width: 639px) {
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section { padding-top: 18px !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading { gap: 9px !important; margin-bottom: 11px !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading-icon { width: 36px !important; height: 36px !important; flex-basis: 36px !important; border-radius: 10px !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading h2 { font-size: 17px !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-heading p { font-size: 10px !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle { min-height: 36px; width: 36px; padding: 8px; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-toggle span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell { padding: 15px 10px 18px !important; border-radius: 14px !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-track,
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-group { gap: 10px !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card { width: 250px !important; min-height: 96px !important; padding: 10px !important; gap: 9px !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-image-wrap { width: 59px !important; height: 65px !important; flex-basis: 59px; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-title { font-size: 13px; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-amount { font-size: 16px; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-meta { margin-top: 6px; font-size: 9px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell { overflow-x: auto !important; scrollbar-width: thin; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-track { animation: none !important; will-change: auto !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-motion-opt-in { overflow-x: hidden !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-motion-opt-in.is-user-paused { overflow-x: auto !important; }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-motion-opt-in .latest-orders-track {
+    animation: latest-orders-3d-run var(--latest-orders-duration, 32s) linear infinite !important;
+    animation-play-state: paused !important;
+  }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-orders-shell.is-motion-opt-in.is-visible:not(.is-user-paused):not(:hover):not(:focus-within) .latest-orders-track {
+    animation-play-state: running !important;
+  }
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card,
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:hover,
+  #site-page-shell #latest-orders.latest-orders-section.storefront-control-section .latest-order-card:focus-visible { transform: perspective(750px) rotateX(4deg) translateY(0) !important; transition: none; }
+}

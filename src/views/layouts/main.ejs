@@ -55,6 +55,7 @@
   <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v20.css') %>&amp;rev=3" /><% } %>
   <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v21.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-main-v3.css') %>&amp;rev=3" /><% } %>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/latest-orders-3d-v1.css') %>" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
 
@@ -891,5 +892,6 @@
 </script>
   <script src="<%= asset('js/scroll-motion-v1.js') %>" defer></script>
   <script src="<%= asset('js/interaction-performance-v1.js') %>" defer></script>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><script src="<%= asset('js/latest-orders-3d-v1.js') %>" defer></script><% } %>
 </body>
 </html>

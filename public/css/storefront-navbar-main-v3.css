@@ -397,3 +397,11 @@
   .store-nav--main .store-nav__chevron { display: none !important; }
   .store-nav--main .store-nav__register { padding-inline: 12px !important; }
 }
+
+/* The mobile toggle also has the round-button class. Keep the desktop
+   utility-button rule from re-enabling it and creating a second nav row. */
+@media (min-width: 1101px) {
+  .store-nav--main .store-nav__inner > .store-nav__round.store-nav__mobile-toggle {
+    display: none !important;
+  }
+}
