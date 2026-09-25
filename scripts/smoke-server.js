@@ -323,7 +323,10 @@ async function run() {
     if (!home.body.includes('owner-home-v20-hero') || !home.body.includes('owner-home-v20-product-rail') || !home.body.includes('owner-home-v20-sidebar')) throw new Error('main home is missing its sidebar, real-data hero, or product rail');
     if (!home.body.includes('/css/storefront-owner-home-v21.css') || !home.body.includes('owner-home-v21-product-card') || !home.body.includes('owner-home-v21-stock-badge')) throw new Error('main home is missing the new image-first product card with a clear stock badge');
     const ownerHomeV21Css = await fetchOk('/css/storefront-owner-home-v21.css', 'text/css');
-    if (!/\.owner-home-v21-media\s*>\s*img\s*\{[^}]*object-fit:\s*cover/s.test(ownerHomeV21Css.body)) throw new Error('main shop product artwork no longer fills the card preview');
+    if (!/\.owner-home-v21-media\s*>\s*img\s*\{[^}]*object-fit:\s*contain/s.test(ownerHomeV21Css.body)) throw new Error('main shop product artwork must remain fully visible without cropping');
+    const ownerProductImageCss = await fetchOk('/css/storefront-owner-home-v1.css', 'text/css');
+    if (!/\.main-store-product-card img\s*\{[^}]*height:\s*auto\s*!important[^}]*aspect-ratio:\s*auto\s*!important[^}]*object-fit:\s*contain\s*!important/s.test(ownerProductImageCss.body)) throw new Error('main-store product images must use their full intrinsic aspect ratio');
+    if (!/\.main-store-product-card :is\(\.catalog-image, \.owner-home-v21-media, \.owner-home-v20-poster\)\s*\{[^}]*aspect-ratio:\s*auto\s*!important[^}]*overflow:\s*visible\s*!important/s.test(ownerProductImageCss.body)) throw new Error('main-store product image frames must not clip uploaded artwork');
     if (home.body.includes('cdn.tailwindcss.com')) throw new Error('home still loads the Tailwind browser compiler');
     if (!home.body.includes('data-seamless-navigation="true"')) throw new Error('home is missing persistent navigation for uninterrupted music');
     if (!home.body.includes('/js/interaction-performance-v1.js')) throw new Error('home is missing shared interaction performance helpers');
