@@ -66,16 +66,7 @@
   <%
     const ownerHomeFeatured = (newest || [])[0] || null;
   %>
-  <section class="owner-home-v20-hero" id="home-top" aria-labelledby="owner-home-v20-title">
-    <% if (ownerHomeBanner) { %>
-      <div class="owner-home-v20-artwork">
-        <% if (settings.hero.bannerLink) { %>
-          <a href="<%= settings.hero.bannerLink %>" aria-label="เปิดแบนเนอร์ร้าน <%= settings.shopName %>"><img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high" decoding="async" /></a>
-        <% } else { %>
-          <img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high" decoding="async" />
-        <% } %>
-      </div>
-    <% } %>
+  <section class="owner-home-v20-hero<%= ownerHomeBanner ? '' : ' owner-home-v20-hero--no-art' %>" id="home-top" aria-labelledby="owner-home-v20-title">
     <div class="owner-home-v20-hero-content">
       <p class="owner-home-v20-eyebrow"><span></span> LILTEAM SHOP <i>·</i> FEATURED STORE</p>
       <h1 id="owner-home-v20-title"><%= settings.shopName || 'LILTeam Shop' %></h1>
@@ -90,7 +81,16 @@
         <a class="owner-home-v20-secondary" href="/help">วิธีสั่งซื้อ</a>
       </div>
     </div>
-    <div class="owner-home-v20-hero-note"><span></span> LILTEAM MAIN STORE <i>·</i> <%= Number(productTotal || 0).toLocaleString() %> รายการ</div>
+    <% if (ownerHomeBanner) { %>
+      <div class="owner-home-v20-artwork">
+        <% if (settings.hero.bannerLink) { %>
+          <a href="<%= settings.hero.bannerLink %>" aria-label="เปิดแบนเนอร์ร้าน <%= settings.shopName %>"><img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high" decoding="async" /></a>
+        <% } else { %>
+          <img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high" decoding="async" />
+        <% } %>
+        <div class="owner-home-v20-hero-note"><span></span> LILTEAM MAIN STORE <i>·</i> <%= Number(productTotal || 0).toLocaleString() %> รายการ</div>
+      </div>
+    <% } %>
   </section>
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
   <section class="storefront-hero-banner">
