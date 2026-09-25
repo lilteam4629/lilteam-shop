@@ -212,6 +212,12 @@ mainProductStylesheet.walkRules(rule => {
 });
 assert.match(mainProductCss, /\.main-store-product-card img\s*\{[^}]*object-fit:\s*contain\s*!important/s,
   'all current and future main-store product cards must show uploaded artwork without cropping');
+assert.match(mainProductCss, /\.main-store-product-card img\s*\{[^}]*height:\s*auto\s*!important[^}]*aspect-ratio:\s*auto\s*!important/s,
+  'main-store product images must keep their intrinsic dimensions rather than fill a cropped frame');
+assert.match(mainProductCss, /\.main-store-product-card :is\(\.catalog-image, \.owner-home-v21-media, \.owner-home-v20-poster\)\s*\{[^}]*aspect-ratio:\s*auto\s*!important[^}]*overflow:\s*visible\s*!important/s,
+  'catalog, featured-card, and new-arrival media frames must not clip full product artwork');
+assert.match(mainProductCss, /\.main-store-product-card :is\(\.catalog-image, \.owner-home-v21-media, \.owner-home-v20-poster\)\s*>\s*img\s*\{[^}]*height:\s*auto\s*!important[^}]*object-fit:\s*contain\s*!important/s,
+  'product images inside each supported media frame must scale by width without cropping or distortion');
 assert.match(mainProductCss, /\.main-store-product-stock\s*\{[^}]*var\(--gold\)/s,
   'stock badges beside product titles must use the saved storefront accent');
 
