@@ -728,12 +728,14 @@
   html body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) header.store-nav.store-nav--main .store-nav__actions .store-nav__cart,
   html body:has(.store-nav--main) header.store-nav.store-nav--main .store-nav__actions .store-nav__theme,
   html body:has(.store-nav--main) header.store-nav.store-nav--main .store-nav__actions .store-nav__cart {
-    width: 38px !important;
-    height: 38px !important;
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
     border: 0 !important;
-    border-radius: 50% !important;
-    color: var(--text-2) !important;
-    background: var(--bg) !important;
+    border-radius: 10px !important;
+    color: var(--gold-contrast) !important;
+    background: var(--gold) !important;
+    transition: transform .18s ease, background-color .18s ease !important;
   }
 
   :is(body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell), body:has(.store-nav--main)) .store-nav--main .store-nav__theme:hover,
