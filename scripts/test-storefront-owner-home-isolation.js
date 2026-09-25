@@ -192,12 +192,16 @@ let mainNavbarRuleCount = 0;
 mainNavbarStylesheet.walkRules(rule => {
   mainNavbarRuleCount += 1;
   for (const selector of rule.selectors) {
-    assert.ok(selector.startsWith('.store-nav--main'),
+    assert.ok(selector.includes('.store-nav--main'),
       `the redesigned navigation must only apply to the main shop: ${selector}`);
   }
 });
-assert.match(mainNavbarCss, /grid-template-columns:\s*minmax\(165px, auto\) minmax\(0, 1fr\) 44px auto/,
-  'the redesigned header must keep brand, centered navigation, search, and actions in one row');
+assert.match(mainNavbarCss, /grid-template-columns:\s*minmax\(170px, 1fr\) auto 38px auto/,
+  'the redesigned header must keep the brand left and place navigation, search, and actions to its right');
+assert.match(mainNavbarCss, /justify-content:\s*flex-end/,
+  'the navigation links must align to the right side of the header');
+assert.match(mainNavbarCss, /border-radius:\s*999px/,
+  'the signup action must use the rounded treatment shown in the reference');
 assert.match(mainNavbarCss, /background:\s*var\(--gold\)/,
   'header action colors must follow the accent selected in the admin theme');
 assert.match(mainNavbarCss, /background:\s*var\(--card\)/,
