@@ -81,7 +81,7 @@
   outline: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  object-fit: contain !important;
+  object-fit: cover !important;
   object-position: center !important;
 }
 
