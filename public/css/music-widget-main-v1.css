@@ -1,0 +1,149 @@
+/* Compact floating music controls for the main LilTeam storefront. */
+#music-widget {
+  right: 14px !important;
+  bottom: 14px !important;
+}
+
+#music-widget #music-toggle-btn {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 50% !important;
+  border-color: color-mix(in srgb, var(--gold) 42%, var(--border)) !important;
+  background: var(--card) !important;
+  box-shadow: 0 5px 16px color-mix(in srgb, var(--text) 18%, transparent) !important;
+  font-size: 16px !important;
+}
+
+#music-widget #music-thumb {
+  opacity: .24 !important;
+}
+
+#music-widget #music-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--gold) 42%, var(--border));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--card) 88%, transparent);
+}
+
+#music-widget #music-playing-ring {
+  border-color: var(--gold) !important;
+}
+
+#music-widget #music-settings-btn {
+  top: -4px !important;
+  left: -4px !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-color: color-mix(in srgb, var(--gold) 38%, var(--border)) !important;
+  border-radius: 50% !important;
+  background: var(--card) !important;
+  font-size: 10px !important;
+}
+
+#music-widget #music-panel {
+  right: 0 !important;
+  bottom: 54px !important;
+  display: none;
+  width: min(252px, calc(100vw - 24px)) !important;
+  padding: 9px !important;
+  overflow: visible !important;
+  border-color: var(--border) !important;
+  border-radius: 15px !important;
+  background: var(--card) !important;
+  box-shadow: 0 14px 36px color-mix(in srgb, var(--text) 20%, transparent) !important;
+}
+
+#music-widget #music-panel:not(.hidden) {
+  display: block !important;
+}
+
+#music-widget #music-panel > .relative.aspect-video {
+  width: 100% !important;
+  height: 48px !important;
+  aspect-ratio: auto !important;
+  overflow: visible !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+}
+
+#music-widget #music-panel > .relative.aspect-video img {
+  width: 48px !important;
+  height: 48px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 9px !important;
+  object-fit: cover !important;
+}
+
+#music-widget #music-panel > .relative.aspect-video > .absolute.inset-0 {
+  display: none !important;
+}
+
+#music-widget #music-collapse-btn {
+  top: -5px !important;
+  right: -5px !important;
+  width: 22px !important;
+  height: 22px !important;
+  border: 1px solid color-mix(in srgb, var(--card) 80%, var(--border)) !important;
+  border-radius: 50% !important;
+  background: var(--text) !important;
+  color: var(--card) !important;
+}
+
+#music-widget #music-panel > .p-3 {
+  position: static !important;
+  margin-top: 8px !important;
+  padding: 0 !important;
+}
+
+#music-widget #music-title {
+  position: absolute !important;
+  top: 21px !important;
+  right: 34px !important;
+  left: 67px !important;
+  display: -webkit-box !important;
+  overflow: hidden !important;
+  margin: 0 !important;
+  color: var(--text) !important;
+  font-size: 11px !important;
+  font-weight: 650 !important;
+  line-height: 1.35 !important;
+  text-overflow: ellipsis !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+}
+
+#music-widget #music-panel > .p-3 > .flex.items-center.gap-3 {
+  gap: 9px !important;
+  min-height: 34px;
+}
+
+#music-widget #music-play-btn {
+  width: 32px !important;
+  height: 32px !important;
+  border-radius: 50% !important;
+  font-size: 12px !important;
+}
+
+#music-widget #music-volume {
+  min-width: 0;
+  accent-color: var(--gold);
+}
+
+#music-widget :is(button, input):focus-visible {
+  outline: 2px solid var(--gold-text) !important;
+  outline-offset: 3px !important;
+}
+
+@media (max-width: 420px) {
+  #music-widget { right: 10px !important; bottom: 10px !important; }
+  #music-widget #music-toggle-btn { width: 42px !important; height: 42px !important; }
+  #music-widget #music-panel { bottom: 50px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #music-widget #music-toggle-btn,
+  #music-widget #music-play-btn { transition: none !important; }
+}
