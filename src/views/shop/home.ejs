@@ -193,12 +193,15 @@
     </div>
     <div class="owner-home-v20-product-rail" aria-label="สินค้าเข้าใหม่">
       <% newest.slice(0, 6).forEach((product, index) => { %>
-        <a class="owner-home-v20-product-card" href="/game/<%= product.slug %>">
+        <a class="owner-home-v20-product-card main-store-product-card" href="/game/<%= product.slug %>">
           <span class="owner-home-v20-poster">
             <% if (product.images && product.images[0]) { %><img src="<%= product.images[0] %>" alt="<%= product.title %>" loading="<%= index === 0 ? 'eager' : 'lazy' %>" decoding="async" /><% } else { %><span class="owner-home-v20-poster-fallback" aria-hidden="true">L</span><% } %>
             <span class="owner-home-v20-poster-tag">สินค้าใหม่</span>
           </span>
-          <span class="owner-home-v20-product-info"><b><%= product.title %></b><strong>฿<%= Number(product.price || 0).toLocaleString() %></strong></span>
+          <span class="owner-home-v20-product-info">
+            <span class="main-store-product-title-row"><b><%= product.title %></b><span class="main-store-product-stock" data-stock-state="<%= product.stockCount > 0 ? 'available' : 'sold' %>"><i aria-hidden="true"></i><span><%= product.stockCount > 0 ? `พร้อมส่ง ${product.stockCount.toLocaleString()}` : 'หมด' %></span></span></span>
+            <strong>฿<%= Number(product.price || 0).toLocaleString() %></strong>
+          </span>
         </a>
       <% }) %>
     </div>

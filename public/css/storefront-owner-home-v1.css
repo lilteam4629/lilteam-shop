@@ -12,3 +12,100 @@
 @media(max-width:800px){.storefront-owner-lilteam .owner-home-command,.storefront-owner-lilteam .owner-home-steps{width:calc(100% - 24px)}.owner-home-command{grid-template-columns:1fr;gap:17px;margin-top:12px;padding:22px 19px;border-radius:17px}.owner-home-command h2{font-size:clamp(24px,7.2vw,34px)}.owner-home-command p{font-size:12px}.owner-home-command__stats{align-self:stretch}.owner-home-steps{grid-template-columns:1fr;gap:7px;margin-top:8px}.owner-home-steps>div{padding:11px 13px}.owner-home-steps small{white-space:normal}}
 @media(max-width:430px){.owner-home-command{padding:19px 16px}.owner-home-command__actions{gap:7px}.owner-home-command__actions a{min-height:36px;padding-inline:12px;font-size:11px}.owner-home-command__stats strong{font-size:19px}.owner-home-command__stats span{font-size:9px}}
 @media(prefers-reduced-motion:reduce){.owner-home-command__actions a{transition:none}}
+
+/* Main-store product cards: keep every uploaded artwork whole and keep stock with its title. */
+body.storefront-owner-lilteam #site-page-shell .main-store-product-card img {
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: none !important;
+}
+body.storefront-owner-lilteam #site-page-shell .main-store-product-title-row {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+}
+body.storefront-owner-lilteam #site-page-shell .main-store-product-title-row > :is(h3, b, a) {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+body.storefront-owner-lilteam #site-page-shell .main-store-product-stock {
+  display: inline-flex;
+  min-width: 0;
+  max-width: 55%;
+  min-height: 23px;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 5px;
+  overflow: hidden;
+  padding: 3px 7px;
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 94%, #fff);
+  color: var(--gold-text);
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
+}
+body.storefront-owner-lilteam #site-page-shell .main-store-product-stock > i {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 14%, #fff);
+  font-style: normal;
+}
+body.storefront-owner-lilteam #site-page-shell .main-store-product-stock > span,
+body.storefront-owner-lilteam #site-page-shell .main-store-product-stock > strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+body.storefront-owner-lilteam #site-page-shell .main-store-product-stock[data-stock-state="sold"] {
+  border-color: var(--border);
+  background: var(--input);
+  color: var(--text-3);
+}
+body.storefront-owner-lilteam #site-page-shell .main-store-product-stock[data-stock-state="sold"] > i {
+  background: var(--text-4);
+  box-shadow: none;
+}
+body.storefront-owner-lilteam #site-page-shell .catalog-card-title-row .catalog-card-title {
+  display: block;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+body.storefront-owner-lilteam #site-page-shell .owner-home-v20-product-info > .main-store-product-title-row {
+  width: auto;
+  flex: 1 1 auto;
+}
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-title-row .owner-home-v21-stock-badge {
+  position: static;
+  top: auto;
+  right: auto;
+  width: auto;
+  min-height: 23px;
+  max-width: 55%;
+  flex: 0 0 auto;
+  gap: 5px;
+  padding: 3px 7px;
+  box-shadow: none;
+  font-size: 9px;
+}
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-title-row .owner-home-v21-stock-badge > strong {
+  min-width: 0;
+  overflow: hidden;
+  font-size: 9px;
+  text-overflow: ellipsis;
+}
+@media(max-width:430px) {
+  body.storefront-owner-lilteam #site-page-shell .main-store-product-title-row { gap: 4px; }
+  body.storefront-owner-lilteam #site-page-shell .main-store-product-stock { min-height: 21px; gap: 4px; padding: 3px 5px; font-size: 8px; }
+  body.storefront-owner-lilteam #site-page-shell .owner-home-v21-title-row .owner-home-v21-stock-badge { min-height: 21px; gap: 4px; padding: 3px 5px; font-size: 8px; }
+  body.storefront-owner-lilteam #site-page-shell .owner-home-v21-title-row .owner-home-v21-stock-badge > strong { font-size: 8px; }
+}

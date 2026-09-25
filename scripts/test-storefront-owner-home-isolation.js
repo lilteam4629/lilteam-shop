@@ -7,7 +7,9 @@ const read = relative => fs.readFileSync(path.join(__dirname, '..', relative), '
 const route = read('src/routes/shop.js');
 const layout = read('src/views/layouts/main.ejs');
 const home = read('src/views/shop/home.ejs');
+const listing = read('src/views/shop/listing.ejs');
 const productCard = read('src/views/partials/product-card.ejs');
+const ownerBaseCss = read('public/css/storefront-owner-home-v1.css');
 const css = read('public/css/storefront-owner-home-v7.css');
 const redesignCss = read('public/css/storefront-owner-home-v14.css');
 const gameWorldCss = read('public/css/storefront-owner-home-v15.css');
@@ -45,10 +47,20 @@ assert.match(home, /newest\.slice\(0, 6\)\.forEach\(\(product, index\) => \{/,
   'the new horizontal shelf must render actual newest products, not reference/demo items');
 assert.equal((home.match(/ownerHomeProductCard: ownerHomeV20/g) || []).length, 2,
   'both main-store product grids must opt in to the new product-card design without affecting tenants');
-assert.match(productCard, /if \(useOwnerHomeShowcase\) \{ %>[\s\S]*?owner-home-v21-product-card[\s\S]*?owner-home-v21-stock-badge[\s\S]*?owner-home-v21-summary[\s\S]*?owner-home-v21-name[\s\S]*?owner-home-v21-purchase-row[\s\S]*?owner-home-v21-price-values[\s\S]*?owner-home-v21-buy/,
-  'the homepage card must match the image-first stock/title/price/action design');
+assert.match(productCard, /const isMainStorefrontCard = typeof isMainSite !== 'undefined' && isMainSite/,
+  'the shared product card must opt in to owner-only changes without altering tenant cards');
+assert.match(productCard, /if \(useOwnerHomeShowcase\) \{ %>[\s\S]*?owner-home-v21-product-card main-store-product-card[\s\S]*?owner-home-v21-summary[\s\S]*?owner-home-v21-name[\s\S]*?owner-home-v21-stock-badge[\s\S]*?owner-home-v21-purchase-row[\s\S]*?owner-home-v21-price-values[\s\S]*?owner-home-v21-buy/,
+  'the homepage card must place live stock beside its title below the full image');
+assert.match(productCard, /if \(!isMainStorefrontCard\) \{[\s\S]*?ready-glow/,
+  'tenant cards must retain their existing image-overlay stock badge');
+assert.match(productCard, /if \(isMainStorefrontCard\) \{[\s\S]*?main-store-product-title-row[\s\S]*?main-store-product-stock/,
+  'main-store classic and natural cards must show live stock beside the product name');
 assert.match(productCard, /owner-home-v21-media[\s\S]*?width="960" height="540"/,
   'the new card must reserve image space and preserve the full product image');
+assert.match(listing, /isMainStorefrontListing[\s\S]*?main-store-product-title-row[\s\S]*?main-store-product-stock/,
+  'the main catalog page must place each product stock badge beside its title');
+assert.match(home, /owner-home-v20-product-card main-store-product-card[\s\S]*?main-store-product-title-row[\s\S]*?main-store-product-stock/,
+  'the newest-products rail must use full images and show stock beside every title');
 assert.doesNotMatch(home, /owner-home-v17-hero-shell|owner-home-v17-visual|owner-home-v17-banner-frame/,
   'the former split-text and framed-screen hero must be removed from the active homepage template');
 assert.doesNotMatch(home, /owner-home-v16|data-scene-motion-toggle|anime/i,
@@ -187,6 +199,21 @@ assert.match(productCardCss, /var\(--gold\)/,
 assert.doesNotMatch(productCardCss, /#(?:00ff91|10b981|34d399)\b/i,
   'the new card must not introduce unrelated green accents');
 assert.ok(productCardRuleCount > 0, 'the new product-card layer must have owner-home scoped rules');
+
+const mainProductCssStart = ownerBaseCss.indexOf('/* Main-store product cards:');
+assert.notEqual(mainProductCssStart, -1, 'main-store product-card rules must be present');
+const mainProductCss = ownerBaseCss.slice(mainProductCssStart);
+const mainProductStylesheet = postcss.parse(mainProductCss, { from: 'main-store-product-cards.css' });
+mainProductStylesheet.walkRules(rule => {
+  for (const selector of rule.selectors) {
+    assert.ok(selector.startsWith('body.storefront-owner-lilteam #site-page-shell'),
+      `full-image and stock-title styles must not affect tenant storefronts: ${selector}`);
+  }
+});
+assert.match(mainProductCss, /\.main-store-product-card img\s*\{[^}]*object-fit:\s*contain\s*!important/s,
+  'all current and future main-store product cards must show uploaded artwork without cropping');
+assert.match(mainProductCss, /\.main-store-product-stock\s*\{[^}]*var\(--gold\)/s,
+  'stock badges beside product titles must use the saved storefront accent');
 
 const mainNavbarCss = read('public/css/storefront-navbar-main-v3.css');
 const mainNavbarStylesheet = postcss.parse(mainNavbarCss, { from: 'storefront-navbar-main-v3.css' });
