@@ -408,9 +408,28 @@
   }
 }
 
-/* Hide the uploaded logo image on the primary navbar; keep the shop name text. */
+/* Keep the complete uploaded wordmark and remove the duplicate text beside it. */
 .store-nav--main .store-nav__brand img {
-  display: none !important;
+  display: block !important;
+  width: auto !important;
+  height: 35px !important;
+  max-width: min(132px, 22vw) !important;
+  flex: 0 1 auto !important;
+  aspect-ratio: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+.store-nav--main .store-nav__brand strong { display: none !important; }
+
+@media (max-width: 1100px) {
+  .store-nav--main .store-nav__brand img { height: 32px !important; max-width: min(116px, 25vw) !important; }
+}
+
+@media (max-width: 640px) {
+  .store-nav--main .store-nav__brand img { height: 29px !important; max-width: min(104px, 28vw) !important; }
 }
 
 /* Remove the standalone search control from the main shop header. */
