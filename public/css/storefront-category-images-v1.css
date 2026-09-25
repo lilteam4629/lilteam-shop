@@ -13,12 +13,11 @@
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-grid {
-  display: flex !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   width: 100% !important;
   max-width: 100% !important;
-  flex-wrap: wrap !important;
-  align-items: flex-start !important;
-  justify-content: center !important;
+  align-items: stretch !important;
   gap: 14px !important;
   padding: 0 !important;
   overflow: visible !important;
@@ -28,8 +27,7 @@
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-card {
   position: relative !important;
   display: block !important;
-  flex: 0 1 min(640px, 100%) !important;
-  width: auto !important;
+  width: 100% !important;
   max-width: 100% !important;
   min-width: 0 !important;
   min-height: 0 !important;
@@ -89,6 +87,5 @@
 
 @media (max-width: 640px) {
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories { padding: 8px 0 2px !important; }
-  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-grid { gap: 10px !important; }
-  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-card { flex-basis: 100% !important; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
 }
