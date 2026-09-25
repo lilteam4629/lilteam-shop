@@ -66,7 +66,7 @@
   <%
     const ownerHomeFeatured = (newest || [])[0] || null;
   %>
-  <section class="owner-home-v20-hero<%= ownerHomeBanner ? '' : ' owner-home-v20-hero--no-art' %>" id="home-top" aria-labelledby="owner-home-v20-title">
+  <section class="owner-home-v20-hero owner-home-v23-hero<%= ownerHomeBanner || ownerHomeFeatured ? '' : ' owner-home-v20-hero--no-art' %>" id="home-top" aria-labelledby="owner-home-v20-title">
     <div class="owner-home-v20-hero-content">
       <p class="owner-home-v20-eyebrow"><span></span> LILTEAM SHOP <i>·</i> FEATURED STORE</p>
       <h1 id="owner-home-v20-title"><%= settings.shopName || 'LILTeam Shop' %></h1>
@@ -90,6 +90,14 @@
         <% } %>
         <div class="owner-home-v20-hero-note"><span></span> LILTEAM MAIN STORE <i>·</i> <%= Number(productTotal || 0).toLocaleString() %> รายการ</div>
       </div>
+    <% } else if (ownerHomeFeatured) { %>
+      <a class="owner-home-v20-artwork owner-home-v23-spotlight" href="<%= ownerHomeFeatured.slug ? '/game/' + ownerHomeFeatured.slug : '#home-catalog' %>" aria-label="ดูสินค้า <%= ownerHomeFeatured.title %>">
+        <span class="owner-home-v23-spotlight-head"><span>สินค้าเข้าใหม่</span><span class="owner-home-v23-stock" data-stock-state="<%= Number(ownerHomeFeatured.stockCount || 0) > 0 ? 'available' : 'sold' %>"><i aria-hidden="true"></i><%= Number(ownerHomeFeatured.stockCount || 0) > 0 ? `พร้อมส่ง ${Number(ownerHomeFeatured.stockCount).toLocaleString()}` : 'สินค้าหมด' %></span></span>
+        <span class="owner-home-v23-spotlight-image">
+          <% if (ownerHomeFeatured.images && ownerHomeFeatured.images[0]) { %><img src="<%= ownerHomeFeatured.images[0] %>" alt="" fetchpriority="high" decoding="async" /><% } else { %><span class="owner-home-v23-spotlight-fallback" aria-hidden="true">L</span><% } %>
+        </span>
+        <span class="owner-home-v23-spotlight-details"><span><small>สินค้าล่าสุด</small><strong><%= ownerHomeFeatured.title %></strong></span><span class="owner-home-v23-spotlight-price"><small>ราคา</small><strong>฿<%= Number(ownerHomeFeatured.price || 0).toLocaleString() %></strong></span></span>
+      </a>
     <% } %>
   </section>
 <% } else if (settings.hero.mode === 'banner' && settings.hero.bannerImage) { %>
