@@ -1,0 +1,180 @@
+/* Editorial product rail: show each real product clearly without changing its route or data. */
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals {
+  margin-top: clamp(30px, 4vw, 52px) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals > .owner-home-v20-section-head {
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head h2 {
+  font-size: clamp(21px, 2vw, 25px) !important;
+  letter-spacing: -.035em;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head p {
+  margin-top: 5px;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head > a {
+  display: inline-flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  transition: border-color .18s ease, color .18s ease, background .18s ease;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head > a:hover {
+  border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 8%, var(--card));
+  color: var(--gold-text);
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-rail {
+  grid-auto-columns: clamp(248px, 19vw, 292px);
+  gap: 15px;
+  padding: 2px 2px 12px;
+  scrollbar-color: color-mix(in srgb, var(--gold) 55%, var(--border)) transparent;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card {
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: var(--card);
+  box-shadow: 0 5px 18px rgba(20, 22, 28, .07);
+  transition: border-color .2s ease, box-shadow .2s ease, transform .2s ease;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--gold) 65%, var(--border));
+  background: var(--card);
+  box-shadow: 0 12px 28px rgba(20, 22, 28, .12);
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold) 72%, white);
+  outline-offset: 3px;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-poster {
+  aspect-ratio: 16 / 9;
+  background: #101116;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-poster > img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card:hover .owner-home-v20-poster img {
+  transform: none;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-poster-tag {
+  top: 10px;
+  left: 10px;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 999px;
+  background: rgba(20, 20, 20, .78);
+  color: #fff;
+  font-size: 9px;
+  backdrop-filter: blur(6px);
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  min-height: 66px;
+  padding: 12px 14px;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-title-row {
+  display: grid;
+  min-width: 0;
+  justify-content: stretch;
+  gap: 7px;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info b {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-stock {
+  width: max-content;
+  max-width: 100%;
+  min-height: 22px;
+  padding: 3px 8px;
+  font-size: 9px;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info > strong {
+  color: var(--gold-text);
+  font-size: 17px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-rail {
+    grid-auto-columns: clamp(230px, 34vw, 278px);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 640px) {
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals {
+    margin-top: 28px !important;
+  }
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals > .owner-home-v20-section-head {
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head h2 {
+    font-size: 20px !important;
+  }
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head p {
+    max-width: 34ch;
+    font-size: 10px;
+  }
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head > a {
+    min-height: 34px;
+    gap: 5px;
+    padding: 0 10px;
+    font-size: 9px;
+  }
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-rail {
+    grid-auto-columns: minmax(228px, 78vw);
+    gap: 10px;
+    padding-bottom: 10px;
+  }
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info {
+    min-height: 62px;
+    padding: 10px 12px;
+  }
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info > strong {
+    font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #site-page-shell.storefront-owner-home-v7 #home-new-arrivals * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
