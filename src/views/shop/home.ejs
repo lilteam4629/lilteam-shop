@@ -258,7 +258,8 @@
     <% recommendedCategories.forEach(category => { if (ownerHomeV20 && !category.imageUrl) return; %>
       <a class="home-category-card" href="/products?recommended=<%= encodeURIComponent(category.id) %>">
         <span class="home-category-image"><% if (category.imageUrl) { %><img src="<%= category.imageUrl %>" alt="<%= category.title %>" loading="lazy" decoding="async" /><% } else { %><span>600 × 200</span><% } %></span>
-        <% if (!ownerHomeV20) { %><span class="home-category-copy"><b><%= category.title %></b><small>สินค้าทั้งหมด <%= category.count %> รายการ</small></span><span class="home-category-arrow">↗</span><% } %>
+        <span class="home-category-copy"><b><%= category.title %></b><small>สินค้าในหมวด <%= category.count %> รายการ</small></span>
+        <% if (!ownerHomeV20) { %><span class="home-category-arrow">↗</span><% } %>
       </a>
     <% }) %>
   </div>
@@ -276,18 +277,19 @@
 </style>
 <style>
 /* Keep owner-home category artwork complete, bright, and readable. */
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-rail { padding-top: 8px !important; }
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-grid { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 14px !important; overflow: visible !important; }
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-rail { width: min(1800px, calc(100% - 24px)) !important; max-width: 1800px !important; margin: 0 auto !important; padding: 8px 0 4px !important; }
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-grid { display: grid !important; width: 100% !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 14px !important; overflow: visible !important; }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-card {
   position: relative;
   display: block !important;
+  width: 100% !important;
   min-height: 0 !important;
   aspect-ratio: auto !important;
   padding: 0 !important;
   overflow: hidden !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  background: transparent !important;
+  border: 1px solid var(--border-light) !important;
+  border-radius: 14px !important;
+  background: var(--card) !important;
   color: var(--text) !important;
   box-shadow: none !important;
   isolation: isolate;
@@ -307,17 +309,17 @@
   width: 100% !important;
   height: auto !important;
   min-height: 0 !important;
-  aspect-ratio: auto !important;
-  overflow: visible;
-  border-radius: 0;
-  background: transparent !important;
+  aspect-ratio: 3 / 1 !important;
+  overflow: hidden !important;
+  border-radius: 0 !important;
+  background: var(--card) !important;
   color: var(--text-2);
   line-height: 0;
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-image img {
   display: block !important;
   width: 100% !important;
-  height: auto !important;
+  height: 100% !important;
   max-height: none !important;
   object-fit: contain !important;
   object-position: center !important;
@@ -325,12 +327,23 @@
   filter: brightness(1.08) saturate(1.06);
   transition: filter .25s ease;
 }
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-copy {
+  display: block !important;
+  min-width: 0;
+  padding: 11px 14px 13px !important;
+  border-top: 1px solid var(--border);
+  background: var(--card);
+}
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-copy b,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-copy b { color: var(--text); font-size: 14px; font-weight: 850; }
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-copy small { margin-top: 4px; color: var(--text-4); font-size: 11px; }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-card:hover .home-category-image img { filter: brightness(1.12) saturate(1.08); }
 @media (max-width: 860px) {
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-grid { grid-template-columns: 1fr !important; }
 }
 @media (max-width: 560px) {
-  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-rail { padding-top: 8px !important; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-rail { width: calc(100% - 24px) !important; padding-top: 8px !important; }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .home-category-grid { gap: 10px !important; }
 }
 @media (prefers-reduced-motion: reduce) {
