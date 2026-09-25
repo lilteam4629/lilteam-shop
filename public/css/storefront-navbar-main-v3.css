@@ -434,3 +434,10 @@
     max-width: min(104px, 28vw) !important;
   }
 }
+
+/* Remove the standalone search control from the main shop header. */
+@media (min-width: 1101px) {
+  .store-nav--main .store-nav__inner { grid-template-columns: minmax(170px, 1fr) auto auto !important; }
+  .store-nav--main .store-nav__search { display: none !important; }
+  .store-nav--main .store-nav__actions { grid-column: 3 !important; }
+}
