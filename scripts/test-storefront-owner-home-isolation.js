@@ -202,6 +202,10 @@ assert.match(mainNavbarCss, /justify-content:\s*flex-end/,
   'the navigation links must align to the right side of the header');
 assert.match(mainNavbarCss, /border-radius:\s*999px/,
   'the signup action must use the rounded treatment shown in the reference');
+assert.match(mainNavbarCss, /\.store-nav--main \.store-nav__mobile-toggle\s*\{\s*display:\s*none !important/s,
+  'the mobile hamburger must not create an extra row on desktop');
+assert.match(mainNavbarCss, /min-height:\s*60px !important/,
+  'the desktop header must remain compact');
 assert.match(mainNavbarCss, /background:\s*var\(--gold\)/,
   'header action colors must follow the accent selected in the admin theme');
 assert.match(mainNavbarCss, /background:\s*var\(--card\)/,

@@ -2,7 +2,7 @@
    Loaded only for the main LilTeam shop; all colors follow the active admin theme. */
 @media (min-width: 1101px) {
   .store-nav--main {
-    min-height: 64px !important;
+    min-height: 60px !important;
     border-bottom: 1px solid var(--border) !important;
     background: color-mix(in srgb, var(--card) 97%, transparent) !important;
     box-shadow: none !important;
@@ -16,7 +16,7 @@
     align-items: center !important;
     gap: clamp(10px, 1.15vw, 18px) !important;
     width: min(1320px, calc(100% - 40px)) !important;
-    min-height: 64px !important;
+    min-height: 60px !important;
     padding: 0 !important;
   }
 
@@ -51,6 +51,9 @@
   }
 
   .store-nav--main .store-nav__brand strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* The mobile hamburger is the extra item currently creating a second row. */
+  .store-nav--main .store-nav__mobile-toggle { display: none !important; }
 
   .store-nav--main .store-nav__links {
     grid-column: 2 !important;
@@ -327,7 +330,7 @@
 /* The homepage has older high-specificity nav rules; override only those rules. */
 @media (min-width: 1101px) {
   body:has(#site-page-shell.storefront-owner-home-v7) .store-nav--main {
-    min-height: 64px !important;
+    min-height: 60px !important;
     border-bottom: 1px solid var(--border) !important;
     background: color-mix(in srgb, var(--card) 97%, transparent) !important;
     box-shadow: none !important;
@@ -337,6 +340,7 @@
   body:has(#site-page-shell.storefront-owner-home-v7) .store-nav--main .store-nav__links { justify-content: flex-end !important; background: transparent !important; }
 
   body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main {
+    min-height: 60px !important;
     border-bottom: 1px solid var(--border) !important;
     background: color-mix(in srgb, var(--card) 97%, transparent) !important;
     box-shadow: none !important;
@@ -344,7 +348,7 @@
 
   body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main .store-nav__inner {
     width: min(1320px, calc(100% - 40px)) !important;
-    min-height: 64px !important;
+    min-height: 60px !important;
   }
 
   body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main :is(
