@@ -1,0 +1,29 @@
+/* Keep product shelves open and quiet: no enclosing panel or divider. */
+#site-page-shell .store-product-gallery,
+#site-page-shell.storefront-owner-home-v7 .store-product-gallery,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .store-product-gallery {
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#site-page-shell .store-product-gallery > .section-hud-header,
+#site-page-shell.storefront-owner-home-v7 .store-product-gallery > .section-hud-header,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .store-product-gallery > .section-hud-header {
+  margin-bottom: 16px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-bottom: 0 !important;
+}
+
+#site-page-shell .store-product-gallery > .section-hud-header .section-hud-icon,
+#site-page-shell.storefront-owner-home-v7 .store-product-gallery > .section-hud-header .section-hud-icon,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .store-product-gallery > .section-hud-header .section-hud-icon {
+  width: auto !important;
+  height: auto !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
