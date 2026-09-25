@@ -45,8 +45,8 @@ assert.match(home, /newest\.slice\(0, 6\)\.forEach\(\(product, index\) => \{/,
   'the new horizontal shelf must render actual newest products, not reference/demo items');
 assert.equal((home.match(/ownerHomeProductCard: ownerHomeV20/g) || []).length, 2,
   'both main-store product grids must opt in to the new product-card design without affecting tenants');
-assert.match(productCard, /if \(useOwnerHomeShowcase\) \{ %>[\s\S]*?owner-home-v21-product-card[\s\S]*?owner-home-v21-name[\s\S]*?owner-home-v21-price-values[\s\S]*?owner-home-v21-stock-row/,
-  'the homepage card must show a distinct title, price, and live inventory count');
+assert.match(productCard, /if \(useOwnerHomeShowcase\) \{ %>[\s\S]*?owner-home-v21-product-card[\s\S]*?owner-home-v21-stock-badge[\s\S]*?owner-home-v21-summary[\s\S]*?owner-home-v21-name[\s\S]*?owner-home-v21-purchase-row[\s\S]*?owner-home-v21-price-values[\s\S]*?owner-home-v21-buy/,
+  'the homepage card must match the image-first stock/title/price/action design');
 assert.match(productCard, /owner-home-v21-media[\s\S]*?width="960" height="540"/,
   'the new card must reserve image space and preserve the full product image');
 assert.doesNotMatch(home, /owner-home-v17-hero-shell|owner-home-v17-visual|owner-home-v17-banner-frame/,
@@ -174,12 +174,12 @@ productCardStylesheet.walkRules(rule => {
       `product-card style could affect a tenant or non-home page: ${selector}`);
   }
 });
-assert.match(productCardCss, /\.owner-home-v21-media\s*>\s*img\s*\{[^}]*object-fit:\s*contain/s,
-  'product images must remain fully visible without cropping');
-assert.match(productCardCss, /\.owner-home-v21-price-values\s*>\s*strong\s*\{[^}]*font-size:\s*clamp\(19px/s,
+assert.match(productCardCss, /\.owner-home-v21-media\s*>\s*img\s*\{[^}]*object-fit:\s*cover/s,
+  'product artwork must fill the image-first preview without distortion');
+assert.match(productCardCss, /\.owner-home-v21-price-values\s*>\s*strong\s*\{[^}]*font-size:\s*clamp\(20px/s,
   'the live price must be prominent and readable');
-assert.match(productCardCss, /\.owner-home-v21-stock-row\s*>\s*strong\s*\{[^}]*font-size:\s*13px/s,
-  'the live stock count must have a clear visual hierarchy');
+assert.match(productCardCss, /\.owner-home-v21-stock-badge\s+strong\s*\{[^}]*font-size:\s*11px/s,
+  'the live inventory count must be legible in the image badge');
 assert.match(productCardCss, /var\(--gold\)/,
   'the new card must retain the shop accent for its primary action');
 assert.doesNotMatch(productCardCss, /#(?:00ff91|10b981|34d399)\b/i,

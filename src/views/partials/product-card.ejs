@@ -19,27 +19,30 @@
     <% } %>
     <% if (p.flashSaleActive) { %><span class="owner-home-v21-image-tag">ลดพิเศษ</span><% } else if (p.flashSaleUpcoming) { %><span class="owner-home-v21-image-tag">เร็ว ๆ นี้</span><% } %>
     <% if (p.isSyndicated) { %><span class="owner-home-v21-partner-tag">Partner</span><% } %>
-  </div>
-  <div class="owner-home-v21-details">
-    <h3 class="owner-home-v21-name"><%= p.title %></h3>
-    <div class="owner-home-v21-price-row">
-      <span class="owner-home-v21-label">ราคาขาย</span>
-      <div class="owner-home-v21-price-values">
-        <strong>฿<%= p.price.toLocaleString() %><small>.00</small></strong>
-        <% if (crossedPrice > p.price) { %><del>฿<%= crossedPrice.toLocaleString() %>.00</del><% } %>
-      </div>
-    </div>
-    <div class="owner-home-v21-stock-row" data-stock-state="<%= soldOut ? 'sold' : 'available' %>">
-      <span class="owner-home-v21-label">คงเหลือ</span>
-      <% if (soldOut) { %><strong>หมด</strong><% } else { %><strong><%= p.stockCount.toLocaleString() %><small> ชิ้น</small></strong><% } %>
+    <div class="owner-home-v21-stock-badge" data-stock-state="<%= soldOut ? 'sold' : 'available' %>">
+      <span class="owner-home-v21-stock-dot" aria-hidden="true"></span>
+      <% if (soldOut) { %><strong>หมด</strong><% } else { %><strong>พร้อมส่ง <%= p.stockCount.toLocaleString() %></strong><% } %>
     </div>
     <% if (p.flashSaleActive || p.flashSaleUpcoming) { %>
       <div class="owner-home-v21-countdown">
-        <span><%= p.flashSaleActive ? 'โปรโมชันเหลือเวลา' : 'เริ่มโปรโมชันใน' %></span>
+        <span><%= p.flashSaleActive ? 'โปรเหลือ' : 'เริ่มโปรใน' %></span>
         <strong class="flash-countdown" data-flash-compact="1" <% if (p.flashSaleActive) { %>data-flash-end="<%= p.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= p.flashSaleStartsAt %>"<% } %>><%= flashInitial %></strong>
       </div>
     <% } %>
-    <span class="owner-home-v21-buy"><%= soldOut ? 'ดูรายละเอียดสินค้า' : 'เลือกสินค้า' %><i aria-hidden="true">→</i></span>
+  </div>
+  <div class="owner-home-v21-details">
+    <span class="owner-home-v21-summary"><%= String(p.description || 'สินค้าเกมดิจิทัล').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() %></span>
+    <h3 class="owner-home-v21-name"><%= p.title %></h3>
+    <div class="owner-home-v21-purchase-row">
+      <div class="owner-home-v21-price-row">
+        <span class="owner-home-v21-label">ราคา</span>
+        <div class="owner-home-v21-price-values">
+          <strong>฿<%= p.price.toLocaleString() %><small>.00</small></strong>
+          <% if (crossedPrice > p.price) { %><del>฿<%= crossedPrice.toLocaleString() %>.00</del><% } %>
+        </div>
+      </div>
+      <span class="owner-home-v21-buy"><%= soldOut ? 'ดูสินค้า' : 'ซื้อ' %><i aria-hidden="true">→</i></span>
+    </div>
   </div>
 </a>
 <% } else if (useClassic) { %>
