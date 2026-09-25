@@ -1,7 +1,7 @@
 /* Homepage hero: an unboxed editorial split that gives the real banner room. */
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero {
   display: grid !important;
-  grid-template-columns: minmax(0, 1.28fr) minmax(280px, .72fr) !important;
+  grid-template-columns: minmax(280px, .72fr) minmax(0, 1.28fr) !important;
   align-items: center !important;
   gap: clamp(28px, 4vw, 64px) !important;
   min-height: 0 !important;
@@ -15,7 +15,7 @@
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero .owner-home-v20-hero-content {
-  grid-column: 2 !important;
+  grid-column: 1 !important;
   grid-row: 1 !important;
   max-width: 39rem;
   padding: 0 !important;
@@ -100,7 +100,7 @@
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero .owner-home-v20-artwork {
   position: relative;
-  grid-column: 1 !important;
+  grid-column: 2 !important;
   grid-row: 1 !important;
   align-self: stretch;
   display: grid;
