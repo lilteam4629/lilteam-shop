@@ -868,11 +868,11 @@
 
 <% if (latestOrders && latestOrders.length) { %>
 <section class="latest-orders-section storefront-control-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-5" id="latest-orders">
-  <div class="latest-orders-heading"><span class="latest-orders-heading-icon"><svg><use href="#ui-clock"/></svg></span><div><h2>รายการสั่งซื้อล่าสุด</h2><p>Latest order list</p></div></div>
+  <div class="latest-orders-heading"><span class="latest-orders-heading-icon"><svg><use href="#ui-clock"/></svg></span><div><h2>รายการสั่งซื้อล่าสุด</h2><p>Latest order list</p></div><% if (typeof isMainSite !== 'undefined' && isMainSite) { %><button type="button" class="latest-orders-toggle" data-latest-orders-toggle aria-pressed="false" aria-label="พักการเลื่อนอัตโนมัติ">พักการเลื่อน</button><% } %></div>
   <div class="latest-orders-shell">
     <div class="latest-orders-track">
       <% for (let duplicate = 0; duplicate < (typeof isMainSite !== 'undefined' && isMainSite ? 1 : 2); duplicate++) { %>
-        <div class="latest-orders-group" <%- duplicate ? 'aria-hidden="true"' : '' %>>
+        <div class="latest-orders-group" <%- duplicate ? 'aria-hidden="true" inert' : '' %>>
           <% latestOrders.forEach(order => { %>
             <a href="<%= order.slug ? '/game/' + order.slug : '/products' %>" class="latest-order-card">
               <span class="latest-order-image-wrap">
@@ -936,7 +936,187 @@
     .latest-order-image-wrap { width: 3rem; height: 3.65rem; border-radius: .55rem; }
     @keyframes latest-orders-scroll { to { transform: translateX(calc(-50% - .275rem)); } }
   }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-heading { align-items: center; }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-toggle {
+    flex: 0 0 auto; margin-left: auto; padding: 7px 11px; border: 1px solid var(--border-light);
+    border-radius: 999px; background: var(--card); color: var(--text-2); font-size: 11px;
+    font-weight: 700; line-height: 1.2; cursor: pointer; white-space: nowrap;
+  }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-toggle:hover { border-color: var(--gold); color: var(--text); }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-toggle:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 3px; }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-shell {
+    overflow-x: auto !important; overflow-y: hidden !important; scrollbar-width: none;
+    -ms-overflow-style: none; touch-action: pan-x; scroll-behavior: auto !important;
+  }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-shell::-webkit-scrollbar { display: none; }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-track {
+    width: max-content !important; gap: 0 !important; animation: none !important; transform: none !important;
+    will-change: scroll-position;
+  }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-group {
+    flex: 0 0 auto; gap: 15px !important; padding-right: 15px;
+  }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-shell:is(.is-static, .is-motion-reduced) .latest-orders-group[aria-hidden="true"] { display: none !important; }
+  @media (max-width: 639px) {
+    #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-group { gap: 10px !important; padding-right: 10px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-track { scroll-behavior: auto !important; }
+    #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-toggle { cursor: default; }
+  }
 </style>
+<% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+<script>
+  (function () {
+    function initLatestOrdersRail() {
+      var section = document.querySelector('#site-page-shell.storefront-owner-home-v7 #latest-orders');
+      if (!section) return;
+      var shell = section.querySelector('.latest-orders-shell');
+      var track = section.querySelector('.latest-orders-track');
+      var button = section.querySelector('[data-latest-orders-toggle]');
+      var baseGroup = track && track.querySelector('.latest-orders-group');
+      if (!shell || !track || !button || !baseGroup || shell.dataset.autoscrollReady === 'true') return;
+      shell.dataset.autoscrollReady = 'true';
+
+      var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      var userPaused = false;
+      var hovered = false;
+      var cardFocused = false;
+      var pointerActive = false;
+      var inView = !('IntersectionObserver' in window);
+      var destroyed = false;
+      var frame = 0;
+      var lastFrame = 0;
+      var resumeTimer = 0;
+      var speed = 34;
+      var cycleWidth = 0;
+      var visibilityObserver = null;
+
+      function removeGeneratedCopies() {
+        track.querySelectorAll('[data-loop-generated="true"]').forEach(function (copy) { copy.remove(); });
+      }
+
+      function configureCopies() {
+        var oldPosition = shell.scrollLeft;
+        removeGeneratedCopies();
+        cycleWidth = baseGroup.getBoundingClientRect().width;
+        if (!cycleWidth || cycleWidth <= shell.clientWidth || reducedMotion.matches) {
+          shell.classList.toggle('is-static', !reducedMotion.matches && cycleWidth <= shell.clientWidth);
+          shell.classList.toggle('is-motion-reduced', reducedMotion.matches);
+          shell.scrollLeft = Math.min(oldPosition, Math.max(0, shell.scrollWidth - shell.clientWidth));
+          syncMotion();
+          return;
+        }
+        shell.classList.remove('is-static', 'is-motion-reduced');
+        var count = 0;
+        while (track.scrollWidth < cycleWidth + shell.clientWidth + 2 && count < 32) {
+          var copy = baseGroup.cloneNode(true);
+          copy.setAttribute('aria-hidden', 'true');
+          copy.setAttribute('inert', '');
+          copy.setAttribute('data-loop-generated', 'true');
+          track.appendChild(copy);
+          count++;
+        }
+        shell.scrollLeft = oldPosition % cycleWidth;
+        syncMotion();
+      }
+
+      function shouldRun() {
+        return !destroyed && !userPaused && !hovered && !cardFocused && !pointerActive && inView && !reducedMotion.matches && !document.hidden && cycleWidth > shell.clientWidth;
+      }
+
+      function stop() {
+        if (frame) cancelAnimationFrame(frame);
+        frame = 0;
+        lastFrame = 0;
+      }
+
+      function tick(now) {
+        frame = 0;
+        if (!shouldRun()) { lastFrame = 0; return; }
+        if (lastFrame) {
+          shell.scrollLeft += Math.min(now - lastFrame, 50) * speed / 1000;
+          if (shell.scrollLeft >= cycleWidth) shell.scrollLeft -= cycleWidth;
+        }
+        lastFrame = now;
+        frame = requestAnimationFrame(tick);
+      }
+
+      function syncMotion() {
+        var reduce = reducedMotion.matches;
+        button.disabled = reduce;
+        button.setAttribute('aria-pressed', String(userPaused));
+        button.textContent = reduce ? 'เลื่อนด้วยมือ' : (userPaused ? 'เล่นต่อ' : 'พักการเลื่อน');
+        button.setAttribute('aria-label', reduce ? 'ปิดการเลื่อนอัตโนมัติตามการตั้งค่าลดการเคลื่อนไหว' : (userPaused ? 'เล่นการเลื่อนอัตโนมัติ' : 'พักการเลื่อนอัตโนมัติ'));
+        if (shouldRun()) {
+          if (!frame) frame = requestAnimationFrame(tick);
+        } else stop();
+      }
+
+      button.addEventListener('click', function () {
+        userPaused = !userPaused;
+        syncMotion();
+      });
+      shell.addEventListener('mouseenter', function () { hovered = true; syncMotion(); });
+      shell.addEventListener('mouseleave', function () { hovered = false; syncMotion(); });
+      shell.addEventListener('focusin', function (event) {
+        if (event.target.closest('.latest-order-card')) { cardFocused = true; syncMotion(); }
+      });
+      shell.addEventListener('focusout', function () {
+        requestAnimationFrame(function () {
+          cardFocused = !!shell.querySelector('.latest-order-card:focus');
+          syncMotion();
+        });
+      });
+      shell.addEventListener('pointerdown', function (event) {
+        if (event.target.closest('[data-latest-orders-toggle]')) return;
+        pointerActive = true;
+        clearTimeout(resumeTimer);
+        syncMotion();
+      });
+      function finishPointer() {
+        if (!pointerActive) return;
+        pointerActive = false;
+        clearTimeout(resumeTimer);
+        resumeTimer = setTimeout(syncMotion, 1100);
+      }
+      window.addEventListener('pointerup', finishPointer, { passive: true });
+      window.addEventListener('pointercancel', finishPointer, { passive: true });
+      shell.addEventListener('wheel', function () {
+        pointerActive = true;
+        clearTimeout(resumeTimer);
+        syncMotion();
+        resumeTimer = setTimeout(function () { pointerActive = false; syncMotion(); }, 1200);
+      }, { passive: true });
+      document.addEventListener('visibilitychange', syncMotion);
+      reducedMotion.addEventListener ? reducedMotion.addEventListener('change', configureCopies) : reducedMotion.addListener(configureCopies);
+      if ('IntersectionObserver' in window) {
+        visibilityObserver = new IntersectionObserver(function (entries) {
+          inView = !!(entries[0] && entries[0].isIntersecting);
+          syncMotion();
+        }, { rootMargin: '120px 0px', threshold: 0.01 });
+        visibilityObserver.observe(shell);
+      }
+      var resizeTimer;
+      window.addEventListener('resize', function () {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(configureCopies, 120);
+      }, { passive: true });
+      document.addEventListener('lilteam:page-unloading', function () {
+        destroyed = true;
+        stop();
+        if (visibilityObserver) visibilityObserver.disconnect();
+        clearTimeout(resumeTimer);
+        clearTimeout(resizeTimer);
+      }, { once: true });
+      configureCopies();
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLatestOrdersRail, { once: true });
+    else initLatestOrdersRail();
+    document.addEventListener('lilteam:page-loaded', initLatestOrdersRail);
+  })();
+</script>
+<% } %>
 <% } %>
 
 <% if (filterTags && filterTags.length) { %>
