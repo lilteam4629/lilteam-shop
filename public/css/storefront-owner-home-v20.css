@@ -17,8 +17,13 @@ body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store
   min-height: 70px;
 }
 
-body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main :is(.store-nav__links > a, .store-nav__category-link, .store-nav__account summary, .store-nav__round, .store-nav__theme, .store-nav__cart, .store-nav__wallet) {
+body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main :is(.store-nav__links > a, .store-nav__category-link, .store-nav__account summary, .store-nav__round, .store-nav__theme, .store-nav__cart) {
   color: var(--text-2) !important;
+}
+
+body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main .store-nav__wallet {
+  color: var(--theme-ink, var(--text)) !important;
+  background: transparent !important;
 }
 
 body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main :is(.store-nav__links > a:hover, .store-nav__category-link:hover, .store-nav__account summary:hover, .store-nav__round:hover, .store-nav__theme:hover) {

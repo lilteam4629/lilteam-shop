@@ -356,15 +356,20 @@
   body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main :is(
     .store-nav__brand, .store-nav__brand strong, .store-nav__links > a,
     .store-nav__category-link, .store-nav__account summary,
-    .store-nav__round, .store-nav__theme, .store-nav__cart, .store-nav__wallet
+    .store-nav__round, .store-nav__theme, .store-nav__cart
   ) { color: var(--text-2) !important; }
 
   body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main :is(.store-nav__brand, .store-nav__brand strong) { color: var(--text) !important; }
 
   body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main :is(
     .store-nav__search, .store-nav__round, .store-nav__theme,
-    .store-nav__wallet, .store-nav__account summary
+    .store-nav__account summary
   ) { border-color: var(--border) !important; background: transparent !important; }
+
+  body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main .store-nav__wallet {
+    color: var(--theme-ink, var(--text)) !important;
+    background: transparent !important;
+  }
 
   body:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell) .store-nav--main :is(
     .store-nav__links > a:is(:hover, .is-active), .store-nav__category-link:hover,
@@ -750,8 +755,8 @@
     padding: 0 5px 0 13px !important;
     border: 0 !important;
     border-radius: 10px !important;
-    color: var(--bg) !important;
-    background: var(--text) !important;
+    color: var(--theme-ink, var(--text)) !important;
+    background: transparent !important;
     font-size: 12px !important;
     font-variant-numeric: tabular-nums !important;
     font-weight: 700 !important;
