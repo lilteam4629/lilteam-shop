@@ -2,19 +2,62 @@
   .replace(/Slip\s*XEPHT/gi, 'ระบบตรวจสอบ')
   .replace(/slip\.xepht\.com/gi, 'ระบบภายนอก')
   .replace(/XEPHT/gi, 'ระบบตรวจสอบ'); %>
-<section class="max-w-lg mx-auto px-4 py-10">
-  <a href="/account" class="text-sm text-[var(--gold-text)]">← กลับไปหน้าบัญชี</a>
-  <h1 class="text-2xl font-bold mt-2 mb-1">คำขอเติมเงิน #<%= request.refCode %></h1>
-  <p class="text-sm text-[var(--text-3)] mb-6"><%= new Date(request.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></p>
+<style>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+  body:has(.topup-detail-page) #store-rain{display:none!important}
+  .topup-detail-page{width:min(1100px,calc(100% - 32px));max-width:none;margin:0 auto;padding:34px 0 64px;color:var(--text)}
+  .topup-detail-head{display:grid;gap:5px;margin-bottom:22px}
+  .topup-detail-head>a{width:max-content;margin-bottom:5px;color:var(--gold-text);font-size:12px;font-weight:600;text-decoration:none}
+  .topup-detail-head>a:hover{text-decoration:underline;text-underline-offset:4px}
+  .topup-detail-head h1{margin:0;font-size:clamp(24px,3vw,32px);font-weight:750;letter-spacing:-.025em;line-height:1.2}
+  .topup-detail-head p{margin:0;color:var(--text-3);font-size:12px;line-height:1.6}
+  .topup-detail-api-note{margin:0 0 14px!important;padding:14px 17px!important;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--border))!important;border-radius:14px!important;background:color-mix(in srgb,var(--gold) 8%,var(--card))!important;color:var(--text-2);font-size:12px!important}
+  .topup-detail-api-note>div{color:var(--gold-text);font-size:13px}
+  .topup-detail-api-note p{margin-top:4px!important;color:var(--text-2)!important;line-height:1.65}
+  .topup-detail-status{grid-column:1/-1;margin:0 0 14px!important;border-radius:13px!important;padding:13px 16px!important;font-size:12px!important;line-height:1.65}
+  .topup-detail-grid{display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);align-items:start;gap:16px}
+  .topup-detail-grid:not(:has(.topup-detail-upload)){grid-template-columns:minmax(0,760px);justify-content:center}
+  .topup-detail-summary,.topup-detail-upload{min-width:0;margin:0!important;padding:23px!important;border:1px solid var(--border)!important;border-radius:16px!important;background:var(--card)!important;box-shadow:none!important}
+  .topup-detail-summary>div:first-child{align-items:center;padding-bottom:15px;border-bottom:1px solid var(--border);font-size:13px}
+  .topup-detail-summary>div:first-child>span:last-child{font-size:21px!important;font-variant-numeric:tabular-nums}
+  .topup-detail-summary>div:nth-child(2){padding-bottom:13px;color:var(--text-2)}
+  .topup-detail-summary>div.border-t{padding-top:15px;border-color:var(--border)}
+  .topup-detail-summary .text-sm.space-y-1{display:grid;gap:6px;font-size:12px}
+  .topup-detail-summary .text-sm.space-y-1>div{display:flex;justify-content:space-between;gap:18px;line-height:1.55}
+  .topup-detail-summary .text-sm.space-y-1>div>span:last-child{text-align:right;overflow-wrap:anywhere}
+  .topup-detail-summary .bg-white.rounded-lg{margin:0 auto 14px;padding:12px;border:1px solid var(--border);border-radius:13px}
+  .topup-detail-summary .bg-white.rounded-lg img{width:min(100%,220px);height:220px}
+  .topup-detail-summary .bg-white.rounded-lg p{color:#454542}
+  .topup-detail-summary .flex.items-start.gap-2\.5{margin-top:16px;padding:13px 14px;border:1px solid color-mix(in srgb,var(--gold) 30%,var(--border));border-radius:12px;background:color-mix(in srgb,var(--gold) 8%,var(--card));font-size:12px;line-height:1.7}
+  .topup-detail-upload h2{margin:0 0 14px;font-size:16px;font-weight:700}
+  .topup-detail-upload #slipDeadline{margin-bottom:15px;border-radius:13px}
+  .topup-detail-upload #slipCountdown{font-size:30px}
+  .topup-detail-upload #slipUploadForm{align-items:center;margin-top:10px}
+  .topup-detail-upload input[type=file]{min-height:44px;max-width:100%;color:var(--text-2);font-size:12px}
+  .topup-detail-upload input[type=file]::file-selector-button{min-height:38px;margin-right:10px;padding:0 13px;border:1px solid var(--border);border-radius:9px;background:var(--input);color:var(--text);font:inherit;font-weight:600;font-size:12px;cursor:pointer}
+  .topup-detail-upload #slipUploadForm button{min-height:42px;border-radius:10px;padding:0 17px}
+  .topup-detail-upload>p:last-child{margin-top:12px;line-height:1.6}
+  .topup-detail-page a:focus-visible,.topup-detail-page button:focus-visible,.topup-detail-page input:focus-visible{outline:3px solid color-mix(in srgb,var(--gold) 40%,transparent);outline-offset:3px}
+  @media(max-width:760px){.topup-detail-page{width:min(calc(100% - 24px),620px);padding:23px 0 44px}.topup-detail-head{margin-bottom:17px}.topup-detail-grid,.topup-detail-grid:has(.topup-detail-upload){grid-template-columns:1fr;gap:12px}.topup-detail-summary,.topup-detail-upload{padding:18px!important}.topup-detail-status{margin-bottom:12px!important}}
+  @media(max-width:430px){.topup-detail-page{width:calc(100% - 20px)}.topup-detail-head h1{font-size:23px}.topup-detail-summary,.topup-detail-upload{padding:15px!important}.topup-detail-summary .text-sm.space-y-1>div{gap:10px}}
+  @media(prefers-reduced-motion:reduce){.topup-detail-page *{scroll-behavior:auto!important;transition:none!important}}
+  <% } %>
+</style>
+<section class="topup-detail-page max-w-lg mx-auto px-4 py-10">
+  <header class="topup-detail-head" style="<%= typeof isMainSite !== 'undefined' && isMainSite ? '' : 'display:contents' %>">
+    <a href="/account" class="text-sm text-[var(--gold-text)]">← กลับไปหน้าบัญชี</a>
+    <h1 class="text-2xl font-bold mt-2 mb-1">คำขอเติมเงิน #<%= request.refCode %></h1>
+    <p class="text-sm text-[var(--text-3)] mb-6"><%= new Date(request.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></p>
+  </header>
   <% if (catalogApiTopup) { %>
-    <div class="mb-5 rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-4 text-sm">
+    <div class="topup-detail-api-note mb-5 rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-4 text-sm">
       <div class="font-black text-[var(--gold-text)]">🔒 ยอดเติมเงินสินค้า API โอนเข้าบัญชีร้านหลัก: <%= settlementShopName %></div>
       <p class="mt-1 text-xs leading-relaxed text-[var(--text-2)]">ยอดนี้แยกจากเงินเติมร้านเช่า เมื่ออนุมัติแล้วใช้ซื้อสินค้า API เท่านั้น หลังซื้อสำเร็จให้กดติดต่อร้านหลักจากหน้าออเดอร์เพื่อรับไอดี</p>
     </div>
   <% } %>
 
   <% if (request.status === 'approved') { %>
-    <div class="bg-emerald-900/30 border border-emerald-700 rounded-xl p-5 text-center mb-6">
+    <div class="topup-detail-status bg-emerald-900/30 border border-emerald-700 rounded-xl p-5 text-center mb-6">
       <div class="text-3xl mb-2">✅</div>
       <div class="text-emerald-300 font-semibold mb-1">อนุมัติแล้ว เติมเงินสำเร็จ</div>
       <div class="text-2xl font-bold text-[var(--gold-text)]">฿<%= request.amount.toLocaleString() %>.00</div>
@@ -23,31 +66,32 @@
       <% } %>
     </div>
   <% } else if (request.status === 'rejected') { %>
-    <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 rounded-xl p-5 text-center mb-6">
+    <div class="topup-detail-status bg-[var(--coral)]/10 border border-[var(--coral)]/40 rounded-xl p-5 text-center mb-6">
       <div class="text-3xl mb-2">✕</div>
       <div class="text-[var(--coral)] font-semibold mb-1">คำขอนี้ถูกปฏิเสธ</div>
       <% if (request.reviewNote) { %><p class="text-sm text-[var(--text-3)]"><%= request.reviewNote %></p><% } %>
     </div>
   <% } else if (request.status === 'verifying' && request.slipPath && automaticSlipCheck) { %>
-    <div class="bg-sky-500/10 border border-sky-500/30 rounded-2xl p-4 mb-6 flex items-center gap-3 text-sm">
+    <div class="topup-detail-status bg-sky-500/10 border border-sky-500/30 rounded-2xl p-4 mb-6 flex items-center gap-3 text-sm">
       <span class="relative flex h-3 w-3 shrink-0"><span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-60"></span><span class="relative inline-flex h-3 w-3 rounded-full bg-sky-500"></span></span>
       <div><div class="font-semibold text-[var(--text)]">กำลังตรวจสลิปให้คุณ</div><div class="text-xs text-[var(--text-3)] mt-0.5">ระบบกำลังตรวจด้วยคีย์ปัจจุบัน และจะเติมเงินให้ทันทีเมื่อตรวจผ่าน</div></div>
     </div>
   <% } else if (request.slipPath && request.slipCheck && (request.slipCheck.rateLimited || request.slipCheck.quotaMismatch || request.slipCheck.retryable || request.slipCheck.providerCode === 'verify_failed')) { %>
-    <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-6 text-sm text-amber-300">
+    <div class="topup-detail-status bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 mb-6 text-sm text-amber-300">
       ระบบตรวจสลิปยังไม่พร้อมรับคำขอในขณะนี้ สลิปถูกเก็บไว้แล้วและสามารถกดตรวจรูปเดิมได้โดยไม่ต้องแนบซ้ำ
     </div>
   <% } else if (!request.slipPath && automaticSlipCheck) { %>
-    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
+    <div class="topup-detail-status bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
       ⏳ โอนเงินแล้วแนบสลิปด้านล่าง ระบบจะตรวจสอบและเติมเงินให้อัตโนมัติทันที
     </div>
   <% } else { %>
-    <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
+    <div class="topup-detail-status bg-[var(--gold)]/10 border border-[var(--gold)]/40 rounded-xl p-4 text-center mb-6 text-sm text-[var(--gold-light)]">
       ⏳ แนบสลิปแล้วรอแอดมินร้านตรวจสอบและอนุมัติยอดเงิน
     </div>
   <% } %>
 
-  <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 space-y-4 mb-6">
+  <div class="topup-detail-grid" style="<%= typeof isMainSite !== 'undefined' && isMainSite ? '' : 'display:contents' %>">
+  <div class="topup-detail-summary bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 space-y-4 mb-6">
     <div class="flex justify-between text-sm"><span class="text-[var(--text-3)]">จำนวนเงิน</span><span class="text-[var(--gold-text)] font-bold text-lg">฿<%= request.amount.toLocaleString() %>.00</span></div>
     <div class="flex justify-between text-sm"><span class="text-[var(--text-3)]">ช่องทาง</span><span><%= request.method === 'truemoney_angpao' ? 'ซองของขวัญ TrueMoney' : (request.method === 'promptpay' ? 'พร้อมเพย์ (PromptPay)' : 'โอนผ่านธนาคาร') %></span></div>
 
@@ -72,7 +116,7 @@
         </div>
       <% } %>
       <% if (request.method !== 'truemoney_angpao') { %>
-        <div class="flex items-start gap-2.5 bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl px-4 py-3 mt-4 text-sm">
+        <div class="flex items-start gap-2.5 topup-detail-warning bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl px-4 py-3 mt-4 text-sm">
           <span class="shrink-0 text-lg">⚠️</span>
           <span class="text-[var(--text)]">โอนแล้วกรุณาระบุจำนวนเงินให้ตรงเป๊ะ <b class="text-[var(--gold-text)]">(฿<%= request.amount.toLocaleString() %>.00)</b><%= automaticSlipCheck ? ' เพื่อให้ระบบตรวจสอบอัตโนมัติผ่านและเติมเงินได้ทันที' : ' จากนั้นแอดมินร้านจะตรวจสอบและอนุมัติให้' %></span>
         </div>
@@ -81,7 +125,7 @@
   </div>
 
   <% if (request.status === 'pending' || request.status === 'verifying') { %>
-    <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
+    <div class="topup-detail-upload bg-[var(--card)] border border-[var(--border)] rounded-xl p-6">
       <h2 class="font-semibold mb-3">แนบสลิปการโอนเงิน</h2>
       <% if (automaticSlipCheck) { %>
         <div id="slipDeadline" data-deadline="<%= new Date(request.createdAt).getTime() + (5 * 60 * 1000) %>" class="mb-4 rounded-xl border border-amber-500/50 bg-amber-500/10 px-4 py-3 text-center">
@@ -119,6 +163,7 @@
       <p class="text-[10px] text-[var(--text-4)] mt-2">⚠️ สลิปต้องเป็นรายการโอนภายใน 5 นาทีล่าสุด และใช้ยืนยันได้ครั้งเดียวเท่านั้น (สลิปเก่าเกิน 5 นาที หรือสลิปที่เคยใช้แล้วจะไม่ผ่านการตรวจสอบ)</p>
     </div>
   <% } %>
+  </div>
 </section>
 
 <div id="slipUploadOverlay" class="hidden fixed inset-x-4 bottom-5 z-50 mx-auto max-w-md rounded-2xl border border-sky-500/30 bg-[var(--card)]/95 p-4 shadow-2xl backdrop-blur-md">
