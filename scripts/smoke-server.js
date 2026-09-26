@@ -108,7 +108,7 @@ async function crawlAdmin(cookie) {
     if (checked.size > 160) throw new Error('admin crawl exceeded the safety limit');
     const page = await fetchOk(requestPath, 'text/html', { cookie });
     if (page.body.includes('admin-mobile-motion.js') || page.body.includes('admin-scroll-motion-v1.css') || page.body.includes('admin-page-surface')) throw new Error(`removed admin motion still loaded: ${requestPath}`);
-    if (!page.body.includes('class="experiment-admin admin-site"') || !page.body.includes('data-experiment-sidebar')) {
+    if (!/class="experiment-admin admin-site(?:\s|")/.test(page.body) || !page.body.includes('data-experiment-sidebar')) {
       throw new Error(`main admin route did not use the unified sidebar shell: ${requestPath}`);
     }
     if (page.body.includes('id="admin-sidebar"') || page.body.includes('ผู้ดูแลระบบ · รุ่นทดลอง')) {

@@ -60,7 +60,12 @@ console.log('Main admin accent wiring and tenant/status boundaries passed');
 
 for (const background of backgrounds) {
   for (const accent of accents) {
-    for (const vars of modeVariables(theme.renderCss({ ...background, accent }))) {
+    const renderedTheme = theme.renderCss({ ...background, accent });
+    for (const vars of modeVariables(renderedTheme)) {
+      assert(renderedTheme.includes(`--theme-page-surface: ${vars.bg};`), 'shared page surface must follow the selected theme');
+      assert(renderedTheme.includes(`--theme-card-surface: ${vars.card};`), 'shared card surface must follow the selected theme');
+      assert(renderedTheme.includes(`--theme-control-surface: ${vars.input};`), 'shared control surface must follow the selected theme');
+      assert(renderedTheme.includes(`--theme-accent: ${vars.gold};`), 'shared accent must follow the contrast-safe selected accent');
       for (const surface of ['bg', 'card']) {
         assert(theme.contrastRatio(vars.text, vars[surface]) >= 4.5, `main text failed on ${surface}: ${accent}`);
         assert(theme.contrastRatio(vars['gold-text'], vars[surface]) >= 4.5, `accent text failed on ${surface}: ${accent}`);
@@ -107,3 +112,8 @@ for (const darkSurface of ['black', 'white']) {
 assert.equal(theme.getBgPresets().some((item) => item.key === theme.MAIN_BG_PRESET_KEY), false, 'tenant preset list must not gain the main-only palette');
 assert.deepEqual(theme.getBgPresets({ mainShopOnly: true }).map((item) => item.key), [theme.MAIN_BG_PRESET_KEY]);
 console.log('Main-shop monochrome surfaces and tenant palette isolation passed');
+
+const mainLayout = fs.readFileSync(path.join(__dirname, '../src/views/layouts/main.ejs'), 'utf8');
+assert(mainLayout.includes("asset('css/storefront-theme-cohesion-v1.css')"), 'every storefront page must load the shared theme layer');
+assert(fs.existsSync(path.join(__dirname, '../public/css/storefront-theme-cohesion-v1.css')), 'shared storefront theme layer must exist');
+console.log('Shared storefront theme layer is connected to the public layout');

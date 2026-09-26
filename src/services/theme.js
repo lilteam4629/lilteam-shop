@@ -290,6 +290,9 @@ function renderCss(theme) {
     return `
       --bg: ${vars.bg};
       --card: ${vars.card};
+      --theme-page-surface: ${vars.bg};
+      --theme-card-surface: ${vars.card};
+      --theme-control-surface: ${vars.input};
       --border: ${vars.border};
       --border-light: ${vars.borderLight};
       --input: ${vars.input};
@@ -309,6 +312,11 @@ function renderCss(theme) {
       --text-2: ${vars.text2};
       --text-3: ${vars.text3};
       --text-4: ${vars.text4};
+      --theme-ink: ${vars.text};
+      --theme-muted-ink: ${vars.text3};
+      --theme-line: ${vars.border};
+      --theme-accent: ${accentFill};
+      --theme-accent-ink: ${contrastTextFor(accentFill)};
       --coral: ${readableAccentOn('#e2836f', [vars.bg, vars.card])};`;
   };
 

@@ -1,0 +1,150 @@
+/* A shared semantic theme layer for every customer-facing route. The theme
+   editor owns these tokens; page-specific layouts may change structure, but
+   their reusable surfaces and controls always read the same selected palette. */
+body {
+  color: var(--theme-ink, var(--text));
+}
+
+#site-page-shell {
+  color: var(--theme-ink, var(--text));
+}
+
+#site-page-shell :where(
+  .premium-product-card,
+  .premium-natural-card,
+  .catalog-card,
+  .catalog-head,
+  .catalog-active-tags,
+  .catalog-advanced-filter,
+  .cart-card,
+  .account-card,
+  .orders-card,
+  .order-card,
+  .wallet-card,
+  .help-card,
+  .contact-row,
+  .category-tile,
+  .product-detail-card
+) {
+  color: var(--theme-ink, var(--text));
+  border-color: var(--theme-line, var(--border));
+}
+
+#site-page-shell :where(
+  .premium-natural-card,
+  .catalog-card,
+  .catalog-head,
+  .catalog-active-tags,
+  .catalog-advanced-filter,
+  .cart-card,
+  .account-card,
+  .orders-card,
+  .order-card,
+  .wallet-card,
+  .help-card,
+  .contact-row,
+  .category-tile,
+  .product-detail-card
+) {
+  background-color: var(--theme-card-surface, var(--card));
+}
+
+#site-page-shell :where(
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select,
+  textarea,
+  .catalog-search,
+  .catalog-sort-row select,
+  .product-detail-filters,
+  .qty-tier-btn
+) {
+  color: var(--theme-ink, var(--text));
+  border-color: var(--theme-line, var(--border));
+  background-color: var(--theme-control-surface, var(--input));
+}
+
+#site-page-shell :where(.catalog-card-title, .product-detail-title, .contact-row, .contact-row b) {
+  color: var(--theme-ink, var(--text));
+}
+
+#site-page-shell :where(.catalog-price b, .minigame-price, [data-unit-price], [data-subtotal]) {
+  color: var(--theme-accent, var(--gold));
+}
+
+#site-page-shell :where(.catalog-cta:not(.sold), .product-action-primary, .contact-primary) {
+  color: var(--theme-accent-ink, var(--gold-contrast));
+  background-color: var(--theme-accent, var(--gold));
+}
+
+#site-page-shell .contact-primary {
+  color: var(--theme-accent-ink, var(--gold-contrast)) !important;
+}
+
+#site-page-shell .contact-primary-subtitle,
+#site-page-shell .contact-open {
+  color: color-mix(in srgb, var(--theme-accent-ink, var(--gold-contrast)) 78%, transparent) !important;
+}
+
+#site-page-shell .contact-open {
+  background: color-mix(in srgb, var(--theme-accent-ink, var(--gold-contrast)) 12%, transparent);
+  border-color: color-mix(in srgb, var(--theme-accent-ink, var(--gold-contrast)) 18%, transparent);
+}
+
+/* Sold-out is a status, not a second visual theme: keep the warning readable
+   while using the selected surface and border in both light and dark modes. */
+#site-page-shell .catalog-card[data-stock="sold"] {
+  color: var(--theme-muted-ink, var(--text-3));
+  border-color: var(--theme-line, var(--border));
+  background: var(--theme-card-surface, var(--card));
+}
+
+#site-page-shell .catalog-card[data-stock="sold"] .catalog-image {
+  background: color-mix(in srgb, var(--theme-page-surface, var(--bg)) 78%, var(--theme-card-surface, var(--card)));
+}
+
+#site-page-shell .catalog-card[data-stock="sold"] .catalog-card-title,
+#site-page-shell .catalog-card[data-stock="sold"] .catalog-price {
+  color: var(--theme-muted-ink, var(--text-3));
+}
+
+#site-page-shell .catalog-card[data-stock="sold"] .catalog-cta.sold {
+  color: var(--danger) !important;
+  border-color: var(--theme-line, var(--border));
+  background: var(--theme-control-surface, var(--input));
+}
+
+/* Menus and floating account surfaces should follow the same palette as the
+   page underneath instead of switching to hard-coded white on dark mode. */
+.store-nav__category-menu,
+.store-nav__account-menu,
+.store-nav__mobile-row {
+  color: var(--theme-ink, var(--text)) !important;
+  border-color: var(--theme-line, var(--border)) !important;
+  background-color: var(--theme-card-surface, var(--card)) !important;
+}
+
+.store-nav__account summary,
+.store-nav__account-menu a,
+.store-nav__mobile-row nav a {
+  color: var(--theme-ink, var(--text)) !important;
+}
+
+.store-nav__account summary {
+  border-color: var(--theme-line, var(--border)) !important;
+  background: var(--theme-control-surface, var(--input)) !important;
+}
+
+.store-nav__account-name,
+.store-nav__chevron {
+  color: var(--theme-ink, var(--text)) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #site-page-shell *,
+  .store-nav * {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
