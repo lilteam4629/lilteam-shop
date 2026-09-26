@@ -1,6 +1,7 @@
 <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
 <style>
   .topup-page{--tp-line:var(--border);--tp-line-soft:var(--border-light);--tp-surface:var(--card);--tp-input:var(--input);width:min(1080px,calc(100% - 32px));margin:0 auto;padding:38px 0 64px;color:var(--text)}
+  body:has(.topup-page) #store-rain{display:none!important}
   .topup-page *{box-sizing:border-box}
   .topup-page__head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:28px}
   .topup-page__back{display:inline-flex;align-items:center;gap:8px;margin-bottom:15px;color:var(--gold-text);font-size:12px;font-weight:600;text-decoration:none}
