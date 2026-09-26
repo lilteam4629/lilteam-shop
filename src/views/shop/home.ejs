@@ -458,6 +458,7 @@
   const welcomePopupHasContent = welcomePopupImages.length || welcomePopupTitle || welcomePopupContent;
 %>
 <% if (showWelcomePopupRedesign) { %><link rel="stylesheet" href="<%= asset('css/storefront-welcome-popup-experiment-v1.css') %>" /><% } %>
+<% if (showWelcomePopupRedesign && typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-welcome-popup-main-v2.css') %>" /><% } %>
 <% if ((welcomePopup.enabled && welcomePopupHasContent) || welcomePopupExperiment) { %>
 <div id="welcome-popup" class="hidden fixed inset-0 z-[9998] items-center justify-center bg-black/70 backdrop-blur-sm p-4<%= showWelcomePopupRedesign ? ' welcome-popup-redesign' : '' %>" data-popup-id="<%= welcomePopupImages.join('|') %>|<%= welcomePopupTitle %>|<%= welcomePopupContent %>" data-shop-name="<%= settings.shopName || 'LilTeam Shop' %>" data-shop-logo="<%= settings.branding && settings.branding.logoImage ? settings.branding.logoImage : '' %>"<% if (showWelcomePopupRedesign) { %> role="dialog" aria-modal="true"<% if (welcomePopupTitle) { %> aria-labelledby="welcome-popup-title"<% } else { %> aria-label="ป๊อปอัปต้อนรับ"<% } %><% if (welcomePopupContent) { %> aria-describedby="welcome-popup-description"<% } %> tabindex="-1"<% } %>>
   <div class="relative w-full max-w-md bg-[var(--card)] border border-[var(--gold)]/40 rounded-2xl overflow-hidden shadow-2xl welcome-popup-dialog">
