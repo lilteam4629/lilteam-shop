@@ -117,3 +117,15 @@ const mainLayout = fs.readFileSync(path.join(__dirname, '../src/views/layouts/ma
 assert(mainLayout.includes("asset('css/storefront-theme-cohesion-v1.css')"), 'every storefront page must load the shared theme layer');
 assert(fs.existsSync(path.join(__dirname, '../public/css/storefront-theme-cohesion-v1.css')), 'shared storefront theme layer must exist');
 console.log('Shared storefront theme layer is connected to the public layout');
+
+const legacyNavbarCss = fs.readFileSync(path.join(__dirname, '../public/css/storefront-navbar-v1.css'), 'utf8');
+const cozyNavbarCss = fs.readFileSync(path.join(__dirname, '../public/css/storefront-navbar-cozy-v2.css'), 'utf8');
+assert.match(legacyNavbarCss, /html:not\(\.light\) \.store-nav__wallet[^}]*background:var\(--card\)!important/,
+  'legacy dark-mode wallet rule remains the cascade source that must be guarded');
+const cozyDarkWalletRule = cozyNavbarCss.match(/html:not\(\.light\) \.store-nav--cozy-owner \.store-nav__wallet\s*\{([^}]*)\}/);
+assert(cozyDarkWalletRule, 'main-shop wallet needs an explicit dark-mode cascade guard');
+assert.match(cozyDarkWalletRule[1], /background:\s*transparent\s*!important/,
+  'main-shop wallet must leave its selected-color surface to the surrounding group');
+assert.match(cozyDarkWalletRule[1], /color:\s*var\(--theme-ink,\s*var\(--text\)\)\s*!important/,
+  'main-shop wallet text must follow the active theme in dark mode');
+console.log('Main-shop wallet theme cascade checks passed');

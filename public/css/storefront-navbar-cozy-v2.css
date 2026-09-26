@@ -155,6 +155,15 @@
   font-weight: 500;
 }
 .store-nav--cozy-owner .store-nav__wallet b { display: none !important; }
+
+/* The legacy navbar stylesheet uses a more specific dark-mode rule for every
+   wallet link. Keep that rule from painting a second surface over this
+   transparent balance control; the surrounding group owns the surface. */
+html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--theme-ink, var(--text)) !important;
+}
 .store-nav--cozy-owner .store-nav__desktop-topup {
   display: flex !important;
   align-items: center;
