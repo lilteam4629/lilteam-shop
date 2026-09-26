@@ -836,3 +836,127 @@
     transform: translateY(-1px) !important;
   }
 }
+
+/* Main-store category menu: a compact, scannable two-column catalog. */
+@media (min-width: 1101px) {
+  .store-nav--main .store-nav__category-menu--main {
+    top: calc(100% + 12px) !important;
+    left: -14px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    align-content: start !important;
+    gap: 6px !important;
+    width: min(424px, calc(100vw - 32px)) !important;
+    min-width: 0 !important;
+    max-height: min(560px, calc(100dvh - 96px)) !important;
+    padding: 14px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 16px !important;
+    background: var(--card) !important;
+    box-shadow: 0 22px 52px color-mix(in srgb, var(--text) 20%, transparent) !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    scrollbar-color: var(--gold) transparent;
+    scrollbar-width: thin;
+    transform: none !important;
+    transition: opacity .18s ease, box-shadow .18s ease !important;
+  }
+
+  .store-nav--main .store-nav__category-menu-head,
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-all {
+    grid-column: 1 / -1 !important;
+  }
+
+  .store-nav--main .store-nav__category-menu-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 1px 2px 8px;
+    color: var(--text);
+  }
+
+  .store-nav--main .store-nav__category-menu-head strong {
+    font-size: 14px;
+    font-weight: 750;
+    letter-spacing: -.02em;
+  }
+
+  .store-nav--main .store-nav__category-menu-head span {
+    flex: none;
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: var(--gold-text);
+    background: color-mix(in srgb, var(--gold) 12%, var(--card));
+    font-size: 10px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .store-nav--main .store-nav__category-menu--main > a {
+    display: flex !important;
+    align-items: center !important;
+    gap: 9px !important;
+    min-width: 0 !important;
+    min-height: 52px !important;
+    padding: 6px 8px !important;
+    border: 1px solid transparent !important;
+    border-radius: 11px !important;
+    color: var(--text-2) !important;
+    background: transparent !important;
+    transition: background-color .16s ease, border-color .16s ease, transform .16s ease !important;
+  }
+
+  .store-nav--main .store-nav__category-menu--main > a:hover,
+  .store-nav--main .store-nav__category-menu--main > a:focus-visible {
+    border-color: color-mix(in srgb, var(--gold) 28%, var(--border)) !important;
+    color: var(--text) !important;
+    background: color-mix(in srgb, var(--gold) 9%, var(--card)) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-all {
+    min-height: 58px !important;
+    margin: 0 0 3px !important;
+    padding: 8px 10px !important;
+    border: 1px solid color-mix(in srgb, var(--gold) 32%, var(--border)) !important;
+    border-radius: 12px !important;
+    color: var(--gold-text) !important;
+    background: color-mix(in srgb, var(--gold) 10%, var(--card)) !important;
+  }
+
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-all > svg,
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-item > img,
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-item > i {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 9px;
+  }
+
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-all > svg {
+    padding: 9px;
+    color: var(--gold-contrast);
+    background: var(--gold);
+    stroke: currentColor;
+  }
+
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-item > img {
+    padding: 2px;
+    object-fit: cover;
+    background: var(--bg);
+  }
+
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-item > i {
+    color: var(--gold-text);
+    background: color-mix(in srgb, var(--gold) 12%, var(--card));
+  }
+
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-item > i svg { width: 17px; height: 17px; }
+  .store-nav--main .store-nav__category-menu--main > a > span { display: grid; min-width: 0; gap: 2px; }
+  .store-nav--main .store-nav__category-menu--main > a b { overflow: hidden; color: inherit; font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+  .store-nav--main .store-nav__category-menu--main > .store-nav__category-all small { color: var(--text-3); font-size: 10px; }
+}
