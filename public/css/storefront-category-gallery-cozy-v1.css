@@ -1,0 +1,173 @@
+/* Main-store category gallery: let the category artwork lead, with unboxed captions. */
+body.storefront-owner-lilteam #site-page-shell #home-categories {
+  display: block !important;
+  width: min(1420px, calc(100% - 48px)) !important;
+  max-width: 1420px !important;
+  margin: 0 auto !important;
+  padding: 14px 0 18px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-grid {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: start !important;
+  gap: 22px !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  background: transparent !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card {
+  position: relative !important;
+  display: block !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--text) !important;
+  text-decoration: none !important;
+  transform: none !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card::before,
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card::after {
+  display: none !important;
+  content: none !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card:focus-visible {
+  outline: 3px solid var(--gold-text) !important;
+  outline-offset: 4px !important;
+  border-radius: 15px !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-image {
+  display: grid !important;
+  place-items: center !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: 2.58 / 1 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  border-radius: 15px !important;
+  background: color-mix(in srgb, var(--gold) 8%, var(--input)) !important;
+  box-shadow: none !important;
+  line-height: 0 !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-image img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: none !important;
+  max-height: none !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  object-fit: cover !important;
+  object-position: center !important;
+  transition: transform .28s cubic-bezier(.2, .7, .2, 1), filter .28s ease !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card:hover .home-category-image img {
+  transform: scale(1.025) !important;
+  filter: saturate(1.04) !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-fallback {
+  color: var(--text-2) !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+  line-height: 1.4 !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy {
+  display: flex !important;
+  align-items: baseline !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  min-width: 0 !important;
+  margin: 9px 1px 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy b {
+  display: block !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+  color: var(--text) !important;
+  font-size: 14px !important;
+  font-weight: 750 !important;
+  line-height: 1.45 !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy small {
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin: 0 !important;
+  color: var(--text-3) !important;
+  font-size: 11px !important;
+  font-weight: 500 !important;
+  line-height: 1.45 !important;
+  white-space: nowrap !important;
+}
+
+body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-arrow {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  body.storefront-owner-lilteam #site-page-shell #home-categories {
+    width: calc(100% - 32px) !important;
+    padding: 10px 0 14px !important;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 17px !important;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-image {
+    aspect-ratio: 2.45 / 1 !important;
+    border-radius: 13px !important;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy {
+    margin-top: 7px !important;
+    gap: 8px !important;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy b {
+    font-size: 13px !important;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy small {
+    font-size: 10px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-image img {
+    transition: none !important;
+  }
+}
