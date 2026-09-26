@@ -41,6 +41,13 @@
   box-shadow: none !important;
 }
 
+/* The uploaded primary-shop wordmark is dark; keep its transparent pixels on
+   a light tile so it stays visible when the storefront switches to dark mode. */
+html:not(.light) .store-nav--cozy-owner .store-nav__brand img {
+  border-color: color-mix(in srgb, #fff 24%, transparent) !important;
+  background: #fff !important;
+}
+
 .store-nav--cozy-owner .store-nav__links {
   grid-column: 2 !important;
   display: flex !important;
