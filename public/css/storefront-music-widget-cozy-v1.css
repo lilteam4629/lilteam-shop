@@ -15,8 +15,12 @@ body.storefront-owner-home-page #music-widget {
   color-scheme: light;
   display: flex !important;
   align-items: center !important;
+  justify-content: space-between !important;
   gap: 0 !important;
   padding: 4px !important;
+  width: 198px !important;
+  max-width: calc(100vw - 24px) !important;
+  min-width: 0 !important;
   right: max(16px, env(safe-area-inset-right)) !important;
   bottom: max(16px, env(safe-area-inset-bottom)) !important;
   z-index: 80 !important;
@@ -24,6 +28,7 @@ body.storefront-owner-home-page #music-widget {
   border-radius: 20px !important;
   background: var(--card) !important;
   box-shadow: 0 7px 22px color-mix(in srgb, var(--text) 14%, transparent), inset 0 1px color-mix(in srgb, white 42%, transparent) !important;
+  transition: transform .22s cubic-bezier(.2, .8, .2, 1), border-radius .22s ease, background-color .16s ease, box-shadow .16s ease !important;
 }
 
 body.storefront-owner-home-page #music-widget.is-playing {
@@ -37,7 +42,8 @@ body.storefront-owner-home-page #music-widget #music-toggle-btn {
   justify-content: flex-start !important;
   gap: 9px !important;
   width: auto !important;
-  min-width: 150px !important;
+  min-width: 0 !important;
+  max-width: calc(100% - 38px) !important;
   height: 52px !important;
   padding: 4px 9px 4px 4px !important;
   flex: 0 0 auto !important;
@@ -53,6 +59,97 @@ body.storefront-owner-home-page #music-widget #music-toggle-btn {
 body.storefront-owner-home-page #music-widget #music-toggle-btn:hover {
   transform: none !important;
   background: color-mix(in srgb, var(--gold) 8%, var(--card)) !important;
+}
+
+body.storefront-owner-home-page #music-widget .music-dock-action,
+body.storefront-owner-home-page #music-widget .music-dock-restore {
+  display: grid !important;
+  flex: 0 0 30px !important;
+  width: 30px !important;
+  height: 30px !important;
+  place-items: center !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 999px !important;
+  color: var(--text-2) !important;
+  background: color-mix(in srgb, var(--card) 78%, white) !important;
+  box-shadow: none !important;
+  transition: color .16s ease, background-color .16s ease, transform .16s ease !important;
+}
+
+body.storefront-owner-home-page #music-widget .music-dock-action:hover,
+body.storefront-owner-home-page #music-widget .music-dock-restore:hover {
+  color: var(--gold-text) !important;
+  background: var(--input) !important;
+}
+
+body.storefront-owner-home-page #music-widget .music-dock-action svg {
+  width: 15px !important;
+  height: 15px !important;
+}
+
+body.storefront-owner-home-page #music-widget .music-dock-restore {
+  display: none !important;
+  position: relative !important;
+  flex-basis: 44px !important;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  color: var(--gold-text) !important;
+  background: var(--input) !important;
+}
+
+body.storefront-owner-home-page #music-widget .music-dock-action[hidden],
+body.storefront-owner-home-page #music-widget .music-dock-restore[hidden] {
+  display: none !important;
+}
+
+body.storefront-owner-home-page #music-widget .music-restore-cover,
+body.storefront-owner-home-page #music-widget .music-restore-cover img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body.storefront-owner-home-page #music-widget .music-restore-cover {
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+body.storefront-owner-home-page #music-widget .music-restore-cover img {
+  object-fit: cover;
+  opacity: .78;
+}
+
+body.storefront-owner-home-page #music-widget .music-restore-cover svg {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  width: 18px;
+  height: 18px;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed {
+  justify-content: flex-end !important;
+  border-radius: 50% !important;
+  transform: scale(.263, .84) !important;
+  transform-origin: right bottom !important;
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed #music-toggle-btn,
+body.storefront-owner-home-page #music-widget.is-collapsed #music-minimize-btn {
+  display: none !important;
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed .music-dock-restore:not([hidden]) {
+  display: grid !important;
+  transform: scale(3.8, 1.2) !important;
+  transform-origin: right center !important;
 }
 
 body.storefront-owner-home-page #music-widget .music-cover {
@@ -155,7 +252,10 @@ body.storefront-owner-home-page #music-widget :is(button, input):focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.storefront-owner-home-page #music-widget #music-toggle-btn {
+  body.storefront-owner-home-page #music-widget,
+  body.storefront-owner-home-page #music-widget #music-toggle-btn,
+  body.storefront-owner-home-page #music-widget .music-dock-action,
+  body.storefront-owner-home-page #music-widget .music-dock-restore {
     transition: none !important;
   }
 }

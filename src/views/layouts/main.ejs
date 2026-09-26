@@ -65,7 +65,7 @@
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-compact-v1.css') %>&amp;rev=1" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-mobile-v1.css') %>&amp;rev=2" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-new-arrivals-mobile-v2.css') %>&amp;rev=1" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-music-widget-cozy-v1.css') %>&amp;rev=1" /><% } %>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-music-widget-cozy-v1.css') %>&amp;rev=2" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-theme-cohesion-v1.css') %>" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
@@ -542,7 +542,12 @@
       <span id="music-playing-ring" class="hidden absolute inset-0 rounded-full border-2 border-[var(--gold)] animate-ping"></span>
       <% } %>
     </button>
-    <% if (!(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7)) { %>
+    <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
+    <button id="music-minimize-btn" type="button" aria-label="ย่อแถบเพลง" title="ย่อแถบเพลง" class="music-dock-action" aria-controls="music-toggle-btn" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+    <button id="music-expand-btn" type="button" aria-label="เปิดแถบเพลง" title="เปิดแถบเพลง" class="music-dock-restore" aria-controls="music-toggle-btn" aria-expanded="false" hidden>
+      <span class="music-restore-cover" aria-hidden="true"><img src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="" /><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17V5l12-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+    </button>
+    <% } else { %>
     <button id="music-settings-btn" type="button" aria-label="ตั้งค่าเพลง" title="ระดับเสียงและข้อมูลเพลง" class="absolute -top-2 -left-2 z-20 w-7 h-7 rounded-full bg-[var(--input)] border border-[var(--border-light)] text-xs shadow-lg hover:border-[var(--gold)]"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.6 2.8-.2-.1a1.7 1.7 0 0 0-1.8.2l-.2.1h-3.2l-.1-.2a1.7 1.7 0 0 0-1.5-1l-.2.1-2.8-1.6.1-.2a1.7 1.7 0 0 0-.2-1.8l-.1-.2v-3.2l.2-.1a1.7 1.7 0 0 0 1-1.5l-.1-.2L11 7.3l.2.1a1.7 1.7 0 0 0 1.8-.2l.2-.1h3.2l.1.2a1.7 1.7 0 0 0 1.5 1l.2-.1 2.8 1.6-.1.2a1.7 1.7 0 0 0 .2 1.8l.1.2v3.2z" transform="translate(-3 -3) scale(1.25)"/></svg></button>
     <% } %>
 
@@ -573,6 +578,8 @@
       const videoId = widget.dataset.videoId;
       const toggleBtn = document.getElementById('music-toggle-btn');
       const settingsBtn = document.getElementById('music-settings-btn');
+      const minimizeBtn = document.getElementById('music-minimize-btn');
+      const expandBtn = document.getElementById('music-expand-btn');
       const panel = document.getElementById('music-panel');
       const collapseBtn = document.getElementById('music-collapse-btn');
       const playBtn = document.getElementById('music-play-btn');
@@ -586,6 +593,7 @@
       const STORAGE_VOLUME = 'lilteam_music_volume';
       const STORAGE_TIME = 'lilteam_music_time';
       const STORAGE_TS = 'lilteam_music_ts';
+      const STORAGE_WIDGET_COLLAPSED = 'lilteam_music_widget_collapsed';
 
       let player = null;
       let apiRequested = false;
@@ -607,6 +615,36 @@
       const savedVolume = localStorage.getItem(STORAGE_VOLUME);
       const initialVolume = savedVolume !== null ? parseInt(savedVolume, 10) : parseInt(widget.dataset.defaultVolume, 10);
       volumeSlider.value = initialVolume;
+      if (minimizeBtn && expandBtn) {
+        const collapsed = localStorage.getItem(STORAGE_WIDGET_COLLAPSED) === 'true';
+        widget.classList.toggle('is-collapsed', collapsed);
+        toggleBtn.hidden = collapsed;
+        minimizeBtn.hidden = collapsed;
+        expandBtn.hidden = !collapsed;
+        minimizeBtn.setAttribute('aria-expanded', String(!collapsed));
+        expandBtn.setAttribute('aria-expanded', String(collapsed));
+        minimizeBtn.addEventListener('click', function () {
+          widget.classList.add('is-collapsed');
+          toggleBtn.hidden = true;
+          minimizeBtn.hidden = true;
+          expandBtn.hidden = false;
+          minimizeBtn.setAttribute('aria-expanded', 'false');
+          expandBtn.setAttribute('aria-expanded', 'true');
+          panel.classList.add('hidden');
+          localStorage.setItem(STORAGE_WIDGET_COLLAPSED, 'true');
+          expandBtn.focus({ preventScroll: true });
+        });
+        expandBtn.addEventListener('click', function () {
+          widget.classList.remove('is-collapsed');
+          toggleBtn.hidden = false;
+          minimizeBtn.hidden = false;
+          expandBtn.hidden = true;
+          minimizeBtn.setAttribute('aria-expanded', 'true');
+          expandBtn.setAttribute('aria-expanded', 'false');
+          localStorage.setItem(STORAGE_WIDGET_COLLAPSED, 'false');
+          toggleBtn.focus({ preventScroll: true });
+        });
+      }
 
       // Clean up the old registration autoplay hint if present (superseded by default-on below).
       const urlParams = new URLSearchParams(window.location.search);
