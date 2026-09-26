@@ -137,7 +137,7 @@ body.storefront-owner-home-page #music-widget .music-restore-cover svg {
 body.storefront-owner-home-page #music-widget.is-collapsed {
   justify-content: flex-end !important;
   border-radius: 50% !important;
-  transform: scale(.263, .84) !important;
+  transform: scale(.263, .926) !important;
   transform-origin: right bottom !important;
 }
 
