@@ -59,6 +59,38 @@
         <a href="/account/topup" class="store-nav__wallet" aria-label="ยอดเงิน ฿<%= currentUser.walletBalance.toLocaleString() %>"><span>฿<%= currentUser.walletBalance.toLocaleString() %></span><b>＋</b></a>
         <details class="store-nav__account">
           <summary><span class="store-nav__avatar"><%= (currentUser.username || 'U')[0].toUpperCase() %></span><span class="store-nav__account-name"><%= currentUser.username %></span><span class="store-nav__chevron">⌄</span></summary>
+          <% if (mainSiteNav) { %>
+          <div class="store-nav__account-menu store-nav__account-menu--main">
+            <header class="store-nav__profile-card">
+              <div class="store-nav__profile-person">
+                <span class="store-nav__profile-avatar"><%= (currentUser.username || 'U')[0].toUpperCase() %></span>
+                <span><strong><%= currentUser.username %></strong><small><svg><use href="#ui-<%= currentUser.role === 'admin' ? 'shield' : 'user' %>"/></svg><%= currentUser.role === 'admin' ? 'ADMIN' : 'สมาชิก' %></small></span>
+              </div>
+              <div class="store-nav__account-balance">
+                <span><small>ยอดเงินคงเหลือ</small><strong>฿<%= currentUser.walletBalance.toLocaleString() %>.00</strong></span>
+                <a href="/account/topup" class="store-nav__balance-action"><svg><use href="#ui-wallet"/></svg> เติมเงิน</a>
+              </div>
+            </header>
+            <% if (currentUser.role === 'admin') { %>
+              <section class="store-nav__account-section store-nav__account-management" aria-label="จัดการร้าน">
+                <h3 class="store-nav__account-section-title">จัดการร้าน</h3>
+                <a href="/admin" class="store-nav__admin-link"><i><svg><use href="#ui-shield"/></svg></i><span><strong>จัดการหลังบ้าน</strong><small>สินค้า คำสั่งซื้อ และร้านค้า</small></span><em>→</em></a>
+              </section>
+            <% } %>
+            <nav class="store-nav__account-section store-nav__menu-group" aria-label="บัญชีและคำสั่งซื้อ">
+              <h3 class="store-nav__account-section-title">บัญชีและคำสั่งซื้อ</h3>
+              <a href="/account"><i><svg><use href="#ui-user"/></svg></i><span>บัญชีของฉัน</span></a>
+              <a href="/account/orders"><i><svg><use href="#ui-receipt"/></svg></i><span>คำสั่งซื้อของฉัน</span></a>
+              <a href="/cart"><i><svg><use href="#ui-cart"/></svg></i><span>ตะกร้าสินค้า</span><% if (cartCount > 0) { %><em><%= cartCount %></em><% } %></a>
+            </nav>
+            <nav class="store-nav__account-section store-nav__menu-group store-nav__menu-group--support" aria-label="ความช่วยเหลือ">
+              <h3 class="store-nav__account-section-title">ความช่วยเหลือ</h3>
+              <a href="/help"><i><svg><use href="#ui-help"/></svg></i><span>คู่มือการใช้งาน</span></a>
+              <a href="/contact"><i><svg><use href="#ui-phone"/></svg></i><span>ติดต่อร้าน</span></a>
+            </nav>
+            <a href="/logout" class="store-nav__logout"><i><svg><use href="#ui-logout"/></svg></i><span>ออกจากระบบ</span></a>
+          </div>
+          <% } else { %>
           <div class="store-nav__account-menu" <% if (settings.hero && settings.hero.bannerImage) { %>style="--account-menu-bg:url('<%= settings.hero.bannerImage %>')"<% } %>>
             <div class="store-nav__profile-card">
               <span class="store-nav__profile-avatar"><%= (currentUser.username || 'U')[0].toUpperCase() %></span>
@@ -78,6 +110,7 @@
             </div>
             <a href="/logout" class="store-nav__logout"><i><svg><use href="#ui-logout"/></svg></i><span>ออกจากระบบ</span></a>
           </div>
+          <% } %>
         </details>
       <% } else { %>
         <a href="/register" class="store-nav__register"><svg><use href="#ui-user"/></svg> สมัครสมาชิก</a><a href="/login" class="store-nav__login"><svg><use href="#ui-user"/></svg> เข้าสู่ระบบ</a>
