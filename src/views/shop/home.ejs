@@ -66,7 +66,7 @@
   <%
     const ownerHomeFeatured = (newest || [])[0] || null;
   %>
-  <section class="owner-home-v20-hero owner-home-v23-hero<%= ownerHomeBanner || ownerHomeFeatured ? '' : ' owner-home-v20-hero--no-art' %>" id="home-top" aria-labelledby="owner-home-v20-title">
+  <section class="owner-home-v20-hero owner-home-v23-hero<%= ownerHomeBanner ? ' owner-home-v20-hero--banner' : '' %><%= ownerHomeBanner || ownerHomeFeatured ? '' : ' owner-home-v20-hero--no-art' %>" id="home-top" aria-labelledby="owner-home-v20-title">
     <div class="owner-home-v20-hero-content">
       <p class="owner-home-v20-eyebrow"><span></span> LILTEAM SHOP <i>·</i> FEATURED STORE</p>
       <h1 id="owner-home-v20-title"><%= settings.shopName || 'LILTeam Shop' %></h1>
