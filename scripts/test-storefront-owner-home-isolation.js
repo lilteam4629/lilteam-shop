@@ -204,6 +204,26 @@ assert.doesNotMatch(productCardCss, /#(?:00ff91|10b981|34d399)\b/i,
   'the new card must not introduce unrelated green accents');
 assert.ok(productCardRuleCount > 0, 'the new product-card layer must have owner-home scoped rules');
 
+const mobileNewArrivalsCss = read('public/css/storefront-new-arrivals-mobile-v2.css');
+assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*?storefront-new-arrivals-mobile-v2\.css/,
+  'the mobile new-arrivals redesign must only load on the main shop');
+const mobileNewArrivalsStylesheet = postcss.parse(mobileNewArrivalsCss, { from: 'storefront-new-arrivals-mobile-v2.css' });
+let mobileNewArrivalsRuleCount = 0;
+mobileNewArrivalsStylesheet.walkRules(rule => {
+  mobileNewArrivalsRuleCount += 1;
+  for (const selector of rule.selectors) {
+    assert.ok(selector.startsWith('body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals'),
+      `mobile new-arrivals styles must not affect tenants or other pages: ${selector}`);
+  }
+});
+assert.match(mobileNewArrivalsCss, /grid-auto-columns:\s*min\(78vw,\s*312px\)/,
+  'mobile product cards must have a touch-friendly width and reveal the next card');
+assert.match(mobileNewArrivalsCss, /scroll-snap-type:\s*x mandatory/,
+  'mobile product cards must snap cleanly while swiping');
+assert.match(mobileNewArrivalsCss, /min-height:\s*44px/,
+  'the mobile view-all action must keep a comfortable touch target');
+assert.ok(mobileNewArrivalsRuleCount > 0, 'the main-store mobile new-arrivals design must include scoped rules');
+
 const heroV23Css = read('public/css/storefront-owner-home-hero-v23.css');
 const heroV23Stylesheet = postcss.parse(heroV23Css, { from: 'storefront-owner-home-hero-v23.css' });
 let heroV23RuleCount = 0;
