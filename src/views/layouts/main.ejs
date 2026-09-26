@@ -525,7 +525,7 @@
     const musicVideoId = (typeof settings !== 'undefined' && settings.music && settings.music.enabled)
       ? getYoutubeId(settings.music.youtubeUrl) : null;
   %>
-  <% if (musicVideoId) { %>
+  <% if (musicVideoId && !(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7)) { %>
   <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>" data-start-seconds="<%= settings.music.startSeconds || 0 %>" data-end-seconds="<%= settings.music.endSeconds || 0 %>">
     <button id="music-toggle-btn" type="button" aria-label="เล่นเพลง" title="เล่นเพลง / หยุดเพลง" class="relative w-14 h-14 rounded-full bg-[var(--card)] border border-[var(--border)] shadow-lg flex items-center justify-center text-xl overflow-hidden hover:border-[var(--gold)]/60 transition">
       <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
