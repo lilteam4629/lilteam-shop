@@ -1,0 +1,326 @@
+/* Main LilTeam storefront navigation: a calm, three-zone header with the
+   wallet and its top-up action treated as one related control. */
+.store-nav--cozy-owner {
+  z-index: 50;
+  color: var(--theme-ink, var(--text)) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--theme-line, var(--border)) 84%, var(--theme-accent, var(--gold))) !important;
+  background: color-mix(in srgb, var(--theme-page-surface, var(--bg)) 91%, var(--theme-accent, var(--gold))) !important;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--theme-ink, var(--text)) 5%, transparent) !important;
+  backdrop-filter: saturate(1.04) blur(10px);
+}
+
+.store-nav--cozy-owner .store-nav__inner {
+  display: grid !important;
+  grid-template-columns: minmax(160px, .9fr) minmax(380px, 1.25fr) minmax(380px, 1fr) !important;
+  align-items: center !important;
+  gap: 16px !important;
+  width: min(1500px, calc(100% - 48px)) !important;
+  min-height: 74px !important;
+}
+
+.store-nav--cozy-owner .store-nav__mobile-toggle { display: none !important; }
+.store-nav--cozy-owner .store-nav__brand {
+  grid-column: 1 !important;
+  display: flex !important;
+  align-items: center;
+  gap: 10px !important;
+  min-width: 0 !important;
+  color: var(--theme-ink, var(--text)) !important;
+  font-size: 17px !important;
+  letter-spacing: -.025em;
+}
+.store-nav--cozy-owner .store-nav__brand img,
+.store-nav--cozy-owner .store-nav__logo-fallback {
+  display: grid !important;
+  width: 38px !important;
+  height: 38px !important;
+  border: 1px solid var(--theme-line, var(--border));
+  border-radius: 12px !important;
+  background: var(--theme-card-surface, var(--card)) !important;
+  color: var(--theme-accent, var(--gold)) !important;
+  box-shadow: none !important;
+}
+
+.store-nav--cozy-owner .store-nav__links {
+  grid-column: 2 !important;
+  display: flex !important;
+  align-items: center;
+  justify-content: center !important;
+  gap: 3px !important;
+  min-width: 0;
+  margin: 0 !important;
+}
+.store-nav--cozy-owner .store-nav__links > a,
+.store-nav--cozy-owner .store-nav__category > summary {
+  position: relative;
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 11px;
+  border: 0 !important;
+  border-radius: 11px;
+  background: transparent !important;
+  color: color-mix(in srgb, var(--theme-ink, var(--text)) 76%, var(--theme-muted-ink, var(--text-3))) !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  text-decoration: none;
+  transition: background-color .16s ease, color .16s ease;
+}
+.store-nav--cozy-owner .store-nav__links > a svg,
+.store-nav--cozy-owner .store-nav__category > summary svg { display: none !important; }
+.store-nav--cozy-owner .store-nav__category > summary::-webkit-details-marker { display: none; }
+.store-nav--cozy-owner .store-nav__links > a:hover,
+.store-nav--cozy-owner .store-nav__links > a.is-active,
+.store-nav--cozy-owner .store-nav__category > summary:hover,
+.store-nav--cozy-owner .store-nav__category[open] > summary {
+  background: color-mix(in srgb, var(--theme-accent, var(--gold)) 11%, var(--theme-card-surface, var(--card))) !important;
+  color: var(--theme-accent, var(--gold)) !important;
+}
+.store-nav--cozy-owner .store-nav__category-menu,
+.store-nav--cozy-owner .store-nav__account-menu {
+  border: 1px solid var(--theme-line, var(--border)) !important;
+  border-radius: 14px !important;
+  background: var(--theme-card-surface, var(--card)) !important;
+  box-shadow: 0 16px 40px color-mix(in srgb, var(--theme-ink, var(--text)) 13%, transparent) !important;
+}
+
+.store-nav--cozy-owner .store-nav__search { display: none !important; }
+.store-nav--cozy-owner .store-nav__actions {
+  grid-column: 3 !important;
+  display: flex !important;
+  align-items: center;
+  justify-self: end;
+  gap: 7px !important;
+  min-width: 0;
+  margin: 0 !important;
+}
+.store-nav--cozy-owner .store-nav__theme,
+.store-nav--cozy-owner .store-nav__cart {
+  display: grid !important;
+  place-items: center;
+  width: 36px !important;
+  height: 36px !important;
+  border: 1px solid transparent !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: var(--theme-muted-ink, var(--text-3)) !important;
+  box-shadow: none !important;
+  transition: background-color .16s ease, color .16s ease;
+}
+.store-nav--cozy-owner .store-nav__theme:hover,
+.store-nav--cozy-owner .store-nav__cart:hover {
+  border-color: var(--theme-line, var(--border)) !important;
+  background: var(--theme-card-surface, var(--card)) !important;
+  color: var(--theme-ink, var(--text)) !important;
+}
+.store-nav--cozy-owner .store-nav__theme svg,
+.store-nav--cozy-owner .store-nav__cart > svg { width: 17px !important; height: 17px !important; }
+.store-nav--cozy-owner .store-nav__cart b {
+  top: -2px;
+  right: -2px;
+  border-color: var(--theme-page-surface, var(--bg));
+  background: var(--theme-accent, var(--gold));
+  color: var(--theme-accent-ink, var(--gold-contrast));
+}
+
+.store-nav--cozy-owner .store-nav__wallet-group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 40px;
+  padding: 3px;
+  border: 1px solid var(--theme-line, var(--border));
+  border-radius: 12px;
+  background: var(--theme-card-surface, var(--card));
+}
+.store-nav--cozy-owner .store-nav__wallet {
+  display: flex !important;
+  align-items: center;
+  min-width: 80px;
+  height: 32px !important;
+  padding: 0 8px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  color: var(--theme-ink, var(--text)) !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  font-variant-numeric: tabular-nums;
+}
+.store-nav--cozy-owner .store-nav__wallet span { display: flex; align-items: baseline; gap: 5px; }
+.store-nav--cozy-owner .store-nav__wallet small {
+  color: var(--theme-muted-ink, var(--text-3));
+  font-size: 9px;
+  font-weight: 500;
+}
+.store-nav--cozy-owner .store-nav__wallet b { display: none !important; }
+.store-nav--cozy-owner .store-nav__desktop-topup {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 82px;
+  height: 32px !important;
+  padding: 0 10px !important;
+  border: 0 !important;
+  border-radius: 9px !important;
+  background: var(--theme-accent, var(--gold)) !important;
+  color: var(--theme-accent-ink, var(--gold-contrast)) !important;
+  font-size: 11px !important;
+  font-weight: 750 !important;
+}
+.store-nav--cozy-owner .store-nav__desktop-topup:hover { filter: brightness(1.04); }
+.store-nav--cozy-owner .store-nav__desktop-topup svg { width: 15px; height: 15px; }
+.store-nav--cozy-owner .store-nav__mobile-topup { display: none !important; }
+.store-nav--cozy-owner .store-nav__register,
+.store-nav--cozy-owner .store-nav__login {
+  height: 38px !important;
+  padding-inline: 13px !important;
+  border: 1px solid var(--theme-line, var(--border)) !important;
+  border-radius: 11px !important;
+  background: var(--theme-card-surface, var(--card)) !important;
+  color: var(--theme-ink, var(--text)) !important;
+  font-size: 11px !important;
+}
+.store-nav--cozy-owner .store-nav__login {
+  border-color: var(--theme-accent, var(--gold)) !important;
+  background: var(--theme-accent, var(--gold)) !important;
+  color: var(--theme-accent-ink, var(--gold-contrast)) !important;
+}
+.store-nav--cozy-owner .store-nav__account {
+  margin-left: 3px;
+  padding-left: 10px;
+  border-left: 1px solid var(--theme-line, var(--border));
+}
+.store-nav--cozy-owner .store-nav__account summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 42px !important;
+  padding: 0 2px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: var(--theme-ink, var(--text)) !important;
+  font-size: 11px !important;
+}
+.store-nav--cozy-owner .store-nav__avatar {
+  width: 32px !important;
+  height: 32px !important;
+  background: color-mix(in srgb, var(--theme-accent, var(--gold)) 15%, var(--theme-card-surface, var(--card))) !important;
+  color: var(--theme-accent, var(--gold)) !important;
+}
+.store-nav--cozy-owner :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--theme-accent, var(--gold)) !important;
+  outline-offset: 3px !important;
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .store-nav--cozy-owner .store-nav__inner {
+    grid-template-columns: minmax(150px, 1fr) auto !important;
+    grid-template-rows: 58px 45px;
+    width: calc(100% - 36px) !important;
+    gap: 0 12px !important;
+    min-height: 104px !important;
+  }
+  .store-nav--cozy-owner .store-nav__brand { grid-column: 1; grid-row: 1; }
+  .store-nav--cozy-owner .store-nav__actions { grid-column: 2; grid-row: 1; }
+  .store-nav--cozy-owner .store-nav__links {
+    grid-column: 1 / -1 !important;
+    grid-row: 2;
+    justify-content: flex-start !important;
+    border-top: 1px solid var(--theme-line, var(--border));
+  }
+}
+
+@media (max-width: 900px) {
+  .store-nav--cozy-owner .store-nav__inner {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    min-height: 64px !important;
+    padding: 8px 14px !important;
+    gap: 10px !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-toggle {
+    display: grid !important;
+    place-items: center;
+    flex: 0 0 40px !important;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    border: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 11px !important;
+    background: var(--theme-card-surface, var(--card)) !important;
+    color: var(--theme-ink, var(--text)) !important;
+    box-shadow: none !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-toggle > span { width: 17px !important; margin: 0 !important; }
+  .store-nav--cozy-owner .store-nav__links {
+    display: none !important;
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+  .store-nav--cozy-owner .store-nav__brand { flex: 1 1 auto !important; min-width: 0 !important; }
+  .store-nav--cozy-owner .store-nav__brand strong { overflow: hidden; font-size: 15px !important; text-overflow: ellipsis; white-space: nowrap; }
+  .store-nav--cozy-owner .store-nav__wallet-group { display: none !important; }
+  .store-nav--cozy-owner .store-nav__mobile-topup {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    padding: 0 9px !important;
+    border: 1px solid var(--theme-accent, var(--gold)) !important;
+    border-radius: 11px !important;
+    background: var(--theme-accent, var(--gold)) !important;
+    color: var(--theme-accent-ink, var(--gold-contrast)) !important;
+  }
+  .store-nav--cozy-owner .store-nav__actions { flex: 0 0 auto !important; gap: 4px !important; margin-left: auto !important; }
+  .store-nav--cozy-owner .store-nav__theme,
+  .store-nav--cozy-owner .store-nav__cart { width: 38px !important; height: 38px !important; }
+  .store-nav--cozy-owner .store-nav__account { margin: 0; padding: 0; border: 0; }
+  .store-nav--cozy-owner .store-nav__account summary {
+    display: flex !important;
+    justify-content: center;
+    width: 38px;
+    height: 38px !important;
+    padding: 0 !important;
+    border: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 11px !important;
+    background: var(--theme-card-surface, var(--card)) !important;
+  }
+  .store-nav--cozy-owner .store-nav__avatar { width: 28px !important; height: 28px !important; }
+  .store-nav--cozy-owner .store-nav__account-name,
+  .store-nav--cozy-owner .store-nav__chevron { display: none !important; }
+  .store-nav--cozy-owner .store-nav__login,
+  .store-nav--cozy-owner .store-nav__register { height: 38px !important; padding-inline: 10px !important; }
+  .store-nav--cozy-owner .store-nav__mobile-row { background: var(--theme-card-surface, var(--card)) !important; }
+}
+
+@media (max-width: 520px) {
+  .store-nav--cozy-owner .store-nav__inner { padding-inline: 10px !important; gap: 6px !important; }
+  .store-nav--cozy-owner .store-nav__mobile-toggle,
+  .store-nav--cozy-owner .store-nav__mobile-topup { width: 36px !important; min-width: 36px !important; height: 36px !important; min-height: 36px !important; flex-basis: 36px !important; }
+  .store-nav--cozy-owner .store-nav__mobile-topup { padding: 0 !important; }
+  .store-nav--cozy-owner .store-nav__mobile-topup span { display: none !important; }
+  .store-nav--cozy-owner .store-nav__theme,
+  .store-nav--cozy-owner .store-nav__cart,
+  .store-nav--cozy-owner .store-nav__account summary { width: 34px !important; height: 34px !important; }
+  .store-nav--cozy-owner .store-nav__actions { gap: 2px !important; }
+  .store-nav--cozy-owner .store-nav__brand img,
+  .store-nav--cozy-owner .store-nav__logo-fallback { width: 30px !important; height: 30px !important; }
+  .store-nav--cozy-owner .store-nav__brand strong { font-size: 14px !important; }
+  .store-nav--cozy-owner .store-nav__login { min-width: 34px !important; padding-inline: 8px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-nav--cozy-owner *,
+  .store-nav--cozy-owner *::before,
+  .store-nav--cozy-owner *::after { transition-duration: .01ms !important; }
+}
