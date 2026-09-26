@@ -274,4 +274,26 @@ const navbarV3Link = layoutHtml.split(/\r?\n/).find(line => line.includes('store
 assert.ok(navbarV3Link.includes('isMainSite') && navbarV3Link.includes('if ('),
   'the new header stylesheet must only load on the main store');
 
-console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount + productCardRuleCount + heroV23RuleCount + mainNavbarRuleCount} scoped CSS rules).`);
+const listingHtml = read('src/views/shop/listing.ejs');
+const mainCatalogCss = read('public/css/storefront-catalog-main-v2.css');
+assert.match(listingHtml, /if \(isMainStorefrontListing\)[\s\S]*?storefront-catalog-main-v2\.css/,
+  'the redesigned catalogue stylesheet must only load for the main store');
+assert.match(listingHtml, /main-storefront-catalog-page/,
+  'the main-store listing must expose its isolated catalogue scope');
+const mainCatalogStylesheet = postcss.parse(mainCatalogCss, { from: 'storefront-catalog-main-v2.css' });
+let mainCatalogRuleCount = 0;
+mainCatalogStylesheet.walkRules(rule => {
+  if (rule.parent && rule.parent.type === 'atrule' && /keyframes$/i.test(rule.parent.name)) return;
+  mainCatalogRuleCount += 1;
+  for (const selector of rule.selectors) {
+    assert.ok(selector.includes('body.storefront-owner-lilteam') && selector.includes('.main-storefront-catalog-page'),
+      `main catalogue style could leak into tenant storefronts: ${selector}`);
+  }
+});
+assert.match(mainCatalogCss, /\.catalog-grid\s*\{\s*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/,
+  'the main catalogue must show four products per desktop row');
+assert.match(mainCatalogCss, /@media\s*\(max-width:\s*760px\)[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/,
+  'the main catalogue must retain a readable two-column mobile layout');
+assert.ok(mainCatalogRuleCount > 0, 'main catalogue styles must remain scoped to the primary storefront');
+
+console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount + productCardRuleCount + heroV23RuleCount + mainNavbarRuleCount + mainCatalogRuleCount} scoped CSS rules).`);
