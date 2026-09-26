@@ -1,0 +1,235 @@
+/* Cozy, low-noise storefront navigation. All surfaces derive from the shop's
+   selected theme so this treatment stays coherent in both light and dark mode. */
+.store-nav {
+  color: var(--theme-ink, var(--text)) !important;
+  background: color-mix(in srgb, var(--theme-card-surface, var(--card)) 94%, var(--theme-accent, var(--gold))) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--theme-line, var(--border)) 78%, var(--theme-accent, var(--gold))) !important;
+  box-shadow: 0 5px 18px color-mix(in srgb, var(--theme-ink, var(--text)) 5%, transparent) !important;
+  backdrop-filter: saturate(1.05) blur(12px);
+}
+
+.store-nav__inner {
+  width: min(1500px, calc(100% - 48px)) !important;
+  min-height: 70px !important;
+  gap: 24px !important;
+}
+
+.store-nav__brand { gap: 10px !important; color: var(--theme-ink, var(--text)) !important; }
+.store-nav__brand img,
+.store-nav__logo-fallback {
+  width: 38px !important;
+  height: 38px !important;
+  border: 1px solid color-mix(in srgb, var(--theme-line, var(--border)) 65%, transparent);
+  border-radius: 12px !important;
+  box-shadow: none !important;
+}
+
+.store-nav__links { gap: clamp(16px, 2vw, 30px) !important; }
+.store-nav__links > a,
+.store-nav__category > summary {
+  position: relative;
+  min-height: 44px;
+  color: color-mix(in srgb, var(--theme-ink, var(--text)) 76%, var(--theme-muted-ink, var(--text-3))) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  transition: color .16s ease;
+}
+.store-nav__links > a svg,
+.store-nav__category > summary svg { display: none !important; }
+.store-nav__links > a::after {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  left: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--theme-accent, var(--gold));
+  content: "";
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform .18s ease;
+}
+.store-nav__links > a:hover,
+.store-nav__links > a.is-active,
+.store-nav__category > summary:hover,
+.store-nav__category[open] > summary {
+  color: var(--theme-ink, var(--text)) !important;
+}
+.store-nav__links > a:hover::after,
+.store-nav__links > a.is-active::after { transform: scaleX(1); }
+.store-nav__category > summary span { color: var(--theme-muted-ink, var(--text-3)); }
+
+.store-nav__actions { gap: 8px !important; }
+.store-nav__round,
+.store-nav__theme,
+.store-nav__cart {
+  width: 40px !important;
+  height: 40px !important;
+  border: 1px solid var(--theme-line, var(--border)) !important;
+  border-radius: 12px !important;
+  background: var(--theme-control-surface, var(--input)) !important;
+  color: var(--theme-ink, var(--text)) !important;
+  box-shadow: none !important;
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease !important;
+}
+.store-nav__round:hover,
+.store-nav__theme:hover,
+.store-nav__cart:hover {
+  border-color: color-mix(in srgb, var(--theme-accent, var(--gold)) 58%, var(--theme-line, var(--border))) !important;
+  background: color-mix(in srgb, var(--theme-accent, var(--gold)) 9%, var(--theme-control-surface, var(--input))) !important;
+  transform: translateY(-1px);
+}
+.store-nav__desktop-topup,
+.store-nav__login {
+  min-height: 40px !important;
+  height: 40px !important;
+  padding-inline: 15px !important;
+  border: 1px solid var(--theme-accent, var(--gold)) !important;
+  border-radius: 11px !important;
+  background: var(--theme-accent, var(--gold)) !important;
+  color: var(--theme-accent-ink, var(--gold-contrast)) !important;
+  font-size: 12px !important;
+  font-weight: 750 !important;
+  box-shadow: none !important;
+}
+.store-nav__desktop-topup:hover,
+.store-nav__login:hover { filter: brightness(1.04); transform: translateY(-1px); }
+.store-nav__wallet {
+  height: 40px !important;
+  padding: 0 8px 0 13px !important;
+  border: 1px solid var(--theme-line, var(--border)) !important;
+  border-radius: 11px !important;
+  background: var(--theme-card-surface, var(--card)) !important;
+  color: var(--theme-ink, var(--text)) !important;
+  font-variant-numeric: tabular-nums;
+}
+.store-nav__wallet b {
+  width: 25px !important;
+  height: 25px !important;
+  background: color-mix(in srgb, var(--theme-accent, var(--gold)) 14%, var(--theme-control-surface, var(--input))) !important;
+  color: var(--theme-accent, var(--gold)) !important;
+}
+.store-nav__account { margin-left: 4px; padding-left: 13px; border-left: 1px solid var(--theme-line, var(--border)); }
+.store-nav__account summary {
+  height: 42px !important;
+  padding: 0 2px 0 0 !important;
+  background: transparent !important;
+  color: var(--theme-ink, var(--text)) !important;
+  font-size: 12px !important;
+  font-weight: 650 !important;
+}
+.store-nav__avatar {
+  width: 36px !important;
+  height: 36px !important;
+  background: color-mix(in srgb, var(--theme-accent, var(--gold)) 16%, var(--theme-control-surface, var(--input))) !important;
+  color: var(--theme-accent, var(--gold)) !important;
+}
+
+.store-nav__category-menu,
+.store-nav__account-menu {
+  border: 1px solid var(--theme-line, var(--border)) !important;
+  border-radius: 14px !important;
+  background: var(--theme-card-surface, var(--card)) !important;
+  box-shadow: 0 16px 42px color-mix(in srgb, var(--theme-ink, var(--text)) 14%, transparent) !important;
+}
+
+.store-nav :is(a, button, summary):focus-visible {
+  outline: 2px solid var(--theme-accent, var(--gold)) !important;
+  outline-offset: 3px !important;
+}
+
+@media (min-width: 1101px) {
+  .store-nav__inner {
+    grid-template-columns: minmax(170px, 1fr) auto minmax(340px, 1fr) !important;
+    gap: 20px !important;
+  }
+  .store-nav__brand { grid-column: 1 !important; }
+  .store-nav__links { grid-column: 2 !important; }
+  .store-nav__search { display: none !important; }
+  .store-nav__actions { grid-column: 3 !important; justify-self: end; }
+}
+
+@media (min-width: 901px) and (max-width: 1100px) {
+  .store-nav__inner { width: calc(100% - 28px) !important; gap: 12px !important; }
+  .store-nav__links { gap: 12px !important; }
+  .store-nav__links > a,
+  .store-nav__category > summary { font-size: 11px !important; }
+  .store-nav__actions { gap: 5px !important; }
+  .store-nav__account-name { display: none !important; }
+}
+
+@media (max-width: 900px) {
+  .store-nav__inner {
+    min-height: 62px !important;
+    padding: 8px 16px !important;
+    gap: 9px !important;
+  }
+  .store-nav__mobile-toggle {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    flex-basis: 40px !important;
+    border: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 11px !important;
+    background: var(--theme-control-surface, var(--input)) !important;
+    box-shadow: none !important;
+  }
+  .store-nav__mobile-toggle > span { width: 17px !important; }
+  .store-nav__brand img,
+  .store-nav__logo-fallback { display: grid !important; width: 34px !important; height: 34px !important; }
+  .store-nav__brand { color: var(--theme-ink, var(--text)) !important; }
+  .store-nav__brand strong { color: inherit !important; font-size: 16px !important; }
+  .store-nav__mobile-topup {
+    min-width: 40px !important;
+    height: 40px !important;
+    padding: 0 11px !important;
+    border: 1px solid var(--theme-accent, var(--gold)) !important;
+    border-radius: 11px !important;
+    background: var(--theme-accent, var(--gold)) !important;
+    color: var(--theme-accent-ink, var(--gold-contrast)) !important;
+  }
+  .store-nav__theme { width: 40px !important; height: 40px !important; }
+  .store-nav__login { min-width: 40px !important; height: 40px !important; padding-inline: 12px !important; }
+  .store-nav__account { margin-left: 0; padding-left: 0; border-left: 0; }
+  .store-nav__account summary {
+    height: 40px !important;
+    padding: 0 5px !important;
+    border: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 11px !important;
+    background: var(--theme-card-surface, var(--card)) !important;
+    color: var(--theme-ink, var(--text)) !important;
+  }
+  .store-nav__avatar { width: 30px !important; height: 30px !important; }
+  .store-nav__mobile-row {
+    border-color: var(--theme-line, var(--border)) !important;
+    background: var(--theme-card-surface, var(--card)) !important;
+  }
+  .store-nav__mobile-row nav a { border-radius: 9px !important; }
+}
+
+@media (max-width: 520px) {
+  .store-nav__inner { padding-inline: 12px !important; }
+  .store-nav__mobile-toggle,
+  .store-nav__mobile-topup,
+  .store-nav__theme,
+  .store-nav__account summary,
+  .store-nav__login { height: 38px !important; }
+  .store-nav__mobile-toggle,
+  .store-nav__theme { width: 38px !important; min-width: 38px !important; flex-basis: 38px !important; }
+  .store-nav__mobile-topup { min-width: 38px !important; width: 38px !important; padding: 0 !important; }
+  .store-nav__mobile-topup span { display: none !important; }
+  .store-nav__cart { display: grid !important; width: 38px !important; height: 38px !important; }
+  .store-nav__account summary { width: 38px !important; padding: 0 !important; justify-content: center !important; }
+  .store-nav__account-name,
+  .store-nav__chevron { display: none !important; }
+  .store-nav__avatar { width: 28px !important; height: 28px !important; }
+  .store-nav__login { min-width: 38px !important; height: 38px !important; padding-inline: 10px !important; }
+  .store-nav__login svg { width: 17px !important; height: 17px !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-nav *,
+  .store-nav *::before,
+  .store-nav *::after { transition-duration: .01ms !important; }
+}
