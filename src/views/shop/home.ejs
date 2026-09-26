@@ -206,23 +206,38 @@
 
 <% if (ownerHomeV20 && newest && newest.length) { %>
   <section class="owner-home-v20-section" id="home-new-arrivals" aria-labelledby="owner-home-v20-trending-title">
+    <% const ownerHomeNewestProducts = newest.slice(0, 6); const ownerHomeFeaturedProduct = ownerHomeNewestProducts[0]; %>
     <div class="owner-home-v20-section-head">
       <div><h2 id="owner-home-v20-trending-title">สินค้าเข้าใหม่</h2><p>อัปเดตล่าสุดจากรายการสินค้าจริงของร้าน</p></div>
       <a href="#home-catalog">ดูทั้งหมด <span aria-hidden="true">→</span></a>
     </div>
-    <div class="owner-home-v20-product-rail" aria-label="สินค้าเข้าใหม่">
-      <% newest.slice(0, 6).forEach((product, index) => { %>
-        <a class="owner-home-v20-product-card main-store-product-card" href="/game/<%= product.slug %>">
+    <div class="owner-home-v24-showcase <%= ownerHomeNewestProducts.length === 1 ? 'is-single' : '' %>">
+      <a class="owner-home-v20-product-card main-store-product-card owner-home-v24-featured" href="/game/<%= ownerHomeFeaturedProduct.slug %>">
+        <span class="owner-home-v20-poster">
+          <% if (ownerHomeFeaturedProduct.images && ownerHomeFeaturedProduct.images[0]) { %><img src="<%= ownerHomeFeaturedProduct.images[0] %>" alt="<%= ownerHomeFeaturedProduct.title %>" loading="eager" decoding="async" fetchpriority="high" /><% } else { %><span class="owner-home-v20-poster-fallback" aria-hidden="true">L</span><% } %>
+          <span class="owner-home-v24-featured-tag">ล่าสุด</span>
+        </span>
+        <span class="owner-home-v20-product-info">
+          <span class="main-store-product-title-row"><b><%= ownerHomeFeaturedProduct.title %></b><span class="main-store-product-stock" data-stock-state="<%= Number(ownerHomeFeaturedProduct.stockCount || 0) > 0 ? 'available' : 'sold' %>"><i aria-hidden="true"></i><span><%= Number(ownerHomeFeaturedProduct.stockCount || 0) > 0 ? `พร้อมส่ง ${Number(ownerHomeFeaturedProduct.stockCount).toLocaleString()}` : 'หมด' %></span></span></span>
+          <strong>฿<%= Number(ownerHomeFeaturedProduct.price || 0).toLocaleString() %></strong>
+        </span>
+      </a>
+      <% if (ownerHomeNewestProducts.length > 1) { %>
+      <div class="owner-home-v20-product-rail owner-home-v24-rail" tabindex="0" aria-label="สินค้าเข้าใหม่เพิ่มเติม เลื่อนดูได้">
+        <% ownerHomeNewestProducts.slice(1).forEach(product => { %>
+        <a class="owner-home-v20-product-card main-store-product-card owner-home-v24-card" href="/game/<%= product.slug %>">
           <span class="owner-home-v20-poster">
-            <% if (product.images && product.images[0]) { %><img src="<%= product.images[0] %>" alt="<%= product.title %>" loading="<%= index === 0 ? 'eager' : 'lazy' %>" decoding="async" /><% } else { %><span class="owner-home-v20-poster-fallback" aria-hidden="true">L</span><% } %>
+            <% if (product.images && product.images[0]) { %><img src="<%= product.images[0] %>" alt="<%= product.title %>" loading="lazy" decoding="async" /><% } else { %><span class="owner-home-v20-poster-fallback" aria-hidden="true">L</span><% } %>
             <span class="owner-home-v20-poster-tag">สินค้าใหม่</span>
           </span>
           <span class="owner-home-v20-product-info">
-            <span class="main-store-product-title-row"><b><%= product.title %></b><span class="main-store-product-stock" data-stock-state="<%= product.stockCount > 0 ? 'available' : 'sold' %>"><i aria-hidden="true"></i><span><%= product.stockCount > 0 ? `พร้อมส่ง ${product.stockCount.toLocaleString()}` : 'หมด' %></span></span></span>
+            <span class="main-store-product-title-row"><b><%= product.title %></b><span class="main-store-product-stock" data-stock-state="<%= Number(product.stockCount || 0) > 0 ? 'available' : 'sold' %>"><i aria-hidden="true"></i><span><%= Number(product.stockCount || 0) > 0 ? `พร้อมส่ง ${Number(product.stockCount).toLocaleString()}` : 'หมด' %></span></span></span>
             <strong>฿<%= Number(product.price || 0).toLocaleString() %></strong>
           </span>
         </a>
-      <% }) %>
+        <% }) %>
+      </div>
+      <% } %>
     </div>
   </section>
 <% } %>

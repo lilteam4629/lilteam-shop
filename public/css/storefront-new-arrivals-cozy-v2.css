@@ -1,0 +1,352 @@
+/* Cozy, editorial treatment for the main storefront's newest products. */
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals {
+  margin-block: 26px 0 !important;
+  padding: 20px 20px 8px;
+  border: 1px solid var(--border-light);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--card) 94%, var(--gold) 6%);
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals > .owner-home-v20-section-head {
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 14px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-section-head h2 {
+  color: var(--text);
+  font-size: clamp(22px, 2.2vw, 28px) !important;
+  font-weight: 780;
+  letter-spacing: -.03em;
+  line-height: 1.2;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-section-head p {
+  max-width: 56ch;
+  margin-top: 5px;
+  color: var(--text-3);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-section-head > a {
+  min-height: 42px;
+  padding-inline: 15px;
+  border: 1px solid var(--border-light);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 700;
+  transition: border-color .18s ease, background-color .18s ease, color .18s ease;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-section-head > a:hover {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--border));
+  background: var(--gold-soft, color-mix(in srgb, var(--gold) 9%, var(--card)));
+  color: var(--gold-text);
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-rail {
+  display: grid;
+  grid-template-columns: none !important;
+  grid-auto-flow: column !important;
+  grid-auto-columns: clamp(208px, 18vw, 236px) !important;
+  gap: 13px;
+  padding: 2px 2px 12px;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scroll-padding-inline: 2px;
+  scroll-snap-type: x proximity;
+  scrollbar-color: color-mix(in srgb, var(--gold) 44%, var(--border)) transparent;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-card {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+  border-radius: 15px;
+  background: var(--card);
+  box-shadow: none;
+  scroll-snap-align: start;
+  transition: border-color .18s ease, transform .18s ease;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--border));
+  background: var(--card);
+  box-shadow: none;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-card:focus-visible,
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-section-head > a:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold) 70%, white);
+  outline-offset: 3px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-poster {
+  aspect-ratio: 16 / 9;
+  background: color-mix(in srgb, var(--text) 4%, var(--input));
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-poster-tag {
+  top: 9px;
+  left: 9px;
+  min-height: 25px;
+  padding: 4px 9px;
+  border: 1px solid color-mix(in srgb, var(--border) 75%, white);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--card) 96%, transparent);
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 700;
+  backdrop-filter: none;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-info {
+  min-height: 70px;
+  gap: 9px;
+  padding: 11px 13px 12px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-info b {
+  font-size: 12px;
+  font-weight: 750;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .main-store-product-stock {
+  min-height: 23px;
+  padding: 3px 8px;
+  font-size: 9px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-info > strong {
+  color: var(--gold-text);
+  font-size: 17px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 700px) {
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals {
+    margin-top: 22px !important;
+    padding: 16px 12px 5px;
+    border: 1px solid var(--border-light);
+    border-radius: 17px;
+    background: color-mix(in srgb, var(--card) 90%, var(--gold) 10%);
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals > .owner-home-v20-section-head {
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-section-head h2 {
+    font-size: clamp(20px, 5.8vw, 24px) !important;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-section-head p {
+    max-width: 34ch;
+    font-size: 11px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-section-head > a {
+    min-width: 80px;
+    min-height: 40px;
+    padding-inline: 11px;
+    font-size: 11px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-rail {
+    grid-template-columns: none !important;
+    grid-auto-columns: min(78vw, 318px) !important;
+    gap: 11px;
+    padding: 2px 1px 12px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-rail::-webkit-scrollbar {
+    display: none;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-card {
+    width: 100%;
+    border-radius: 14px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-poster {
+    aspect-ratio: 1.55 / 1;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-info {
+    min-height: 70px;
+    padding: 11px 12px 12px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-info > strong {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 370px) {
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals > .owner-home-v20-section-head {
+    align-items: flex-start;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v20-product-rail {
+    grid-auto-columns: min(82vw, 300px) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* Lead with the newest real listing, then keep the rest in a browseable rail. */
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-showcase {
+  display: grid;
+  grid-template-columns: minmax(280px, .95fr) minmax(0, 1.8fr);
+  align-items: stretch;
+  gap: 13px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-showcase.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured {
+  display: flex;
+  flex-direction: column;
+  border-radius: 15px;
+  background: var(--card);
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured .owner-home-v20-poster {
+  aspect-ratio: 16 / 9;
+  flex: 1 0 auto;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured-tag {
+  position: absolute;
+  top: 11px;
+  left: 11px;
+  display: inline-flex;
+  min-height: 27px;
+  align-items: center;
+  padding: 4px 10px;
+  border: 1px solid color-mix(in srgb, var(--gold) 32%, var(--border));
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--gold-text);
+  font-size: 10px;
+  font-weight: 750;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured .owner-home-v20-product-info {
+  min-height: 78px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  padding: 12px 15px 14px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured .owner-home-v20-product-info b {
+  font-size: 14px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured .owner-home-v20-product-info > strong {
+  font-size: 21px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-rail {
+  grid-auto-columns: clamp(170px, 14vw, 196px) !important;
+  align-content: start;
+  gap: 10px;
+  padding: 2px 2px 12px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-card {
+  border-radius: 14px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-card .owner-home-v20-poster {
+  aspect-ratio: 1.42 / 1;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-card .owner-home-v20-product-info {
+  min-height: 73px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 7px;
+  padding: 10px 11px 11px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-card .main-store-product-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-card .owner-home-v20-product-info b {
+  min-width: 0;
+  font-size: 11px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-card .main-store-product-stock {
+  min-height: 21px;
+  padding: 2px 6px;
+  font-size: 8px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-card .owner-home-v20-product-info > strong {
+  justify-self: start;
+  font-size: 16px;
+}
+
+body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-rail:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--gold) 70%, white);
+  outline-offset: 3px;
+  border-radius: 12px;
+}
+
+@media (max-width: 1000px) {
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-showcase {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured .owner-home-v20-poster {
+    aspect-ratio: 2.4 / 1;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-rail {
+    grid-auto-columns: clamp(190px, 27vw, 218px) !important;
+  }
+}
+
+@media (max-width: 700px) {
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-showcase {
+    gap: 12px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured .owner-home-v20-poster {
+    aspect-ratio: 1.65 / 1;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured .owner-home-v20-product-info {
+    min-height: 74px;
+    padding: 11px 12px 12px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-featured .owner-home-v20-product-info b {
+    font-size: 13px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] #home-new-arrivals .owner-home-v24-rail {
+    grid-auto-columns: min(78vw, 290px) !important;
+  }
+}

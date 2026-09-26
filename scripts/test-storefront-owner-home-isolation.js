@@ -50,8 +50,12 @@ assert.match(home, /include\('\.\.\/partials\/latest-orders-rail', \{ latestOrde
   'the main homepage order rail must use its shared live-data partial');
 assert.match(read('src/views/partials/latest-orders-rail.ejs'), /latestOrders\.forEach\(order => \{/,
   'the shared order rail must render live order data');
-assert.match(home, /newest\.slice\(0, 6\)\.forEach\(\(product, index\) => \{/,
-  'the new horizontal shelf must render actual newest products, not reference/demo items');
+assert.match(home, /const ownerHomeNewestProducts = newest\.slice\(0, 6\); const ownerHomeFeaturedProduct = ownerHomeNewestProducts\[0\]/,
+  'the newest-products showcase must take its live data from the newest real listings');
+assert.match(home, /owner-home-v24-featured" href="\/game\/<%= ownerHomeFeaturedProduct\.slug %>"/,
+  'the freshest product must be promoted as a working product link');
+assert.match(home, /ownerHomeNewestProducts\.slice\(1\)\.forEach\(product => \{/,
+  'the remaining live newest products must stay browseable after the featured item');
 assert.equal((home.match(/ownerHomeProductCard: ownerHomeV20/g) || []).length, 2,
   'both main-store product grids must opt in to the new product-card design without affecting tenants');
 assert.match(productCard, /const isMainStorefrontCard = typeof isMainSite !== 'undefined' && isMainSite/,
@@ -241,6 +245,26 @@ assert.match(mobileNewArrivalsCss, /scroll-snap-type:\s*x mandatory/,
 assert.match(mobileNewArrivalsCss, /min-height:\s*44px/,
   'the mobile view-all action must keep a comfortable touch target');
 assert.ok(mobileNewArrivalsRuleCount > 0, 'the main-store mobile new-arrivals design must include scoped rules');
+
+const newArrivalsSpotlightCss = read('public/css/storefront-new-arrivals-cozy-v2.css');
+assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-new-arrivals-cozy-v2\.css.*?rev=2/,
+  'the latest-product showcase styling must only load on the redesigned main storefront');
+assert.match(home, /owner-home-v24-rail" tabindex="0" aria-label="สินค้าเข้าใหม่เพิ่มเติม เลื่อนดูได้"/,
+  'the remaining products rail must be keyboard reachable and clearly labelled');
+const newArrivalsSpotlightStylesheet = postcss.parse(newArrivalsSpotlightCss, { from: 'storefront-new-arrivals-cozy-v2.css' });
+let newArrivalsSpotlightRuleCount = 0;
+newArrivalsSpotlightStylesheet.walkRules(rule => {
+  newArrivalsSpotlightRuleCount += 1;
+  for (const selector of rule.selectors) {
+    assert.ok(selector.startsWith('body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell'),
+      `the newest-product showcase styles must not affect tenant shops or other pages: ${selector}`);
+  }
+});
+assert.match(newArrivalsSpotlightCss, /owner-home-v24-showcase[\s\S]*?grid-template-columns:\s*minmax\(280px,\s*\.95fr\) minmax\(0,\s*1\.8fr\)/,
+  'the newest listing must lead a two-part spotlight and browse rail on wide screens');
+assert.match(newArrivalsSpotlightCss, /@media \(max-width: 700px\)[\s\S]*?owner-home-v24-rail[\s\S]*?grid-auto-columns:\s*min\(78vw,\s*290px\)/,
+  'mobile users must see one large lead listing and be able to swipe the rest');
+assert.ok(newArrivalsSpotlightRuleCount > 0, 'the showcase redesign must have owner-home scoped rules');
 
 const heroV23Css = read('public/css/storefront-owner-home-hero-v23.css');
 const heroV23Stylesheet = postcss.parse(heroV23Css, { from: 'storefront-owner-home-hero-v23.css' });
