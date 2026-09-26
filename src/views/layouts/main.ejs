@@ -546,6 +546,8 @@
     <button id="music-minimize-btn" type="button" aria-label="ย่อแถบเพลง" title="ย่อแถบเพลง" class="music-dock-action" aria-controls="music-toggle-btn" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
     <button id="music-expand-btn" type="button" aria-label="เปิดแถบเพลง" title="เปิดแถบเพลง" class="music-dock-restore" aria-controls="music-toggle-btn" aria-expanded="false" hidden>
       <span class="music-restore-cover" aria-hidden="true"><img src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="" /><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17V5l12-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
+      <span class="music-restore-copy" aria-hidden="true"><strong>เพลงร้าน</strong><small id="music-restore-state-label">แตะเพื่อเปิด</small></span>
+      <span class="music-restore-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></span>
     </button>
     <% } else { %>
     <button id="music-settings-btn" type="button" aria-label="ตั้งค่าเพลง" title="ระดับเสียงและข้อมูลเพลง" class="absolute -top-2 -left-2 z-20 w-7 h-7 rounded-full bg-[var(--input)] border border-[var(--border-light)] text-xs shadow-lg hover:border-[var(--gold)]"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.6 2.8-.2-.1a1.7 1.7 0 0 0-1.8.2l-.2.1h-3.2l-.1-.2a1.7 1.7 0 0 0-1.5-1l-.2.1-2.8-1.6.1-.2a1.7 1.7 0 0 0-.2-1.8l-.1-.2v-3.2l.2-.1a1.7 1.7 0 0 0 1-1.5l-.1-.2L11 7.3l.2.1a1.7 1.7 0 0 0 1.8-.2l.2-.1h3.2l.1.2a1.7 1.7 0 0 0 1.5 1l.2-.1 2.8 1.6-.1.2a1.7 1.7 0 0 0 .2 1.8l.1.2v3.2z" transform="translate(-3 -3) scale(1.25)"/></svg></button>
@@ -588,6 +590,7 @@
       const playingRing = document.getElementById('music-playing-ring');
       const titleEl = document.getElementById('music-title');
       const musicStateLabel = document.getElementById('music-state-label');
+      const musicRestoreStateLabel = document.getElementById('music-restore-state-label');
 
       const STORAGE_PLAYING = 'lilteam_music_playing';
       const STORAGE_VOLUME = 'lilteam_music_volume';
@@ -680,6 +683,7 @@
         if (icon.querySelector('svg')) icon.classList.toggle('is-playing', playing);
         else icon.textContent = playing ? '🎶' : '🎵';
         if (musicStateLabel) musicStateLabel.textContent = playing ? 'กำลังเล่น' : 'แตะเพื่อเล่น';
+        if (musicRestoreStateLabel) musicRestoreStateLabel.textContent = playing ? 'กำลังเล่น' : 'แตะเพื่อเปิด';
         widget.classList.toggle('is-playing', playing);
         playingRing.classList.toggle('hidden', !playing);
       }
