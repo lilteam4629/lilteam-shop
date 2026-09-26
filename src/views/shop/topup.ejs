@@ -1,3 +1,236 @@
+<% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+<style>
+  .topup-page{--tp-line:var(--border);--tp-line-soft:var(--border-light);--tp-surface:var(--card);--tp-input:var(--input);width:min(1080px,calc(100% - 32px));margin:0 auto;padding:38px 0 64px;color:var(--text)}
+  .topup-page *{box-sizing:border-box}
+  .topup-page__head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:28px}
+  .topup-page__back{display:inline-flex;align-items:center;gap:8px;margin-bottom:15px;color:var(--gold-text);font-size:12px;font-weight:600;text-decoration:none}
+  .topup-page__back:hover{text-decoration:underline;text-underline-offset:4px}
+  .topup-page__title-row{display:flex;align-items:center;gap:14px}
+  .topup-page__mark{display:grid;width:52px;height:52px;flex:none;place-items:center;border:1px solid var(--tp-line);border-radius:16px;background:color-mix(in srgb,var(--gold) 12%,var(--tp-surface));color:var(--gold-text)}
+  .topup-page__mark svg{width:25px;height:25px}
+  .topup-page h1{margin:0;font-size:clamp(24px,3vw,32px);font-weight:750;letter-spacing:-.025em;line-height:1.2}
+  .topup-page__subtitle{margin:5px 0 0;color:var(--text-3);font-size:13px;line-height:1.6}
+  .topup-page__layout{display:grid;grid-template-columns:minmax(245px,.78fr) minmax(0,1.65fr);align-items:start;gap:22px}
+  .topup-page__rail{padding:22px;border:1px solid var(--tp-line);border-radius:18px;background:color-mix(in srgb,var(--tp-surface) 88%,var(--bg));}
+  .topup-page__rail h2{margin:0;font-size:16px;font-weight:700;letter-spacing:-.015em}
+  .topup-page__rail-copy{margin:7px 0 18px;color:var(--text-3);font-size:12px;line-height:1.7}
+  .topup-page__channels{display:grid;gap:9px}
+  .topup-page__channel{display:flex;align-items:center;gap:12px;width:100%;min-height:62px;padding:10px 13px;border:1px solid var(--tp-line-soft);border-radius:13px;background:var(--tp-surface);color:var(--text-2);text-align:left;cursor:pointer;transition:border-color .18s ease,background-color .18s ease,transform .18s ease}
+  .topup-page__channel:hover{border-color:color-mix(in srgb,var(--gold) 52%,var(--tp-line));transform:translateY(-1px)}
+  .topup-page__channel.is-active{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 10%,var(--tp-surface));color:var(--gold-text)}
+  .topup-page__channel img,.topup-page__channel-icon{display:grid;width:36px;height:36px;flex:none;place-items:center;border-radius:10px;background:var(--tp-input);object-fit:cover}
+  .topup-page__channel-icon svg{width:19px;height:19px}
+  .topup-page__channel-label{display:grid;gap:2px;font-size:12px;font-weight:700}
+  .topup-page__channel-label small{color:var(--text-4);font-size:10px;font-weight:450}
+  .topup-page__hint{margin:18px 0 0;padding-top:16px;border-top:1px solid var(--tp-line);color:var(--text-3);font-size:11px;line-height:1.75}
+  .topup-page__panel{min-width:0;padding:26px;border:1px solid var(--tp-line);border-radius:18px;background:var(--tp-surface)}
+  .topup-page__panel-head{display:flex;align-items:center;gap:11px;margin-bottom:22px}
+  .topup-page__panel-head img{width:38px;height:38px;border-radius:11px;object-fit:cover}
+  .topup-page__panel-head h2{margin:0;font-size:16px;font-weight:700;line-height:1.4}
+  .topup-page__panel-head p{margin:3px 0 0;color:var(--text-3);font-size:11px;line-height:1.6}
+  .topup-page label{color:var(--text-2)}
+  .topup-page input[type=text]{min-height:48px;border-color:var(--tp-line-soft);background:var(--tp-input);color:var(--text)}
+  .topup-page input[type=text]::placeholder{color:var(--text-4);opacity:1}
+  .topup-page input[type=text]:focus{border-color:var(--gold);outline:3px solid color-mix(in srgb,var(--gold) 20%,transparent);outline-offset:1px}
+  .topup-page__primary{display:flex;min-height:50px;align-items:center;justify-content:center;gap:9px;width:100%;padding:11px 18px;border:0;border-radius:12px;background:var(--gold);color:var(--gold-contrast);font-size:13px;font-weight:700;text-align:center;cursor:pointer;transition:filter .18s ease,transform .18s ease}
+  .topup-page__primary:hover{filter:brightness(1.06);transform:translateY(-1px)}
+  .topup-page__primary:focus-visible,.topup-page__channel:focus-visible,.topup-page a:focus-visible{outline:3px solid color-mix(in srgb,var(--gold) 42%,transparent);outline-offset:3px}
+  .topup-page__primary img{width:24px;height:24px;border-radius:7px;object-fit:cover}
+  .topup-page__helper{margin-top:18px;padding:15px 16px;border:1px solid var(--tp-line);border-radius:13px;background:color-mix(in srgb,var(--tp-input) 54%,var(--tp-surface));color:var(--text-2);font-size:11px;line-height:1.8}
+  .topup-page__helper strong{color:var(--text)}
+  .topup-page__helper-title{margin-bottom:5px;color:var(--text);font-size:12px;font-weight:700}
+  .topup-page__api-layout{display:grid;grid-template-columns:minmax(290px,.95fr) minmax(0,1.05fr);align-items:start;gap:22px}
+  .topup-page__api-note{padding:21px;border:1px solid var(--tp-line);border-radius:17px;background:color-mix(in srgb,var(--gold) 8%,var(--tp-surface))}
+  .topup-page__api-note h2{margin:0;font-size:16px;line-height:1.5}
+  .topup-page__api-note p{margin:8px 0 0;color:var(--text-2);font-size:12px;line-height:1.75}
+  .topup-page__api-note .topup-page__api-warning{margin-top:13px;color:var(--coral);font-weight:700}
+  .topup-page__account{display:grid;gap:12px;margin-top:18px;padding-top:16px;border-top:1px solid color-mix(in srgb,var(--gold) 25%,var(--tp-line))}
+  .topup-page__account div{display:grid;gap:3px;min-width:0}
+  .topup-page__account small{color:var(--text-3);font-size:10px}
+  .topup-page__account b{overflow-wrap:anywhere;font-size:13px}
+  .topup-page__account .topup-account-number{font-size:17px;font-variant-numeric:tabular-nums;letter-spacing:.015em}
+  .topup-page__qr{display:flex;justify-content:center;margin-top:16px;padding:12px;border-radius:13px;background:#fff}
+  .topup-page__qr img{width:min(220px,100%);height:220px;object-fit:contain}
+  .topup-page__api-form{padding:25px;border:1px solid var(--tp-line);border-radius:17px;background:var(--tp-surface)}
+  .topup-page__api-form h2{margin:0 0 19px;font-size:16px;font-weight:700}
+  .topup-page__amounts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-bottom:12px}
+  .topup-page__amount{min-height:44px;border:1px solid var(--tp-line-soft);border-radius:11px;background:var(--tp-input);color:var(--text-2);font-size:12px;font-weight:700;cursor:pointer;transition:border-color .16s ease,background-color .16s ease,color .16s ease}
+  .topup-page__amount:hover,.topup-page__amount.is-selected{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 11%,var(--tp-surface));color:var(--gold-text)}
+  .topup-page__after-note{margin-top:15px;color:var(--text-3);font-size:11px;line-height:1.7}
+  @media(max-width:760px){.topup-page{width:min(calc(100% - 24px),620px);padding:23px 0 44px}.topup-page__head{margin-bottom:19px}.topup-page__layout,.topup-page__api-layout{grid-template-columns:1fr;gap:13px}.topup-page__rail{padding:17px}.topup-page__rail-copy{margin-bottom:13px}.topup-page__channels{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.topup-page__channel{min-height:60px;padding:9px}.topup-page__channel-label{font-size:11px}.topup-page__channel-label small{font-size:9px}.topup-page__hint{margin-top:12px;padding-top:11px}.topup-page__panel,.topup-page__api-form{padding:19px}.topup-page__api-note{padding:18px}}
+  @media(max-width:420px){.topup-page{width:calc(100% - 20px)}.topup-page__head{align-items:flex-start}.topup-page__mark{width:44px;height:44px;border-radius:14px}.topup-page__title-row{gap:11px}.topup-page h1{font-size:23px}.topup-page__subtitle{font-size:11px}.topup-page__channels{grid-template-columns:1fr}.topup-page__panel,.topup-page__api-form{padding:16px}.topup-page__amounts{gap:7px}.topup-page__amount{font-size:11px}}
+  @media(prefers-reduced-motion:reduce){.topup-page *{scroll-behavior:auto!important;transition:none!important}}
+</style>
+
+<section class="topup-page">
+  <header class="topup-page__head">
+    <div>
+      <a href="/account" class="topup-page__back"><span aria-hidden="true">←</span> กลับไปหน้าบัญชี</a>
+      <div class="topup-page__title-row">
+        <span class="topup-page__mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="M16 14h.01M3 10h18M7 6V4h12v2"/></svg></span>
+        <div>
+          <h1><%= catalogApiTopup ? 'เติมเงินสินค้า API' : 'เติมเงินเข้ากระเป๋า' %></h1>
+          <p class="topup-page__subtitle"><%= catalogApiTopup ? 'เติมยอดสำหรับสินค้าจากร้านหลัก' : 'เลือกช่องทางที่สะดวก แล้วทำรายการได้ที่นี่' %></p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <% if (catalogApiTopup) { %>
+    <div class="topup-page__api-layout">
+      <aside class="topup-page__api-note">
+        <h2>เติมเข้าบัญชีร้านหลัก <span style="color:var(--gold-text)"><%= settlementShopName %></span></h2>
+        <p>ยอดนี้แยกจากเงินเติมของร้านเช่า ใช้ซื้อสินค้าที่ส่งมาจากร้านหลักเท่านั้น โอนเข้าบัญชีด้านล่างแล้วแนบสลิปเพื่อให้ร้านตรวจสอบ</p>
+        <p class="topup-page__api-warning">ห้ามเติมเงินร้านเช่าแล้วนำมากดซื้อสินค้า API เพราะระบบใช้คนละกระเป๋า</p>
+        <% if (payment.bankName || payment.bankAccountNumber || payment.bankAccountName) { %>
+          <div class="topup-page__account">
+            <div><small>ธนาคาร</small><b><%= payment.bankName || '-' %></b></div>
+            <div><small>เลขบัญชี</small><b class="topup-account-number"><%= payment.bankAccountNumber || '-' %></b></div>
+            <div><small>ชื่อบัญชี</small><b><%= payment.bankAccountName || '-' %></b></div>
+          </div>
+        <% } %>
+        <% if (payment.bankQrImage) { %><div class="topup-page__qr"><img src="<%= payment.bankQrImage %>" alt="QR บัญชีร้านหลัก" /></div><% } %>
+      </aside>
+
+      <form action="/account/topup/catalog-api" method="post" class="topup-page__api-form">
+        <h2>ระบุยอดที่ต้องการเติม</h2>
+        <label class="block text-sm font-medium mb-3" for="amountInput">จำนวนเงิน (บาท)</label>
+        <div class="topup-page__amounts" id="amountPresets">
+          <% [100, 300, 500, 1000, 2000, 5000].forEach(v => { %><button type="button" data-amount="<%= v %>" class="topup-page__amount">฿<%= v.toLocaleString() %></button><% }) %>
+        </div>
+        <input type="text" inputmode="numeric" pattern="[0-9]*" name="amount" id="amountInput" required placeholder="หรือระบุยอดเอง (ขั้นต่ำ 1 บาท)" class="w-full rounded-xl border px-3.5 py-3 text-sm" />
+        <p id="amountError" class="hidden text-xs text-[var(--coral)] mt-2">กรุณาระบุจำนวนเงินเป็นตัวเลข อย่างน้อย 1 บาท</p>
+        <button class="topup-page__primary mt-5" type="submit">สร้างรายการเติมเงิน API <span aria-hidden="true">→</span></button>
+        <p class="topup-page__after-note">หลังร้านอนุมัติ ยอดจะเข้ากระเป๋าสินค้า API แยกต่างหากและใช้ซื้อสินค้า API ในร้านนี้ได้เท่านั้น</p>
+      </form>
+    </div>
+    <script>
+      document.querySelectorAll('#amountPresets .topup-page__amount').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var input = document.getElementById('amountInput');
+          if (input) input.value = btn.dataset.amount;
+          document.querySelectorAll('#amountPresets .topup-page__amount').forEach(function (item) { item.classList.toggle('is-selected', item === btn); });
+        });
+      });
+    </script>
+  <% } else { %>
+    <div class="topup-page__layout">
+      <aside class="topup-page__rail">
+        <h2>เลือกช่องทางชำระเงิน</h2>
+        <p class="topup-page__rail-copy">เลือกวิธีที่ต้องการ แล้วกรอกรายละเอียดในแบบฟอร์มด้านข้าง</p>
+        <div class="topup-page__channels" role="tablist" aria-label="ช่องทางเติมเงิน">
+          <button type="button" id="tabTruemoney" role="tab" aria-controls="sectionTruemoney" aria-selected="true" onclick="switchTab('truemoney')" class="topup-page__channel is-active">
+            <img src="/images/truemoney-wallet.jpg" alt="" />
+            <span class="topup-page__channel-label">ซองของขวัญ<small>TrueMoney Wallet</small></span>
+          </button>
+          <button type="button" id="tabBank" role="tab" aria-controls="sectionBank" aria-selected="false" onclick="switchTab('bank')" class="topup-page__channel">
+            <span class="topup-page__channel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-6 9 6M5 10h14M6 10v8m4-8v8m4-8v8m4-8v8M3 21h18M4 18h16"/></svg></span>
+            <span class="topup-page__channel-label">โอนธนาคาร<small>แนบสลิปในขั้นตอนถัดไป</small></span>
+          </button>
+        </div>
+        <p class="topup-page__hint">ตรวจสอบยอดและช่องทางให้ถูกต้องก่อนยืนยัน รายการโอนธนาคารจะให้แนบสลิปในหน้าถัดไป</p>
+      </aside>
+
+      <div class="topup-page__content">
+        <div id="sectionTruemoney" role="tabpanel" aria-labelledby="tabTruemoney" class="topup-page__panel">
+          <div class="topup-page__panel-head">
+            <img src="/images/truemoney-wallet.jpg" alt="" />
+            <div><h2>เติมเงินด้วยซองของขวัญ TrueMoney</h2><p>วางลิงก์ซองเพื่อส่งคำขอรับเงิน</p></div>
+          </div>
+          <% if (payment.truemoneyEnabled === false || !payment.truemoneyPhone) { %>
+            <div class="rounded-xl border border-amber-600/50 bg-amber-900/20 p-4 text-center text-xs text-amber-300">ระบบเติมเงินผ่านซองของขวัญ TrueMoney ยังไม่พร้อมใช้งาน กรุณาเลือกโอนผ่านธนาคาร</div>
+          <% } else { %>
+            <form action="/account/topup/truemoney" method="post" class="space-y-4">
+              <div>
+                <label class="mb-2 block text-xs font-medium" for="voucherLink">ลิงก์ซองของขวัญ TrueMoney</label>
+                <input type="text" name="voucherLink" id="voucherLink" required placeholder="https://gift.truemoney.com/campaign/?v=..." class="w-full rounded-xl border px-3.5 py-3 text-sm font-mono" />
+                <p class="mt-2 text-[11px] leading-relaxed text-[var(--text-3)]">สร้างซองของขวัญจากแอป TrueMoney เลือก <strong>แบ่งจำนวนเงินเท่ากัน</strong> และตั้งจำนวนคนรับเป็น <strong>1 คน</strong></p>
+              </div>
+              <button class="topup-page__primary" type="submit"><img src="/images/truemoney-wallet.jpg" alt="" /> ยืนยันรับเงินจากซองของขวัญ</button>
+            </form>
+            <details class="topup-page__helper">
+              <summary class="topup-page__helper-title" style="cursor:pointer">วิธีสร้างซองของขวัญ</summary>
+              <div>1. เปิดแอป <strong>TrueMoney</strong> แล้วเลือก “ส่งซองของขวัญ”<br />2. ใส่ยอดและเลือก “แบ่งจำนวนเงินเท่ากัน”<br />3. ตั้งจำนวนคนรับเป็น <strong>1 คน</strong> แล้วสร้างซอง<br />4. คัดลอกลิงก์มาวางในช่องด้านบน</div>
+            </details>
+          <% } %>
+        </div>
+
+        <div id="sectionBank" role="tabpanel" aria-labelledby="tabBank" class="hidden topup-page__panel">
+          <div class="topup-page__panel-head">
+            <span class="topup-page__channel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-6 9 6M5 10h14M6 10v8m4-8v8m4-8v8m4-8v8M3 21h18M4 18h16"/></svg></span>
+            <div><h2>เติมเงินด้วยการโอนธนาคาร</h2><p>ระบุยอด แล้วแนบหลักฐานในหน้าถัดไป</p></div>
+          </div>
+          <form action="/account/topup" method="post" class="space-y-5">
+            <div>
+              <label class="mb-3 block text-sm font-medium" for="amountInput">เลือกจำนวนเงิน (บาท)</label>
+              <div class="topup-page__amounts" id="amountPresets">
+                <% [100, 300, 500, 1000, 2000, 5000].forEach(v => { %><button type="button" data-amount="<%= v %>" class="topup-page__amount">฿<%= v.toLocaleString() %></button><% }) %>
+              </div>
+              <input type="text" inputmode="numeric" pattern="[0-9]*" name="amount" id="amountInput" placeholder="หรือระบุยอดเอง (ขั้นต่ำ 1 บาท)" class="w-full rounded-xl border px-3.5 py-3 text-sm" />
+              <p id="amountError" class="hidden mt-2 text-xs text-[var(--coral)]">กรุณาระบุจำนวนเงินเป็นตัวเลข อย่างน้อย 1 บาท</p>
+            </div>
+            <fieldset>
+              <legend class="mb-2.5 text-sm font-medium">ช่องทางชำระเงิน</legend>
+              <label class="method-option flex min-h-[62px] cursor-pointer items-center gap-3 rounded-xl border border-[var(--gold)] bg-[color-mix(in_srgb,var(--gold)_9%,var(--card))] px-4 py-3 transition-colors">
+                <input type="radio" name="method" value="bank_transfer" checked class="accent-[var(--gold)]" />
+                <span class="topup-page__channel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-6 9 6M5 10h14M6 10v8m4-8v8m4-8v8m4-8v8M3 21h18M4 18h16"/></svg></span>
+                <span class="text-sm font-medium">โอนผ่านธนาคาร</span>
+              </label>
+            </fieldset>
+            <button class="topup-page__primary" type="submit">ดำเนินการต่อ <span aria-hidden="true">→</span></button>
+          </form>
+          <div class="topup-page__helper">หลังโอนเงินแล้ว แนบสลิปในหน้าถัดไป ทีมงานจะตรวจสอบและอัปเดตสถานะคำขอให้</div>
+        </div>
+      </div>
+    </div>
+    <script>
+      function switchTab(tab) {
+        var isTrueMoney = tab === 'truemoney';
+        var tabTm = document.getElementById('tabTruemoney');
+        var tabBk = document.getElementById('tabBank');
+        var secTm = document.getElementById('sectionTruemoney');
+        var secBk = document.getElementById('sectionBank');
+        tabTm.classList.toggle('is-active', isTrueMoney);
+        tabBk.classList.toggle('is-active', !isTrueMoney);
+        tabTm.setAttribute('aria-selected', String(isTrueMoney));
+        tabBk.setAttribute('aria-selected', String(!isTrueMoney));
+        secTm.classList.toggle('hidden', !isTrueMoney);
+        secBk.classList.toggle('hidden', isTrueMoney);
+      }
+      document.querySelectorAll('.topup-page__amount').forEach(function (button) {
+        button.addEventListener('click', function () {
+          var form = button.closest('form');
+          var input = form && form.querySelector('input[name="amount"]');
+          var error = form && form.querySelector('#amountError');
+          if (input) input.value = button.dataset.amount;
+          if (error) error.classList.add('hidden');
+          var group = button.closest('.topup-page__amounts');
+          if (group) group.querySelectorAll('.topup-page__amount').forEach(function (item) { item.classList.toggle('is-selected', item === button); });
+        });
+      });
+      var bankForm = document.querySelector('#sectionBank form');
+      if (bankForm) {
+        var amountInput = bankForm.querySelector('input[name="amount"]');
+        var amountError = bankForm.querySelector('#amountError');
+        amountInput.addEventListener('input', function () {
+          var digitsOnly = amountInput.value.replace(/[^0-9]/g, '');
+          if (digitsOnly !== amountInput.value) amountInput.value = digitsOnly;
+          amountError.classList.add('hidden');
+        });
+        bankForm.addEventListener('submit', function (event) {
+          var amount = parseInt(amountInput.value, 10);
+          if (!amount || amount < 1) {
+            event.preventDefault();
+            amountError.classList.remove('hidden');
+            amountInput.focus();
+          }
+        });
+      }
+    </script>
+  <% } %>
+</section>
+
+<% } else { %>
 <section class="max-w-lg mx-auto px-4 py-10">
   <a href="/account" class="text-sm text-[var(--gold-text)] hover:text-[var(--gold-hover)]">← กลับไปหน้าบัญชี</a>
 
@@ -205,4 +438,6 @@
   }
   syncMethodOptions();
 </script>
+<% } %>
+
 <% } %>
