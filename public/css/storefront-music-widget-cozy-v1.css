@@ -65,10 +65,12 @@ body.storefront-owner-home-page #music-widget #music-settings-btn {
   color: var(--text-2) !important;
   background: var(--card) !important;
   box-shadow: 0 4px 13px color-mix(in srgb, var(--text) 10%, transparent) !important;
+  transform: none !important;
   transition: color .16s ease, border-color .16s ease, background-color .16s ease !important;
 }
 
 body.storefront-owner-home-page #music-widget #music-settings-btn:hover {
+  transform: none !important;
   color: var(--gold-text) !important;
   border-color: color-mix(in srgb, var(--gold) 50%, var(--border)) !important;
   background: color-mix(in srgb, var(--card) 84%, var(--gold-soft, #f4ead5)) !important;
