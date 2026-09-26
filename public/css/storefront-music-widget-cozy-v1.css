@@ -15,7 +15,7 @@ body.storefront-owner-home-page #music-widget {
   color-scheme: light;
   display: flex !important;
   align-items: center !important;
-  gap: 2px !important;
+  gap: 0 !important;
   padding: 4px !important;
   right: max(16px, env(safe-area-inset-right)) !important;
   bottom: max(16px, env(safe-area-inset-bottom)) !important;
@@ -32,7 +32,6 @@ body.storefront-owner-home-page #music-widget.is-playing {
 
 body.storefront-owner-home-page #music-widget #music-toggle-btn {
   position: relative !important;
-  order: 2;
   display: flex !important;
   align-items: center !important;
   justify-content: flex-start !important;
@@ -129,36 +128,6 @@ body.storefront-owner-home-page #music-widget #music-playing-ring {
   animation: none !important;
 }
 
-body.storefront-owner-home-page #music-widget #music-settings-btn {
-  position: relative !important;
-  inset: auto !important;
-  order: 1;
-  display: grid !important;
-  width: 44px !important;
-  height: 44px !important;
-  flex: 0 0 44px !important;
-  place-items: center !important;
-  border: 0 !important;
-  border-left: 1px solid var(--border) !important;
-  border-radius: 0 15px 15px 0 !important;
-  color: var(--text-2) !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  transform: none !important;
-  transition: color .16s ease, background-color .16s ease !important;
-}
-
-body.storefront-owner-home-page #music-widget #music-settings-btn:hover {
-  transform: none !important;
-  color: var(--gold-text) !important;
-  background: color-mix(in srgb, var(--gold) 8%, var(--card)) !important;
-}
-
-body.storefront-owner-home-page #music-widget #music-settings-btn svg {
-  width: 17px !important;
-  height: 17px !important;
-}
-
 body.storefront-owner-home-page #music-widget #music-panel {
   right: 0 !important;
   bottom: 64px !important;
@@ -186,8 +155,7 @@ body.storefront-owner-home-page #music-widget :is(button, input):focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.storefront-owner-home-page #music-widget #music-toggle-btn,
-  body.storefront-owner-home-page #music-widget #music-settings-btn {
+  body.storefront-owner-home-page #music-widget #music-toggle-btn {
     transition: none !important;
   }
 }

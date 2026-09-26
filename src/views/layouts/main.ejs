@@ -541,7 +541,9 @@
       <span id="music-playing-ring" class="hidden absolute inset-0 rounded-full border-2 border-[var(--gold)] animate-ping"></span>
       <% } %>
     </button>
+    <% if (!(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7)) { %>
     <button id="music-settings-btn" type="button" aria-label="ตั้งค่าเพลง" title="ระดับเสียงและข้อมูลเพลง" class="absolute -top-2 -left-2 z-20 w-7 h-7 rounded-full bg-[var(--input)] border border-[var(--border-light)] text-xs shadow-lg hover:border-[var(--gold)]"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.6 2.8-.2-.1a1.7 1.7 0 0 0-1.8.2l-.2.1h-3.2l-.1-.2a1.7 1.7 0 0 0-1.5-1l-.2.1-2.8-1.6.1-.2a1.7 1.7 0 0 0-.2-1.8l-.1-.2v-3.2l.2-.1a1.7 1.7 0 0 0 1-1.5l-.1-.2L11 7.3l.2.1a1.7 1.7 0 0 0 1.8-.2l.2-.1h3.2l.1.2a1.7 1.7 0 0 0 1.5 1l.2-.1 2.8 1.6-.1.2a1.7 1.7 0 0 0 .2 1.8l.1.2v3.2z" transform="translate(-3 -3) scale(1.25)"/></svg></button>
+    <% } %>
 
     <div id="music-panel" class="hidden absolute bottom-16 right-0 w-64 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden text-[var(--text)]">
       <div class="relative aspect-video bg-[#0c0a06]">
@@ -742,9 +744,11 @@
       toggleBtn.addEventListener('click', function () {
         requestPlayback(!isPlaying);
       });
-      settingsBtn.addEventListener('click', function () {
-        panel.classList.toggle('hidden');
-      });
+      if (settingsBtn) {
+        settingsBtn.addEventListener('click', function () {
+          panel.classList.toggle('hidden');
+        });
+      }
       collapseBtn.addEventListener('click', function () {
         panel.classList.add('hidden');
       });
