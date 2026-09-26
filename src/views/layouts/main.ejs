@@ -65,6 +65,7 @@
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-compact-v1.css') %>&amp;rev=1" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-mobile-v1.css') %>&amp;rev=2" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-new-arrivals-mobile-v2.css') %>&amp;rev=1" /><% } %>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-music-widget-cozy-v1.css') %>&amp;rev=1" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
 
