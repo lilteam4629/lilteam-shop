@@ -1,4 +1,4 @@
-/* A single, quiet music dock on the primary storefront homepage. */
+/* A small Now Playing dock for the primary storefront homepage. */
 body.storefront-owner-home-page #music-widget {
   --bg: #f4efdf;
   --card: #fbf7ed;
@@ -33,48 +33,99 @@ body.storefront-owner-home-page #music-widget.is-playing {
 body.storefront-owner-home-page #music-widget #music-toggle-btn {
   position: relative !important;
   order: 2;
-  width: 44px !important;
-  height: 44px !important;
-  flex: 0 0 44px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 9px !important;
+  width: auto !important;
+  min-width: 150px !important;
+  height: 52px !important;
+  padding: 4px 9px 4px 4px !important;
+  flex: 0 0 auto !important;
   border: 0 !important;
-  border-radius: 14px !important;
+  border-radius: 15px !important;
+  color: var(--text) !important;
   background: transparent !important;
   box-shadow: none !important;
-  transition: background-color .16s ease, transform .16s ease !important;
+  text-align: left !important;
+  transition: background-color .16s ease !important;
 }
 
 body.storefront-owner-home-page #music-widget #music-toggle-btn:hover {
-  transform: translateY(-1px) !important;
-  background: color-mix(in srgb, var(--gold) 9%, var(--card)) !important;
+  transform: none !important;
+  background: color-mix(in srgb, var(--gold) 8%, var(--card)) !important;
+}
+
+body.storefront-owner-home-page #music-widget .music-cover {
+  position: relative;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--gold) 18%, var(--border));
+  border-radius: 12px;
+  background: var(--input);
 }
 
 body.storefront-owner-home-page #music-widget #music-thumb {
-  opacity: .1 !important;
-  transform: scale(1.04) !important;
+  opacity: .88 !important;
+  transform: scale(1.02) !important;
 }
 
 body.storefront-owner-home-page #music-widget #music-icon {
+  position: absolute !important;
+  right: 2px;
+  bottom: 2px;
   display: grid !important;
-  width: 24px !important;
-  height: 24px !important;
+  width: 18px !important;
+  height: 18px !important;
   place-items: center !important;
+  border: 1px solid color-mix(in srgb, var(--gold) 18%, var(--border));
+  border-radius: 7px;
   color: var(--gold-text) !important;
-  font-size: 13px !important;
+  background: var(--card) !important;
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--text) 14%, transparent);
   line-height: 1 !important;
 }
 
 body.storefront-owner-home-page #music-widget #music-icon svg {
   display: block !important;
-  width: 21px !important;
-  height: 21px !important;
+  width: 12px !important;
+  height: 12px !important;
+}
+
+body.storefront-owner-home-page #music-widget .music-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  text-align: left;
+}
+
+body.storefront-owner-home-page #music-widget .music-copy strong {
+  overflow: hidden;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+body.storefront-owner-home-page #music-widget .music-copy small {
+  color: var(--text-2);
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1.3;
 }
 
 body.storefront-owner-home-page #music-widget.is-playing #music-icon {
-  color: var(--gold) !important;
+  color: var(--gold-text) !important;
 }
 
 body.storefront-owner-home-page #music-widget #music-playing-ring {
-  border: 1.5px solid color-mix(in srgb, var(--gold) 72%, transparent) !important;
+  border: 1.5px solid color-mix(in srgb, var(--gold) 68%, transparent) !important;
   animation: none !important;
 }
 
@@ -110,7 +161,7 @@ body.storefront-owner-home-page #music-widget #music-settings-btn svg {
 
 body.storefront-owner-home-page #music-widget #music-panel {
   right: 0 !important;
-  bottom: 58px !important;
+  bottom: 64px !important;
   width: min(280px, calc(100vw - 28px)) !important;
   border: 1px solid var(--border) !important;
   border-radius: 18px !important;
@@ -129,7 +180,7 @@ body.storefront-owner-home-page #music-widget :is(button, input):focus-visible {
   }
 
   body.storefront-owner-home-page #music-widget #music-panel {
-    bottom: 58px !important;
+    bottom: 64px !important;
     width: min(280px, calc(100vw - 24px)) !important;
   }
 }
