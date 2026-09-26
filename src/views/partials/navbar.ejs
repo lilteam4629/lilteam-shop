@@ -32,11 +32,11 @@
       <details class="store-nav__category">
         <summary class="store-nav__category-link" aria-label="เปิดเมนูหมวดหมู่"><svg><use href="#ui-grid"/></svg> หมวดหมู่ <span>⌄</span></summary>
         <div class="store-nav__category-menu<%= mainSiteNav ? ' store-nav__category-menu--main' : '' %>">
-          <% if (mainSiteNav) { const categoryMenuTags = typeof navFilterTags !== 'undefined' && Array.isArray(navFilterTags) ? navFilterTags : []; %>
+          <% const categoryMenuTags = typeof navFilterTags !== 'undefined' && Array.isArray(navFilterTags) ? navFilterTags : []; if (mainSiteNav) { %>
             <div class="store-nav__category-menu-head"><strong>เลือกหมวดหมู่</strong><span><%= categoryMenuTags.length %> หมวด</span></div>
           <% } %>
           <a href="/products" class="store-nav__category-all"><svg><use href="#ui-box"/></svg><span><b>สินค้าทั้งหมด</b><small>ดูสินค้าทุกประเภท</small></span></a>
-          <% (typeof navFilterTags !== 'undefined' ? navFilterTags : []).slice(0, 10).forEach(tag => { %>
+          <% (mainSiteNav ? categoryMenuTags : categoryMenuTags.slice(0, 10)).forEach(tag => { %>
             <a href="/products?tags=<%= encodeURIComponent(tag.id) %>" class="store-nav__category-item">
               <% if (tag.image) { %><img src="<%= tag.image %>" alt="" loading="lazy" /><% } else { %><i><svg><use href="#ui-tag"/></svg></i><% } %>
               <span><b><%= tag.name %></b></span>
