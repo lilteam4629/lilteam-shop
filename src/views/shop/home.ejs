@@ -53,7 +53,7 @@
 
 <% const ownerHomeV20 = typeof isMainSite !== 'undefined' && isMainSite; %>
 <% if (ownerHomeV20) { %>
-<div class="owner-home-v20-shell" data-owner-home-layout="media-storefront">
+<div class="owner-home-v20-shell" data-owner-home-layout="cozy-marketplace">
   <div class="owner-home-v20-main">
 <% } %>
 
@@ -168,6 +168,40 @@
   </div>
   <% } %>
 </section>
+<% } %>
+
+<% if (ownerHomeV20) { %>
+<section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
+  <div class="hud-bar relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
+    <div class="hud-bar-glow"></div>
+    <div class="hud-bar-scan"></div>
+    <span class="hud-icon hidden sm:flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[13px]">🕐</span>
+    <div class="flex-1 relative h-5 overflow-hidden min-w-0 z-[1]">
+      <span class="marquee-track flex items-center gap-2 font-mono tracking-tight"><span class="sm:hidden">🕐</span> <span data-storefront-preview-setting="openHours"><%= settings.openHours %></span> &nbsp;&nbsp;<span class="text-[var(--gold-text)]">◆</span>&nbsp;&nbsp; <span data-storefront-preview-setting="tagline"><%= settings.tagline %></span></span>
+    </div>
+    <span class="hud-status inline-flex items-center gap-1.5 shrink-0 ml-2 pl-2.5 pr-3 py-1 rounded-full text-[11px] font-bold text-emerald-300 z-[1]">
+      <span class="relative flex h-2 w-2 shrink-0">
+        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
+      </span>
+      เปิดให้บริการ
+    </span>
+  </div>
+</section>
+
+<% if (announcements.length) { %>
+<div class="store-announcements w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-2 space-y-2">
+  <% announcements.forEach(a => { %>
+    <div class="announce-hud relative flex items-start gap-3 rounded-xl px-4 py-3 text-[var(--text)] text-sm overflow-hidden">
+      <div class="announce-hud-glow"></div>
+      <span class="announce-hud-icon relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"><svg><use href="#ui-megaphone"/></svg></span>
+      <p class="relative z-[1] min-w-0 leading-relaxed"><b class="text-[var(--gold-text)]"><%= a.title %></b> — <%= a.body %></p>
+    </div>
+  <% }) %>
+</div>
+<% } %>
+
+
 <% } %>
 
 <% if (ownerHomeV20 && newest && newest.length) { %>
@@ -360,6 +394,8 @@
 }
 </style>
 
+
+<% if (!ownerHomeV20) { %>
 <section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
   <div class="hud-bar relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
     <div class="hud-bar-glow"></div>
@@ -388,6 +424,9 @@
     </div>
   <% }) %>
 </div>
+<% } %>
+
+
 <% } %>
 
 <style>
@@ -799,35 +838,71 @@
 </script>
 <% } %>
 
-<% if (latestOrders && latestOrders.length) { %>
-<% const isOwnerLatestRail = typeof isMainSite !== 'undefined' && isMainSite; %>
-<section class="latest-orders-section storefront-control-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-5" id="latest-orders" <%- isOwnerLatestRail ? 'data-latest-orders' : '' %>>
-  <div class="latest-orders-heading"><span class="latest-orders-heading-icon" aria-hidden="true"><svg><use href="#ui-clock"/></svg></span><div class="<%= isOwnerLatestRail ? 'latest-orders-heading-copy' : '' %>"><h2>รายการสั่งซื้อล่าสุด</h2><p><%= isOwnerLatestRail ? 'เลือกการ์ดเพื่อดูรายละเอียดสินค้า' : 'Latest order list' %></p></div></div>
-  <div class="latest-orders-shell" <%- isOwnerLatestRail ? 'id="latest-orders-rail" tabindex="0" aria-label="รายการสั่งซื้อล่าสุด เลื่อนดูได้"' : '' %>>
-    <div class="latest-orders-track">
-      <% for (let duplicate = 0; duplicate < (typeof isMainSite !== 'undefined' && isMainSite ? 1 : 2); duplicate++) { %>
-        <div class="latest-orders-group" <%- duplicate ? 'aria-hidden="true" inert' : '' %>>
-          <% latestOrders.forEach(order => { %>
-            <a href="<%= order.slug ? '/game/' + order.slug : '/products' %>" class="latest-order-card">
-              <span class="latest-order-image-wrap">
-                <% if (order.image) { %><img src="<%= order.image %>" alt="<%= order.title %>" class="latest-order-image" loading="lazy" decoding="async" /><% } else { %><svg><use href="#ui-box"/></svg><% } %>
-              </span>
-              <span class="min-w-0 flex-1<%- isOwnerLatestRail ? ' latest-order-copy' : '' %>">
-                <span class="block text-xs sm:text-sm font-semibold truncate text-[var(--text)]<%- isOwnerLatestRail ? ' latest-order-title' : '' %>"><%= order.title %><%= order.extraItems ? ' +' + order.extraItems + ' รายการ' : '' %></span>
-                <span class="block text-xs sm:text-sm font-bold text-[var(--gold-text)] mt-1<%- isOwnerLatestRail ? ' latest-order-amount' : '' %>">฿<%= order.amount.toLocaleString() %>.00</span>
-                <span class="flex items-center gap-1 text-[9px] sm:text-[10px] text-[var(--text-4)] mt-1 truncate<%- isOwnerLatestRail ? ' latest-order-meta' : '' %>">
-                  <svg><use href="#ui-clock"/></svg><%= new Date(order.createdAt).toLocaleString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %> <span>•</span> <%= order.buyer %>
-                </span>
-              </span>
-              <% if (isOwnerLatestRail) { %><svg class="latest-order-arrow" aria-hidden="true" viewBox="0 0 20 20" fill="none"><path d="m7 4 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><% } %>
-            </a>
-          <% }) %>
-        </div>
-      <% } %>
-    </div>
-  </div>
+<% if (!ownerHomeV20 && latestOrders && latestOrders.length) { %>
+  <%- include('../partials/latest-orders-rail', { latestOrders, isOwnerLatestRail: false }) %>
+<% } %><% if (filterTags && filterTags.length) { %>
+<section class="store-filter-section w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto pt-4">
+  <%- include('../partials/filter-panel', { filterTags }) %>
 </section>
+<% } %>
 
+<section id="home-catalog" class="store-product-gallery w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
+  <% if (homeSections.length) { %>
+    <% homeSections.forEach(section => { %>
+      <section id="home-section-<%= section.id %>" class="scroll-mt-28">
+      <%- include('../partials/section-hud-header', { icon: '✨', title: section.title, subtitle: '', href: null }) %>
+      <div class="product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4 mb-10">
+        <% section.products.forEach(p => { %><%- include('../partials/product-card', { p, ownerHomeProductCard: ownerHomeV20 }) %><% }) %>
+      </div>
+      </section>
+    <% }) %>
+  <% } else if (!products.length) { %>
+    <%- include('../partials/section-hud-header', { icon: '✨', title: 'เกมมาใหม่', subtitle: 'New Arrivals', href: null }) %>
+    <div class="product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4 mb-10">
+      <% [1,2,3,4,5].forEach(n => { %><%- include('../partials/example-product-card', { n }) %><% }) %>
+    </div>
+  <% } %>
+
+  <div class="home-catalog-head" id="catalog-search">
+    <div class="home-catalog-title"><span><svg><use href="#ui-box"/></svg></span><div><h2>สินค้าทั้งหมด</h2><p>All Products&nbsp; • &nbsp;<%= productTotal %> รายการ</p></div></div>
+    <label class="home-catalog-search"><svg><use href="#ui-search"/></svg><input id="homeCatalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off"></label>
+    <div class="home-catalog-filters" aria-label="กรองสินค้า"><button type="button" class="is-active" data-home-stock="all">ทั้งหมด</button><button type="button" data-home-stock="available"><i></i> พร้อมขาย</button><button type="button" data-home-stock="sold"><i></i> สินค้าหมด</button></div>
+  </div>
+  <div class="all-products-grid product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4">
+    <% if (products.length) { %>
+      <% products.forEach(p => { %><%- include('../partials/product-card', { p, ownerHomeProductCard: ownerHomeV20 }) %><% }) %>
+    <% } else { %>
+      <% [1,2,3,4,5].forEach(n => { %><%- include('../partials/example-product-card', { n }) %><% }) %>
+    <% } %>
+  </div>
+  <% if (products.length) { %>
+    <p class="text-center text-[var(--text-4)] text-xs mt-6">
+      หน้า <%= productPage %> จาก <%= productTotalPages %> &nbsp;•&nbsp; แสดง <%= products.length %> จากทั้งหมด <%= productTotal %> รายการ
+    </p>
+    <% if (productTotalPages > 1) { %>
+      <div class="flex items-center justify-center gap-1.5 mt-3 flex-wrap">
+        <% const pageHref = (p) => '/?page=' + p; %>
+        <a href="<%= pageHref(Math.max(1, productPage - 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] text-xs <%= productPage <= 1 ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">‹ ก่อนหน้า</a>
+        <% for (let p = 1; p <= productTotalPages; p++) { %>
+          <% if (p === 1 || p === productTotalPages || Math.abs(p - productPage) <= 1) { %>
+            <a href="<%= pageHref(p) %>" class="w-8 h-8 grid place-items-center rounded-lg border text-xs transition <%= p === productPage ? 'border-[var(--gold)] bg-[var(--gold)] text-[var(--gold-contrast)] font-bold' : 'border-[var(--border-light)] hover:border-[var(--gold)]' %>"><%= p %></a>
+          <% } else if (p === 2 || p === productTotalPages - 1) { %>
+            <span class="text-[var(--text-4)] text-xs px-1">…</span>
+          <% } %>
+        <% } %>
+        <a href="<%= pageHref(Math.min(productTotalPages, productPage + 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] text-xs <%= productPage >= productTotalPages ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">ถัดไป ›</a>
+      </div>
+    <% } %>
+  <% } else { %>
+    <p class="text-center text-[var(--text-4)] text-xs mt-6">ยังไม่มีสินค้า — เพิ่มสินค้าได้ที่หน้าแอดมิน (รูปด้านบนเป็นแค่ตัวอย่าง)</p>
+  <% } %>
+</section>
+<script>(function(){const grid=document.querySelector('.all-products-grid'),search=document.getElementById('homeCatalogSearch'),buttons=[...document.querySelectorAll('[data-home-stock]')];if(!grid)return;let stock='all';const cards=[...grid.querySelectorAll('.filterable-card')];function apply(){const term=(search?.value||'').trim().toLocaleLowerCase('th-TH');cards.forEach(card=>{const matchesText=!term||(card.dataset.title||'').toLocaleLowerCase('th-TH').includes(term);const matchesStock=stock==='all'||card.dataset.stock===stock;card.toggleAttribute('hidden',!(matchesText&&matchesStock));});}search?.addEventListener('input',apply);buttons.forEach(button=>button.addEventListener('click',()=>{stock=button.dataset.homeStock||'all';buttons.forEach(item=>{const active=item===button;item.classList.toggle('is-active',active);item.setAttribute('aria-pressed',String(active));});apply();}));buttons.forEach(item=>item.setAttribute('aria-pressed',String(item.classList.contains('is-active'))));apply();})();</script>
+
+<% if (ownerHomeV20 && latestOrders && latestOrders.length) { %>
+  <%- include('../partials/latest-orders-rail', { latestOrders, isOwnerLatestRail: true }) %>
+<% } %>
+<% if (latestOrders && latestOrders.length) { %>
 <style>
   .latest-orders-heading{display:flex;align-items:flex-start;gap:11px;margin-bottom:14px}.latest-orders-heading-icon{display:grid;place-items:center;width:36px;height:36px;flex:none;border:1px solid var(--border-light);border-radius:9px;background:var(--card);color:var(--text-2)}.latest-orders-heading-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8}.latest-orders-heading h2{color:var(--text);font-size:19px!important;font-weight:800;line-height:1.15}.latest-orders-heading p{margin-top:5px;color:var(--text-4);font-size:11px}
   .latest-orders-shell {
@@ -893,64 +968,6 @@
   }
 </style>
 <% } %>
-<% if (filterTags && filterTags.length) { %>
-<section class="store-filter-section w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto pt-4">
-  <%- include('../partials/filter-panel', { filterTags }) %>
-</section>
-<% } %>
-
-<section id="home-catalog" class="store-product-gallery w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-8">
-  <% if (homeSections.length) { %>
-    <% homeSections.forEach(section => { %>
-      <section id="home-section-<%= section.id %>" class="scroll-mt-28">
-      <%- include('../partials/section-hud-header', { icon: '✨', title: section.title, subtitle: '', href: null }) %>
-      <div class="product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4 mb-10">
-        <% section.products.forEach(p => { %><%- include('../partials/product-card', { p, ownerHomeProductCard: ownerHomeV20 }) %><% }) %>
-      </div>
-      </section>
-    <% }) %>
-  <% } else if (!products.length) { %>
-    <%- include('../partials/section-hud-header', { icon: '✨', title: 'เกมมาใหม่', subtitle: 'New Arrivals', href: null }) %>
-    <div class="product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4 mb-10">
-      <% [1,2,3,4,5].forEach(n => { %><%- include('../partials/example-product-card', { n }) %><% }) %>
-    </div>
-  <% } %>
-
-  <div class="home-catalog-head" id="catalog-search">
-    <div class="home-catalog-title"><span><svg><use href="#ui-box"/></svg></span><div><h2>สินค้าทั้งหมด</h2><p>All Products&nbsp; • &nbsp;<%= productTotal %> รายการ</p></div></div>
-    <label class="home-catalog-search"><svg><use href="#ui-search"/></svg><input id="homeCatalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off"></label>
-    <div class="home-catalog-filters" aria-label="กรองสินค้า"><button type="button" class="is-active" data-home-stock="all">ทั้งหมด</button><button type="button" data-home-stock="available"><i></i> พร้อมขาย</button><button type="button" data-home-stock="sold"><i></i> สินค้าหมด</button></div>
-  </div>
-  <div class="all-products-grid product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-5 gap-1 sm:gap-4">
-    <% if (products.length) { %>
-      <% products.forEach(p => { %><%- include('../partials/product-card', { p, ownerHomeProductCard: ownerHomeV20 }) %><% }) %>
-    <% } else { %>
-      <% [1,2,3,4,5].forEach(n => { %><%- include('../partials/example-product-card', { n }) %><% }) %>
-    <% } %>
-  </div>
-  <% if (products.length) { %>
-    <p class="text-center text-[var(--text-4)] text-xs mt-6">
-      หน้า <%= productPage %> จาก <%= productTotalPages %> &nbsp;•&nbsp; แสดง <%= products.length %> จากทั้งหมด <%= productTotal %> รายการ
-    </p>
-    <% if (productTotalPages > 1) { %>
-      <div class="flex items-center justify-center gap-1.5 mt-3 flex-wrap">
-        <% const pageHref = (p) => '/?page=' + p; %>
-        <a href="<%= pageHref(Math.max(1, productPage - 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] text-xs <%= productPage <= 1 ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">‹ ก่อนหน้า</a>
-        <% for (let p = 1; p <= productTotalPages; p++) { %>
-          <% if (p === 1 || p === productTotalPages || Math.abs(p - productPage) <= 1) { %>
-            <a href="<%= pageHref(p) %>" class="w-8 h-8 grid place-items-center rounded-lg border text-xs transition <%= p === productPage ? 'border-[var(--gold)] bg-[var(--gold)] text-[var(--gold-contrast)] font-bold' : 'border-[var(--border-light)] hover:border-[var(--gold)]' %>"><%= p %></a>
-          <% } else if (p === 2 || p === productTotalPages - 1) { %>
-            <span class="text-[var(--text-4)] text-xs px-1">…</span>
-          <% } %>
-        <% } %>
-        <a href="<%= pageHref(Math.min(productTotalPages, productPage + 1)) %>" class="px-3 py-1.5 rounded-lg border border-[var(--border-light)] text-xs <%= productPage >= productTotalPages ? 'opacity-40 pointer-events-none' : 'hover:border-[var(--gold)]' %> transition">ถัดไป ›</a>
-      </div>
-    <% } %>
-  <% } else { %>
-    <p class="text-center text-[var(--text-4)] text-xs mt-6">ยังไม่มีสินค้า — เพิ่มสินค้าได้ที่หน้าแอดมิน (รูปด้านบนเป็นแค่ตัวอย่าง)</p>
-  <% } %>
-</section>
-<script>(function(){const grid=document.querySelector('.all-products-grid'),search=document.getElementById('homeCatalogSearch'),buttons=[...document.querySelectorAll('[data-home-stock]')];if(!grid)return;let stock='all';const cards=[...grid.querySelectorAll('.filterable-card')];function apply(){const term=(search?.value||'').trim().toLocaleLowerCase('th-TH');cards.forEach(card=>{const matchesText=!term||(card.dataset.title||'').toLocaleLowerCase('th-TH').includes(term);const matchesStock=stock==='all'||card.dataset.stock===stock;card.toggleAttribute('hidden',!(matchesText&&matchesStock));});}search?.addEventListener('input',apply);buttons.forEach(button=>button.addEventListener('click',()=>{stock=button.dataset.homeStock||'all';buttons.forEach(item=>{const active=item===button;item.classList.toggle('is-active',active);item.setAttribute('aria-pressed',String(active));});apply();}));buttons.forEach(item=>item.setAttribute('aria-pressed',String(item.classList.contains('is-active'))));apply();})();</script>
 
 <% if (ownerHomeV20) { %></div></div><% } %>
 

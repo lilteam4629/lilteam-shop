@@ -14,6 +14,7 @@ const css = read('public/css/storefront-owner-home-v7.css');
 const redesignCss = read('public/css/storefront-owner-home-v14.css');
 const gameWorldCss = read('public/css/storefront-owner-home-v15.css');
 const cinematicCss = read('public/css/storefront-owner-home-v20.css');
+const cozyCss = read('public/css/storefront-home-cozy-v1.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
   'the redesign must be enabled for the main store only');
@@ -25,13 +26,15 @@ assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && store
   'the new media-storefront stylesheet must only load on the owner storefront');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v21\.css/,
   'the new readable product-card layer must only load on the owner storefront');
+assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
+  'the cozy homepage layer must only load on the main storefront');
 assert.doesNotMatch(layout, /storefront-owner-home-v18\.css/,
   'the superseded split hero styling must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,
   'the replaced 3D scene stylesheet and script must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
   'the rejected oversized banner treatment must no longer load');
-assert.match(home, /if \(ownerHomeV20\) \{[\s\S]*?<div class="owner-home-v20-shell" data-owner-home-layout="media-storefront">[\s\S]*?<div class="owner-home-v20-main">/,
+assert.match(home, /if \(ownerHomeV20\) \{[\s\S]*?<div class="owner-home-v20-shell" data-owner-home-layout="cozy-marketplace">[\s\S]*?<div class="owner-home-v20-main">/,
   'the full-width content layout must be wrapped only for the main store');
 assert.doesNotMatch(home, /owner-home-v20-sidebar|owner-home-v20-nav/,
   'the removed main-store sidebar must not render or remain as dead navigation');
@@ -43,8 +46,10 @@ assert.match(home, /class="owner-home-v20-artwork"[\s\S]*?<a href="<%= settings\
   'the uploaded banner must remain visible and load with high priority');
 assert.match(home, /recommendedCategories\.forEach\(category => \{[\s\S]*?class="home-category-card" href="\/products\?recommended=<%= encodeURIComponent\(category\.id\) %>/,
   'real shop categories must remain available in the homepage category rail');
-assert.match(home, /id="latest-orders"[\s\S]*?latestOrders\.forEach\(order => \{/,
-  'the main homepage order rail must use live order data');
+assert.match(home, /include\('\.\.\/partials\/latest-orders-rail', \{ latestOrders, isOwnerLatestRail: true \}\)/,
+  'the main homepage order rail must use its shared live-data partial');
+assert.match(read('src/views/partials/latest-orders-rail.ejs'), /latestOrders\.forEach\(order => \{/,
+  'the shared order rail must render live order data');
 assert.match(home, /newest\.slice\(0, 6\)\.forEach\(\(product, index\) => \{/,
   'the new horizontal shelf must render actual newest products, not reference/demo items');
 assert.equal((home.match(/ownerHomeProductCard: ownerHomeV20/g) || []).length, 2,
@@ -71,7 +76,7 @@ assert.doesNotMatch(home, /storefront-banner-index/,
   'the rejected side rail must not render around the main-store banner');
 assert.match(layout, /id="site-page-shell"[^\n]*storefrontOwnerHomeV7/,
   'the homepage scope must travel with the replaceable page shell');
-assert.match(home, /duplicate < \(typeof isMainSite !== 'undefined' && isMainSite \? 1 : 2\)/,
+assert.match(read('src/views/partials/latest-orders-rail.ejs'), /duplicate < \(isOwnerLatestRail \? 1 : 2\)/,
   'only the main store may change the duplicated order-carousel item count');
 
 const stylesheet = postcss.parse(css, { from: 'storefront-owner-home-v7.css' });
@@ -179,6 +184,19 @@ assert.doesNotMatch(cinematicCss, /--(?:gold|bg|card|input|border|text):\s*#[0-9
 assert.match(cinematicCss, /body:has\(#site-page-shell\.storefront-owner-home-v7\s+\.owner-home-v20-shell\)/,
   'the navigation theme must only change when the main homepage is active');
 assert.ok(cinematicRuleCount > 0, 'the media-storefront design must include scoped owner-only rules');
+
+const cozyStylesheet = postcss.parse(cozyCss, { from: 'storefront-home-cozy-v1.css' });
+let cozyRuleCount = 0;
+cozyStylesheet.walkRules(rule => {
+  cozyRuleCount += 1;
+  for (const selector of rule.selectors) {
+    assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7') && selector.includes('[data-owner-home-layout="cozy-marketplace"]'),
+      `cozy homepage selector must be isolated to the main-store layout: ${selector}`);
+  }
+});
+assert.match(cozyCss, /@media \(max-width: 640px\)/, 'the cozy layout must adapt to phone widths');
+assert.match(cozyCss, /prefers-reduced-motion: reduce/, 'the cozy layout must respect reduced-motion settings');
+assert.ok(cozyRuleCount > 0, 'the cozy marketplace layout should contain owner-only rules');
 
 const productCardCss = read('public/css/storefront-owner-home-v21.css');
 const productCardStylesheet = postcss.parse(productCardCss, { from: 'storefront-owner-home-v21.css' });

@@ -1,0 +1,26 @@
+<section class="latest-orders-section storefront-control-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto pt-5" id="latest-orders" <%- isOwnerLatestRail ? 'data-latest-orders' : '' %>>
+  <div class="latest-orders-heading"><span class="latest-orders-heading-icon" aria-hidden="true"><svg><use href="#ui-clock"/></svg></span><div class="<%= isOwnerLatestRail ? 'latest-orders-heading-copy' : '' %>"><h2>รายการสั่งซื้อล่าสุด</h2><p><%= isOwnerLatestRail ? 'เลือกการ์ดเพื่อดูรายละเอียดสินค้า' : 'Latest order list' %></p></div></div>
+  <div class="latest-orders-shell" <%- isOwnerLatestRail ? 'id="latest-orders-rail" tabindex="0" aria-label="รายการสั่งซื้อล่าสุด เลื่อนดูได้"' : '' %>>
+    <div class="latest-orders-track">
+      <% for (let duplicate = 0; duplicate < (isOwnerLatestRail ? 1 : 2); duplicate++) { %>
+        <div class="latest-orders-group" <%- duplicate ? 'aria-hidden="true" inert' : '' %>>
+          <% latestOrders.forEach(order => { %>
+            <a href="<%= order.slug ? '/game/' + order.slug : '/products' %>" class="latest-order-card">
+              <span class="latest-order-image-wrap">
+                <% if (order.image) { %><img src="<%= order.image %>" alt="<%= order.title %>" class="latest-order-image" loading="lazy" decoding="async" /><% } else { %><svg><use href="#ui-box"/></svg><% } %>
+              </span>
+              <span class="min-w-0 flex-1<%- isOwnerLatestRail ? ' latest-order-copy' : '' %>">
+                <span class="block text-xs sm:text-sm font-semibold truncate text-[var(--text)]<%- isOwnerLatestRail ? ' latest-order-title' : '' %>"><%= order.title %><%= order.extraItems ? ' +' + order.extraItems + ' รายการ' : '' %></span>
+                <span class="block text-xs sm:text-sm font-bold text-[var(--gold-text)] mt-1<%- isOwnerLatestRail ? ' latest-order-amount' : '' %>">฿<%= order.amount.toLocaleString() %>.00</span>
+                <span class="flex items-center gap-1 text-[9px] sm:text-[10px] text-[var(--text-4)] mt-1 truncate<%- isOwnerLatestRail ? ' latest-order-meta' : '' %>">
+                  <svg><use href="#ui-clock"/></svg><%= new Date(order.createdAt).toLocaleString('th-TH', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %> <span>•</span> <%= order.buyer %>
+                </span>
+              </span>
+              <% if (isOwnerLatestRail) { %><svg class="latest-order-arrow" aria-hidden="true" viewBox="0 0 20 20" fill="none"><path d="m7 4 6 6-6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><% } %>
+            </a>
+          <% }) %>
+        </div>
+      <% } %>
+    </div>
+  </div>
+</section>
