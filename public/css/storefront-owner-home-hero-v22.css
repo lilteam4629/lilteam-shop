@@ -133,7 +133,7 @@
   max-height: none;
   object-fit: contain;
   object-position: center;
-  filter: drop-shadow(0 18px 26px color-mix(in srgb, var(--text) 13%, transparent));
+  filter: none;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero .owner-home-v20-artwork > a:focus-visible {

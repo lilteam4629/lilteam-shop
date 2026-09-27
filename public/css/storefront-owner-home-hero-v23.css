@@ -22,44 +22,28 @@
   border-radius: clamp(17px, 2vw, 25px);
   background: linear-gradient(145deg, color-mix(in srgb, var(--card) 82%, var(--gold)), var(--card) 45%, color-mix(in srgb, var(--input) 78%, var(--gold)));
   box-shadow: 0 28px 48px -25px rgba(0,0,0,.65), 0 12px 35px -25px color-mix(in srgb, var(--gold) 70%, transparent), inset 0 1px rgba(255,255,255,.42);
-  transform: perspective(1350px) rotateY(-6deg) rotateX(2deg) translateZ(0);
-  transform-style: preserve-3d;
-  animation: owner-home-v23-banner-float 8s ease-in-out infinite;
-  transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease, border-color .25s ease;
+  /* Keep the configured store art on a flat compositing layer. Continuous
+     3D transforms and blurred pseudo-elements produced black paint artifacts
+     on mobile Chromium/WebKit and some desktop GPU drivers. */
+  transform: none;
+  animation: none;
+  transition: box-shadow .25s ease, border-color .25s ease;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight)::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 10% 5% -9% 8%;
-  border-radius: inherit;
-  background: color-mix(in srgb, var(--gold) 35%, transparent);
-  filter: blur(28px);
-  opacity: .42;
-  transform: translateZ(-24px);
-  pointer-events: none;
+  content: none;
+  display: none;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight)::after {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  inset: 8px;
-  border: 1px solid rgba(255,255,255,.18);
-  border-radius: clamp(11px, 1.4vw, 17px);
-  background: linear-gradient(118deg, transparent 34%, rgba(255,255,255,.2) 48%, transparent 59%);
-  background-size: 220% 100%;
-  background-position: 130% 0;
-  animation: owner-home-v23-banner-glint 8s ease-in-out infinite;
-  pointer-events: none;
+  content: none;
+  display: none;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight):hover {
   border-color: var(--gold-text);
   box-shadow: 0 34px 58px -25px rgba(0,0,0,.68), 0 15px 42px -24px color-mix(in srgb, var(--gold) 82%, transparent), inset 0 1px rgba(255,255,255,.5);
-  transform: perspective(1350px) rotateY(-1deg) rotateX(0) translateY(-5px);
-  animation-play-state: paused;
+  transform: translateY(-2px);
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) > img,
@@ -70,7 +54,7 @@
   border: 1px solid color-mix(in srgb, var(--border) 75%, transparent);
   border-radius: clamp(11px, 1.4vw, 17px);
   box-shadow: 0 14px 28px -20px rgba(0,0,0,.68);
-  transform: translateZ(13px);
+  transform: none;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) > a:focus-visible {
@@ -85,16 +69,6 @@
   border-color: color-mix(in srgb, var(--gold) 30%, var(--border));
   border-radius: 999px;
   box-shadow: 0 8px 20px rgba(0,0,0,.22);
-}
-
-@keyframes owner-home-v23-banner-glint {
-  0%, 22% { background-position: 130% 0; }
-  52%, 100% { background-position: -130% 0; }
-}
-
-@keyframes owner-home-v23-banner-float {
-  0%, 100% { transform: perspective(1350px) rotateY(-6deg) rotateX(2deg) translateY(0); }
-  50% { transform: perspective(1350px) rotateY(-3deg) rotateX(1deg) translateY(-7px); }
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork.owner-home-v23-spotlight {
@@ -115,15 +89,15 @@
   color: #fff;
   text-decoration: none;
   box-shadow: 0 19px 35px -20px rgba(0, 0, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .13);
-  transform: perspective(1000px) rotateY(-3deg) rotateX(1deg);
-  transition: transform .24s cubic-bezier(.16, 1, .3, 1), box-shadow .24s ease, border-color .2s ease;
+  transform: none;
+  transition: box-shadow .24s ease, border-color .2s ease;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork.owner-home-v23-spotlight:hover,
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork.owner-home-v23-spotlight:focus-visible {
   border-color: var(--gold);
   box-shadow: 0 25px 42px -20px rgba(0, 0, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .18);
-  transform: perspective(1000px) rotateY(0) rotateX(0) translateY(-3px);
+  transform: translateY(-2px);
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork.owner-home-v23-spotlight:focus-visible {
@@ -196,7 +170,7 @@
   height: 100%;
   max-height: 216px;
   object-fit: contain;
-  transform: translateZ(12px);
+  transform: none;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v23-spotlight-fallback {
@@ -248,8 +222,8 @@
 
 @media (max-width: 860px) {
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) {
-    transform: perspective(1200px) rotateY(-3deg) rotateX(1deg);
-    animation-duration: 10s;
+    transform: none;
+    animation: none;
   }
 
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero .owner-home-v20-artwork.owner-home-v23-spotlight {

@@ -15,6 +15,8 @@ const redesignCss = read('public/css/storefront-owner-home-v14.css');
 const gameWorldCss = read('public/css/storefront-owner-home-v15.css');
 const cinematicCss = read('public/css/storefront-owner-home-v20.css');
 const cozyCss = read('public/css/storefront-home-cozy-v1.css');
+const ownerHeroFxCss = read('public/css/storefront-owner-home-hero-v23.css');
+const ownerHeroLayoutCss = read('public/css/storefront-owner-home-hero-v22.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
   'the redesign must be enabled for the main store only');
@@ -26,6 +28,8 @@ assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && store
   'the new media-storefront stylesheet must only load on the owner storefront');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v21\.css/,
   'the new readable product-card layer must only load on the owner storefront');
+assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-owner-home-hero-v23\.css[^\n]*rev=2/,
+  'the safe hero rendering stylesheet must be cache-busted for the main store only');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
   'the cozy homepage layer must only load on the main storefront');
 assert.doesNotMatch(layout, /storefront-owner-home-v18\.css/,
@@ -40,6 +44,16 @@ assert.doesNotMatch(home, /owner-home-v20-sidebar|owner-home-v20-nav/,
   'the removed main-store sidebar must not render or remain as dead navigation');
 assert.match(home, /if \(ownerHomeV20\) \{ %><\/div><\/div><% \}/,
   'the main-store content wrapper must close before shared lower page modules');
+assert.doesNotMatch(ownerHeroFxCss, /perspective\s*\(|rotate[XYZ]\s*\(|translateZ\s*\(|filter\s*:\s*blur\s*\(/i,
+  'the main hero must avoid 3D transforms and blurred compositor layers that paint as black shapes on some mobile GPUs');
+assert.doesNotMatch(ownerHeroFxCss, /owner-home-v23-banner-(?:float|glint)[^}]*infinite|animation:[^;}]*owner-home-v23-banner-(?:float|glint)/i,
+  'the main hero must not keep GPU-heavy banner animations running continuously');
+assert.match(ownerHeroFxCss, /owner-home-v20-artwork:not\(\.owner-home-v23-spotlight\)\s*\{[^}]*transform:\s*none;[^}]*animation:\s*none;/,
+  'the configured banner must keep a stable, flat rendering layer');
+assert.match(ownerHeroFxCss, /owner-home-v20-artwork:not\(\.owner-home-v23-spotlight\)::before\s*\{[^}]*content:\s*none;[^}]*display:\s*none;/,
+  'the blurred banner underlay that can turn into a black disk must stay removed');
+assert.match(ownerHeroLayoutCss, /\.owner-home-v20-artwork img\s*\{[^}]*filter:\s*none;/,
+  'the main banner image must not create a filtered GPU layer');
 assert.match(home, /ownerHomeV20\) \{ %>[\s\S]*?ownerHomeBanner = settings\.hero && settings\.hero\.mode === 'banner' \? settings\.hero\.bannerImage : null/,
   'the new banner-first hero must use the configured real shop banner');
 assert.match(home, /class="owner-home-v20-artwork"[\s\S]*?<a href="<%= settings\.hero\.bannerLink %>" aria-label=[\s\S]*?<img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high"/,
@@ -233,10 +247,10 @@ heroV23Stylesheet.walkRules(rule => {
       `new homepage hero styling could leak to a rental storefront: ${selector}`);
   }
 });
-assert.match(heroV23Css, /owner-home-v23-hero:not\(\.owner-home-v20-hero--no-art\).*owner-home-v20-artwork:not\(\.owner-home-v23-spotlight\)[\s\S]*?rotateY\(-6deg\)/,
-  'the configured banner must receive the new 3D treatment too');
-assert.match(heroV23Css, /owner-home-v23-banner-float[\s\S]*?prefers-reduced-motion:\s*reduce/,
-  'the 3D banner motion must respect reduced-motion preferences');
+assert.match(heroV23Css, /owner-home-v23-hero:not\(\.owner-home-v20-hero--no-art\).*owner-home-v20-artwork:not\(\.owner-home-v23-spotlight\)[\s\S]*?transform:\s*none;/,
+  'the configured banner must remain in the stable flat treatment');
+assert.doesNotMatch(heroV23Css, /owner-home-v23-banner-float|owner-home-v23-banner-glint/,
+  'the retired 3D banner animations must not remain in the hero stylesheet');
 assert.ok(heroV23RuleCount > 0, 'the v23 hero layer must have owner-home scoped rules');
 
 const mainProductCssStart = ownerBaseCss.indexOf('/* Main-store product cards:');
