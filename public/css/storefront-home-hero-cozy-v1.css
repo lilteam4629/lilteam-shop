@@ -72,7 +72,7 @@
   font-weight: 800 !important;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero--banner .owner-home-v20-hours {
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero .owner-home-v20-hours {
   display: inline-flex !important;
   align-items: center !important;
   gap: 11px !important;
@@ -88,13 +88,13 @@
   box-shadow: 0 5px 16px -14px color-mix(in srgb, var(--gold-dark) 45%, transparent) !important;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero--banner .owner-home-v20-hours::before,
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero--banner .owner-home-v20-hours > span::before {
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero .owner-home-v20-hours::before,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero .owner-home-v20-hours > span::before {
   display: none !important;
   content: none !important;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero--banner .owner-home-v20-hours > svg {
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero .owner-home-v20-hours > svg {
   flex: 0 0 19px;
   width: 19px;
   height: 19px;
@@ -105,20 +105,20 @@
   stroke-width: 1.7;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero--banner .owner-home-v20-hours-copy {
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero .owner-home-v20-hours-copy {
   display: grid !important;
   gap: 2px !important;
   color: var(--text) !important;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero--banner .owner-home-v20-hours-copy small {
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero .owner-home-v20-hours-copy small {
   color: var(--text-3) !important;
   font-size: 9px !important;
   font-weight: 650 !important;
   letter-spacing: .025em;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero--banner .owner-home-v20-hours-copy strong {
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-hero .owner-home-v20-hours-copy strong {
   color: var(--gold-text) !important;
   font-size: 15px !important;
   font-weight: 800 !important;
@@ -271,13 +271,13 @@
     font-size: 10px !important;
   }
 
-  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v20-hero--banner .owner-home-v20-hours {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v20-hero .owner-home-v20-hours {
     gap: 10px !important;
     margin-top: 13px !important;
     padding: 9px 13px !important;
   }
 
-  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v20-hero--banner .owner-home-v20-hours-copy strong {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v20-hero .owner-home-v20-hours-copy strong {
     font-size: 14px !important;
   }
 
@@ -323,5 +323,128 @@
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-artwork img,
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-actions a {
     transition: none !important;
+  }
+}
+
+/* A real item keeps the welcome area useful when the shop has no hero banner. */
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--banner):not(.owner-home-v20-hero--no-art) {
+  grid-template-columns: minmax(0, .9fr) minmax(300px, 1.1fr) !important;
+  grid-auto-rows: max-content !important;
+  align-items: center !important;
+  gap: clamp(24px, 4vw, 56px) !important;
+  min-height: 0 !important;
+  padding: clamp(26px, 4vw, 48px) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--banner):not(.owner-home-v20-hero--no-art) .owner-home-v20-hero-content {
+  align-self: center !important;
+  grid-column: 1 !important;
+  grid-row: 1 !important;
+  max-width: 36rem !important;
+  padding: 0 !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero .owner-home-cozy-spotlight {
+  min-height: 290px !important;
+  padding: 13px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 18px !important;
+  background: var(--card) !important;
+  color: var(--text) !important;
+  box-shadow: 0 16px 34px -27px color-mix(in srgb, var(--text) 38%, transparent) !important;
+  transform: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero .owner-home-cozy-spotlight:hover,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero .owner-home-cozy-spotlight:focus-visible {
+  border-color: color-mix(in srgb, var(--gold) 65%, var(--border)) !important;
+  box-shadow: 0 20px 36px -25px color-mix(in srgb, var(--text) 45%, transparent) !important;
+  transform: translateY(-2px) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-head > span:first-child {
+  color: var(--text-3) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-image {
+  min-height: 150px !important;
+  border-color: var(--border-light) !important;
+  border-radius: 12px !important;
+  background: color-mix(in srgb, var(--gold) 7%, var(--input)) !important;
+  box-shadow: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-image img {
+  max-height: 210px !important;
+  transform: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-details strong {
+  color: var(--text) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-details small,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-price small {
+  color: var(--text-3) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-price strong {
+  color: var(--gold-text) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-fallback {
+  border-color: var(--border) !important;
+  color: var(--gold-text) !important;
+}
+
+@media (max-width: 640px) {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--banner):not(.owner-home-v20-hero--no-art) {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 15px !important;
+    padding: 17px !important;
+    border-radius: 16px !important;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero .owner-home-cozy-spotlight {
+    display: grid !important;
+    grid-template-columns: minmax(92px, .78fr) minmax(0, 1.22fr) !important;
+    grid-template-rows: auto minmax(0, 1fr) !important;
+    gap: 8px 11px !important;
+    min-height: 143px !important;
+    padding: 10px !important;
+    border-radius: 14px !important;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-head {
+    grid-column: 1 / -1;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-image {
+    grid-column: 1;
+    grid-row: 2;
+    min-height: 86px !important;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-details {
+    grid-column: 2;
+    grid-row: 2;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 7px;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-details strong {
+    font-size: 13px !important;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-price {
+    text-align: left;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-cozy-spotlight .owner-home-v23-spotlight-price strong {
+    font-size: 18px !important;
   }
 }
