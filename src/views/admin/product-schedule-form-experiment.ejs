@@ -9,17 +9,17 @@
 <div class="experiment-app experiment-schedule-form-page">
   <aside class="experiment-sidebar" data-experiment-sidebar aria-label="เมนูร้านค้า">
     <div class="experiment-brand"><div class="experiment-brand-mark"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName || 'ร้านค้า' %>" /><% } else { %><span aria-hidden="true"><%= (settings.shopName || 'L')[0] %></span><% } %></div><div><div class="experiment-brand-title"><%= settings.shopName || 'LILTeam Shop' %></div><div class="experiment-brand-sub">ผู้ดูแลระบบ</div></div><button class="experiment-collapse" data-experiment-collapse type="button" aria-label="ย่อหรือขยายเมนู"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button></div>
-    <div class="experiment-sidebar-scroll"><div class="experiment-nav-group"><div class="experiment-nav-label">ภาพรวม</div><a class="experiment-nav-item" href="/admin"><span aria-hidden="true">▦</span><span>แดชบอร์ด</span></a></div><div class="experiment-nav-group"><div class="experiment-nav-label">สินค้าและสต๊อก</div><a class="experiment-nav-item" href="/admin/products"><span aria-hidden="true">◇</span><span>รายการสินค้า</span></a><a class="experiment-nav-item active" href="/admin/scheduled-products"><span aria-hidden="true">◷</span><span>ตั้งเวลาเปิดขาย</span></a><a class="experiment-nav-item" href="/admin/filter-tags"><span aria-hidden="true">◈</span><span>แท็ก/จัดหมวดสินค้า</span></a><a class="experiment-nav-item" href="/admin/recommended-categories"><span aria-hidden="true">☷</span><span>หมวดหมู่แนะนำ</span></a></div><div class="experiment-nav-group"><div class="experiment-nav-label">การสั่งซื้อ & การเงิน</div><a class="experiment-nav-item" href="/admin/orders"><span aria-hidden="true">▤</span><span>คำสั่งซื้อ</span></a><a class="experiment-nav-item" href="/admin/topups"><span aria-hidden="true">▭</span><span>เติมเงิน & ตรวจสอบ</span></a></div></div>
+    <div class="experiment-sidebar-scroll"><div class="experiment-nav-group"><div class="experiment-nav-label">ภาพรวม</div><a class="experiment-nav-item" href="/admin"><span aria-hidden="true">▦</span><span>แดชบอร์ด</span></a></div><div class="experiment-nav-group"><div class="experiment-nav-label">สินค้าและสต๊อก</div><a class="experiment-nav-item <%= active === 'products' ? 'active' : '' %>" href="/admin/products"><span aria-hidden="true">◇</span><span>รายการสินค้า</span></a><a class="experiment-nav-item" href="/admin/scheduled-products"><span aria-hidden="true">◷</span><span>ตั้งเวลาเปิดขาย</span></a><a class="experiment-nav-item" href="/admin/filter-tags"><span aria-hidden="true">◈</span><span>แท็ก/จัดหมวดสินค้า</span></a><a class="experiment-nav-item" href="/admin/recommended-categories"><span aria-hidden="true">☷</span><span>หมวดหมู่แนะนำ</span></a></div><div class="experiment-nav-group"><div class="experiment-nav-label">การสั่งซื้อ & การเงิน</div><a class="experiment-nav-item" href="/admin/orders"><span aria-hidden="true">▤</span><span>คำสั่งซื้อ</span></a><a class="experiment-nav-item" href="/admin/topups"><span aria-hidden="true">▭</span><span>เติมเงิน & ตรวจสอบ</span></a></div></div>
     <div class="experiment-sidebar-bottom"><a class="experiment-nav-item" href="/"><span aria-hidden="true">⌂</span><span>กลับหน้าร้าน</span><span style="margin-left:auto">→</span></a><div class="experiment-profile"><div class="experiment-avatar">A</div><div><strong>admin</strong><small>แอดมินสูงสุด</small></div></div></div>
   </aside>
   <div class="experiment-main">
     <header class="experiment-topbar"><span class="experiment-user-name" style="font-size:12px;font-weight:700">admin</span></header>
     <main class="experiment-content">
       <div class="experiment-page-head"><div><h1><%= editing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า' %></h1><p><%= editing ? 'แก้ข้อมูลสินค้า รูปภาพ และรายละเอียดสำหรับหน้าร้าน' : 'เพิ่มข้อมูลสินค้า รูปภาพ และรายละเอียดสำหรับหน้าร้าน' %></p></div><div class="experiment-actions"><a href="/admin/products" class="experiment-button">← กลับรายการสินค้า</a></div></div>
-      <div class="experiment-page-status-note"><strong>หมายเหตุ:</strong> กำหนดวันและเวลาเปิดขายได้ที่เมนู “ตั้งเวลาเปิดขาย” หลังบันทึกสินค้า</div>
+      <div class="experiment-page-status-note" role="note"><span class="experiment-status-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span><span><strong>ตั้งเวลาเปิดขาย</strong><small>กำหนดวันและเวลาเปิดขายได้ที่เมนู “ตั้งเวลาเปิดขาย” หลังบันทึกสินค้า</small></span><span class="experiment-status-note-step">ทำได้ภายหลัง</span></div>
 
       <form class="experiment-schedule-form" action="<%= formAction %>" method="post" enctype="multipart/form-data" data-schedule-form>
-        <section class="experiment-card experiment-form-panel">
+        <section class="experiment-card experiment-form-panel experiment-form-panel-info">
           <div class="experiment-form-panel-head"><div><div><h2>ข้อมูลสินค้า</h2><p>ข้อมูลที่แสดงในรายการสินค้าและหน้าร้าน</p></div></div></div>
           <div class="experiment-form-grid">
             <label class="experiment-field full"><span>ชื่อสินค้า <b>*</b></span><input name="title" value="<%= product ? (product.title || '') : '' %>" placeholder="เช่น Shadow Realm Chronicles" required maxlength="160" /></label>
@@ -49,7 +49,7 @@
           </div>
         </section>
 
-        <section class="experiment-card experiment-form-panel">
+        <section class="experiment-card experiment-form-panel experiment-form-panel-purchase">
           <div class="experiment-form-panel-head"><div><div><h2>ยืนยันก่อนเพิ่มลงตะกร้า</h2><p>ให้ลูกค้าอ่านและยืนยันเงื่อนไขก่อนซื้อสินค้าชิ้นนี้</p></div></div><span class="experiment-muted-chip">ตัวเลือกการซื้อ</span></div>
           <label class="experiment-check-row"><input type="checkbox" name="purchaseApprovalEnabled" <%= product && product.purchaseApprovalEnabled ? 'checked' : '' %> /> ให้ลูกค้าติ๊กยืนยันก่อนเพิ่มลงตะกร้า</label>
           <p class="experiment-field-note">เมื่อเปิด ลูกค้าติ๊กยืนยันแล้วเพิ่มสินค้าเข้าตะกร้าได้ทันที ไม่ต้องรอแอดมิน</p>
@@ -74,7 +74,7 @@
           </div>
         </section>
 
-        <section class="experiment-card experiment-form-panel">
+        <section class="experiment-card experiment-form-panel experiment-form-panel-messenger">
           <div class="experiment-form-panel-head"><div><div><h2>ข้อความ Messenger</h2><p>ใช้กับสินค้าที่ให้ลูกค้าติดต่อร้านเพื่อรับสินค้า</p></div></div><span class="experiment-muted-chip">ข้อความสำเร็จรูป</span></div>
           <p class="experiment-field-note">ระบบเติมหมายเลขคำสั่งซื้อ ชื่อสินค้า ชื่อลูกค้า และข้อมูลที่ต้องเตรียมให้อัตโนมัติ ส่วนที่ล็อกไว้แก้ไขไม่ได้</p>
           <label class="experiment-field"><span>คำขึ้นต้น</span><input name="contactMessageIntro" value="<%= product ? (product.contactMessageIntro || '') : '' %>" placeholder="สวัสดีครับ ต้องการติดต่อรับสินค้า" /></label>
@@ -82,7 +82,7 @@
           <label class="experiment-field"><span>คำปิดท้าย</span><input name="contactMessageOutro" value="<%= product ? (product.contactMessageOutro || '') : '' %>" placeholder="กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ" /></label>
         </section>
 
-        <section class="experiment-card experiment-form-panel">
+        <section class="experiment-card experiment-form-panel experiment-form-panel-content">
           <div class="experiment-form-panel-head"><div><div><h2>ข้อความในหน้าสินค้า</h2><p>ตั้งข้อความเฉพาะสินค้านี้ หรือเว้นว่างเพื่อใช้ข้อความมาตรฐานของร้าน</p></div></div><span class="experiment-muted-chip">แสดงผลหน้าร้าน</span></div>
           <div class="experiment-content-settings">
             <div><label class="experiment-check-row"><input type="checkbox" name="howToReceiveEnabled" <%= !product || product.howToReceiveEnabled !== false ? 'checked' : '' %> /> แสดงส่วน “วิธีรับสินค้า”</label><label class="experiment-field"><span>รายละเอียดวิธีรับสินค้า</span><textarea name="howToReceiveText" rows="3" placeholder="รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ..."><%= product ? (product.howToReceiveText || '') : '' %></textarea></label></div>
@@ -96,5 +96,5 @@
       </form>
     </main>
   </div>
-  <nav class="experiment-mobile-nav" aria-label="เมนูมือถือ"><a href="/admin">⌂<span>ภาพรวม</span></a><a href="/admin/products">▦<span>สินค้า</span></a><a class="active" href="/admin/scheduled-products">◷<span>ตั้งเวลา</span></a><a href="/admin/orders">▤<span>คำสั่งซื้อ</span></a><a href="/admin/settings">⚙<span>ตั้งค่า</span></a></nav>
+  <nav class="experiment-mobile-nav" aria-label="เมนูมือถือ"><a href="/admin">⌂<span>ภาพรวม</span></a><a class="active" href="/admin/products">▦<span>สินค้า</span></a><a href="/admin/scheduled-products">◷<span>ตั้งเวลา</span></a><a href="/admin/orders">▤<span>คำสั่งซื้อ</span></a><a href="/admin/settings">⚙<span>ตั้งค่า</span></a></nav>
 </div>
