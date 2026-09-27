@@ -336,7 +336,7 @@
   box-shadow: none !important;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1200px) {
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner {
     display: grid !important;
     grid-template-columns: minmax(0, 1fr) !important;
@@ -356,13 +356,15 @@
     grid-row: 2 !important;
     width: 100% !important;
     max-width: none !important;
-    aspect-ratio: 2.15 / 1 !important;
-    overflow: hidden !important;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: auto !important;
+    overflow: visible !important;
   }
 
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-artwork > img {
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
     object-fit: contain !important;
     object-position: center !important;
   }
@@ -379,7 +381,8 @@
   }
 
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-artwork {
-    aspect-ratio: 1.8 / 1 !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
   }
 }
 
