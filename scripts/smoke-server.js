@@ -277,6 +277,12 @@ async function crawlAdmin(cookie) {
     if (!/class="experiment-admin admin-site(?:\s|")/.test(page.body) || !page.body.includes('data-experiment-sidebar')) {
       throw new Error(`main admin route did not use the unified sidebar shell: ${requestPath}`);
     }
+    if (!page.body.includes('data-admin-theme-toggle') || !page.body.includes('aria-pressed="false"')) {
+      throw new Error(`main admin route is missing the accessible saved dark/light theme toggle: ${requestPath}`);
+    }
+    if (!page.body.includes('/css/admin-dark-mode-v1.css') || !page.body.includes('/js/admin-theme-bootstrap-v1.js') || !page.body.includes('/js/admin-theme-toggle-v1.js')) {
+      throw new Error(`main admin route is missing its shared dark/light theme assets: ${requestPath}`);
+    }
     if (page.body.includes('id="admin-sidebar"') || page.body.includes('ผู้ดูแลระบบ · รุ่นทดลอง')) {
       throw new Error(`legacy admin shell leaked into the main shop: ${requestPath}`);
     }
@@ -288,6 +294,9 @@ async function crawlAdmin(cookie) {
     }
   }
   if (checked.size < 15) throw new Error(`admin crawl covered only ${checked.size} pages`);
+  await fetchOk('/css/admin-dark-mode-v1.css', 'text/css');
+  await fetchOk('/js/admin-theme-bootstrap-v1.js', 'application/javascript');
+  await fetchOk('/js/admin-theme-toggle-v1.js', 'application/javascript');
   return checked.size;
 }
 

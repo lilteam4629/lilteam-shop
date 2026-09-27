@@ -1,0 +1,195 @@
+:root[data-admin-theme="dark"] {
+  color-scheme: dark;
+  --ex-bg: #171815;
+  --ex-surface: #20211d;
+  --ex-ink: #f0ede6;
+  --ex-muted: #b7b4aa;
+  --ex-line: #3b3b34;
+  --ex-sidebar: #1d1e1a;
+  --ex-shadow: 0 12px 30px rgba(0, 0, 0, .2);
+  --ex-green-soft: #23352b;
+  --ex-orange-soft: #3d2e1a;
+  --ex-red-soft: #3d2227;
+  --admin-dark-canvas: #171815;
+  --admin-dark-surface: #20211d;
+  --admin-dark-raised: #282923;
+  --admin-dark-input: #292a24;
+  --admin-dark-line: #3b3b34;
+  --admin-dark-text: #f0ede6;
+  --admin-dark-muted: #b7b4aa;
+  --bg: var(--admin-dark-canvas) !important;
+  --card: var(--admin-dark-surface) !important;
+  --theme-page-surface: var(--admin-dark-canvas) !important;
+  --theme-card-surface: var(--admin-dark-surface) !important;
+  --theme-control-surface: var(--admin-dark-input) !important;
+  --border: var(--admin-dark-line) !important;
+  --border-light: #4a4b43 !important;
+  --input: var(--admin-dark-input) !important;
+  --brand: var(--admin-brand-accent, #936344) !important;
+  --gold: var(--admin-brand-fill, #70533c) !important;
+  --gold-hover: var(--admin-brand-hover, #89674d) !important;
+  --gold-light: #b59779 !important;
+  --gold-dark: var(--admin-brand-strong, #60452f) !important;
+  --gold-contrast: var(--admin-brand-contrast, #fffaf3) !important;
+  --gold-text: var(--admin-brand-readable, #e7c29e) !important;
+  --gold-hover-text: #fffaf3 !important;
+  --text: var(--admin-dark-text) !important;
+  --text-2: #dedbd2 !important;
+  --text-3: var(--admin-dark-muted) !important;
+  --text-4: #99968b !important;
+  --theme-ink: var(--admin-dark-text) !important;
+  --theme-muted-ink: var(--admin-dark-muted) !important;
+  --theme-line: var(--admin-dark-line) !important;
+  --theme-accent: var(--admin-brand-fill, #70533c) !important;
+  --theme-accent-ink: var(--admin-brand-contrast, #fffaf3) !important;
+  --success: #a8deb9 !important;
+  --danger: #ffc4cc !important;
+  --warning: #f2daa2 !important;
+  --coral: #f0aa99 !important;
+}
+
+html[data-admin-theme="light"] { color-scheme: light; }
+
+html[data-admin-theme="dark"].admin-main-site {
+  --admin-brand-fill: color-mix(in srgb, var(--admin-brand-accent, #936344) 44%, #000000);
+  --admin-brand-hover: color-mix(in srgb, var(--admin-brand-accent, #936344) 46%, #000000);
+  --admin-brand-strong: color-mix(in srgb, var(--admin-brand-accent, #936344) 26%, #000000);
+  --admin-brand-readable: color-mix(in srgb, var(--admin-brand-accent, #936344) 34%, #ffffff);
+  --admin-brand-contrast: #fffaf3;
+  --admin-brand-soft: color-mix(in srgb, var(--admin-brand-accent, #936344) 20%, #24231f);
+  --admin-brand-border: color-mix(in srgb, var(--admin-brand-accent, #936344) 44%, #24231f);
+  --ex-green: var(--admin-brand-fill);
+  --ex-green-dark: var(--admin-brand-readable);
+  --ex-green-soft: var(--admin-brand-soft);
+}
+
+html[data-admin-theme="dark"] body.experiment-admin {
+  color-scheme: dark;
+  color: var(--admin-dark-text) !important;
+  background: var(--admin-dark-canvas) !important;
+}
+
+html[data-admin-theme="dark"] .experiment-sidebar,
+html[data-admin-theme="dark"] .experiment-topbar,
+html[data-admin-theme="dark"] .experiment-menu-dialog-content,
+html[data-admin-theme="dark"] .experiment-mobile-nav,
+html[data-admin-theme="dark"] .experiment-confirm-dialog,
+html[data-admin-theme="dark"] .experiment-roadmap-dialog,
+html[data-admin-theme="dark"] .experiment-icon-button {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-surface);
+  border-color: var(--admin-dark-line);
+}
+
+html[data-admin-theme="dark"] .experiment-topbar { background-color: rgb(32 33 29 / .94); }
+html[data-admin-theme="dark"] .experiment-dialog,
+html[data-admin-theme="dark"] .experiment-dialog-content { background-color: var(--admin-dark-surface); }
+html[data-admin-theme="dark"] .experiment-nav-label,
+html[data-admin-theme="dark"] .experiment-profile small,
+html[data-admin-theme="dark"] .experiment-brand-sub,
+html[data-admin-theme="dark"] .experiment-page-head p,
+html[data-admin-theme="dark"] .experiment-panel-head p,
+html[data-admin-theme="dark"] .experiment-kpi-label,
+html[data-admin-theme="dark"] .experiment-summary-item,
+html[data-admin-theme="dark"] .experiment-summary-item small,
+html[data-admin-theme="dark"] .experiment-confirm-note { color: var(--admin-dark-muted); }
+html[data-admin-theme="dark"] .experiment-nav-item { color: #d1cec4; }
+html[data-admin-theme="dark"] .experiment-nav-item:hover,
+html[data-admin-theme="dark"] .experiment-icon-button:hover { color: var(--admin-dark-text); background: var(--admin-dark-raised); }
+html[data-admin-theme="dark"] .experiment-nav-item.active { color: var(--admin-dark-text); background: var(--admin-brand-soft, #34332c); }
+html[data-admin-theme="dark"] .experiment-nav-item svg { color: #aaa79e; }
+html[data-admin-theme] .experiment-theme-icon-sun { display: none; }
+html[data-admin-theme="dark"] .experiment-theme-toggle[aria-pressed="true"] .experiment-theme-icon-sun { display: block; }
+html[data-admin-theme="dark"] .experiment-theme-toggle[aria-pressed="true"] .experiment-theme-icon-moon { display: none; }
+
+html[data-admin-theme="dark"] body.experiment-admin :is(
+  .experiment-card, .experiment-panel, .experiment-build-roadmap, .experiment-build-column,
+  .experiment-roadmap-mock-row, .experiment-product, .experiment-luxury-card,
+  .experiment-placeholder-card, .experiment-menu-dialog-head, .experiment-confirm-head,
+  .experiment-roadmap-dialog-head, [class*="-card"], [class*="-panel"],
+  [class*="-surface"], [class*="-box"], [class*="-dialog"], [class*="-sheet"],
+  fieldset, .bg-white, .bg-gray-50, .bg-slate-50
+):not([class*="status"]):not([class*="badge"]):not([class*="alert"]):not([class*="toast"]):not([class*="success"]):not([class*="error"]):not([class*="danger"]):not([class*="warning"]):not([class*="empty"]) {
+  color: var(--admin-dark-text);
+  background: var(--admin-dark-surface) !important;
+  border-color: var(--admin-dark-line) !important;
+  box-shadow: 0 10px 24px rgb(0 0 0 / .12);
+}
+
+html[data-admin-theme="dark"] body.experiment-admin :is(h1, h2, h3, h4, h5, h6, p, li, label, legend, dt, dd, th, td) {
+  color: var(--admin-dark-text) !important;
+}
+html[data-admin-theme="dark"] body.experiment-admin :is(small, [class*="muted"], [class*="description"], [class*="subtitle"], [class*="helper"], [class*="text-gray"], [class*="text-slate"], [class*="text-zinc"]) {
+  color: var(--admin-dark-muted) !important;
+}
+html[data-admin-theme="dark"] body.experiment-admin a:not(.experiment-nav-item) { color: var(--admin-brand-readable, #e2c09d); }
+
+html[data-admin-theme="dark"] body.experiment-admin :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]), select, textarea, [contenteditable="true"]) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-input) !important;
+  border-color: var(--admin-dark-line) !important;
+  accent-color: var(--admin-brand-fill, #966746);
+}
+html[data-admin-theme="dark"] body.experiment-admin :is(input, textarea, [contenteditable="true"])::placeholder { color: #aaa69a; opacity: 1; }
+html[data-admin-theme="dark"] body.experiment-admin :is(input[type="checkbox"], input[type="radio"]) { accent-color: var(--admin-brand-fill, #966746); }
+
+html[data-admin-theme="dark"] body.experiment-admin :is(button, .btn, [role="button"]):not(.primary):not([class*="primary"]):not([class*="danger"]):not([class*="success"]):not([class*="warning"]):not([class*="status"]):not([class*="badge"]) {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-raised);
+  border-color: var(--admin-dark-line);
+}
+html[data-admin-theme="dark"] body.experiment-admin :is(.experiment-button.primary, button.primary, .btn-primary, button[class*="submit"], input[type="submit"]) {
+  color: var(--admin-brand-contrast, #fffaf3);
+  background-color: var(--admin-brand-fill, #70533c);
+  border-color: var(--admin-brand-fill, #70533c);
+}
+html[data-admin-theme="dark"] body.experiment-admin :is(.experiment-button.primary, button.primary, .btn-primary, button[class*="submit"], input[type="submit"]):hover {
+  background-color: var(--admin-brand-hover, #89674d);
+}
+
+html[data-admin-theme="dark"] body.experiment-admin :is(table, .experiment-table) { color: var(--admin-dark-text); }
+html[data-admin-theme="dark"] body.experiment-admin :is(th, .experiment-table th) { color: #d9d5cb !important; background: #2c2d27 !important; }
+html[data-admin-theme="dark"] body.experiment-admin :is(td, .experiment-table td) { color: #d6d3ca !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.experiment-admin :is(tr:nth-child(even), .experiment-table tr:nth-child(even)) { background-color: #242520; }
+html[data-admin-theme="dark"] body.experiment-admin :is(tr:hover, .experiment-table tr:hover) { background-color: #30312a; }
+
+html[data-admin-theme="dark"] body.experiment-admin :is([class*="alert"], [class*="notice"]):not([class*="success"]):not([class*="error"]):not([class*="danger"]) {
+  color: #f2daa2;
+  background-color: #3c321f !important;
+  border-color: #64502c !important;
+}
+html[data-admin-theme="dark"] .experiment-stock-alert { color: #ffc4cc; background: #3b2428 !important; border-color: #663740 !important; }
+html[data-admin-theme="dark"] .experiment-stock-alert .experiment-alert-head p { color: #e2aab2; }
+html[data-admin-theme="dark"] .experiment-stock-alert .experiment-alert-head > div:first-child { color: #ffc4cc !important; background: #542e35; }
+html[data-admin-theme="dark"] .experiment-page-status-note { color: #f2daa2; background: #3c321f !important; border-color: #64502c !important; }
+html[data-admin-theme="dark"] .experiment-page-status-note strong { color: #fff0c2; }
+
+html[data-admin-theme="dark"] body.experiment-admin :is([class*="success"], [class*="ready"], [class*="complete"], [class*="available"]) {
+  color: #b8e2c4 !important;
+  background-color: #20372a !important;
+  border-color: #365c43 !important;
+}
+html[data-admin-theme="dark"] body.experiment-admin :is([class*="error"], [class*="danger"], [class*="failed"], [class*="negative"]) {
+  color: #ffc4ca !important;
+  background-color: #3b2428 !important;
+  border-color: #663740 !important;
+}
+html[data-admin-theme="dark"] body.experiment-admin :is([class*="warning"], [class*="pending"], [class*="status"], [class*="badge"]) {
+  color: #f2daa2;
+  background-color: #3c321f;
+  border-color: #64502c;
+}
+
+html[data-admin-theme="dark"] body.experiment-admin ::selection { color: #fffaf3; background: #77533b; }
+html[data-admin-theme="dark"] body.experiment-admin :focus-visible { outline-color: #d9b794; }
+html[data-admin-theme="dark"] body.experiment-admin ::-webkit-scrollbar-track { background: #1b1c18; }
+html[data-admin-theme="dark"] body.experiment-admin ::-webkit-scrollbar-thumb { background-color: #626056; }
+
+@media (prefers-reduced-motion: no-preference) {
+  body.experiment-admin,
+  body.experiment-admin :is(.experiment-topbar, .experiment-sidebar, .experiment-card, .experiment-panel, input, select, textarea, button) {
+    transition-property: background-color, border-color, color, box-shadow;
+    transition-duration: 160ms;
+    transition-timing-function: ease-out;
+  }
+}
