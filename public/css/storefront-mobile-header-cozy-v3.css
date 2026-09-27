@@ -32,9 +32,11 @@
     width: auto !important;
     max-width: min(92px, 100%) !important;
     height: 34px !important;
-    border: 0 !important;
-    border-radius: 0 !important;
-    background: transparent !important;
+    padding: 4px 7px !important;
+    border: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 12px !important;
+    background: var(--theme-card-surface, var(--card)) !important;
+    box-shadow: inset 0 1px color-mix(in srgb, white 42%, transparent) !important;
     object-fit: contain !important;
   }
 
