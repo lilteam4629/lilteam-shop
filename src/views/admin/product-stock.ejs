@@ -1,4 +1,4 @@
-<% const isRandomBox = product.specialType === 'random-box'; const randomBoxRate = typeof randomBoxRateConfig === 'undefined' ? { rate: 1, minTarget: 85, maxTarget: 110 } : randomBoxRateConfig; const randomBoxAvailableCount = typeof randomBoxStockCount === 'undefined' ? stockItems.filter(item => item.status === 'available').length : randomBoxStockCount; %>
+<% const isRandomBox = product.specialType === 'random-box'; const randomBoxAvailableCount = typeof randomBoxStockCount === 'undefined' ? stockItems.filter(item => item.status === 'available').length : randomBoxStockCount; %>
 <!-- Stock Management Header -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
@@ -25,8 +25,7 @@
       <div><h2 id="random-box-stock-info-title" class="font-bold text-sm sm:text-base text-[var(--text)]">สต็อกกล่องสุ่ม</h2><p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">ไม่มีหมวดหรือสัดส่วนรางวัล · ระบบสุ่มสินค้า 1 ชิ้นจากทุกบรรทัดที่พร้อมส่ง</p></div>
       <span class="rounded-full bg-[var(--gold)]/10 px-3 py-1.5 text-xs font-bold text-[var(--gold-text)]">฿1 / ครั้ง</span>
     </div>
-    <div class="mt-4 grid gap-3 sm:grid-cols-2">
-      <div class="rounded-xl bg-[var(--input)] px-4 py-3"><span class="block text-[11px] text-[var(--text-4)]">เรทปัจจุบัน · 1 ชิ้นต่อรอบ</span><strong class="mt-1 block text-base font-black text-[var(--gold-text)]">เรท <%= randomBoxRate.rate.toLocaleString('th-TH', { maximumFractionDigits: 2 }) %> · <%= randomBoxRate.minTarget.toLocaleString('th-TH') %>–<%= randomBoxRate.maxTarget.toLocaleString('th-TH') %> บาท</strong><span class="mt-1 block text-[11px] text-[var(--text-3)]">เท่ากับจำนวนครั้งที่เปิด · ครั้งละ 1 บาท · นับรวมทุกคน</span></div>
+    <div class="mt-4 grid gap-3">
       <div class="rounded-xl bg-[var(--input)] px-4 py-3"><span class="block text-[11px] text-[var(--text-4)]">สินค้าในสต็อกพร้อมสุ่ม</span><strong class="mt-1 block text-base font-black text-[var(--text)]"><%= randomBoxAvailableCount.toLocaleString('th-TH') %> ชิ้น</strong><span class="mt-1 block text-[11px] text-[var(--text-3)]">สินค้า 1 ชิ้นที่ส่งออก จะถูกหักจากสต็อก 1 รายการ</span></div>
     </div>
   </section>
@@ -146,8 +145,7 @@
       <% if (isRandomBox) { %>
         <div class="rounded-xl bg-[var(--input)] px-3.5 py-3">
           <p class="text-xs font-bold text-[var(--text-2)]">สต็อก (1 บรรทัดนับเป็น 1 ชิ้น)</p>
-          <p class="mt-1 text-[11px] text-[var(--text-4)]">เรท <%= randomBoxRate.rate.toLocaleString('th-TH', { maximumFractionDigits: 2 }) %> · สินค้า 1 ชิ้นต่อ <%= randomBoxRate.minTarget.toLocaleString('th-TH') %>–<%= randomBoxRate.maxTarget.toLocaleString('th-TH') %> บาท · ครั้งละ ฿1</p>
-          <p class="mt-1 text-[11px] text-[var(--text-4)]">นับยอดเปิดรวมทุกคนในรอบเดียว และส่งคีย์/ไอดีอัตโนมัติ</p>
+          <p class="mt-1 text-[11px] text-[var(--text-4)]">ส่งคีย์/ไอดีจากสต็อกให้อัตโนมัติเมื่อได้รับรางวัล</p>
         </div>
         <label class="block"><span class="mb-1 block text-xs font-semibold text-[var(--text-3)]">ข้อมูลคีย์ / ไอดี *</span><textarea name="bulk" rows="8" placeholder="คีย์หรือไอดีชิ้นที่ 1&#10;คีย์หรือไอดีชิ้นที่ 2&#10;คีย์หรือไอดีชิ้นที่ 3" required data-random-box-stock-input class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition"></textarea><small class="mt-1 block text-[11px] text-[var(--text-4)]">นับได้ <strong data-random-box-stock-lines>0</strong> ชิ้น · วาง 1 รายการต่อบรรทัด</small></label>
         <script>

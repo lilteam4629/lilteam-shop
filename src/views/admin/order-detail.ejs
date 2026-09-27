@@ -83,7 +83,6 @@
                   <div class="mt-1 text-[var(--text-2)]"><%= i.credentials ? 'ตัดคีย์/ไอดีจากสต็อกและส่งอัตโนมัติแล้ว' : 'ไม่พบคีย์/ไอดีที่ตัดจากสต็อก' %></div>
                 <% } else { %>
                   <div class="font-bold text-[var(--text-2)]">ผลสุ่ม: ไม่ถูกรางวัลในครั้งนี้</div>
-                  <div class="mt-1 text-[var(--text-3)]">ความคืบหน้ารอบรวม <%= i.randomBoxDraw.roundProgress %>/<%= i.randomBoxDraw.roundTarget %></div>
                 <% } %>
               </div>
             <% } else if (i.fulfillmentMode === 'contact') { %>

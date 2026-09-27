@@ -1555,7 +1555,6 @@ router.get('/products/:id/stock', (req, res) => {
     return res.render('admin/product-stock', {
       title: `สต็อกกล่องสุ่ม: ${product.title}`, active: 'products', product, stockItems,
       randomBoxStockCount: randomBox.availableStockCount(stockItems),
-      randomBoxRateConfig: randomBox.getRateConfig(product.randomBox?.rate),
     });
   }
   res.render('admin/product-stock', { title: `สต๊อกสินค้า: ${product.title}`, active: 'products', product, stockItems });

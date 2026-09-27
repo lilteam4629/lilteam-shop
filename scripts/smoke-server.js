@@ -159,7 +159,8 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const form = await fetchOk('/admin/products/new', 'text/html', { cookie: adminCookie });
   if (!form.body.includes('name="productKind"') || !form.body.includes('random-box-product-fields-v1.css')
     || !form.body.includes('name="randomBoxRate"') || !form.body.includes('min="0.01"') || !form.body.includes('max="100"')
-    || form.body.includes('name="randomBoxPrizeName"') || !form.body.includes('data-random-box-range')) {
+    || form.body.includes('name="randomBoxPrizeName"') || form.body.includes('data-random-box-range')
+    || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*85\s*[–-]\s*110/.test(form.body)) {
     throw new Error('product form does not expose the random-box product type and setup UI');
   }
   const title = `random-box-smoke-${process.pid}`;
@@ -180,8 +181,9 @@ async function checkRandomBoxWorkflow(adminCookie) {
   }
   const emptyStockPage = await fetchOk(`/admin/products/${encodeURIComponent(productId)}/stock`, 'text/html', { cookie: adminCookie });
   if (emptyStockPage.body.includes('name="randomBoxPrizeName"') || emptyStockPage.body.includes('name="randomBoxPrizePercent"')
-    || !emptyStockPage.body.includes('1 บรรทัดนับเป็น 1 ชิ้น') || !emptyStockPage.body.includes('85') || !emptyStockPage.body.includes('110')) {
-    throw new Error('random-box stock page still asks for prize categories or fails to show the rate-one payout range');
+    || !emptyStockPage.body.includes('1 บรรทัดนับเป็น 1 ชิ้น') || emptyStockPage.body.includes('เรทปัจจุบัน')
+    || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*85\s*[–-]\s*110/.test(emptyStockPage.body)) {
+    throw new Error('random-box stock page still asks for prize categories or reveals the payout range');
   }
 
   const editWithoutRewardFields = await request(`/admin/products/${encodeURIComponent(productId)}/edit`, {
@@ -215,8 +217,9 @@ async function checkRandomBoxWorkflow(adminCookie) {
     throw new Error('removing an unused stock line did not update the available inventory count');
   }
   const stockPage = await fetchOk(`/admin/products/${encodeURIComponent(productId)}/stock`, 'text/html', { cookie: adminCookie });
-  if (!stockPage.body.includes('ส่งคีย์/ไอดีอัตโนมัติ') || !stockPage.body.includes('smoke-user') || !stockPage.body.includes('สินค้า 1 ชิ้นต่อ')) {
-    throw new Error('random-box stock page does not show direct inventory and its payout range');
+  if (!stockPage.body.includes('ส่งคีย์/ไอดีจากสต็อกให้อัตโนมัติ') || !stockPage.body.includes('smoke-user')
+    || stockPage.body.includes('สินค้า 1 ชิ้น ต่อ') || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*\d+\s*[–-]\s*\d+/.test(stockPage.body)) {
+    throw new Error('random-box stock page does not show direct inventory or reveals the payout range');
   }
 
   const scheduled = await request('/admin/scheduled-products', {
@@ -226,9 +229,11 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (scheduled.statusCode !== 302) throw new Error('random-box product could not be published through the existing schedule workflow');
   product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
   const page = await fetchOk(`/game/${encodeURIComponent(product.slug)}`, 'text/html');
-  if (!page.body.includes('฿1') || !page.body.includes('85–110') || !page.body.includes('นับยอดสะสมรวมทุกคน')
-    || page.body.includes('เรทออกรางวัล') || page.body.includes('เปอร์เซ็นต์ใช้เลือกชนิดรางวัล')) {
-    throw new Error('random-box storefront does not explain the one-stock-item payout range clearly');
+  if (!page.body.includes('฿1') || !page.body.includes('ส่งข้อมูลจากสต็อกให้อัตโนมัติ')
+    || page.body.includes('เรทออกรางวัล') || page.body.includes('เปอร์เซ็นต์ใช้เลือกชนิดรางวัล')
+    || page.body.includes('นับยอดสะสมรวมทุกคน') || page.body.includes('สินค้า 1 ชิ้น ต่อ')
+    || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*\d+\s*[–-]\s*\d+/.test(page.body)) {
+    throw new Error('random-box storefront reveals payout thresholds or hides its delivery information');
   }
 
   const customerCookie = await loginAsCustomer();
@@ -240,6 +245,12 @@ async function checkRandomBoxWorkflow(adminCookie) {
   });
   if (firstDraw.statusCode !== 302 || !/^\/account\/orders\//.test(firstDraw.headers.location || '')) {
     throw new Error(`random-box draw route did not return an order (HTTP ${firstDraw.statusCode})`);
+  }
+  const customerOrderPage = await fetchOk(firstDraw.headers.location, 'text/html', { cookie: customerCookie });
+  if (!customerOrderPage.body.includes('กำลังนับยอดสุ่มรวม')
+    || /รอบรวม\s*\d+\s*\/\s*\d+/.test(customerOrderPage.body)
+    || customerOrderPage.body.includes('ความคืบหน้ารอบ')) {
+    throw new Error('random-box order page exposes shared-round progress or hides the draw result');
   }
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   product = data.products.find(item => item.id === productId);

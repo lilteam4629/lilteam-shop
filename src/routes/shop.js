@@ -408,14 +408,7 @@ router.get('/game/:slug', (req, res) => {
   const productRangers = rangersSource.resolveCodes(
     remoteProduct ? [] : store.data.settings.rangersCatalog?.productAssignments?.[product.id] || [],
   );
-  const boxRound = product.specialType === randomBox.RANDOM_BOX_KIND
-    ? store.data.randomBoxRounds?.[String(product.id)] || null
-    : null;
   const randomBoxDetails = product.specialType === randomBox.RANDOM_BOX_KIND ? {
-    progress: Math.max(0, Number(boxRound?.progress) || 0),
-    target: boxRound?.target ? Number(boxRound.target) : null,
-    roundNumber: Math.max(1, Number(boxRound?.roundNumber) || 1),
-    rateConfig: randomBox.getRateConfig(product.randomBox?.rate),
     availableStockCount: randomBox.availableStockCount(store.data.stockItems, product.id),
     requestId: require('crypto').randomUUID(),
   } : null;
