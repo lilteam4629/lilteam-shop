@@ -204,6 +204,9 @@
 </div>
 <% } %>
 
+<% if (latestOrders && latestOrders.length) { %>
+  <%- include('../partials/latest-orders-rail', { latestOrders, isOwnerLatestRail: true }) %>
+<% } %>
 
 <% } %>
 
@@ -921,9 +924,6 @@
 <script>(function(){const grid=document.querySelector('.all-products-grid'),search=document.getElementById('homeCatalogSearch'),buttons=[...document.querySelectorAll('[data-home-stock]')];if(!grid)return;let stock='all';const cards=[...grid.querySelectorAll('.filterable-card')];function apply(){const term=(search?.value||'').trim().toLocaleLowerCase('th-TH');cards.forEach(card=>{const matchesText=!term||(card.dataset.title||'').toLocaleLowerCase('th-TH').includes(term);const matchesStock=stock==='all'||card.dataset.stock===stock;card.toggleAttribute('hidden',!(matchesText&&matchesStock));});}search?.addEventListener('input',apply);buttons.forEach(button=>button.addEventListener('click',()=>{stock=button.dataset.homeStock||'all';buttons.forEach(item=>{const active=item===button;item.classList.toggle('is-active',active);item.setAttribute('aria-pressed',String(active));});apply();}));buttons.forEach(item=>item.setAttribute('aria-pressed',String(item.classList.contains('is-active'))));apply();})();</script>
 <% } %>
 
-<% if (ownerHomeV20 && latestOrders && latestOrders.length) { %>
-  <%- include('../partials/latest-orders-rail', { latestOrders, isOwnerLatestRail: true }) %>
-<% } %>
 <% if (latestOrders && latestOrders.length) { %>
 <style>
   .latest-orders-heading{display:flex;align-items:flex-start;gap:11px;margin-bottom:14px}.latest-orders-heading-icon{display:grid;place-items:center;width:36px;height:36px;flex:none;border:1px solid var(--border-light);border-radius:9px;background:var(--card);color:var(--text-2)}.latest-orders-heading-icon svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.8}.latest-orders-heading h2{color:var(--text);font-size:19px!important;font-weight:800;line-height:1.15}.latest-orders-heading p{margin-top:5px;color:var(--text-4);font-size:11px}
