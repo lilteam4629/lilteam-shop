@@ -261,10 +261,20 @@
     body.storefront-global-background #site-page-shell,
     body.storefront-global-background #site-page-shell.storefront-owner-home-v7 {
       background: transparent !important;
+      background-color: transparent !important;
       background-image: none !important;
     }
     #site-page-shell.storefront-owner-home-v7 {
       background: transparent !important;
+      background-color: transparent !important;
+      background-image: none !important;
+    }
+    /* The current v20 home layout uses :has() to repaint an opaque page
+       surface. Match that selector's specificity so the store wallpaper can
+       actually show through, and set the longhand explicitly. */
+    body.storefront-global-background #site-page-shell.storefront-owner-home-v7:has(.owner-home-v20-shell) {
+      background: transparent !important;
+      background-color: transparent !important;
       background-image: none !important;
     }
     @media (max-width: 900px) {
