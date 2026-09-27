@@ -22,7 +22,7 @@
   </svg>
   <div class="store-nav__inner">
     <button type="button" class="store-nav__round store-nav__mobile-toggle" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="storeMobileMenu"><span></span><span></span><span></span></button>
-    <a href="/" class="store-nav__brand" aria-label="หน้าแรก <%= settings.shopName %>">
+    <a href="/" class="store-nav__brand<%= settings.branding && settings.branding.logoImage ? ' store-nav__brand--image' : '' %>" aria-label="หน้าแรก <%= settings.shopName %>">
       <% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" /><% } else { %><span class="store-nav__logo-fallback" data-storefront-preview-initial>L</span><% } %>
       <strong data-storefront-preview-setting="shopName"><%= settings.shopName %></strong>
     </a>
