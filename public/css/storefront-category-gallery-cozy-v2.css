@@ -55,16 +55,15 @@ body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-h
 }
 
 body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-image {
-  display: grid !important;
-  place-items: center !important;
+  display: block !important;
   width: 100% !important;
   height: auto !important;
   min-height: 0 !important;
-  aspect-ratio: 2.58 / 1 !important;
+  aspect-ratio: auto !important;
   overflow: hidden !important;
   border: 0 !important;
   border-radius: 15px !important;
-  background: color-mix(in srgb, var(--gold) 8%, var(--input)) !important;
+  background: transparent !important;
   box-shadow: none !important;
   line-height: 0 !important;
 }
@@ -72,7 +71,7 @@ body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-h
 body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-image img {
   display: block !important;
   width: 100% !important;
-  height: 100% !important;
+  height: auto !important;
   max-width: none !important;
   max-height: none !important;
   border: 0 !important;
@@ -147,7 +146,7 @@ body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-h
   }
 
   body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-image {
-    aspect-ratio: 2.45 / 1 !important;
+    aspect-ratio: auto !important;
     border-radius: 13px !important;
   }
 
