@@ -79,10 +79,10 @@
             <% if (i.randomBoxDraw) { %>
               <div class="mt-2 rounded-xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 p-3 text-xs">
                 <% if (i.randomBoxDraw.isWin) { %>
-                  <div class="font-bold text-[var(--gold-text)]">🎉 ผู้ชนะรอบ <%= i.randomBoxDraw.roundNumber %> · รางวัล <%= i.randomBoxDraw.prizeName %></div>
+                  <div class="font-bold text-[var(--gold-text)] break-words">🎉 ผู้ชนะรอบ <%= i.randomBoxDraw.roundNumber %> · รางวัล <%= i.randomBoxDraw.prizeName %></div>
                   <div class="mt-1 text-[var(--text-2)]"><%= i.credentials ? 'ตัดคีย์/ไอดีจากสต็อกและส่งอัตโนมัติแล้ว' : 'ไม่พบคีย์/ไอดีที่ตัดจากสต็อก' %></div>
                 <% } else { %>
-                  <div class="font-bold text-[var(--text-2)]">ผลสุ่ม: ไม่ถูกรางวัลในครั้งนี้</div>
+                  <div class="font-bold text-[var(--text-2)] whitespace-pre-line break-words">ผลสุ่ม: <%= i.randomBoxDraw.missMessage || 'ยังไม่ได้รับรางวัลในครั้งนี้' %></div>
                 <% } %>
               </div>
             <% } else if (i.fulfillmentMode === 'contact') { %>

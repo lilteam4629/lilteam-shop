@@ -1652,6 +1652,17 @@ router.post('/products/:id/stock/settings', async (req, res) => {
   res.redirect(`/admin/products/${product.id}/stock#add-stock`);
 });
 
+router.post('/products/:id/stock/random-box-message', async (req, res) => {
+  const product = store.data.products.find(p => p.id === req.params.id);
+  if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  if (product.specialType !== randomBox.RANDOM_BOX_KIND || !randomBox.supportsRandomBox(req)) return res.sendStatus(404);
+  product.randomBox ||= {};
+  product.randomBox.missMessage = randomBox.normalizeMissMessage(req.body.randomBoxMissMessage);
+  await store.save();
+  req.flash('success', product.randomBox.missMessage ? 'บันทึกข้อความเมื่อไม่ได้รางวัลแล้ว' : 'ล้างข้อความแล้ว ระบบจะแสดงข้อความเริ่มต้น');
+  res.redirect(`/admin/products/${product.id}/stock#random-box-stock-info`);
+});
+
 router.post('/products/:id/stock/add', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }

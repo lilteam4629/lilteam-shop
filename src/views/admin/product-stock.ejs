@@ -1,4 +1,4 @@
-<% const isRandomBox = product.specialType === 'random-box'; const randomBoxAvailableCount = typeof randomBoxStockCount === 'undefined' ? stockItems.filter(item => item.status === 'available').length : randomBoxStockCount; %>
+<% const isRandomBox = product.specialType === 'random-box'; const randomBoxAvailableCount = typeof randomBoxStockCount === 'undefined' ? stockItems.filter(item => item.status === 'available').length : randomBoxStockCount; const randomBoxMissMessage = String(product.randomBox?.missMessage || '').trim(); %>
 <!-- Stock Management Header -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
@@ -25,8 +25,16 @@
       <div><h2 id="random-box-stock-info-title" class="font-bold text-sm sm:text-base text-[var(--text)]">สต็อกกล่องสุ่ม</h2><p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">ไม่มีหมวดหรือสัดส่วนรางวัล · ระบบสุ่มสินค้า 1 ชิ้นจากทุกบรรทัดที่พร้อมส่ง</p></div>
       <span class="rounded-full bg-[var(--gold)]/10 px-3 py-1.5 text-xs font-bold text-[var(--gold-text)]">฿1 / ครั้ง</span>
     </div>
-    <div class="mt-4 grid gap-3">
+    <div class="mt-4 grid gap-3 sm:grid-cols-2">
       <div class="rounded-xl bg-[var(--input)] px-4 py-3"><span class="block text-[11px] text-[var(--text-4)]">สินค้าในสต็อกพร้อมสุ่ม</span><strong class="mt-1 block text-base font-black text-[var(--text)]"><%= randomBoxAvailableCount.toLocaleString('th-TH') %> ชิ้น</strong><span class="mt-1 block text-[11px] text-[var(--text-3)]">สินค้า 1 ชิ้นที่ส่งออก จะถูกหักจากสต็อก 1 รายการ</span></div>
+      <form action="/admin/products/<%= product.id %>/stock/random-box-message" method="post" class="rounded-xl border border-[var(--border-light)] bg-[var(--card)] p-3.5">
+        <label for="random-box-miss-message" class="block text-xs font-bold text-[var(--text)]">ข้อความเมื่อสุ่มไม่ได้รางวัล</label>
+        <textarea id="random-box-miss-message" name="randomBoxMissMessage" rows="2" maxlength="300" placeholder="ยังไม่ได้รับรางวัลในครั้งนี้" class="mt-2 w-full resize-y rounded-lg border border-[var(--border-light)] bg-[var(--input)] px-3 py-2 text-xs leading-relaxed text-[var(--text)] outline-none transition focus:border-[var(--gold)]"><%= randomBoxMissMessage %></textarea>
+        <div class="mt-2 flex flex-wrap items-center justify-between gap-2">
+          <span class="text-[11px] text-[var(--text-4)]">จะแสดงข้อความนี้ในผลสุ่มที่ไม่ได้รางวัล</span>
+          <button type="submit" class="rounded-lg bg-[var(--gold)] px-3 py-2 text-xs font-bold text-[var(--gold-contrast)] transition hover:brightness-105">บันทึกข้อความ</button>
+        </div>
+      </form>
     </div>
   </section>
 <% } else { %>

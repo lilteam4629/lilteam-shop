@@ -8,6 +8,23 @@ const MAX_RANDOM_BOX_DRAWS = 100;
 const DEFAULT_RANDOM_BOX_RATE = 1;
 const RANDOM_BOX_MIN_TARGET = 85;
 const RANDOM_BOX_MAX_TARGET = 110;
+const DEFAULT_MISS_MESSAGE = 'ยังไม่ได้รับรางวัลในครั้งนี้';
+const MAX_MISS_MESSAGE_LENGTH = 300;
+
+function normalizeMissMessage(message) {
+  return String(message ?? '').replace(/\r\n?/g, '\n').trim().slice(0, MAX_MISS_MESSAGE_LENGTH);
+}
+
+function getMissMessage(product) {
+  return normalizeMissMessage(product?.randomBox?.missMessage) || DEFAULT_MISS_MESSAGE;
+}
+
+function getStockPrizeName(stockItem) {
+  return [stockItem?.username, stockItem?.password, stockItem?.extra]
+    .map(value => String(value ?? '').trim())
+    .filter(Boolean)
+    .join(':') || 'คีย์/ไอดี 1 ชิ้น';
+}
 
 function supportsRandomBox(req) {
   if (!req || !req.tenantShop) return true;
@@ -162,8 +179,7 @@ function drawRandomBox(data, {
         ? selectedIndex
         : 0;
       prizeStockItem = availablePrizes[safeIndex];
-      const legacyPrize = (product.randomBox?.prizes || []).find(item => String(item.id) === String(prizeStockItem.randomBoxPrizeId));
-      prizeName = String(legacyPrize?.name || 'คีย์/ไอดี 1 ชิ้น').trim().slice(0, 120);
+      prizeName = getStockPrizeName(prizeStockItem);
       prizeStockItem.status = 'sold';
       prizeStockItem.soldOrderId = orderId;
       round.progress = 0;
@@ -187,6 +203,7 @@ function drawRandomBox(data, {
       nextRoundProgress: Number(round.progress) || 0,
       nextRoundTarget: Number(round.target),
       prizeName,
+      missMessage: isWin ? null : getMissMessage(product),
     };
     drawResults.push(drawResult);
     orderItems.push({
@@ -259,11 +276,14 @@ module.exports = {
   RANDOM_BOX_MAX_RATE,
   MAX_RANDOM_BOX_DRAWS,
   DEFAULT_RANDOM_BOX_RATE,
+  DEFAULT_MISS_MESSAGE,
+  MAX_MISS_MESSAGE_LENGTH,
   supportsRandomBox,
   randomTarget,
   normalizeRate,
   getRateConfig,
   parseRate,
+  normalizeMissMessage,
   validateRate,
   parseDrawCount,
   availableStockItems,

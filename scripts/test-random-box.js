@@ -18,6 +18,8 @@ assert.strictEqual(randomBox.validateRate('0.01'), null);
 assert.strictEqual(randomBox.validateRate('100'), null);
 assert.strictEqual(randomBox.getRateConfig(100).minTarget, 1, 'a 100% rate awards every draw');
 assert.notStrictEqual(randomBox.validateRate('1.001'), null);
+assert.strictEqual(randomBox.normalizeMissMessage('  เสียใจด้วยครับ\r\nลองใหม่อีกครั้ง  '), 'เสียใจด้วยครับ\nลองใหม่อีกครั้ง');
+assert.strictEqual(randomBox.normalizeMissMessage('x'.repeat(400)).length, randomBox.MAX_MISS_MESSAGE_LENGTH, 'miss copy is bounded');
 assert.strictEqual(randomBox.parseDrawCount(undefined), 1, 'a missing count keeps the single-draw default');
 assert.strictEqual(randomBox.parseDrawCount('7'), 7, 'buyers can request multiple draws');
 for (const invalidCount of ['', '0', '-1', '1.5', '101', '2e2']) {
@@ -42,7 +44,7 @@ const data = {
   products: [{
     id: 'box-1', slug: 'one-baht-box', title: 'กล่องสุ่ม', price: 999, originalPrice: 999,
     specialType: randomBox.RANDOM_BOX_KIND, status: 'active', images: ['/box.png'],
-    randomBox: { rate: 1, prizes: [{ id: 'legacy-prize', name: 'รางวัลเดิม', percent: 99, active: true }] },
+    randomBox: { rate: 1, missMessage: 'ขอบคุณที่ร่วมสนุก', prizes: [{ id: 'legacy-prize', name: 'รางวัลเดิม', percent: 99, active: true }] },
   }],
   stockItems: [
     { id: 'legacy-stock-1', productId: 'box-1', randomBoxPrizeId: 'legacy-prize', username: 'winner-a', password: 'key-a', status: 'available' },
@@ -63,6 +65,7 @@ for (let draw = 1; draw <= 84; draw += 1) {
     now: 1_800_000_000_000, randomInt: deterministicRandom, genId,
   });
   assert.strictEqual(result.result.isWin, false, `draw ${draw} must not win before the global target`);
+  assert.strictEqual(result.result.missMessage, 'ขอบคุณที่ร่วมสนุก', 'each miss snapshots the configured customer message');
 }
 assert.strictEqual(data.randomBoxRounds['box-1'].progress, 84, 'round count is global across buyers');
 assert.strictEqual(data.users[0].walletBalance, 58, 'first buyer pays for their own 42 attempts');
@@ -75,7 +78,8 @@ const winner = randomBox.drawRandomBox(data, {
 });
 assert.strictEqual(winner.result.isWin, true, 'the draw that reaches target wins');
 assert.strictEqual(winner.result.roundProgress, 85);
-assert.strictEqual(winner.result.prizeName, 'รางวัลเดิม', 'legacy inventory still keeps its saved display name');
+assert.strictEqual(winner.result.prizeName, 'winner-a:key-a', 'a win uses the selected stock entry as its prize label');
+assert.strictEqual(winner.result.missMessage, null, 'winning draws do not include the miss message');
 assert.strictEqual(Object.hasOwn(winner.result, 'prizePercent'), false, 'draw results no longer depend on prize percentages');
 assert.strictEqual(data.stockItems[0].status, 'sold', 'the selected key is consumed from inventory once');
 assert.strictEqual(data.stockItems[0].soldOrderId, winner.orderId, 'inventory is linked to the winning order');
@@ -116,7 +120,7 @@ for (let draw = 1; draw <= 45; draw += 1) {
   assert.strictEqual(result.result.isWin, draw === 45, `rate two draw ${draw} follows the 45–60 target`);
   if (draw === 45) {
     assert.strictEqual(result.result.roundTarget, 45);
-    assert.strictEqual(result.result.prizeName, 'คีย์/ไอดี 1 ชิ้น', 'uncategorized inventory is delivered directly');
+    assert.strictEqual(result.result.prizeName, 'winner-b', 'a single-field stock entry is used as the prize label');
     assert.strictEqual(data.orders.at(-1).items[0].stockItemId, 'direct-stock-1');
   }
 }

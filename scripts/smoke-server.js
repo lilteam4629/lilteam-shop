@@ -181,6 +181,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
   }
   const emptyStockPage = await fetchOk(`/admin/products/${encodeURIComponent(productId)}/stock`, 'text/html', { cookie: adminCookie });
   if (emptyStockPage.body.includes('name="randomBoxPrizeName"') || emptyStockPage.body.includes('name="randomBoxPrizePercent"')
+    || !emptyStockPage.body.includes('name="randomBoxMissMessage"')
     || !emptyStockPage.body.includes('1 บรรทัดนับเป็น 1 ชิ้น') || emptyStockPage.body.includes('เรทปัจจุบัน')
     || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*85\s*[–-]\s*110/.test(emptyStockPage.body)) {
     throw new Error('random-box stock page still asks for prize categories or reveals the payout range');
@@ -193,6 +194,16 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (editWithoutRewardFields.statusCode !== 302) throw new Error('the random-box product form did not save without reward rows');
   product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
   if (product.randomBox.rate !== 1) throw new Error('editing the random-box product changed its configured rate');
+
+  const missMessage = 'ขอบคุณที่ร่วมสนุก ลองใหม่ได้เสมอ';
+  const saveMissMessage = await request(`/admin/products/${encodeURIComponent(productId)}/stock/random-box-message`, {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ randomBoxMissMessage: `  ${missMessage}  ` }).toString(),
+  });
+  product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
+  if (saveMissMessage.statusCode !== 302 || product.randomBox.missMessage !== missMessage) {
+    throw new Error('the configured miss message was not trimmed and saved');
+  }
 
   const addStock = await request(`/admin/products/${encodeURIComponent(productId)}/stock/add`, {
     method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
@@ -263,7 +274,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
     throw new Error(`random-box draw route did not return an order (HTTP ${firstDraw.statusCode})`);
   }
   const customerOrderPage = await fetchOk(firstDraw.headers.location, 'text/html', { cookie: customerCookie });
-  if (!customerOrderPage.body.includes('ยังไม่ได้รับรางวัลในครั้งนี้')
+  if (!customerOrderPage.body.includes(missMessage)
     || /รอบรวม\s*\d+\s*\/\s*\d+/.test(customerOrderPage.body)
     || customerOrderPage.body.includes('ความคืบหน้ารอบ')) {
     throw new Error('random-box order page exposes shared-round progress or hides the draw result');
@@ -273,8 +284,20 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const buyer = data.users.find(user => user.username === 'demo');
   const order = data.orders.find(item => item.id === firstDraw.headers.location.split('/').pop());
   if (!buyer || buyer.walletBalance !== balanceBeforeDraw - 1 || !order?.randomBoxOrder || order.total !== 1
-    || order.items[0].randomBoxDraw.roundProgress !== 1 || order.items[0].randomBoxDraw.isWin) {
+    || order.items[0].randomBoxDraw.roundProgress !== 1 || order.items[0].randomBoxDraw.isWin
+    || order.items[0].randomBoxDraw.missMessage !== missMessage) {
     throw new Error('a random-box attempt did not create its ฿1 order and shared-round progress atomically');
+  }
+
+  const revisedMissMessage = 'รอบนี้ยังไม่ถูกรางวัล';
+  const reviseMissMessage = await request(`/admin/products/${encodeURIComponent(productId)}/stock/random-box-message`, {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ randomBoxMissMessage: revisedMissMessage }).toString(),
+  });
+  const historicalOrderPage = await fetchOk(firstDraw.headers.location, 'text/html', { cookie: customerCookie });
+  if (reviseMissMessage.statusCode !== 302 || !historicalOrderPage.body.includes(missMessage)
+    || historicalOrderPage.body.includes(revisedMissMessage)) {
+    throw new Error('changing the miss message rewrote a previously completed draw');
   }
   const balanceBeforeBatch = buyer.walletBalance;
   const batchRequestId = crypto.randomUUID();
@@ -293,7 +316,8 @@ async function checkRandomBoxWorkflow(adminCookie) {
     throw new Error('the selected draw count did not create separate attempts and charge one baht per attempt');
   }
   const batchOrderPage = await fetchOk(batchResponse.headers.location, 'text/html', { cookie: customerCookie });
-  if (!batchOrderPage.body.includes('สุ่ม 3 ครั้ง') || !batchOrderPage.body.includes('ผลสุ่มครั้งที่ 3')) {
+  if (!batchOrderPage.body.includes('สุ่ม 3 ครั้ง') || !batchOrderPage.body.includes('ผลสุ่มครั้งที่ 3')
+    || !batchOrderPage.body.includes(revisedMissMessage)) {
     throw new Error('the batch order page does not summarize and list all selected draws');
   }
   const batchReplay = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
@@ -337,8 +361,11 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const winningOrderId = winnerResponse.headers.location.split('/').pop();
   const winningOrder = data.orders.find(item => item.id === winningOrderId);
   const deliveredStock = data.stockItems.find(item => item.id === winningOrder?.items[0]?.stockItemId);
+  const expectedPrizeLabel = [deliveredStock?.username, deliveredStock?.password, deliveredStock?.extra].filter(Boolean).join(':');
   const deliveredPage = await fetchOk(winnerResponse.headers.location, 'text/html', { cookie: customerCookie });
   if (winningOrder?.status !== 'completed' || !winningOrder?.items[0]?.randomBoxDraw?.isWin
+    || winningOrder.items[0].randomBoxDraw.prizeName !== expectedPrizeLabel
+    || !deliveredPage.body.includes(expectedPrizeLabel)
     || deliveredStock?.status !== 'sold' || deliveredStock.soldOrderId !== winningOrderId
     || !deliveredStock || !deliveredPage.body.includes(deliveredStock.username)
     || (deliveredStock.password && !deliveredPage.body.includes(deliveredStock.password))) {
