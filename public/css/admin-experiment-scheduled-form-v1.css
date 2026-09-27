@@ -1,11 +1,15 @@
+.experiment-schedule-form-page { --ex-bg: #f5f3ef; --ex-surface: #fff; --ex-ink: #29251f; --ex-muted: #746d64; --ex-line: #e4ddd3; --ex-green: #9a673f; --ex-green-dark: #805333; --ex-green-soft: #f4ece4; --ex-shadow: 0 8px 24px rgba(73, 54, 35, .045); }
+.experiment-schedule-form-page .experiment-content { width: min(1540px, 100%); }
 .experiment-schedule-form-page .experiment-kicker { color: #8c5e12; }
+.experiment-schedule-form-page .experiment-page-head { align-items: center; }
+.experiment-schedule-form-page .experiment-page-head h1 { color: #29251f; }
 .experiment-schedule-form-page .experiment-page-head p { max-width: 650px; }
-.experiment-schedule-form { display: grid; gap: 16px; max-width: 1080px; padding-bottom: 20px; }
-.experiment-form-panel { padding: 22px; }
-.experiment-form-panel-highlight { border-color: var(--ex-line); background: var(--ex-surface); }
+.experiment-schedule-form { display: grid; gap: 14px; max-width: 1260px; padding-bottom: 20px; }
+.experiment-form-panel { padding: clamp(18px, 2vw, 25px); border-radius: 18px; }
+.experiment-form-panel-highlight { border-color: var(--ex-line); background: linear-gradient(120deg, #fff 55%, #fcfaf6); }
 .experiment-form-panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 17px; }
 .experiment-form-panel-head > div:first-child { display: flex; align-items: flex-start; gap: 11px; }
-.experiment-form-panel-head h2 { margin: 1px 0 2px; color: var(--ex-ink); font: 700 17px var(--ex-display); letter-spacing: -.03em; }
+.experiment-form-panel-head h2 { margin: 1px 0 2px; color: var(--ex-ink); font: 700 18px var(--ex-display); letter-spacing: -.03em; }
 .experiment-form-panel-head p { margin: 0; color: var(--ex-muted); font-size: 11px; line-height: 1.5; }
 .experiment-form-step { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 30px; border-radius: 10px; color: #8c5e12; background: #f4ead5; font: 800 11px var(--ex-display); }
 .experiment-form-step.green { color: #8c5e12; background: #f4ead5; }
@@ -18,13 +22,15 @@
 .experiment-field { display: grid; gap: 7px; min-width: 0; color: var(--ex-ink); font-size: 12px; font-weight: 700; }
 .experiment-field.full { grid-column: 1 / -1; }
 .experiment-field b { color: #c05245; }
-.experiment-field input, .experiment-field textarea, .experiment-field select { width: 100%; min-width: 0; border: 1px solid var(--ex-line); border-radius: 12px; outline: 0; padding: 12px 13px; color: var(--ex-ink); background: #fff; font: 500 13px var(--ex-body); transition: border-color .16s ease, box-shadow .16s ease; }
+.experiment-field input, .experiment-field textarea, .experiment-field select { width: 100%; min-width: 0; border: 1px solid #d8cfc3; border-radius: 11px; outline: 0; padding: 12px 13px; color: var(--ex-ink); background: #fff; font: 500 13px var(--ex-body); transition: border-color .16s ease, box-shadow .16s ease, background .16s ease; }
+.experiment-field input::placeholder, .experiment-field textarea::placeholder { color: #928a80; opacity: 1; }
+.experiment-field input:hover, .experiment-field textarea:hover, .experiment-field select:hover { border-color: #bda993; }
 .experiment-field input[type="file"] { padding: 9px; background: #f8f7f4; }
 .experiment-field textarea { min-height: 78px; resize: vertical; line-height: 1.55; }
-.experiment-field input:focus, .experiment-field textarea:focus, .experiment-field select:focus { border-color: #a87850; box-shadow: 0 0 0 3px rgba(140,94,18,.12); }
+.experiment-field input:focus, .experiment-field textarea:focus, .experiment-field select:focus { border-color: #a87850; box-shadow: 0 0 0 3px rgba(140,94,18,.12); background: #fffefa; }
 .experiment-field input:focus-visible, .experiment-field textarea:focus-visible, .experiment-field select:focus-visible, .experiment-schedule-form input[type="checkbox"]:focus-visible, .experiment-button:focus-visible { outline: 3px solid rgba(140,94,18,.32); outline-offset: 2px; }
 .experiment-field small, .experiment-form-hint { color: var(--ex-muted); font-size: 10px; font-weight: 500; line-height: 1.5; }
-.experiment-datetime-wrap { display: flex; align-items: center; gap: 8px; padding-left: 11px; border: 1px solid var(--ex-line); border-radius: 12px; background: #fff; }
+.experiment-datetime-wrap { display: flex; align-items: center; gap: 8px; padding-left: 11px; border: 1px solid #d8cfc3; border-radius: 11px; background: #fff; }
 .experiment-datetime-wrap:focus-within { box-shadow: 0 0 0 3px rgba(140,94,18,.12); }
 .experiment-datetime-wrap svg { width: 16px; height: 16px; flex: 0 0 16px; fill: none; stroke: #8c5e12; stroke-linecap: round; stroke-linejoin: round; stroke-width: 1.7; }
 .experiment-datetime-wrap input { border: 0; box-shadow: none !important; padding-left: 0; background: transparent; }
@@ -37,15 +43,15 @@
 .experiment-subsection-head h3 { margin: 0; color: var(--ex-ink); font: 700 14px var(--ex-display); }
 .experiment-subsection-head p, .experiment-field-note, .experiment-inline-empty { margin: 3px 0 0; color: var(--ex-muted); font-size: 11px; line-height: 1.6; }
 .experiment-image-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 10px; }
-.experiment-image-choice { min-width: 0; overflow: hidden; border: 1px solid var(--ex-line); border-radius: 12px; background: #fff; }
+.experiment-image-choice { min-width: 0; overflow: hidden; border: 1px solid #e0d8ce; border-radius: 12px; background: #fff; }
 .experiment-image-preview { display: grid; place-items: center; aspect-ratio: 4 / 3; background: #f5f4f1; }
 .experiment-image-preview img { width: 100%; height: 100%; object-fit: contain; }
 .experiment-image-choice-meta { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 7px 8px; color: var(--ex-ink); font-size: 10px; font-weight: 700; }
 .experiment-image-remove { display: inline-flex; align-items: center; gap: 4px; color: #8a5147; font-weight: 500; }
 .experiment-image-remove input, .experiment-check-row input, .experiment-filter-option input { width: 16px; height: 16px; flex: 0 0 16px; accent-color: #8c5e12; }
 .experiment-filter-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
-.experiment-filter-option { display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 60px; padding: 10px 12px; border: 1px solid var(--ex-line); border-radius: 12px; background: #fff; cursor: pointer; transition: border-color .15s ease, background .15s ease; }
-.experiment-filter-option:has(input:checked) { border-color: #a87850; background: #f8f5ef; }
+.experiment-filter-option { display: flex; align-items: center; gap: 10px; min-width: 0; min-height: 60px; padding: 10px 12px; border: 1px solid #e0d8ce; border-radius: 12px; background: #fff; cursor: pointer; transition: border-color .15s ease, background .15s ease, box-shadow .15s ease; }
+.experiment-filter-option:has(input:checked) { border-color: #a87850; background: #fbf7f1; box-shadow: inset 0 0 0 1px rgba(168,120,80,.13); }
 .experiment-filter-option img { width: 36px; height: 36px; flex: 0 0 36px; border-radius: 9px; object-fit: cover; }
 .experiment-filter-option span { display: grid; gap: 2px; min-width: 0; }
 .experiment-filter-option strong { color: var(--ex-ink); font-size: 12px; }
@@ -59,4 +65,38 @@
 .status-field { margin-top: 18px; max-width: 320px; }
 .experiment-form-actions { display: flex; justify-content: flex-end; gap: 8px; padding-top: 2px; }
 .experiment-form-actions .experiment-button.primary { min-width: 190px; }
+
+/* The shared admin reset makes every border transparent. Restore only this form's
+   controls and selection surfaces in that reset's layer so they remain visible. */
+@layer admin-main-neutral-borders {
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-form-panel,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-image-choice,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-filter-option,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-message-locked,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-datetime-wrap,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-field input,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-field textarea,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-field select {
+    border-color: #d8cfc3 !important;
+  }
+
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-filter-option:has(input:checked) {
+    border-color: #a87850 !important;
+  }
+
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-field input:focus,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-field textarea:focus,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-field select:focus,
+  body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-filter-option:focus-within {
+    border-color: #a87850 !important;
+    outline: 2px solid rgba(140, 94, 18, .24) !important;
+    outline-offset: 1px !important;
+  }
+}
+
+@media (min-width: 1300px) {
+  .experiment-schedule-form { gap: 15px; }
+  .experiment-filter-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
 @media (max-width: 700px) { .experiment-schedule-form { gap: 12px; } .experiment-form-panel { padding: 15px; } .experiment-form-panel-head { gap: 10px; } .experiment-form-panel-head p { font-size: 10px; } .experiment-form-grid { grid-template-columns: 1fr; gap: 12px; } .experiment-field.full { grid-column: auto; } .experiment-ready-chip, .experiment-muted-chip { display: none; } .experiment-filter-options { grid-template-columns: 1fr; } .experiment-image-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; } .experiment-image-choice-meta { flex-wrap: wrap; } .experiment-form-actions { position: sticky; bottom: 0; z-index: 5; margin: 0 -12px; padding: 10px 12px calc(10px + env(safe-area-inset-bottom)); background: rgba(245,245,242,.96); border-top: 1px solid var(--ex-line); justify-content: stretch; flex-direction: column-reverse; } .experiment-form-actions .experiment-button { width: 100%; justify-content: center; min-height: 46px; } .experiment-form-actions .experiment-button.primary { min-width: 0; } }
