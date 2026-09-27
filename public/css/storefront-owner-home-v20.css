@@ -219,20 +219,26 @@ body.storefront-global-background #site-page-shell.storefront-owner-home-v7:has(
   gap: 8px;
   min-height: 42px;
   padding: 0 18px;
-  border: 1px solid var(--text);
+  border: 1px solid var(--gold);
   border-radius: 9px;
-  color: var(--bg) !important;
-  background: var(--text);
+  color: var(--gold-contrast) !important;
+  background: var(--gold);
   font-size: 12px;
   font-weight: 800;
   text-decoration: none;
   white-space: nowrap;
-  transition: opacity .16s ease, transform .16s ease;
+  transition: background-color .16s ease, border-color .16s ease, transform .16s ease;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-catalog-heading-cta:hover {
+  border-color: var(--gold-hover);
+  background: var(--gold-hover);
   transform: translateY(-1px);
-  opacity: .84;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-catalog-heading-cta:focus-visible {
+  outline: 2px solid var(--gold-text);
+  outline-offset: 3px;
 }
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-catalog-heading-cta svg {
