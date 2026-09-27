@@ -1,18 +1,6 @@
 /* A small Now Playing dock for the primary storefront homepage. */
 body.storefront-owner-home-page #music-widget {
-  --bg: #f4efdf;
-  --card: #fbf7ed;
-  --text: #37382f;
-  --text-2: #605f50;
-  --text-3: #777260;
-  --border: #e6ddc9;
-  --border-light: #ded2b8;
-  --input: #f4ecd9;
-  --gold: #7d8950;
-  --gold-hover: #6e7b45;
-  --gold-text: #5e6840;
-  --gold-contrast: #fffdf6;
-  color-scheme: light;
+  color-scheme: dark;
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -29,6 +17,10 @@ body.storefront-owner-home-page #music-widget {
   background: var(--card) !important;
   box-shadow: 0 7px 22px color-mix(in srgb, var(--text) 14%, transparent), inset 0 1px color-mix(in srgb, white 42%, transparent) !important;
   transition: transform .22s cubic-bezier(.2, .8, .2, 1), border-radius .22s ease, background-color .16s ease, box-shadow .16s ease !important;
+}
+
+html.light body.storefront-owner-home-page #music-widget {
+  color-scheme: light;
 }
 
 body.storefront-owner-home-page #music-widget.is-playing {
@@ -71,7 +63,7 @@ body.storefront-owner-home-page #music-widget .music-dock-restore {
   border: 1px solid var(--border) !important;
   border-radius: 999px !important;
   color: var(--text-2) !important;
-  background: color-mix(in srgb, var(--card) 78%, white) !important;
+  background: var(--input) !important;
   box-shadow: none !important;
   transition: color .16s ease, background-color .16s ease, transform .16s ease !important;
 }
@@ -193,7 +185,7 @@ body.storefront-owner-home-page #music-widget .music-restore-chevron {
   border: 1px solid var(--border);
   border-radius: 50%;
   color: var(--gold-text);
-  background: color-mix(in srgb, var(--card) 78%, white);
+  background: var(--input);
 }
 
 body.storefront-owner-home-page #music-widget .music-restore-chevron svg {

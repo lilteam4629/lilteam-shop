@@ -5,18 +5,18 @@
   min-width: 0;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid #dedede;
+  border: 1px solid var(--border);
   border-radius: 18px;
-  background: #fff;
-  color: #17191d;
+  background: var(--card);
+  color: var(--text);
   text-decoration: none;
-  box-shadow: 0 5px 16px rgba(0, 0, 0, .09);
+  box-shadow: 0 5px 16px color-mix(in srgb, var(--text) 9%, transparent);
   transition: border-color .18s ease, box-shadow .18s ease, transform .18s ease;
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-product-card:hover {
   transform: translateY(-3px);
-  border-color: color-mix(in srgb, var(--gold) 65%, #dedede);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, .14);
+  border-color: color-mix(in srgb, var(--gold) 65%, var(--border));
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--text) 14%, transparent);
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-media {
   position: relative;
@@ -75,11 +75,11 @@
   align-items: center;
   gap: 6px;
   padding: 5px 10px;
-  border: 1px solid color-mix(in srgb, var(--gold) 22%, #fff);
+  border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--border));
   border-radius: 999px;
-  background: rgba(255, 255, 255, .96);
+  background: var(--input);
   color: var(--gold-text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 18%, transparent);
   font-size: 11px;
   line-height: 1;
 }
@@ -90,10 +90,10 @@
   flex: 0 0 7px;
   border-radius: 50%;
   background: var(--gold);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 15%, #fff);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 15%, var(--card));
 }
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-stock-badge[data-stock-state="sold"] { color: #777; }
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-stock-badge[data-stock-state="sold"] .owner-home-v21-stock-dot { background: #9a9a9a; box-shadow: 0 0 0 3px #eee; }
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-stock-badge[data-stock-state="sold"] { color: var(--theme-muted-ink, var(--text-3)); }
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-stock-badge[data-stock-state="sold"] .owner-home-v21-stock-dot { background: var(--text-3); box-shadow: 0 0 0 3px var(--input); }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-countdown {
   position: absolute;
   bottom: 10px;
@@ -123,7 +123,7 @@
   display: -webkit-box;
   min-height: 16px;
   overflow: hidden;
-  color: #858585;
+  color: var(--text-2);
   font-size: 11px;
   line-height: 1.4;
   text-overflow: ellipsis;
@@ -135,7 +135,7 @@
   min-height: 2.55em;
   overflow: hidden;
   margin: 0;
-  color: #171717;
+  color: var(--text);
   font-size: clamp(14px, 1.08vw, 16px);
   font-weight: 750;
   line-height: 1.35;
@@ -144,7 +144,7 @@
   -webkit-line-clamp: 2;
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-label {
-  color: #777;
+  color: var(--text-2);
   font-size: 11px;
   font-weight: 600;
   line-height: 1.2;
@@ -163,7 +163,7 @@
   gap: 5px 8px;
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-price-values > strong {
-  color: #171717;
+  color: var(--text);
   font-size: clamp(20px, 1.65vw, 24px);
   font-weight: 850;
   letter-spacing: -.025em;
@@ -171,13 +171,13 @@
   white-space: nowrap;
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-price-values > strong small {
-  color: #454545;
+  color: var(--text-2);
   font-size: .53em;
   font-weight: 750;
   letter-spacing: 0;
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-price-values del {
-  color: #8a8a8a;
+  color: var(--text-3);
   font-size: 10px;
   font-weight: 650;
   white-space: nowrap;
@@ -190,7 +190,7 @@
   gap: 10px;
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid #e5e5e5;
+  border-top: 1px solid var(--border);
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-purchase-row .owner-home-v21-price-row { padding: 0; }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-buy {
@@ -202,16 +202,16 @@
   gap: 8px;
   margin-top: auto;
   padding: 0 13px;
-  border: 1px solid color-mix(in srgb, var(--gold) 60%, #fff);
+  border: 1px solid color-mix(in srgb, var(--gold) 60%, var(--border));
   border-radius: 999px;
-  background: #fff;
+  background: var(--input);
   color: var(--gold-text);
   font-size: 12px;
   font-weight: 800;
   transition: background-color .18s ease, border-color .18s ease;
 }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-buy i { font-size: 17px; font-style: normal; }
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-product-card:hover .owner-home-v21-buy { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, #fff); }
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-product-card:hover .owner-home-v21-buy { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 10%, var(--card)); }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v21-product-card:focus-visible {
   outline: 3px solid var(--gold);
   outline-offset: 3px;
