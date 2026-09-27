@@ -277,9 +277,14 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (!customerOrderPage.body.includes(missMessage) || !customerOrderPage.body.includes('ไม่ได้รับรางวัล')
     || !customerOrderPage.body.includes('data-random-box-result-status="miss"')
     || !customerOrderPage.body.includes('object-contain object-center')
+    || !customerOrderPage.body.includes('data-random-box-product')
+    || !customerOrderPage.body.includes('data-random-box-purchase-list')
+    || !customerOrderPage.body.includes('ชื่อรายการ') || !customerOrderPage.body.includes('ของรางวัล')
+    || (customerOrderPage.body.match(/data-random-box-product-image/g) || []).length !== 1
+    || (customerOrderPage.body.match(/data-random-box-draw-row=/g) || []).length !== 1
     || /รอบรวม\s*\d+\s*\/\s*\d+/.test(customerOrderPage.body)
     || customerOrderPage.body.includes('ความคืบหน้ารอบ')) {
-    throw new Error('random-box order page exposes shared-round progress or hides the draw result');
+    throw new Error('random-box order page should show one product and a purchase-results list without shared-round progress');
   }
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   product = data.products.find(item => item.id === productId);
@@ -318,8 +323,10 @@ async function checkRandomBoxWorkflow(adminCookie) {
     throw new Error('the selected draw count did not create separate attempts and charge one baht per attempt');
   }
   const batchOrderPage = await fetchOk(batchResponse.headers.location, 'text/html', { cookie: customerCookie });
-  if (!batchOrderPage.body.includes('สุ่ม 3 ครั้ง') || !batchOrderPage.body.includes('ผลสุ่มครั้งที่ 3')
-    || !batchOrderPage.body.includes(revisedMissMessage)) {
+  if (!batchOrderPage.body.includes('สุ่ม 3 ครั้ง') || !batchOrderPage.body.includes('ครั้งที่ 3')
+    || !batchOrderPage.body.includes(revisedMissMessage)
+    || (batchOrderPage.body.match(/data-random-box-product-image/g) || []).length !== 1
+    || (batchOrderPage.body.match(/data-random-box-draw-row=/g) || []).length !== 3) {
     throw new Error('the batch order page does not summarize and list all selected draws');
   }
   const batchReplay = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
@@ -368,6 +375,8 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (winningOrder?.status !== 'completed' || !winningOrder?.items[0]?.randomBoxDraw?.isWin
     || winningOrder.items[0].randomBoxDraw.prizeName !== expectedPrizeLabel
     || !deliveredPage.body.includes('data-random-box-result-status="win"')
+    || (deliveredPage.body.match(/data-random-box-product-image/g) || []).length !== 1
+    || (deliveredPage.body.match(/data-random-box-draw-row=/g) || []).length !== 1
     || !deliveredPage.body.includes('ได้รับรางวัล')
     || !deliveredPage.body.includes(expectedPrizeLabel)
     || deliveredStock?.status !== 'sold' || deliveredStock.soldOrderId !== winningOrderId

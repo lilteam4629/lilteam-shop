@@ -10,15 +10,60 @@
     </div>
   <% } %>
 
-  <% if (order.randomBoxOrder) { const winCount = itemsWithCreds.filter(item => item.randomBoxDraw?.isWin).length; %>
-    <div class="mb-4 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-4 py-3 text-sm">
-      สุ่ม <strong class="text-[var(--text)]"><%= itemsWithCreds.length.toLocaleString('th-TH') %> ครั้ง</strong>
-      · ได้รับรางวัล <strong class="text-[var(--gold-text)]"><%= winCount.toLocaleString('th-TH') %> ชิ้น</strong>
-      · ยอดชำระ <strong class="text-[var(--gold-text)]">฿<%= Number(order.total || 0).toLocaleString('th-TH') %>.00</strong>
-      <% if (Number(order.randomBoxRequestedDrawCount) > itemsWithCreds.length) { %><div class="mt-1 text-xs text-[var(--text-3)]">หยุดสุ่มเมื่อรางวัลในสต็อกหมด</div><% } %>
-    </div>
-  <% } %>
-  <div class="space-y-3 mb-6">
+  <% if (order.randomBoxOrder) { const boxProduct = itemsWithCreds[0] || {}; const winCount = itemsWithCreds.filter(item => item.randomBoxDraw?.isWin).length; %>
+    <section class="mb-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]" data-random-box-product>
+      <div class="flex items-center gap-4 p-4 sm:p-5">
+        <div class="relative grid aspect-video w-28 shrink-0 place-items-center overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--input)] sm:w-36">
+          <span class="absolute inset-0 grid place-items-center text-2xl text-[var(--text-4)]" aria-hidden="true">▧</span>
+          <% if (boxProduct.productImage) { %><img data-random-box-product-image src="<%= boxProduct.productImage %>" alt="รูปสินค้า <%= boxProduct.productTitle %>" width="960" height="540" loading="eager" decoding="async" class="relative z-[1] block h-full w-full bg-[var(--input)] object-contain object-center" onerror="this.hidden=true" /><% } %>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="text-xs text-[var(--text-3)]">กล่องสุ่ม · สุ่ม <%= itemsWithCreds.length.toLocaleString('th-TH') %> ครั้ง</div>
+          <h2 class="mt-1 break-words text-base font-bold sm:text-lg"><%= boxProduct.productTitle || 'กล่องสุ่ม' %></h2>
+          <% if (Number(order.randomBoxRequestedDrawCount) > itemsWithCreds.length) { %><div class="mt-1 text-xs text-[var(--text-3)]">หยุดสุ่มเมื่อรางวัลในสต็อกหมด</div><% } %>
+        </div>
+        <span class="self-start whitespace-nowrap font-bold text-[var(--gold-text)]">฿<%= Number(order.total || 0).toLocaleString('th-TH') %>.00</span>
+      </div>
+      <div class="overflow-x-auto border-t border-[var(--border)]">
+        <table class="w-full table-fixed text-sm" data-random-box-purchase-list>
+          <thead class="bg-[var(--input)]/70 text-left text-xs text-[var(--text-3)]">
+            <tr><th scope="col" class="w-[34%] px-4 py-3 font-semibold sm:w-[30%]">ชื่อรายการ</th><th scope="col" class="px-4 py-3 text-right font-semibold">ของรางวัล</th></tr>
+          </thead>
+          <tbody class="divide-y divide-[var(--border)]">
+            <% itemsWithCreds.forEach((i, drawIndex) => { const isWin = Boolean(i.randomBoxDraw?.isWin); %>
+              <tr data-random-box-draw-row="<%= drawIndex + 1 %>">
+                <th scope="row" class="px-4 py-4 text-left align-top font-medium">
+                  <div class="break-words text-[var(--text)]">กล่องสุ่ม</div>
+                  <div class="mt-1 text-xs text-[var(--text-3)]">ครั้งที่ <%= (drawIndex + 1).toLocaleString('th-TH') %></div>
+                </th>
+                <td class="px-4 py-4 text-right align-top" data-random-box-result-status="<%= isWin ? 'win' : 'miss' %>" role="status">
+                  <span class="inline-flex min-h-7 items-center rounded-full border px-3 py-1 text-xs font-bold <%= isWin ? 'border-[var(--gold)]/30 bg-[var(--gold)]/10 text-[var(--gold-text)]' : 'border-[var(--border)] bg-[var(--input)]/60 text-[var(--text-2)]' %>"><%= isWin ? 'ได้รับรางวัล' : 'ไม่ได้รับรางวัล' %></span>
+                  <% if (isWin) { %>
+                    <div class="mt-2 break-words font-bold text-[var(--gold-text)]">🎉 <%= i.randomBoxDraw.prizeName || 'รางวัลจากสต็อก' %></div>
+                    <% if (i.credentials) { %>
+                      <div class="mt-2 rounded-lg border border-[var(--border-light)] bg-[var(--bg)] p-3 text-left font-mono text-xs">
+                        <div class="break-all">ข้อมูลบน: <strong class="text-emerald-500"><%= i.credentials.username %></strong></div>
+                        <% if (i.credentials.password) { %><div class="mt-1 break-all">ข้อมูลล่าง: <strong class="text-emerald-500"><%= i.credentials.password %></strong></div><% } %>
+                        <% if (i.credentials.extra) { %><div class="mt-1 break-words font-sans text-[var(--text-3)]"><%= i.credentials.extra %></div><% } %>
+                      </div>
+                    <% } else { %><div class="mt-2 text-left text-xs text-[var(--coral)]">รางวัลนี้ยังไม่มีคีย์/ไอดีในสต็อก กรุณาติดต่อร้าน</div><% } %>
+                  <% } else { %>
+                    <div class="mt-2 text-xs text-[var(--text-3)]">ข้อความจากร้าน</div>
+                    <div class="mt-0.5 whitespace-pre-line break-words font-semibold text-[var(--text)]"><%= i.randomBoxDraw.missMessage || 'ยังไม่ได้รับรางวัลในครั้งนี้' %></div>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex flex-wrap justify-between gap-2 border-t border-[var(--border)] px-4 py-3 text-sm">
+        <span class="text-[var(--text-3)]">สุ่ม <%= itemsWithCreds.length.toLocaleString('th-TH') %> ครั้ง · ได้รับรางวัล <%= winCount.toLocaleString('th-TH') %> ชิ้น</span>
+        <strong class="text-[var(--gold-text)]">รวม ฿<%= Number(order.total || 0).toLocaleString('th-TH') %>.00</strong>
+      </div>
+    </section>
+  <% } else { %>
+    <div class="space-y-3 mb-6">
     <% itemsWithCreds.forEach((i, drawIndex) => { %>
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
         <div class="flex items-start gap-3 sm:gap-4 mb-4">
@@ -73,7 +118,8 @@
         <% } %>
       </div>
     <% }) %>
-  </div>
+    </div>
+  <% } %>
 
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-5 space-y-1 text-sm">
     <div class="flex justify-between"><span class="text-[var(--text-3)]">ยอดรวมสินค้า</span><span>฿<%= order.subtotal.toLocaleString() %>.00</span></div>
