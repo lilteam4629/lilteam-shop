@@ -67,7 +67,8 @@
     const ownerHomeFeatured = (newest || [])[0] || null;
     const ownerHomeHeroProduct = ownerHomeFeatured || (products || [])[0] || null;
   %>
-  <section class="owner-home-v20-hero owner-home-v23-hero<%= ownerHomeBanner ? ' owner-home-v20-hero--banner' : '' %><%= ownerHomeBanner || ownerHomeHeroProduct ? '' : ' owner-home-v20-hero--no-art' %>" id="home-top" aria-labelledby="owner-home-v20-title">
+  <section class="owner-home-v20-hero owner-home-v23-hero<%= ownerHomeBanner ? ' owner-home-v20-hero--banner owner-home-v20-hero--banner-only' : '' %><%= ownerHomeBanner || ownerHomeHeroProduct ? '' : ' owner-home-v20-hero--no-art' %>" id="home-top" <%= ownerHomeBanner ? `aria-label="${settings.shopName || 'LILTeam Shop'}"` : 'aria-labelledby="owner-home-v20-title"' %>>
+    <% if (!ownerHomeBanner) { %>
     <div class="owner-home-v20-hero-content">
       <p class="owner-home-v20-eyebrow"><span></span> LILTEAM SHOP <i>·</i> FEATURED STORE</p>
       <h1 id="owner-home-v20-title"><%= settings.shopName || 'LILTeam Shop' %></h1>
@@ -83,6 +84,7 @@
         <a class="owner-home-v20-secondary" href="/help">วิธีสั่งซื้อ</a>
       </div>
     </div>
+    <% } %>
     <% if (ownerHomeBanner) { %>
       <div class="owner-home-v20-artwork">
         <% if (settings.hero.bannerLink) { %>
@@ -90,7 +92,6 @@
         <% } else { %>
           <img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high" decoding="async" />
         <% } %>
-        <div class="owner-home-v20-hero-note"><span></span> LILTEAM MAIN STORE <i>·</i> <%= Number(productTotal || 0).toLocaleString() %> รายการ</div>
       </div>
     <% } else if (ownerHomeHeroProduct) { %>
       <a class="owner-home-v20-artwork owner-home-v23-spotlight owner-home-cozy-spotlight" href="<%= ownerHomeHeroProduct.slug ? '/game/' + ownerHomeHeroProduct.slug : '#home-catalog' %>" aria-label="ดูสินค้า <%= ownerHomeHeroProduct.title %>">

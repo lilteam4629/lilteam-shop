@@ -1,4 +1,52 @@
 /* Main storefront spotlight: make the empty hero column show a real catalog item. */
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only {
+  display: block !important;
+  width: 100%;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-artwork {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 14px;
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-artwork > img,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-artwork > a,
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-artwork > a img {
+  display: block !important;
+  width: 100% !important;
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  border: 0 !important;
+  border-radius: 14px;
+  box-shadow: none !important;
+  transform: none !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-hero-note { display: none !important; }
+
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-eyebrow {
   width: fit-content;
   padding: 7px 11px;
@@ -238,6 +286,16 @@
 }
 
 @media (max-width: 560px) {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only {
+    width: calc(100% + 24px);
+    margin-inline: -12px !important;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-artwork,
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-artwork img {
+    border-radius: 0;
+  }
+
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-artwork:not(.owner-home-v23-spotlight) {
     padding: 6px;
     border-radius: 16px;

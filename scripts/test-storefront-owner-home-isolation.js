@@ -28,8 +28,8 @@ assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && store
   'the new media-storefront stylesheet must only load on the owner storefront');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v21\.css/,
   'the new readable product-card layer must only load on the owner storefront');
-assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-owner-home-hero-v23\.css[^\n]*rev=2/,
-  'the safe hero rendering stylesheet must be cache-busted for the main store only');
+assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-owner-home-hero-v23\.css[^\n]*rev=3/,
+  'the banner-only hero stylesheet must be cache-busted for the main store only');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
   'the cozy homepage layer must only load on the main storefront');
 assert.doesNotMatch(layout, /storefront-owner-home-v18\.css/,
@@ -58,6 +58,12 @@ assert.match(home, /ownerHomeV20\) \{ %>[\s\S]*?ownerHomeBanner = settings\.hero
   'the new banner-first hero must use the configured real shop banner');
 assert.match(home, /class="owner-home-v20-artwork"[\s\S]*?<a href="<%= settings\.hero\.bannerLink %>" aria-label=[\s\S]*?<img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high"/,
   'the uploaded banner must remain visible and load with high priority');
+assert.match(home, /owner-home-v20-hero--banner-only[\s\S]*?if \(!ownerHomeBanner\) \{ %>[\s\S]*?owner-home-v20-hero-content/,
+  'a configured banner must replace the homepage text and action block');
+assert.doesNotMatch(home, /owner-home-v20-hero-note/,
+  'the enlarged banner must not carry a floating text badge');
+assert.match(ownerHeroFxCss, /owner-home-v20-hero--banner-only[\s\S]*?width:\s*100%[\s\S]*?owner-home-v20-artwork[\s\S]*?width:\s*100%[\s\S]*?object-fit:\s*contain/s,
+  'the main-store banner must use the available width and preserve the full image');
 assert.match(home, /recommendedCategories\.forEach\(category => \{[\s\S]*?class="home-category-card" href="\/products\?recommended=<%= encodeURIComponent\(category\.id\) %>/,
   'real shop categories must remain available in the homepage category rail');
 assert.match(home, /include\('\.\.\/partials\/latest-orders-rail', \{ latestOrders, isOwnerLatestRail: true \}\)/,
