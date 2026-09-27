@@ -196,7 +196,7 @@
       #page-loading-overlay .loading-ring::before { animation-duration: 1.6s; }
     }
   </style>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-account-menu-mobile-v1.css') %>" /><% } %>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-account-menu-mobile-v1.css') %>&amp;rev=2" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v1.css') %>" /><link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v2.css') %>" /><link rel="stylesheet" href="<%= asset('css/storefront-mobile-header-cozy-v3.css') %>&amp;rev=4" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-cozy-v1.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-hero-cozy-v1.css') %>" /><% } %>
