@@ -340,3 +340,209 @@ html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
   .store-nav--cozy-owner *::before,
   .store-nav--cozy-owner *::after { transition-duration: .01ms !important; }
 }
+
+/* A calm, scrollable mobile navigation for the primary storefront only. */
+@media (max-width: 900px) {
+  .store-nav--cozy-owner .store-nav__mobile-backdrop {
+    z-index: 10010 !important;
+    background: rgb(23 23 23 / 38%) !important;
+    opacity: 0;
+    transition: opacity .22s ease, visibility .22s ease !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-backdrop.is-open { opacity: 1; }
+  .store-nav--cozy-owner .store-nav__mobile-row {
+    display: flex !important;
+    flex-direction: column !important;
+    align-content: flex-start !important;
+    z-index: 10020 !important;
+    inset: 0 auto 0 0 !important;
+    width: min(420px, 92vw) !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    padding: env(safe-area-inset-top, 0px) 20px max(18px, env(safe-area-inset-bottom, 0px)) !important;
+    box-sizing: border-box !important;
+    gap: 0 !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    border: 0 !important;
+    border-right: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 0 18px 18px 0 !important;
+    background: var(--theme-card-surface, var(--card)) !important;
+    color: var(--theme-ink, #171717) !important;
+    box-shadow: 18px 0 48px rgb(23 23 23 / 14%) !important;
+    opacity: 0;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--theme-line, #deded8) transparent;
+    transform: translateX(-102%);
+    transition: transform .28s cubic-bezier(.2,.75,.25,1), opacity .2s ease, visibility .28s ease !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-row.is-open {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .store-nav--cozy-owner .store-nav__mobile-row > header {
+    position: sticky;
+    z-index: 2;
+    top: calc(-1 * env(safe-area-inset-top, 0px));
+    flex: 0 0 auto;
+    height: 72px !important;
+    min-height: 72px !important;
+    box-sizing: border-box !important;
+    margin: 0 -20px 14px !important;
+    padding: 10px 20px !important;
+    border-bottom: 1px solid var(--theme-line, var(--border)) !important;
+    background: var(--theme-card-surface, var(--card)) !important;
+  }
+  .store-nav--cozy-owner .store-nav__drawer-brand {
+    min-width: 0;
+    gap: 11px !important;
+    color: var(--theme-ink, #171717) !important;
+    font-size: 13px !important;
+    font-weight: 750 !important;
+    letter-spacing: -.025em;
+  }
+  .store-nav--cozy-owner .store-nav__drawer-brand img,
+  .store-nav--cozy-owner .store-nav__drawer-brand > span {
+    flex: 0 0 42px;
+    width: 42px !important;
+    height: 42px !important;
+    border: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 14px !important;
+    background: var(--theme-accent-soft, #f4ead5) !important;
+    color: var(--theme-accent-deep, #8c5e12) !important;
+  }
+  .store-nav--cozy-owner .store-nav__drawer-brand img { object-fit: cover; }
+  .store-nav--cozy-owner .store-nav__drawer-brand strong {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-close {
+    flex: 0 0 44px;
+    width: 44px !important;
+    height: 44px !important;
+    border: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 14px !important;
+    background: var(--theme-card-surface, #fff) !important;
+    color: var(--theme-ink, #171717) !important;
+    line-height: 1 !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+  .store-nav--cozy-owner .store-nav__mobile-close:focus-visible,
+  .store-nav--cozy-owner .store-nav__mobile-row form button:focus-visible,
+  .store-nav--cozy-owner .store-nav__drawer-auth a:focus-visible {
+    outline: 2px solid var(--theme-accent-deep, #8c5e12) !important;
+    outline-offset: 2px;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-row form {
+    position: relative;
+    z-index: 1;
+    top: auto;
+    flex: 0 0 48px !important;
+    height: 48px !important;
+    margin: 0 0 18px !important;
+    border: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 14px !important;
+    background: var(--theme-card-surface, #fff) !important;
+    box-shadow: 0 3px 10px rgb(23 23 23 / 4%);
+  }
+  .store-nav--cozy-owner .store-nav__mobile-row input {
+    min-width: 0;
+    padding: 0 14px !important;
+    color: var(--theme-ink, #171717) !important;
+    font-size: 14px !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-row input::placeholder { color: var(--theme-muted, #6b6b68) !important; }
+  .store-nav--cozy-owner .store-nav__mobile-row form button {
+    display: grid;
+    width: 48px;
+    place-items: center;
+    color: var(--theme-accent-deep, #8c5e12) !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-row form button svg { width: 19px; height: 19px; }
+  .store-nav--cozy-owner .store-nav__mobile-row nav {
+    display: grid !important;
+    flex: 0 0 auto !important;
+    width: 100%;
+    height: max-content !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    align-content: start !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: none !important;
+    grid-auto-rows: minmax(49px, max-content) !important;
+    gap: 3px !important;
+    overflow: visible !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-row nav a {
+    min-width: 0;
+    min-height: 49px !important;
+    gap: 14px !important;
+    padding: 0 12px !important;
+    border: 0 !important;
+    border-radius: 14px !important;
+    background: transparent !important;
+    color: var(--theme-ink, #171717) !important;
+    font-size: 13px !important;
+    font-weight: 650 !important;
+    line-height: 1.35;
+    text-decoration: none;
+    transition: background .16s ease, color .16s ease !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-row nav a:hover,
+  .store-nav--cozy-owner .store-nav__mobile-row nav a:focus-visible {
+    outline: 0;
+    background: var(--theme-accent-soft, #f4ead5) !important;
+    color: var(--theme-accent-deep, #8c5e12) !important;
+  }
+  .store-nav--cozy-owner .store-nav__mobile-row nav a svg {
+    flex: 0 0 21px;
+    width: 21px !important;
+    height: 21px !important;
+    color: var(--theme-muted, #6b6b68) !important;
+    stroke-width: 1.7;
+  }
+  .store-nav--cozy-owner .store-nav__drawer-section {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0 7px !important;
+    color: var(--theme-muted, #6b6b68) !important;
+    font-size: 10px !important;
+    font-weight: 700;
+    letter-spacing: .04em !important;
+  }
+  .store-nav--cozy-owner .store-nav__drawer-section::before,
+  .store-nav--cozy-owner .store-nav__drawer-section::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--theme-line, #deded8);
+  }
+  .store-nav--cozy-owner .store-nav__drawer-section b { font-weight: 700; }
+  .store-nav--cozy-owner .store-nav__drawer-auth { gap: 8px !important; margin: 15px 0 4px !important; }
+  .store-nav--cozy-owner .store-nav__drawer-auth a {
+    min-height: 46px !important;
+    border: 1px solid var(--theme-line, var(--border)) !important;
+    border-radius: 14px !important;
+    background: var(--theme-card-surface, #fff) !important;
+    color: var(--theme-ink, #171717) !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+  .store-nav--cozy-owner .store-nav__drawer-auth a:last-child {
+    border-color: var(--theme-accent, #c58a24) !important;
+    background: var(--theme-accent, #c58a24) !important;
+    color: #fff !important;
+  }
+  .store-nav--cozy-owner .store-nav__drawer-logout { color: var(--theme-accent-deep, #8c5e12) !important; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-nav--cozy-owner .store-nav__mobile-row,
+  .store-nav--cozy-owner .store-nav__mobile-backdrop { transition-duration: .01ms !important; }
+}
