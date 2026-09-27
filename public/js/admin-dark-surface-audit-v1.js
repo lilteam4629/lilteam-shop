@@ -5,9 +5,7 @@
   var body = document.body;
   if (!documentElement || !body || !body.classList.contains('experiment-admin')) return;
 
-  var neutralCanvas = { r: 23, g: 24, b: 21 };
-  var pending = new Set();
-  var timer = 0;
+  var neutralCanvas = { r: 0, g: 0, b: 0 };
 
   function parseColor(value) {
     if (!value) return null;
@@ -34,7 +32,16 @@
       }
     }
     var rgb = text.match(/^rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)(?:\s*[,/]\s*([\d.]+%?))?\s*\)$/);
-    if (!rgb) return null;
+    if (!rgb) {
+      var srgb = text.match(/^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+%?))?\s*\)$/);
+      if (!srgb) return null;
+      return {
+        r: Math.max(0, Math.min(255, Number(srgb[1]) * 255)),
+        g: Math.max(0, Math.min(255, Number(srgb[2]) * 255)),
+        b: Math.max(0, Math.min(255, Number(srgb[3]) * 255)),
+        a: srgb[4] ? (srgb[4].endsWith('%') ? Number(srgb[4].slice(0, -1)) / 100 : Number(srgb[4])) : 1,
+      };
+    }
     return {
       r: Math.max(0, Math.min(255, Number(rgb[1]))),
       g: Math.max(0, Math.min(255, Number(rgb[2]))),
@@ -73,30 +80,33 @@
     return max - min <= 48;
   }
 
-  function imageHasNeutralLightGradient(backgroundImage) {
+  function imageHasNeutralGradient(backgroundImage) {
     if (!backgroundImage || backgroundImage === 'none' || /url\s*\(/i.test(backgroundImage)) return false;
-    var colors = backgroundImage.match(/rgba?\([^)]*\)|#[\da-f]{3,8}\b/gi) || [];
+    var colors = backgroundImage.match(/rgba?\([^)]*\)|color\(srgb[^)]*\)|#[\da-f]{3,8}\b/gi) || [];
     var parsed = colors.map(parseColor).filter(function (color) { return color && color.a > 0.05; });
     if (!parsed.length || parsed.some(function (color) { return !neutral(color); })) return false;
-    var lightCount = parsed.filter(function (color) { return luminance(blend(color, neutralCanvas)) > 0.72; }).length;
-    return lightCount / parsed.length >= 0.6;
+    // Even a mostly-black gradient can leave a tinted endpoint visible. Treat
+    // any neutral gradient with a non-black stop as a surface so dark mode can
+    // replace the whole gradient with the exact black canvas color.
+    return parsed.some(function (color) { return luminance(blend(color, neutralCanvas)) > 0.001; });
   }
 
   function isVisualAsset(element) {
     return /^(IMG|VIDEO|CANVAS|PICTURE|IFRAME|OBJECT|EMBED)$/.test(element.tagName)
-      || element.matches('.experiment-chart-bar')
+      || element.matches('.experiment-chart-bar, .admin-theme-swatch, .welcome-live-save-indicator')
       || element.closest('[data-admin-dark-preserve], .admin-dark-mode-preserve');
   }
 
   function semanticSurface(element) {
-    return element.matches('[class*="success"], [class*="error"], [class*="danger"], [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"], [class*="alert"], [class*="toast"]');
+    var semanticSelector = '[class*="success"], [class*="error"], [class*="danger"], [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="ready"], [class*="complete"], [class*="available"], .as-live-pill';
+    return element.matches(semanticSelector) || Boolean(element.closest(semanticSelector));
   }
 
   function backgroundRole(element, style) {
     var color = parseColor(style.backgroundColor);
     var visibleColor = color && color.a > 0.02 ? blend(color, neutralCanvas) : null;
-    var image = imageHasNeutralLightGradient(style.backgroundImage);
-    if (!image && (!visibleColor || !neutral(visibleColor) || luminance(visibleColor) < 0.69)) return '';
+    var image = imageHasNeutralGradient(style.backgroundImage);
+    if (!image && (!visibleColor || !neutral(visibleColor) || luminance(visibleColor) < 0.001)) return '';
 
     if (/^(INPUT|SELECT|TEXTAREA)$/.test(element.tagName)) return 'input';
     if (image) return 'surface';
@@ -104,6 +114,12 @@
   }
 
   function foregroundRole(element, color, surface) {
+    var ancestor = element;
+    while (ancestor && ancestor !== body && !ancestor.hasAttribute('data-admin-dark-bg')) ancestor = ancestor.parentElement;
+    if (ancestor && ancestor !== body && ancestor.hasAttribute('data-admin-dark-bg')) {
+      if (!neutral(color)) return 'accent';
+      return luminance(color) < 0.45 ? 'primary' : 'muted';
+    }
     if (contrast(neutralCanvas, surface) >= 4.5) return 'dark';
     var className = typeof element.className === 'string' ? element.className.toLowerCase() : '';
     if (element.tagName === 'SMALL' || /muted|description|subtitle|helper|hint|secondary|text-gray|text-slate|text-zinc/.test(className)) return 'muted';
@@ -119,7 +135,7 @@
       if (color && color.a > 0.02) {
         var effective = blend(color, neutralCanvas);
         if (current.hasAttribute('data-admin-dark-bg')) {
-          return current.getAttribute('data-admin-dark-bg') === 'input' ? { r: 41, g: 42, b: 36 } : { r: 36, g: 37, b: 32 };
+          return neutralCanvas;
         }
         if (color.a > 0.92) return effective;
       }
@@ -168,7 +184,7 @@
     var style = window.getComputedStyle(element, pseudo);
     var bg = parseColor(style.backgroundColor);
     var effective = bg && bg.a > 0.02 ? blend(bg, neutralCanvas) : null;
-    var hasGradient = imageHasNeutralLightGradient(style.backgroundImage);
+    var hasGradient = imageHasNeutralGradient(style.backgroundImage);
     var bgName = 'data-admin-dark-' + type + '-bg';
     if (!element.hasAttribute(bgName) && !semanticSurface(element) && (hasGradient || (effective && neutral(effective) && luminance(effective) > 0.72))) {
       element.setAttribute(bgName, 'surface');
@@ -205,27 +221,13 @@
     ].forEach(function (attribute) { root.removeAttribute(attribute); });
   }
 
-  function flush() {
-    timer = 0;
-    if (documentElement.dataset.adminTheme !== 'dark') { pending.clear(); return; }
-    var roots = Array.from(pending);
-    pending.clear();
-    roots.forEach(scan);
-  }
-
-  function schedule(root) {
-    if (documentElement.dataset.adminTheme !== 'dark') return;
-    pending.add(root);
-    if (!timer) timer = window.setTimeout(flush, 45);
-  }
-
   scan(body);
+  documentElement.classList.remove('admin-theme-booting');
   new MutationObserver(function (mutations) {
-    var fullScan = false;
     mutations.forEach(function (mutation) {
       if (mutation.type === 'attributes') {
         if (mutation.target === documentElement && mutation.attributeName === 'data-admin-theme') {
-          if (documentElement.dataset.adminTheme === 'dark') fullScan = true;
+          if (documentElement.dataset.adminTheme === 'dark') scan(body);
         } else if (mutation.attributeName === 'class' || mutation.attributeName === 'style') {
           clearOwnAnnotations(mutation.target);
           scan(mutation.target);
@@ -234,15 +236,14 @@
       }
       mutation.addedNodes.forEach(function (node) {
         if (node.nodeType !== 1) return;
-        if (/^(STYLE|LINK)$/.test(node.tagName)) fullScan = true;
-        else schedule(node);
+        if (/^(STYLE|LINK)$/.test(node.tagName)) scan(body);
+        else scan(node);
       });
     });
-    if (fullScan) schedule(body);
   }).observe(documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-admin-theme', 'class', 'style'] });
   document.addEventListener('load', function (event) {
     var target = event.target;
     if (!target || target.tagName !== 'LINK' || target.rel !== 'stylesheet') return;
-    schedule(body);
+    scan(body);
   }, true);
 })();

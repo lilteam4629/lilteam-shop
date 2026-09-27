@@ -161,7 +161,7 @@ async function waitForPage() {
 
 async function evaluate(expression) {
   const response = await cdp.command('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
-  if (response.exceptionDetails) throw new Error(response.exceptionDetails.text || 'Browser evaluation failed.');
+  if (response.exceptionDetails) throw new Error(response.exceptionDetails.exception?.description || response.exceptionDetails.text || 'Browser evaluation failed.');
   return response.result?.value;
 }
 
@@ -172,41 +172,69 @@ async function auditPage(requestPath, viewport) {
   await cdp.command('Page.navigate', { url: `http://127.0.0.1:${dbPort}${requestPath}` });
   await waitForPage();
   if (requestPath === '/admin') {
-    await cdp.command('Runtime.evaluate', { expression: `(() => { const dialog = document.querySelector('.experiment-menu-dialog'); if (dialog && !dialog.open) dialog.showModal(); const probe = document.createElement('div'); probe.id = 'admin-dark-audit-probe'; probe.textContent = 'probe'; probe.style.cssText = 'position:fixed;z-index:2147483647;left:2px;bottom:2px;width:40px;height:40px;background:#fff;color:#111'; document.body.appendChild(probe); })()` });
+    const probeResult = await cdp.command('Runtime.evaluate', { expression: `(() => { const dialog = document.querySelector('.experiment-menu-dialog'); if (dialog && !dialog.open) dialog.showModal(); const probe = document.createElement('div'); probe.id = 'admin-dark-audit-probe'; probe.textContent = 'probe'; probe.style.cssText = 'position:fixed;z-index:2147483647;left:2px;bottom:2px;width:40px;height:40px;background:#fff;color:#111'; document.body.appendChild(probe); const srgbProbe = document.createElement('div'); srgbProbe.id = 'admin-dark-srgb-probe'; srgbProbe.textContent = 'srgb'; srgbProbe.style.cssText = 'position:fixed;z-index:2147483647;left:48px;bottom:2px;width:40px;height:40px;background-color:color(srgb 0.92 0.91 0.87);background-image:linear-gradient(color(srgb 0.92 0.91 0.87),color(srgb 0.85 0.84 0.8));color:#111'; document.body.appendChild(srgbProbe); })()`, returnByValue: true });
+    if (probeResult.exceptionDetails) throw new Error(probeResult.exceptionDetails.exception?.description || probeResult.exceptionDetails.text || 'Probe injection failed.');
   }
   await new Promise(resolve => setTimeout(resolve, 120));
   const result = await evaluate(`(() => {
     const body = document.body;
     const root = document.documentElement;
     const color = value => {
-      const match = String(value || '').match(/rgba?\\(\\s*([\\d.]+)[,\\s]+([\\d.]+)[,\\s]+([\\d.]+)(?:\\s*[,/]\\s*([\\d.]+%?))?\\s*\\)/i);
-      if (!match) return null;
-      return { r: +match[1], g: +match[2], b: +match[3], a: match[4] ? (match[4].endsWith('%') ? +match[4].slice(0, -1) / 100 : +match[4]) : 1 };
+      const text = String(value || '');
+      const match = text.match(/rgba?\\(\\s*([\\d.]+)[,\\s]+([\\d.]+)[,\\s]+([\\d.]+)(?:\\s*[,/]\\s*([\\d.]+%?))?\\s*\\)/i);
+      if (match) return { r: +match[1], g: +match[2], b: +match[3], a: match[4] ? (match[4].endsWith('%') ? +match[4].slice(0, -1) / 100 : +match[4]) : 1 };
+      const srgb = text.match(/color\\(srgb\\s+([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)(?:\\s*\\/\\s*([\\d.]+%?))?\\s*\\)/i);
+      if (!srgb) return null;
+      return { r: +srgb[1] * 255, g: +srgb[2] * 255, b: +srgb[3] * 255, a: srgb[4] ? (srgb[4].endsWith('%') ? +srgb[4].slice(0, -1) / 100 : +srgb[4]) : 1 };
     };
     const linear = value => { const x = value / 255; return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); };
     const lum = c => 0.2126 * linear(c.r) + 0.7152 * linear(c.g) + 0.0722 * linear(c.b);
     const composite = (c, under) => ({ r: c.r * c.a + under.r * (1 - c.a), g: c.g * c.a + under.g * (1 - c.a), b: c.b * c.a + under.b * (1 - c.a) });
     const isLightNeutral = c => {
       if (!c || c.a < 0.12) return false;
-      const visible = composite(c, { r: 23, g: 24, b: 21 });
+      const visible = composite(c, { r: 0, g: 0, b: 0 });
       const spread = Math.max(visible.r, visible.g, visible.b) - Math.min(visible.r, visible.g, visible.b);
       return spread <= 48 && lum(visible) > 0.67;
     };
+    const isOffBlackNeutral = c => {
+      if (!c || c.a < 0.12) return false;
+      const visible = composite(c, { r: 0, g: 0, b: 0 });
+      const spread = Math.max(visible.r, visible.g, visible.b) - Math.min(visible.r, visible.g, visible.b);
+      return spread <= 12 && lum(visible) > 0.001;
+    };
+    const isOffBlackNeutralGradient = value => {
+      if (!value || value === 'none' || /url\\s*\\(/i.test(value)) return false;
+      const tokens = value.match(/rgba?\\([^)]*\\)|color\\(srgb[^)]*\\)|#[\\da-f]{3,8}\\b/gi) || [];
+      const colors = tokens.map(color).filter(candidate => candidate && candidate.a > .05);
+      if (!colors.length || colors.some(candidate => {
+        const channels = [candidate.r, candidate.g, candidate.b];
+        return Math.max(...channels) - Math.min(...channels) > 48;
+      })) return false;
+      return colors.some(candidate => lum(composite(candidate, { r: 0, g: 0, b: 0 })) > 0.001);
+    };
     const contrast = (a, b) => (Math.max(lum(a), lum(b)) + .05) / (Math.min(lum(a), lum(b)) + .05);
     const offenders = [];
+    const offBlackNeutrals = [];
     const lowContrast = [];
+    const semanticSurface = '[class*="success"], [class*="error"], [class*="danger"], [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="ready"], [class*="complete"], [class*="available"], .as-live-pill';
     const elements = Array.from(body.querySelectorAll('*'));
     const visible = el => {
       const style = getComputedStyle(el);
       return style.display !== 'none' && style.visibility !== 'hidden' && +style.opacity !== 0;
     };
     for (const el of elements) {
-      if (/^(IMG|VIDEO|CANVAS|PICTURE|IFRAME|OBJECT|EMBED|SVG|PATH|CIRCLE|RECT|LINE|POLYGON|POLYLINE)$/.test(el.tagName) || el.matches('.experiment-chart-bar') || !visible(el)) continue;
+      if (/^(IMG|VIDEO|CANVAS|PICTURE|IFRAME|OBJECT|EMBED|SVG|PATH|CIRCLE|RECT|LINE|POLYGON|POLYLINE)$/.test(el.tagName) || el.matches('.experiment-chart-bar, .admin-theme-swatch, .admin-theme-store, .welcome-live-save-indicator') || el.closest('[data-admin-dark-preserve], .admin-dark-mode-preserve') || !visible(el)) continue;
       const style = getComputedStyle(el);
       const bg = color(style.backgroundColor);
       const rect = el.getBoundingClientRect();
       if (rect.width > 3 && rect.height > 3 && isLightNeutral(bg)) {
         offenders.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 110), color: style.backgroundColor, marker: el.getAttribute('data-admin-dark-bg'), text: (el.childNodes.length && Array.from(el.childNodes).filter(n => n.nodeType === 3).map(n => n.nodeValue.trim()).join(' ').slice(0, 60)) || '' });
+      }
+      if (rect.width > 3 && rect.height > 3 && !el.matches(semanticSurface) && !el.closest(semanticSurface) && isOffBlackNeutral(bg)) {
+        offBlackNeutrals.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 110), color: style.backgroundColor, marker: el.getAttribute('data-admin-dark-bg') });
+      }
+      if (rect.width > 3 && rect.height > 3 && !el.matches(semanticSurface) && !el.closest(semanticSurface) && isOffBlackNeutralGradient(style.backgroundImage)) {
+        offBlackNeutrals.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 110), image: style.backgroundImage, marker: el.getAttribute('data-admin-dark-bg') });
       }
       let text = '';
       for (const node of el.childNodes) if (node.nodeType === 3 && node.nodeValue.trim()) text += node.nodeValue.trim() + ' ';
@@ -218,12 +246,19 @@ async function auditPage(requestPath, viewport) {
       while (parent && parent !== body) {
         const parentStyle = getComputedStyle(parent);
         const candidate = color(parentStyle.backgroundColor);
-        if (candidate && candidate.a > .92) { bgColor = composite(candidate, { r: 23, g: 24, b: 21 }); break; }
+        if (candidate && candidate.a > .92) { bgColor = composite(candidate, { r: 0, g: 0, b: 0 }); break; }
         parent = parent.parentElement;
       }
-      if (!bgColor) bgColor = { r: 23, g: 24, b: 21 };
+      if (!bgColor) bgColor = { r: 0, g: 0, b: 0 };
       if (contrast(composite(fg, bgColor), bgColor) < 4.49) {
-        lowContrast.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 100), color: style.color, background: bgColor, marker: el.getAttribute('data-admin-dark-ink'), text: text.slice(0, 75) });
+        const ancestors = [];
+        let current = el;
+        while (current && current !== body && ancestors.length < 6) {
+          const currentStyle = getComputedStyle(current);
+          ancestors.push({ tag: current.tagName.toLowerCase(), className: String(current.className || '').slice(0, 75), background: currentStyle.backgroundColor, marker: current.getAttribute('data-admin-dark-bg') });
+          current = current.parentElement;
+        }
+        lowContrast.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 100), color: style.color, background: bgColor, marker: el.getAttribute('data-admin-dark-ink'), text: text.slice(0, 75), ancestors });
       }
       for (const pseudo of ['::before', '::after']) {
         const ps = getComputedStyle(el, pseudo);
@@ -232,13 +267,21 @@ async function auditPage(requestPath, viewport) {
         if (rect.width > 3 && rect.height > 3 && isLightNeutral(pbg)) {
           offenders.push({ tag: el.tagName.toLowerCase() + pseudo, className: String(el.className || '').slice(0, 100), color: ps.backgroundColor, marker: el.getAttribute('data-admin-dark-' + (pseudo === '::before' ? 'before' : 'after') + '-bg') });
         }
+        if (rect.width > 3 && rect.height > 3 && !el.matches(semanticSurface) && !el.closest(semanticSurface) && isOffBlackNeutral(pbg)) {
+          offBlackNeutrals.push({ tag: el.tagName.toLowerCase() + pseudo, className: String(el.className || '').slice(0, 100), color: ps.backgroundColor, marker: el.getAttribute('data-admin-dark-' + (pseudo === '::before' ? 'before' : 'after') + '-bg') });
+        }
+        if (rect.width > 3 && rect.height > 3 && !el.matches(semanticSurface) && !el.closest(semanticSurface) && isOffBlackNeutralGradient(ps.backgroundImage)) {
+          offBlackNeutrals.push({ tag: el.tagName.toLowerCase() + pseudo, className: String(el.className || '').slice(0, 100), image: ps.backgroundImage, marker: el.getAttribute('data-admin-dark-' + (pseudo === '::before' ? 'before' : 'after') + '-bg') });
+        }
       }
     }
     const auditScript = Array.from(document.scripts).find(script => script.src.includes('admin-dark-surface-audit-v1.js'));
     const scriptTiming = performance.getEntriesByType('resource').find(entry => entry.name.includes('admin-dark-surface-audit-v1.js'));
     const probe = document.querySelector('#admin-dark-audit-probe');
     const dynamicProbe = probe ? { background: getComputedStyle(probe).backgroundColor, color: getComputedStyle(probe).color, bgMarker: probe.getAttribute('data-admin-dark-bg'), inkMarker: probe.getAttribute('data-admin-dark-ink') } : null;
-    return { title: document.title, viewportWidth: innerWidth, status: body.innerText.trim().slice(0, 55), dark: root.dataset.adminTheme, toggle: !!document.querySelector('[data-admin-theme-toggle]'), bodyClass: body.className, bodyBackground: getComputedStyle(body).backgroundColor, dynamicProbe, auditScript: auditScript && { src: auditScript.src, loaded: auditScript.readyState || 'present' }, scriptTransferSize: scriptTiming && scriptTiming.transferSize, markedBackgrounds: body.querySelectorAll('[data-admin-dark-bg]').length, lightSurfaces: offenders.slice(0, 8), lowContrast: lowContrast.slice(0, 8), lightSurfaceCount: offenders.length, lowContrastCount: lowContrast.length };
+    const srgbProbe = document.querySelector('#admin-dark-srgb-probe');
+    const dynamicSrgbProbe = srgbProbe ? { background: getComputedStyle(srgbProbe).backgroundColor, image: getComputedStyle(srgbProbe).backgroundImage, color: getComputedStyle(srgbProbe).color, bgMarker: srgbProbe.getAttribute('data-admin-dark-bg'), inkMarker: srgbProbe.getAttribute('data-admin-dark-ink') } : null;
+    return { title: document.title, viewportWidth: innerWidth, status: body.innerText.trim().slice(0, 55), dark: root.dataset.adminTheme, toggle: !!document.querySelector('[data-admin-theme-toggle]'), bodyVisible: getComputedStyle(body).visibility !== 'hidden', booting: root.classList.contains('admin-theme-booting'), bootTrace: window.__adminDarkBootTrace || null, bodyClass: body.className, bodyBackground: getComputedStyle(body).backgroundColor, canvasBackground: getComputedStyle(root).backgroundColor, dynamicProbe, dynamicSrgbProbe, auditScript: auditScript && { src: auditScript.src, loaded: auditScript.readyState || 'present' }, scriptTransferSize: scriptTiming && scriptTiming.transferSize, markedBackgrounds: body.querySelectorAll('[data-admin-dark-bg]').length, lightSurfaces: offenders.slice(0, 8), offBlackNeutrals: offBlackNeutrals.slice(0, 8), lowContrast: lowContrast.slice(0, 8), lightSurfaceCount: offenders.length, offBlackNeutralCount: offBlackNeutrals.length, lowContrastCount: lowContrast.length };
   })()`);
   if (requestPath === '/admin') await cdp.command('Runtime.evaluate', { expression: `document.querySelector('#admin-dark-audit-probe')?.remove(); document.querySelector('.experiment-menu-dialog')?.close()` });
   return result;
@@ -291,7 +334,7 @@ async function cleanup() {
   await cdp.command('Network.enable');
   await cdp.command('Network.setBlockedURLs', { urls: ['https://fonts.googleapis.com/*', 'https://fonts.gstatic.com/*'] });
   await cdp.command('Network.setCookie', { name: cookieName, value: cookieValue, url: `http://127.0.0.1:${dbPort}` });
-  await cdp.command('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('lilteam_admin_theme', 'dark'); } catch (_) {}` });
+  await cdp.command('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('lilteam_admin_theme', 'dark'); } catch (_) {}\nwindow.__adminDarkBootTrace = { visibilityWhileBooting: null, visibilityAfterScan: null };\nconst bootTraceObserver = new MutationObserver(() => { const trace = window.__adminDarkBootTrace; const root = document.documentElement; if (!trace || !document.body) return; if (root.classList.contains('admin-theme-booting') && trace.visibilityWhileBooting === null) trace.visibilityWhileBooting = getComputedStyle(document.body).visibility; if (trace.visibilityWhileBooting !== null && !root.classList.contains('admin-theme-booting')) { trace.visibilityAfterScan = getComputedStyle(document.body).visibility; bootTraceObserver.disconnect(); } });\nbootTraceObserver.observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });` });
 
   const failures = [];
   let checked = 0;
@@ -303,12 +346,18 @@ async function cleanup() {
       checked += 1;
       const testedRoute = `${viewport.name}:${route}`;
       if (result.dark !== 'dark' || !result.toggle) failures.push({ route: testedRoute, problem: 'theme did not initialize or toggle missing', result });
+      if (!result.bodyVisible || result.booting) failures.push({ route: testedRoute, problem: 'dark-mode first-paint cloak did not clear after the initial scan', result });
+      if (!result.bootTrace || result.bootTrace.visibilityWhileBooting !== 'hidden' || result.bootTrace.visibilityAfterScan !== 'visible') failures.push({ route: testedRoute, problem: 'first content was not hidden until dark surfaces finished scanning', result: { bootTrace: result.bootTrace } });
       if (result.lightSurfaceCount || result.lowContrastCount) failures.push({ route: testedRoute, problem: 'computed colors remain too light / low contrast', result: { title: result.title, viewportWidth: result.viewportWidth, bodyClass: result.bodyClass, bodyBackground: result.bodyBackground, auditScript: result.auditScript, scriptTransferSize: result.scriptTransferSize, markedBackgrounds: result.markedBackgrounds, lightSurfaceCount: result.lightSurfaceCount, lowContrastCount: result.lowContrastCount, lightSurfaces: result.lightSurfaces, lowContrast: result.lowContrast } });
-      if (route === '/admin' && (!result.dynamicProbe || result.dynamicProbe.bgMarker !== 'surface' || result.dynamicProbe.inkMarker !== 'primary' || result.dynamicProbe.background !== 'rgb(32, 33, 29)')) {
+      if (result.offBlackNeutralCount) failures.push({ route: testedRoute, problem: 'neutral UI surfaces are not pure black', result: { offBlackNeutralCount: result.offBlackNeutralCount, offBlackNeutrals: result.offBlackNeutrals } });
+      if (route === '/admin' && (!result.dynamicProbe || result.dynamicProbe.bgMarker !== 'surface' || result.dynamicProbe.inkMarker !== 'primary' || result.dynamicProbe.background !== 'rgb(0, 0, 0)')) {
         failures.push({ route: testedRoute, problem: 'new dynamic content did not inherit a dark surface and readable ink', result: { dynamicProbe: result.dynamicProbe } });
       }
+      if (route === '/admin' && (!result.dynamicSrgbProbe || result.dynamicSrgbProbe.bgMarker !== 'surface' || result.dynamicSrgbProbe.inkMarker !== 'primary' || result.dynamicSrgbProbe.background !== 'rgb(0, 0, 0)' || result.dynamicSrgbProbe.image !== 'none')) {
+        failures.push({ route: testedRoute, problem: 'modern sRGB colors did not get converted to black surfaces', result: { dynamicSrgbProbe: result.dynamicSrgbProbe } });
+      }
       const bodyColor = result.bodyBackground.match(/([\d.]+)/g)?.slice(0, 3).map(Number) || [];
-      if (bodyColor.length === 3 && bodyColor.some(channel => channel > 80)) failures.push({ route: testedRoute, problem: 'admin canvas is not dark', result });
+      if (bodyColor.length === 3 && bodyColor.some(channel => channel !== 0)) failures.push({ route: testedRoute, problem: 'admin canvas is not pure black', result });
     }
   }
 
@@ -332,8 +381,11 @@ async function cleanup() {
     problem: failure.problem,
     lightSurfaceCount: failure.result?.lightSurfaceCount,
     lowContrastCount: failure.result?.lowContrastCount,
+    offBlackNeutralCount: failure.result?.offBlackNeutralCount,
+    bootTrace: failure.result?.bootTrace,
+    dynamicSrgbProbe: failure.result?.dynamicSrgbProbe,
     toggleCheck: failure.result?.lightMode ? { lightMode: failure.result.lightMode, darkMode: failure.result.darkMode } : undefined,
-    examples: [...(failure.result?.lightSurfaces || []), ...(failure.result?.lowContrast || [])].slice(0, 4),
+    examples: [...(failure.result?.lightSurfaces || []), ...(failure.result?.offBlackNeutrals || []), ...(failure.result?.lowContrast || [])].slice(0, 4).map(example => ({ ...example, ancestors: example.ancestors?.slice(0, 3) })),
   }));
   console.log(JSON.stringify({ browser: path.basename(browserPath), browserVersion: version.Browser, adminPagesDiscovered: routes.length, viewportSizes: viewports.map(viewport => ({ name: viewport.name, width: viewport.width, height: viewport.height })), pagesChecked: checked, failureCount: failures.length, failures: summary.slice(0, 16), omittedFailures: Math.max(0, summary.length - 16) }, null, 2));
   if (failures.length) process.exitCode = 1;

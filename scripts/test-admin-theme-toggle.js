@@ -9,7 +9,17 @@ const bootstrapSource = fs.readFileSync(path.join(__dirname, '../public/js/admin
 const toggleSource = fs.readFileSync(path.join(__dirname, '../public/js/admin-theme-toggle-v1.js'), 'utf8');
 
 function bootstrap(savedTheme, storageThrows = false) {
-  const root = { dataset: {}, style: {} };
+  const classNames = new Set();
+  const root = {
+    dataset: {},
+    style: {},
+    classList: {
+      add(name) { classNames.add(name); },
+      remove(name) { classNames.delete(name); },
+      contains(name) { return classNames.has(name); },
+    },
+  };
+  let bootFallback;
   const localStorage = {
     getItem(key) {
       assert.equal(key, 'lilteam_admin_theme');
@@ -17,7 +27,12 @@ function bootstrap(savedTheme, storageThrows = false) {
       return savedTheme;
     },
   };
-  vm.runInNewContext(bootstrapSource, { document: { documentElement: root }, localStorage });
+  vm.runInNewContext(bootstrapSource, {
+    document: { documentElement: root },
+    localStorage,
+    window: { setTimeout(callback) { bootFallback = callback; } },
+  });
+  root.releaseBootCloak = () => bootFallback?.();
   return root;
 }
 
@@ -47,8 +62,19 @@ function createPage(initialTheme = 'light', storageThrows = false) {
 
 assert.equal(bootstrap('dark').dataset.adminTheme, 'dark');
 assert.equal(bootstrap('dark').style.colorScheme, 'dark');
-assert.equal(bootstrap('invalid').dataset.adminTheme, 'light');
-assert.equal(bootstrap('dark', true).dataset.adminTheme, 'light');
+const lightBoot = bootstrap('light');
+assert.equal(lightBoot.dataset.adminTheme, 'light');
+assert.equal(lightBoot.classList.contains('admin-theme-booting'), false);
+const invalidBoot = bootstrap('invalid');
+assert.equal(invalidBoot.dataset.adminTheme, 'light');
+assert.equal(invalidBoot.classList.contains('admin-theme-booting'), false);
+const unavailableStorageBoot = bootstrap('dark', true);
+assert.equal(unavailableStorageBoot.dataset.adminTheme, 'light');
+assert.equal(unavailableStorageBoot.classList.contains('admin-theme-booting'), false);
+const bootingPage = bootstrap('dark');
+assert.equal(bootingPage.classList.contains('admin-theme-booting'), true);
+bootingPage.releaseBootCloak();
+assert.equal(bootingPage.classList.contains('admin-theme-booting'), false);
 
 const page = createPage('dark');
 assert.equal(page.root.dataset.adminTheme, 'dark');
