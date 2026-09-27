@@ -588,7 +588,10 @@ function randomBoxProductFormError(req, existingProduct = null) {
   }
   if (req.body.productKind !== randomBox.RANDOM_BOX_KIND) return null;
   if (!randomBox.supportsRandomBox(req)) return 'ประเภทกล่องสุ่มเปิดใช้เฉพาะเว็บหลักและ bank-shop';
-  if (req.body.randomBoxRate && !randomBox.RANDOM_BOX_RATE_CONFIGS[Number(req.body.randomBoxRate)]) return 'กรุณาเลือกเรทการออกรางวัลที่รองรับ';
+  if (req.body.randomBoxRate) {
+    const rateError = randomBox.validateRate(req.body.randomBoxRate);
+    if (rateError) return rateError;
+  }
   const nextPrizes = randomBox.parsePrizeRows(req.body, store.genId);
   if (existingProduct?.specialType === randomBox.RANDOM_BOX_KIND) {
     const nextIds = new Set(nextPrizes.map(prize => String(prize.id)));

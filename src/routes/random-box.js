@@ -28,8 +28,8 @@ router.post('/:productId/draw', requireLogin, async (req, res) => {
       genId: store.genId,
     })));
     req.flash('success', result.result.isWin
-      ? `ยินดีด้วย! รอบรวมครบ ${result.result.roundTarget} ครั้ง คุณได้รับรางวัล “${result.result.prizeName}”`
-      : `เปิดกล่องแล้ว · รอบรวม ${result.result.roundProgress}/${result.result.roundTarget} ครั้ง`);
+      ? `ยินดีด้วย! คุณได้รับรางวัล “${result.result.prizeName}”`
+      : 'เปิดกล่องเรียบร้อยแล้ว · ระบบคิดเงิน 1 บาท');
     return res.redirect(`/account/orders/${encodeURIComponent(result.orderId)}`);
   } catch (error) {
     const safeCodes = new Set(['PRODUCT_UNAVAILABLE', 'NOT_RANDOM_BOX', 'NO_PRIZES', 'USER_UNAVAILABLE', 'INSUFFICIENT_BALANCE']);

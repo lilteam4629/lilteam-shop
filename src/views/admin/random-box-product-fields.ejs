@@ -15,7 +15,7 @@
       <div><h3 id="random-box-prizes-heading">รางวัลและสัดส่วน</h3><p>ตั้งชื่อรางวัลและเปอร์เซ็นต์ที่นี่ แล้วเติมคีย์/ไอดีจริงในหน้าสต็อกของกล่อง ระบบส่งให้ผู้ชนะอัตโนมัติ</p></div>
       <span class="random-box-price-pill">฿1 / ครั้ง</span>
     </div>
-    <label class="random-box-rate-field"><span>เรทการออกรางวัล</span><select name="randomBoxRate"><option value="1" <%= !product?.randomBox?.rate || Number(product.randomBox.rate) === 1 ? 'selected' : '' %>>เรท 1% · ไม่ออก 99% · รับรางวัลทุก 85–110 ครั้ง</option><option value="2" <%= Number(product?.randomBox?.rate) === 2 ? 'selected' : '' %>>เรท 2% · ไม่ออก 98% · รับรางวัลทุก 45–60 ครั้ง</option></select><small>เปลี่ยนเรทแล้วจะเริ่มรอบรวมใหม่ทันที เปอร์เซ็นต์ในรายการด้านล่างใช้แบ่งชนิดรางวัล</small></label>
+    <label class="random-box-rate-field"><span>เรทการออกรางวัล (%)</span><input name="randomBoxRate" type="number" min="0.01" max="100" step="0.01" value="<%= Number(product?.randomBox?.rate) || 1 %>" placeholder="เช่น 1 หรือ 2" data-random-box-required /><small>พิมพ์เรทได้ตั้งแต่ 0.01 ถึง 100% · เปลี่ยนเรทแล้วเริ่มรอบรวมใหม่ · เปอร์เซ็นต์ในรายการด้านล่างใช้แบ่งชนิดรางวัล</small></label>
     <div class="random-box-rule" role="note"><strong>รอบรวมของกล่องนี้ · ฿1 ต่อครั้ง</strong><span>ยอดเปิดของลูกค้าทุกคนในร้านนี้จะนับร่วมกันตามเรทที่เลือก ผู้ที่เปิดครั้งที่ถึงเป้าจะได้รับคีย์/ไอดีจากสต็อกอัตโนมัติ แล้วเริ่มรอบใหม่</span></div>
     <div class="random-box-prize-list" data-random-box-prizes>
       <% configuredBoxPrizes.forEach((prize, index) => { %>
@@ -59,7 +59,7 @@
           if (priceCaption) priceCaption.textContent = active ? 'ราคาต่อครั้ง · กำหนดไว้ 1 บาท' : normalPriceCaption;
         }
         form.querySelectorAll('[data-random-box-hide]').forEach(element => { element.hidden = active; });
-        prizeList.querySelectorAll('[data-random-box-required]').forEach(input => { input.required = active; });
+        panel.querySelectorAll('[data-random-box-required]').forEach(input => { input.required = active; });
         const rows = [...prizeList.querySelectorAll('[data-random-box-prize-row]')];
         const total = rows.reduce((sum, row) => sum + (Number(row.querySelector('[name="randomBoxPrizePercent"]')?.value) || 0), 0);
         const valid = Math.round(total * 100) === 10000;

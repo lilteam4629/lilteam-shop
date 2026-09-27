@@ -158,7 +158,7 @@ async function checkScheduledProductWorkflow(cookie) {
 async function checkRandomBoxWorkflow(adminCookie) {
   const form = await fetchOk('/admin/products/new', 'text/html', { cookie: adminCookie });
   if (!form.body.includes('name="productKind"') || !form.body.includes('random-box-product-fields-v1.css')
-    || !form.body.includes('เรท 1%') || !form.body.includes('85–110') || !form.body.includes('เรท 2%') || !form.body.includes('45–60')) {
+    || !form.body.includes('name="randomBoxRate"') || !form.body.includes('min="0.01"') || !form.body.includes('max="100"')) {
     throw new Error('product form does not expose the random-box product type and setup UI');
   }
   const title = `random-box-smoke-${process.pid}`;
@@ -199,8 +199,9 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (scheduled.statusCode !== 302) throw new Error('random-box product could not be published through the existing schedule workflow');
   product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
   const page = await fetchOk(`/game/${encodeURIComponent(product.slug)}`, 'text/html');
-  if (!page.body.includes('฿1') || !page.body.includes('รอบรวมของกล่องนี้') || !page.body.includes('85–110')) {
-    throw new Error('random-box storefront does not explain the fixed price and pooled round target');
+  if (!page.body.includes('฿1') || !page.body.includes('เรทออกรางวัล')
+    || page.body.includes('85–110') || page.body.includes('45–60') || page.body.includes('roundTarget')) {
+    throw new Error('random-box storefront displays payout ranges or misses the selected rate');
   }
 
   const customerCookie = await loginAsCustomer();

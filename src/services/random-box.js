@@ -2,13 +2,11 @@ const crypto = require('crypto');
 
 const RANDOM_BOX_KIND = 'random-box';
 const RANDOM_BOX_PRICE = 1;
-const RANDOM_BOX_RATE_CONFIGS = Object.freeze({
-  1: Object.freeze({ rate: 1, missPercent: 99, minTarget: 85, maxTarget: 110 }),
-  2: Object.freeze({ rate: 2, missPercent: 98, minTarget: 45, maxTarget: 60 }),
-});
+const RANDOM_BOX_MIN_RATE = 0.01;
+const RANDOM_BOX_MAX_RATE = 100;
 const DEFAULT_RANDOM_BOX_RATE = 1;
-const RANDOM_BOX_MIN_TARGET = RANDOM_BOX_RATE_CONFIGS[DEFAULT_RANDOM_BOX_RATE].minTarget;
-const RANDOM_BOX_MAX_TARGET = RANDOM_BOX_RATE_CONFIGS[DEFAULT_RANDOM_BOX_RATE].maxTarget;
+const RANDOM_BOX_MIN_TARGET = 85;
+const RANDOM_BOX_MAX_TARGET = 110;
 const RANDOM_BOX_MAX_PRIZES = 30;
 
 function supportsRandomBox(req) {
@@ -18,11 +16,20 @@ function supportsRandomBox(req) {
 
 function normalizeRate(rate) {
   const value = Number(rate);
-  return RANDOM_BOX_RATE_CONFIGS[value] ? value : DEFAULT_RANDOM_BOX_RATE;
+  if (!Number.isFinite(value) || value < RANDOM_BOX_MIN_RATE || value > RANDOM_BOX_MAX_RATE) return DEFAULT_RANDOM_BOX_RATE;
+  return Math.round(value * 100) / 100;
 }
 
 function getRateConfig(rate) {
-  return RANDOM_BOX_RATE_CONFIGS[normalizeRate(rate)];
+  const normalizedRate = normalizeRate(rate);
+  const minTarget = normalizedRate === 100 ? 1 : Math.max(1, Math.ceil((85 / normalizedRate) / 5) * 5);
+  const maxTarget = normalizedRate === 100 ? 1 : Math.max(minTarget, Math.ceil((110 / normalizedRate) / 10) * 10);
+  return {
+    rate: normalizedRate,
+    missPercent: Math.round((100 - normalizedRate) * 100) / 100,
+    minTarget,
+    maxTarget,
+  };
 }
 
 function randomTarget(randomInt = crypto.randomInt, rate = DEFAULT_RANDOM_BOX_RATE) {
@@ -65,6 +72,16 @@ function validatePrizeRows(prizes) {
 
 function parseRate(body = {}) {
   return normalizeRate(body.randomBoxRate);
+}
+
+function validateRate(rate) {
+  const raw = String(rate == null ? '' : rate).trim();
+  const value = Number(raw);
+  if (!raw || !Number.isFinite(value) || value < RANDOM_BOX_MIN_RATE || value > RANDOM_BOX_MAX_RATE) {
+    return `เรทการออกรางวัลต้องอยู่ระหว่าง ${RANDOM_BOX_MIN_RATE}–${RANDOM_BOX_MAX_RATE}%`;
+  }
+  if (Math.abs(value * 100 - Math.round(value * 100)) > 1e-8) return 'เรทการออกรางวัลใส่ทศนิยมได้ไม่เกิน 2 ตำแหน่ง';
+  return null;
 }
 
 function availablePrizePool(randomBox, stockItems = [], productId = null) {
@@ -254,7 +271,8 @@ module.exports = {
   RANDOM_BOX_PRICE,
   RANDOM_BOX_MIN_TARGET,
   RANDOM_BOX_MAX_TARGET,
-  RANDOM_BOX_RATE_CONFIGS,
+  RANDOM_BOX_MIN_RATE,
+  RANDOM_BOX_MAX_RATE,
   DEFAULT_RANDOM_BOX_RATE,
   RANDOM_BOX_MAX_PRIZES,
   supportsRandomBox,
@@ -262,6 +280,7 @@ module.exports = {
   normalizeRate,
   getRateConfig,
   parseRate,
+  validateRate,
   parsePrizeRows,
   validatePrizeRows,
   availablePrizePool,

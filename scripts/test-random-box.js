@@ -9,8 +9,15 @@ assert.strictEqual(randomBox.randomTarget((min) => min), 85);
 assert.strictEqual(randomBox.randomTarget((min, max) => max - 1), 110);
 assert.strictEqual(randomBox.randomTarget((min) => min, 2), 45);
 assert.strictEqual(randomBox.randomTarget((min, max) => max - 1, 2), 60);
+assert.strictEqual(randomBox.getRateConfig(3).minTarget, 30, 'custom rates calculate their lower round bound');
+assert.strictEqual(randomBox.getRateConfig(3).maxTarget, 40, 'custom rates calculate their upper round bound');
 assert.strictEqual(randomBox.parseRate({}), 1, 'rate one is the default');
 assert.strictEqual(randomBox.parseRate({ randomBoxRate: '2' }), 2, 'the admin can select rate two');
+assert.strictEqual(randomBox.parseRate({ randomBoxRate: '3.25' }), 3.25, 'the admin can enter any rate with up to two decimals');
+assert.strictEqual(randomBox.validateRate('0.01'), null);
+assert.strictEqual(randomBox.validateRate('100'), null);
+assert.strictEqual(randomBox.getRateConfig(100).minTarget, 1, 'a 100% rate awards every draw');
+assert.notStrictEqual(randomBox.validateRate('1.001'), null);
 
 const validPrizes = [
   { id: 'out', name: 'รางวัลหมด', percent: 50 },

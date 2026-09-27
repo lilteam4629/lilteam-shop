@@ -29,7 +29,7 @@
     <% } %>
   </div>
   <div class="owner-home-v21-details">
-      <span class="owner-home-v21-summary"><%= isRandomBox ? 'สะสมยอดรวม 85–110 ครั้ง แล้วรับ 1 รางวัล' : String(p.description || 'สินค้าเกมดิจิทัล').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() %></span>
+      <span class="owner-home-v21-summary"><%= isRandomBox ? 'กล่องสุ่มรางวัลคีย์/ไอดี · ฿1/ครั้ง' : String(p.description || 'สินค้าเกมดิจิทัล').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() %></span>
     <div class="main-store-product-title-row owner-home-v21-title-row">
       <h3 class="owner-home-v21-name"><%= p.title %></h3>
       <span class="owner-home-v21-stock-badge main-store-product-stock" data-stock-state="<%= soldOut ? 'sold' : 'available' %>">
@@ -190,7 +190,7 @@
       <% if (p.isSyndicated) { %><span class="shrink-0 inline-flex items-center gap-1 rounded-full border border-[var(--gold)]/50 bg-[var(--input)] px-2 py-1 text-[9px] font-black text-[var(--gold-text)]">Partner</span><% } %>
     </div>
     <span <%= soldOut ? '' : 'data-theme-fill="accent"' %> class="mt-1 block w-full text-center rounded-lg py-1.5 text-xs font-bold transition-colors <%= soldOut ? 'theme-danger bg-[var(--input)] border' : 'bg-[var(--gold)] text-[var(--gold-contrast)] group-hover:bg-[var(--gold-hover)]' %>"><%= soldOut ? (isRandomBox ? 'รางวัลหมดชั่วคราว' : 'สินค้าหมด') : (isRandomBox ? 'สุ่มสินค้า · ฿1/ครั้ง' : 'สั่งซื้อสินค้า') %></span>
-    <span class="text-[10px] text-[var(--text-4)] text-center truncate"><%= soldOut ? (isRandomBox ? 'ปิดรับการสุ่มชั่วคราว' : 'รอสินค้าเข้าใหม่') : (isRandomBox ? 'รอบสะสมรวมทุกคน · เป้า 85–110 ครั้ง' : `สินค้าคงเหลือ ${p.stockCount.toLocaleString()} ชิ้น`) %></span>
+    <span class="text-[10px] text-[var(--text-4)] text-center truncate"><%= soldOut ? (isRandomBox ? 'ปิดรับการสุ่มชั่วคราว' : 'รอสินค้าเข้าใหม่') : (isRandomBox ? 'รางวัลส่งอัตโนมัติจากสต็อก' : `สินค้าคงเหลือ ${p.stockCount.toLocaleString()} ชิ้น`) %></span>
   </div>
 </a>
 <% } %>
