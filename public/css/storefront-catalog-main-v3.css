@@ -492,6 +492,7 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ca
 body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-row {
   display: grid;
   grid-template-columns: max-content minmax(48px, 1fr) max-content;
+  grid-template-areas: "heading rule cta";
   align-items: center;
   gap: 16px;
   min-height: 58px;
@@ -505,6 +506,7 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ca
 }
 
 body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title {
+  grid-area: heading !important;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -548,11 +550,13 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ca
 }
 
 body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-rule {
+  grid-area: rule;
   height: 1px;
   background: linear-gradient(90deg, var(--border), transparent);
 }
 
 body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-cta {
+  grid-area: cta;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -617,6 +621,7 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ca
 @media (max-width: 700px) {
   body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-row {
     grid-template-columns: minmax(0, 1fr) max-content;
+    grid-template-areas: "heading cta";
     gap: 8px 12px;
     margin-bottom: 13px;
   }
