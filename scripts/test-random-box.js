@@ -18,6 +18,11 @@ assert.strictEqual(randomBox.validateRate('0.01'), null);
 assert.strictEqual(randomBox.validateRate('100'), null);
 assert.strictEqual(randomBox.getRateConfig(100).minTarget, 1, 'a 100% rate awards every draw');
 assert.notStrictEqual(randomBox.validateRate('1.001'), null);
+assert.strictEqual(randomBox.parseDrawCount(undefined), 1, 'a missing count keeps the single-draw default');
+assert.strictEqual(randomBox.parseDrawCount('7'), 7, 'buyers can request multiple draws');
+for (const invalidCount of ['', '0', '-1', '1.5', '101', '2e2']) {
+  assert.throws(() => randomBox.parseDrawCount(invalidCount), error => error.code === 'INVALID_DRAW_COUNT', `invalid draw count ${invalidCount} is rejected`);
+}
 
 const prizeStock = [
   { id: 'stock-legacy', productId: 'box-1', randomBoxPrizeId: 'legacy-prize', status: 'available', username: 'legacy-user', password: 'legacy-key' },
@@ -137,10 +142,66 @@ assert.deepStrictEqual(noBalanceData.randomBoxRounds, {}, 'failed payment must n
 assert.strictEqual(noBalanceData.orders.length, 0, 'failed payment must not create an order');
 
 noBalanceData.users[0].walletBalance = 1;
+assert.throws(() => randomBox.drawRandomBox(noBalanceData, {
+  productId: 'box', userId: 'broke', idempotencyKey: 'insufficient-batch-request', drawCount: 2,
+  randomInt: deterministicRandom, genId,
+}), error => error.code === 'INSUFFICIENT_BALANCE');
+assert.strictEqual(noBalanceData.users[0].walletBalance, 1, 'an unaffordable batch is rejected without a partial debit');
+assert.deepStrictEqual(noBalanceData.randomBoxRounds, {}, 'an unaffordable batch never advances the shared round');
+assert.strictEqual(noBalanceData.orders.length, 0, 'an unaffordable batch creates no order');
 noBalanceData.stockItems[0].status = 'sold';
 assert.throws(() => randomBox.drawRandomBox(noBalanceData, {
   productId: 'box', userId: 'broke', idempotencyKey: 'no-prizes-request', randomInt: deterministicRandom, genId,
 }), error => error.code === 'NO_PRIZES');
 assert.strictEqual(noBalanceData.users[0].walletBalance, 1, 'a draw with no available prize must not charge the buyer');
 
-console.log('Random box checks passed: shop scope, rate ranges, one-line/one-prize inventory, pooled draws, ฿1 debit, one-time replay, partner exclusion');
+const multiDrawData = {
+  users: [{ id: 'multi-buyer', status: 'active', walletBalance: 20 }],
+  products: [{ id: 'multi-box', slug: 'multi-box', title: 'multi box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 1 } }],
+  stockItems: [
+    { id: 'multi-prize-a', productId: 'multi-box', username: 'multi-a', status: 'available' },
+    { id: 'multi-prize-b', productId: 'multi-box', username: 'multi-b', status: 'available' },
+  ],
+  walletTransactions: [],
+  orders: [],
+  randomBoxRounds: { 'multi-box': { progress: 84, target: 85, rate: 1, roundNumber: 1, totalDraws: 84, totalAwards: 0 } },
+};
+const multiDrawKey = 'multi-draw-request-0001';
+const multiDraw = randomBox.drawRandomBox(multiDrawData, {
+  productId: 'multi-box', userId: 'multi-buyer', idempotencyKey: multiDrawKey, drawCount: '3',
+  now: 1_800_000_200_000, randomInt: deterministicRandom, genId,
+});
+const multiOrder = multiDrawData.orders[0];
+assert.strictEqual(multiDraw.result.drawCount, 3, 'a batch performs the requested number of draws');
+assert.strictEqual(multiDraw.result.winCount, 1, 'each draw in a batch advances the shared round in order');
+assert.strictEqual(multiOrder.items.length, 3, 'each draw has its own auditable order line');
+assert.strictEqual(multiOrder.items[0].randomBoxDraw.isWin, true, 'the first draw reaches the existing pooled target');
+assert.strictEqual(multiOrder.items[0].stockItemId, 'multi-prize-a', 'a batch win consumes and records its stock item');
+assert.strictEqual(multiOrder.total, 3, 'the batch order charges one baht per completed draw');
+assert.strictEqual(multiDrawData.users[0].walletBalance, 17, 'the wallet is debited once for the batch total');
+assert.strictEqual(multiDrawData.walletTransactions[0].amount, -3, 'the ledger records the exact batch debit');
+assert.strictEqual(multiDrawData.randomBoxRounds['multi-box'].progress, 2, 'draws after a win continue the next shared round');
+const multiReplay = randomBox.drawRandomBox(multiDrawData, {
+  productId: 'multi-box', userId: 'multi-buyer', idempotencyKey: multiDrawKey, drawCount: '3',
+  now: 1_800_000_200_001, randomInt: deterministicRandom, genId,
+});
+assert.strictEqual(multiReplay.replay, true, 'a replayed batch request returns the original order');
+assert.strictEqual(multiDrawData.users[0].walletBalance, 17, 'a batch replay never charges twice');
+assert.strictEqual(multiDrawData.orders.length, 1, 'a batch replay never creates another order');
+
+const exhaustedBatchData = {
+  users: [{ id: 'last-buyer', status: 'active', walletBalance: 10 }],
+  products: [{ id: 'last-box', title: 'last box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } }],
+  stockItems: [{ id: 'last-prize', productId: 'last-box', username: 'last-key', status: 'available' }],
+  walletTransactions: [], orders: [], randomBoxRounds: {},
+};
+const exhaustedBatch = randomBox.drawRandomBox(exhaustedBatchData, {
+  productId: 'last-box', userId: 'last-buyer', idempotencyKey: 'last-stock-batch-0001', drawCount: 5,
+  now: 1_800_000_300_000, randomInt: deterministicRandom, genId,
+});
+assert.strictEqual(exhaustedBatch.result.drawCount, 1, 'a batch stops when its prize inventory runs out');
+assert.strictEqual(exhaustedBatch.result.stockExhausted, true, 'a partial batch reports that inventory stopped the remaining draws');
+assert.strictEqual(exhaustedBatch.result.total, 1, 'only completed draws are charged when stock runs out mid-batch');
+assert.strictEqual(exhaustedBatchData.users[0].walletBalance, 9, 'unperformed draws are not charged');
+
+console.log('Random box checks passed: shop scope, rate mechanics, selectable multi-draws, pooled awards, exact debits, idempotency, inventory exhaustion, partner exclusion');

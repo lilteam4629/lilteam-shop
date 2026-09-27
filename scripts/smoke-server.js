@@ -228,18 +228,34 @@ async function checkRandomBoxWorkflow(adminCookie) {
   });
   if (scheduled.statusCode !== 302) throw new Error('random-box product could not be published through the existing schedule workflow');
   product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
-  const page = await fetchOk(`/game/${encodeURIComponent(product.slug)}`, 'text/html');
-  if (!page.body.includes('฿1') || !page.body.includes('ส่งข้อมูลจากสต็อกให้อัตโนมัติ')
-    || page.body.includes('เรทออกรางวัล') || page.body.includes('เปอร์เซ็นต์ใช้เลือกชนิดรางวัล')
-    || page.body.includes('นับยอดสะสมรวมทุกคน') || page.body.includes('สินค้า 1 ชิ้น ต่อ')
-    || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*\d+\s*[–-]\s*\d+/.test(page.body)) {
-    throw new Error('random-box storefront reveals payout thresholds or hides its delivery information');
+  const anonymousPage = await fetchOk(`/game/${encodeURIComponent(product.slug)}`, 'text/html');
+  if (anonymousPage.body.includes('85–110') || anonymousPage.body.includes('85-110')
+    || anonymousPage.body.includes('สินค้า 1 ชิ้น ต่อ') || anonymousPage.body.includes('ความคืบหน้ารอบ')) {
+    throw new Error('anonymous random-box storefront exposes payout thresholds or round progress');
+  }
+  const customerCookie = await loginAsCustomer();
+  const page = await fetchOk(`/game/${encodeURIComponent(product.slug)}`, 'text/html', { cookie: customerCookie });
+  const storefrontProblems = [
+    !page.body.includes('฿1') && 'one-baht price missing',
+    !page.body.includes('ส่งข้อมูลจากสต็อกให้อัตโนมัติ') && 'automatic-delivery note missing',
+    !page.body.includes('name="drawCount"') && 'draw count input missing',
+    !page.body.includes('จำนวนครั้งที่ต้องการสุ่ม') && 'draw count label missing',
+    !page.body.includes('data-random-box-total') && 'total preview missing',
+    !page.body.includes('data-random-box-button-total') && 'button total missing',
+    page.body.includes('เรทออกรางวัล') && 'rate label leaked',
+    page.body.includes('เปอร์เซ็นต์ใช้เลือกชนิดรางวัล') && 'reward percentage leaked',
+    page.body.includes('นับยอดสะสมรวมทุกคน') && 'shared progress explanation leaked',
+    page.body.includes('สินค้า 1 ชิ้น ต่อ') && 'payout interval leaked',
+    page.body.includes('ความคืบหน้ารอบ') && 'round progress explanation leaked',
+    /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*\d+\s*[–-]\s*\d+/.test(page.body) && 'numeric payout interval leaked',
+  ].filter(Boolean);
+  if (storefrontProblems.length) {
+    throw new Error(`random-box storefront check failed: ${storefrontProblems.join(', ')}`);
   }
 
-  const customerCookie = await loginAsCustomer();
   const balanceBeforeDraw = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).users.find(user => user.username === 'demo')?.walletBalance;
   const drawRequestId = crypto.randomUUID();
-  const drawBody = new URLSearchParams({ drawRequestId }).toString();
+  const drawBody = new URLSearchParams({ drawRequestId, drawCount: '1' }).toString();
   const firstDraw = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
     method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: drawBody,
   });
@@ -247,7 +263,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
     throw new Error(`random-box draw route did not return an order (HTTP ${firstDraw.statusCode})`);
   }
   const customerOrderPage = await fetchOk(firstDraw.headers.location, 'text/html', { cookie: customerCookie });
-  if (!customerOrderPage.body.includes('กำลังนับยอดสุ่มรวม')
+  if (!customerOrderPage.body.includes('ยังไม่ได้รับรางวัลในครั้งนี้')
     || /รอบรวม\s*\d+\s*\/\s*\d+/.test(customerOrderPage.body)
     || customerOrderPage.body.includes('ความคืบหน้ารอบ')) {
     throw new Error('random-box order page exposes shared-round progress or hides the draw result');
@@ -260,18 +276,48 @@ async function checkRandomBoxWorkflow(adminCookie) {
     || order.items[0].randomBoxDraw.roundProgress !== 1 || order.items[0].randomBoxDraw.isWin) {
     throw new Error('a random-box attempt did not create its ฿1 order and shared-round progress atomically');
   }
+  const balanceBeforeBatch = buyer.walletBalance;
+  const batchRequestId = crypto.randomUUID();
+  const batchResponse = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
+    method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ drawRequestId: batchRequestId, drawCount: '3' }).toString(),
+  });
+  if (batchResponse.statusCode !== 302 || !/^\/account\/orders\//.test(batchResponse.headers.location || '')) {
+    throw new Error('a selected multi-draw request did not create an order');
+  }
+  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  const batchOrder = data.orders.find(item => item.id === batchResponse.headers.location.split('/').pop());
+  if (!batchOrder?.randomBoxOrder || batchOrder.items.length !== 3 || batchOrder.total !== 3
+    || batchOrder.items.some(item => item.price !== 1 || item.randomBoxDraw.isWin)
+    || data.users.find(user => user.username === 'demo').walletBalance !== balanceBeforeBatch - 3) {
+    throw new Error('the selected draw count did not create separate attempts and charge one baht per attempt');
+  }
+  const batchOrderPage = await fetchOk(batchResponse.headers.location, 'text/html', { cookie: customerCookie });
+  if (!batchOrderPage.body.includes('สุ่ม 3 ครั้ง') || !batchOrderPage.body.includes('ผลสุ่มครั้งที่ 3')) {
+    throw new Error('the batch order page does not summarize and list all selected draws');
+  }
+  const batchReplay = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
+    method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ drawRequestId: batchRequestId, drawCount: '3' }).toString(),
+  });
+  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  if (batchReplay.headers.location !== batchResponse.headers.location
+    || data.users.find(user => user.username === 'demo').walletBalance !== balanceBeforeBatch - 3
+    || data.orders.filter(item => item.randomBoxRequestId === batchRequestId).length !== 1) {
+    throw new Error('replaying a selected multi-draw request charged the wallet more than once');
+  }
   const replay = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
     method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: drawBody,
   });
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   if (replay.headers.location !== firstDraw.headers.location
-    || data.users.find(user => user.username === 'demo').walletBalance !== balanceBeforeDraw - 1
+    || data.users.find(user => user.username === 'demo').walletBalance !== balanceBeforeDraw - 4
     || data.orders.filter(item => item.randomBoxRequestId === drawRequestId).length !== 1) {
     throw new Error('replaying the same draw request debited the wallet or created a second order');
   }
 
   let round = data.randomBoxRounds[productId];
-  if (!round || round.progress !== 1 || round.target < 85 || round.target > 110) {
+  if (!round || round.progress !== 4 || round.target < 85 || round.target > 110) {
     throw new Error('the pooled random-box counter was not persisted after the first draw');
   }
   for (let progress = round.progress; progress < round.target - 1; progress += 1) {

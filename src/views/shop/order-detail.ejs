@@ -10,19 +10,34 @@
     </div>
   <% } %>
 
+  <% if (order.randomBoxOrder) { const winCount = itemsWithCreds.filter(item => item.randomBoxDraw?.isWin).length; %>
+    <div class="mb-4 rounded-xl border border-[var(--gold)]/30 bg-[var(--gold)]/10 px-4 py-3 text-sm">
+      สุ่ม <strong class="text-[var(--text)]"><%= itemsWithCreds.length.toLocaleString('th-TH') %> ครั้ง</strong>
+      · ได้รับรางวัล <strong class="text-[var(--gold-text)]"><%= winCount.toLocaleString('th-TH') %> ชิ้น</strong>
+      · ยอดชำระ <strong class="text-[var(--gold-text)]">฿<%= Number(order.total || 0).toLocaleString('th-TH') %>.00</strong>
+      <% if (Number(order.randomBoxRequestedDrawCount) > itemsWithCreds.length) { %><div class="mt-1 text-xs text-[var(--text-3)]">หยุดสุ่มเมื่อรางวัลในสต็อกหมด</div><% } %>
+    </div>
+  <% } %>
   <div class="space-y-3 mb-6">
-    <% itemsWithCreds.forEach(i => { %>
+    <% itemsWithCreds.forEach((i, drawIndex) => { %>
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
-        <div class="flex items-start gap-3 sm:gap-4 mb-4">
-          <div class="relative w-28 sm:w-36 aspect-video shrink-0 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--input)] grid place-items-center">
-            <span class="absolute inset-0 grid place-items-center text-2xl text-[var(--text-4)]" aria-hidden="true">▧</span>
-            <% if (i.productImage) { %><img src="<%= i.productImage %>" alt="รูปสินค้า <%= i.productTitle %>" width="960" height="540" loading="eager" decoding="async" class="relative z-[1] block w-full h-full object-contain bg-[var(--input)]" onerror="this.hidden=true" /><% } %>
-          </div>
-          <div class="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5">
-            <div class="min-w-0"><div class="text-[10px] text-[var(--text-4)] mb-0.5">สินค้า</div><h2 class="font-bold text-base sm:text-lg leading-snug break-words"><%= i.productTitle %></h2></div>
+        <% if (order.randomBoxOrder && i.randomBoxDraw) { %>
+          <div class="mb-3 flex items-center justify-between gap-3">
+            <h2 class="font-bold text-sm sm:text-base">ผลสุ่มครั้งที่ <%= drawIndex + 1 %></h2>
             <span class="text-[var(--gold-text)] font-bold whitespace-nowrap">฿<%= i.price.toLocaleString() %>.00</span>
           </div>
-        </div>
+        <% } else { %>
+          <div class="flex items-start gap-3 sm:gap-4 mb-4">
+            <div class="relative w-28 sm:w-36 aspect-video shrink-0 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--input)] grid place-items-center">
+              <span class="absolute inset-0 grid place-items-center text-2xl text-[var(--text-4)]" aria-hidden="true">▧</span>
+              <% if (i.productImage) { %><img src="<%= i.productImage %>" alt="รูปสินค้า <%= i.productTitle %>" width="960" height="540" loading="eager" decoding="async" class="relative z-[1] block w-full h-full object-contain bg-[var(--input)]" onerror="this.hidden=true" /><% } %>
+            </div>
+            <div class="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5">
+              <div class="min-w-0"><div class="text-[10px] text-[var(--text-4)] mb-0.5">สินค้า</div><h2 class="font-bold text-base sm:text-lg leading-snug break-words"><%= i.productTitle %></h2></div>
+              <span class="text-[var(--gold-text)] font-bold whitespace-nowrap">฿<%= i.price.toLocaleString() %>.00</span>
+            </div>
+          </div>
+        <% } %>
         <% if (i.randomBoxDraw) { %>
           <div class="mb-3 rounded-xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 p-4 text-sm">
             <% if (i.randomBoxDraw.isWin) { %>
@@ -35,8 +50,7 @@
                 </div>
               <% } else { %><div class="mt-1 text-[var(--coral)]">รางวัลนี้ยังไม่มีคีย์/ไอดีในสต็อก กรุณาติดต่อร้าน</div><% } %>
             <% } else { %>
-              <div class="font-bold text-[var(--text)]">เปิดกล่องสำเร็จ · คุณจ่าย ฿1</div>
-              <div class="mt-1 text-[var(--text-2)]">ระบบกำลังนับยอดสุ่มรวม และจะส่งรางวัลอัตโนมัติเมื่อได้รับรางวัล</div>
+              <div class="font-bold text-[var(--text)]">ยังไม่ได้รับรางวัลในครั้งนี้</div>
             <% } %>
           </div>
         <% } else if (i.fulfillmentMode === 'contact') { %>

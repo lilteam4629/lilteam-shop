@@ -4,6 +4,7 @@ const RANDOM_BOX_KIND = 'random-box';
 const RANDOM_BOX_PRICE = 1;
 const RANDOM_BOX_MIN_RATE = 0.01;
 const RANDOM_BOX_MAX_RATE = 100;
+const MAX_RANDOM_BOX_DRAWS = 100;
 const DEFAULT_RANDOM_BOX_RATE = 1;
 const RANDOM_BOX_MIN_TARGET = 85;
 const RANDOM_BOX_MAX_TARGET = 110;
@@ -74,14 +75,25 @@ function fail(code, message) {
   throw error;
 }
 
+function parseDrawCount(value = 1) {
+  const raw = String(value == null ? '' : value).trim();
+  const count = Number(raw);
+  if (!/^\d+$/.test(raw) || !Number.isSafeInteger(count) || count < 1 || count > MAX_RANDOM_BOX_DRAWS) {
+    fail('INVALID_DRAW_COUNT', `เลือกจำนวนเปิดกล่องได้ตั้งแต่ 1 ถึง ${MAX_RANDOM_BOX_DRAWS} ครั้ง`);
+  }
+  return count;
+}
+
 function drawRandomBox(data, {
   productId,
   userId,
   idempotencyKey,
+  drawCount = 1,
   now = Date.now(),
   randomInt = crypto.randomInt,
   genId = length => crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length),
 }) {
+  const requestedDrawCount = parseDrawCount(drawCount);
   data.orders ||= [];
   data.walletTransactions ||= [];
   data.stockItems ||= [];
@@ -105,7 +117,10 @@ function drawRandomBox(data, {
   if (!user || user.status === 'disabled' || user.status === 'banned') fail('USER_UNAVAILABLE', 'ไม่พบบัญชีผู้ใช้หรือบัญชีถูกระงับ');
   const storedBalance = Number(user.walletBalance);
   const balance = Number.isFinite(storedBalance) ? Math.round(storedBalance * 100) / 100 : 0;
-  if (balance < RANDOM_BOX_PRICE) fail('INSUFFICIENT_BALANCE', 'ยอดเงินในกระเป๋าไม่เพียงพอ ต้องมีอย่างน้อย 1 บาท');
+  const requestedTotal = requestedDrawCount * RANDOM_BOX_PRICE;
+  if (balance < requestedTotal) {
+    fail('INSUFFICIENT_BALANCE', `ยอดเงินในกระเป๋าไม่เพียงพอ ต้องมีอย่างน้อย ${requestedTotal.toLocaleString('th-TH')} บาท`);
+  }
 
   const rounds = data.randomBoxRounds;
   const rateConfig = getRateConfig(product.randomBox?.rate);
@@ -124,67 +139,91 @@ function drawRandomBox(data, {
     };
   }
 
-  const progressBefore = Math.max(0, Math.floor(Number(round.progress) || 0));
-  const progressAfter = progressBefore + 1;
-  const roundNumber = Math.max(1, Math.floor(Number(round.roundNumber) || 1));
-  const target = Number(round.target);
-  const isWin = progressAfter >= target;
   const orderId = genId(10);
   const createdAt = new Date(now).toISOString();
-  let prizeName = null;
-  let prizeStockItem = null;
+  const drawResults = [];
+  const orderItems = [];
 
-  if (isWin) {
-    const selectedIndex = randomInt(0, prizeStockItems.length);
-    const safeIndex = Number.isInteger(selectedIndex) && selectedIndex >= 0 && selectedIndex < prizeStockItems.length
-      ? selectedIndex
-      : 0;
-    prizeStockItem = prizeStockItems[safeIndex];
-    const legacyPrize = (product.randomBox?.prizes || []).find(item => String(item.id) === String(prizeStockItem.randomBoxPrizeId));
-    prizeName = String(legacyPrize?.name || 'คีย์/ไอดี 1 ชิ้น').trim().slice(0, 120);
-    prizeStockItem.status = 'sold';
-    prizeStockItem.soldOrderId = orderId;
-    round.progress = 0;
-    round.target = randomTarget(randomInt, rate);
-    round.rate = rate;
-    round.roundNumber = roundNumber + 1;
-    round.totalAwards = (Number(round.totalAwards) || 0) + 1;
-  } else {
-    round.progress = progressAfter;
+  for (let index = 0; index < requestedDrawCount; index += 1) {
+    const availablePrizes = availableStockItems(data.stockItems, product.id);
+    if (!availablePrizes.length) break;
+
+    const progressBefore = Math.max(0, Math.floor(Number(round.progress) || 0));
+    const progressAfter = progressBefore + 1;
+    const roundNumber = Math.max(1, Math.floor(Number(round.roundNumber) || 1));
+    const target = Number(round.target);
+    const isWin = progressAfter >= target;
+    let prizeName = null;
+    let prizeStockItem = null;
+
+    if (isWin) {
+      const selectedIndex = randomInt(0, availablePrizes.length);
+      const safeIndex = Number.isInteger(selectedIndex) && selectedIndex >= 0 && selectedIndex < availablePrizes.length
+        ? selectedIndex
+        : 0;
+      prizeStockItem = availablePrizes[safeIndex];
+      const legacyPrize = (product.randomBox?.prizes || []).find(item => String(item.id) === String(prizeStockItem.randomBoxPrizeId));
+      prizeName = String(legacyPrize?.name || 'คีย์/ไอดี 1 ชิ้น').trim().slice(0, 120);
+      prizeStockItem.status = 'sold';
+      prizeStockItem.soldOrderId = orderId;
+      round.progress = 0;
+      round.target = randomTarget(randomInt, rate);
+      round.rate = rate;
+      round.roundNumber = roundNumber + 1;
+      round.totalAwards = (Number(round.totalAwards) || 0) + 1;
+    } else {
+      round.progress = progressAfter;
+    }
+    round.totalDraws = (Number(round.totalDraws) || 0) + 1;
+
+    const drawResult = {
+      isWin,
+      boxProductId: product.id,
+      boxTitle: product.title,
+      boxSlug: product.slug,
+      roundNumber,
+      roundProgress: progressAfter,
+      roundTarget: target,
+      nextRoundProgress: Number(round.progress) || 0,
+      nextRoundTarget: Number(round.target),
+      prizeName,
+    };
+    drawResults.push(drawResult);
+    orderItems.push({
+      productId: product.id,
+      title: product.title,
+      price: RANDOM_BOX_PRICE,
+      productImage: product.images?.[0] || '',
+      stockItemId: prizeStockItem?.id || null,
+      fulfillmentMode: 'automatic',
+      randomBoxDraw: drawResult,
+    });
   }
-  round.totalDraws = (Number(round.totalDraws) || 0) + 1;
 
-  user.walletBalance = Math.round((balance - RANDOM_BOX_PRICE) * 100) / 100;
+  if (!drawResults.length) fail('NO_PRIZES', 'สต็อกของรางวัลหมดชั่วคราว กรุณาลองใหม่ภายหลัง');
+  const drawTotal = drawResults.length * RANDOM_BOX_PRICE;
+  user.walletBalance = Math.round((balance - drawTotal) * 100) / 100;
+  drawResults.forEach(draw => { draw.walletBalance = user.walletBalance; });
+  const winResults = drawResults.filter(draw => draw.isWin);
   const result = {
-    isWin,
-    boxProductId: product.id,
-    boxTitle: product.title,
-    boxSlug: product.slug,
-    roundNumber,
-    roundProgress: progressAfter,
-    roundTarget: target,
-    nextRoundProgress: Number(round.progress) || 0,
-    nextRoundTarget: Number(round.target),
-    prizeName,
+    ...(drawResults.length === 1 ? drawResults[0] : {}),
+    isWin: winResults.length > 0,
+    drawCount: drawResults.length,
+    requestedDrawCount,
+    winCount: winResults.length,
+    stockExhausted: drawResults.length < requestedDrawCount,
+    total: drawTotal,
+    prizeName: winResults[0]?.prizeName || null,
+    prizeNames: winResults.map(draw => draw.prizeName),
     walletBalance: user.walletBalance,
   };
-
-  const orderItems = [{
-    productId: product.id,
-    title: product.title,
-    price: RANDOM_BOX_PRICE,
-    productImage: product.images?.[0] || '',
-    stockItemId: prizeStockItem?.id || null,
-    fulfillmentMode: 'automatic',
-    randomBoxDraw: result,
-  }];
   const order = {
     id: orderId,
     userId: user.id,
     items: orderItems,
-    subtotal: RANDOM_BOX_PRICE,
+    subtotal: drawTotal,
     discount: 0,
-    total: RANDOM_BOX_PRICE,
+    total: drawTotal,
     couponCode: null,
     status: 'completed',
     paymentMethod: 'wallet',
@@ -192,6 +231,7 @@ function drawRandomBox(data, {
     salesChannel: 'direct',
     federatedTenantIds: [],
     randomBoxOrder: true,
+    randomBoxRequestedDrawCount: requestedDrawCount,
     randomBoxRequestId: idempotencyKey,
   };
   data.orders.push(order);
@@ -199,8 +239,8 @@ function drawRandomBox(data, {
     id: genId(10),
     userId: user.id,
     type: 'random_box_draw',
-    amount: -RANDOM_BOX_PRICE,
-    note: `เปิดกล่องสุ่ม ${product.title} · คำสั่งซื้อ #${orderId}`,
+    amount: -drawTotal,
+    note: `เปิดกล่องสุ่ม ${product.title} ${drawResults.length} ครั้ง · คำสั่งซื้อ #${orderId}`,
     orderId,
     productId: product.id,
     idempotencyKey,
@@ -217,6 +257,7 @@ module.exports = {
   RANDOM_BOX_MAX_TARGET,
   RANDOM_BOX_MIN_RATE,
   RANDOM_BOX_MAX_RATE,
+  MAX_RANDOM_BOX_DRAWS,
   DEFAULT_RANDOM_BOX_RATE,
   supportsRandomBox,
   randomTarget,
@@ -224,6 +265,7 @@ module.exports = {
   getRateConfig,
   parseRate,
   validateRate,
+  parseDrawCount,
   availableStockItems,
   availableStockCount,
   isPublished,

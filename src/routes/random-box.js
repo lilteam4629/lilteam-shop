@@ -23,17 +23,26 @@ router.post('/:productId/draw', requireLogin, async (req, res) => {
       productId: req.params.productId,
       userId: user.id,
       idempotencyKey,
+      drawCount: req.body.drawCount,
       now: Date.now(),
       randomInt: crypto.randomInt,
       genId: store.genId,
     })));
-    req.flash('success', result.result.isWin
-      ? `ยินดีด้วย! คุณได้รับรางวัล “${result.result.prizeName}”`
-      : 'เปิดกล่องเรียบร้อยแล้ว · ระบบคิดเงิน 1 บาท');
+    const summary = result.result || {};
+    const drawCount = Number(summary.drawCount) || 1;
+    const total = Number(summary.total) || drawCount * randomBox.RANDOM_BOX_PRICE;
+    const winCount = Number(summary.winCount) || (summary.isWin ? 1 : 0);
+    const stockNote = summary.stockExhausted ? ' · สต็อกรางวัลหมด จึงหยุดสุ่มเท่านี้' : '';
+    req.flash('success', winCount
+      ? `ยินดีด้วย! ได้รับรางวัล ${winCount} ชิ้น · สุ่ม ${drawCount} ครั้ง ใช้เงิน ฿${total.toLocaleString('th-TH')}${stockNote}`
+      : `สุ่ม ${drawCount} ครั้งเรียบร้อย · ใช้เงิน ฿${total.toLocaleString('th-TH')}${stockNote}`);
     return res.redirect(`/account/orders/${encodeURIComponent(result.orderId)}`);
   } catch (error) {
-    const safeCodes = new Set(['PRODUCT_UNAVAILABLE', 'NOT_RANDOM_BOX', 'NO_PRIZES', 'USER_UNAVAILABLE', 'INSUFFICIENT_BALANCE']);
-    req.flash('error', safeCodes.has(error.code) ? error.message : 'เปิดกล่องไม่สำเร็จ กรุณาลองอีกครั้ง');
+    const safeCodes = new Set(['PRODUCT_UNAVAILABLE', 'NOT_RANDOM_BOX', 'NO_PRIZES', 'USER_UNAVAILABLE', 'INSUFFICIENT_BALANCE', 'INVALID_DRAW_COUNT']);
+    const safeMessage = error.code === 'INVALID_DRAW_COUNT'
+      ? `เลือกจำนวนเปิดกล่องได้ตั้งแต่ 1 ถึง ${randomBox.MAX_RANDOM_BOX_DRAWS} ครั้ง`
+      : error.message;
+    req.flash('error', safeCodes.has(error.code) ? safeMessage : 'เปิดกล่องไม่สำเร็จ กรุณาลองอีกครั้ง');
     if (!safeCodes.has(error.code)) console.error('[random-box] draw failed:', error);
     return res.redirect(returnPath);
   }
