@@ -319,6 +319,54 @@
   }
 }
 
+/* Give configured hero art a calm, contained home on the actual storefront wallpaper. */
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner {
+  padding: clamp(22px, 3.2vw, 38px) !important;
+  overflow: hidden !important;
+  border: 1px solid color-mix(in srgb, var(--gold) 17%, var(--border-light)) !important;
+  border-radius: 22px !important;
+  background: color-mix(in srgb, var(--card) 96%, var(--gold) 4%) !important;
+  box-shadow: 0 16px 38px -32px color-mix(in srgb, var(--text) 44%, transparent) !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-eyebrow {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 7px;
+  margin: 0 0 14px !important;
+  color: var(--gold-text) !important;
+  font-size: 9px !important;
+  font-weight: 800 !important;
+  letter-spacing: .12em !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-artwork {
+  border: 1px solid var(--border-light) !important;
+  border-radius: 15px !important;
+  background: color-mix(in srgb, var(--gold) 5%, var(--input)) !important;
+  box-shadow: 0 12px 26px -24px color-mix(in srgb, var(--text) 35%, transparent) !important;
+}
+
+@media (max-width: 640px) {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner {
+    gap: 0 !important;
+    padding: 20px !important;
+    border-radius: 18px !important;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-eyebrow {
+    margin-bottom: 10px !important;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-hero-content {
+    padding-bottom: 16px !important;
+  }
+
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-artwork {
+    border-radius: 12px !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-artwork img,
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-actions a {
