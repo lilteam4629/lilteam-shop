@@ -5,6 +5,10 @@ const { withEffectivePrice } = require('../services/pricing');
 const { requireAdmin } = require('../middleware/auth');
 const rangersSource = require('../services/rangers-catalog');
 const catalogSyndication = require('../services/catalog-syndication');
+const {
+  filterHomeProductsByRecommendedCategory,
+  shouldGroupRecommendedProductsOnHome,
+} = require('../services/recommended-category-home');
 const { MAIN_SITE_URL } = require('../middleware/tenant');
 
 function publishTime(product) {
@@ -103,9 +107,20 @@ const UNPAGINATED_HOME_TENANTS = new Set(['moopee-shop']);
 function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts = false, req = null) {
   const stockCounts = availableStockCounts();
   const remote = syndicatedProducts(req);
-  const localProducts = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
-  // Keep the tenant's own catalog and the platform/API catalog as separate
-  // storefront sections. The main shop still sees its complete catalog.
+  const recommendedCategories = (store.data.recommendedCategories || []).filter(category => category.enabled !== false);
+  // The main storefront hides assigned products only for banners it actually
+  // renders; Bank Shop renders category cards even when they use the fallback image.
+  const homeVisibleRecommendedCategories = req?.tenantShop
+    ? recommendedCategories
+    : recommendedCategories.filter(category => Boolean(category.imageUrl));
+  const allLocalProducts = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
+  const groupRecommendedProducts = shouldGroupRecommendedProductsOnHome(req);
+  const localProducts = groupRecommendedProducts
+    ? filterHomeProductsByRecommendedCategory(allLocalProducts, homeVisibleRecommendedCategories, req)
+    : allLocalProducts;
+  const categorizedHomeProductCount = allLocalProducts.length - localProducts.length;
+  // Keep platform/API items out of the tenant-owned category assignment filter:
+  // identical IDs from two catalogs must never hide the partner item by accident.
   const active = req?.tenantShop ? localProducts : localProducts.concat(remote);
   const apiConfig = catalogSyndication.normalizeConfig(store.data.settings || {});
   const platformApiConfig = catalogSyndication.normalizeConfig(store.platformData.settings || {});
@@ -129,7 +144,6 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
       : newestProducts.slice(0, section.limit || 5);
     return { id: section.id, title: section.title, products };
   }).filter(section => section.products.length);
-  const recommendedCategories = (store.data.recommendedCategories || []).filter(category => category.enabled !== false);
   // Every product is still reachable (nothing is silently capped) — just
   // paginated instead of rendering the entire catalog in one page load,
   // which was ballooning page weight/DOM size once a shop had 50+ products.
@@ -148,6 +162,8 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     recommendedCategories,
     products: pageProducts,
     productTotal: active.length,
+    productCatalogTotal: allLocalProducts.length + remote.length,
+    recommendedCategoryHomeMode: groupRecommendedProducts && categorizedHomeProductCount > 0,
     productPage: page,
     productTotalPages: totalPages,
     catalogApiNotice: Boolean(req?.tenantShop && store.data.settings.catalogApi?.enabled),

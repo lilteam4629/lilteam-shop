@@ -53,6 +53,44 @@ async function loginAsAdmin() {
   return cookie.split(';')[0];
 }
 
+async function checkRecommendedCategoryHomepage(cookie) {
+  const initialData = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  const orderedProductIds = new Set((initialData.orders || []).flatMap(order => (order.items || []).map(item => String(item.productId))));
+  const product = (initialData.products || []).find(item => item.status === 'active' && item.slug && !orderedProductIds.has(String(item.id)));
+  if (!product) throw new Error('recommended category smoke test has no active product fixture');
+
+  const title = `recommended-home-smoke-${process.pid}`;
+  const created = await request('/admin/recommended-categories', {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ title, imageUrl: 'https://example.test/category.png' }).toString(),
+  });
+  if (created.statusCode !== 302) throw new Error('recommended category could not be created for the homepage visibility check');
+
+  const createdData = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  const category = (createdData.recommendedCategories || []).find(item => item.title === title);
+  if (!category) throw new Error('recommended category was not persisted');
+  const selection = new URLSearchParams();
+  selection.append('productIds', String(product.id));
+  const saved = await request(`/admin/recommended-categories/${encodeURIComponent(category.id)}/products`, {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: selection.toString(),
+  });
+  if (saved.statusCode !== 302) throw new Error('product assignment to a recommended category failed');
+
+  const home = await fetchOk('/', 'text/html');
+  if (home.body.includes(`/game/${product.slug}`)) throw new Error('a categorized product still appears in the main homepage shelves');
+  if (!home.body.includes(`/products?recommended=${encodeURIComponent(category.id)}`)) throw new Error('homepage category card does not lead to its selected product list');
+  const categoryPage = await fetchOk(`/products?recommended=${encodeURIComponent(category.id)}`, 'text/html');
+  if (!categoryPage.body.includes(`/game/${product.slug}`)) throw new Error('selected product is missing from its recommended category page');
+
+  const disabled = await request(`/admin/recommended-categories/${encodeURIComponent(category.id)}/toggle`, { method: 'POST', headers: { cookie } });
+  if (disabled.statusCode !== 302) throw new Error('recommended category could not be disabled for the fallback check');
+  const homeAfterDisable = await fetchOk('/', 'text/html');
+  if (!homeAfterDisable.body.includes(`/game/${product.slug}`)) throw new Error('a product in a hidden category did not return to the homepage catalog');
+}
+
 async function checkScheduledProductWorkflow(cookie) {
   const form = await fetchOk('/admin/products/new', 'text/html', { cookie });
   if (/name="(?:publishAt|eventBadge|eventDescription)"/.test(form.body)) {
@@ -437,6 +475,7 @@ async function run() {
     if (!mainLayoutSource.includes("addEventListener('pageshow'")) throw new Error('rain does not resume after a back-forward cache restore');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
+    await checkRecommendedCategoryHomepage(cookie);
     await checkScheduledProductWorkflow(cookie);
     const mainAdmin = await fetchOk('/admin', 'text/html', { cookie });
     if (!mainAdmin.body.includes('admin-site')) throw new Error('admin is missing its motion scope');
