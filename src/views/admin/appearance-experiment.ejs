@@ -2,6 +2,7 @@
   const heroSettings = settings.hero || {};
   const authAppearance = settings.authAppearance || {};
   const storefrontAppearance = settings.storefrontAppearance || {};
+  const authBackgroundPreview = authAppearance.backgroundImage || storefrontAppearance.backgroundImage;
   const mediaCount = [settings.branding && settings.branding.logoImage, heroSettings.bannerImage,
     storefrontAppearance.backgroundImage, authAppearance.backgroundImage].filter(Boolean).length;
   const notices = [].concat(successMessages || [], errorMessages || []);
@@ -90,8 +91,8 @@
         <article class="as-card" data-as-card data-search="พื้นหลังเข้าสู่ระบบ สมัครสมาชิก login auth">
           <header class="as-card-head"><div><span class="as-card-icon is-violet" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8h6M8 17c.5-2 1.8-3 4-3s3.5 1 4 3"/><circle cx="12" cy="10.5" r="1.5"/></svg></span><div><h3>พื้นหลังเข้าสู่ระบบ</h3><p>ใช้ภาพเดียวกันกับหน้าเข้าสู่ระบบและสมัครสมาชิก</p></div></div><span class="as-status <%= authAppearance.backgroundImage ? 'is-set' : '' %>"><i></i><%= authAppearance.backgroundImage ? 'มีรูปแล้ว' : 'ใช้ภาพหน้าร้าน' %></span></header>
           <div class="as-preview as-preview-background" data-as-preview>
-            <img src="<%= authAppearance.backgroundImage || '' %>" alt="ตัวอย่างพื้นหลังหน้าเข้าสู่ระบบ" data-as-image <%= authAppearance.backgroundImage ? '' : 'hidden' %>>
-            <div class="as-empty-preview" data-as-empty <%= authAppearance.backgroundImage ? 'hidden' : '' %>><span class="as-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8h6M8 17c.5-2 1.8-3 4-3s3.5 1 4 3"/><circle cx="12" cy="10.5" r="1.5"/></svg></span><strong>ใช้ภาพพื้นหลังหน้าร้าน</strong><small>ตั้งภาพเฉพาะส่วนนี้ได้ทุกเมื่อ</small></div>
+            <img src="<%= authBackgroundPreview || '' %>" alt="ตัวอย่างพื้นหลังหน้าเข้าสู่ระบบ" data-as-image <%= authBackgroundPreview ? '' : 'hidden' %>>
+            <div class="as-empty-preview" data-as-empty <%= authBackgroundPreview ? 'hidden' : '' %>><span class="as-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2.5"/><path d="M9 8h6M8 17c.5-2 1.8-3 4-3s3.5 1 4 3"/><circle cx="12" cy="10.5" r="1.5"/></svg></span><strong>ยังไม่มีภาพพื้นหลัง</strong><small>อัปโหลดรูปเฉพาะ หรือเพิ่มภาพพื้นหลังหน้าร้าน</small></div>
             <span class="as-preview-chip">หน้าเข้าสู่ระบบ · สมัครสมาชิก</span>
           </div>
           <div class="as-card-footer"><form class="as-upload-form" action="/admin/auth-background/upload" method="post" enctype="multipart/form-data" data-as-upload data-max-mb="10">
