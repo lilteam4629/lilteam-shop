@@ -80,13 +80,12 @@ body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-h
   outline: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  object-fit: cover !important;
+  object-fit: contain !important;
   object-position: center !important;
-  transition: transform .28s cubic-bezier(.2, .7, .2, 1), filter .28s ease !important;
+  transition: filter .28s ease !important;
 }
 
 body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-card:hover .home-category-image img {
-  transform: scale(1.025) !important;
   filter: saturate(1.04) !important;
 }
 
