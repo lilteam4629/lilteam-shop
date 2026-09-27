@@ -823,6 +823,7 @@ async function main() {
     const appearanceView = fs.readFileSync(path.join(root, 'src/views/admin/appearance-experiment.ejs'), 'utf8');
     assert.match(mainLayout, /id="storefront-background-override"/);
     assert.match(mainLayout, /storefront-global-background #site-page-shell/);
+    assert.match(mainLayout, /body\.storefront-global-background #site-page-shell,[\s\S]*?background:\s*transparent !important;\s*background-image:\s*none !important;/);
     assert.match(mainLayout, /background-image: url\('<%= storefrontBackground %>'\)/);
     assert.ok(mainLayout.indexOf('id="storefront-background-override"') > mainLayout.indexOf('<%- body %>'));
     assert.doesNotMatch(mainLayout, /body\.storefront-global-background\s*\{[^}]*background-image:\s*none/i);
