@@ -36,8 +36,8 @@ assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && ty
   'the cozy homepage layer must only load on the main storefront');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*storefront-music-widget-cozy-v1\.css[^\n]*rev=4/,
   'the compact music dock must be cache-busted and enabled only for the main storefront');
-assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-account-menu-mobile-v1\.css[^\n]*rev=2/,
-  'the redesigned main account menu must be cache-busted without changing rental storefronts');
+assert.match(layout, /storefront-mobile-header-cozy-v3\.css[\s\S]*?if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-account-menu-mobile-v1\.css[^\n]*rev=3/,
+  'the redesigned main account menu must load after the main-store theme layers');
 assert.match(accountMenuCss, /\.store-nav--main \.store-nav__account-menu--main\s*\{[^}]*box-shadow:\s*0 18px 46px/s,
   'the account menu must read as a calm, elevated surface above the mobile storefront');
 assert.match(accountMenuCss, /\.store-nav--main \.store-nav__account-balance\s*\{[^}]*background:\s*color-mix/s,
