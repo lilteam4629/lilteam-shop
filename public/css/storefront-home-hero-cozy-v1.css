@@ -611,13 +611,16 @@
     grid-row: 2 !important;
     width: 100% !important;
     max-width: none !important;
-    aspect-ratio: 2.15 / 1 !important;
+    height: auto !important;
+    aspect-ratio: auto !important;
     overflow: hidden !important;
   }
 
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-artwork > img {
+    display: block !important;
     width: 100% !important;
-    height: 100% !important;
+    height: auto !important;
+    max-height: none !important;
     object-fit: contain !important;
     object-position: center !important;
   }
@@ -626,7 +629,7 @@
 @media (max-width: 640px) {
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner {
     gap: 14px !important;
-    padding: 14px 0 22px !important;
+    padding: 14px 0 4px !important;
   }
 
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-hero-content {
@@ -634,6 +637,6 @@
   }
 
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner .owner-home-v20-artwork {
-    aspect-ratio: 1.8 / 1 !important;
+    aspect-ratio: auto !important;
   }
 }

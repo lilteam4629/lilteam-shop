@@ -259,6 +259,41 @@ cozyHeroStylesheet.walkAtRules('media', mediaRule => {
 });
 assert.ok(desktopBannerUsesIntrinsicRatio,
   'the main-store banner must fill its row while preserving its original aspect ratio');
+let mobileBannerUsesIntrinsicRatio = false;
+let phoneBannerHasCompactBottomSpacing = false;
+cozyHeroStylesheet.walkAtRules('media', mediaRule => {
+  if (mediaRule.params === '(max-width: 900px)') {
+    let artworkFollowsImageHeight = false;
+    let imageKeepsItsNaturalRatio = false;
+    mediaRule.walkRules(rule => {
+      if (!rule.selector.includes('.owner-home-v20-hero--banner .owner-home-v20-artwork')) return;
+      const declarations = Object.fromEntries(rule.nodes
+        .filter(node => node.type === 'decl')
+        .map(node => [node.prop, node.value]));
+      if (declarations.height === 'auto' && declarations['aspect-ratio'] === 'auto') {
+        artworkFollowsImageHeight = true;
+      }
+      if (rule.selector.includes('> img') && declarations.display === 'block'
+        && declarations.height === 'auto' && declarations['object-fit'] === 'contain') {
+        imageKeepsItsNaturalRatio = true;
+      }
+    });
+    mobileBannerUsesIntrinsicRatio = artworkFollowsImageHeight && imageKeepsItsNaturalRatio;
+  }
+  if (mediaRule.params === '(max-width: 640px)') {
+    mediaRule.walkRules(rule => {
+      if (!rule.selector.endsWith('.owner-home-v23-hero.owner-home-v20-hero--banner')) return;
+      const declarations = Object.fromEntries(rule.nodes
+        .filter(node => node.type === 'decl')
+        .map(node => [node.prop, node.value]));
+      if (declarations.padding === '14px 0 4px') phoneBannerHasCompactBottomSpacing = true;
+    });
+  }
+});
+assert.ok(mobileBannerUsesIntrinsicRatio,
+  'the mobile banner frame must follow the full, uncropped image height');
+assert.ok(phoneBannerHasCompactBottomSpacing,
+  'the mobile banner must not leave excess padding before the announcement');
 assert.ok(cozyRuleCount > 0, 'the cozy marketplace layout should contain owner-only rules');
 
 const productCardCss = read('public/css/storefront-owner-home-v21.css');
