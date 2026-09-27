@@ -325,19 +325,19 @@
 .experiment-field textarea,
 .experiment-field select,
 .experiment-field input[type="file"],
-.experiment-field input:hover,
-.experiment-field textarea:hover,
-.experiment-field select:hover,
 .experiment-field input:focus,
 .experiment-field textarea:focus,
-.experiment-field select:focus { background: #fff !important; }
+.experiment-field select:focus { background: #f2f3f2 !important; }
+.experiment-field input:hover,
+.experiment-field textarea:hover,
+.experiment-field select:hover { background: #ebedec !important; }
 .experiment-field input,
 .experiment-field textarea,
 .experiment-field select { box-shadow: 0 2px 9px rgba(30, 30, 30, .055); }
 .experiment-field input:focus,
 .experiment-field textarea:focus,
 .experiment-field select:focus { box-shadow: 0 0 0 3px rgba(197, 138, 36, .18); }
-.experiment-field input[type="file"]::file-selector-button { background: #f4f4f4 !important; }
+.experiment-field input[type="file"]::file-selector-button { background: #e7e9e8 !important; }
 .experiment-image-choice,
 .experiment-image-preview,
 .experiment-inline-empty,
