@@ -141,7 +141,7 @@
 .experiment-form-panel-images,
 .experiment-form-panel-filters { background: linear-gradient(145deg, #fffefa, #fdfbf5) !important; }
 .experiment-form-panel-purchase { background: linear-gradient(145deg, #fffefa, #fff8ed) !important; }
-.experiment-form-panel-messenger { background: linear-gradient(145deg, #fffefa, #fff8f2) !important; }
+.experiment-form-panel-messenger { background: #fff !important; }
 .experiment-form-panel-head { align-items: center; gap: 12px; margin-bottom: 20px; }
 .experiment-form-panel-title,
 .experiment-subsection-title { display: flex; align-items: center; gap: 11px; min-width: 0; }
@@ -149,10 +149,10 @@
 .experiment-panel-icon { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 14px; color: #675039; box-shadow: inset 0 -2px 0 rgba(91, 65, 34, .06); }
 .experiment-panel-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
 .experiment-panel-icon.info { background: #e9ecde; }
-.experiment-panel-icon.photos { background: #f2e5da; }
+.experiment-panel-icon.photos { background: #f3f3f0; }
 .experiment-panel-icon.purchase { background: #f3ebcf; }
 .experiment-panel-icon.filters { background: #e7eadc; }
-.experiment-panel-icon.message { background: #f1e2d8; }
+.experiment-panel-icon.message { background: #f3f3f0; }
 .experiment-panel-icon.storefront { background: #e6ebe0; }
 .experiment-subsection-head { align-items: center; }
 .experiment-subsection-head h3 { font-size: 16px; }
@@ -187,7 +187,7 @@
 .experiment-content-settings { gap: 12px; }
 .experiment-content-settings > div { padding: 14px; border-radius: 15px; background: #f5f1e8; }
 .experiment-content-settings > div:nth-child(2) { background: #f2eee2; }
-.experiment-content-settings > div:nth-child(3) { background: #f5eee7; }
+.experiment-content-settings > div:nth-child(3) { background: #f5f5f2; }
 .experiment-content-settings > div .experiment-check-row { width: 100%; min-height: 0; padding: 9px; border-radius: 11px; background: rgba(255, 255, 255, .65); }
 .experiment-content-settings > div .experiment-check-row:hover { background: #fffefa; }
 .experiment-form-panel-content .status-field { max-width: 380px; }
