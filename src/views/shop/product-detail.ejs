@@ -1,15 +1,15 @@
-<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8 system-lab-product-detail">
-  <a href="javascript:history.back()" class="text-sm text-[var(--gold-text)]">← กลับหน้าร้าน</a>
+<section class="w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8 system-lab-product-detail product-detail-page">
+  <a href="javascript:history.back()" class="text-sm text-[var(--gold-text)] product-detail-back">← กลับหน้าร้าน</a>
 
-  <div class="grid md:grid-cols-2 gap-8 mt-4">
-    <div>
-      <div class="w-fit max-w-full mx-auto overflow-hidden rounded-2xl mb-3">
-        <img src="<%= product.images[0] %>" class="block w-auto max-w-full h-auto max-h-[75vh] object-contain" alt="<%= product.title %>" />
+  <div class="grid md:grid-cols-2 gap-8 mt-4 product-detail-main">
+    <div class="product-detail-gallery">
+      <div class="w-fit max-w-full mx-auto overflow-hidden rounded-2xl mb-3 product-detail-media">
+        <img src="<%= product.images[0] %>" class="block w-auto max-w-full h-auto max-h-[75vh] object-contain product-detail-primary-image" alt="<%= product.title %>" />
       </div>
       <% if (product.images.length > 1) { %>
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-4 gap-2 product-detail-thumbnails">
           <% product.images.slice(1).forEach(img => { %>
-            <div class="aspect-video rounded-lg overflow-hidden border border-[var(--border)]">
+            <div class="aspect-video rounded-lg overflow-hidden border border-[var(--border)] product-detail-thumb">
               <img src="<%= img %>" class="w-full h-full object-contain bg-black" />
             </div>
           <% }) %>
@@ -17,19 +17,19 @@
       <% } %>
     </div>
 
-    <div>
-      <div class="flex items-center gap-2 mb-3">
-        <span class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-[var(--gold-text)] text-xs px-2 py-1 rounded">สินค้าเกม</span>
+    <div class="product-detail-info">
+      <div class="flex items-center gap-2 mb-3 product-detail-meta">
+        <span class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-[var(--gold-text)] text-xs px-2 py-1 rounded product-detail-kind">สินค้าเกม</span>
         <% if (product.stockCount > 0) { %>
-          <span class="text-emerald-400 text-xs">พร้อมส่งทันที</span>
+          <span class="text-emerald-400 text-xs product-detail-stock is-available">พร้อมส่งทันที</span>
         <% } else { %>
-          <span class="text-[var(--coral)] text-xs">สินค้าหมด</span>
+          <span class="text-[var(--coral)] text-xs product-detail-stock is-sold">สินค้าหมด</span>
         <% } %>
         <button onclick="navigator.clipboard && navigator.clipboard.writeText(window.location.href); this.textContent='คัดลอกแล้ว'"
-          class="ml-auto text-xs text-[var(--text-3)] hover:text-[var(--gold-text)] border border-[var(--border-light)] rounded-lg px-2 py-1">คัดลอกลิงก์</button>
+          class="ml-auto text-xs text-[var(--text-3)] hover:text-[var(--gold-text)] border border-[var(--border-light)] rounded-lg px-2 py-1 product-detail-copy">คัดลอกลิงก์</button>
       </div>
 
-      <h1 class="text-2xl font-bold mb-2"><%= product.title %></h1>
+      <h1 class="text-2xl font-bold mb-2 product-detail-title"><%= product.title %></h1>
       <% if (product.federatedCheckout) { %>
         <div class="mb-4 rounded-xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 px-4 py-3 text-sm">
           <div class="font-black text-[var(--gold-text)]">🔒 ชำระเงินกับร้านหลักและรับสินค้าที่ร้านหลักเท่านั้น</div>
@@ -111,15 +111,15 @@
           <div class="min-w-[7.5rem] rounded-lg border border-[var(--gold)]/45 bg-black/35 px-3 py-2 text-center"><div class="text-[10px] font-medium text-[var(--gold-text)]"><%= product.flashSaleActive ? 'เหลือเวลา' : 'เริ่มใน' %></div><div class="flash-countdown mt-0.5 whitespace-nowrap font-mono text-xl sm:text-2xl font-black tracking-wide text-[var(--gold-light)]" <% if (product.flashSaleActive) { %>data-flash-end="<%= product.flashSaleEndsAt %>"<% } else { %>data-flash-start="<%= product.flashSaleStartsAt %>"<% } %>><%= detailFlashInitial %></div></div>
         </div>
       <% } %>
-      <div class="flex flex-wrap gap-2 mb-3">
+      <div class="flex flex-wrap gap-2 mb-3 product-detail-genres">
         <% genreNames.forEach(g => { %>
-          <span class="text-xs bg-[var(--input)] border border-[var(--border-light)] text-[var(--text-2)] px-2 py-1 rounded-full"><%= g %></span>
+          <span class="text-xs bg-[var(--input)] border border-[var(--border-light)] text-[var(--text-2)] px-2 py-1 rounded-full product-detail-genre"><%= g %></span>
         <% }) %>
       </div>
       <% const qtyTiers = (product.priceOptions || []).slice().sort((a, b) => a.minQty - b.minQty); %>
       <% if (qtyTiers.length) { %>
-        <div class="mb-1 text-xs text-[var(--text-3)]">ราคา</div>
-        <div class="flex items-baseline gap-2 mb-3">
+        <div class="mb-1 text-xs text-[var(--text-3)] product-price-label">ราคา</div>
+        <div class="flex items-baseline gap-2 mb-3 product-detail-price">
           <span class="text-3xl font-bold text-[var(--gold-text)]">฿<span data-unit-price><%= product.price.toLocaleString() %></span></span>
           <span class="text-sm text-[var(--text-3)]">/ ชิ้น</span>
         </div>
@@ -163,8 +163,8 @@
           #qty-input::-webkit-outer-spin-button,#qty-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
         </style>
       <% } else { %>
-        <div class="mb-1 text-xs text-[var(--text-3)]">ราคา</div>
-        <div class="flex items-baseline gap-2 mb-5">
+        <div class="mb-1 text-xs text-[var(--text-3)] product-price-label">ราคา</div>
+        <div class="flex items-baseline gap-2 mb-5 product-detail-price">
           <span class="text-3xl font-bold text-[var(--gold-text)]">฿<%= product.price.toLocaleString() %>.00</span>
           <% const crossedPrice = product.flashSaleActive ? product.regularPrice : product.originalPrice; %>
           <% if (crossedPrice > product.price) { %>
@@ -175,7 +175,7 @@
 
       <% if (product.isSyndicated) { %>
         <% if (product.stockCount > 0) { %>
-          <div class="rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-5 shadow-[0_12px_30px_-18px_color-mix(in_srgb,var(--gold)_70%,transparent)]">
+          <div class="rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-5 shadow-[0_12px_30px_-18px_color-mix(in_srgb,var(--gold)_70%,transparent)] product-federated-panel">
             <div class="mb-2 flex items-center gap-2 text-base font-black text-[var(--gold-text)]">🔒 ชำระเงินและรับสินค้าในร้านหลักเท่านั้น</div>
             <p class="mb-3 text-sm font-medium leading-relaxed text-[var(--text-2)]">ก่อนกดซื้อ กรุณากดปุ่ม “เติมเงินสินค้า API” ด้านล่างและโอนเข้าบัญชีร้านหลัก ยอดนี้แยกจากเงินเติมของร้านเช่าและใช้ซื้อสินค้านี้เท่านั้น</p>
             <p class="mb-4 text-xs text-[var(--text-3)]">หลังสั่งซื้อสำเร็จเท่านั้น ให้กดปุ่มติดต่อร้านหลักในหน้าออเดอร์เพื่อรับไอดีที่ร้านหลัก · ราคานี้รวมส่วนต่างร้านเช่าแล้ว</p>
@@ -194,7 +194,7 @@
             <% if (currentUser && currentUser.role === 'admin' && !isMainSite) { %>
               <div class="rounded-xl border border-[var(--coral)]/45 bg-[var(--coral)]/10 px-4 py-3 text-sm font-bold text-[var(--coral)]">บัญชีเจ้าของร้านเช่าไม่สามารถใช้เงินของร้านเช่าซื้อสินค้านี้ได้ ลูกค้าต้องเป็นผู้เติมเงินและสั่งซื้อเอง</div>
             <% } else { %>
-              <form action="/cart/add/<%= product.id %>" method="post" class="space-y-3">
+              <form action="/cart/add/<%= product.id %>" method="post" class="space-y-3 product-buy-form product-buy-form-federated">
                 <div class="flex items-start gap-3 rounded-xl border border-[var(--border-light)] bg-[var(--bg)]/55 p-4 cursor-pointer transition hover:border-[var(--gold)]/60">
                   <input data-purchase-confirm type="checkbox" name="purchaseConfirmed" value="yes" required class="peer mt-0.5 h-6 w-6 shrink-0 accent-[var(--gold)]" />
                   <span class="text-sm font-medium leading-relaxed peer-checked:text-[var(--gold-light)]">ฉันตรวจสอบข้อมูลสินค้า Partner ราคา และยืนยันว่าพร้อมเติมเงินสินค้า API ก่อนซื้อ</span>
@@ -212,7 +212,7 @@
           <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมดจากร้านหลัก</div>
         <% } %>
       <% } else if (product.stockCount > 0) { %>
-        <form action="/cart/add/<%= product.id %><%= product.federatedCheckout ? '?federated=1' : '' %>" method="post" <%= product.purchaseApprovalEnabled ? 'class="relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 bg-gradient-to-br from-[var(--card)] to-[var(--input)] p-5 shadow-lg"' : '' %>>
+        <form action="/cart/add/<%= product.id %><%= product.federatedCheckout ? '?federated=1' : '' %>" method="post" class="product-buy-form <%= product.purchaseApprovalEnabled ? 'product-buy-form-confirm relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 bg-gradient-to-br from-[var(--card)] to-[var(--input)] p-5 shadow-lg' : '' %>">
           <% if (qtyTiers.length) { %>
             <div class="flex flex-wrap items-center gap-4 mb-4" data-qty-wrap data-base-price="<%= product.price %>" data-tiers='<%- JSON.stringify(qtyTiers) %>'>
               <div>
@@ -282,7 +282,7 @@
               <input data-purchase-confirm type="checkbox" name="purchaseConfirmed" value="yes" required class="peer mt-0.5 h-6 w-6 shrink-0 accent-[var(--gold)]" />
               <span class="text-sm font-medium leading-relaxed peer-checked:text-[var(--gold-light)]"><%= product.purchaseConfirmationText || 'ฉันตรวจสอบข้อมูลและยืนยันว่าพร้อมทำตามเงื่อนไขของสินค้านี้' %></span>
             </label>
-            <div class="relative mt-4 grid gap-2 sm:grid-cols-2">
+            <div class="relative mt-4 grid gap-2 sm:grid-cols-2 product-purchase-actions">
               <% if (product.purchaseActionUrl) { %>
                 <a href="<%= product.purchaseActionUrl %>" target="_blank" rel="noopener noreferrer" class="product-action-secondary inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-5 py-3 text-center text-sm font-semibold transition hover:-translate-y-0.5" style="background:#172033!important;color:#fff!important;border:1px solid #334155!important">↗ <%= product.purchaseActionLabel || 'ไปทำขั้นตอนนี้ก่อน' %></a>
               <% } %>
@@ -294,7 +294,7 @@
       <% } else { %>
         <div class="bg-[var(--coral)]/10 border border-[var(--coral)]/40 text-[var(--coral)] text-sm rounded-lg px-4 py-3">สินค้าหมด กรุณาเลือกสินค้าอื่น</div>
       <% } %>
-      <div class="mt-3 grid grid-cols-2 gap-2 sm:flex">
+      <div class="mt-3 grid grid-cols-2 gap-2 sm:flex product-utility-actions">
         <% if (!product.isSyndicated) { %><a href="/account/topup" class="product-topup-action inline-flex min-h-12 items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-bold shadow-sm transition hover:-translate-y-0.5" style="background:#111827!important;color:#fff!important;border:1px solid #374151!important">
           <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M4 7.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a3 3 0 0 1-3-3v-10a3 3 0 0 1 3-3h12v4" />
@@ -314,7 +314,7 @@
 
       <% if (product.howToReceiveEnabled !== false) { %>
         <% const howToReceiveText = product.howToReceiveText || 'รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ ตรวจสอบได้ที่หน้าคำสั่งซื้อของคุณ\nระบบส่งมอบอัตโนมัติตลอด 24 ชั่วโมง\nหากติดปัญหาแจ้งทางร้านได้ที่หน้าติดต่อร้าน'; %>
-        <div class="receive-highlight mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2">
+        <div class="receive-highlight mt-6 bg-[var(--card)] border border-[var(--border)] rounded-xl p-4 space-y-2 product-how-to">
           <div class="receive-highlight-title">✦ วิธีรับสินค้า ✦</div>
           <% howToReceiveText.split('\n').map(l => l.trim()).filter(Boolean).forEach(line => { %>
             <p><span>✓</span><strong><%= line %></strong></p>
@@ -333,8 +333,8 @@
     .receive-highlight p>strong{font-weight:750}
   </style>
 
-  <div class="mt-10">
-    <div class="flex gap-1 border-b border-[var(--border)] text-sm overflow-x-auto" id="tabbar">
+  <div class="mt-10 product-detail-extra">
+    <div class="flex gap-1 border-b border-[var(--border)] text-sm overflow-x-auto product-detail-tabs" id="tabbar">
       <button data-tab="terms" class="tab-btn px-4 py-2 border-b-2 border-[var(--gold)] text-[var(--gold-text)] whitespace-nowrap">เงื่อนไข</button>
       <button data-tab="gallery" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">ภาพเกม</button>
       <button data-tab="about" class="tab-btn px-4 py-2 border-b-2 border-transparent text-[var(--text-3)] hover:text-[var(--text-2)] whitespace-nowrap">รายละเอียด</button>
@@ -402,6 +402,10 @@ body.storefront-model-rangers-market .system-lab-product-detail .receive-highlig
 body.storefront-model-rangers-market .system-lab-product-detail .receive-highlight-title{background:none;color:#d95f43}
 @media(max-width:700px){body.storefront-model-rangers-market .system-lab-product-detail{padding:14px 10px 42px!important}body.storefront-model-rangers-market .system-lab-product-detail>div.grid{display:flex!important;flex-direction:column;gap:12px!important;padding:10px}.storefront-model-rangers-market .system-lab-product-detail>div.grid>div:first-child>div:first-child{height:230px!important}.storefront-model-rangers-market .system-lab-product-detail h1{font-size:28px!important}}
 </style>
+
+<% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+  <link rel="stylesheet" href="<%= asset('css/storefront-product-detail-cozy-v1.css') %>" />
+<% } %>
 
 <script>
   (function () {
