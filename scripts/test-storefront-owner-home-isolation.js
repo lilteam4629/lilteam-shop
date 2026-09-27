@@ -17,6 +17,7 @@ const cinematicCss = read('public/css/storefront-owner-home-v20.css');
 const cozyCss = read('public/css/storefront-home-cozy-v1.css');
 const ownerHeroFxCss = read('public/css/storefront-owner-home-hero-v23.css');
 const ownerHeroLayoutCss = read('public/css/storefront-owner-home-hero-v22.css');
+const musicDockCss = read('public/css/storefront-music-widget-cozy-v1.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
   'the redesign must be enabled for the main store only');
@@ -32,6 +33,12 @@ assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n
   'the banner-only hero stylesheet must be cache-busted for the main store only');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
   'the cozy homepage layer must only load on the main storefront');
+assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*storefront-music-widget-cozy-v1\.css[^\n]*rev=4/,
+  'the compact music dock must be cache-busted and enabled only for the main storefront');
+assert.match(musicDockCss, /#music-widget\.is-collapsed\s*\{[^}]*width:\s*max-content[^}]*max-width:\s*min\(168px,\s*calc\(100vw - 24px\)\)/s,
+  'the collapsed music dock must stay compact on narrow screens');
+assert.match(musicDockCss, /#music-widget\.is-collapsed \.music-dock-restore:not\(\[hidden\]\)\s*\{[^}]*height:\s*36px/s,
+  'the collapsed music control must fit a low-profile floating chip');
 assert.doesNotMatch(layout, /storefront-owner-home-v18\.css/,
   'the superseded split hero styling must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,

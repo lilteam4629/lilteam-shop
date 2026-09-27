@@ -216,6 +216,71 @@ body.storefront-owner-home-page #music-widget.is-collapsed .music-dock-restore:n
   transform: none !important;
 }
 
+/* Keep the collapsed player to a quiet, thumb-sized Now Playing chip. */
+body.storefront-owner-home-page #music-widget.is-collapsed {
+  width: max-content !important;
+  max-width: min(168px, calc(100vw - 24px)) !important;
+  padding: 3px !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--card) 94%, transparent) !important;
+  box-shadow: 0 5px 16px color-mix(in srgb, var(--text) 12%, transparent), inset 0 1px color-mix(in srgb, white 46%, transparent) !important;
+  backdrop-filter: blur(12px);
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed .music-dock-restore:not([hidden]) {
+  flex: 0 1 auto !important;
+  width: max-content !important;
+  max-width: 100% !important;
+  height: 36px !important;
+  gap: 7px !important;
+  padding: 3px 6px 3px 3px !important;
+  border-radius: 999px !important;
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed .music-restore-cover {
+  flex: 0 0 28px !important;
+  width: 28px !important;
+  height: 28px !important;
+  border-radius: 50% !important;
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed .music-restore-cover svg {
+  right: -1px !important;
+  bottom: -1px !important;
+  width: 14px !important;
+  height: 14px !important;
+  padding: 1px !important;
+  border-radius: 50% !important;
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed .music-restore-copy {
+  gap: 0 !important;
+  flex: 0 1 auto !important;
+  max-width: 78px !important;
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed .music-restore-copy strong {
+  font-size: 10px !important;
+  line-height: 1.15 !important;
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed .music-restore-copy small {
+  font-size: 8px !important;
+  line-height: 1.15 !important;
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed .music-restore-chevron {
+  flex: 0 0 22px !important;
+  width: 22px !important;
+  height: 22px !important;
+  border-radius: 50% !important;
+}
+
+body.storefront-owner-home-page #music-widget.is-collapsed .music-restore-chevron svg {
+  width: 12px !important;
+  height: 12px !important;
+}
+
 body.storefront-owner-home-page #music-widget .music-cover {
   position: relative;
   display: grid;
