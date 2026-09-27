@@ -158,7 +158,8 @@ async function checkScheduledProductWorkflow(cookie) {
 async function checkRandomBoxWorkflow(adminCookie) {
   const form = await fetchOk('/admin/products/new', 'text/html', { cookie: adminCookie });
   if (!form.body.includes('name="productKind"') || !form.body.includes('random-box-product-fields-v1.css')
-    || !form.body.includes('name="randomBoxRate"') || !form.body.includes('min="0.01"') || !form.body.includes('max="100"')) {
+    || !form.body.includes('name="randomBoxRate"') || !form.body.includes('min="0.01"') || !form.body.includes('max="100"')
+    || form.body.includes('name="randomBoxPrizeName"') || !form.body.includes('จัดการรางวัลในสต็อก')) {
     throw new Error('product form does not expose the random-box product type and setup UI');
   }
   const title = `random-box-smoke-${process.pid}`;
@@ -167,8 +168,6 @@ async function checkRandomBoxWorkflow(adminCookie) {
   payload.set('productKind', 'random-box');
   payload.set('randomBoxRate', '1');
   payload.set('price', '999');
-  payload.append('randomBoxPrizeName', 'รางวัลทดสอบ');
-  payload.append('randomBoxPrizePercent', '100');
   const created = await request('/admin/products/new', {
     method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: payload.toString(),
   });
@@ -176,8 +175,32 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (created.statusCode !== 302 || !productId) throw new Error('random-box product was not created into the main product workflow');
   let data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   let product = data.products.find(item => item.id === productId);
-  if (!product || product.specialType !== 'random-box' || product.price !== 1 || product.randomBox.rate !== 1 || product.randomBox.prizes[0].percent !== 100) {
-    throw new Error('random-box price or separate prize settings were not enforced when saving');
+  if (!product || product.specialType !== 'random-box' || product.price !== 1 || product.randomBox.rate !== 1 || product.randomBox.prizes.length !== 0) {
+    throw new Error('random-box product setup did not leave reward management in stock');
+  }
+  const emptyStockPage = await fetchOk(`/admin/products/${encodeURIComponent(productId)}/stock`, 'text/html', { cookie: adminCookie });
+  if (!emptyStockPage.body.includes('name="randomBoxPrizeName"') || !emptyStockPage.body.includes('name="randomBoxPrizePercent"')) {
+    throw new Error('empty random-box inventory does not expose the stock-based reward setup');
+  }
+
+  const savePrizes = await request(`/admin/products/${encodeURIComponent(productId)}/stock/prizes`, {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ randomBoxPrizeName: 'รางวัลทดสอบ', randomBoxPrizePercent: '100' }).toString(),
+  });
+  if (savePrizes.statusCode !== 302) throw new Error('random-box reward category could not be configured from stock management');
+  product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
+  if (product.randomBox.prizes.length !== 1 || product.randomBox.prizes[0].name !== 'รางวัลทดสอบ') {
+    throw new Error('stock management did not save the reward category');
+  }
+
+  const editWithoutRewardFields = await request(`/admin/products/${encodeURIComponent(productId)}/edit`, {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ title, productKind: 'random-box', randomBoxRate: '1', status: 'active' }).toString(),
+  });
+  if (editWithoutRewardFields.statusCode !== 302) throw new Error('the random-box product form did not save without reward rows');
+  product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
+  if (product.randomBox.prizes.length !== 1 || product.randomBox.prizes[0].name !== 'รางวัลทดสอบ') {
+    throw new Error('editing the random-box product deleted its stock-based reward setup');
   }
 
   const addStock = await request(`/admin/products/${encodeURIComponent(productId)}/stock/add`, {
@@ -187,9 +210,19 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (addStock.statusCode !== 302 || addStock.headers.location !== `/admin/products/${productId}/stock#add-stock`) {
     throw new Error('random-box key could not be added to its selected prize inventory');
   }
+  const blockedPrizeRemoval = await request(`/admin/products/${encodeURIComponent(productId)}/stock/prizes`, {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ randomBoxPrizeName: 'รางวัลใหม่', randomBoxPrizePercent: '100' }).toString(),
+  });
+  if (blockedPrizeRemoval.statusCode !== 302) throw new Error('stocked reward protection did not return safely');
+  product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
+  if (product.randomBox.prizes.length !== 1 || product.randomBox.prizes[0].name !== 'รางวัลทดสอบ') {
+    throw new Error('a reward with available stock was removed or replaced');
+  }
   const stockPage = await fetchOk(`/admin/products/${encodeURIComponent(productId)}/stock`, 'text/html', { cookie: adminCookie });
-  if (!stockPage.body.includes('ส่งคีย์/ไอดีอัตโนมัติเท่านั้น') || !stockPage.body.includes('smoke-user')) {
-    throw new Error('random-box stock page does not enforce and display automatic key delivery');
+  if (!stockPage.body.includes('ส่งคีย์/ไอดีอัตโนมัติเท่านั้น') || !stockPage.body.includes('smoke-user')
+    || !stockPage.body.includes('name="randomBoxPrizeName"') || !stockPage.body.includes('name="randomBoxPrizePercent"')) {
+    throw new Error('random-box stock page does not manage reward setup and automatic key delivery in one place');
   }
 
   const scheduled = await request('/admin/scheduled-products', {

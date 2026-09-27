@@ -524,7 +524,7 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     title: body.title,
     type: 'game',
     specialType: isRandomBox ? randomBox.RANDOM_BOX_KIND : 'standard',
-    randomBox: isRandomBox ? { rate: randomBox.parseRate(body), prizes: randomBox.parsePrizeRows(body, store.genId) } : null,
+    randomBox: isRandomBox ? { rate: randomBox.parseRate(body), prizes: [] } : null,
     ...(isRandomBox ? { fulfillmentMode: 'automatic', fulfillmentInstructions: '' } : {}),
     genres,
     filterTagIds,
@@ -592,14 +592,7 @@ function randomBoxProductFormError(req, existingProduct = null) {
     const rateError = randomBox.validateRate(req.body.randomBoxRate);
     if (rateError) return rateError;
   }
-  const nextPrizes = randomBox.parsePrizeRows(req.body, store.genId);
-  if (existingProduct?.specialType === randomBox.RANDOM_BOX_KIND) {
-    const nextIds = new Set(nextPrizes.map(prize => String(prize.id)));
-    const stockedPrize = (existingProduct.randomBox?.prizes || []).find(prize => !nextIds.has(String(prize.id))
-      && (getRandomBoxPrizeCounts(existingProduct)[String(prize.id)] || 0) > 0);
-    if (stockedPrize) return `รางวัล “${stockedPrize.name}” ยังมีคีย์ในสต็อก กรุณาจัดการสต็อกก่อนลบรางวัลนี้`;
-  }
-  return randomBox.validatePrizeRows(nextPrizes);
+  return null;
 }
 
 router.get('/products', (req, res) => {
@@ -860,6 +853,9 @@ router.post('/products/:id/edit', (req, res) => {
         fields.eventDescription = product.eventDescription || '';
       }
       const previousRandomBoxRate = randomBox.normalizeRate(product.randomBox?.rate);
+      if (fields.specialType === randomBox.RANDOM_BOX_KIND && product.specialType === randomBox.RANDOM_BOX_KIND) {
+        fields.randomBox.prizes = product.randomBox?.prizes || [];
+      }
       Object.assign(product, fields, { status: req.body.status || 'active' });
       if (fields.specialType === randomBox.RANDOM_BOX_KIND && previousRandomBoxRate !== fields.randomBox.rate) {
         const currentRound = store.data.randomBoxRounds?.[String(product.id)];
@@ -1559,6 +1555,7 @@ router.post('/theme', async (req, res) => {
 router.get('/products/:id/stock', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  if (product.specialType === randomBox.RANDOM_BOX_KIND && !randomBox.supportsRandomBox(req)) return res.sendStatus(404);
   const stockItems = store.data.stockItems.filter(s => s.productId === product.id)
     .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
   if (product.specialType === randomBox.RANDOM_BOX_KIND) {
@@ -1647,6 +1644,7 @@ router.post('/products/:id/stock/settings', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   if (product.specialType === randomBox.RANDOM_BOX_KIND) {
+    if (!randomBox.supportsRandomBox(req)) return res.sendStatus(404);
     product.fulfillmentMode = 'automatic';
     product.fulfillmentInstructions = '';
     await store.save();
@@ -1663,10 +1661,47 @@ router.post('/products/:id/stock/settings', async (req, res) => {
   res.redirect(`/admin/products/${product.id}/stock#add-stock`);
 });
 
+router.post('/products/:id/stock/prizes', async (req, res) => {
+  const product = store.data.products.find(p => p.id === req.params.id);
+  if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  if (product.specialType !== randomBox.RANDOM_BOX_KIND || !randomBox.supportsRandomBox(req)) return res.sendStatus(404);
+
+  const prizes = randomBox.parsePrizeRows(req.body, store.genId);
+  const validationError = randomBox.validatePrizeRows(prizes);
+  if (validationError) {
+    req.flash('error', validationError);
+    return res.redirect(`/admin/products/${product.id}/stock#random-box-prizes`);
+  }
+  const prizeIds = prizes.map(prize => String(prize.id));
+  if (new Set(prizeIds).size !== prizeIds.length) {
+    req.flash('error', 'รายการรางวัลมีรหัสซ้ำ กรุณาลองใหม่');
+    return res.redirect(`/admin/products/${product.id}/stock#random-box-prizes`);
+  }
+  const nextIds = new Set(prizeIds);
+  const stockedPrize = (product.randomBox?.prizes || []).find(prize => !nextIds.has(String(prize.id))
+    && (getRandomBoxPrizeCounts(product)[String(prize.id)] || 0) > 0);
+  if (stockedPrize) {
+    req.flash('error', `รางวัล “${stockedPrize.name}” ยังมีคีย์ในสต็อก กรุณาย้ายหรือลบคีย์ก่อน`);
+    return res.redirect(`/admin/products/${product.id}/stock#random-box-prizes`);
+  }
+
+  product.randomBox = {
+    ...(product.randomBox || {}),
+    rate: randomBox.normalizeRate(product.randomBox?.rate),
+    prizes,
+  };
+  product.fulfillmentMode = 'automatic';
+  product.fulfillmentInstructions = '';
+  await store.save();
+  req.flash('success', 'บันทึกชื่อและสัดส่วนรางวัลในสต็อกแล้ว');
+  return res.redirect(`/admin/products/${product.id}/stock#random-box-prizes`);
+});
+
 router.post('/products/:id/stock/add', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   if (product.specialType === randomBox.RANDOM_BOX_KIND) {
+    if (!randomBox.supportsRandomBox(req)) return res.sendStatus(404);
     product.fulfillmentMode = 'automatic';
     product.fulfillmentInstructions = '';
     const prizeId = String(req.body.randomBoxPrizeId || '');

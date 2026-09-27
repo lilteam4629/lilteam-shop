@@ -1,6 +1,6 @@
 <link rel="stylesheet" href="<%= asset('css/admin-random-box-product-fields-v1.css') %>" />
 <% if (allowRandomBox) { %>
-  <% const isBoxProduct = Boolean(product && product.specialType === 'random-box'); const configuredBoxPrizes = product && Array.isArray(product.randomBox?.prizes) && product.randomBox.prizes.length ? product.randomBox.prizes : [{ id: '', name: '', percent: '' }]; const boxPrizeCounts = typeof randomBoxPrizeCounts === 'undefined' ? {} : randomBoxPrizeCounts; %>
+  <% const isBoxProduct = Boolean(product && product.specialType === 'random-box'); %>
   <section class="random-box-product-kind" aria-labelledby="product-kind-title">
     <h2 id="product-kind-title">ประเภทสินค้า</h2>
     <p>เลือกสินค้าปกติ หรือกล่องสุ่มที่คิดเงิน 1 บาทต่อครั้ง</p>
@@ -10,24 +10,14 @@
     </div>
   </section>
 
-  <section class="random-box-config" data-random-box-panel <%= isBoxProduct ? '' : 'hidden' %> aria-labelledby="random-box-prizes-heading">
+  <section class="random-box-config" data-random-box-panel <%= isBoxProduct ? '' : 'hidden' %> aria-labelledby="random-box-rate-heading">
     <div class="random-box-config-head">
-      <div><h3 id="random-box-prizes-heading">รางวัลและสัดส่วน</h3><p>ตั้งชื่อรางวัลและเปอร์เซ็นต์ที่นี่ แล้วเติมคีย์/ไอดีจริงในหน้าสต็อกของกล่อง ระบบส่งให้ผู้ชนะอัตโนมัติ</p></div>
+      <div><h3 id="random-box-rate-heading">ตั้งค่าเรทกล่องสุ่ม</h3><p>กำหนดเรทที่นี่ ส่วนชื่อรางวัล สัดส่วน และคีย์/ไอดี จัดการทั้งหมดได้ในหน้าสต็อก</p></div>
       <span class="random-box-price-pill">฿1 / ครั้ง</span>
     </div>
-    <label class="random-box-rate-field"><span>เรทการออกรางวัล (%)</span><input name="randomBoxRate" type="number" min="0.01" max="100" step="0.01" value="<%= Number(product?.randomBox?.rate) || 1 %>" placeholder="เช่น 1 หรือ 2" data-random-box-required /><small>พิมพ์เรทได้ตั้งแต่ 0.01 ถึง 100% · เปลี่ยนเรทแล้วเริ่มรอบรวมใหม่ · เปอร์เซ็นต์ในรายการด้านล่างใช้แบ่งชนิดรางวัล</small></label>
-    <div class="random-box-rule" role="note"><strong>รอบรวมของกล่องนี้ · ฿1 ต่อครั้ง</strong><span>ยอดเปิดของลูกค้าทุกคนในร้านนี้จะนับร่วมกันตามเรทที่เลือก ผู้ที่เปิดครั้งที่ถึงเป้าจะได้รับคีย์/ไอดีจากสต็อกอัตโนมัติ แล้วเริ่มรอบใหม่</span></div>
-    <div class="random-box-prize-list" data-random-box-prizes>
-      <% configuredBoxPrizes.forEach((prize, index) => { %>
-        <div class="random-box-prize-row" data-random-box-prize-row>
-          <input type="hidden" name="randomBoxPrizeId" value="<%= prize.id || '' %>" />
-          <label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" value="<%= prize.name || '' %>" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" data-random-box-required /><small>สต็อกพร้อมส่ง <%= boxPrizeCounts[String(prize.id)] || 0 %> ชิ้น · เติมในหน้าสต็อก</small></label>
-          <label><span>สัดส่วน (%)</span><input name="randomBoxPrizePercent" type="number" min="0.01" max="100" step="0.01" value="<%= prize.percent ?? '' %>" placeholder="เช่น 25" data-random-box-required /></label>
-          <button type="button" class="random-box-prize-remove" data-random-box-remove aria-label="ลบรางวัล <%= prize.name || `ลำดับที่ ${index + 1}` %>">ลบ</button>
-        </div>
-      <% }) %>
-    </div>
-    <div class="random-box-config-footer"><div class="flex flex-wrap items-center gap-2"><button type="button" class="random-box-prize-add" data-random-box-add>＋ เพิ่มรางวัล</button><% if (isBoxProduct) { %><a class="random-box-prize-add" href="/admin/products/<%= product.id %>/stock">จัดการสต็อกคีย์/ไอดี</a><% } %></div><strong data-random-box-total role="status" aria-live="polite">เปอร์เซ็นต์รวม: 0%</strong></div>
+    <label class="random-box-rate-field"><span>เรทการออกรางวัล (%)</span><input name="randomBoxRate" type="number" min="0.01" max="100" step="0.01" value="<%= Number(product?.randomBox?.rate) || 1 %>" placeholder="เช่น 1 หรือ 2" data-random-box-required /><small>พิมพ์เรทได้ตั้งแต่ 0.01 ถึง 100% · เปลี่ยนเรทแล้วเริ่มรอบรวมใหม่</small></label>
+    <div class="random-box-rule" role="note"><strong>จัดการรางวัลในสต็อก</strong><span>หลังบันทึกสินค้า ให้เพิ่มชื่อรางวัลและเปอร์เซ็นต์ในหน้าสต็อก แล้วใส่คีย์/ไอดีของแต่ละรางวัลได้ในหน้าเดียวกัน</span></div>
+    <% if (isBoxProduct) { %><a class="random-box-prize-add inline-flex items-center" href="/admin/products/<%= product.id %>/stock#random-box-prizes">ไปจัดการรางวัลและสต็อก →</a><% } %>
   </section>
   <script>
     (() => {
@@ -35,14 +25,11 @@
       if (!form) return;
       const panel = form.querySelector('[data-random-box-panel]');
       const typeRadios = form.querySelectorAll('input[name="productKind"]');
-      const prizeList = form.querySelector('[data-random-box-prizes]');
-      const totalLabel = form.querySelector('[data-random-box-total]');
-      const addButton = form.querySelector('[data-random-box-add]');
       const priceInput = form.querySelector('input[name="price"]');
       const priceLabel = priceInput && priceInput.closest('label,div');
       const priceCaption = priceLabel && priceLabel.querySelector('span');
       const normalPriceCaption = priceCaption ? priceCaption.textContent : '';
-      if (!panel || !typeRadios.length || !prizeList) return;
+      if (!panel || !typeRadios.length) return;
       const isBox = () => form.querySelector('input[name="productKind"]:checked')?.value === 'random-box';
       let normalPrice = priceInput ? priceInput.value : '';
       const update = () => {
@@ -60,42 +47,8 @@
         }
         form.querySelectorAll('[data-random-box-hide]').forEach(element => { element.hidden = active; });
         panel.querySelectorAll('[data-random-box-required]').forEach(input => { input.required = active; });
-        const rows = [...prizeList.querySelectorAll('[data-random-box-prize-row]')];
-        const total = rows.reduce((sum, row) => sum + (Number(row.querySelector('[name="randomBoxPrizePercent"]')?.value) || 0), 0);
-        const valid = Math.round(total * 100) === 10000;
-        if (totalLabel) {
-          totalLabel.textContent = `เปอร์เซ็นต์รวม: ${total.toLocaleString('th-TH', { maximumFractionDigits: 2 })}%${active && !valid ? ' · ต้องรวมให้ครบ 100%' : ''}`;
-          totalLabel.classList.toggle('is-valid', active && valid);
-          totalLabel.classList.toggle('is-invalid', active && !valid);
-        }
-      };
-      const addRow = () => {
-        if (prizeList.querySelectorAll('[data-random-box-prize-row]').length >= 30) return;
-        const row = document.createElement('div');
-        row.className = 'random-box-prize-row';
-        row.setAttribute('data-random-box-prize-row', '');
-        row.innerHTML = '<input type="hidden" name="randomBoxPrizeId" value=""><label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" data-random-box-required><small>เติมคีย์/ไอดีในหน้าสต็อกของกล่อง</small></label><label><span>สัดส่วน (%)</span><input name="randomBoxPrizePercent" type="number" min="0.01" max="100" step="0.01" placeholder="เช่น 25" data-random-box-required></label><button type="button" class="random-box-prize-remove" data-random-box-remove aria-label="ลบรางวัล">ลบ</button>';
-        prizeList.appendChild(row);
-        update();
-        row.querySelector('[name="randomBoxPrizeName"]')?.focus();
       };
       typeRadios.forEach(radio => radio.addEventListener('change', update));
-      prizeList.addEventListener('input', update);
-      prizeList.addEventListener('click', event => {
-        const remove = event.target.closest('[data-random-box-remove]');
-        if (remove) { remove.closest('[data-random-box-prize-row]')?.remove(); update(); }
-      });
-      addButton?.addEventListener('click', addRow);
-      form.addEventListener('submit', event => {
-        if (!isBox()) return;
-        update();
-        const total = [...prizeList.querySelectorAll('[name="randomBoxPrizePercent"]')].reduce((sum, input) => sum + (Number(input.value) || 0), 0);
-        if (Math.round(total * 100) !== 10000) {
-          event.preventDefault();
-          totalLabel?.focus?.();
-          prizeList.querySelector('[name="randomBoxPrizePercent"]')?.focus();
-        }
-      });
       update();
     })();
   </script>

@@ -1,4 +1,5 @@
-<% const isRandomBox = product.specialType === 'random-box'; const randomBoxPrizes = product.randomBox?.prizes || []; %>
+<% const isRandomBox = product.specialType === 'random-box'; const randomBoxPrizes = product.randomBox?.prizes || []; const configuredRandomBoxPrizes = randomBoxPrizes.length ? randomBoxPrizes : [{ id: '', name: '', percent: '' }]; const boxPrizeCounts = typeof randomBoxPrizeCounts === 'undefined' ? {} : randomBoxPrizeCounts; %>
+<% if (isRandomBox) { %><link rel="stylesheet" href="<%= asset('css/admin-random-box-product-fields-v1.css') %>" /><% } %>
 <!-- Stock Management Header -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
@@ -20,18 +21,73 @@
 </div>
 
 <% if (isRandomBox) { %>
-  <section class="bg-[var(--card)] border border-[var(--gold)]/35 rounded-2xl p-5 sm:p-6 mb-6 shadow-sm">
-    <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-      <div><h3 class="font-bold text-sm sm:text-base text-[var(--text)]">ส่งคีย์/ไอดีอัตโนมัติเท่านั้น</h3><p class="text-xs text-[var(--text-3)] mt-1">เพิ่ม 1 บรรทัดต่อ 1 ชิ้นในสต็อก ระบบจะหักคีย์ให้ทันทีเมื่อมีผู้ชนะ</p></div>
-      <a class="text-xs font-bold text-[var(--gold-text)] hover:underline" href="/admin/products/<%= product.id %>/edit">แก้รายชื่อรางวัลและเปอร์เซ็นต์</a>
+  <section id="random-box-prizes" class="random-box-config mb-6" aria-labelledby="random-box-stock-prizes-title">
+    <div class="random-box-config-head">
+      <div><h3 id="random-box-stock-prizes-title">จัดการรางวัลในสต็อก</h3><p>ตั้งชื่อและสัดส่วนรางวัลที่นี่ แล้วเพิ่มคีย์/ไอดีของแต่ละรางวัลด้านล่าง</p></div>
+      <span class="random-box-price-pill">ส่งอัตโนมัติ</span>
     </div>
-    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-2 mt-4">
-      <% randomBoxPrizes.forEach(prize => { %>
-        <div class="rounded-xl border border-[var(--border-light)] bg-[var(--input)]/50 px-3 py-2.5 flex items-center justify-between gap-3"><span class="min-w-0 truncate text-xs font-semibold"><%= prize.name %> · <%= Number(prize.percent).toLocaleString('th-TH') %>%</span><b class="shrink-0 text-xs text-emerald-600"><%= randomBoxPrizeCounts[String(prize.id)] || 0 %> ชิ้น</b></div>
-      <% }) %>
-      <% if (!randomBoxPrizes.length) { %><a href="/admin/products/<%= product.id %>/edit" class="text-xs text-[var(--gold-text)] underline">เพิ่มรายการรางวัลก่อนเติมสต็อก</a><% } %>
-    </div>
+    <form action="/admin/products/<%= product.id %>/stock/prizes" method="post" class="mt-4">
+      <div class="random-box-prize-list" data-stock-prizes>
+        <% configuredRandomBoxPrizes.forEach((prize, index) => { %>
+          <% const stockedCount = boxPrizeCounts[String(prize.id)] || 0; %>
+          <div class="random-box-prize-row" data-stock-prize-row>
+            <input type="hidden" name="randomBoxPrizeId" value="<%= prize.id || '' %>" />
+            <label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" value="<%= prize.name || '' %>" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" required /><small><%= stockedCount %> ชิ้นพร้อมส่ง</small></label>
+            <label><span>สัดส่วน (%)</span><input name="randomBoxPrizePercent" type="number" min="0.01" max="100" step="0.01" value="<%= prize.percent ?? '' %>" placeholder="เช่น 25" required /></label>
+            <button type="button" class="random-box-prize-remove" data-stock-prize-remove aria-label="ลบรางวัล <%= prize.name || `ลำดับที่ ${index + 1}` %>" <%= stockedCount ? 'disabled title="ลบไม่ได้เพราะยังมีคีย์ในสต็อก"' : '' %>>ลบ</button>
+          </div>
+        <% }) %>
+      </div>
+      <div class="random-box-config-footer">
+        <button type="button" class="random-box-prize-add" data-stock-prize-add>＋ เพิ่มรางวัล</button>
+        <strong data-stock-prize-total role="status" aria-live="polite">เปอร์เซ็นต์รวม: 0%</strong>
+      </div>
+      <button type="submit" class="mt-4 rounded-xl bg-[var(--gold)] px-4 py-2.5 text-xs font-bold text-[var(--gold-contrast)] shadow-sm">บันทึกรางวัลและสัดส่วน</button>
+    </form>
+    <p class="mt-3 text-[11px] text-[var(--text-4)]">ส่งคีย์/ไอดีอัตโนมัติเท่านั้น · 1 บรรทัดต่อ 1 ชิ้น · หมวดที่ยังมีคีย์พร้อมส่งจะลบไม่ได้</p>
   </section>
+  <script>
+    (() => {
+      const form = document.querySelector('#random-box-prizes form');
+      const list = form?.querySelector('[data-stock-prizes]');
+      const totalLabel = form?.querySelector('[data-stock-prize-total]');
+      const addButton = form?.querySelector('[data-stock-prize-add]');
+      if (!form || !list) return;
+      const update = () => {
+        const total = [...list.querySelectorAll('[name="randomBoxPrizePercent"]')].reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+        const valid = Math.round(total * 100) === 10000;
+        if (totalLabel) {
+          totalLabel.textContent = `เปอร์เซ็นต์รวม: ${total.toLocaleString('th-TH', { maximumFractionDigits: 2 })}%${!valid ? ' · ต้องรวมให้ครบ 100%' : ''}`;
+          totalLabel.classList.toggle('is-valid', valid);
+          totalLabel.classList.toggle('is-invalid', !valid);
+        }
+      };
+      addButton?.addEventListener('click', () => {
+        if (list.querySelectorAll('[data-stock-prize-row]').length >= 30) return;
+        const row = document.createElement('div');
+        row.className = 'random-box-prize-row';
+        row.setAttribute('data-stock-prize-row', '');
+        row.innerHTML = '<input type="hidden" name="randomBoxPrizeId" value=""><label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" required><small>0 ชิ้นพร้อมส่ง</small></label><label><span>สัดส่วน (%)</span><input name="randomBoxPrizePercent" type="number" min="0.01" max="100" step="0.01" placeholder="เช่น 25" required></label><button type="button" class="random-box-prize-remove" data-stock-prize-remove aria-label="ลบรางวัล">ลบ</button>';
+        list.appendChild(row);
+        row.querySelector('[name="randomBoxPrizeName"]')?.focus();
+        update();
+      });
+      list.addEventListener('input', update);
+      list.addEventListener('click', event => {
+        const remove = event.target.closest('[data-stock-prize-remove]');
+        if (remove && !remove.disabled) { remove.closest('[data-stock-prize-row]')?.remove(); update(); }
+      });
+      form.addEventListener('submit', event => {
+        update();
+        const total = [...list.querySelectorAll('[name="randomBoxPrizePercent"]')].reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+        if (Math.round(total * 100) !== 10000) {
+          event.preventDefault();
+          totalLabel?.focus?.();
+        }
+      });
+      update();
+    })();
+  </script>
 <% } else { %>
 <!-- Fulfillment Mode Configuration Card -->
 <form action="/admin/products/<%= product.id %>/stock/settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 mb-6 space-y-4 shadow-sm">
@@ -148,10 +204,15 @@
 
     <form action="/admin/products/<%= product.id %>/stock/add" method="post" class="space-y-3.5">
       <% if (isRandomBox) { %>
-        <p class="text-[11px] text-[var(--text-4)] leading-relaxed">เลือกชนิดรางวัล แล้วเพิ่มคีย์/ไอดีจริงให้ครบตามจำนวนที่มี รายการเหล่านี้จะส่งให้ผู้ชนะทันที</p>
-        <label class="block"><span class="block text-xs font-semibold mb-1 text-[var(--text-3)]">รางวัล *</span><select name="randomBoxPrizeId" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition"><option value="">เลือกรางวัล</option><% randomBoxPrizes.forEach(prize => { %><option value="<%= prize.id %>"><%= prize.name %> · <%= Number(prize.percent).toLocaleString('th-TH') %>% · พร้อมส่ง <%= randomBoxPrizeCounts[String(prize.id)] || 0 %> ชิ้น</option><% }) %></select></label>
-        <p class="text-[11px] text-[var(--text-4)] leading-relaxed">รูปแบบ: <code class="bg-[var(--input)] px-1.5 py-0.5 rounded font-mono text-[10px] text-[var(--gold-text)]">ข้อมูลบน:ข้อมูลล่าง:หมายเหตุ</code> · 1 บรรทัดต่อ 1 ชิ้น</p>
-        <textarea name="bulk" rows="8" placeholder="user01:pass01:หมายเหตุ&#10;user02:pass02:หมายเหตุ&#10;user03:pass03" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition"></textarea>
+        <% if (randomBoxPrizes.length) { %>
+          <p class="text-[11px] text-[var(--text-4)] leading-relaxed">เลือกประเภทรางวัล แล้วเพิ่มคีย์/ไอดีจริง · 1 บรรทัดต่อ 1 ชิ้น</p>
+          <label class="block"><span class="block text-xs font-semibold mb-1 text-[var(--text-3)]">รางวัล *</span><select name="randomBoxPrizeId" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs outline-none focus:border-[var(--gold)] transition"><option value="">เลือกรางวัล</option><% randomBoxPrizes.forEach(prize => { %><option value="<%= prize.id %>"><%= prize.name %> · <%= Number(prize.percent).toLocaleString('th-TH') %>% · พร้อมส่ง <%= boxPrizeCounts[String(prize.id)] || 0 %> ชิ้น</option><% }) %></select></label>
+          <p class="text-[11px] text-[var(--text-4)] leading-relaxed">รูปแบบ: <code class="bg-[var(--input)] px-1.5 py-0.5 rounded font-mono text-[10px] text-[var(--gold-text)]">ข้อมูลบน:ข้อมูลล่าง:หมายเหตุ</code></p>
+          <textarea name="bulk" rows="8" placeholder="user01:pass01:หมายเหตุ&#10;user02:pass02:หมายเหตุ&#10;user03:pass03" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition"></textarea>
+        <% } else { %>
+          <p class="text-[11px] text-[var(--text-4)] leading-relaxed">เพิ่มชื่อรางวัลและเปอร์เซ็นต์ในส่วน “จัดการรางวัลในสต็อก” ก่อน แล้วจึงใส่คีย์/ไอดีให้รางวัลนั้น</p>
+          <a href="#random-box-prizes" class="inline-flex rounded-xl border border-[var(--gold)]/40 px-3 py-2 text-xs font-bold text-[var(--gold-text)]">ตั้งค่ารางวัลในสต็อก</a>
+        <% } %>
       <% } else if (product.fulfillmentMode === 'contact') { %>
         <p class="text-[11px] text-[var(--text-4)]">ระบุจำนวนสิทธิ์ที่ต้องการเปิดขาย ลูกค้าจะติดต่อร้านเพื่อรับสินค้าหลังชำระเงิน</p>
         <div>
