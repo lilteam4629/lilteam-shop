@@ -8,6 +8,7 @@ const catalogSyndication = require('../services/catalog-syndication');
 const {
   filterHomeProductsByRecommendedCategory,
   shouldGroupRecommendedProductsOnHome,
+  shouldShowFullRecommendedCategoryImages,
 } = require('../services/recommended-category-home');
 const { MAIN_SITE_URL } = require('../middleware/tenant');
 
@@ -160,6 +161,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     newest,
     homeSections,
     recommendedCategories,
+    fullRecommendedCategoryImages: shouldShowFullRecommendedCategoryImages(req),
     products: pageProducts,
     productTotal: active.length,
     productCatalogTotal: allLocalProducts.length + remote.length,

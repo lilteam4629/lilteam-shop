@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize, findProductForPrize, getPrizeImage, buildLiveCatalogPreview } = require('../services/minigame');
 const { usesMainAdminUi, normalizeTenantAdminUi, normalizeMainAdminUi } = require('../services/admin-ui-mode');
+const { shouldUseModernRecommendedCategoryAdmin } = require('../services/recommended-category-home');
 const license = require('../services/license');
 const banks = require('../data/thai-banks');
 const slipok = require('../services/slipok');
@@ -1264,9 +1265,11 @@ const recommendedCategoriesRedirect = () => '/admin/recommended-categories';
 router.get('/recommended-categories', (req, res) => {
   const categories = store.data.recommendedCategories || [];
   const products = (store.data.products || []).filter(p => p.status === 'active');
-  const mainAdminUi = usesMainAdminUi(req);
+  const mainAdminUi = usesMainAdminUi(req) || shouldUseModernRecommendedCategoryAdmin(req);
   if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(mainAdminUi ? 'admin/recommended-categories-experiment' : 'admin/recommended-categories', { title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories, products });
+  res.render(mainAdminUi ? 'admin/recommended-categories-experiment' : 'admin/recommended-categories', {
+    title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories, products,
+  });
 });
 router.post('/recommended-categories', (req, res) => bannerUpload.single('image')(req, res, store.bindTenantContext(async err => {
   const title = String(req.body.title || '').trim();

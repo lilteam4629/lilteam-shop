@@ -3,6 +3,8 @@ const {
   filterHomeProductsByRecommendedCategory,
   getEnabledRecommendedProductIds,
   shouldGroupRecommendedProductsOnHome,
+  shouldShowFullRecommendedCategoryImages,
+  shouldUseModernRecommendedCategoryAdmin,
 } = require('../src/services/recommended-category-home');
 
 const products = [
@@ -18,11 +20,17 @@ const categories = [
 ];
 const mainRequest = { tenantShop: undefined };
 const bankShopRequest = { tenantShop: { slug: 'bank-shop' } };
+const nwgamerRequest = { tenantShop: { slug: 'nwgamer' } };
 const unrelatedTenantRequest = { tenantShop: { slug: 'another-shop' } };
 
 assert.equal(shouldGroupRecommendedProductsOnHome(mainRequest), true);
 assert.equal(shouldGroupRecommendedProductsOnHome(bankShopRequest), true);
+assert.equal(shouldGroupRecommendedProductsOnHome(nwgamerRequest), true);
 assert.equal(shouldGroupRecommendedProductsOnHome(unrelatedTenantRequest), false);
+assert.equal(shouldShowFullRecommendedCategoryImages(nwgamerRequest), true);
+assert.equal(shouldShowFullRecommendedCategoryImages(bankShopRequest), false);
+assert.equal(shouldUseModernRecommendedCategoryAdmin(nwgamerRequest), true);
+assert.equal(shouldUseModernRecommendedCategoryAdmin(bankShopRequest), false);
 assert.deepEqual([...getEnabledRecommendedProductIds(categories)].sort(), ['7', 'featured']);
 assert.deepEqual(
   filterHomeProductsByRecommendedCategory(products, categories, mainRequest).map(product => product.id),
@@ -32,7 +40,11 @@ assert.deepEqual(
   filterHomeProductsByRecommendedCategory(products, categories, bankShopRequest).map(product => product.id),
   ['regular', 'disabled-only'],
 );
+assert.deepEqual(
+  filterHomeProductsByRecommendedCategory(products, categories, nwgamerRequest).map(product => product.id),
+  ['regular', 'disabled-only'],
+);
 assert.strictEqual(filterHomeProductsByRecommendedCategory(products, categories, unrelatedTenantRequest), products);
 assert.strictEqual(filterHomeProductsByRecommendedCategory(products, categories, null), products);
 
-console.log('Recommended category homepage visibility checks passed: main site, bank-shop only, enabled categories, canonical IDs');
+console.log('Recommended category homepage visibility checks passed: main site, bank-shop, nwgamer, enabled categories, canonical IDs');

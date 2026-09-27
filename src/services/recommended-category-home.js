@@ -1,9 +1,17 @@
-const CATEGORY_HOME_TENANTS = new Set(['bank-shop']);
+const CATEGORY_HOME_TENANTS = new Set(['bank-shop', 'nwgamer']);
 
 function shouldGroupRecommendedProductsOnHome(req) {
   if (!req) return false;
   if (!req.tenantShop) return true;
   return CATEGORY_HOME_TENANTS.has(String(req.tenantShop.slug || '').trim().toLowerCase());
+}
+
+function shouldShowFullRecommendedCategoryImages(req) {
+  return String(req?.tenantShop?.slug || '').trim().toLowerCase() === 'nwgamer';
+}
+
+function shouldUseModernRecommendedCategoryAdmin(req) {
+  return shouldShowFullRecommendedCategoryImages(req);
 }
 
 function getEnabledRecommendedProductIds(categories = []) {
@@ -27,4 +35,6 @@ module.exports = {
   filterHomeProductsByRecommendedCategory,
   getEnabledRecommendedProductIds,
   shouldGroupRecommendedProductsOnHome,
+  shouldShowFullRecommendedCategoryImages,
+  shouldUseModernRecommendedCategoryAdmin,
 };

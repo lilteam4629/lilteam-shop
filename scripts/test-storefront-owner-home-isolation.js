@@ -86,7 +86,7 @@ assert.match(heroCozyCss, /@media \(min-width:\s*901px\)[\s\S]*?owner-home-v20-h
   'the desktop banner must use its full row width at the original aspect ratio');
 assert.doesNotMatch(heroCozyCss, /max-height:\s*min\(52vh,\s*460px\)/,
   'the desktop banner must not be narrowed by a viewport-height cap');
-assert.match(home, /recommendedCategories\.forEach\(category => \{[\s\S]*?class="home-category-card" href="\/products\?recommended=<%= encodeURIComponent\(category\.id\) %>/,
+assert.match(home, /recommendedCategories\.forEach\(category => \{[\s\S]*?class="home-category-card <%= fullRecommendedCategoryImages \? 'full-category-artwork' : '' %>" href="\/products\?recommended=<%= encodeURIComponent\(category\.id\) %>/,
   'real shop categories must remain available in the homepage category rail');
 assert.match(home, /include\('\.\.\/partials\/latest-orders-rail', \{ latestOrders, isOwnerLatestRail: true \}\)/,
   'the main homepage order rail must use its shared live-data partial');
