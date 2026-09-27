@@ -193,3 +193,39 @@ html[data-admin-theme="dark"] body.experiment-admin ::-webkit-scrollbar-thumb { 
     transition-timing-function: ease-out;
   }
 }
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-bg="surface"] {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-bg="raised"] {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-bg="input"] {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-input) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-ink="primary"] { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-ink="muted"] { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-ink="accent"] { color: var(--admin-brand-readable, #e7c29e) !important; }
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-ink="dark"] { color: var(--admin-dark-canvas) !important; }
+html[data-admin-theme="dark"] body.experiment-admin .experiment-status-note-icon {
+  color: #f2daa2 !important;
+  background: #463a22 !important;
+  border-color: #66502b !important;
+}
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-before-bg="surface"]::before,
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-after-bg="surface"]::after {
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+  box-shadow: none !important;
+}
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-before-ink="primary"]::before,
+html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-after-ink="primary"]::after { color: var(--admin-dark-text) !important; }
