@@ -15,6 +15,7 @@ const redesignCss = read('public/css/storefront-owner-home-v14.css');
 const gameWorldCss = read('public/css/storefront-owner-home-v15.css');
 const cinematicCss = read('public/css/storefront-owner-home-v20.css');
 const cozyCss = read('public/css/storefront-home-cozy-v1.css');
+const cozyHeroCss = read('public/css/storefront-home-hero-cozy-v1.css');
 const ownerHeroFxCss = read('public/css/storefront-owner-home-hero-v23.css');
 const ownerHeroLayoutCss = read('public/css/storefront-owner-home-hero-v22.css');
 const musicDockCss = read('public/css/storefront-music-widget-cozy-v1.css');
@@ -232,6 +233,27 @@ cozyStylesheet.walkRules(rule => {
 });
 assert.match(cozyCss, /@media \(max-width: 640px\)/, 'the cozy layout must adapt to phone widths');
 assert.match(cozyCss, /prefers-reduced-motion: reduce/, 'the cozy layout must respect reduced-motion settings');
+const cozyHeroStylesheet = postcss.parse(cozyHeroCss, { from: 'storefront-home-hero-cozy-v1.css' });
+let desktopBannerHeightIsBounded = false;
+cozyHeroStylesheet.walkAtRules('media', mediaRule => {
+  if (mediaRule.params !== '(min-width: 901px)') return;
+  mediaRule.walkRules(rule => {
+    if (!rule.selector.includes('.owner-home-v20-hero--banner-only')) return;
+    assert.ok(rule.selector.includes('#site-page-shell.storefront-owner-home-v7')
+      && rule.selector.includes('[data-owner-home-layout="cozy-marketplace"]'),
+    'the desktop banner size limit must remain isolated to the main storefront');
+    const declarations = Object.fromEntries(rule.nodes
+      .filter(node => node.type === 'decl')
+      .map(node => [node.prop, node.value]));
+    if (declarations['max-height'] === 'min(52vh, 460px)'
+      && declarations.height === 'auto'
+      && declarations['object-fit'] === 'contain') {
+      desktopBannerHeightIsBounded = true;
+    }
+  });
+});
+assert.ok(desktopBannerHeightIsBounded,
+  'the main-store banner-only hero must fit the desktop viewport without cropping its image');
 assert.ok(cozyRuleCount > 0, 'the cozy marketplace layout should contain owner-only rules');
 
 const productCardCss = read('public/css/storefront-owner-home-v21.css');
