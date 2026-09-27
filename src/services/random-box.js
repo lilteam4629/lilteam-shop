@@ -10,7 +10,7 @@ const RANDOM_BOX_MAX_TARGET = 110;
 
 function supportsRandomBox(req) {
   if (!req || !req.tenantShop) return true;
-  return String(req.tenantShop.slug || '').trim().toLowerCase() === 'bank-shop';
+  return false;
 }
 
 function normalizeRate(rate) {

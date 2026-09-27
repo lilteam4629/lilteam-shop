@@ -3,7 +3,7 @@ const randomBox = require('../src/services/random-box');
 const catalog = require('../src/services/catalog-syndication');
 
 assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: null }), true, 'main site supports random boxes');
-assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: { slug: 'bank-shop' } }), true, 'bank-shop supports random boxes');
+assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: { slug: 'bank-shop' } }), false, 'other shops cannot use random boxes');
 assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: { slug: 'other-shop' } }), false, 'other tenants cannot use them');
 assert.strictEqual(randomBox.randomTarget((min) => min), 85);
 assert.strictEqual(randomBox.randomTarget((min, max) => max - 1), 110);
