@@ -320,13 +320,11 @@
 }
 
 /* Keep the welcome open and let the store artwork fill narrow screens below the copy. */
-/* The banner-only desktop hero was allowed to grow to its full intrinsic
-   height, pushing every homepage section below the first screen. Keep the
-   complete image visible while giving the content below it room to appear. */
+/* Keep the uploaded banner at full row width and preserve its native ratio. */
 @media (min-width: 901px) {
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-artwork > img,
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-artwork > a img {
-    max-height: min(52vh, 460px) !important;
+    max-height: none !important;
     height: auto !important;
     object-fit: contain !important;
   }

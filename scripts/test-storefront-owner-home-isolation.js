@@ -18,6 +18,7 @@ const cozyCss = read('public/css/storefront-home-cozy-v1.css');
 const cozyHeroCss = read('public/css/storefront-home-hero-cozy-v1.css');
 const ownerHeroFxCss = read('public/css/storefront-owner-home-hero-v23.css');
 const ownerHeroLayoutCss = read('public/css/storefront-owner-home-hero-v22.css');
+const heroCozyCss = read('public/css/storefront-home-hero-cozy-v1.css');
 const musicDockCss = read('public/css/storefront-music-widget-cozy-v1.css');
 const accountMenuCss = read('public/css/storefront-account-menu-mobile-v1.css');
 
@@ -81,6 +82,10 @@ assert.doesNotMatch(home, /owner-home-v20-hero-note/,
   'the enlarged banner must not carry a floating text badge');
 assert.match(ownerHeroFxCss, /owner-home-v20-hero--banner-only[\s\S]*?width:\s*100%[\s\S]*?owner-home-v20-artwork[\s\S]*?width:\s*100%[\s\S]*?object-fit:\s*contain/s,
   'the main-store banner must use the available width and preserve the full image');
+assert.match(heroCozyCss, /@media \(min-width:\s*901px\)[\s\S]*?owner-home-v20-hero--banner-only[\s\S]*?max-height:\s*none !important;[\s\S]*?height:\s*auto !important;[\s\S]*?object-fit:\s*contain !important;/,
+  'the desktop banner must use its full row width at the original aspect ratio');
+assert.doesNotMatch(heroCozyCss, /max-height:\s*min\(52vh,\s*460px\)/,
+  'the desktop banner must not be narrowed by a viewport-height cap');
 assert.match(home, /recommendedCategories\.forEach\(category => \{[\s\S]*?class="home-category-card" href="\/products\?recommended=<%= encodeURIComponent\(category\.id\) %>/,
   'real shop categories must remain available in the homepage category rail');
 assert.match(home, /include\('\.\.\/partials\/latest-orders-rail', \{ latestOrders, isOwnerLatestRail: true \}\)/,
@@ -234,26 +239,26 @@ cozyStylesheet.walkRules(rule => {
 assert.match(cozyCss, /@media \(max-width: 640px\)/, 'the cozy layout must adapt to phone widths');
 assert.match(cozyCss, /prefers-reduced-motion: reduce/, 'the cozy layout must respect reduced-motion settings');
 const cozyHeroStylesheet = postcss.parse(cozyHeroCss, { from: 'storefront-home-hero-cozy-v1.css' });
-let desktopBannerHeightIsBounded = false;
+let desktopBannerUsesIntrinsicRatio = false;
 cozyHeroStylesheet.walkAtRules('media', mediaRule => {
   if (mediaRule.params !== '(min-width: 901px)') return;
   mediaRule.walkRules(rule => {
     if (!rule.selector.includes('.owner-home-v20-hero--banner-only')) return;
     assert.ok(rule.selector.includes('#site-page-shell.storefront-owner-home-v7')
       && rule.selector.includes('[data-owner-home-layout="cozy-marketplace"]'),
-    'the desktop banner size limit must remain isolated to the main storefront');
+    'the desktop banner sizing must remain isolated to the main storefront');
     const declarations = Object.fromEntries(rule.nodes
       .filter(node => node.type === 'decl')
       .map(node => [node.prop, node.value]));
-    if (declarations['max-height'] === 'min(52vh, 460px)'
+    if (declarations['max-height'] === 'none'
       && declarations.height === 'auto'
       && declarations['object-fit'] === 'contain') {
-      desktopBannerHeightIsBounded = true;
+      desktopBannerUsesIntrinsicRatio = true;
     }
   });
 });
-assert.ok(desktopBannerHeightIsBounded,
-  'the main-store banner-only hero must fit the desktop viewport without cropping its image');
+assert.ok(desktopBannerUsesIntrinsicRatio,
+  'the main-store banner must fill its row while preserving its original aspect ratio');
 assert.ok(cozyRuleCount > 0, 'the cozy marketplace layout should contain owner-only rules');
 
 const productCardCss = read('public/css/storefront-owner-home-v21.css');
