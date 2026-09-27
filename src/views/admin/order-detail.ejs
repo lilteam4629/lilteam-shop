@@ -21,7 +21,7 @@
     <% if (order.status === 'completed') { %>
       <span class="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm">
         <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-        <span>สำเร็จ (ส่งคีย์แล้ว)</span>
+        <span><%= order.randomBoxOrder ? 'บันทึกผลสุ่มแล้ว' : 'สำเร็จ (ส่งคีย์แล้ว)' %></span>
       </span>
     <% } else if (order.status === 'pending') { %>
       <span class="inline-flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm">
@@ -76,7 +76,17 @@
               <span class="font-bold text-sm text-[var(--gold-text)] shrink-0">฿<%= i.price.toLocaleString() %></span>
             </div>
 
-            <% if (i.fulfillmentMode === 'contact') { %>
+            <% if (i.randomBoxDraw) { %>
+              <div class="mt-2 rounded-xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 p-3 text-xs">
+                <% if (i.randomBoxDraw.isWin) { %>
+                  <div class="font-bold text-[var(--gold-text)]">🎉 ผู้ชนะรอบ <%= i.randomBoxDraw.roundNumber %> · รางวัล <%= i.randomBoxDraw.prizeName %></div>
+                  <div class="mt-1 text-[var(--text-2)]">รหัสรับรางวัล <span class="font-mono font-bold"><%= i.randomBoxDraw.claimCode %></span> · ตรวจสอบการส่งมอบกับลูกค้า</div>
+                <% } else { %>
+                  <div class="font-bold text-[var(--text-2)]">ผลสุ่ม: ไม่ถูกรางวัลในครั้งนี้</div>
+                  <div class="mt-1 text-[var(--text-3)]">ความคืบหน้ารอบรวม <%= i.randomBoxDraw.roundProgress %>/<%= i.randomBoxDraw.roundTarget %></div>
+                <% } %>
+              </div>
+            <% } else if (i.fulfillmentMode === 'contact') { %>
               <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-3 text-xs text-[var(--text-2)] mt-2">
                 <div class="font-bold text-[var(--gold-text)] flex items-center gap-1.5">
                   <span>💬</span>

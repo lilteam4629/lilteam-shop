@@ -5,6 +5,7 @@ const { withEffectivePrice } = require('../services/pricing');
 const { requireAdmin } = require('../middleware/auth');
 const rangersSource = require('../services/rangers-catalog');
 const catalogSyndication = require('../services/catalog-syndication');
+const randomBox = require('../services/random-box');
 const {
   filterHomeProductsByRecommendedCategory,
   shouldGroupRecommendedProductsOnHome,
@@ -22,6 +23,10 @@ function isProductVisible(product) {
   return product.status === 'active' && (!product.publishAt || publishTime(product) <= Date.now());
 }
 
+function isAvailableOnThisShop(product, req) {
+  return product?.specialType !== randomBox.RANDOM_BOX_KIND || randomBox.supportsRandomBox(req);
+}
+
 function availableStockCounts() {
   const counts = new Map();
   store.data.stockItems.forEach(item => {
@@ -30,7 +35,13 @@ function availableStockCounts() {
   return counts;
 }
 
-function withStock(product, counts) {
+function withStock(product, counts, req = null) {
+  if (product?.specialType === randomBox.RANDOM_BOX_KIND) {
+    const active = randomBox.supportsRandomBox(req)
+      && product.status === 'active'
+      && randomBox.availablePrizePool(product.randomBox).length > 0;
+    return { ...withEffectivePrice({ ...product, price: randomBox.RANDOM_BOX_PRICE, originalPrice: 0, priceOptions: [] }), stockCount: active ? 1 : 0 };
+  }
   const stockCount = counts
     ? (counts.get(product.id) || 0)
     : store.data.stockItems.filter(s => s.productId === product.id && s.status === 'available').length;
@@ -114,7 +125,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
   const homeVisibleRecommendedCategories = req?.tenantShop
     ? recommendedCategories
     : recommendedCategories.filter(category => Boolean(category.imageUrl));
-  const allLocalProducts = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts));
+  const allLocalProducts = store.data.products.filter(product => isProductVisible(product) && isAvailableOnThisShop(product, req)).map(product => withStock(product, stockCounts, req));
   const groupRecommendedProducts = shouldGroupRecommendedProductsOnHome(req);
   const localProducts = groupRecommendedProducts
     ? filterHomeProductsByRecommendedCategory(allLocalProducts, homeVisibleRecommendedCategories, req)
@@ -248,7 +259,7 @@ router.get('/preview/mobile-cinematic-7f4c2a', (req, res) => {
 
 router.get('/products', (req, res) => {
   const stockCounts = availableStockCounts();
-  let products = store.data.products.filter(isProductVisible).map(product => withStock(product, stockCounts)).concat(syndicatedProducts(req));
+  let products = store.data.products.filter(product => isProductVisible(product) && isAvailableOnThisShop(product, req)).map(product => withStock(product, stockCounts, req)).concat(syndicatedProducts(req));
   const recommendedId = String(req.query.recommended || '').trim();
   const recommendedCategory = recommendedId
     ? (store.data.recommendedCategories || []).find(category => String(category.id) === recommendedId)
@@ -300,8 +311,8 @@ router.get('/search', (req, res) => {
   const q = (req.query.q || '').trim().toLowerCase();
   const stockCounts = availableStockCounts();
   const products = store.data.products
-    .filter(p => isProductVisible(p) && p.title.toLowerCase().includes(q))
-    .map(product => withStock(product, stockCounts))
+    .filter(p => isProductVisible(p) && isAvailableOnThisShop(p, req) && p.title.toLowerCase().includes(q))
+    .map(product => withStock(product, stockCounts, req))
     .concat(syndicatedProducts(req).filter(p => String(p.title || '').toLowerCase().includes(q)));
   const catalogApiProducts = req.tenantShop ? products.filter(product => product.isSyndicated) : [];
   const visibleProducts = req.tenantShop ? products.filter(product => !product.isSyndicated) : products;
@@ -380,11 +391,14 @@ router.get('/game/:slug', (req, res) => {
   const remoteProduct = catalogSyndication.findTenantProduct(store.platformData, store.data, req.params.slug, mainSiteUrlFor(req), req.tenantShop);
   const product = remoteProduct || store.data.products.find(p => p.slug === req.params.slug);
   if (!product || !isProductVisible(product)) return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });
+  if (product.specialType === randomBox.RANDOM_BOX_KIND && (!randomBox.supportsRandomBox(req) || remoteProduct)) {
+    return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });
+  }
   const federated = !remoteProduct && req.session.federatedCatalog &&
     String(req.session.federatedCatalog.sourceProductId) === String(product.id) &&
     Number(req.session.federatedCatalog.expiresAt) > Date.now();
   const displayProduct = remoteProduct ? remoteProduct : (() => {
-    const local = withStock(product);
+    const local = withStock(product, null, req);
     if (!federated) return local;
     return { ...local, price: Number(req.session.federatedCatalog.price), sourcePrice: Number(req.session.federatedCatalog.sourcePrice), federatedCheckout: true };
   })();
@@ -394,12 +408,23 @@ router.get('/game/:slug', (req, res) => {
   const productRangers = rangersSource.resolveCodes(
     remoteProduct ? [] : store.data.settings.rangersCatalog?.productAssignments?.[product.id] || [],
   );
+  const boxRound = product.specialType === randomBox.RANDOM_BOX_KIND
+    ? store.data.randomBoxRounds?.[String(product.id)] || null
+    : null;
+  const randomBoxDetails = product.specialType === randomBox.RANDOM_BOX_KIND ? {
+    progress: Math.max(0, Number(boxRound?.progress) || 0),
+    target: boxRound?.target ? Number(boxRound.target) : null,
+    roundNumber: Math.max(1, Number(boxRound?.roundNumber) || 1),
+    prizes: randomBox.availablePrizePool(product.randomBox),
+    requestId: require('crypto').randomUUID(),
+  } : null;
   res.render('shop/product-detail', {
     title: product.title,
     product: displayProduct,
     genreNames: (product.genres || []).map(g => store.data.settings.genres[g] || g),
     productFilterTags,
     productRangers,
+    randomBoxDetails,
     reviews,
     ogTitle: `${product.title} | ${store.data.settings.shopName}`,
     ogDescription: `฿${product.price.toLocaleString()} — ${product.description || store.data.settings.tagline || ''}`.trim(),

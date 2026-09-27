@@ -160,6 +160,9 @@ function getTenantProducts(mainDb, tenantDb, mainSiteUrl = '', tenantShop = null
   if (!config.enabled) return { config, products: [] };
   const products = (mainDb.products || [])
     .filter(product => product && product.status === 'active')
+    // Random boxes are tied to the source shop's shared round and wallet;
+    // they must never be mirrored or sold through a partner catalog.
+    .filter(product => product.specialType !== 'random-box')
     .filter(product => !product.publishAt || Date.parse(String(product.publishAt).includes('T') ? product.publishAt : `${product.publishAt}:00+07:00`) <= Date.now())
     .map(product => sanitizeProduct(product, mainDb, config, mainSiteUrl, tenantShop))
     // A Partner listing represents an actually purchasable account. Do not

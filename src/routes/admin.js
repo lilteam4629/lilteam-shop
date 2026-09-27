@@ -4,6 +4,7 @@ const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize, findProductForPrize, getPrizeImage, buildLiveCatalogPreview } = require('../services/minigame');
+const randomBox = require('../services/random-box');
 const { usesMainAdminUi, normalizeTenantAdminUi, normalizeMainAdminUi } = require('../services/admin-ui-mode');
 const { shouldUseModernRecommendedCategoryAdmin } = require('../services/recommended-category-home');
 const license = require('../services/license');
@@ -496,6 +497,7 @@ router.post('/catalog-api/sync', async (req, res) => {
 
 // ---------- Products ----------
 function parseProductBody(body, uploadedImages = [], existingImages = []) {
+  const isRandomBox = body.productKind === randomBox.RANDOM_BOX_KIND;
   const removedImages = new Set(Array.isArray(body.removeImages) ? body.removeImages : (body.removeImages ? [body.removeImages] : []));
   const keptImages = existingImages.filter(image => !removedImages.has(image));
   const urlImages = (body.images || '').split('\n').map(s => s.trim()).filter(Boolean);
@@ -520,14 +522,16 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
   return {
     title: body.title,
     type: 'game',
+    specialType: isRandomBox ? randomBox.RANDOM_BOX_KIND : 'standard',
+    randomBox: isRandomBox ? { prizes: randomBox.parsePrizeRows(body, store.genId) } : null,
     genres,
     filterTagIds,
-    price: parseInt(body.price, 10) || 0,
-    originalPrice: parseInt(body.originalPrice, 10) || 0,
-    priceOptions,
-    flashSalePrice: body.flashSalePrice === '' ? null : Math.max(0, parseInt(body.flashSalePrice, 10) || 0),
-    flashSaleStartAt: (body.flashSaleStartAt || '').trim(),
-    flashSaleEndAt: (body.flashSaleEndAt || '').trim(),
+    price: isRandomBox ? randomBox.RANDOM_BOX_PRICE : (parseInt(body.price, 10) || 0),
+    originalPrice: isRandomBox ? 0 : (parseInt(body.originalPrice, 10) || 0),
+    priceOptions: isRandomBox ? [] : priceOptions,
+    flashSalePrice: isRandomBox || body.flashSalePrice === '' ? null : Math.max(0, parseInt(body.flashSalePrice, 10) || 0),
+    flashSaleStartAt: isRandomBox ? '' : (body.flashSaleStartAt || '').trim(),
+    flashSaleEndAt: isRandomBox ? '' : (body.flashSaleEndAt || '').trim(),
     description: body.description || '',
     aboutText: body.aboutText || '',
     publishAt: (body.publishAt || '').trim(),
@@ -542,12 +546,12 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     warrantyText: (body.warrantyText || '').trim(),
     contactMessageIntro: (body.contactMessageIntro || '').trim(),
     contactMessageOutro: (body.contactMessageOutro || '').trim(),
-    purchaseApprovalEnabled: body.purchaseApprovalEnabled === 'on',
+    purchaseApprovalEnabled: !isRandomBox && body.purchaseApprovalEnabled === 'on',
     purchaseConfirmationText: (body.purchaseConfirmationText || '').trim(),
     purchaseActionLabel: (body.purchaseActionLabel || '').trim().slice(0, 80),
     purchaseActionUrl: safeExternalUrl(body.purchaseActionUrl),
-    apiProvider: body.apiProvider === 'custom' ? 'custom' : 'none',
-    apiProductId: (body.apiProductId || '').trim(),
+    apiProvider: !isRandomBox && body.apiProvider === 'custom' ? 'custom' : 'none',
+    apiProductId: isRandomBox ? '' : (body.apiProductId || '').trim(),
     // Admin-only — never rendered on any customer-facing page. Useful for
     // things like the original filename behind a renamed product code.
     internalNote: (body.internalNote || '').trim(),
@@ -569,6 +573,15 @@ function parseScheduledProductBody(body) {
   };
 }
 
+function randomBoxProductFormError(req, existingProduct = null) {
+  if (existingProduct?.specialType === randomBox.RANDOM_BOX_KIND && !randomBox.supportsRandomBox(req)) {
+    return 'กล่องสุ่มเปิดใช้เฉพาะเว็บหลักและ bank-shop';
+  }
+  if (req.body.productKind !== randomBox.RANDOM_BOX_KIND) return null;
+  if (!randomBox.supportsRandomBox(req)) return 'ประเภทกล่องสุ่มเปิดใช้เฉพาะเว็บหลักและ bank-shop';
+  return randomBox.validatePrizeRows(randomBox.parsePrizeRows(req.body, store.genId));
+}
+
 router.get('/products', (req, res) => {
   const mainAdminUi = usesMainAdminUi(req);
   if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
@@ -576,12 +589,16 @@ router.get('/products', (req, res) => {
   const products = store.data.products.map(p => {
     const stockCount = store.data.stockItems.filter(s => s.productId === p.id && s.status === 'available').length;
     const selectedFilterTags = (p.filterTagIds || []).map(id => filterTagById.get(id)).filter(Boolean);
-    return { ...p, stockCount, selectedFilterTags };
+    const randomBoxAvailablePrizeCount = p.specialType === randomBox.RANDOM_BOX_KIND
+      ? randomBox.availablePrizePool(p.randomBox).length
+      : 0;
+    return { ...p, stockCount, randomBoxAvailablePrizeCount, selectedFilterTags };
   });
   // Inventory value is based on IDs that are still available. Sold/issued
   // IDs remain in history but must not inflate the amount shown to the admin.
-  const totalAvailableProductCount = products.reduce((sum, product) => sum + product.stockCount, 0);
-  const totalProductPrice = products.reduce((sum, product) => sum + ((Number(product.price) || 0) * product.stockCount), 0);
+  const countedInventory = products.filter(product => product.specialType !== randomBox.RANDOM_BOX_KIND);
+  const totalAvailableProductCount = countedInventory.reduce((sum, product) => sum + product.stockCount, 0);
+  const totalProductPrice = countedInventory.reduce((sum, product) => sum + ((Number(product.price) || 0) * product.stockCount), 0);
   res.render(mainAdminUi ? 'admin/products-experiment' : 'admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
 });
 
@@ -595,9 +612,9 @@ router.post('/products/card-style', async (req, res) => {
 router.get('/products/new', (req, res) => {
   if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'เพิ่มสินค้า', active: 'products', product: null, filterTags: store.data.filterTags || [] });
+    return res.render('admin/product-schedule-form-experiment', { title: 'เพิ่มสินค้า', active: 'products', product: null, filterTags: store.data.filterTags || [], allowRandomBox: randomBox.supportsRandomBox(req) });
   }
-  res.render('admin/product-form', { title: 'เพิ่มสินค้าใหม่', active: 'products', product: null, genres: store.data.settings.genres, filterTags: store.data.filterTags });
+  res.render('admin/product-form', { title: 'เพิ่มสินค้าใหม่', active: 'products', product: null, genres: store.data.settings.genres, filterTags: store.data.filterTags, allowRandomBox: randomBox.supportsRandomBox(req) });
 });
 
 router.post('/products/new', (req, res) => {
@@ -608,6 +625,11 @@ router.post('/products/new', (req, res) => {
       return res.redirect('/admin/products/new');
     }
     try {
+      const boxFormError = randomBoxProductFormError(req);
+      if (boxFormError) {
+        req.flash('error', boxFormError);
+        return res.redirect('/admin/products/new');
+      }
       const uploadedImages = [...directUploadUrls(req.body, 'productImages'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
       const fields = parseProductBody(req.body, uploadedImages);
       const product = {
@@ -738,14 +760,17 @@ router.get('/products/:id/edit', (req, res) => {
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขสินค้า', active: 'products', product, filterTags: store.data.filterTags || [] });
+    return res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขสินค้า', active: 'products', product, filterTags: store.data.filterTags || [], allowRandomBox: randomBox.supportsRandomBox(req) });
   }
-  res.render('admin/product-form', { title: 'แก้ไขสินค้า', active: 'products', product, genres: store.data.settings.genres, filterTags: store.data.filterTags });
+  res.render('admin/product-form', { title: 'แก้ไขสินค้า', active: 'products', product, genres: store.data.settings.genres, filterTags: store.data.filterTags, allowRandomBox: randomBox.supportsRandomBox(req) });
 });
 
 router.post('/products/:id/price', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) return res.status(404).json({ ok: false, message: 'ไม่พบสินค้า' });
+  if (product.specialType === randomBox.RANDOM_BOX_KIND) {
+    return res.status(400).json({ ok: false, message: 'กล่องสุ่มกำหนดราคาไว้ที่ 1 บาทต่อครั้ง' });
+  }
   const rawPrice = String(req.body.price == null ? '' : req.body.price).trim();
   const price = Number(rawPrice);
   if (!rawPrice || !Number.isInteger(price) || price < 0 || price > 100000000) {
@@ -771,12 +796,13 @@ router.post('/products/bulk-price', async (req, res) => {
     return res.redirect('/admin/products');
   }
   const targets = store.data.products.filter(product => scope === 'all' || selectedIds.has(String(product.id)));
-  if (!targets.length) {
+  const priceableTargets = targets.filter(product => product.specialType !== randomBox.RANDOM_BOX_KIND);
+  if (!priceableTargets.length) {
     req.flash('error', 'ไม่พบสินค้าที่ต้องการปรับราคา');
     return res.redirect('/admin/products');
   }
   const factor = operation === 'discount' ? 1 - (percentage / 100) : 1 + (percentage / 100);
-  targets.forEach(product => {
+  priceableTargets.forEach(product => {
     const currentPrice = Math.max(0, Number(product.price) || 0);
     const nextPrice = Math.min(100000000, Math.max(0, Math.round(currentPrice * factor)));
     if (operation === 'discount' && nextPrice < currentPrice) {
@@ -786,7 +812,8 @@ router.post('/products/bulk-price', async (req, res) => {
   });
   await store.save();
   const actionLabel = operation === 'discount' ? 'ลด' : 'เพิ่ม';
-  req.flash('success', `${actionLabel}ราคา ${percentage}% สำเร็จ ${targets.length} รายการ`);
+  const skipped = targets.length - priceableTargets.length;
+  req.flash('success', `${actionLabel}ราคา ${percentage}% สำเร็จ ${priceableTargets.length} รายการ${skipped ? ` · ข้ามกล่องสุ่ม ${skipped} รายการเพราะราคา fix 1 บาท/ครั้ง` : ''}`);
   res.redirect('/admin/products');
 });
 
@@ -800,6 +827,11 @@ router.post('/products/:id/edit', (req, res) => {
       return res.redirect(`/admin/products/${product.id}/edit`);
     }
     try {
+      const boxFormError = randomBoxProductFormError(req, product);
+      if (boxFormError) {
+        req.flash('error', boxFormError);
+        return res.redirect(`/admin/products/${product.id}/edit`);
+      }
       const uploadedImages = [...directUploadUrls(req.body, 'productImages'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
       const fields = parseProductBody(req.body, uploadedImages, product.images || []);
       if (mainAdminUi) {
@@ -840,6 +872,7 @@ router.post('/products/stock/add-all', async (req, res) => {
   const now = new Date().toISOString();
   let updated = 0;
   store.data.products.forEach(product => {
+    if (product.specialType === randomBox.RANDOM_BOX_KIND) return;
     if (stockCountByProduct.get(product.id) > 0) return;
     product.fulfillmentMode = 'contact';
     store.data.stockItems.push({
@@ -1493,6 +1526,7 @@ router.post('/theme', async (req, res) => {
 router.get('/products/:id/stock', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  if (product.specialType === randomBox.RANDOM_BOX_KIND) return res.redirect(`/admin/products/${product.id}/edit`);
   const stockItems = store.data.stockItems.filter(s => s.productId === product.id)
     .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
   res.render('admin/product-stock', { title: `สต๊อกสินค้า: ${product.title}`, active: 'products', product, stockItems });
@@ -1572,6 +1606,7 @@ router.post('/scheduled-products/:id/clear', async (req, res) => {
 router.post('/products/:id/stock/settings', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  if (product.specialType === randomBox.RANDOM_BOX_KIND) return res.redirect(`/admin/products/${product.id}/edit`);
   product.fulfillmentMode = req.body.fulfillmentMode === 'contact' ? 'contact' : 'automatic';
   product.fulfillmentInstructions = (req.body.fulfillmentInstructions || '').trim();
   await store.save();
@@ -1585,6 +1620,7 @@ router.post('/products/:id/stock/settings', async (req, res) => {
 router.post('/products/:id/stock/add', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  if (product.specialType === randomBox.RANDOM_BOX_KIND) return res.redirect(`/admin/products/${product.id}/edit`);
   if (product.fulfillmentMode === 'contact') {
     const quantity = Math.min(1000, Math.max(0, parseInt(req.body.quantity, 10) || 0));
     for (let i = 0; i < quantity; i++) {
@@ -1616,6 +1652,7 @@ router.post('/products/:id/stock/add', async (req, res) => {
 
 router.post('/products/:id/stock/:stockId/delete', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
+  if (product?.specialType === randomBox.RANDOM_BOX_KIND) return res.redirect(`/admin/products/${product.id}/edit`);
   const stock = store.data.stockItems.find(s => s.id === req.params.stockId && s.productId === req.params.id);
   if (!product || !stock) {
     req.flash('error', 'ไม่พบไอดีในสต๊อกของสินค้านี้');

@@ -2,7 +2,7 @@
 <section class="max-w-3xl mx-auto px-4 py-8">
   <a href="/account/orders" class="text-sm text-[var(--gold-text)]">← กลับไปหน้าคำสั่งซื้อ</a>
   <h1 class="text-2xl font-bold mt-2 mb-1">คำสั่งซื้อ #<%= order.id %></h1>
-  <p class="text-[var(--text-3)] text-sm mb-6"><%= new Date(order.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %> &middot; สถานะ: <span class="text-emerald-400"><%= order.status %></span></p>
+  <p class="text-[var(--text-3)] text-sm mb-6"><%= new Date(order.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %> &middot; สถานะ: <span class="text-emerald-400"><%= order.randomBoxOrder && order.status === 'completed' ? 'บันทึกผลสุ่มแล้ว' : order.status %></span></p>
   <% if (order.salesChannel === 'catalog-api') { %>
     <div class="mb-6 rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-4">
       <div class="font-black text-[var(--gold-text)]">🔒 รับสินค้าที่ร้านหลักเท่านั้น</div>
@@ -23,7 +23,17 @@
             <span class="text-[var(--gold-text)] font-bold whitespace-nowrap">฿<%= i.price.toLocaleString() %>.00</span>
           </div>
         </div>
-        <% if (i.fulfillmentMode === 'contact') { %>
+        <% if (i.randomBoxDraw) { %>
+          <div class="mb-3 rounded-xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 p-4 text-sm">
+            <% if (i.randomBoxDraw.isWin) { %>
+              <div class="font-black text-[var(--gold-text)]">🎉 รอบที่ <%= i.randomBoxDraw.roundNumber %> ครบ <%= i.randomBoxDraw.roundTarget %> ครั้ง — คุณได้รับ <%= i.randomBoxDraw.prizeName %></div>
+              <div class="mt-1 text-[var(--text-2)]">รหัสรับรางวัล: <strong class="font-mono"><%= i.randomBoxDraw.claimCode %></strong> · ติดต่อร้านเพื่อรับรางวัล</div>
+            <% } else { %>
+              <div class="font-bold text-[var(--text)]">เปิดกล่องสำเร็จ · รอบที่ <%= i.randomBoxDraw.roundNumber %></div>
+              <div class="mt-1 text-[var(--text-2)]">ยอดรวมของลูกค้าทุกคนในรอบนี้ <%= i.randomBoxDraw.roundProgress %> / <%= i.randomBoxDraw.roundTarget %> ครั้ง · คุณจ่าย ฿1</div>
+            <% } %>
+          </div>
+        <% } else if (i.fulfillmentMode === 'contact') { %>
           <div class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 rounded-xl p-4 text-sm">
             <div class="font-semibold text-[var(--gold-text)] mb-1">กรุณาติดต่อร้านเพื่อรับสินค้า</div>
             <% if (i.fulfillmentInstructions) { %><div class="text-[var(--text-2)] whitespace-pre-line mb-3"><%= i.fulfillmentInstructions %></div><% } %>

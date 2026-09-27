@@ -12,6 +12,7 @@ const child = spawn(process.execPath, ['src/app.js'], {
   env: { ...process.env, PORT: String(port), NODE_ENV: 'test', TEST_DB_PATH: testDbPath, MONGODB_URI: '', DISCORD_BOT_TOKEN: '', LICENSE_GATE: 'off' },
   stdio: ['ignore', 'pipe', 'pipe'],
 });
+const crypto = require('crypto');
 let output = '';
 child.stdout.on('data', chunk => { output += chunk; });
 child.stderr.on('data', chunk => { output += chunk; });
@@ -152,6 +153,70 @@ async function checkScheduledProductWorkflow(cookie) {
     method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
   });
   if (deleted.statusCode !== 302) throw new Error('scheduled workflow smoke product cleanup failed');
+}
+
+async function checkRandomBoxWorkflow(adminCookie) {
+  const form = await fetchOk('/admin/products/new', 'text/html', { cookie: adminCookie });
+  if (!form.body.includes('name="productKind"') || !form.body.includes('random-box-product-fields-v1.css')) {
+    throw new Error('product form does not expose the random-box product type and setup UI');
+  }
+  const title = `random-box-smoke-${process.pid}`;
+  const payload = new URLSearchParams();
+  payload.set('title', title);
+  payload.set('productKind', 'random-box');
+  payload.set('price', '999');
+  payload.append('randomBoxPrizeName', 'รางวัลทดสอบ');
+  payload.append('randomBoxPrizePercent', '100');
+  payload.append('randomBoxPrizeStock', '2');
+  const created = await request('/admin/products/new', {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: payload.toString(),
+  });
+  const productId = decodeURIComponent(created.headers.location?.match(/[?&]productId=([^&#]+)/)?.[1] || '');
+  if (created.statusCode !== 302 || !productId) throw new Error('random-box product was not created into the main product workflow');
+  let data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  let product = data.products.find(item => item.id === productId);
+  if (!product || product.specialType !== 'random-box' || product.price !== 1 || product.randomBox.prizes[0].percent !== 100) {
+    throw new Error('random-box price or separate prize settings were not enforced when saving');
+  }
+
+  const scheduled = await request('/admin/scheduled-products', {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ productId, publishAt: '2020-01-01T00:00' }).toString(),
+  });
+  if (scheduled.statusCode !== 302) throw new Error('random-box product could not be published through the existing schedule workflow');
+  product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
+  const page = await fetchOk(`/game/${encodeURIComponent(product.slug)}`, 'text/html');
+  if (!page.body.includes('฿1') || !page.body.includes('รอบรวมของกล่องนี้') || !page.body.includes('85–110')) {
+    throw new Error('random-box storefront does not explain the fixed price and pooled round target');
+  }
+
+  const customerCookie = await loginAsCustomer();
+  const balanceBeforeDraw = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).users.find(user => user.username === 'demo')?.walletBalance;
+  const drawRequestId = crypto.randomUUID();
+  const drawBody = new URLSearchParams({ drawRequestId }).toString();
+  const firstDraw = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
+    method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: drawBody,
+  });
+  if (firstDraw.statusCode !== 302 || !/^\/account\/orders\//.test(firstDraw.headers.location || '')) {
+    throw new Error(`random-box draw route did not return an order (HTTP ${firstDraw.statusCode})`);
+  }
+  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  product = data.products.find(item => item.id === productId);
+  const buyer = data.users.find(user => user.username === 'demo');
+  const order = data.orders.find(item => item.id === firstDraw.headers.location.split('/').pop());
+  if (!buyer || buyer.walletBalance !== balanceBeforeDraw - 1 || !order?.randomBoxOrder || order.total !== 1
+    || order.items[0].randomBoxDraw.roundProgress !== 1 || order.items[0].randomBoxDraw.isWin) {
+    throw new Error('a random-box attempt did not create its ฿1 order and shared-round progress atomically');
+  }
+  const replay = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
+    method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: drawBody,
+  });
+  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  if (replay.headers.location !== firstDraw.headers.location
+    || data.users.find(user => user.username === 'demo').walletBalance !== balanceBeforeDraw - 1
+    || data.orders.filter(item => item.randomBoxRequestId === drawRequestId).length !== 1) {
+    throw new Error('replaying the same draw request debited the wallet or created a second order');
+  }
 }
 
 async function loginAsCustomer() {
@@ -494,6 +559,7 @@ async function run() {
     const adminPageCount = await crawlAdmin(cookie);
     await checkBulkPrice(cookie);
     await checkBulkFolderImportFallback(cookie);
+    await checkRandomBoxWorkflow(cookie);
     const missing = await request('/definitely-missing');
     if (missing.statusCode !== 404 || !missing.body.includes('>404<')) throw new Error('404 page does not identify HTTP 404');
     console.log(`Smoke checks passed: storefront, assets, undeployed module isolation, ${adminPageCount} admin pages, bulk pricing, error page`);

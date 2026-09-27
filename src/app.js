@@ -13,6 +13,7 @@ const { attachUser } = require('./middleware/auth');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 const cartRoutes = require('./routes/cart');
+const randomBoxRoutes = require('./routes/random-box');
 const accountRoutes = require('./routes/account');
 const minigameRoutes = require('./routes/minigame');
 const adminRoutes = require('./routes/admin');
@@ -233,6 +234,7 @@ app.use((req, res, next) => {
 app.use('/', shopRoutes);
 app.use('/', authRoutes);
 app.use('/cart', cartRoutes);
+app.use('/random-box', randomBoxRoutes);
 app.use('/account', accountRoutes);
 app.use('/minigame', minigameRoutes);
 app.use('/admin', customSystemsAdminRoutes);

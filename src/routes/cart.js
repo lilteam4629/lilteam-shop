@@ -4,6 +4,8 @@ const store = require('../data/store');
 const { requireLogin, currentUser } = require('../middleware/auth');
 const { withEffectivePrice } = require('../services/pricing');
 const catalogSyndication = require('../services/catalog-syndication');
+const randomBox = require('../services/random-box');
+const { runWithCheckoutQueue } = require('../services/checkout-queue');
 const { MAIN_SITE_URL } = require('../middleware/tenant');
 
 function getCart(req) {
@@ -81,6 +83,10 @@ router.post('/add/:productId', (req, res) => {
     req.flash('error', 'ไม่พบสินค้า');
     return res.redirect('back');
   }
+  if (!remoteProduct && product.specialType === randomBox.RANDOM_BOX_KIND) {
+    req.flash('error', 'กล่องสุ่มต้องเปิดจากหน้าสินค้าโดยตรง');
+    return res.redirect(`/game/${encodeURIComponent(product.slug)}`);
+  }
   const stock = remoteProduct ? remoteProduct.stockCount : availableStock(product.id);
   if (stock < 1) {
     req.flash('error', 'สินค้าหมดสต๊อก');
@@ -157,13 +163,6 @@ router.post('/coupon/remove', (req, res) => {
   req.session.coupon = null;
   res.redirect('/cart');
 });
-
-let checkoutQueue = Promise.resolve();
-function runWithCheckoutQueue(fn) {
-  const result = checkoutQueue.then(fn, fn);
-  checkoutQueue = result.catch(() => {});
-  return result;
-}
 
 const checkoutLocks = new Set();
 
@@ -308,6 +307,10 @@ router.post('/checkout', requireLogin, (req, res) => {
       const { items, total } = buildCartView(req);
       if (!items.length) {
         req.flash('error', 'ตะกร้าว่างเปล่า');
+        return res.redirect('/cart');
+      }
+      if (items.some(item => item.product.specialType === randomBox.RANDOM_BOX_KIND)) {
+        req.flash('error', 'กล่องสุ่มต้องเปิดจากหน้าสินค้าโดยตรง');
         return res.redirect('/cart');
       }
 

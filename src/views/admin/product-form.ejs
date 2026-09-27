@@ -37,18 +37,20 @@
     </div>
   <% } %>
 
+  <% if (!isBulkImport) { %><%- include('random-box-product-fields', { product, allowRandomBox }) %><% } %>
+
   <div class="grid sm:grid-cols-2 gap-4">
     <div>
       <label class="block text-sm mb-1 text-[var(--text-3)]">ราคาขาย (บาท)</label>
       <input type="number" name="price" required value="<%= product ? product.price : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
-    <div>
+    <div data-random-box-hide>
       <label class="block text-sm mb-1 text-[var(--text-3)]">ราคาปกติ (สำหรับแสดงราคาขีดฆ่า)</label>
       <input type="number" name="originalPrice" value="<%= product ? product.originalPrice : '' %>" class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-lg px-3 py-2" />
     </div>
   </div>
 
-  <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.flashSalePrice != null) ? 'open' : '' %>>
+  <details data-random-box-hide class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.flashSalePrice != null) ? 'open' : '' %>>
     <summary class="font-medium text-[var(--gold-text)] cursor-pointer select-none">⚡ Flash Sale</summary>
     <div class="space-y-4 mt-4">
     <p class="text-xs text-[var(--text-4)]">ตั้งราคาพิเศษและเวลาไทยล่วงหน้า ระบบจะเริ่มลดราคาและคืนราคาขายเดิมให้อัตโนมัติเมื่อหมดเวลา เว้นว่างทั้งหมดหากไม่ใช้</p>
@@ -70,7 +72,7 @@
     </div>
   </details>
 
-  <details class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.priceOptions && product.priceOptions.length) ? 'open' : '' %>>
+  <details data-random-box-hide class="bg-[var(--input)]/45 border border-[var(--gold)]/30 rounded-xl p-4" <%= (product && product.priceOptions && product.priceOptions.length) ? 'open' : '' %>>
     <summary class="font-medium text-[var(--gold-text)] cursor-pointer select-none">💰 ราคาลดตามจำนวนซื้อ (ยิ่งซื้อเยอะยิ่งถูก)</summary>
     <div class="space-y-3 mt-4">
       <p class="text-xs text-[var(--text-4)]">พิมพ์แค่ "ซื้อกี่ชิ้น ราคารวมเท่าไหร่" ระบบคิดราคาต่อชิ้นและราคาตามจำนวนที่ลูกค้าซื้อให้อัตโนมัติ เช่น ซื้อ 5 ชิ้น ราคารวม 200 บาท เว้นว่างไว้ทั้งหมดถ้าไม่ต้องการใช้ (ใช้ราคาขายด้านบนตามปกติ)</p>

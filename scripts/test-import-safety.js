@@ -115,10 +115,11 @@ async function main() {
     assert.doesNotMatch(adminForm, /name="(?:promptpayId|promptpayName|promptpayQrImage)"/);
     assert.doesNotMatch(customerForm, /value="promptpay"|พร้อมเพย์/);
   });
-  check('Admin inventory value excludes issued IDs', () => {
+  check('Admin inventory value excludes issued IDs and separately managed random-box prizes', () => {
     const adminRoutes = fs.readFileSync(path.join(root, 'src/routes/admin.js'), 'utf8');
     const productsPage = fs.readFileSync(path.join(root, 'src/views/admin/products.ejs'), 'utf8');
-    assert.match(adminRoutes, /totalAvailableProductCount = products\.reduce\(\(sum, product\) => sum \+ product\.stockCount/);
+    assert.match(adminRoutes, /countedInventory = products\.filter\(product => product\.specialType !== randomBox\.RANDOM_BOX_KIND\)/);
+    assert.match(adminRoutes, /totalAvailableProductCount = countedInventory\.reduce\(\(sum, product\) => sum \+ product\.stockCount/);
     assert.match(adminRoutes, /Number\(product\.price\) \|\| 0\) \* product\.stockCount/);
     assert.match(productsPage, /มูลค่าไอดีที่พร้อมขาย/);
     assert.match(productsPage, /data-available-stock/);

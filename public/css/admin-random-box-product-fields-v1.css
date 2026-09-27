@@ -1,0 +1,29 @@
+.random-box-product-kind,.random-box-config{border:1px solid var(--border-light,#d8d5d0);border-radius:16px;padding:18px;background:var(--card,#fff)}
+.random-box-product-kind h2,.random-box-config h3{margin:0;color:var(--text,#17211f);font-size:1rem;font-weight:850}
+.random-box-product-kind>p,.random-box-config-head p{margin:.35rem 0 0;color:var(--text-3,#727b77);font-size:.8rem;line-height:1.5}
+.random-box-kind-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.random-box-kind-options label{display:flex;min-height:58px;align-items:flex-start;gap:10px;border:1px solid var(--border-light,#d8d5d0);border-radius:12px;padding:12px;cursor:pointer}
+.random-box-kind-options label:has(input:checked){border-color:var(--gold,#94613e);background:color-mix(in srgb,var(--gold,#94613e) 8%,var(--card,#fff))}
+.random-box-kind-options input{width:18px;height:18px;flex:0 0 auto;margin-top:2px;accent-color:var(--gold,#94613e)}
+.random-box-kind-options span,.random-box-prize-row label{display:flex;min-width:0;flex-direction:column;gap:4px}
+.random-box-kind-options strong{color:var(--text,#17211f);font-size:.88rem}
+.random-box-kind-options small,.random-box-prize-row small{color:var(--text-4,#858c89);font-size:.72rem;line-height:1.45}
+.random-box-config[hidden]{display:none}
+.random-box-config{border-color:color-mix(in srgb,var(--gold,#94613e) 38%,var(--border-light,#d8d5d0));background:linear-gradient(145deg,color-mix(in srgb,var(--gold,#94613e) 5%,var(--card,#fff)),var(--card,#fff))}
+.random-box-config-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.random-box-price-pill{flex:0 0 auto;border-radius:999px;background:color-mix(in srgb,var(--gold,#94613e) 13%,var(--card,#fff));padding:7px 11px;color:var(--gold-text,#815333);font-size:.78rem;font-weight:900}
+.random-box-rule{display:grid;gap:4px;margin:14px 0;padding:12px 14px;border-left:3px solid var(--gold,#94613e);border-radius:8px;background:var(--input,#f6f4f1);color:var(--text-3,#727b77);font-size:.78rem;line-height:1.55}
+.random-box-rule strong{color:var(--text-2,#343e39)}
+.random-box-prize-list{display:grid;gap:9px}
+.random-box-prize-row{display:grid;grid-template-columns:minmax(150px,2fr) minmax(110px,1fr) minmax(120px,1fr) auto;align-items:end;gap:9px;border:1px solid var(--border-light,#d8d5d0);border-radius:12px;padding:11px;background:var(--card,#fff)}
+.random-box-prize-row label>span{color:var(--text-3,#727b77);font-size:.72rem;font-weight:700}
+.random-box-prize-row input{width:100%;min-width:0;min-height:42px;border:1px solid var(--border-light,#d8d5d0);border-radius:9px;background:var(--input,#f6f4f1);padding:8px 10px;color:var(--text,#17211f);font:inherit;font-size:.82rem}
+.random-box-prize-row input:focus,.random-box-kind-options input:focus-visible,.random-box-prize-add:focus-visible,.random-box-prize-remove:focus-visible{outline:3px solid color-mix(in srgb,var(--gold,#94613e) 40%,transparent);outline-offset:2px}
+.random-box-prize-remove,.random-box-prize-add{min-height:42px;border:1px solid var(--border-light,#d8d5d0);border-radius:10px;background:var(--card,#fff);padding:8px 13px;color:var(--text-2,#343e39);font:inherit;font-size:.8rem;font-weight:750;cursor:pointer}
+.random-box-prize-remove:hover{border-color:#c96f63;color:#a33e32}
+.random-box-prize-add{border-color:color-mix(in srgb,var(--gold,#94613e) 45%,var(--border-light,#d8d5d0));color:var(--gold-text,#815333)}
+.random-box-config-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:11px}
+.random-box-config-footer strong{font-size:.78rem;color:var(--text-3,#727b77)}
+.random-box-config-footer strong.is-valid{color:#15805d}.random-box-config-footer strong.is-invalid{color:#ad4d3e}
+.random-box-fixed-price input[name="price"]{border-color:color-mix(in srgb,var(--gold,#94613e) 50%,var(--border-light,#d8d5d0));font-weight:850}
+@media(max-width:700px){.random-box-kind-options{grid-template-columns:1fr}.random-box-product-kind,.random-box-config{padding:14px;border-radius:13px}.random-box-prize-row{grid-template-columns:minmax(0,1fr) minmax(100px,.65fr);align-items:start}.random-box-prize-row label:first-of-type{grid-column:1/-1}.random-box-prize-remove{grid-column:2;justify-self:end}.random-box-config-head{flex-direction:column}.random-box-config-footer{align-items:flex-start;flex-direction:column}}

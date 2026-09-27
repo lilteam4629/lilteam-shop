@@ -1,0 +1,102 @@
+<link rel="stylesheet" href="<%= asset('css/admin-random-box-product-fields-v1.css') %>" />
+<% if (allowRandomBox) { %>
+  <% const isBoxProduct = Boolean(product && product.specialType === 'random-box'); const configuredBoxPrizes = product && Array.isArray(product.randomBox?.prizes) && product.randomBox.prizes.length ? product.randomBox.prizes : [{ id: '', name: '', percent: '', stock: null }]; %>
+  <section class="random-box-product-kind" aria-labelledby="product-kind-title">
+    <h2 id="product-kind-title">ประเภทสินค้า</h2>
+    <p>เลือกสินค้าปกติ หรือกล่องสุ่มที่คิดเงิน 1 บาทต่อครั้ง</p>
+    <div class="random-box-kind-options">
+      <label><input type="radio" name="productKind" value="standard" <%= isBoxProduct ? '' : 'checked' %> /><span><strong>สินค้าปกติ</strong><small>ขายตามราคาและสต็อกสินค้าเดิม</small></span></label>
+      <label><input type="radio" name="productKind" value="random-box" <%= isBoxProduct ? 'checked' : '' %> /><span><strong>กล่องสุ่ม · ฿1/ครั้ง</strong><small>สะสมยอดรวมทุกคน 85–110 ครั้ง แล้วสุ่มออก 1 รางวัล</small></span></label>
+    </div>
+  </section>
+
+  <section class="random-box-config" data-random-box-panel <%= isBoxProduct ? '' : 'hidden' %> aria-labelledby="random-box-prizes-heading">
+    <div class="random-box-config-head">
+      <div><h3 id="random-box-prizes-heading">รางวัลและสัดส่วน</h3><p>เปอร์เซ็นต์ใช้สุ่มเลือกรางวัลเมื่อรอบครบเป้า ไม่ใช่โอกาสถูกรางวัลต่อการเปิด 1 ครั้ง</p></div>
+      <span class="random-box-price-pill">฿1 / ครั้ง</span>
+    </div>
+    <div class="random-box-rule" role="note"><strong>รอบรวมของกล่องนี้</strong><span>ยอดเปิดของลูกค้าทุกคนในร้านนี้จะนับร่วมกัน ระบบสุ่มเป้ารอบละ 85–110 ครั้ง และผู้ที่เปิดครั้งที่ถึงเป้าจะได้ 1 รางวัล จากนั้นเริ่มรอบใหม่</span></div>
+    <div class="random-box-prize-list" data-random-box-prizes>
+      <% configuredBoxPrizes.forEach((prize, index) => { %>
+        <div class="random-box-prize-row" data-random-box-prize-row>
+          <input type="hidden" name="randomBoxPrizeId" value="<%= prize.id || '' %>" />
+          <label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" value="<%= prize.name || '' %>" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" data-random-box-required /></label>
+          <label><span>สัดส่วน (%)</span><input name="randomBoxPrizePercent" type="number" min="0.01" max="100" step="0.01" value="<%= prize.percent ?? '' %>" placeholder="เช่น 25" data-random-box-required /></label>
+          <label><span>จำนวนรางวัล</span><input name="randomBoxPrizeStock" type="number" min="0" step="1" value="<%= prize.stock ?? '' %>" placeholder="ไม่จำกัด" /><small>ใส่ 0 เพื่อพักรางวัล</small></label>
+          <button type="button" class="random-box-prize-remove" data-random-box-remove aria-label="ลบรางวัล <%= prize.name || `ลำดับที่ ${index + 1}` %>">ลบ</button>
+        </div>
+      <% }) %>
+    </div>
+    <div class="random-box-config-footer"><button type="button" class="random-box-prize-add" data-random-box-add>＋ เพิ่มรางวัล</button><strong data-random-box-total role="status" aria-live="polite">เปอร์เซ็นต์รวม: 0%</strong></div>
+  </section>
+  <script>
+    (() => {
+      const form = document.currentScript && document.currentScript.closest('form');
+      if (!form) return;
+      const panel = form.querySelector('[data-random-box-panel]');
+      const typeRadios = form.querySelectorAll('input[name="productKind"]');
+      const prizeList = form.querySelector('[data-random-box-prizes]');
+      const totalLabel = form.querySelector('[data-random-box-total]');
+      const addButton = form.querySelector('[data-random-box-add]');
+      const priceInput = form.querySelector('input[name="price"]');
+      const priceLabel = priceInput && priceInput.closest('label,div');
+      const priceCaption = priceLabel && priceLabel.querySelector('span');
+      const normalPriceCaption = priceCaption ? priceCaption.textContent : '';
+      if (!panel || !typeRadios.length || !prizeList) return;
+      const isBox = () => form.querySelector('input[name="productKind"]:checked')?.value === 'random-box';
+      let normalPrice = priceInput ? priceInput.value : '';
+      const update = () => {
+        const active = isBox();
+        panel.hidden = !active;
+        if (priceInput) {
+          if (!active && priceInput.readOnly) priceInput.value = normalPrice;
+          if (active && !priceInput.readOnly) normalPrice = priceInput.value;
+          priceInput.readOnly = active;
+          priceInput.min = active ? '1' : '0';
+          priceInput.max = active ? '1' : '';
+          priceInput.value = active ? '1' : priceInput.value;
+          if (priceLabel) priceLabel.classList.toggle('random-box-fixed-price', active);
+          if (priceCaption) priceCaption.textContent = active ? 'ราคาต่อครั้ง · กำหนดไว้ 1 บาท' : normalPriceCaption;
+        }
+        form.querySelectorAll('[data-random-box-hide]').forEach(element => { element.hidden = active; });
+        prizeList.querySelectorAll('[data-random-box-required]').forEach(input => { input.required = active; });
+        const rows = [...prizeList.querySelectorAll('[data-random-box-prize-row]')];
+        const total = rows.reduce((sum, row) => sum + (Number(row.querySelector('[name="randomBoxPrizePercent"]')?.value) || 0), 0);
+        const valid = Math.round(total * 100) === 10000;
+        if (totalLabel) {
+          totalLabel.textContent = `เปอร์เซ็นต์รวม: ${total.toLocaleString('th-TH', { maximumFractionDigits: 2 })}%${active && !valid ? ' · ต้องรวมให้ครบ 100%' : ''}`;
+          totalLabel.classList.toggle('is-valid', active && valid);
+          totalLabel.classList.toggle('is-invalid', active && !valid);
+        }
+      };
+      const addRow = () => {
+        if (prizeList.querySelectorAll('[data-random-box-prize-row]').length >= 30) return;
+        const row = document.createElement('div');
+        row.className = 'random-box-prize-row';
+        row.setAttribute('data-random-box-prize-row', '');
+        row.innerHTML = '<input type="hidden" name="randomBoxPrizeId" value=""><label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" data-random-box-required></label><label><span>สัดส่วน (%)</span><input name="randomBoxPrizePercent" type="number" min="0.01" max="100" step="0.01" placeholder="เช่น 25" data-random-box-required></label><label><span>จำนวนรางวัล</span><input name="randomBoxPrizeStock" type="number" min="0" step="1" placeholder="ไม่จำกัด"><small>ใส่ 0 เพื่อพักรางวัล</small></label><button type="button" class="random-box-prize-remove" data-random-box-remove aria-label="ลบรางวัล">ลบ</button>';
+        prizeList.appendChild(row);
+        update();
+        row.querySelector('[name="randomBoxPrizeName"]')?.focus();
+      };
+      typeRadios.forEach(radio => radio.addEventListener('change', update));
+      prizeList.addEventListener('input', update);
+      prizeList.addEventListener('click', event => {
+        const remove = event.target.closest('[data-random-box-remove]');
+        if (remove) { remove.closest('[data-random-box-prize-row]')?.remove(); update(); }
+      });
+      addButton?.addEventListener('click', addRow);
+      form.addEventListener('submit', event => {
+        if (!isBox()) return;
+        update();
+        const total = [...prizeList.querySelectorAll('[name="randomBoxPrizePercent"]')].reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+        if (Math.round(total * 100) !== 10000) {
+          event.preventDefault();
+          totalLabel?.focus?.();
+          prizeList.querySelector('[name="randomBoxPrizePercent"]')?.focus();
+        }
+      });
+      update();
+    })();
+  </script>
+<% } else { %><input type="hidden" name="productKind" value="standard" /><% } %>

@@ -19,11 +19,11 @@
 
     <div class="product-detail-info">
       <div class="flex items-center gap-2 mb-3 product-detail-meta">
-        <span class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-[var(--gold-text)] text-xs px-2 py-1 rounded product-detail-kind">สินค้าเกม</span>
+        <span class="bg-[var(--gold)]/10 border border-[var(--gold)]/30 text-[var(--gold-text)] text-xs px-2 py-1 rounded product-detail-kind"><%= product.specialType === 'random-box' ? 'กล่องสุ่ม' : 'สินค้าเกม' %></span>
         <% if (product.stockCount > 0) { %>
           <span class="text-emerald-400 text-xs product-detail-stock is-available">พร้อมส่งทันที</span>
         <% } else { %>
-          <span class="text-[var(--coral)] text-xs product-detail-stock is-sold">สินค้าหมด</span>
+          <span class="text-[var(--coral)] text-xs product-detail-stock is-sold"><%= product.specialType === 'random-box' ? 'รางวัลหมดชั่วคราว' : 'สินค้าหมด' %></span>
         <% } %>
         <button onclick="navigator.clipboard && navigator.clipboard.writeText(window.location.href); this.textContent='คัดลอกแล้ว'"
           class="ml-auto text-xs text-[var(--text-3)] hover:text-[var(--gold-text)] border border-[var(--border-light)] rounded-lg px-2 py-1 product-detail-copy">คัดลอกลิงก์</button>
@@ -116,8 +116,36 @@
           <span class="text-xs bg-[var(--input)] border border-[var(--border-light)] text-[var(--text-2)] px-2 py-1 rounded-full product-detail-genre"><%= g %></span>
         <% }) %>
       </div>
-      <% const qtyTiers = (product.priceOptions || []).slice().sort((a, b) => a.minQty - b.minQty); %>
-      <% if (qtyTiers.length) { %>
+      <% const qtyTiers = (product.priceOptions || []).slice().sort((a, b) => a.minQty - b.minQty); const isRandomBox = product.specialType === 'random-box'; %>
+      <% if (isRandomBox) { %>
+        <div class="mb-5 rounded-2xl border border-[var(--gold)]/35 bg-[var(--card)] p-4 shadow-sm">
+          <div class="flex flex-wrap items-baseline justify-between gap-2">
+            <span class="text-xs font-semibold text-[var(--text-3)]">ราคาเปิดกล่อง</span>
+            <strong class="text-3xl font-black text-[var(--gold-text)]">฿1 <small class="text-sm font-semibold text-[var(--text-3)]">/ ครั้ง</small></strong>
+          </div>
+          <div class="mt-3 rounded-xl bg-[var(--input)] px-4 py-3">
+            <div class="text-xs font-bold text-[var(--text-2)]">รอบรวมของกล่องนี้ · ครั้งที่ถึงเป้ารับ 1 รางวัล</div>
+            <% if (randomBoxDetails.target) { %>
+              <div class="mt-1 text-lg font-black text-[var(--gold-text)]">สะสมแล้ว <%= randomBoxDetails.progress %> / <%= randomBoxDetails.target %> ครั้ง</div>
+            <% } else { %>
+              <div class="mt-1 text-lg font-black text-[var(--gold-text)]">รอบใหม่ · เป้าสุ่ม 85–110 ครั้ง</div>
+            <% } %>
+            <p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">นับรวมยอดเปิดของลูกค้าทุกคนในร้านนี้ เมื่อมีผู้เปิดถึงเป้ารอบนั้น คนนั้นได้รับรางวัลและเริ่มรอบใหม่</p>
+          </div>
+          <div class="mt-4">
+            <div class="mb-2 text-xs font-bold text-[var(--text-2)]">รางวัลที่มีในกล่อง · เปอร์เซ็นต์ใช้เลือกชนิดรางวัลเมื่อรอบครบ</div>
+            <ul class="space-y-2">
+              <% randomBoxDetails.prizes.forEach(prize => { %>
+                <li class="flex items-center justify-between gap-3 rounded-lg border border-[var(--border-light)] px-3 py-2 text-sm">
+                  <span class="min-w-0 truncate font-semibold text-[var(--text)]"><%= prize.name %></span>
+                  <strong class="shrink-0 text-[var(--gold-text)]"><%= Number(prize.publicPercent.toFixed(2)).toLocaleString('th-TH') %>%</strong>
+                </li>
+              <% }) %>
+            </ul>
+            <p class="mt-2 text-[11px] leading-relaxed text-[var(--text-4)]">เปอร์เซ็นต์แสดงตามรางวัลที่ยังเหลืออยู่ และรวมเป็น 100% สำหรับการเลือกของรางวัลในแต่ละรอบ</p>
+          </div>
+        </div>
+      <% } else if (qtyTiers.length) { %>
         <div class="mb-1 text-xs text-[var(--text-3)] product-price-label">ราคา</div>
         <div class="flex items-baseline gap-2 mb-3 product-detail-price">
           <span class="text-3xl font-bold text-[var(--gold-text)]">฿<span data-unit-price><%= product.price.toLocaleString() %></span></span>
@@ -173,7 +201,25 @@
         </div>
       <% } %>
 
-      <% if (product.isSyndicated) { %>
+      <% if (isRandomBox) { %>
+        <% if (product.stockCount > 0) { %>
+          <% if (currentUser) { %>
+            <div class="mb-3 rounded-xl border border-[var(--border-light)] bg-[var(--input)] px-4 py-3 text-sm">
+              <span class="text-[var(--text-3)]">เงินในกระเป๋า</span>
+              <strong class="ml-2 text-[var(--gold-text)]">฿<%= Number(currentUser.walletBalance || 0).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong>
+            </div>
+            <form action="/random-box/<%= product.id %>/draw" method="post" class="product-buy-form">
+              <input type="hidden" name="drawRequestId" value="<%= randomBoxDetails.requestId %>" />
+              <button type="submit" class="w-full rounded-xl bg-[var(--gold)] px-6 py-3.5 font-black text-[var(--gold-contrast)] transition hover:bg-[var(--gold-hover)]">🎲 สุ่ม 1 ครั้ง · ฿1</button>
+              <p class="mt-2 text-center text-xs text-[var(--text-3)]">หักเงิน 1 บาททันที · ผลการสุ่มและความคืบหน้ารอบจะแสดงในคำสั่งซื้อ</p>
+            </form>
+          <% } else { %>
+            <a href="/login?redirect=<%= encodeURIComponent(`/game/${product.slug}`) %>" class="block w-full rounded-xl bg-[var(--gold)] px-6 py-3.5 text-center font-black text-[var(--gold-contrast)]">เข้าสู่ระบบเพื่อสุ่ม · ฿1/ครั้ง</a>
+          <% } %>
+        <% } else { %>
+          <div class="rounded-xl border border-[var(--coral)]/40 bg-[var(--coral)]/10 px-4 py-3 text-sm text-[var(--coral)]">รางวัลหมดชั่วคราว กล่องนี้ปิดรับการสุ่ม</div>
+        <% } %>
+      <% } else if (product.isSyndicated) { %>
         <% if (product.stockCount > 0) { %>
           <div class="rounded-2xl border-2 border-[var(--gold)]/60 bg-[var(--gold)]/10 p-5 shadow-[0_12px_30px_-18px_color-mix(in_srgb,var(--gold)_70%,transparent)] product-federated-panel">
             <div class="mb-2 flex items-center gap-2 text-base font-black text-[var(--gold-text)]">🔒 ชำระเงินและรับสินค้าในร้านหลักเท่านั้น</div>

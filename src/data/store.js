@@ -744,6 +744,10 @@ function migrateSchema(db) {
   }
   if (!db.miniGamePrizes) { db.miniGamePrizes = []; changed = true; }
   if (!db.miniGamePlays) { db.miniGamePlays = []; changed = true; }
+  if (!db.randomBoxRounds || typeof db.randomBoxRounds !== 'object' || Array.isArray(db.randomBoxRounds)) {
+    db.randomBoxRounds = {};
+    changed = true;
+  }
   if (!db.licensePlans) { db.licensePlans = []; changed = true; }
   if (!db.licenseSales) { db.licenseSales = []; changed = true; }
   if (!db.shops) { db.shops = []; changed = true; }
