@@ -818,10 +818,15 @@ async function main() {
     const mainLayout = fs.readFileSync(path.join(root, 'src/views/layouts/main.ejs'), 'utf8');
     const marketView = fs.readFileSync(path.join(root, 'src/views/shop/home-rangers-market.ejs'), 'utf8');
     const lineRangersCss = fs.readFileSync(path.join(root, 'public/css/storefront-line-rangers-v1.css'), 'utf8');
+    const loginView = fs.readFileSync(path.join(root, 'src/views/shop/login.ejs'), 'utf8');
+    const registerView = fs.readFileSync(path.join(root, 'src/views/shop/register.ejs'), 'utf8');
     assert.match(mainLayout, /id="storefront-background-override"/);
     assert.match(mainLayout, /storefront-global-background #site-page-shell/);
     assert.match(mainLayout, /background-image: url\('<%= storefrontBackground %>'\)/);
     assert.ok(mainLayout.indexOf('id="storefront-background-override"') > mainLayout.indexOf('<%- body %>'));
+    assert.doesNotMatch(mainLayout, /body\.storefront-global-background\s*\{[^}]*background-image:\s*none/i);
+    assert.match(loginView, /authAppearance && settings\.authAppearance\.backgroundImage\)\s*\|\|\s*\(settings\.storefrontAppearance && settings\.storefrontAppearance\.backgroundImage\)/);
+    assert.match(registerView, /authAppearance && settings\.authAppearance\.backgroundImage\)\s*\|\|\s*\(settings\.storefrontAppearance && settings\.storefrontAppearance\.backgroundImage\)/);
     assert.match(marketView, /body\.storefront-model-rangers-market\s*\{/);
     assert.match(lineRangersCss, /body\.storefront-model-line-rangers\s*\{/);
   });
