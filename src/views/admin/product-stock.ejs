@@ -1,4 +1,4 @@
-<% const isRandomBox = product.specialType === 'random-box'; const randomBoxAvailableCount = typeof randomBoxStockCount === 'undefined' ? stockItems.filter(item => item.status === 'available').length : randomBoxStockCount; const randomBoxMissMessage = String(product.randomBox?.missMessage || '').trim(); %>
+<% const isRandomBox = product.specialType === 'random-box'; const randomBoxAvailableCount = typeof randomBoxStockCount === 'undefined' ? stockItems.filter(item => item.status === 'available').length : randomBoxStockCount; const randomBoxMissMessage = String(product.randomBox?.missMessage || '').trim(); const availableStockItems = stockItems.filter(item => item.status === 'available'); const soldStockCount = stockItems.length - availableStockItems.length; %>
 <!-- Stock Management Header -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
@@ -14,7 +14,7 @@
   <div class="flex items-center gap-2.5">
     <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl px-3.5 py-1.5 text-xs text-[var(--text-3)] flex items-center gap-2 shadow-sm">
       <span>พร้อมขาย:</span>
-      <b class="text-emerald-400 font-bold"><%= stockItems.filter(s => s.status === 'available').length %> รายการ</b>
+      <b class="text-emerald-400 font-bold"><%= availableStockItems.length %> รายการ</b>
     </div>
   </div>
 </div>
@@ -80,14 +80,15 @@
   <!-- Left Column: Existing Stock Items Table -->
   <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
     <div class="p-4 border-b border-[var(--border)] flex items-center justify-between">
-      <h3 class="font-bold text-sm text-[var(--text)]">รายการคีย์ / ไอดีในสต็อก (<%= stockItems.length %>)</h3>
-      <span class="text-xs text-[var(--text-4)]">พร้อมขาย: <b class="text-emerald-400"><%= stockItems.filter(s => s.status === 'available').length %></b> | ขายแล้ว: <b class="text-rose-400"><%= stockItems.filter(s => s.status !== 'available').length %></b></span>
+      <h3 class="font-bold text-sm text-[var(--text)]">รายการคีย์ / ไอดีที่พร้อมขาย (<%= availableStockItems.length %>)</h3>
+      <span class="text-xs text-[var(--text-4)]">ขายแล้วซ่อนจากรายการ: <b class="text-rose-400"><%= soldStockCount %></b></span>
     </div>
 
     <div class="overflow-x-auto">
       <table class="w-full text-left text-xs sm:text-sm">
         <thead class="text-xs text-[var(--text-4)] bg-[var(--input)]/40 border-b border-[var(--border)] uppercase">
           <tr>
+            <th class="py-3 px-4 font-semibold w-16">ลำดับ</th>
             <th class="py-3 px-4 font-semibold">ข้อมูลบน / Username</th>
             <th class="py-3 px-4 font-semibold">ข้อมูลล่าง / Password</th>
             <th class="py-3 px-4 font-semibold">สถานะ</th>
@@ -95,8 +96,9 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-[var(--border)]">
-          <% stockItems.forEach(s => { %>
+          <% availableStockItems.forEach((s, index) => { %>
             <tr class="hover:bg-[var(--input)]/40 transition duration-150">
+              <td class="py-3 px-4 font-mono text-xs text-[var(--text-4)]"><%= index + 1 %></td>
               <td class="py-3 px-4 font-mono text-xs">
                 <%= s.fulfillmentMode === 'contact' ? 'ติดต่อร้านค้า' : s.username %>
               </td>
@@ -126,11 +128,11 @@
             </tr>
           <% }) %>
 
-          <% if (!stockItems.length) { %>
+          <% if (!availableStockItems.length) { %>
             <tr>
-              <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="4">
+              <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="5">
                 <div class="text-2xl mb-1">📦</div>
-                ยังไม่มีข้อมูลสต็อกสินค้าในระบบ
+                ไม่มีสินค้าเหลือพร้อมขายในสต็อก
               </td>
             </tr>
           <% } %>

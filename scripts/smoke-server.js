@@ -229,7 +229,9 @@ async function checkRandomBoxWorkflow(adminCookie) {
   }
   const stockPage = await fetchOk(`/admin/products/${encodeURIComponent(productId)}/stock`, 'text/html', { cookie: adminCookie });
   if (!stockPage.body.includes('ส่งคีย์/ไอดีจากสต็อกให้อัตโนมัติ') || !stockPage.body.includes('smoke-user')
-    || stockPage.body.includes('สินค้า 1 ชิ้น ต่อ') || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*\d+\s*[–-]\s*\d+/.test(stockPage.body)) {
+    || stockPage.body.includes('สินค้า 1 ชิ้น ต่อ') || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*\d+\s*[–-]\s*\d+/.test(stockPage.body)
+    || !stockPage.body.includes('รายการคีย์ / ไอดีที่พร้อมขาย (2)')
+    || !/<th[^>]*>ลำดับ<\/th>/.test(stockPage.body) || !/>1<\/td>/.test(stockPage.body) || !/>2<\/td>/.test(stockPage.body)) {
     throw new Error('random-box stock page does not show direct inventory or reveals the payout range');
   }
 
@@ -383,6 +385,16 @@ async function checkRandomBoxWorkflow(adminCookie) {
     || !deliveredStock || !deliveredPage.body.includes(deliveredStock.username)
     || (deliveredStock.password && !deliveredPage.body.includes(deliveredStock.password))) {
     throw new Error('the winning draw did not consume one stock key and reveal it automatically in the customer order');
+  }
+  const remainingStock = data.stockItems.filter(item => item.productId === productId);
+  const remainingAvailable = remainingStock.filter(item => item.status === 'available').length;
+  const soldCount = remainingStock.length - remainingAvailable;
+  const soldStockPage = await fetchOk(`/admin/products/${encodeURIComponent(productId)}/stock`, 'text/html', { cookie: adminCookie });
+  if (soldStockPage.body.includes(deliveredStock.username)
+    || (deliveredStock.password && soldStockPage.body.includes(deliveredStock.password))
+    || !soldStockPage.body.includes(`รายการคีย์ / ไอดีที่พร้อมขาย (${remainingAvailable})`)
+    || !new RegExp(`ขายแล้วซ่อนจากรายการ:\\s*<b[^>]*>${soldCount}</b>`).test(soldStockPage.body)) {
+    throw new Error('sold stock still appears in the inventory table instead of being hidden from the available list');
   }
   const deletedDeliveredStock = await request(`/admin/products/${encodeURIComponent(productId)}/stock/${encodeURIComponent(deliveredStock.id)}/delete`, {
     method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
