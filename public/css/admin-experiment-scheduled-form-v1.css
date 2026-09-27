@@ -132,6 +132,66 @@
 .experiment-schedule-form .experiment-button.primary { border-color: var(--ex-ink); color: #fff; background: var(--ex-ink); }
 .experiment-schedule-form .experiment-button.primary:hover { border-color: #333; background: #333; }
 
+/* Warm, tactile treatment for the form's actual editing surfaces. */
+.experiment-schedule-form > .experiment-form-panel {
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fffefa 0%, #fffdfa 66%, #fffaf2 100%);
+  box-shadow: 0 8px 24px rgba(83, 65, 38, .065);
+}
+.experiment-form-panel-images,
+.experiment-form-panel-filters { background: linear-gradient(145deg, #fffefa, #fdfbf5) !important; }
+.experiment-form-panel-purchase { background: linear-gradient(145deg, #fffefa, #fff8ed) !important; }
+.experiment-form-panel-messenger { background: linear-gradient(145deg, #fffefa, #fff8f2) !important; }
+.experiment-form-panel-head { align-items: center; gap: 12px; margin-bottom: 20px; }
+.experiment-form-panel-title,
+.experiment-subsection-title { display: flex; align-items: center; gap: 11px; min-width: 0; }
+.experiment-subsection-title > div { min-width: 0; }
+.experiment-panel-icon { display: grid; place-items: center; width: 42px; height: 42px; flex: 0 0 42px; border-radius: 14px; color: #675039; box-shadow: inset 0 -2px 0 rgba(91, 65, 34, .06); }
+.experiment-panel-icon svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
+.experiment-panel-icon.info { background: #e9ecde; }
+.experiment-panel-icon.photos { background: #f2e5da; }
+.experiment-panel-icon.purchase { background: #f3ebcf; }
+.experiment-panel-icon.filters { background: #e7eadc; }
+.experiment-panel-icon.message { background: #f1e2d8; }
+.experiment-panel-icon.storefront { background: #e6ebe0; }
+.experiment-subsection-head { align-items: center; }
+.experiment-subsection-head h3 { font-size: 16px; }
+.experiment-form-panel-head h2 { font-weight: 800; }
+.experiment-ready-chip,
+.experiment-muted-chip { color: #765a36; background: #f4ecdc; }
+.experiment-field { color: #453a2e; }
+.experiment-field input,
+.experiment-field textarea,
+.experiment-field select { border-color: transparent; border-radius: 13px; background: #f7f3eb; }
+.experiment-field input:hover,
+.experiment-field textarea:hover,
+.experiment-field select:hover { background: #f4efe4; }
+.experiment-field input[type="file"] { background: #f7f3eb; }
+.experiment-field input[type="file"]::file-selector-button { border-radius: 999px; background: #ece2cf; color: #5f482c; }
+.experiment-field input:focus,
+.experiment-field textarea:focus,
+.experiment-field select:focus { border-color: transparent; background: #fffefa; box-shadow: 0 0 0 3px rgba(197, 138, 36, .2); }
+.experiment-image-choice { border-radius: 15px; background: #fbf7ef; box-shadow: 0 4px 12px rgba(83, 65, 38, .055); }
+.experiment-image-preview { background: linear-gradient(145deg, #f5eddf, #fffaf1); }
+.experiment-image-choice-meta { color: #554331; }
+.experiment-inline-empty { margin: 0; padding: 12px 14px; border-radius: 13px; color: #675941; background: #f5efe3; }
+.experiment-filter-option { border-radius: 14px; background: #f7f3eb; }
+.experiment-filter-option:hover { background: #f1eadc; }
+.experiment-filter-option:has(input:checked) { background: #f1e5cd; box-shadow: 0 5px 14px rgba(83, 65, 38, .08); }
+.experiment-filter-option img { border-radius: 11px; box-shadow: 0 3px 7px rgba(50, 38, 22, .1); }
+.experiment-check-row { width: fit-content; padding: 7px 11px; border-radius: 12px; background: #f5efe3; }
+.experiment-check-row:hover { background: #efe5d3; }
+.experiment-message-locked { gap: 6px; border-radius: 14px; background: #f4eddf; color: #5f503f; }
+.experiment-message-locked span { min-height: 30px; padding: 4px 8px; border-radius: 9px; background: rgba(255, 255, 255, .58); }
+.experiment-message-locked svg { color: #907550; }
+.experiment-content-settings { gap: 12px; }
+.experiment-content-settings > div { padding: 14px; border-radius: 15px; background: #f5f1e8; }
+.experiment-content-settings > div:nth-child(2) { background: #f2eee2; }
+.experiment-content-settings > div:nth-child(3) { background: #f5eee7; }
+.experiment-content-settings > div .experiment-check-row { width: 100%; min-height: 0; padding: 9px; border-radius: 11px; background: rgba(255, 255, 255, .65); }
+.experiment-content-settings > div .experiment-check-row:hover { background: #fffefa; }
+.experiment-form-panel-content .status-field { max-width: 380px; }
+
 /* Keep form borders visible above the shared admin reset. */
 @layer admin-main-neutral-borders {
   body.admin-site.admin-main-site.experiment-admin .experiment-schedule-form .experiment-form-panel,
@@ -207,7 +267,10 @@
   .experiment-shortcut-icon svg { width: 19px; height: 19px; }
   .experiment-schedule-form { gap: 10px; padding-bottom: 16px; }
   .experiment-schedule-form > .experiment-form-panel { padding: 15px; border-radius: 14px; }
-  .experiment-form-panel-head { gap: 8px; margin-bottom: 14px; }
+  .experiment-form-panel-head { align-items: flex-start; gap: 8px; margin-bottom: 14px; }
+  .experiment-panel-icon { width: 36px; height: 36px; flex-basis: 36px; border-radius: 12px; }
+  .experiment-panel-icon svg { width: 19px; height: 19px; }
+  .experiment-form-panel-title, .experiment-subsection-title { gap: 9px; }
   .experiment-form-panel-head h2 { font-size: 16px; }
   .experiment-form-panel-head p { font-size: 10px; }
   .experiment-ready-chip, .experiment-muted-chip { display: none; }
