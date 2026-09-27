@@ -291,9 +291,9 @@
               <div>
                 <label class="block text-xs text-[var(--text-3)] mb-1" for="qty-input">จำนวน</label>
                 <div class="flex items-stretch">
-                  <button type="button" class="qty-stepper-btn" data-qty-step="-1" aria-label="ลดจำนวน">−</button>
+                  <button type="button" class="qty-stepper-btn" data-qty-step="-1" aria-label="ลดจำนวน"><% if (isMainSite) { %><svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 20 20" style="display:block"><path d="M4 10h12" fill="none" stroke="#76502f" stroke-linecap="round" stroke-width="2.2" /></svg><% } else { %>−<% } %></button>
                   <input type="number" id="qty-input" name="qty" value="1" min="1" class="w-16 text-center bg-[var(--input)] border-y border-[var(--border-light)] text-sm font-semibold" data-qty-input />
-                  <button type="button" class="qty-stepper-btn" data-qty-step="1" aria-label="เพิ่มจำนวน">+</button>
+                  <button type="button" class="qty-stepper-btn" data-qty-step="1" aria-label="เพิ่มจำนวน"><% if (isMainSite) { %><svg aria-hidden="true" focusable="false" width="18" height="18" viewBox="0 0 20 20" style="display:block"><path d="M4 10h12M10 4v12" fill="none" stroke="#76502f" stroke-linecap="round" stroke-width="2.2" /></svg><% } else { %>+<% } %></button>
                 </div>
               </div>
               <div>
