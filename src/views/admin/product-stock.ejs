@@ -137,10 +137,14 @@
         </div>
       <% } else { %>
         <p class="text-[11px] text-[var(--text-4)] leading-relaxed">
-          เพิ่มแบบหลายรายการได้พร้อมกัน โดยใส่ <b>1 บรรทัดต่อ 1 สินค้า</b><br />
-          รูปแบบ: <code class="bg-[var(--input)] px-1.5 py-0.5 rounded font-mono text-[10px] text-[var(--gold-text)]">ข้อมูลบน:ข้อมูลล่าง:หมายเหตุ</code>
+          ใส่ข้อมูล <b>1 บรรทัดต่อ 1 สินค้า</b> ได้เลย ไม่ต้องคั่นด้วย <code>:</code><br />
+          ข้อความทั้งบรรทัดจะถูกบันทึกเป็นข้อมูลสินค้า
         </p>
-        <textarea name="bulk" rows="8" placeholder="user01:pass01:หมายเหตุ&#10;user02:pass02:หมายเหตุ&#10;user03:pass03" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition"></textarea>
+        <details class="text-[10px] text-[var(--text-4)]">
+          <summary class="cursor-pointer">ต้องการแยก Username / Password แบบเดิม?</summary>
+          <p class="mt-1">ใช้ <code class="font-mono">Username:Password:หมายเหตุ</code> ได้ โดยใส่ 1 รายการต่อ 1 บรรทัด</p>
+        </details>
+        <textarea name="bulk" rows="8" placeholder="ข้อมูลสินค้า/ไอดีชิ้นที่ 1&#10;ข้อมูลสินค้า/ไอดีชิ้นที่ 2&#10;ข้อมูลสินค้า/ไอดีชิ้นที่ 3" required class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition"></textarea>
       <% } %>
 
       <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95">

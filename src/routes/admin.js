@@ -21,6 +21,7 @@ const topupsService = require('../services/topups');
 const { adjustCustomerWallet, WalletAdjustmentError } = require('../services/admin-wallet-adjustment');
 const { collectCatalogApiMembers } = require('../services/admin-catalog-wallet-members');
 const { getCloudUrl } = require('../services/cloud-url');
+const { parseBulkStockEntries } = require('../services/stock-bulk-entry');
 const { requireAdmin } = require('../middleware/auth');
 const r2 = require('../services/r2');
 const efootballSource = require('../services/efootball-catalog');
@@ -1633,20 +1634,18 @@ router.post('/products/:id/stock/add', async (req, res) => {
     req.flash(quantity ? 'success' : 'error', quantity ? `เพิ่มจำนวนพร้อมขายแล้ว ${quantity} รายการ` : 'กรุณาระบุจำนวนที่ต้องการเพิ่ม');
     return res.redirect(`/admin/products/${product.id}/stock`);
   }
-  const lines = (req.body.bulk || '').split('\n').map(l => l.trim()).filter(Boolean);
-  let added = 0;
-  lines.forEach(line => {
-    const [username, password, ...rest] = line.split(':').map(s => s.trim());
-    if (!username || !password) return;
+  const entries = parseBulkStockEntries(req.body.bulk);
+  entries.forEach(({ username, password, extra }) => {
     store.data.stockItems.push({
       id: store.genId(10), productId: product.id, username, password,
-      extra: rest.join(':') || '', fulfillmentMode: 'automatic', status: 'available', soldOrderId: null,
+      extra, fulfillmentMode: 'automatic', status: 'available', soldOrderId: null,
       addedAt: new Date().toISOString(),
     });
-    added++;
   });
   await store.save();
-  req.flash('success', `เพิ่มสต๊อกสินค้าแล้ว ${added} รายการ`);
+  req.flash(entries.length ? 'success' : 'error', entries.length
+    ? `เพิ่มสต๊อกสินค้าแล้ว ${entries.length} รายการ`
+    : 'กรุณาใส่ข้อมูลสินค้าอย่างน้อย 1 บรรทัด');
   res.redirect(`/admin/products/${product.id}/stock`);
 });
 
