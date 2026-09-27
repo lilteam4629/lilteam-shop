@@ -39,7 +39,7 @@ function withStock(product, counts, req = null) {
   if (product?.specialType === randomBox.RANDOM_BOX_KIND) {
     const active = randomBox.supportsRandomBox(req)
       && product.status === 'active'
-      && randomBox.availablePrizePool(product.randomBox, store.data.stockItems, product.id).length > 0;
+      && randomBox.availableStockCount(store.data.stockItems, product.id) > 0;
     return { ...withEffectivePrice({ ...product, price: randomBox.RANDOM_BOX_PRICE, originalPrice: 0, priceOptions: [] }), stockCount: active ? 1 : 0 };
   }
   const stockCount = counts
@@ -416,7 +416,7 @@ router.get('/game/:slug', (req, res) => {
     target: boxRound?.target ? Number(boxRound.target) : null,
     roundNumber: Math.max(1, Number(boxRound?.roundNumber) || 1),
     rateConfig: randomBox.getRateConfig(product.randomBox?.rate),
-    prizes: randomBox.availablePrizePool(product.randomBox, store.data.stockItems, product.id),
+    availableStockCount: randomBox.availableStockCount(store.data.stockItems, product.id),
     requestId: require('crypto').randomUUID(),
   } : null;
   res.render('shop/product-detail', {
