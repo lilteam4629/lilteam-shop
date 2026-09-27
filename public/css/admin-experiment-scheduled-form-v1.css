@@ -289,3 +289,66 @@
 @media (prefers-reduced-motion: reduce) {
   .experiment-schedule-form-page *, .experiment-schedule-form-page *::before, .experiment-schedule-form-page *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
 }
+
+/* Keep the product editor surfaces white; only the paper rings retain their warm accent. */
+.experiment-schedule-form-page {
+  --ex-paper: #fff;
+  --ex-surface: #fff;
+  background: #fff !important;
+}
+.experiment-schedule-form-page .experiment-main,
+.experiment-schedule-form-page .experiment-sidebar,
+.experiment-schedule-form-page .experiment-topbar,
+.experiment-schedule-form-page .experiment-content { background: #fff !important; }
+.experiment-form-notepad { background: #fff !important; }
+.experiment-schedule-form-page .experiment-page-status-note { background: #fff !important; }
+.experiment-status-note-icon { background: #f5f5f5 !important; }
+.experiment-form-shortcuts { background: #fff !important; }
+.experiment-form-shortcuts a:hover { background: #f8f8f8 !important; }
+.experiment-shortcut-icon.details,
+.experiment-shortcut-icon.photos,
+.experiment-shortcut-icon.selling,
+.experiment-shortcut-icon.storefront,
+.experiment-panel-icon.info,
+.experiment-panel-icon.photos,
+.experiment-panel-icon.purchase,
+.experiment-panel-icon.filters,
+.experiment-panel-icon.message,
+.experiment-panel-icon.storefront { background: #f3f3f3 !important; }
+.experiment-schedule-form > .experiment-form-panel,
+.experiment-form-panel-images,
+.experiment-form-panel-filters,
+.experiment-form-panel-purchase,
+.experiment-form-panel-messenger,
+.experiment-schedule-form > .experiment-form-panel-highlight { background: #fff !important; }
+.experiment-field input,
+.experiment-field textarea,
+.experiment-field select,
+.experiment-field input[type="file"],
+.experiment-field input:hover,
+.experiment-field textarea:hover,
+.experiment-field select:hover,
+.experiment-field input:focus,
+.experiment-field textarea:focus,
+.experiment-field select:focus { background: #fff !important; }
+.experiment-field input,
+.experiment-field textarea,
+.experiment-field select { box-shadow: 0 2px 9px rgba(30, 30, 30, .055); }
+.experiment-field input:focus,
+.experiment-field textarea:focus,
+.experiment-field select:focus { box-shadow: 0 0 0 3px rgba(197, 138, 36, .18); }
+.experiment-field input[type="file"]::file-selector-button { background: #f4f4f4 !important; }
+.experiment-image-choice,
+.experiment-image-preview,
+.experiment-inline-empty,
+.experiment-filter-option,
+.experiment-message-locked,
+.experiment-message-locked span,
+.experiment-check-row,
+.experiment-content-settings > div,
+.experiment-content-settings > div .experiment-check-row { background: #fff !important; }
+.experiment-filter-option:hover,
+.experiment-check-row:hover,
+.experiment-content-settings > div .experiment-check-row:hover { background: #f8f8f8 !important; }
+.experiment-filter-option:has(input:checked) { background: #f5f5f5 !important; box-shadow: 0 4px 12px rgba(30, 30, 30, .08); }
+.experiment-form-actions { background: rgba(255, 255, 255, .97) !important; }
