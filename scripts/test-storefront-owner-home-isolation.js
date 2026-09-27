@@ -28,7 +28,7 @@ assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && store
   'the new media-storefront stylesheet must only load on the owner storefront');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v21\.css/,
   'the new readable product-card layer must only load on the owner storefront');
-assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-owner-home-hero-v23\.css[^\n]*rev=3/,
+assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-owner-home-hero-v23\.css[^\n]*rev=4/,
   'the banner-only hero stylesheet must be cache-busted for the main store only');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
   'the cozy homepage layer must only load on the main storefront');

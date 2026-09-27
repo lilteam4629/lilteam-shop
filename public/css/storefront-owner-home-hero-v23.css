@@ -47,6 +47,27 @@
 
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v20-hero--banner-only .owner-home-v20-hero-note { display: none !important; }
 
+/* This stylesheet is loaded before the legacy hero overrides. Anchor the
+   banner-only layout to its unique ID so the later two-column rule cannot
+   squeeze the configured shop banner into the old artwork column. */
+#site-page-shell.storefront-owner-home-v7 #home-top.owner-home-v20-hero--banner-only {
+  display: block !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  width: 100% !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-top.owner-home-v20-hero--banner-only > .owner-home-v20-artwork {
+  width: 100% !important;
+}
+
+#site-page-shell.storefront-owner-home-v7 #home-top.owner-home-v20-hero--banner-only > .owner-home-v20-artwork > img,
+#site-page-shell.storefront-owner-home-v7 #home-top.owner-home-v20-hero--banner-only > .owner-home-v20-artwork > a,
+#site-page-shell.storefront-owner-home-v7 #home-top.owner-home-v20-hero--banner-only > .owner-home-v20-artwork > a img {
+  width: 100% !important;
+  height: auto !important;
+  object-fit: contain !important;
+}
+
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--no-art) .owner-home-v20-eyebrow {
   width: fit-content;
   padding: 7px 11px;
