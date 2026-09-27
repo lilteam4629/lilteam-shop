@@ -579,7 +579,7 @@ router.post('/products/card-style', async (req, res) => {
 router.get('/products/new', (req, res) => {
   if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'สร้างสินค้าแบบตั้งเวลา', active: 'products', product: null });
+    return res.render('admin/product-schedule-form-experiment', { title: 'สร้างสินค้าแบบตั้งเวลา', active: 'products', product: null, filterTags: store.data.filterTags || [] });
   }
   res.render('admin/product-form', { title: 'เพิ่มสินค้าใหม่', active: 'products', product: null, genres: store.data.settings.genres, filterTags: store.data.filterTags });
 });
@@ -720,7 +720,7 @@ router.get('/products/:id/edit', (req, res) => {
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขเวลาขาย', active: 'scheduled-products', product });
+    return res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขเวลาขาย', active: 'scheduled-products', product, filterTags: store.data.filterTags || [] });
   }
   res.render('admin/product-form', { title: 'แก้ไขสินค้า', active: 'products', product, genres: store.data.settings.genres, filterTags: store.data.filterTags });
 });
