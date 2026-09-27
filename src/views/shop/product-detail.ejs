@@ -198,9 +198,9 @@
                 <div class="flex items-center justify-between gap-3">
                   <label for="random-box-draw-count" class="text-sm font-bold text-[var(--text-2)]">จำนวนครั้งที่ต้องการสุ่ม</label>
                   <div class="inline-flex items-center overflow-hidden rounded-lg border border-[var(--border-light)] bg-[var(--card)]">
-                    <button type="button" data-random-box-step="-1" class="grid h-10 w-10 place-items-center text-lg font-bold text-[var(--text-2)] transition hover:bg-[var(--gold)]/10" aria-label="ลดจำนวนครั้ง">−</button>
+                    <button type="button" data-random-box-step="-1" class="grid h-10 w-10 place-items-center text-lg font-bold transition <%= isMainSite ? 'bg-[var(--input)] text-[var(--gold-text)] hover:bg-[var(--gold)] hover:text-[var(--gold-contrast)]' : 'text-[var(--text-2)] hover:bg-[var(--gold)]/10' %>" aria-label="ลดจำนวนครั้ง">−</button>
                     <input id="random-box-draw-count" name="drawCount" type="number" min="1" max="<%= randomBoxDetails.maxDrawCount %>" step="1" value="1" inputmode="numeric" required data-random-box-count class="h-10 w-16 border-x border-[var(--border-light)] bg-transparent text-center font-black text-[var(--text)] outline-none" aria-label="จำนวนครั้งที่ต้องการสุ่ม" />
-                    <button type="button" data-random-box-step="1" class="grid h-10 w-10 place-items-center text-lg font-bold text-[var(--text-2)] transition hover:bg-[var(--gold)]/10" aria-label="เพิ่มจำนวนครั้ง">+</button>
+                    <button type="button" data-random-box-step="1" class="grid h-10 w-10 place-items-center text-lg font-bold transition <%= isMainSite ? 'bg-[var(--input)] text-[var(--gold-text)] hover:bg-[var(--gold)] hover:text-[var(--gold-contrast)]' : 'text-[var(--text-2)] hover:bg-[var(--gold)]/10' %>" aria-label="เพิ่มจำนวนครั้ง">+</button>
                   </div>
                 </div>
                 <p class="mt-2 text-right text-xs text-[var(--text-3)]">รวม <strong class="text-[var(--gold-text)]" data-random-box-total>฿1</strong></p>
