@@ -222,12 +222,15 @@ function drawRandomBox(data, {
   user.walletBalance = Math.round((balance - drawTotal) * 100) / 100;
   drawResults.forEach(draw => { draw.walletBalance = user.walletBalance; });
   const winResults = drawResults.filter(draw => draw.isWin);
+  const missResults = drawResults.filter(draw => !draw.isWin);
   const result = {
     ...(drawResults.length === 1 ? drawResults[0] : {}),
     isWin: winResults.length > 0,
     drawCount: drawResults.length,
     requestedDrawCount,
     winCount: winResults.length,
+    missCount: missResults.length,
+    missMessage: missResults[0]?.missMessage || null,
     stockExhausted: drawResults.length < requestedDrawCount,
     total: drawTotal,
     prizeName: winResults[0]?.prizeName || null,

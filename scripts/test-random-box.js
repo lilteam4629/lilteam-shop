@@ -66,6 +66,7 @@ for (let draw = 1; draw <= 84; draw += 1) {
   });
   assert.strictEqual(result.result.isWin, false, `draw ${draw} must not win before the global target`);
   assert.strictEqual(result.result.missMessage, 'ขอบคุณที่ร่วมสนุก', 'each miss snapshots the configured customer message');
+  assert.strictEqual(result.result.missCount, 1, 'single miss summaries report their miss count');
 }
 assert.strictEqual(data.randomBoxRounds['box-1'].progress, 84, 'round count is global across buyers');
 assert.strictEqual(data.users[0].walletBalance, 58, 'first buyer pays for their own 42 attempts');
@@ -80,6 +81,7 @@ assert.strictEqual(winner.result.isWin, true, 'the draw that reaches target wins
 assert.strictEqual(winner.result.roundProgress, 85);
 assert.strictEqual(winner.result.prizeName, 'winner-a:key-a', 'a win uses the selected stock entry as its prize label');
 assert.strictEqual(winner.result.missMessage, null, 'winning draws do not include the miss message');
+assert.strictEqual(winner.result.missCount, 0, 'winning draw summaries count no misses');
 assert.strictEqual(Object.hasOwn(winner.result, 'prizePercent'), false, 'draw results no longer depend on prize percentages');
 assert.strictEqual(data.stockItems[0].status, 'sold', 'the selected key is consumed from inventory once');
 assert.strictEqual(data.stockItems[0].soldOrderId, winner.orderId, 'inventory is linked to the winning order');

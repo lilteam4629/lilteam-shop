@@ -195,7 +195,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
   product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
   if (product.randomBox.rate !== 1) throw new Error('editing the random-box product changed its configured rate');
 
-  const missMessage = 'ขอบคุณที่ร่วมสนุก ลองใหม่ได้เสมอ';
+  const missMessage = 'เกลือ';
   const saveMissMessage = await request(`/admin/products/${encodeURIComponent(productId)}/stock/random-box-message`, {
     method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ randomBoxMissMessage: `  ${missMessage}  ` }).toString(),
@@ -274,7 +274,9 @@ async function checkRandomBoxWorkflow(adminCookie) {
     throw new Error(`random-box draw route did not return an order (HTTP ${firstDraw.statusCode})`);
   }
   const customerOrderPage = await fetchOk(firstDraw.headers.location, 'text/html', { cookie: customerCookie });
-  if (!customerOrderPage.body.includes(missMessage)
+  if (!customerOrderPage.body.includes(missMessage) || !customerOrderPage.body.includes('ไม่ได้รับรางวัล')
+    || !customerOrderPage.body.includes('data-random-box-result-status="miss"')
+    || !customerOrderPage.body.includes('object-contain object-center')
     || /รอบรวม\s*\d+\s*\/\s*\d+/.test(customerOrderPage.body)
     || customerOrderPage.body.includes('ความคืบหน้ารอบ')) {
     throw new Error('random-box order page exposes shared-round progress or hides the draw result');
@@ -365,6 +367,8 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const deliveredPage = await fetchOk(winnerResponse.headers.location, 'text/html', { cookie: customerCookie });
   if (winningOrder?.status !== 'completed' || !winningOrder?.items[0]?.randomBoxDraw?.isWin
     || winningOrder.items[0].randomBoxDraw.prizeName !== expectedPrizeLabel
+    || !deliveredPage.body.includes('data-random-box-result-status="win"')
+    || !deliveredPage.body.includes('ได้รับรางวัล')
     || !deliveredPage.body.includes(expectedPrizeLabel)
     || deliveredStock?.status !== 'sold' || deliveredStock.soldOrderId !== winningOrderId
     || !deliveredStock || !deliveredPage.body.includes(deliveredStock.username)

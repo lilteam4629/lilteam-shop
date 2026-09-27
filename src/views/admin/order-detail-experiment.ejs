@@ -79,7 +79,7 @@
                     <% if (item.randomBoxDraw) { %>
                       <div class="order-fulfillment-note <%= item.randomBoxDraw.isWin ? 'is-contact' : 'is-ready' %>">
                         <span class="order-fulfillment-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>
-                        <span><strong class="break-words"><%= item.randomBoxDraw.isWin ? `ผู้ชนะรอบ ${item.randomBoxDraw.roundNumber} · ${item.randomBoxDraw.prizeName}` : `สุ่มแล้ว · ${item.randomBoxDraw.missMessage || 'ยังไม่ได้รับรางวัลในครั้งนี้'}` %></strong><% if (item.randomBoxDraw.isWin) { %><small><%= item.credentials ? 'ตัดคีย์/ไอดีจากสต็อกและส่งอัตโนมัติแล้ว' : 'ไม่พบคีย์/ไอดีที่ตัดจากสต็อก' %></small><% } %></span>
+                        <span><strong class="break-words"><%= item.randomBoxDraw.isWin ? `ได้รับรางวัล · ${item.randomBoxDraw.prizeName}` : `ไม่ได้รับรางวัล · ${item.randomBoxDraw.missMessage || 'ยังไม่ได้รับรางวัลในครั้งนี้'}` %></strong><% if (item.randomBoxDraw.isWin) { %><small><%= item.credentials ? 'ตัดคีย์/ไอดีจากสต็อกและส่งอัตโนมัติแล้ว' : 'ไม่พบคีย์/ไอดีที่ตัดจากสต็อก' %></small><% } %></span>
                       </div>
                     <% } else if (item.fulfillmentMode === 'contact') { %>
                       <div class="order-fulfillment-note is-contact">

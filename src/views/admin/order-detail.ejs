@@ -82,7 +82,7 @@
                   <div class="font-bold text-[var(--gold-text)] break-words">🎉 ผู้ชนะรอบ <%= i.randomBoxDraw.roundNumber %> · รางวัล <%= i.randomBoxDraw.prizeName %></div>
                   <div class="mt-1 text-[var(--text-2)]"><%= i.credentials ? 'ตัดคีย์/ไอดีจากสต็อกและส่งอัตโนมัติแล้ว' : 'ไม่พบคีย์/ไอดีที่ตัดจากสต็อก' %></div>
                 <% } else { %>
-                  <div class="font-bold text-[var(--text-2)] whitespace-pre-line break-words">ผลสุ่ม: <%= i.randomBoxDraw.missMessage || 'ยังไม่ได้รับรางวัลในครั้งนี้' %></div>
+                  <div class="font-bold text-[var(--text-2)] whitespace-pre-line break-words">ไม่ได้รับรางวัล · <%= i.randomBoxDraw.missMessage || 'ยังไม่ได้รับรางวัลในครั้งนี้' %></div>
                 <% } %>
               </div>
             <% } else if (i.fulfillmentMode === 'contact') { %>
