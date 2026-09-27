@@ -71,11 +71,12 @@
       <p class="owner-home-v20-eyebrow"><span></span> LILTEAM SHOP <i>·</i> FEATURED STORE</p>
       <h1 id="owner-home-v20-title"><%= settings.shopName || 'LILTeam Shop' %></h1>
       <p class="owner-home-v20-description"><%= settings.tagline || 'เลือกสินค้าที่ใช่ พร้อมลุยในแบบของคุณ' %></p>
-      <div class="owner-home-v20-meta">
-        <span class="owner-home-v20-meta-accent"><%= Number(productTotal || 0).toLocaleString() %> รายการ</span>
-        <% if (settings.openHours) { %><span><%= settings.openHours %></span><% } %>
-        <% if (ownerHomeFeatured) { %><span>สินค้าใหม่ · <%= ownerHomeFeatured.title %></span><% } %>
-      </div>
+      <% if (settings.openHours) { %>
+        <div class="owner-home-v20-meta owner-home-v20-hours" aria-label="เวลาเปิดร้าน <%= settings.openHours %>">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <span class="owner-home-v20-hours-copy"><small>เวลาเปิดร้าน</small><strong><%= settings.openHours %></strong></span>
+        </div>
+      <% } %>
       <div class="owner-home-v20-actions">
         <a class="owner-home-v20-primary" href="#home-catalog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg> เลือกสินค้า</a>
         <a class="owner-home-v20-secondary" href="/help">วิธีสั่งซื้อ</a>
