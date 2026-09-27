@@ -3,11 +3,23 @@
 <% if (isMainStorefrontListing) { %><link rel="stylesheet" href="<%= asset('css/storefront-catalog-main-v2.css') %>" /><link rel="stylesheet" href="<%= asset('css/storefront-catalog-main-v3.css') %>" /><% } %>
 <style>.catalog-card[hidden]{display:none!important}</style>
 <section class="catalog-page w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8<%= isMainStorefrontListing ? ' main-storefront-catalog-page' : '' %>">
-  <header class="catalog-head">
-    <div class="catalog-title"><span class="catalog-title-icon"><svg><use href="#ui-box"/></svg></span><span><h1><%= title %></h1><small>All Products <i>•</i> <b id="catalogVisibleCount"><%= products.length %></b> รายการ</small></span></div>
-    <label class="catalog-search"><svg><use href="#ui-search"/></svg><input id="catalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off" /></label>
-    <div class="catalog-status-tabs" role="group" aria-label="กรองสถานะสินค้า"><button type="button" class="active" data-stock-filter="all">ทั้งหมด</button><button type="button" data-stock-filter="available"><i class="available"></i>พร้อมขาย</button><button type="button" data-stock-filter="sold"><i></i>สินค้าหมด</button></div>
-  </header>
+  <% if (isMainStorefrontListing) { %>
+    <header class="catalog-heading-row">
+      <div class="catalog-title"><span class="catalog-title-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h1><%= title %></h1><small>All Products <i>•</i> <b id="catalogVisibleCount"><%= products.length %></b> รายการ</small></span></div>
+      <span class="catalog-heading-rule" aria-hidden="true"></span>
+      <a class="catalog-heading-cta" href="#catalogGrid">ดูเพิ่มเติม <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </header>
+    <div class="catalog-tools-row">
+      <label class="catalog-search"><svg><use href="#ui-search"/></svg><input id="catalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off" /></label>
+      <div class="catalog-status-tabs" role="group" aria-label="กรองสถานะสินค้า"><button type="button" class="active" data-stock-filter="all">ทั้งหมด</button><button type="button" data-stock-filter="available"><i class="available"></i>พร้อมขาย</button><button type="button" data-stock-filter="sold"><i></i>สินค้าหมด</button></div>
+    </div>
+  <% } else { %>
+    <header class="catalog-head">
+      <div class="catalog-title"><span class="catalog-title-icon"><svg><use href="#ui-box"/></svg></span><span><h1><%= title %></h1><small>All Products <i>•</i> <b id="catalogVisibleCount"><%= products.length %></b> รายการ</small></span></div>
+      <label class="catalog-search"><svg><use href="#ui-search"/></svg><input id="catalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off" /></label>
+      <div class="catalog-status-tabs" role="group" aria-label="กรองสถานะสินค้า"><button type="button" class="active" data-stock-filter="all">ทั้งหมด</button><button type="button" data-stock-filter="available"><i class="available"></i>พร้อมขาย</button><button type="button" data-stock-filter="sold"><i></i>สินค้าหมด</button></div>
+    </header>
+  <% } %>
   <% if (catalogApiNotice) { %>
     <aside class="catalog-api-callout" aria-label="วิธีชำระเงินสินค้า API">
       <div class="catalog-api-callout-icon">API</div>

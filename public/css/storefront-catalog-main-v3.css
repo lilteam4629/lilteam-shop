@@ -487,3 +487,166 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ca
     flex: 0 0 auto;
   }
 }
+
+/* Editorial heading like the recommended-products section; filters stay in their own toolbar. */
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-row {
+  display: grid;
+  grid-template-columns: max-content minmax(48px, 1fr) max-content;
+  align-items: center;
+  gap: 16px;
+  min-height: 58px;
+  margin: 0 0 16px;
+  padding: 0 0 12px;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+  white-space: normal;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title-icon {
+  display: grid;
+  flex: 0 0 38px;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  color: var(--text);
+  background: var(--input);
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title-icon svg {
+  width: 19px;
+  height: 19px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.5;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title h1 {
+  margin: 0;
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.15;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title small {
+  display: block;
+  margin-top: 4px;
+  color: var(--text-2);
+  font-size: 11px;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-rule {
+  height: 1px;
+  background: linear-gradient(90deg, var(--border), transparent);
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid #111;
+  border-radius: 9px;
+  color: #fff;
+  background: #111;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: background-color .16s ease, transform .16s ease;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-cta:hover {
+  transform: translateY(-1px);
+  background: #34302d;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-cta svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-tools-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-search {
+  width: min(100%, 460px);
+  min-height: 42px;
+  border-radius: 10px;
+  background: var(--card);
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+}
+
+body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
+  min-height: 38px;
+  padding: 0 13px;
+  border-radius: 9px;
+}
+
+@media (max-width: 700px) {
+  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-row {
+    grid-template-columns: minmax(0, 1fr) max-content;
+    gap: 8px 12px;
+    margin-bottom: 13px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-rule {
+    display: none;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-cta {
+    min-height: 38px;
+    padding-inline: 12px;
+    font-size: 11px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-tools-row {
+    align-items: stretch;
+    flex-direction: column;
+    margin-bottom: 15px;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-search {
+    width: 100%;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs {
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
+    flex: 0 0 auto;
+  }
+}
