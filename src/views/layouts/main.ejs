@@ -64,7 +64,7 @@
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-announcement-width-v1.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-compact-v1.css') %>&amp;rev=1" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-mobile-v1.css') %>&amp;rev=2" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-music-widget-cozy-v1.css') %>&amp;rev=2" /><% } %>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-music-widget-cozy-v1.css') %>&amp;rev=3" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-theme-cohesion-v1.css') %>" /><% } %>
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
@@ -561,7 +561,7 @@
     <button id="music-minimize-btn" type="button" aria-label="ย่อแถบเพลง" title="ย่อแถบเพลง" class="music-dock-action" aria-controls="music-toggle-btn" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
     <button id="music-expand-btn" type="button" aria-label="เปิดแถบเพลง" title="เปิดแถบเพลง" class="music-dock-restore" aria-controls="music-toggle-btn" aria-expanded="false" hidden>
       <span class="music-restore-cover" aria-hidden="true"><img src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="" /><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17V5l12-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-      <span class="music-restore-copy" aria-hidden="true"><strong>เพลงร้าน</strong><small id="music-restore-state-label">แตะเพื่อเปิด</small></span>
+      <span class="music-restore-copy" aria-hidden="true"><strong id="music-restore-title">เพลงร้าน</strong><small id="music-restore-state-label">แตะเพื่อเปิด</small></span>
       <span class="music-restore-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></span>
     </button>
     <% } else { %>
@@ -606,6 +606,7 @@
       const titleEl = document.getElementById('music-title');
       const musicStateLabel = document.getElementById('music-state-label');
       const musicRestoreStateLabel = document.getElementById('music-restore-state-label');
+      const musicRestoreTitle = document.getElementById('music-restore-title');
 
       const STORAGE_PLAYING = 'lilteam_music_playing';
       const STORAGE_VOLUME = 'lilteam_music_volume';
@@ -796,7 +797,12 @@
 
       fetch('https://noembed.com/embed?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + videoId))
         .then(function (r) { return r.json(); })
-        .then(function (data) { if (data && data.title) titleEl.textContent = data.title; })
+        .then(function (data) {
+          if (data && data.title) {
+            titleEl.textContent = data.title;
+            if (musicRestoreTitle) musicRestoreTitle.textContent = data.title;
+          }
+        })
         .catch(function () {});
 
       toggleBtn.addEventListener('click', function () {
