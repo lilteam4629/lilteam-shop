@@ -1,9 +1,9 @@
 /* Editorial welcome panel for the primary storefront. Keep tenant heroes untouched. */
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v20-hero--banner {
   display: grid !important;
-  grid-template-columns: minmax(290px, .82fr) minmax(0, 1.18fr) !important;
+  grid-template-columns: minmax(290px, .72fr) minmax(0, 1.28fr) !important;
   align-items: center !important;
-  gap: clamp(28px, 4.6vw, 72px) !important;
+  gap: clamp(24px, 3vw, 42px) !important;
   min-height: 0 !important;
   margin: 0 !important;
   padding: clamp(28px, 4vw, 54px) 0 clamp(24px, 3.5vw, 42px) !important;
