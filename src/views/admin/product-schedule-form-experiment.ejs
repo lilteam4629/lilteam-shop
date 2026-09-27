@@ -15,11 +15,23 @@
   <div class="experiment-main">
     <header class="experiment-topbar"><span class="experiment-user-name" style="font-size:12px;font-weight:700">admin</span></header>
     <main class="experiment-content">
-      <div class="experiment-page-head"><div><h1><%= editing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า' %></h1><p><%= editing ? 'แก้ข้อมูลสินค้า รูปภาพ และรายละเอียดสำหรับหน้าร้าน' : 'เพิ่มข้อมูลสินค้า รูปภาพ และรายละเอียดสำหรับหน้าร้าน' %></p></div><div class="experiment-actions"><a href="/admin/products" class="experiment-button">← กลับรายการสินค้า</a></div></div>
-      <div class="experiment-page-status-note" role="note"><span class="experiment-status-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span><span><strong>ตั้งเวลาเปิดขาย</strong><small>กำหนดวันและเวลาเปิดขายได้ที่เมนู “ตั้งเวลาเปิดขาย” หลังบันทึกสินค้า</small></span><span class="experiment-status-note-step">ทำได้ภายหลัง</span></div>
+      <section class="experiment-form-notepad" aria-labelledby="product-form-title">
+        <div class="experiment-notepad-rings" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+        <div class="experiment-notepad-layout">
+          <div class="experiment-page-head"><div><h1 id="product-form-title"><%= editing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า' %></h1><p><%= editing ? 'แก้ข้อมูลสินค้า รูปภาพ และรายละเอียดสำหรับหน้าร้าน' : 'เพิ่มข้อมูลสินค้า รูปภาพ และรายละเอียดสำหรับหน้าร้าน' %></p></div><div class="experiment-actions"><a href="/admin/products" class="experiment-button">← กลับรายการสินค้า</a></div></div>
+          <div class="experiment-page-status-note" role="note"><span class="experiment-status-note-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/></svg></span><span><strong>ตั้งเวลาเปิดขาย</strong><small>กำหนดวันและเวลาเปิดขายได้ที่เมนู “ตั้งเวลาเปิดขาย” หลังบันทึกสินค้า</small></span><span class="experiment-status-note-step">ทำได้ภายหลัง</span></div>
+        </div>
+      </section>
+
+      <nav class="experiment-form-shortcuts" aria-label="ทางลัดส่วนของแบบฟอร์ม">
+        <a href="#product-info"><span class="experiment-shortcut-icon details" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 8 4.2v9.6L12 21l-8-4.2V7.2L12 3Z"/><path d="m4.5 7.4 7.5 4 7.5-4M12 11.5V21"/></svg></span><span>ข้อมูลสินค้า</span></a>
+        <a href="#product-images"><span class="experiment-shortcut-icon photos" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="3"/><circle cx="9" cy="9" r="1.5"/><path d="m5 17 5-5 3 3 2-2 4 4"/></svg></span><span>รูปสินค้า</span></a>
+        <a href="#purchase-options"><span class="experiment-shortcut-icon selling" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10m-7 6h4"/><circle cx="8" cy="6" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="11" cy="18" r="1.5"/></svg></span><span>ตัวเลือกการซื้อ</span></a>
+        <a href="#storefront-content"><span class="experiment-shortcut-icon storefront" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10v10h16V10M3 9l2-5h14l2 5"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0M9 20v-6h6v6"/></svg></span><span>หน้าร้าน</span></a>
+      </nav>
 
       <form class="experiment-schedule-form" action="<%= formAction %>" method="post" enctype="multipart/form-data" data-schedule-form>
-        <section class="experiment-card experiment-form-panel experiment-form-panel-info">
+        <section class="experiment-card experiment-form-panel experiment-form-panel-info" id="product-info">
           <div class="experiment-form-panel-head"><div><div><h2>ข้อมูลสินค้า</h2><p>ข้อมูลที่แสดงในรายการสินค้าและหน้าร้าน</p></div></div></div>
           <div class="experiment-form-grid">
             <label class="experiment-field full"><span>ชื่อสินค้า <b>*</b></span><input name="title" value="<%= product ? (product.title || '') : '' %>" placeholder="เช่น Shadow Realm Chronicles" required maxlength="160" /></label>
@@ -30,7 +42,7 @@
           </div>
         </section>
 
-        <section class="experiment-card experiment-form-panel experiment-form-panel-images">
+        <section class="experiment-card experiment-form-panel experiment-form-panel-images" id="product-images">
           <div class="experiment-subsection">
             <div class="experiment-subsection-head"><div><h3>รูปสินค้า</h3><p>เลือกได้หลายรูป และกำหนดภาพปกจากลำดับรูป</p></div><span class="experiment-muted-chip"><%= productImages.length %> รูปปัจจุบัน</span></div>
             <% if (productImages.length) { %>
@@ -49,7 +61,7 @@
           </div>
         </section>
 
-        <section class="experiment-card experiment-form-panel experiment-form-panel-purchase">
+        <section class="experiment-card experiment-form-panel experiment-form-panel-purchase" id="purchase-options">
           <div class="experiment-form-panel-head"><div><div><h2>ยืนยันก่อนเพิ่มลงตะกร้า</h2><p>ให้ลูกค้าอ่านและยืนยันเงื่อนไขก่อนซื้อสินค้าชิ้นนี้</p></div></div><span class="experiment-muted-chip">ตัวเลือกการซื้อ</span></div>
           <label class="experiment-check-row"><input type="checkbox" name="purchaseApprovalEnabled" <%= product && product.purchaseApprovalEnabled ? 'checked' : '' %> /> ให้ลูกค้าติ๊กยืนยันก่อนเพิ่มลงตะกร้า</label>
           <p class="experiment-field-note">เมื่อเปิด ลูกค้าติ๊กยืนยันแล้วเพิ่มสินค้าเข้าตะกร้าได้ทันที ไม่ต้องรอแอดมิน</p>
@@ -82,7 +94,7 @@
           <label class="experiment-field"><span>คำปิดท้าย</span><input name="contactMessageOutro" value="<%= product ? (product.contactMessageOutro || '') : '' %>" placeholder="กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ" /></label>
         </section>
 
-        <section class="experiment-card experiment-form-panel experiment-form-panel-content">
+        <section class="experiment-card experiment-form-panel experiment-form-panel-content" id="storefront-content">
           <div class="experiment-form-panel-head"><div><div><h2>ข้อความในหน้าสินค้า</h2><p>ตั้งข้อความเฉพาะสินค้านี้ หรือเว้นว่างเพื่อใช้ข้อความมาตรฐานของร้าน</p></div></div><span class="experiment-muted-chip">แสดงผลหน้าร้าน</span></div>
           <div class="experiment-content-settings">
             <div><label class="experiment-check-row"><input type="checkbox" name="howToReceiveEnabled" <%= !product || product.howToReceiveEnabled !== false ? 'checked' : '' %> /> แสดงส่วน “วิธีรับสินค้า”</label><label class="experiment-field"><span>รายละเอียดวิธีรับสินค้า</span><textarea name="howToReceiveText" rows="3" placeholder="รับข้อมูลสินค้าทันทีหลังชำระเงินสำเร็จ..."><%= product ? (product.howToReceiveText || '') : '' %></textarea></label></div>
