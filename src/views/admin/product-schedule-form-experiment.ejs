@@ -2,7 +2,6 @@
 <%
   const editing = Boolean(product);
   const formAction = editing ? `/admin/products/${product.id}/edit` : '/admin/products/new';
-  const scheduleValue = product && product.publishAt ? String(product.publishAt).slice(0, 16) : '';
   const productImages = product && Array.isArray(product.images) ? product.images : [];
   const productFilterTags = typeof filterTags === 'undefined' ? [] : filterTags;
   const selectedFilterTags = product && Array.isArray(product.filterTagIds) ? product.filterTagIds : [];
@@ -16,12 +15,12 @@
   <div class="experiment-main">
     <header class="experiment-topbar"><span class="experiment-user-name" style="font-size:12px;font-weight:700">admin</span></header>
     <main class="experiment-content">
-      <div class="experiment-page-head"><div><h1><%= editing ? 'แก้ไขสินค้าและเวลาขาย' : 'สร้างสินค้าแบบตั้งเวลา' %></h1><p><%= editing ? 'แก้ข้อมูลสินค้า ตัวกรอง และรายละเอียดการซื้อได้ในหน้าเดียว' : 'สร้างสินค้า เลือกตัวกรอง และกำหนดเวลาเปิดขายอัตโนมัติ' %></p></div><div class="experiment-actions"><a href="/admin/products" class="experiment-button">← กลับรายการสินค้า</a></div></div>
-      <div class="experiment-page-status-note"><strong>สถานะหน้านี้:</strong> แบบฟอร์มตั้งเวลาใช้งานได้ · เมื่อบันทึกแล้วสินค้าจะกลับไปอยู่ในคิวเปิดขายทันที</div>
+      <div class="experiment-page-head"><div><h1><%= editing ? 'แก้ไขสินค้า' : 'เพิ่มสินค้า' %></h1><p><%= editing ? 'แก้ข้อมูลสินค้า รูปภาพ และรายละเอียดสำหรับหน้าร้าน' : 'เพิ่มข้อมูลสินค้า รูปภาพ และรายละเอียดสำหรับหน้าร้าน' %></p></div><div class="experiment-actions"><a href="/admin/products" class="experiment-button">← กลับรายการสินค้า</a></div></div>
+      <div class="experiment-page-status-note"><strong>หมายเหตุ:</strong> กำหนดวันและเวลาเปิดขายได้ที่เมนู “ตั้งเวลาเปิดขาย” หลังบันทึกสินค้า</div>
 
       <form class="experiment-schedule-form" action="<%= formAction %>" method="post" enctype="multipart/form-data" data-schedule-form>
         <section class="experiment-card experiment-form-panel">
-          <div class="experiment-form-panel-head"><div><div><h2>ข้อมูลสินค้า</h2><p>ข้อมูลที่แสดงในรายการสินค้าและหน้าร้าน</p></div></div><span class="experiment-ready-chip"><i></i> ข้อมูลสินค้า</span></div>
+          <div class="experiment-form-panel-head"><div><div><h2>ข้อมูลสินค้า</h2><p>ข้อมูลที่แสดงในรายการสินค้าและหน้าร้าน</p></div></div></div>
           <div class="experiment-form-grid">
             <label class="experiment-field full"><span>ชื่อสินค้า <b>*</b></span><input name="title" value="<%= product ? (product.title || '') : '' %>" placeholder="เช่น Shadow Realm Chronicles" required maxlength="160" /></label>
             <label class="experiment-field"><span>ราคาขาย (บาท) <b>*</b></span><input type="number" name="price" value="<%= product ? (product.price || 0) : '' %>" min="0" step="1" placeholder="0" required /></label>
@@ -29,6 +28,9 @@
             <label class="experiment-field full"><span>คำอธิบายสั้น</span><textarea name="description" rows="3" placeholder="อธิบายสินค้าแบบสั้น ๆ ให้ลูกค้าเข้าใจทันที"><%= product ? (product.description || '') : '' %></textarea></label>
             <label class="experiment-field full"><span>รายละเอียดสินค้า</span><textarea name="aboutText" rows="4" placeholder="ข้อมูลเพิ่มเติมที่ลูกค้าควรรู้"><%= product ? (product.aboutText || '') : '' %></textarea></label>
           </div>
+        </section>
+
+        <section class="experiment-card experiment-form-panel experiment-form-panel-images">
           <div class="experiment-subsection">
             <div class="experiment-subsection-head"><div><h3>รูปสินค้า</h3><p>เลือกได้หลายรูป และกำหนดภาพปกจากลำดับรูป</p></div><span class="experiment-muted-chip"><%= productImages.length %> รูปปัจจุบัน</span></div>
             <% if (productImages.length) { %>
@@ -45,19 +47,7 @@
             <label class="experiment-check-row"><input type="checkbox" name="newImagesFirst" /> ใช้รูปที่อัปโหลดใหม่เป็นภาพปก</label>
             <label class="experiment-field"><span>เพิ่มรูปด้วย URL (ใส่ได้หลายบรรทัด)</span><textarea name="images" rows="2" placeholder="https://.../image-1.jpg&#10;https://.../image-2.jpg"></textarea></label>
           </div>
-          <div class="experiment-subsection">
-            <div class="experiment-subsection-head"><div><h3>ตัวกรองสินค้า</h3><p>เลือกลักษณะที่ตรงกับสินค้านี้ ลูกค้าจะใช้ตัวกรองนี้ค้นหาได้</p></div></div>
-            <% if (productFilterTags.length) { %>
-              <div class="experiment-filter-options">
-                <% productFilterTags.forEach(tag => { %>
-                  <label class="experiment-filter-option"><input type="checkbox" name="filterTagIds" value="<%= tag.id %>" <%= selectedFilterTags.includes(tag.id) ? 'checked' : '' %> /><% if (tag.image) { %><img src="<%= tag.image %>" alt="" loading="lazy" /><% } %><span><strong><%= tag.name %></strong><small><%= tag.description || 'ใช้กรองสินค้าหน้าร้าน' %></small></span></label>
-                <% }) %>
-              </div>
-            <% } else { %><p class="experiment-inline-empty">ยังไม่มีตัวกรองสินค้า ไปเพิ่มตัวเลือกได้ที่เมนู “แท็ก/จัดหมวดสินค้า”</p><% } %>
-          </div>
         </section>
-
-        <section class="experiment-card experiment-form-panel experiment-form-panel-highlight"><div class="experiment-form-panel-head"><div><div><h2>กำหนดเวลาเปิดขาย</h2><p>ใช้เวลาเขตประเทศไทย (Asia/Bangkok) และเปิดขายอัตโนมัติ</p></div></div><span class="experiment-ready-chip green"><i></i> ระบบอัตโนมัติ</span></div><div class="experiment-form-grid"><label class="experiment-field full"><span>วันและเวลาเปิดขาย <b>*</b></span><div class="experiment-datetime-wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg><input type="datetime-local" name="publishAt" value="<%= scheduleValue %>" required /></div><small class="experiment-form-hint">เวลาที่กรอกจะตีความเป็นเวลาไทย เช่น 20:00 คือสองทุ่มประเทศไทย</small></label><label class="experiment-field"><span>ป้ายกิจกรรม</span><input name="eventBadge" value="<%= product ? (product.eventBadge || '') : '' %>" placeholder="เช่น LIMITED" maxlength="40" /></label><label class="experiment-field"><span>คำโปรยบนการ์ด</span><input name="eventDescription" value="<%= product ? (product.eventDescription || '') : '' %>" placeholder="เช่น เปิดขายจำนวนจำกัด" maxlength="160" /></label></div><div class="experiment-form-callout"><span class="experiment-callout-icon">ICT</span><div><strong>ระบบจะจัดสถานะให้เอง</strong><p>ก่อนถึงเวลา = รอเวลาเปิดขาย · หลังถึงเวลา = ถึงเวลาแล้ว และสินค้าจะเปิดขายตามระบบเดิม</p></div></div></section>
 
         <section class="experiment-card experiment-form-panel">
           <div class="experiment-form-panel-head"><div><div><h2>ยืนยันก่อนเพิ่มลงตะกร้า</h2><p>ให้ลูกค้าอ่านและยืนยันเงื่อนไขก่อนซื้อสินค้าชิ้นนี้</p></div></div><span class="experiment-muted-chip">ตัวเลือกการซื้อ</span></div>
@@ -71,11 +61,24 @@
           <p class="experiment-field-note">ถ้าใส่ลิงก์ ปุ่มจะเปิดหน้าใหม่ให้ลูกค้าไปทำรายการ แล้วกลับมาติ๊กยืนยันและซื้อได้</p>
         </section>
 
+        <section class="experiment-card experiment-form-panel experiment-form-panel-filters">
+          <div class="experiment-subsection">
+            <div class="experiment-subsection-head"><div><h3>ตัวกรองสินค้า</h3><p>เลือกลักษณะที่ตรงกับสินค้านี้ ลูกค้าจะใช้ตัวกรองนี้ค้นหาได้</p></div></div>
+            <% if (productFilterTags.length) { %>
+              <div class="experiment-filter-options">
+                <% productFilterTags.forEach(tag => { %>
+                  <label class="experiment-filter-option"><input type="checkbox" name="filterTagIds" value="<%= tag.id %>" <%= selectedFilterTags.includes(tag.id) ? 'checked' : '' %> /><% if (tag.image) { %><img src="<%= tag.image %>" alt="" loading="lazy" /><% } %><span><strong><%= tag.name %></strong><small><%= tag.description || 'ใช้กรองสินค้าหน้าร้าน' %></small></span></label>
+                <% }) %>
+              </div>
+            <% } else { %><p class="experiment-inline-empty">ยังไม่มีตัวกรองสินค้า ไปเพิ่มตัวเลือกได้ที่เมนู “แท็ก/จัดหมวดสินค้า”</p><% } %>
+          </div>
+        </section>
+
         <section class="experiment-card experiment-form-panel">
           <div class="experiment-form-panel-head"><div><div><h2>ข้อความ Messenger</h2><p>ใช้กับสินค้าที่ให้ลูกค้าติดต่อร้านเพื่อรับสินค้า</p></div></div><span class="experiment-muted-chip">ข้อความสำเร็จรูป</span></div>
           <p class="experiment-field-note">ระบบเติมหมายเลขคำสั่งซื้อ ชื่อสินค้า ชื่อลูกค้า และข้อมูลที่ต้องเตรียมให้อัตโนมัติ ส่วนที่ล็อกไว้แก้ไขไม่ได้</p>
           <label class="experiment-field"><span>คำขึ้นต้น</span><input name="contactMessageIntro" value="<%= product ? (product.contactMessageIntro || '') : '' %>" placeholder="สวัสดีครับ ต้องการติดต่อรับสินค้า" /></label>
-          <div class="experiment-message-locked" aria-label="ข้อมูลที่ระบบเติมให้อัตโนมัติ"><span>🔒 หมายเลขคำสั่งซื้อ: #...</span><span>🔒 สินค้า: ...</span><span>🔒 ชื่อลูกค้า: ...</span><span>🔒 ข้อมูลที่ร้านขอให้เตรียม: ... (ถ้ามี)</span></div>
+          <div class="experiment-message-locked" aria-label="ข้อมูลที่ระบบเติมให้อัตโนมัติ"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>หมายเลขคำสั่งซื้อ: #...</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>สินค้า: ...</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>ชื่อลูกค้า: ...</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>ข้อมูลที่ร้านขอให้เตรียม: ... (ถ้ามี)</span></div>
           <label class="experiment-field"><span>คำปิดท้าย</span><input name="contactMessageOutro" value="<%= product ? (product.contactMessageOutro || '') : '' %>" placeholder="กรุณาตรวจสอบออเดอร์และแจ้งขั้นตอนรับสินค้าให้ด้วยครับ" /></label>
         </section>
 
@@ -89,7 +92,7 @@
           <% if (editing) { %><label class="experiment-field status-field"><span>สถานะสินค้า</span><select name="status"><option value="active" <%= product.status === 'active' ? 'selected' : '' %>>เปิดขาย</option><option value="hidden" <%= product.status === 'hidden' ? 'selected' : '' %>>ซ่อนอยู่</option></select></label><% } %>
         </section>
 
-        <div class="experiment-form-actions"><a href="/admin/products" class="experiment-button">ยกเลิก</a><button type="submit" class="experiment-button primary"><%= editing ? 'บันทึกข้อมูลสินค้า' : 'สร้างสินค้าและตั้งเวลา' %> <span aria-hidden="true">→</span></button></div>
+        <div class="experiment-form-actions"><a href="/admin/products" class="experiment-button">ยกเลิก</a><button type="submit" class="experiment-button primary"><%= editing ? 'บันทึกข้อมูลสินค้า' : 'สร้างสินค้าและไปตั้งเวลา' %> <span aria-hidden="true">→</span></button></div>
       </form>
     </main>
   </div>

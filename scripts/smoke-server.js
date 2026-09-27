@@ -53,6 +53,69 @@ async function loginAsAdmin() {
   return cookie.split(';')[0];
 }
 
+async function checkScheduledProductWorkflow(cookie) {
+  const form = await fetchOk('/admin/products/new', 'text/html', { cookie });
+  if (/name="(?:publishAt|eventBadge|eventDescription)"/.test(form.body)) {
+    throw new Error('product form still exposes the scheduled-sale controls');
+  }
+  if (!form.body.includes('href="/admin/scheduled-products"') || !form.body.includes('กำหนดวันและเวลาเปิดขายได้ที่เมนู')) {
+    throw new Error('product form does not direct the admin to the scheduled-sales menu');
+  }
+
+  const created = await request('/admin/products/new', {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ title: 'schedule-workflow-smoke', price: '19' }).toString(),
+  });
+  const match = created.headers.location?.match(/^\/admin\/scheduled-products\?productId=([^#]+)#schedule-product$/);
+  if (created.statusCode !== 302 || !match) throw new Error('new product did not lead to its scheduled-sales entry');
+  const productId = decodeURIComponent(match[1]);
+
+  const schedulePage = await fetchOk(`/admin/scheduled-products?productId=${encodeURIComponent(productId)}`, 'text/html', { cookie });
+  if (!new RegExp(`<option value="${productId}" selected>schedule-workflow-smoke · ซ่อนอยู่</option>`).test(schedulePage.body)) {
+    throw new Error('new product was not preselected in the scheduled-sales page');
+  }
+  if (!schedulePage.body.includes('name="publishAt"') || !schedulePage.body.includes('action="/admin/scheduled-products"')) {
+    throw new Error('scheduled-sales page does not expose its queue form');
+  }
+
+  const badDate = await request('/admin/scheduled-products', {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ productId, publishAt: '2099-02-30T20:00' }).toString(),
+  });
+  if (badDate.statusCode !== 302 || !badDate.headers.location.includes(`productId=${encodeURIComponent(productId)}`)) {
+    throw new Error('invalid scheduled-sale date was not rejected');
+  }
+
+  const scheduled = await request('/admin/scheduled-products', {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ productId, publishAt: '2099-12-31T20:00', eventBadge: 'SMOKE', eventDescription: 'workflow check' }).toString(),
+  });
+  if (scheduled.statusCode !== 302 || scheduled.headers.location !== '/admin/scheduled-products') throw new Error('product could not be added to the scheduled-sales queue');
+  let queued = await fetchOk('/admin/scheduled-products', 'text/html', { cookie });
+  if (!queued.body.includes('schedule-workflow-smoke') || !queued.body.includes('SMOKE')) throw new Error('scheduled product details were not saved');
+
+  const updated = await request(`/admin/scheduled-products/${encodeURIComponent(productId)}`, {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ publishAt: '2099-12-31T21:00', eventBadge: 'UPDATED', eventDescription: 'updated workflow check' }).toString(),
+  });
+  if (updated.statusCode !== 302) throw new Error('scheduled-sale edit did not save');
+  queued = await fetchOk('/admin/scheduled-products', 'text/html', { cookie });
+  if (!queued.body.includes('UPDATED')) throw new Error('scheduled-sale edit was not reflected');
+
+  const cleared = await request(`/admin/scheduled-products/${encodeURIComponent(productId)}/clear`, {
+    method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+  });
+  if (cleared.statusCode !== 302) throw new Error('scheduled-sale clearing failed');
+  const deleted = await request(`/admin/products/${encodeURIComponent(productId)}/delete`, {
+    method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+  });
+  if (deleted.statusCode !== 302) throw new Error('scheduled workflow smoke product cleanup failed');
+}
+
 async function loginAsCustomer() {
   const body = 'username=demo&password=demo1234';
   const response = await request('/login', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
@@ -374,6 +437,7 @@ async function run() {
     if (!mainLayoutSource.includes("addEventListener('pageshow'")) throw new Error('rain does not resume after a back-forward cache restore');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
+    await checkScheduledProductWorkflow(cookie);
     const mainAdmin = await fetchOk('/admin', 'text/html', { cookie });
     if (!mainAdmin.body.includes('admin-site')) throw new Error('admin is missing its motion scope');
     if (mainAdmin.body.includes('admin-scroll-motion-v1.css') || mainAdmin.body.includes('admin-mobile-motion.js')) throw new Error('admin still loads the removed motion system');

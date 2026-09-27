@@ -553,6 +553,21 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
   };
 }
 
+function parseScheduledProductBody(body) {
+  const publishAt = String(body.publishAt || '').trim();
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(publishAt);
+  if (!match) return null;
+  const [, year, month, day, hour, minute] = match.map(Number);
+  const check = new Date(Date.UTC(year, month - 1, day, hour, minute));
+  if (check.getUTCFullYear() !== year || check.getUTCMonth() !== month - 1 || check.getUTCDate() !== day
+    || check.getUTCHours() !== hour || check.getUTCMinutes() !== minute) return null;
+  return {
+    publishAt,
+    eventBadge: String(body.eventBadge || '').trim().slice(0, 40),
+    eventDescription: String(body.eventDescription || '').trim().slice(0, 160),
+  };
+}
+
 router.get('/products', (req, res) => {
   const mainAdminUi = usesMainAdminUi(req);
   if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
@@ -579,7 +594,7 @@ router.post('/products/card-style', async (req, res) => {
 router.get('/products/new', (req, res) => {
   if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'สร้างสินค้าแบบตั้งเวลา', active: 'products', product: null, filterTags: store.data.filterTags || [] });
+    return res.render('admin/product-schedule-form-experiment', { title: 'เพิ่มสินค้า', active: 'products', product: null, filterTags: store.data.filterTags || [] });
   }
   res.render('admin/product-form', { title: 'เพิ่มสินค้าใหม่', active: 'products', product: null, genres: store.data.settings.genres, filterTags: store.data.filterTags });
 });
@@ -596,12 +611,14 @@ router.post('/products/new', (req, res) => {
       const fields = parseProductBody(req.body, uploadedImages);
       const product = {
         id: store.genId(8), slug: slugify(fields.title) + '-' + store.genId(4),
-        ...fields, status: 'active', createdAt: new Date().toISOString(),
+        ...fields, status: mainAdminUi ? 'hidden' : 'active', createdAt: new Date().toISOString(),
       };
       store.data.products.push(product);
       await store.save();
-      req.flash('success', mainAdminUi ? 'สร้างสินค้าแบบตั้งเวลาแล้ว' : 'เพิ่มสินค้าแล้ว');
-      res.redirect(mainAdminUi ? '/admin/scheduled-products' : '/admin/products');
+      req.flash('success', mainAdminUi ? 'สร้างสินค้าแล้ว ไปกำหนดเวลาเปิดขายต่อได้เลย' : 'เพิ่มสินค้าแล้ว');
+      res.redirect(mainAdminUi
+        ? `/admin/scheduled-products?productId=${encodeURIComponent(product.id)}#schedule-product`
+        : '/admin/products');
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
       res.redirect('/admin/products/new');
@@ -720,7 +737,7 @@ router.get('/products/:id/edit', (req, res) => {
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   if (usesMainAdminUi(req)) {
     res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขเวลาขาย', active: 'scheduled-products', product, filterTags: store.data.filterTags || [] });
+    return res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขสินค้า', active: 'products', product, filterTags: store.data.filterTags || [] });
   }
   res.render('admin/product-form', { title: 'แก้ไขสินค้า', active: 'products', product, genres: store.data.settings.genres, filterTags: store.data.filterTags });
 });
@@ -784,10 +801,15 @@ router.post('/products/:id/edit', (req, res) => {
     try {
       const uploadedImages = [...directUploadUrls(req.body, 'productImages'), ...unwrapUploadResults(await persistUploadedFiles(req.files || []))];
       const fields = parseProductBody(req.body, uploadedImages, product.images || []);
+      if (mainAdminUi) {
+        fields.publishAt = product.publishAt || '';
+        fields.eventBadge = product.eventBadge || '';
+        fields.eventDescription = product.eventDescription || '';
+      }
       Object.assign(product, fields, { status: req.body.status || 'active' });
       await store.save();
-      req.flash('success', mainAdminUi ? 'บันทึกการตั้งเวลาแล้ว' : 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
-      res.redirect(mainAdminUi ? '/admin/scheduled-products' : '/admin/products');
+      req.flash('success', 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
+      res.redirect('/admin/products');
     } catch (saveError) {
       req.flash('error', 'บันทึกรูปสินค้าไม่สำเร็จ กรุณาลองใหม่');
       res.redirect(`/admin/products/${product.id}/edit`);
@@ -1478,10 +1500,56 @@ router.get('/scheduled-products', (req, res) => {
     .filter(product => product.publishAt)
     .sort((a, b) => String(a.publishAt).localeCompare(String(b.publishAt)));
   if (usesMainAdminUi(req)) {
+    const unscheduledProducts = store.data.products
+      .filter(product => !product.publishAt)
+      .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'th'));
+    const scheduleTargetId = unscheduledProducts.some(product => product.id === req.query.productId)
+      ? String(req.query.productId)
+      : '';
     res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/scheduled-products-experiment', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products });
+    return res.render('admin/scheduled-products-experiment', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products, unscheduledProducts, scheduleTargetId });
   }
   res.render('admin/scheduled-products', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products });
+});
+
+router.post('/scheduled-products', async (req, res) => {
+  if (!usesMainAdminUi(req)) return res.sendStatus(404);
+  const product = store.data.products.find(item => item.id === String(req.body.productId || ''));
+  if (!product) {
+    req.flash('error', 'ไม่พบสินค้าที่เลือก กรุณาเลือกสินค้าอีกครั้ง');
+    return res.redirect('/admin/scheduled-products#schedule-product');
+  }
+  if (product.publishAt) {
+    req.flash('error', 'สินค้านี้อยู่ในคิวตั้งเวลาแล้ว เลือกสินค้าอื่นหรือแก้ไขเวลาจากรายการ');
+    return res.redirect('/admin/scheduled-products');
+  }
+  const schedule = parseScheduledProductBody(req.body);
+  if (!schedule) {
+    req.flash('error', 'กรุณาระบุวันและเวลาเปิดขายให้ถูกต้อง');
+    return res.redirect(`/admin/scheduled-products?productId=${encodeURIComponent(product.id)}#schedule-product`);
+  }
+  Object.assign(product, schedule, { status: 'active' });
+  await store.save();
+  req.flash('success', `เพิ่ม ${product.title} เข้าคิวตั้งเวลาแล้ว`);
+  res.redirect('/admin/scheduled-products');
+});
+
+router.post('/scheduled-products/:id', async (req, res) => {
+  if (!usesMainAdminUi(req)) return res.sendStatus(404);
+  const product = store.data.products.find(item => item.id === req.params.id);
+  if (!product) {
+    req.flash('error', 'ไม่พบสินค้าที่ต้องการแก้ไขเวลา');
+    return res.redirect('/admin/scheduled-products');
+  }
+  const schedule = parseScheduledProductBody(req.body);
+  if (!schedule) {
+    req.flash('error', 'กรุณาระบุวันและเวลาเปิดขายให้ถูกต้อง');
+    return res.redirect('/admin/scheduled-products');
+  }
+  Object.assign(product, schedule);
+  await store.save();
+  req.flash('success', `บันทึกเวลาเปิดขายของ ${product.title} แล้ว`);
+  res.redirect('/admin/scheduled-products');
 });
 
 router.post('/scheduled-products/:id/clear', async (req, res) => {
