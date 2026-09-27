@@ -128,9 +128,9 @@
             <% if (randomBoxDetails.target) { %>
               <div class="mt-1 text-lg font-black text-[var(--gold-text)]">สะสมแล้ว <%= randomBoxDetails.progress %> / <%= randomBoxDetails.target %> ครั้ง</div>
             <% } else { %>
-              <div class="mt-1 text-lg font-black text-[var(--gold-text)]">รอบใหม่ · เป้าสุ่ม 85–110 ครั้ง</div>
+              <div class="mt-1 text-lg font-black text-[var(--gold-text)]">รอบใหม่ · เป้าสุ่ม <%= randomBoxDetails.rateConfig.minTarget %>–<%= randomBoxDetails.rateConfig.maxTarget %> ครั้ง</div>
             <% } %>
-            <p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">นับรวมยอดเปิดของลูกค้าทุกคนในร้านนี้ เมื่อมีผู้เปิดถึงเป้ารอบนั้น คนนั้นได้รับรางวัลและเริ่มรอบใหม่</p>
+            <p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">เรท <%= randomBoxDetails.rateConfig.rate %>% · โอกาสไม่ออกรางวัล <%= randomBoxDetails.rateConfig.missPercent %>% · นับรวมยอดเปิดของลูกค้าทุกคน เมื่อมีผู้เปิดถึงเป้ารอบนั้น คนนั้นได้รับรางวัลและเริ่มรอบใหม่</p>
           </div>
           <div class="mt-4">
             <div class="mb-2 text-xs font-bold text-[var(--text-2)]">รางวัลที่มีในกล่อง · เปอร์เซ็นต์ใช้เลือกชนิดรางวัลเมื่อรอบครบ</div>

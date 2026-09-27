@@ -184,7 +184,7 @@
                   <div class="font-bold text-sm text-[var(--text)] hover:text-[var(--gold-text)] transition truncate">
                     <a href="/admin/products/<%= p.id %>/edit"><%= p.title %></a>
                   </div>
-                  <% if (isRandomBox) { %><div class="mt-1 inline-flex rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--gold-text)]">กล่องสุ่ม · ฿1/ครั้ง · <%= p.randomBoxAvailablePrizeCount %> รางวัลพร้อมจ่าย</div><% } %>
+                  <% if (isRandomBox) { %><div class="mt-1 inline-flex rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--gold-text)]">กล่องสุ่ม · ฿1/ครั้ง · <%= p.randomBoxAvailablePrizeCount %> คีย์/ไอดีพร้อมส่ง</div><% } %>
                   <div class="text-[11px] text-[var(--text-4)] font-mono truncate">slug: <%= p.slug %></div>
                   <% if (p.internalNote) { %>
                     <div class="text-[11px] text-[var(--text-3)] truncate" title="หมายเหตุภายใน (แอดมินเห็นเท่านั้น)">📝 <%= p.internalNote %></div>
@@ -213,9 +213,9 @@
 
             <!-- Stock -->
             <td class="py-3 px-4 whitespace-nowrap">
-              <a href="<%= isRandomBox ? `/admin/products/${p.id}/edit` : `/admin/products/${p.id}/stock` %>" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border font-semibold text-xs transition <%= isRandomBox ? (p.randomBoxAvailablePrizeCount < 1 ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400') : (p.stockCount < 1 ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' : (p.stockCount <= 3 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400')) %>">
+              <a href="/admin/products/<%= p.id %>/stock" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border font-semibold text-xs transition <%= isRandomBox ? (p.randomBoxAvailablePrizeCount < 1 ? 'bg-rose-500/10 border-rose-500/30 text-rose-400' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400') : (p.stockCount < 1 ? 'bg-rose-500/10 border-rose-500/30 text-rose-400 hover:bg-rose-500/20' : (p.stockCount <= 3 ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 hover:bg-amber-500/20' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400')) %>">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path></svg>
-                <span><%= isRandomBox ? (p.randomBoxAvailablePrizeCount ? `พร้อมสุ่ม ${p.randomBoxAvailablePrizeCount} รางวัล` : 'รางวัลหมด') : `${p.stockCount} รายการ` %></span>
+                <span><%= isRandomBox ? (p.randomBoxAvailablePrizeCount ? `คีย์/ไอดีพร้อมส่ง ${p.randomBoxAvailablePrizeCount} ชิ้น` : 'ยังไม่มีคีย์/ไอดี') : `${p.stockCount} รายการ` %></span>
               </a>
             </td>
 
@@ -238,7 +238,7 @@
             <td class="py-3 px-4 text-right whitespace-nowrap">
               <div class="inline-flex items-center gap-1">
                 <!-- Stock Button -->
-                <a href="<%= isRandomBox ? `/admin/products/${p.id}/edit` : `/admin/products/${p.id}/stock` %>" class="p-1.5 rounded-lg text-[var(--text-3)] hover:text-[var(--gold-text)] hover:bg-[var(--input)] transition" title="<%= isRandomBox ? 'จัดการรางวัลกล่องสุ่ม' : 'จัดการสต็อกสินค้า' %>">
+                <a href="/admin/products/<%= p.id %>/stock" class="p-1.5 rounded-lg text-[var(--text-3)] hover:text-[var(--gold-text)] hover:bg-[var(--input)] transition" title="จัดการสต็อกสินค้า">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
                 </a>
 

@@ -157,17 +157,18 @@ async function checkScheduledProductWorkflow(cookie) {
 
 async function checkRandomBoxWorkflow(adminCookie) {
   const form = await fetchOk('/admin/products/new', 'text/html', { cookie: adminCookie });
-  if (!form.body.includes('name="productKind"') || !form.body.includes('random-box-product-fields-v1.css')) {
+  if (!form.body.includes('name="productKind"') || !form.body.includes('random-box-product-fields-v1.css')
+    || !form.body.includes('เรท 1%') || !form.body.includes('85–110') || !form.body.includes('เรท 2%') || !form.body.includes('45–60')) {
     throw new Error('product form does not expose the random-box product type and setup UI');
   }
   const title = `random-box-smoke-${process.pid}`;
   const payload = new URLSearchParams();
   payload.set('title', title);
   payload.set('productKind', 'random-box');
+  payload.set('randomBoxRate', '1');
   payload.set('price', '999');
   payload.append('randomBoxPrizeName', 'รางวัลทดสอบ');
   payload.append('randomBoxPrizePercent', '100');
-  payload.append('randomBoxPrizeStock', '2');
   const created = await request('/admin/products/new', {
     method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: payload.toString(),
   });
@@ -175,8 +176,20 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (created.statusCode !== 302 || !productId) throw new Error('random-box product was not created into the main product workflow');
   let data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   let product = data.products.find(item => item.id === productId);
-  if (!product || product.specialType !== 'random-box' || product.price !== 1 || product.randomBox.prizes[0].percent !== 100) {
+  if (!product || product.specialType !== 'random-box' || product.price !== 1 || product.randomBox.rate !== 1 || product.randomBox.prizes[0].percent !== 100) {
     throw new Error('random-box price or separate prize settings were not enforced when saving');
+  }
+
+  const addStock = await request(`/admin/products/${encodeURIComponent(productId)}/stock/add`, {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ randomBoxPrizeId: product.randomBox.prizes[0].id, bulk: 'smoke-user:smoke-key' }).toString(),
+  });
+  if (addStock.statusCode !== 302 || addStock.headers.location !== `/admin/products/${productId}/stock#add-stock`) {
+    throw new Error('random-box key could not be added to its selected prize inventory');
+  }
+  const stockPage = await fetchOk(`/admin/products/${encodeURIComponent(productId)}/stock`, 'text/html', { cookie: adminCookie });
+  if (!stockPage.body.includes('ส่งคีย์/ไอดีอัตโนมัติเท่านั้น') || !stockPage.body.includes('smoke-user')) {
+    throw new Error('random-box stock page does not enforce and display automatic key delivery');
   }
 
   const scheduled = await request('/admin/scheduled-products', {
@@ -216,6 +229,34 @@ async function checkRandomBoxWorkflow(adminCookie) {
     || data.users.find(user => user.username === 'demo').walletBalance !== balanceBeforeDraw - 1
     || data.orders.filter(item => item.randomBoxRequestId === drawRequestId).length !== 1) {
     throw new Error('replaying the same draw request debited the wallet or created a second order');
+  }
+
+  let round = data.randomBoxRounds[productId];
+  if (!round || round.progress !== 1 || round.target < 85 || round.target > 110) {
+    throw new Error('the pooled random-box counter was not persisted after the first draw');
+  }
+  for (let progress = round.progress; progress < round.target - 1; progress += 1) {
+    const additionalDraw = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
+      method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ drawRequestId: crypto.randomUUID() }).toString(),
+    });
+    if (additionalDraw.statusCode !== 302) throw new Error(`pooled random-box draw ${progress + 1} failed`);
+  }
+  const winnerRequestId = crypto.randomUUID();
+  const winnerResponse = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
+    method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ drawRequestId: winnerRequestId }).toString(),
+  });
+  if (winnerResponse.statusCode !== 302) throw new Error('the draw that completed a pooled round failed');
+  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  const winningOrderId = winnerResponse.headers.location.split('/').pop();
+  const winningOrder = data.orders.find(item => item.id === winningOrderId);
+  const deliveredStock = data.stockItems.find(item => item.id === winningOrder?.items[0]?.stockItemId);
+  const deliveredPage = await fetchOk(winnerResponse.headers.location, 'text/html', { cookie: customerCookie });
+  if (winningOrder?.status !== 'completed' || !winningOrder?.items[0]?.randomBoxDraw?.isWin
+    || deliveredStock?.status !== 'sold' || deliveredStock.soldOrderId !== winningOrderId
+    || !deliveredPage.body.includes('smoke-user') || !deliveredPage.body.includes('smoke-key')) {
+    throw new Error('the winning draw did not consume one stock key and reveal it automatically in the customer order');
   }
 }
 

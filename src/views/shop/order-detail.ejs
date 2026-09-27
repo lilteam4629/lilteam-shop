@@ -27,7 +27,13 @@
           <div class="mb-3 rounded-xl border border-[var(--gold)]/35 bg-[var(--gold)]/10 p-4 text-sm">
             <% if (i.randomBoxDraw.isWin) { %>
               <div class="font-black text-[var(--gold-text)]">🎉 รอบที่ <%= i.randomBoxDraw.roundNumber %> ครบ <%= i.randomBoxDraw.roundTarget %> ครั้ง — คุณได้รับ <%= i.randomBoxDraw.prizeName %></div>
-              <div class="mt-1 text-[var(--text-2)]">รหัสรับรางวัล: <strong class="font-mono"><%= i.randomBoxDraw.claimCode %></strong> · ติดต่อร้านเพื่อรับรางวัล</div>
+              <% if (i.credentials) { %>
+                <div class="mt-3 rounded-lg border border-[var(--border-light)] bg-[var(--bg)] p-3 font-mono text-xs">
+                  <div>ข้อมูลบน: <strong class="text-emerald-500"><%= i.credentials.username %></strong></div>
+                  <% if (i.credentials.password) { %><div class="mt-1">ข้อมูลล่าง: <strong class="text-emerald-500"><%= i.credentials.password %></strong></div><% } %>
+                  <% if (i.credentials.extra) { %><div class="mt-1 font-sans text-[var(--text-3)]"><%= i.credentials.extra %></div><% } %>
+                </div>
+              <% } else { %><div class="mt-1 text-[var(--coral)]">รางวัลนี้ยังไม่มีคีย์/ไอดีในสต็อก กรุณาติดต่อร้าน</div><% } %>
             <% } else { %>
               <div class="font-bold text-[var(--text)]">เปิดกล่องสำเร็จ · รอบที่ <%= i.randomBoxDraw.roundNumber %></div>
               <div class="mt-1 text-[var(--text-2)]">ยอดรวมของลูกค้าทุกคนในรอบนี้ <%= i.randomBoxDraw.roundProgress %> / <%= i.randomBoxDraw.roundTarget %> ครั้ง · คุณจ่าย ฿1</div>

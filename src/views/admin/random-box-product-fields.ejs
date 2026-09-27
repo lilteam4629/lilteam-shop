@@ -1,33 +1,33 @@
 <link rel="stylesheet" href="<%= asset('css/admin-random-box-product-fields-v1.css') %>" />
 <% if (allowRandomBox) { %>
-  <% const isBoxProduct = Boolean(product && product.specialType === 'random-box'); const configuredBoxPrizes = product && Array.isArray(product.randomBox?.prizes) && product.randomBox.prizes.length ? product.randomBox.prizes : [{ id: '', name: '', percent: '', stock: null }]; %>
+  <% const isBoxProduct = Boolean(product && product.specialType === 'random-box'); const configuredBoxPrizes = product && Array.isArray(product.randomBox?.prizes) && product.randomBox.prizes.length ? product.randomBox.prizes : [{ id: '', name: '', percent: '' }]; const boxPrizeCounts = typeof randomBoxPrizeCounts === 'undefined' ? {} : randomBoxPrizeCounts; %>
   <section class="random-box-product-kind" aria-labelledby="product-kind-title">
     <h2 id="product-kind-title">ประเภทสินค้า</h2>
     <p>เลือกสินค้าปกติ หรือกล่องสุ่มที่คิดเงิน 1 บาทต่อครั้ง</p>
     <div class="random-box-kind-options">
       <label><input type="radio" name="productKind" value="standard" <%= isBoxProduct ? '' : 'checked' %> /><span><strong>สินค้าปกติ</strong><small>ขายตามราคาและสต็อกสินค้าเดิม</small></span></label>
-      <label><input type="radio" name="productKind" value="random-box" <%= isBoxProduct ? 'checked' : '' %> /><span><strong>กล่องสุ่ม · ฿1/ครั้ง</strong><small>สะสมยอดรวมทุกคน 85–110 ครั้ง แล้วสุ่มออก 1 รางวัล</small></span></label>
+      <label><input type="radio" name="productKind" value="random-box" <%= isBoxProduct ? 'checked' : '' %> /><span><strong>กล่องสุ่ม · ฿1/ครั้ง</strong><small>สะสมยอดรวมทุกคนตามเรท แล้วสุ่มออก 1 รางวัล</small></span></label>
     </div>
   </section>
 
   <section class="random-box-config" data-random-box-panel <%= isBoxProduct ? '' : 'hidden' %> aria-labelledby="random-box-prizes-heading">
     <div class="random-box-config-head">
-      <div><h3 id="random-box-prizes-heading">รางวัลและสัดส่วน</h3><p>เปอร์เซ็นต์ใช้สุ่มเลือกรางวัลเมื่อรอบครบเป้า ไม่ใช่โอกาสถูกรางวัลต่อการเปิด 1 ครั้ง</p></div>
+      <div><h3 id="random-box-prizes-heading">รางวัลและสัดส่วน</h3><p>ตั้งชื่อรางวัลและเปอร์เซ็นต์ที่นี่ แล้วเติมคีย์/ไอดีจริงในหน้าสต็อกของกล่อง ระบบส่งให้ผู้ชนะอัตโนมัติ</p></div>
       <span class="random-box-price-pill">฿1 / ครั้ง</span>
     </div>
-    <div class="random-box-rule" role="note"><strong>รอบรวมของกล่องนี้</strong><span>ยอดเปิดของลูกค้าทุกคนในร้านนี้จะนับร่วมกัน ระบบสุ่มเป้ารอบละ 85–110 ครั้ง และผู้ที่เปิดครั้งที่ถึงเป้าจะได้ 1 รางวัล จากนั้นเริ่มรอบใหม่</span></div>
+    <label class="random-box-rate-field"><span>เรทการออกรางวัล</span><select name="randomBoxRate"><option value="1" <%= !product?.randomBox?.rate || Number(product.randomBox.rate) === 1 ? 'selected' : '' %>>เรท 1% · ไม่ออก 99% · รับรางวัลทุก 85–110 ครั้ง</option><option value="2" <%= Number(product?.randomBox?.rate) === 2 ? 'selected' : '' %>>เรท 2% · ไม่ออก 98% · รับรางวัลทุก 45–60 ครั้ง</option></select><small>เปลี่ยนเรทแล้วจะเริ่มรอบรวมใหม่ทันที เปอร์เซ็นต์ในรายการด้านล่างใช้แบ่งชนิดรางวัล</small></label>
+    <div class="random-box-rule" role="note"><strong>รอบรวมของกล่องนี้ · ฿1 ต่อครั้ง</strong><span>ยอดเปิดของลูกค้าทุกคนในร้านนี้จะนับร่วมกันตามเรทที่เลือก ผู้ที่เปิดครั้งที่ถึงเป้าจะได้รับคีย์/ไอดีจากสต็อกอัตโนมัติ แล้วเริ่มรอบใหม่</span></div>
     <div class="random-box-prize-list" data-random-box-prizes>
       <% configuredBoxPrizes.forEach((prize, index) => { %>
         <div class="random-box-prize-row" data-random-box-prize-row>
           <input type="hidden" name="randomBoxPrizeId" value="<%= prize.id || '' %>" />
-          <label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" value="<%= prize.name || '' %>" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" data-random-box-required /></label>
+          <label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" value="<%= prize.name || '' %>" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" data-random-box-required /><small>สต็อกพร้อมส่ง <%= boxPrizeCounts[String(prize.id)] || 0 %> ชิ้น · เติมในหน้าสต็อก</small></label>
           <label><span>สัดส่วน (%)</span><input name="randomBoxPrizePercent" type="number" min="0.01" max="100" step="0.01" value="<%= prize.percent ?? '' %>" placeholder="เช่น 25" data-random-box-required /></label>
-          <label><span>จำนวนรางวัล</span><input name="randomBoxPrizeStock" type="number" min="0" step="1" value="<%= prize.stock ?? '' %>" placeholder="ไม่จำกัด" /><small>ใส่ 0 เพื่อพักรางวัล</small></label>
           <button type="button" class="random-box-prize-remove" data-random-box-remove aria-label="ลบรางวัล <%= prize.name || `ลำดับที่ ${index + 1}` %>">ลบ</button>
         </div>
       <% }) %>
     </div>
-    <div class="random-box-config-footer"><button type="button" class="random-box-prize-add" data-random-box-add>＋ เพิ่มรางวัล</button><strong data-random-box-total role="status" aria-live="polite">เปอร์เซ็นต์รวม: 0%</strong></div>
+    <div class="random-box-config-footer"><div class="flex flex-wrap items-center gap-2"><button type="button" class="random-box-prize-add" data-random-box-add>＋ เพิ่มรางวัล</button><% if (isBoxProduct) { %><a class="random-box-prize-add" href="/admin/products/<%= product.id %>/stock">จัดการสต็อกคีย์/ไอดี</a><% } %></div><strong data-random-box-total role="status" aria-live="polite">เปอร์เซ็นต์รวม: 0%</strong></div>
   </section>
   <script>
     (() => {
@@ -74,7 +74,7 @@
         const row = document.createElement('div');
         row.className = 'random-box-prize-row';
         row.setAttribute('data-random-box-prize-row', '');
-        row.innerHTML = '<input type="hidden" name="randomBoxPrizeId" value=""><label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" data-random-box-required></label><label><span>สัดส่วน (%)</span><input name="randomBoxPrizePercent" type="number" min="0.01" max="100" step="0.01" placeholder="เช่น 25" data-random-box-required></label><label><span>จำนวนรางวัล</span><input name="randomBoxPrizeStock" type="number" min="0" step="1" placeholder="ไม่จำกัด"><small>ใส่ 0 เพื่อพักรางวัล</small></label><button type="button" class="random-box-prize-remove" data-random-box-remove aria-label="ลบรางวัล">ลบ</button>';
+        row.innerHTML = '<input type="hidden" name="randomBoxPrizeId" value=""><label><span>ชื่อรางวัล</span><input name="randomBoxPrizeName" maxlength="120" placeholder="เช่น ไอดีเกมระดับ S" data-random-box-required><small>เติมคีย์/ไอดีในหน้าสต็อกของกล่อง</small></label><label><span>สัดส่วน (%)</span><input name="randomBoxPrizePercent" type="number" min="0.01" max="100" step="0.01" placeholder="เช่น 25" data-random-box-required></label><button type="button" class="random-box-prize-remove" data-random-box-remove aria-label="ลบรางวัล">ลบ</button>';
         prizeList.appendChild(row);
         update();
         row.querySelector('[name="randomBoxPrizeName"]')?.focus();
