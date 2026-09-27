@@ -50,12 +50,10 @@ assert.match(home, /include\('\.\.\/partials\/latest-orders-rail', \{ latestOrde
   'the main homepage order rail must use its shared live-data partial');
 assert.match(read('src/views/partials/latest-orders-rail.ejs'), /latestOrders\.forEach\(order => \{/,
   'the shared order rail must render live order data');
-assert.match(home, /const ownerHomeNewestProducts = newest\.slice\(0, 6\); const ownerHomeFeaturedProduct = ownerHomeNewestProducts\[0\]/,
-  'the newest-products showcase must take its live data from the newest real listings');
-assert.match(home, /owner-home-v24-featured" href="\/game\/<%= ownerHomeFeaturedProduct\.slug %>"/,
-  'the freshest product must be promoted as a working product link');
-assert.match(home, /ownerHomeNewestProducts\.slice\(1\)\.forEach\(product => \{/,
-  'the remaining live newest products must stay browseable after the featured item');
+assert.doesNotMatch(home, /id="home-new-arrivals"|owner-home-v24-/,
+  'the new-arrivals showcase must be removed from the main homepage');
+assert.doesNotMatch(layout, /storefront-new-arrivals-(?:v1|mobile-v2|cozy-v2)\.css/,
+  'the main homepage must not load styles for the removed new-arrivals section');
 assert.equal((home.match(/ownerHomeProductCard: ownerHomeV20/g) || []).length, 2,
   'both main-store product grids must opt in to the new product-card design without affecting tenants');
 assert.match(productCard, /const isMainStorefrontCard = typeof isMainSite !== 'undefined' && isMainSite/,
@@ -70,8 +68,6 @@ assert.match(productCard, /owner-home-v21-media[\s\S]*?width="960" height="540"/
   'the new card must reserve image space and preserve the full product image');
 assert.match(listing, /isMainStorefrontListing[\s\S]*?main-store-product-title-row[\s\S]*?main-store-product-stock/,
   'the main catalog page must place each product stock badge beside its title');
-assert.match(home, /owner-home-v20-product-card main-store-product-card[\s\S]*?main-store-product-title-row[\s\S]*?main-store-product-stock/,
-  'the newest-products rail must use full images and show stock beside every title');
 assert.doesNotMatch(home, /owner-home-v17-hero-shell|owner-home-v17-visual|owner-home-v17-banner-frame/,
   'the former split-text and framed-screen hero must be removed from the active homepage template');
 assert.doesNotMatch(home, /owner-home-v16|data-scene-motion-toggle|anime/i,
@@ -225,46 +221,6 @@ assert.match(productCardCss, /var\(--gold\)/,
 assert.doesNotMatch(productCardCss, /#(?:00ff91|10b981|34d399)\b/i,
   'the new card must not introduce unrelated green accents');
 assert.ok(productCardRuleCount > 0, 'the new product-card layer must have owner-home scoped rules');
-
-const mobileNewArrivalsCss = read('public/css/storefront-new-arrivals-mobile-v2.css');
-assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*?storefront-new-arrivals-mobile-v2\.css/,
-  'the mobile new-arrivals redesign must only load on the main shop');
-const mobileNewArrivalsStylesheet = postcss.parse(mobileNewArrivalsCss, { from: 'storefront-new-arrivals-mobile-v2.css' });
-let mobileNewArrivalsRuleCount = 0;
-mobileNewArrivalsStylesheet.walkRules(rule => {
-  mobileNewArrivalsRuleCount += 1;
-  for (const selector of rule.selectors) {
-    assert.ok(selector.startsWith('body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals'),
-      `mobile new-arrivals styles must not affect tenants or other pages: ${selector}`);
-  }
-});
-assert.match(mobileNewArrivalsCss, /grid-auto-columns:\s*min\(78vw,\s*312px\)/,
-  'mobile product cards must have a touch-friendly width and reveal the next card');
-assert.match(mobileNewArrivalsCss, /scroll-snap-type:\s*x mandatory/,
-  'mobile product cards must snap cleanly while swiping');
-assert.match(mobileNewArrivalsCss, /min-height:\s*44px/,
-  'the mobile view-all action must keep a comfortable touch target');
-assert.ok(mobileNewArrivalsRuleCount > 0, 'the main-store mobile new-arrivals design must include scoped rules');
-
-const newArrivalsSpotlightCss = read('public/css/storefront-new-arrivals-cozy-v2.css');
-assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-new-arrivals-cozy-v2\.css.*?rev=2/,
-  'the latest-product showcase styling must only load on the redesigned main storefront');
-assert.match(home, /owner-home-v24-rail" tabindex="0" aria-label="สินค้าเข้าใหม่เพิ่มเติม เลื่อนดูได้"/,
-  'the remaining products rail must be keyboard reachable and clearly labelled');
-const newArrivalsSpotlightStylesheet = postcss.parse(newArrivalsSpotlightCss, { from: 'storefront-new-arrivals-cozy-v2.css' });
-let newArrivalsSpotlightRuleCount = 0;
-newArrivalsSpotlightStylesheet.walkRules(rule => {
-  newArrivalsSpotlightRuleCount += 1;
-  for (const selector of rule.selectors) {
-    assert.ok(selector.startsWith('body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell'),
-      `the newest-product showcase styles must not affect tenant shops or other pages: ${selector}`);
-  }
-});
-assert.match(newArrivalsSpotlightCss, /owner-home-v24-showcase[\s\S]*?grid-template-columns:\s*minmax\(280px,\s*\.95fr\) minmax\(0,\s*1\.8fr\)/,
-  'the newest listing must lead a two-part spotlight and browse rail on wide screens');
-assert.match(newArrivalsSpotlightCss, /@media \(max-width: 700px\)[\s\S]*?owner-home-v24-rail[\s\S]*?grid-auto-columns:\s*min\(78vw,\s*290px\)/,
-  'mobile users must see one large lead listing and be able to swipe the rest');
-assert.ok(newArrivalsSpotlightRuleCount > 0, 'the showcase redesign must have owner-home scoped rules');
 
 const heroV23Css = read('public/css/storefront-owner-home-hero-v23.css');
 const heroV23Stylesheet = postcss.parse(heroV23Css, { from: 'storefront-owner-home-hero-v23.css' });
