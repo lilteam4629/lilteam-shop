@@ -845,12 +845,12 @@
   <% } %>
 
   <% if (ownerHomeV20) { %>
-    <header class="home-catalog-heading-row">
+    <header class="home-catalog-heading-row" id="catalog-search">
       <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2>สินค้าทั้งหมด</h2><p>All Products&nbsp; • &nbsp;<%= productTotal %> รายการ</p></span></div>
       <span class="home-catalog-heading-rule" aria-hidden="true"></span>
       <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </header>
-    <div class="home-catalog-tools-row" id="catalog-search">
+    <div class="home-catalog-tools-row">
       <label class="home-catalog-search"><svg><use href="#ui-search"/></svg><input id="homeCatalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off"></label>
       <div class="home-catalog-filters" aria-label="กรองสินค้า"><button type="button" class="is-active" data-home-stock="all">ทั้งหมด</button><button type="button" data-home-stock="available"><i></i> พร้อมขาย</button><button type="button" data-home-stock="sold"><i></i> สินค้าหมด</button></div>
     </div>

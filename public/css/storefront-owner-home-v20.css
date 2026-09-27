@@ -147,6 +147,7 @@ body.storefront-global-background #site-page-shell.storefront-owner-home-v7:has(
   align-items: center;
   gap: 16px;
   min-height: 58px;
+  scroll-margin-top: 90px;
   margin: 12px 0 15px;
   padding: 0 0 12px;
   border: 0;
