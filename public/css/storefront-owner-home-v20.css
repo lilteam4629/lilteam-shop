@@ -126,7 +126,7 @@ body.storefront-global-background #site-page-shell.storefront-owner-home-v7:has(
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-category-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-category-card { border-color: var(--border); border-radius: 10px; background: var(--card); }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-category-card:hover { border-color: var(--gold); }
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .latest-orders-section { padding: 26px 0 0 !important; }
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .latest-orders-section { padding: 16px 0 0 !important; }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .latest-orders-shell { border-color: var(--border); border-radius: 12px; background: var(--card) !important; }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .latest-order-card { border-color: var(--border); border-radius: 9px; background: var(--input); }
 #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .store-filter-section { padding: 18px 0 0 !important; }
@@ -335,7 +335,7 @@ body.storefront-global-background #site-page-shell.storefront-owner-home-v7:has(
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-category-card { padding: 8px !important; }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-category-image { width: 100% !important; }
-  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .latest-orders-section { padding-top: 22px !important; }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .latest-orders-section { padding-top: 14px !important; }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .store-product-gallery { padding-top: 21px !important; }
   #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main :is(.store-product-gallery .product-grid, .all-products-grid) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; }
 }
