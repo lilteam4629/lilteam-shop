@@ -31,8 +31,11 @@ function getMissMessage(product) {
   return normalizeMissMessage(product?.randomBox?.missMessage) || DEFAULT_MISS_MESSAGE;
 }
 
-function supportsRandomBox(req) {
-  return !req?.tenantShop;
+function supportsRandomBox() {
+  // Request-scoped store.data is resolved to the current tenant by
+  // tenantResolver. Random-box products, stock, draws, and orders therefore
+  // stay inside that shop's own database just like regular products.
+  return true;
 }
 
 function normalizeRate(rate) {

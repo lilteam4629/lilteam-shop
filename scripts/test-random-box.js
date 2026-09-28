@@ -3,8 +3,10 @@ const randomBox = require('../src/services/random-box');
 const catalog = require('../src/services/catalog-syndication');
 
 assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: null }), true);
-assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: { slug: 'bank-shop' } }), false,
-  'random boxes are restricted to the main shop');
+assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: { slug: 'bank-shop' } }), true,
+  'rented shops can manage and sell random boxes using their own tenant data');
+assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: { slug: 'system-lab', isSystemLab: true } }), true,
+  'the isolated system lab can verify the same tenant workflow');
 
 const expectedRateBounds = new Map([
   [1, [85, 110]], [2, [45, 60]], [3, [30, 40]], [4, [22, 27]], [5, [17, 22]],
