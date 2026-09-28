@@ -458,9 +458,11 @@ const assertTenantMobileHeaderSpacing = (breakpoint, selector, expectedValue, pr
     `rental headers must keep ${property} at ${expectedValue}${typeof expectedValue === 'number' ? 'px' : ''} through ${breakpoint}px screens`);
 };
 assertTenantMobileHeaderSpacing(900, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions', 10);
+assertTenantMobileHeaderSpacing(900, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', 'calc(100% - 41px)', 'width');
 assertTenantMobileHeaderSpacing(900, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', '24px 17px', 'margin-inline');
 assertTenantMobileHeaderSpacing(900, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__login', 12, 'padding-inline');
 assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', 8);
+assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', 'calc(100% - 16px)', 'width');
 assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', 8, 'margin-inline');
 assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions', 8);
 assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__login', 10, 'padding-inline');

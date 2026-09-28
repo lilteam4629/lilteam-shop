@@ -1,6 +1,7 @@
 /* Mobile-only header layout for the all storefronts. */
 @media (max-width: 900px) {
   .store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner {
+    width: calc(100% - 41px) !important;
     margin-inline: 24px 17px !important;
   }
 
@@ -103,7 +104,7 @@
 }
 
 @media (max-width: 380px) {
-  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner { margin-inline: 8px !important; padding-inline: 10px !important; gap: 8px !important; }
+  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner { width: calc(100% - 16px) !important; margin-inline: 8px !important; padding-inline: 10px !important; gap: 8px !important; }
   .store-nav--cozy-owner .store-nav__mobile-toggle { width: 40px !important; min-width: 40px !important; flex-basis: 40px !important; }
   .store-nav--cozy-owner .store-nav__theme,
   .store-nav--cozy-owner .store-nav__cart,
