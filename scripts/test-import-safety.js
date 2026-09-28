@@ -505,6 +505,53 @@ async function main() {
     { sendStatus(status) { tenantCatalogStatus = status; } },
   );
   check('Tenant administrators cannot access the main-site live catalog preview', () => assert.equal(tenantCatalogStatus, 404));
+  const miniGamePreview = admin.stack.find(layer => layer.route?.path === '/minigame/preview' && layer.route.methods.post).route.stack.at(-1).handle;
+  async function previewFromShop(tenantShop, mode, prizeName, image) {
+    const shopData = model.fixture();
+    shopData.miniGamePrizes = [
+      { id: 'zero-rate', gameType: mode, name: 'ไม่ควรสุ่ม', active: true, percent: 0, stock: null, isPrize: true, image: '/zero.png' },
+      { id: 'empty-stock', gameType: mode, name: 'สต็อกหมด', active: true, percent: 99, stock: 0, isPrize: true, image: '/empty.png' },
+      { id: 'available', gameType: mode, name: prizeName, active: true, percent: 1, stock: null, isPrize: true, image },
+      { id: 'inactive', gameType: mode, name: 'ปิดแล้ว', active: false, percent: 100, stock: null, isPrize: true, image: '/inactive.png' },
+    ];
+    shopData.products = [{ id: 'linked-prize', title: prizeName, images: ['/main-catalog-prize.png'] }];
+    const before = JSON.stringify({
+      users: shopData.users.map(user => ({ id: user.id, walletBalance: user.walletBalance })),
+      prizes: shopData.miniGamePrizes, plays: shopData.miniGamePlays, transactions: shopData.walletTransactions,
+      stockItems: shopData.stockItems,
+    });
+    let saveCalls = 0;
+    const originalSave = store.save;
+    store.save = async () => { saveCalls++; };
+    try {
+      const response = { status(code) { this.statusCode = code; return this; }, set(name, value) { this.headers = { ...(this.headers || {}), [name]: value }; return this; }, json(payload) { this.payload = payload; return this; } };
+      await als.run(shopData, () => miniGamePreview({ query: { mode }, tenantShop }, response));
+      const after = JSON.stringify({
+        users: shopData.users.map(user => ({ id: user.id, walletBalance: user.walletBalance })),
+        prizes: shopData.miniGamePrizes, plays: shopData.miniGamePlays, transactions: shopData.walletTransactions,
+        stockItems: shopData.stockItems,
+      });
+      return { response, before, after, saveCalls };
+    } finally { store.save = originalSave; }
+  }
+  const mainBoxPreview = await previewFromShop(null, 'box', 'รางวัลกล่องร้านหลัก', null);
+  const tenantBoxPreview = await previewFromShop({ id: 'tenant-preview' }, 'box', 'รางวัลกล่องร้านเช่า', '/tenant-box.png');
+  const tenantRailPreview = await previewFromShop({ id: 'tenant-preview' }, 'rail', 'รางวัลรางร้านเช่า', '/tenant-rail.png');
+  check('Main and rental game previews use only that shop’s active, stocked, weighted prizes without charging or consuming inventory', () => {
+    assert.equal(mainBoxPreview.response.payload.prizeName, 'รางวัลกล่องร้านหลัก');
+    assert.equal(mainBoxPreview.response.payload.gameMode, 'box');
+    assert.equal(tenantBoxPreview.response.payload.prizeName, 'รางวัลกล่องร้านเช่า');
+    assert.equal(tenantBoxPreview.response.payload.image, '/tenant-box.png');
+    assert.equal(tenantRailPreview.response.payload.prizeName, 'รางวัลรางร้านเช่า');
+    assert.equal(tenantRailPreview.response.payload.gameMode, 'rail');
+    for (const preview of [mainBoxPreview, tenantBoxPreview, tenantRailPreview]) {
+      assert.equal(preview.response.payload.isPreview, true);
+      assert.equal(preview.response.payload.claimCode, null);
+      assert.equal(preview.response.headers['Cache-Control'], 'no-store');
+      assert.equal(preview.before, preview.after);
+      assert.equal(preview.saveCalls, 0);
+    }
+  });
   async function playImageFor(tenantShop) {
     const prize = { id: 'prize', name: 'รางวัลทดสอบ', gameType: 'box', image: '/configured-prize.png', isPrize: true, stock: null };
     const gameStore = {
@@ -647,17 +694,27 @@ async function main() {
   const railBase = { endpoint: '/minigame/play?mode=rail', cost: 5, prizes: [{ name: 'รางวัล', image: null, isPrize: true }], showLogin: false, balance: 20 };
   const railLegacy = ejs.render(railTemplate, { ...railBase, mainSiteExperience: false });
   const railMain = ejs.render(railTemplate, { ...railBase, mainSiteExperience: true });
+  const railAdminEmpty = ejs.render(railTemplate, { ...railBase, prizes: [], mainSiteExperience: false, adminPreview: true });
   const widgetLegacyMarkup = widgetLegacy.split('<style>')[0];
   const widgetMainMarkup = widgetMain.split('<style>')[0];
   const railLegacyMarkup = railLegacy.split('<style>')[0];
   const railMainMarkup = railMain.split('<style>')[0];
-  check('Storefront minigame redesign is rendered only for the main shop', () => {
+  check('Admin test widgets render the illustrated box, configured prize strip and safe preview state in both shells', () => {
     assert.match(widgetLegacyMarkup, /class="mg-box mg-box-el">🎁/);
     assert.doesNotMatch(widgetLegacyMarkup, /mg-box-scene-el|mg-result-gift/);
     assert.match(widgetMainMarkup, /mg-play-panel--main-site/);
     assert.match(widgetMainMarkup, /mg-box-scene-el|mg-result-gift/);
+    const boxPreview = ejs.render(widgetTemplate, { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, adminPreview: true, previewPrizes: [{ name: 'รางวัลเช่า', percent: 25, active: true, isPrize: true, image: '/tenant-prize.png' }] });
+    assert.match(boxPreview, /mg-play-panel--admin-preview/);
+    assert.match(boxPreview, /รางวัลที่อยู่ในกล่อง/);
+    assert.match(boxPreview, /25%/);
+    assert.match(boxPreview, /display:grid; grid-template-columns:minmax\(0,1fr\)/);
     assert.doesNotMatch(railLegacyMarkup, /rail-game--main-site|<svg viewBox="0 0 24 24"/);
     assert.match(railLegacyMarkup, /🎰 เริ่มเลื่อน/);
+    assert.match(railAdminEmpty, /rail-game--admin-preview/);
+    assert.match(railAdminEmpty, /disabled data-preview-unavailable="true" aria-describedby="rail-preview-empty"/);
+    assert.match(railAdminEmpty, /เพิ่มรางวัลรางเลื่อนที่เปิดใช้งาน/);
+    assert.match(railTemplate, /prefers-reduced-motion: reduce/);
     assert.match(railMainMarkup, /rail-game--main-site/);
   });
   let pages = 0;

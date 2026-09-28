@@ -2732,8 +2732,10 @@ router.post('/minigame/preview', (req, res) => {
   if (!prize) {
     return res.status(400).json({ error: 'ของรางวัลหมดชั่วคราวหรือยังไม่ได้ตั้งค่าอัตราออก' });
   }
+  res.set('Cache-Control', 'no-store');
   res.json({
     ok: true,
+    gameMode: gameType,
     prizeName: prize.name,
     image: req.tenantShop ? (prize.image || null) : getPrizeImage(prize, store.data.products),
     isWin: Boolean(prize.isPrize),

@@ -2,10 +2,10 @@
   const railCost = typeof cost === 'number' && Number.isFinite(cost) ? cost : null;
   const railBalance = typeof balance === 'number' && Number.isFinite(balance) ? balance : null;
   const railPrizes = (prizes || []).map(p => ({ name: p.name, image: p.image || null, isPrize: Boolean(p.isPrize) }));
-  const railCatalogEndpoint = typeof catalogEndpoint === 'undefined' ? '' : catalogEndpoint;
   const railMainSiteExperience = typeof mainSiteExperience !== 'undefined' && mainSiteExperience === true;
+  const railAdminPreview = typeof adminPreview !== 'undefined' && adminPreview === true;
 %>
-<div class="rail-game<%= railMainSiteExperience ? ' rail-game--main-site' : '' %>" data-prizes="<%= JSON.stringify(railPrizes) %>"<% if (railCatalogEndpoint) { %> data-catalog-endpoint="<%= railCatalogEndpoint %>"<% } %>>
+<div class="rail-game<%= railMainSiteExperience ? ' rail-game--main-site' : '' %><%= railAdminPreview ? ' rail-game--admin-preview' : '' %>" data-prizes="<%= JSON.stringify(railPrizes) %>">
   <div class="rail-window">
     <div class="rail-pointer rail-pointer-top" aria-hidden="true">▼</div>
     <div class="rail-pointer rail-pointer-bottom" aria-hidden="true">▲</div>
@@ -16,7 +16,8 @@
   <% if (showLogin) { %>
     <a href="/login" class="rail-button block text-center">เข้าสู่ระบบเพื่อเล่น</a>
   <% } else { %>
-    <button type="button" class="rail-button rail-play w-full" data-endpoint="<%= endpoint %>"<% if (railCatalogEndpoint) { %> data-catalog-endpoint="<%= railCatalogEndpoint %>" disabled aria-describedby="mgx-live-catalog-status"<% } %>><% if (railMainSiteExperience) { %><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01M9 17h6"/></svg> เริ่มเลื่อน<% } else { %>🎰 เริ่มเลื่อน<% } %><% if (railCost !== null) { %> (฿<%= railCost.toLocaleString() %>)<% } %></button>
+    <button type="button" class="rail-button rail-play w-full" data-endpoint="<%= endpoint %>"<% if (railAdminPreview && !railPrizes.length) { %> disabled data-preview-unavailable="true" aria-describedby="rail-preview-empty"<% } %>><% if (railMainSiteExperience || railAdminPreview) { %><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M8 8h.01M12 8h.01M16 8h.01M8 12h.01M12 12h.01M16 12h.01M9 17h6"/></svg> เริ่มเลื่อน<% } else { %>🎰 เริ่มเลื่อน<% } %><% if (railCost !== null) { %> (฿<%= railCost.toLocaleString() %>)<% } %></button>
+    <% if (railAdminPreview && !railPrizes.length) { %><p class="rail-empty" id="rail-preview-empty">เพิ่มรางวัลรางเลื่อนที่เปิดใช้งาน มีเรทมากกว่า 0% และมีสต็อกก่อนทดลอง</p><% } %>
     <% if (railBalance !== null) { %><p class="text-xs text-[var(--text-4)] text-center mt-2">เครดิตคงเหลือ: ฿<span class="rail-balance"><%= railBalance.toLocaleString() %></span></p><% } %>
   <% } %>
 </div>
@@ -33,12 +34,12 @@
   .rail-window:before{left:0;background:linear-gradient(90deg,var(--bg),transparent)}
   .rail-window:after{right:0;background:linear-gradient(-90deg,var(--bg),transparent)}
 
-  .rail-pointer{position:absolute;z-index:6;left:50%;transform:translateX(-50%);color:var(--gold-text);font-size:1.15rem;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.85));animation:rail-blink 1.6s ease-in-out infinite}
+  .rail-pointer{position:absolute;z-index:6;left:50%;transform:translateX(-50%);color:var(--gold-text);font-size:1.15rem;line-height:1;filter:drop-shadow(0 2px 6px rgba(0,0,0,.45))}
   .rail-pointer-top{top:2px}
   .rail-pointer-bottom{bottom:2px}
   @keyframes rail-blink{0%,100%{opacity:1}50%{opacity:.55}}
 
-  .rail-center{position:absolute;z-index:3;left:50%;top:12px;bottom:12px;width:150px;transform:translateX(-50%);border-radius:.9rem;border:2px solid var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 16%,transparent),0 0 26px color-mix(in srgb,var(--gold) 45%,transparent);pointer-events:none;animation:rail-pulse 1.8s ease-in-out infinite}
+  .rail-center{position:absolute;z-index:3;left:50%;top:12px;bottom:12px;width:150px;transform:translateX(-50%);border-radius:.9rem;border:2px solid var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 16%,transparent),0 0 26px color-mix(in srgb,var(--gold) 45%,transparent);pointer-events:none}
   @keyframes rail-pulse{0%,100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 16%,transparent),0 0 20px color-mix(in srgb,var(--gold) 38%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--gold) 24%,transparent),0 0 32px color-mix(in srgb,var(--gold) 60%,transparent)}}
 
   .rail-track{height:100%;display:flex;align-items:center;gap:14px;padding:16px 0;transform:translate3d(0,0,0);will-change:transform;backface-visibility:hidden}
@@ -55,7 +56,8 @@
   .rail-game--main-site .rail-button svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .rail-button:hover{transform:translateY(-1px);box-shadow:0 14px 30px -12px color-mix(in srgb,var(--gold) 85%,transparent)}
   .rail-button:disabled{opacity:.55;cursor:not-allowed;transform:none}
-  .rail-game.is-spinning .rail-pointer,.rail-game.is-spinning .rail-center{animation:none}
+  .rail-game.is-spinning .rail-pointer{animation:rail-blink .65s ease-in-out infinite}
+  .rail-game.is-spinning .rail-center{animation:rail-pulse 1.1s ease-in-out infinite}
   .rail-game.is-spinning .rail-item img{filter:none}
   .rail-result{margin-top:.85rem;min-height:1.5rem}
   .rail-game--main-site.is-spinning .rail-track{filter:saturate(1.08)}
@@ -63,6 +65,13 @@
   .rail-claim{margin-top:.5rem;padding:.55rem;border:1px solid color-mix(in srgb,var(--gold) 40%,transparent);border-radius:.65rem;background:color-mix(in srgb,var(--gold) 12%,transparent);color:var(--gold-text);font-size:1.25rem;font-weight:800;letter-spacing:.1em}
   .rail-contact-btn{display:flex;align-items:center;justify-content:center;gap:.45rem;width:100%;margin-top:.65rem;padding:.65rem .85rem;border-radius:.7rem;color:var(--text);background:var(--input);border:1px solid var(--border-light);font-size:.8rem;font-weight:700;transition:border-color .2s,color .2s,transform .15s}
   .rail-contact-btn:hover{color:var(--gold-text);border-color:var(--gold);transform:translateY(-1px)}
+  .rail-game--admin-preview{display:grid;gap:12px;padding:16px;border-color:var(--border-light);background:linear-gradient(145deg,var(--card),var(--input))}
+  .rail-game--admin-preview .rail-window{height:190px}
+  .rail-game--admin-preview .rail-button{display:flex;align-items:center;justify-content:center;width:min(100%,480px);min-height:48px;margin:0 auto}
+  .rail-game--admin-preview .rail-result{margin:0 auto;min-height:32px;width:min(100%,620px);font-size:.85rem;line-height:1.55}
+  .rail-game--admin-preview .rail-result-line{color:var(--text-3)}
+  .rail-game--admin-preview .rail-result-line.is-win{color:var(--gold-text);font-weight:700}
+  .rail-empty{margin:0;text-align:center;color:var(--text-3);font-size:.76rem;line-height:1.5}
 
   @media (max-width: 639px){
     .rail-window{height:140px}
@@ -72,8 +81,10 @@
     .rail-game--main-site .rail-item-icon{width:52px;height:52px}
     .rail-game--main-site .rail-item-icon svg{width:40px;height:40px}
     .rail-item-icon{font-size:2.1rem}
+    .rail-game--admin-preview{padding:11px}
+    .rail-game--admin-preview .rail-window{height:150px}
   }
-  @media (prefers-reduced-motion: reduce){.rail-game--main-site .rail-pointer,.rail-game--main-site .rail-center{animation:none!important}.rail-game--main-site .rail-button{transition:none}}
+  @media (prefers-reduced-motion: reduce){.rail-game--main-site .rail-pointer,.rail-game--main-site .rail-center,.rail-game--admin-preview .rail-pointer,.rail-game--admin-preview .rail-center,.rail-game.is-spinning .rail-pointer,.rail-game.is-spinning .rail-center{animation:none!important}.rail-game--main-site .rail-button,.rail-game--admin-preview .rail-button{transition:none}}
 </style>
 
 <script>
@@ -81,13 +92,13 @@
     if(game.dataset.bound==='1') return;
     game.dataset.bound='1';
     const mainSiteExperience=game.classList.contains('rail-game--main-site');
-    const catalogEndpoint=game.dataset.catalogEndpoint||'';
+    const visualExperience=mainSiteExperience||game.classList.contains('rail-game--admin-preview');
     let prizes=JSON.parse(game.dataset.prizes||'[]');
-    if(catalogEndpoint)prizes=[];
     const track=game.querySelector('.rail-track');
     const button=game.querySelector('.rail-play');
     const result=game.querySelector('.rail-result');
     const balance=game.querySelector('.rail-balance');
+    const windowEl=game.querySelector('.rail-window');
     function iconForItem(){
       const ns='http://www.w3.org/2000/svg';
       const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 48 48');svg.setAttribute('aria-hidden','true');
@@ -96,11 +107,11 @@
     function item(p){
       const el=document.createElement('div');el.className='rail-item';
       if(p.image){
-        if(!mainSiteExperience){const img=document.createElement('img');img.src=p.image;img.alt=p.name;el.appendChild(img)}
+        if(!visualExperience){const img=document.createElement('img');img.src=p.image;img.alt=p.name;el.appendChild(img)}
         else {
         const img=document.createElement('img');img.src=p.image;img.alt='';img.loading='eager';img.decoding='async';img.addEventListener('error',function(){const fallback=document.createElement('div');fallback.className='rail-item-icon';fallback.appendChild(iconForItem());img.replaceWith(fallback)},{once:true});el.appendChild(img);
         }
-      } else if(mainSiteExperience){const icon=document.createElement('div');icon.className='rail-item-icon';icon.appendChild(iconForItem());el.appendChild(icon)}
+      } else if(visualExperience){const icon=document.createElement('div');icon.className='rail-item-icon';icon.appendChild(iconForItem());el.appendChild(icon)}
       else {const icon=document.createElement('div');icon.className='rail-item-icon';icon.textContent=p.isPrize?'🎁':'💨';el.appendChild(icon)}
       const name=document.createElement('div');name.className='rail-item-name';name.textContent=p.name;el.appendChild(name);return el;
     }
@@ -111,53 +122,46 @@
       const itemWidth=el.getBoundingClientRect().width;
       const gap=parseFloat(getComputedStyle(track).gap)||14;
       const step=itemWidth+gap;
-      const windowCenter=game.querySelector('.rail-window').clientWidth/2;
+      const windowCenter=windowEl.clientWidth/2;
       return windowCenter-(index*step+itemWidth/2);
     }
     function seed(){
       track.innerHTML='';
       const count=16;
-      for(let i=0;i<count;i++)track.appendChild(item(prizes.length ? (mainSiteExperience ? prizes[Math.floor(Math.random()*prizes.length)] : prizes[i%prizes.length]) : {name:catalogEndpoint?'กำลังโหลดสินค้าจริง…':'ยังไม่มีรางวัล'}));
+      for(let i=0;i<count;i++)track.appendChild(item(prizes.length ? (visualExperience ? prizes[Math.floor(Math.random()*prizes.length)] : prizes[i%prizes.length]) : {name:'ยังไม่มีรางวัล'}));
       track.style.transition='none';
       track.style.transform='translate3d('+(centerIndexAt(Math.floor(count/2))||0)+'px,0,0)';
-      if(mainSiteExperience)void track.offsetWidth;
+      if(visualExperience)void track.offsetWidth;
     }
     function releaseSpin(message,resetTrack){
       clearTimeout(requestTimer);clearTimeout(spinTimer);requestTimer=0;spinTimer=0;
       if(activeController)activeController.abort();activeController=null;
       spinning=false;game.classList.remove('is-spinning');
-      if(button){button.disabled=false;button.removeAttribute('aria-busy')}
+      if(button){button.disabled=button.dataset.previewUnavailable==='true';button.removeAttribute('aria-busy')}
       if(resetTrack)seed();
       if(message)result.textContent=message;
     }
     seed();
-    if(catalogEndpoint&&button){
-      const catalogPreview=window.lilteamLiveCatalogPreview;
-      if(catalogPreview){
-        catalogPreview.load(catalogEndpoint).then(function(catalog){
-          if(!game.isConnected||!Array.isArray(catalog.products))return;
-          prizes=catalog.products.map(function(product){return {name:product.title,image:product.image||null,isPrize:true,productId:product.id,price:product.price,availableStock:product.availableStock}});
-          seed();button.disabled=!prizes.length;
-          if(result)result.textContent=prizes.length?'พร้อมทดลองจากสินค้าจริง '+prizes.length+' รายการ · ไม่ตัดสต็อก':'เว็บจริงไม่มีสินค้าพร้อมทดลอง';
-        }).catch(function(error){if(result)result.textContent=error.message||'อ่านสินค้าจริงไม่สำเร็จ';});
-      }else if(result){result.textContent='ตัวเชื่อมแค็ตตาล็อกจริงยังไม่พร้อม';}
-    }
     function handleRailResize(){if(!spinning&&game.isConnected)seed()}
     window.addEventListener('resize',handleRailResize);
-    window.addEventListener('pageshow',function(event){if(event.persisted||(button&&button.disabled))releaseSpin('พร้อมเริ่มเลื่อนอีกครั้ง',true)});
-    document.addEventListener('lilteam:page-unloading',function(){window.removeEventListener('resize',handleRailResize);releaseSpin()},{once:true});
+    const railResizeObserver=typeof ResizeObserver==='undefined'?null:new ResizeObserver(function(entries){
+      if(!spinning&&game.isConnected&&entries.some(function(entry){return entry.contentRect.width>0}))seed();
+    });
+    if(railResizeObserver)railResizeObserver.observe(windowEl);
+    window.addEventListener('pageshow',function(event){if((event.persisted||(button&&button.hasAttribute('aria-busy')))&&(!button||button.dataset.previewUnavailable!=='true'))releaseSpin('พร้อมเริ่มเลื่อนอีกครั้ง',true)});
+    document.addEventListener('lilteam:page-unloading',function(){window.removeEventListener('resize',handleRailResize);if(railResizeObserver)railResizeObserver.disconnect();releaseSpin()},{once:true});
     if(!button)return;
     button.addEventListener('click',async function(){
       if(spinning||button.disabled)return;
       spinning=true;game.classList.add('is-spinning');button.disabled=true;button.setAttribute('aria-busy','true');result.textContent='กำลังสุ่ม...';seed();
-      let response,data;if(catalogEndpoint){try{const catalog=await window.lilteamLiveCatalogPreview.load(catalogEndpoint);if(!Array.isArray(catalog.products)||!catalog.products.length)throw new Error('เว็บจริงไม่มีสินค้าพร้อมทดลอง');const product=window.lilteamLiveCatalogPreview.pick(catalog.products);if(!product)throw new Error('ไม่มีสินค้าจริงพร้อมทดลอง');response={ok:true};data={prizeName:product.title,image:product.image,productId:product.id,price:product.price,availableStock:product.availableStock,isWin:true,isPreview:true,fromLiveCatalog:true}}catch(e){response={ok:false};data={error:e.message||'อ่านสินค้าจริงไม่สำเร็จ'}}}else{activeController=new AbortController();requestTimer=setTimeout(function(){activeController&&activeController.abort()},10000);try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:activeController.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimer);requestTimer=0;activeController=null}}
+      let response,data;activeController=new AbortController();requestTimer=setTimeout(function(){activeController&&activeController.abort()},10000);try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:activeController.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimer);requestTimer=0;activeController=null}
       if(!response||!response.ok||!data){releaseSpin((data&&data.error)||'ระบบตอบช้า กรุณากดลองใหม่',false);return}
       const winner={name:data.prizeName,image:data.image||null,isPrize:data.isWin};
       const winnerIndex=20;const total=24;
       const sequence=[];for(let i=0;i<total;i++)sequence.push(i===winnerIndex?winner:(prizes[Math.floor(Math.random()*prizes.length)]||winner));
       track.innerHTML='';sequence.forEach(p=>track.appendChild(item(p)));
-      const reduceMotion=mainSiteExperience&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const duration=mainSiteExperience?(reduceMotion?120:3600):3600;
+      const reduceMotion=visualExperience&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const duration=visualExperience?(reduceMotion?120:3600):3600;
       const start=centerIndexAt(8);
       const target=centerIndexAt(winnerIndex);
       track.style.transition='none';track.style.transform='translate3d('+start+'px,0,0)';void track.offsetWidth;
@@ -171,14 +175,14 @@
       function completeSpin(){
         if(completed)return;completed=true;clearTimeout(spinTimer);spinTimer=0;
         spinning=false;game.classList.remove('is-spinning');
-        result.innerHTML='';const line=document.createElement('div');line.className=data.isWin?'text-emerald-400 font-medium':'text-[var(--text-3)]';line.textContent=data.fromLiveCatalog?'ตัวอย่างสินค้าจริง: '+data.prizeName+' · มีในสต็อก '+Number(data.availableStock||0).toLocaleString()+' (ไม่ตัดสต็อก)':data.isPreview?'ตัวอย่างผลสุ่ม: '+data.prizeName:(data.isWin?'ยินดีด้วย! ได้รับ '+data.prizeName:'ผลลัพธ์: '+data.prizeName);result.appendChild(line);
+        result.innerHTML='';const line=document.createElement('div');line.className='rail-result-line'+(data.isWin?' is-win':'');line.textContent=data.isPreview?'ตัวอย่างผลสุ่มจากเรทที่ตั้งไว้: '+data.prizeName:(data.isWin?'ยินดีด้วย! ได้รับ '+data.prizeName:'ผลลัพธ์: '+data.prizeName);result.appendChild(line);
         if(data.isWin&&data.claimCode){const claim=document.createElement('div');claim.className='rail-claim';claim.textContent=data.claimCode;result.appendChild(claim)}
         if(data.isWin&&!data.isPreview){const contactBtn=document.createElement('a');contactBtn.href='/contact';contactBtn.className='rail-contact-btn';contactBtn.textContent='💬 ติดต่อร้านเพื่อรับรางวัล';result.appendChild(contactBtn)}
         if(balance&&typeof data.walletBalance==='number')balance.textContent=data.walletBalance.toLocaleString();button.disabled=false;button.removeAttribute('aria-busy');
       }
       const onTransitionEnd=event=>{if(event.target===track&&event.propertyName==='transform')completeSpin()};
       track.addEventListener('transitionend',onTransitionEnd,{once:true});
-      spinTimer=setTimeout(completeSpin,mainSiteExperience?duration+450:3800);
+      spinTimer=setTimeout(completeSpin,visualExperience?duration+450:3800);
     });
   });
 </script>

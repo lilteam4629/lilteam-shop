@@ -15,7 +15,7 @@
     </header>
     <main class="experiment-content mgx-content">
       <section class="experiment-page-head mgx-page-head">
-        <div><div class="experiment-kicker mgx-page-kicker"><span>ระบบเสริม</span><span class="mgx-arcade-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10a4 4 0 0 1 3.8 5.2l-1 3.2a2 2 0 0 1-3.3.9l-2-1.8h-5l-2 1.8a2 2 0 0 1-3.3-.9l-1-3.2A4 4 0 0 1 7 8Z"/><path d="M8 10v4m-2-2h4m6-1h.01M18 13h.01"/></svg> GAME ARCADE</span></div><h1>จัดการมินิเกม</h1><p>จัดการเกมเปิดกล่องและรางเลื่อน ดูโอกาสรางวัล และทดลองจากสินค้าจริงของร้านได้ในหน้าเดียว</p></div>
+        <div><div class="experiment-kicker mgx-page-kicker"><span>ระบบเสริม</span><span class="mgx-arcade-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 8h10a4 4 0 0 1 3.8 5.2l-1 3.2a2 2 0 0 1-3.3.9l-2-1.8h-5l-2 1.8a2 2 0 0 1-3.3-.9l-1-3.2A4 4 0 0 1 7 8Z"/><path d="M8 10v4m-2-2h4m6-1h.01M18 13h.01"/></svg> GAME ARCADE</span></div><h1>จัดการมินิเกม</h1><p>จัดการเกมเปิดกล่องและรางเลื่อน ดูโอกาสรางวัล และทดลองด้วยรายการกับเรทที่ตั้งไว้ในร้านนี้</p></div>
         <div class="experiment-actions"><a href="#mgx-preview" class="experiment-button primary"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 9 6-9 6V6Z"/></svg> ทดลองเล่น</a><a href="#mgx-settings" class="experiment-button">ตั้งค่าเกม</a></div>
       </section>
 
@@ -53,48 +53,10 @@
       </section>
 
       <section class="mgx-preview-section" id="mgx-preview" aria-labelledby="mgx-preview-title">
-        <div class="mgx-section-heading"><div><span class="mgx-eyebrow">SAFE PLAY TEST</span><h2 id="mgx-preview-title">ทดลองเล่น</h2><p>ใช้สินค้าจริงจากหน้าเว็บเพื่อตรวจรูปและเอฟเฟกต์เท่านั้น ไม่ใช้โอกาสรางวัลจริง ไม่หักเครดิตหรือเพิ่มประวัติ</p></div><span class="mgx-preview-safe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 2.8 7.8 7 10 4.2-2.2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg> ไม่กระทบเครดิต</span></div>
-        <div class="mgx-live-catalog-status mgx-live-catalog-a11y" id="mgx-live-catalog-status" role="status" aria-live="polite" data-state="loading"><span class="mgx-live-catalog-dot" aria-hidden="true"></span><span>กำลังเชื่อมแค็ตตาล็อกสินค้าจริงจาก lilteam.site…</span></div>
-        <script>
-          (function () {
-            const endpoint = '/admin/minigame/live-catalog';
-            const status = document.getElementById('mgx-live-catalog-status');
-            let pending = null;
-            const catalogPreview = {
-              load: function (url) {
-                if (!pending) {
-                  pending = fetch(url || endpoint, { method: 'GET', credentials: 'same-origin', cache: 'no-store', headers: { accept: 'application/json' } })
-                    .then(async function (response) {
-                      const payload = await response.json();
-                      if (!response.ok || !payload || payload.ok !== true || !Array.isArray(payload.products)) {
-                        throw new Error((payload && payload.error) || 'อ่านแค็ตตาล็อกเว็บจริงไม่สำเร็จ');
-                      }
-                      return payload;
-                    })
-                    .catch(function (error) { pending = null; throw error; });
-                }
-                return pending;
-              },
-              pick: function (products) {
-                const items = Array.isArray(products) ? products : [];
-                return items[Math.floor(Math.random() * items.length)] || null;
-              }
-            };
-            window.lilteamLiveCatalogPreview = catalogPreview;
-            if (status) {
-              catalogPreview.load(endpoint).then(function (catalog) {
-                status.dataset.state = 'ready';
-                status.querySelector('span:last-child').textContent = catalog.shopName + ' · ' + catalog.products.length + ' สินค้าที่มีรูปและสต็อก · โหลดเพื่อดูตัวอย่างเท่านั้น';
-              }).catch(function (error) {
-                status.dataset.state = 'error';
-                status.querySelector('span:last-child').textContent = error.message + ' · เกมทดลองจะไม่ใช้รายการตัวอย่างแทนสินค้าเว็บจริง';
-              });
-            }
-          })();
-        </script>
+        <div class="mgx-section-heading"><div><span class="mgx-eyebrow">SAFE PLAY TEST</span><h2 id="mgx-preview-title">ทดลองเล่น</h2><p>สุ่มจากรางวัลและเรทจริงที่ตั้งไว้ เพื่อทดสอบกล่องและรางเลื่อน โดยไม่หักเครดิต ตัดสต็อก หรือบันทึกประวัติ</p></div><span class="mgx-preview-safe"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v5c0 4.5 2.8 7.8 7 10 4.2-2.2 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg> โหมดทดลองปลอดภัย</span></div>
         <div class="mgx-game-tabs" role="tablist" aria-label="เลือกเกมที่ต้องการทดลอง"><button class="mgx-game-tab is-active" type="button" role="tab" id="mgx-tab-box" aria-selected="true" aria-controls="mgx-panel-box" data-mgx-game-tab="box"><span class="mgx-game-tab-icon box"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 8 9-5 9 5v9l-9 5-9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v9"/></svg></span><span><strong><%= game.title || 'เกมเปิดกล่อง' %></strong><small>ทดลองสุ่มรางวัลจากกล่อง</small></span><span class="mgx-tab-arrow" aria-hidden="true">→</span></button><button class="mgx-game-tab" type="button" role="tab" id="mgx-tab-rail" aria-selected="false" aria-controls="mgx-panel-rail" data-mgx-game-tab="rail"><span class="mgx-game-tab-icon rail"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v12H4zM8 9v6m4-6v6m4-6v6"/></svg></span><span><strong><%= game.railTitle || 'เกมรางเลื่อน' %></strong><small>ทดลองเลื่อนดูผลรางวัล</small></span><span class="mgx-tab-arrow" aria-hidden="true">→</span></button></div>
-        <div class="mgx-preview-panel experiment-card" id="mgx-panel-box" role="tabpanel" aria-labelledby="mgx-tab-box" data-mgx-game-panel="box"><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.title || 'เกมเปิดกล่อง' %></h3><p>สุ่มแสดงสินค้าจริงและเอฟเฟกต์จากแค็ตตาล็อก</p></div><span class="mgx-mode-tag">ตัวอย่างปลอดภัย</span></div><%- include('../partials/minigame-widget', { endpoint: '/admin/minigame/preview', catalogEndpoint: '/admin/minigame/live-catalog', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, mainSiteExperience: true }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> ใช้รูปและข้อมูลสินค้าจริง · ผลทดลองไม่ใช่อัตรารางวัลจริง · ไม่ตัดเครดิต/สต็อกและไม่บันทึกประวัติ</p></div>
-        <div class="mgx-preview-panel experiment-card" id="mgx-panel-rail" role="tabpanel" aria-labelledby="mgx-tab-rail" data-mgx-game-panel="rail" hidden><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.railTitle || 'เกมรางเลื่อน' %></h3><p>รางเลื่อนสินค้าจริงและสุ่มผลใหม่เมื่อเริ่มแต่ละครั้ง</p></div><span class="mgx-mode-tag">ตัวอย่างปลอดภัย</span></div><%- include('../partials/minigame-rail', { endpoint: '/admin/minigame/preview?mode=rail', catalogEndpoint: '/admin/minigame/live-catalog', cost: null, prizes: prizes.filter(prize => prize.active && (prize.gameType || 'box') === 'rail').map(prize => ({ ...prize, image: prize.resolvedImage || prize.image || null })), showLogin: false, balance: null, mainSiteExperience: true }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> ใช้รูปและข้อมูลสินค้าจริง · ผลทดลองไม่ใช่อัตรารางวัลจริง · ไม่ตัดเครดิต/สต็อกและไม่บันทึกประวัติ</p></div>
+        <div class="mgx-preview-panel experiment-card" id="mgx-panel-box" role="tabpanel" aria-labelledby="mgx-tab-box" data-mgx-game-panel="box"><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.title || 'เกมเปิดกล่อง' %></h3><p>เขย่ากล่อง เปิดฝา แล้วดูผลจากเรทที่ตั้งไว้</p></div><span class="mgx-mode-tag">อ้างอิงเรทจริง</span></div><%- include('../partials/minigame-widget', { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, mainSiteExperience: true, adminPreview: true, previewPrizes: prizes.filter(prize => prize.active && (prize.gameType || 'box') === 'box' && Number(prize.percent) > 0 && (prize.stock === null || Number(prize.stock) > 0)) }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> ใช้รางวัลและเรทจริง · ไม่หักเครดิต ไม่ตัดสต็อก และไม่บันทึกประวัติการเล่น</p></div>
+        <div class="mgx-preview-panel experiment-card" id="mgx-panel-rail" role="tabpanel" aria-labelledby="mgx-tab-rail" data-mgx-game-panel="rail" hidden><div class="mgx-preview-panel-head"><div><h3>ทดสอบ <%= game.railTitle || 'เกมรางเลื่อน' %></h3><p>เลื่อนผ่านรายการรางวัลก่อนหยุดตรงผลที่สุ่มได้จริง</p></div><span class="mgx-mode-tag">อ้างอิงเรทจริง</span></div><%- include('../partials/minigame-rail', { endpoint: '/admin/minigame/preview?mode=rail', cost: null, prizes: prizes.filter(prize => prize.active && (prize.gameType || 'box') === 'rail' && Number(prize.percent) > 0 && (prize.stock === null || Number(prize.stock) > 0)).map(prize => ({ ...prize, image: prize.resolvedImage || prize.image || null })), showLogin: false, balance: null, mainSiteExperience: true, adminPreview: true }) %><p class="mgx-preview-footnote"><span aria-hidden="true">i</span> ผลที่รางหยุดตรงกันกับรางวัลที่สุ่มตามเรท · ไม่หักเครดิต ไม่ตัดสต็อก และไม่บันทึกประวัติ</p></div>
       </section>
 
       <details class="experiment-card mgx-settings" id="mgx-settings">
