@@ -1,5 +1,9 @@
 /* Mobile-only header layout for the all storefronts. */
 @media (max-width: 900px) {
+  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner {
+    margin-inline: 24px 17px !important;
+  }
+
   .store-nav--cozy-owner .store-nav__inner {
     min-height: 68px !important;
     padding: 10px 14px !important;
@@ -44,8 +48,12 @@
   .store-nav--cozy-owner .store-nav__brand:not(.store-nav__brand--image) strong { font-size: 14px !important; }
 
   .store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions {
-    gap: 8px !important;
+    gap: 10px !important;
     margin-left: auto !important;
+  }
+
+  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__login {
+    padding-inline: 12px !important;
   }
 
   .store-nav--cozy-owner .store-nav__theme,
@@ -102,5 +110,6 @@
   .store-nav--cozy-owner .store-nav__account summary { width: 38px !important; min-width: 38px !important; }
   .store-nav--cozy-owner .store-nav__mobile-topup { width: 42px !important; min-width: 42px !important; flex-basis: 42px !important; }
   .store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions { gap: 8px !important; }
+  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__login { padding-inline: 10px !important; }
   .store-nav--cozy-owner .store-nav__brand--image img { max-width: 72px !important; }
 }

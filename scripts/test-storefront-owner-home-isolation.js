@@ -442,24 +442,28 @@ assert.match(read('src/views/partials/navbar.ejs'), /store-nav--cozy-owner/,
 const mobileHeaderCss = postcss.parse(read('public/css/storefront-mobile-header-cozy-shared-v1.css'), {
   from: 'storefront-mobile-header-cozy-shared-v1.css'
 });
-const assertTenantMobileHeaderSpacing = (breakpoint, selector, expectedGap, property = 'gap') => {
+const assertTenantMobileHeaderSpacing = (breakpoint, selector, expectedValue, property = 'gap') => {
   let found = false;
   mobileHeaderCss.walkAtRules('media', media => {
     if (media.params !== `(max-width: ${breakpoint}px)`) return;
     media.walkRules(selector, rule => {
       const declaration = rule.nodes.find(node => node.type === 'decl' && node.prop === property);
-      if (declaration && declaration.value === `${expectedGap}px` && declaration.important) found = true;
+      const normalizedValue = typeof expectedValue === 'number' ? `${expectedValue}px` : expectedValue;
+      if (declaration && declaration.value === normalizedValue && declaration.important) found = true;
       assert.ok(rule.selector.includes(':not(.store-nav--main)'),
         `rental mobile spacing must exclude the main store header: ${rule.selector}`);
     });
   });
   assert.ok(found,
-    `rental headers must keep ${property} at ${expectedGap}px through ${breakpoint}px screens`);
+    `rental headers must keep ${property} at ${expectedValue}${typeof expectedValue === 'number' ? 'px' : ''} through ${breakpoint}px screens`);
 };
-assertTenantMobileHeaderSpacing(900, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions', 8);
+assertTenantMobileHeaderSpacing(900, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions', 10);
+assertTenantMobileHeaderSpacing(900, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', '24px 17px', 'margin-inline');
+assertTenantMobileHeaderSpacing(900, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__login', 12, 'padding-inline');
 assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', 8);
 assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', 8, 'margin-inline');
 assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions', 8);
+assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__login', 10, 'padding-inline');
 
 const listingHtml = read('src/views/shop/listing.ejs');
 const sharedCatalogCss = read('public/css/storefront-catalog-shared-v1.css');
