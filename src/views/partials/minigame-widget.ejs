@@ -83,15 +83,17 @@
   .mg-box-band-h { position: absolute; top: 19px; left: 0; right: 0; height: 13px; background: color-mix(in srgb, var(--gold-contrast) 20%, var(--gold)); box-shadow: inset 0 1px #fff5, inset 0 -1px #0002; }
   .mg-box-lid { position: absolute; z-index: 2; top: 17px; left: 0; right: 0; height: 20px; border: 2px solid color-mix(in srgb, var(--gold) 78%, #fff); border-radius: 8px; background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 75%, #fff), var(--gold)); transform-origin: 50% 90%; backface-visibility: visible; box-shadow: 0 3px 6px #0002; }
   .mg-box-bow { position: absolute; z-index: 3; top: -6px; left: 50%; width: 8px; height: 14px; border-radius: 50%; background: var(--gold-contrast); transform: translateX(-50%); box-shadow: -10px 0 0 -1px color-mix(in srgb, var(--gold-contrast) 75%, transparent), 10px 0 0 -1px color-mix(in srgb, var(--gold-contrast) 75%, transparent); }
-  .mg-box-scene.is-opening .mg-box-aura { opacity: 1; transform: scale(1.2); }
-  .mg-box-scene.is-opening { animation: mg-scene-burst .52s ease-out both; }
+  .mg-box-scene.is-shaking .mg-box-aura { opacity: .9; animation: mg-aura-pulse .85s ease-in-out infinite; }
+  .mg-box-scene.is-opening .mg-box-aura { opacity: 1; transform: scale(1.28); animation: none; }
+  .mg-box-scene.is-opening { animation: mg-scene-burst .9s cubic-bezier(.2,.75,.25,1) both; }
+  @keyframes mg-aura-pulse { 0%,100% { transform: scale(.78); opacity: .55; } 50% { transform: scale(1.15); opacity: .96; } }
   @keyframes mg-scene-burst { 0% { transform: scale(1); } 45% { transform: scale(1.14); } 100% { transform: scale(.92); } }
   @keyframes mg-float {
     0%, 100% { transform: translateY(0) scale(1); }
     50% { transform: translateY(-6px) scale(1.03); }
   }
   .mg-box.mg-shaking { animation: mg-shake .6s ease-in-out 2; }
-  .mg-play-panel--main-site .mg-box.mg-shaking, .mg-play-panel--admin-preview .mg-box.mg-shaking { animation: mg-shake .5s ease-in-out 2; }
+  .mg-play-panel--main-site .mg-box.mg-shaking, .mg-play-panel--admin-preview .mg-box.mg-shaking { animation: mg-shake .62s ease-in-out infinite; }
   @keyframes mg-shake {
     0%, 100% { transform: translate(0, 0) rotate(0); }
     20% { transform: translate(-6px, 0) rotate(-8deg); }
@@ -99,8 +101,8 @@
     60% { transform: translate(-5px, -3px) rotate(-6deg); }
     80% { transform: translate(5px, -3px) rotate(6deg); }
   }
-  .mg-play-panel--main-site .mg-box.mg-opening, .mg-play-panel--admin-preview .mg-box.mg-opening { animation: mg-box-pop .52s cubic-bezier(.16,1,.3,1) both; }
-  .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid, .mg-play-panel--admin-preview .mg-box.mg-opening .mg-box-lid { animation: mg-lid-open .52s cubic-bezier(.16,1,.3,1) both; }
+  .mg-play-panel--main-site .mg-box.mg-opening, .mg-play-panel--admin-preview .mg-box.mg-opening { animation: mg-box-pop .9s cubic-bezier(.16,1,.3,1) both; }
+  .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid, .mg-play-panel--admin-preview .mg-box.mg-opening .mg-box-lid { animation: mg-lid-open .9s cubic-bezier(.16,1,.3,1) both; }
   @keyframes mg-box-pop { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(6px) scale(.96); } 100% { transform: translateY(15px) scale(.8); } }
   @keyframes mg-lid-open { 0% { transform: translateY(0) rotateX(0) rotateZ(0); } 65% { transform: translateY(-18px) rotateX(-115deg) rotateZ(-7deg); } 100% { transform: translateY(-14px) rotateX(-105deg) rotateZ(-5deg); } }
   .mg-box.mg-hidden { opacity: 0; transform: scale(.4); transition: opacity .25s, transform .25s; }
@@ -181,7 +183,7 @@
   .mgx-preview-panel .mg-play-panel--admin-preview { display:grid; grid-template-columns:minmax(0,1fr); justify-items:center; gap:15px; width:100%; padding:20px; border:1px solid var(--border-light); text-align:center; }
   .mgx-preview-panel .mg-play-panel--admin-preview .mg-stage { width:min(100%,560px); height:188px; flex:initial; margin:0 auto; }
   .mg-play-panel--admin-preview .mg-box-scene { animation:none; }
-  .mg-play-panel--admin-preview .mg-box-scene.is-opening { animation:mg-scene-burst .52s ease-out both; }
+  .mg-play-panel--admin-preview .mg-box-scene.is-opening { animation:mg-scene-burst .9s cubic-bezier(.2,.75,.25,1) both; }
   .mg-play-panel--admin-preview .mg-result-el { display:grid; align-content:center; width:min(100%,620px); min-height:32px; font-size:.85rem; line-height:1.55; }
   .mg-play-panel--admin-preview .mg-result-message { color:var(--text-3); }
   .mg-play-panel--admin-preview .mg-result-message.is-win { color:var(--gold-text); font-weight:700; }
@@ -211,9 +213,9 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .mg-play-panel--main-site .mg-box-scene, .mg-play-panel--main-site .mg-box, .mg-play-panel--main-site .mg-box.mg-shaking, .mg-play-panel--main-site .mg-box.mg-opening, .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid, .mg-play-panel--main-site .mg-box-scene.is-opening,
-    .mg-play-panel--admin-preview .mg-box-scene, .mg-play-panel--admin-preview .mg-box, .mg-play-panel--admin-preview .mg-box.mg-shaking, .mg-play-panel--admin-preview .mg-box.mg-opening, .mg-play-panel--admin-preview .mg-box.mg-opening .mg-box-lid, .mg-play-panel--admin-preview .mg-box-scene.is-opening { animation:none!important; transition-duration:.01ms!important; }
-    .mg-play-panel:not(.mg-play-panel--main-site) .mg-box, .mg-play-panel:not(.mg-play-panel--main-site) .mg-box.mg-shaking { animation: none; }
+    .mg-play-panel--main-site .mg-box-scene, .mg-play-panel--main-site .mg-box, .mg-play-panel--main-site .mg-box.mg-shaking, .mg-play-panel--main-site .mg-box.mg-opening, .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid, .mg-play-panel--main-site .mg-box-scene.is-opening, .mg-play-panel--main-site .mg-box-scene.is-shaking .mg-box-aura,
+    .mg-play-panel--admin-preview .mg-box-scene, .mg-play-panel--admin-preview .mg-box, .mg-play-panel--admin-preview .mg-box.mg-shaking, .mg-play-panel--admin-preview .mg-box.mg-opening, .mg-play-panel--admin-preview .mg-box.mg-opening .mg-box-lid, .mg-play-panel--admin-preview .mg-box-scene.is-opening, .mg-play-panel--admin-preview .mg-box-scene.is-shaking .mg-box-aura { animation:none!important; transition-duration:.01ms!important; }
+    .mg-play-panel:not(.mg-play-panel--main-site) .mg-box, .mg-play-panel:not(.mg-play-panel--main-site) .mg-box.mg-shaking, .mg-play-panel:not(.mg-play-panel--main-site) .mg-box-scene.is-shaking .mg-box-aura { animation: none; }
   }
 </style>
 
@@ -260,7 +262,7 @@
       card.classList.remove('mg-revealed');
       box.classList.remove('mg-hidden');
       box.classList.remove('mg-shaking', 'mg-opening');
-      if (boxScene) boxScene.classList.remove('is-opening');
+      if (boxScene) boxScene.classList.remove('is-opening', 'is-shaking');
       if (visualExperience) cardIcon.classList.remove('is-miss');
       cardImage.onerror = null;
       cardImage.removeAttribute('src');
@@ -275,7 +277,7 @@
       if (activeController) activeController.abort();
       activeController = null;
       box.classList.remove('mg-shaking', 'mg-opening');
-      if (boxScene) boxScene.classList.remove('is-opening');
+      if (boxScene) boxScene.classList.remove('is-opening', 'is-shaking');
       btn.disabled = btn.dataset.previewUnavailable === 'true';
       btn.removeAttribute('aria-busy');
       if (message) resultEl.textContent = message;
@@ -295,9 +297,11 @@
       resultEl.textContent = '';
       resetStage();
       box.classList.add('mg-shaking');
+      if (boxScene) boxScene.classList.add('is-shaking');
+      resultEl.textContent = visualExperience ? 'กำลังเขย่ากล่อง...' : 'กำลังสุ่ม...';
 
       const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const minShakeMs = visualExperience ? (reduceMotion ? 80 : 1000) : 900;
+      const minShakeMs = visualExperience ? (reduceMotion ? 80 : 1400) : 900;
       const started = Date.now();
 
       let response, data;
@@ -323,6 +327,8 @@
         }
 
         box.classList.remove('mg-shaking');
+        if (boxScene) boxScene.classList.remove('is-shaking');
+        if (visualExperience) resultEl.textContent = 'กำลังเปิดกล่อง...';
         const finishReveal = () => {
           revealTimer = 0;
           if (visualExperience) {
@@ -385,7 +391,7 @@
         if (visualExperience) {
           box.classList.add('mg-opening');
           boxScene.classList.add('is-opening');
-          revealTimer = setTimeout(finishReveal, reduceMotion ? 0 : 520);
+          revealTimer = setTimeout(finishReveal, reduceMotion ? 0 : 900);
         } else {
           box.classList.add('mg-hidden');
           finishReveal();

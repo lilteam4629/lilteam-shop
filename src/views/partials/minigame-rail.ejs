@@ -38,6 +38,7 @@
   .rail-pointer-top{top:2px}
   .rail-pointer-bottom{bottom:2px}
   @keyframes rail-blink{0%,100%{opacity:1}50%{opacity:.55}}
+  @keyframes rail-lane-glow{0%,100%{opacity:.35}50%{opacity:.9}}
 
   .rail-center{position:absolute;z-index:3;left:50%;top:12px;bottom:12px;width:150px;transform:translateX(-50%);border-radius:.9rem;border:2px solid var(--gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 16%,transparent),0 0 26px color-mix(in srgb,var(--gold) 45%,transparent);pointer-events:none}
   @keyframes rail-pulse{0%,100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 16%,transparent),0 0 20px color-mix(in srgb,var(--gold) 38%,transparent)}50%{box-shadow:0 0 0 5px color-mix(in srgb,var(--gold) 24%,transparent),0 0 32px color-mix(in srgb,var(--gold) 60%,transparent)}}
@@ -59,6 +60,7 @@
   .rail-game.is-spinning .rail-pointer{animation:rail-blink .65s ease-in-out infinite}
   .rail-game.is-spinning .rail-center{animation:rail-pulse 1.1s ease-in-out infinite}
   .rail-game.is-spinning .rail-item img{filter:none}
+  .rail-game--admin-preview.is-spinning .rail-window:before,.rail-game--admin-preview.is-spinning .rail-window:after{animation:rail-lane-glow 1.5s ease-in-out infinite}
   .rail-result{margin-top:.85rem;min-height:1.5rem}
   .rail-game--main-site.is-spinning .rail-track{filter:saturate(1.08)}
   .rail-game--main-site.is-spinning .rail-window{box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--gold) 35%,transparent),0 0 22px color-mix(in srgb,var(--gold) 18%,transparent)}
@@ -84,7 +86,7 @@
     .rail-game--admin-preview{padding:11px}
     .rail-game--admin-preview .rail-window{height:150px}
   }
-  @media (prefers-reduced-motion: reduce){.rail-game--main-site .rail-pointer,.rail-game--main-site .rail-center,.rail-game--admin-preview .rail-pointer,.rail-game--admin-preview .rail-center,.rail-game.is-spinning .rail-pointer,.rail-game.is-spinning .rail-center{animation:none!important}.rail-game--main-site .rail-button,.rail-game--admin-preview .rail-button{transition:none}}
+  @media (prefers-reduced-motion: reduce){.rail-game--main-site .rail-pointer,.rail-game--main-site .rail-center,.rail-game--admin-preview .rail-pointer,.rail-game--admin-preview .rail-center,.rail-game.is-spinning .rail-pointer,.rail-game.is-spinning .rail-center,.rail-game--admin-preview.is-spinning .rail-window:before,.rail-game--admin-preview.is-spinning .rail-window:after{animation:none!important}.rail-game--main-site .rail-button,.rail-game--admin-preview .rail-button{transition:none}}
 </style>
 
 <script>
@@ -104,18 +106,18 @@
       const svg=document.createElementNS(ns,'svg');svg.setAttribute('viewBox','0 0 48 48');svg.setAttribute('aria-hidden','true');
       const path=document.createElementNS(ns,'path');path.setAttribute('d','M7 20h34v22H7zM4 13h40v9H4zM24 13v29M24 13c-2-7-11-11-14-6-3 5 5 9 14 6Zm0 0c2-7 11-11 14-6 3 5-5 9-14 6Z');svg.appendChild(path);return svg;
     }
-    function item(p){
+    function item(p,eager){
       const el=document.createElement('div');el.className='rail-item';
       if(p.image){
         if(!visualExperience){const img=document.createElement('img');img.src=p.image;img.alt=p.name;el.appendChild(img)}
         else {
-        const img=document.createElement('img');img.src=p.image;img.alt='';img.loading='eager';img.decoding='async';img.addEventListener('error',function(){const fallback=document.createElement('div');fallback.className='rail-item-icon';fallback.appendChild(iconForItem());img.replaceWith(fallback)},{once:true});el.appendChild(img);
+        const img=document.createElement('img');img.src=p.image;img.alt='';img.loading=eager?'eager':(visualExperience?'lazy':'eager');img.decoding='async';img.addEventListener('error',function(){const fallback=document.createElement('div');fallback.className='rail-item-icon';fallback.appendChild(iconForItem());img.replaceWith(fallback)},{once:true});el.appendChild(img);
         }
       } else if(visualExperience){const icon=document.createElement('div');icon.className='rail-item-icon';icon.appendChild(iconForItem());el.appendChild(icon)}
       else {const icon=document.createElement('div');icon.className='rail-item-icon';icon.textContent=p.isPrize?'🎁':'💨';el.appendChild(icon)}
       const name=document.createElement('div');name.className='rail-item-name';name.textContent=p.name;el.appendChild(name);return el;
     }
-    let spinning=false,activeController=null,requestTimer=0,spinTimer=0;
+    let spinning=false,activeController=null,requestTimer=0,spinTimer=0,spinFrame=0,railX=0;
     function centerIndexAt(index){
       const el=track.children[index];
       if(!el)return;
@@ -125,16 +127,29 @@
       const windowCenter=windowEl.clientWidth/2;
       return windowCenter-(index*step+itemWidth/2);
     }
-    function seed(){
+    function pickDisplayPrize(previous){
+      if(!prizes.length)return {name:'ยังไม่มีรางวัล'};
+      const options=prizes.length>1&&previous
+        ?prizes.filter(function(prize){return prize.name!==previous.name||prize.image!==previous.image})
+        :prizes;
+      return options[Math.floor(Math.random()*options.length)]||prizes[0];
+    }
+    function seed(count){
       track.innerHTML='';
-      const count=16;
-      for(let i=0;i<count;i++)track.appendChild(item(prizes.length ? (visualExperience ? prizes[Math.floor(Math.random()*prizes.length)] : prizes[i%prizes.length]) : {name:'ยังไม่มีรางวัล'}));
+      const total=count||16;
+      let previous=null;
+      for(let i=0;i<total;i++){
+        const prize=visualExperience?pickDisplayPrize(previous):(prizes[i%prizes.length]||{name:'ยังไม่มีรางวัล'});
+        track.appendChild(item(prize));previous=prize;
+      }
       track.style.transition='none';
-      track.style.transform='translate3d('+(centerIndexAt(Math.floor(count/2))||0)+'px,0,0)';
+      railX=centerIndexAt(Math.floor(total/2))||0;
+      track.style.transform='translate3d('+railX+'px,0,0)';
       if(visualExperience)void track.offsetWidth;
     }
     function releaseSpin(message,resetTrack){
       clearTimeout(requestTimer);clearTimeout(spinTimer);requestTimer=0;spinTimer=0;
+      if(spinFrame){cancelAnimationFrame(spinFrame);spinFrame=0}
       if(activeController)activeController.abort();activeController=null;
       spinning=false;game.classList.remove('is-spinning');
       if(button){button.disabled=button.dataset.previewUnavailable==='true';button.removeAttribute('aria-busy')}
@@ -153,24 +168,48 @@
     if(!button)return;
     button.addEventListener('click',async function(){
       if(spinning||button.disabled)return;
-      spinning=true;game.classList.add('is-spinning');button.disabled=true;button.setAttribute('aria-busy','true');result.textContent='กำลังสุ่ม...';seed();
+      spinning=true;game.classList.add('is-spinning');button.disabled=true;button.setAttribute('aria-busy','true');result.textContent='กำลังเลื่อนหารางวัล...';
+      const total=60,startIndex=7;seed(total);railX=centerIndexAt(startIndex)||0;track.style.transform='translate3d('+railX+'px,0,0)';void track.offsetWidth;
+      const reduceMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let warmupStarted=performance.now(),lastFrame=warmupStarted;
+      function warmup(now){
+        if(!spinning||!game.isConnected)return;
+        const delta=Math.min(40,Math.max(0,now-lastFrame));lastFrame=now;
+        const ramp=Math.min(1,(now-warmupStarted)/900);const velocity=70+210*(ramp*ramp*(3-2*ramp));
+        railX-=velocity*delta/1000;track.style.transform='translate3d('+railX+'px,0,0)';spinFrame=requestAnimationFrame(warmup);
+      }
+      if(!reduceMotion)spinFrame=requestAnimationFrame(warmup);
       let response,data;activeController=new AbortController();requestTimer=setTimeout(function(){activeController&&activeController.abort()},10000);try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:activeController.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimer);requestTimer=0;activeController=null}
-      if(!response||!response.ok||!data){releaseSpin((data&&data.error)||'ระบบตอบช้า กรุณากดลองใหม่',false);return}
+      if(!response||!response.ok||!data){releaseSpin((data&&data.error)||'ระบบตอบช้า กรุณากดลองใหม่',true);return}
+      if(spinFrame){cancelAnimationFrame(spinFrame);spinFrame=0}
       const winner={name:data.prizeName,image:data.image||null,isPrize:data.isWin};
-      const winnerIndex=20;const total=24;
-      const sequence=[];for(let i=0;i<total;i++)sequence.push(i===winnerIndex?winner:(prizes[Math.floor(Math.random()*prizes.length)]||winner));
-      track.innerHTML='';sequence.forEach(p=>track.appendChild(item(p)));
-      const reduceMotion=visualExperience&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      const duration=visualExperience?(reduceMotion?120:3600):3600;
-      const start=centerIndexAt(8);
+      const first=track.children[0];const itemWidth=first?first.getBoundingClientRect().width:130;
+      const step=itemWidth+(parseFloat(getComputedStyle(track).gap)||14);
+      const visibleIndex=(windowEl.clientWidth/2-itemWidth/2-railX)/step;
+      const winnerIndex=reduceMotion
+        ?Math.max(0,Math.min(total-1,Math.round(visibleIndex)))
+        :Math.min(total-7,Math.max(30,Math.ceil(visibleIndex)+18));
+      track.children[winnerIndex].replaceWith(item(winner,true));
+      if(prizes.some(function(prize){return prize.name!==winner.name||prize.image!==winner.image})){
+        [winnerIndex-1,winnerIndex+1].forEach(function(index){
+          const neighbor=track.children[index];
+          const neighborName=neighbor&&neighbor.querySelector('.rail-item-name').textContent;
+          const neighborImage=neighbor&&neighbor.querySelector('img')&&neighbor.querySelector('img').getAttribute('src');
+          if(neighbor&&neighborName===winner.name&&(neighborImage||null)===(winner.image||null))neighbor.replaceWith(item(pickDisplayPrize(winner)));
+        });
+      }
       const target=centerIndexAt(winnerIndex);
-      track.style.transition='none';track.style.transform='translate3d('+start+'px,0,0)';void track.offsetWidth;
-      requestAnimationFrame(function(){
-        if(!game.isConnected||!spinning)return;
-        track.style.transition='transform '+duration+'ms cubic-bezier(.12,.72,.08,1)';
-        void track.getBoundingClientRect();
-        requestAnimationFrame(function(){if(game.isConnected&&spinning)track.style.transform='translate3d('+target+'px,0,0)'})
-      });
+      let duration=0;
+      track.style.transition='none';void track.offsetWidth;
+      if(reduceMotion){railX=target;track.style.transform='translate3d('+target+'px,0,0)';duration=120}
+      else {
+        const distance=Math.max(0,railX-target);duration=Math.max(5200,Math.min(8200,distance/560*1000));
+        requestAnimationFrame(function(){
+          if(!game.isConnected||!spinning)return;
+          track.style.transition='transform '+duration+'ms cubic-bezier(.5,.3,.12,1)';void track.offsetWidth;
+          requestAnimationFrame(function(){if(game.isConnected&&spinning){railX=target;track.style.transform='translate3d('+target+'px,0,0)'}})
+        });
+      }
       let completed=false;
       function completeSpin(){
         if(completed)return;completed=true;clearTimeout(spinTimer);spinTimer=0;
@@ -182,7 +221,7 @@
       }
       const onTransitionEnd=event=>{if(event.target===track&&event.propertyName==='transform')completeSpin()};
       track.addEventListener('transitionend',onTransitionEnd,{once:true});
-      spinTimer=setTimeout(completeSpin,visualExperience?duration+450:3800);
+      spinTimer=setTimeout(completeSpin,duration+500);
     });
   });
 </script>
