@@ -1,4 +1,4 @@
-const CATEGORY_HOME_TENANTS = new Set(['bank-shop', 'nwgamer']);
+const CATEGORY_HOME_TENANTS = new Set(['bank-shop']);
 
 function shouldGroupRecommendedProductsOnHome(req) {
   if (!req) return false;

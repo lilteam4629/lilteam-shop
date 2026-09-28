@@ -25,7 +25,8 @@ const unrelatedTenantRequest = { tenantShop: { slug: 'another-shop' } };
 
 assert.equal(shouldGroupRecommendedProductsOnHome(mainRequest), true);
 assert.equal(shouldGroupRecommendedProductsOnHome(bankShopRequest), true);
-assert.equal(shouldGroupRecommendedProductsOnHome(nwgamerRequest), true);
+assert.equal(shouldGroupRecommendedProductsOnHome(nwgamerRequest), false,
+  'NwGamer keeps recommended-category products visible on its homepage');
 assert.equal(shouldGroupRecommendedProductsOnHome(unrelatedTenantRequest), false);
 assert.equal(shouldShowFullRecommendedCategoryImages(nwgamerRequest), true);
 assert.equal(shouldShowFullRecommendedCategoryImages(bankShopRequest), false);
@@ -40,11 +41,12 @@ assert.deepEqual(
   filterHomeProductsByRecommendedCategory(products, categories, bankShopRequest).map(product => product.id),
   ['regular', 'disabled-only'],
 );
-assert.deepEqual(
-  filterHomeProductsByRecommendedCategory(products, categories, nwgamerRequest).map(product => product.id),
-  ['regular', 'disabled-only'],
+assert.strictEqual(
+  filterHomeProductsByRecommendedCategory(products, categories, nwgamerRequest),
+  products,
+  'NwGamer homepage includes products that remain assigned to their category pages',
 );
 assert.strictEqual(filterHomeProductsByRecommendedCategory(products, categories, unrelatedTenantRequest), products);
 assert.strictEqual(filterHomeProductsByRecommendedCategory(products, categories, null), products);
 
-console.log('Recommended category homepage visibility checks passed: main site, bank-shop, nwgamer, enabled categories, canonical IDs');
+console.log('Recommended category homepage visibility checks passed: NwGamer shows category products on home; other shops retain their behavior');
