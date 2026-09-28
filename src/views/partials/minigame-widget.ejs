@@ -7,7 +7,7 @@
   const mgShowLogin = typeof showLogin !== 'undefined' && showLogin;
   const mgMainSiteExperience = typeof mainSiteExperience !== 'undefined' && mainSiteExperience === true;
   const mgAdminPreview = typeof adminPreview !== 'undefined' && adminPreview === true;
-  const mgBoxIllustration = mgMainSiteExperience || mgAdminPreview;
+  const mgBoxIllustration = mgMainSiteExperience;
   const mgPreviewPrizes = mgAdminPreview && Array.isArray(previewPrizes) ? previewPrizes : [];
 %>
 <div class="mg-play-panel relative rounded-2xl p-6 flex flex-col items-center text-center gap-4<%= mgMainSiteExperience ? ' mg-play-panel--main-site' : '' %><%= mgAdminPreview ? ' mg-play-panel--admin-preview' : '' %>">
@@ -70,14 +70,24 @@
 
 <style>
   .mg-play-panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-radius: 1rem;
+    text-align: center;
     background: linear-gradient(160deg, var(--input), var(--card));
   }
+  .mg-play-panel .hidden { display: none !important; }
   .mg-stage { position: relative; width: 100%; height: 220px; display: flex; align-items: center; justify-content: center; }
-  .mg-play-panel--main-site .mg-stage, .mg-play-panel--admin-preview .mg-stage { perspective: 900px; }
+  .mg-play-panel--main-site .mg-stage { perspective: 900px; }
   .mg-box-scene { position: relative; display: grid; place-items: center; width: 142px; height: 126px; transform-style: preserve-3d; animation: mg-float 2.6s ease-in-out infinite; }
   .mg-box-aura { position: absolute; inset: 18px 12px 6px; border-radius: 50%; background: color-mix(in srgb, var(--gold) 22%, transparent); filter: blur(22px); opacity: .55; transform: scale(.78); transition: opacity .3s ease, transform .3s ease; }
   .mg-box { font-size: 4.5rem; line-height: 1; cursor: default; filter: drop-shadow(0 0 18px color-mix(in srgb, var(--gold) 45%, transparent)); animation: mg-float 2.6s ease-in-out infinite; }
-  .mg-play-panel--main-site .mg-box, .mg-play-panel--admin-preview .mg-box { position: relative; width: 112px; height: 96px; transform-style: preserve-3d; filter: drop-shadow(0 12px 13px color-mix(in srgb, var(--gold) 32%, transparent)); animation: none; }
+  .mg-play-panel--main-site .mg-box { position: relative; width: 112px; height: 96px; transform-style: preserve-3d; filter: drop-shadow(0 12px 13px color-mix(in srgb, var(--gold) 32%, transparent)); animation: none; }
   .mg-box-body { position: absolute; inset: 27px 5px 2px; overflow: visible; border: 2px solid color-mix(in srgb, var(--gold) 72%, #fff); border-radius: 8px 8px 13px 13px; background: linear-gradient(145deg, color-mix(in srgb, var(--gold) 84%, #fff), var(--gold-hover)); box-shadow: inset 0 2px 4px #fff8; }
   .mg-box-band-v { position: absolute; top: 0; bottom: 0; left: calc(50% - 8px); width: 16px; background: color-mix(in srgb, var(--gold-contrast) 24%, var(--gold)); box-shadow: inset 1px 0 #fff5, inset -1px 0 #0002; }
   .mg-box-band-h { position: absolute; top: 19px; left: 0; right: 0; height: 13px; background: color-mix(in srgb, var(--gold-contrast) 20%, var(--gold)); box-shadow: inset 0 1px #fff5, inset 0 -1px #0002; }
@@ -93,7 +103,7 @@
     50% { transform: translateY(-6px) scale(1.03); }
   }
   .mg-box.mg-shaking { animation: mg-shake .6s ease-in-out 2; }
-  .mg-play-panel--main-site .mg-box.mg-shaking, .mg-play-panel--admin-preview .mg-box.mg-shaking { animation: mg-shake .62s ease-in-out infinite; }
+  .mg-play-panel--main-site .mg-box.mg-shaking { animation: mg-shake .62s ease-in-out infinite; }
   @keyframes mg-shake {
     0%, 100% { transform: translate(0, 0) rotate(0); }
     20% { transform: translate(-6px, 0) rotate(-8deg); }
@@ -101,12 +111,12 @@
     60% { transform: translate(-5px, -3px) rotate(-6deg); }
     80% { transform: translate(5px, -3px) rotate(6deg); }
   }
-  .mg-play-panel--main-site .mg-box.mg-opening, .mg-play-panel--admin-preview .mg-box.mg-opening { animation: mg-box-pop .9s cubic-bezier(.16,1,.3,1) both; }
-  .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid, .mg-play-panel--admin-preview .mg-box.mg-opening .mg-box-lid { animation: mg-lid-open .9s cubic-bezier(.16,1,.3,1) both; }
+  .mg-play-panel--main-site .mg-box.mg-opening { animation: mg-box-pop .9s cubic-bezier(.16,1,.3,1) both; }
+  .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid { animation: mg-lid-open .9s cubic-bezier(.16,1,.3,1) both; }
   @keyframes mg-box-pop { 0% { transform: translateY(0) scale(1); } 35% { transform: translateY(6px) scale(.96); } 100% { transform: translateY(15px) scale(.8); } }
   @keyframes mg-lid-open { 0% { transform: translateY(0) rotateX(0) rotateZ(0); } 65% { transform: translateY(-18px) rotateX(-115deg) rotateZ(-7deg); } 100% { transform: translateY(-14px) rotateX(-105deg) rotateZ(-5deg); } }
   .mg-box.mg-hidden { opacity: 0; transform: scale(.4); transition: opacity .25s, transform .25s; }
-  .mg-play-panel--main-site .mg-box.mg-hidden, .mg-play-panel--admin-preview .mg-box.mg-hidden { opacity: 0; transform: translateY(22px) scale(.48); transition: opacity .24s ease, transform .24s ease; }
+  .mg-play-panel--main-site .mg-box.mg-hidden { opacity: 0; transform: translateY(22px) scale(.48); transition: opacity .24s ease, transform .24s ease; }
 
   .mg-card {
     position: absolute; inset: 0;
@@ -119,7 +129,7 @@
     transition: opacity .32s ease, transform .42s cubic-bezier(.16,1,.3,1);
   }
   .mg-card-icon { font-size: 3.4rem; line-height: 1; filter: drop-shadow(0 0 14px color-mix(in srgb, var(--gold) 50%, transparent)); }
-  .mg-play-panel--main-site .mg-card-icon, .mg-play-panel--admin-preview .mg-card-icon { display: grid; place-items: center; width: 64px; height: 64px; color: var(--gold-text); }
+  .mg-play-panel--main-site .mg-card-icon { display: grid; place-items: center; width: 64px; height: 64px; color: var(--gold-text); }
   .mg-card-icon svg { display: block; width: 56px; height: 56px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
   .mg-card-icon .mg-result-miss { display: none; opacity: .7; }
   .mg-card-icon.is-miss .mg-result-gift { display: none; }
@@ -145,6 +155,8 @@
   }
 
   .mg-play-btn {
+    display: block;
+    width: 100%;
     background: linear-gradient(135deg, var(--gold), var(--gold-hover));
     color: var(--gold-contrast); font-weight: 700; border-radius: .75rem;
     padding: .7rem 1rem; font-size: .9rem;
@@ -179,16 +191,8 @@
   }
   .mg-contact-btn:hover { color:var(--gold-text); border-color:var(--gold); transform: translateY(-1px); }
 
-  /* Explicit preview layout: the redesigned admin shell does not load Tailwind. */
-  .mgx-preview-panel .mg-play-panel--admin-preview { display:grid; grid-template-columns:minmax(0,1fr); justify-items:center; gap:15px; width:100%; padding:20px; border:1px solid var(--border-light); text-align:center; }
-  .mgx-preview-panel .mg-play-panel--admin-preview .mg-stage { width:min(100%,560px); height:188px; flex:initial; margin:0 auto; }
-  .mg-play-panel--admin-preview .mg-box-scene { animation:none; }
-  .mg-play-panel--admin-preview .mg-box-scene.is-opening { animation:mg-scene-burst .9s cubic-bezier(.2,.75,.25,1) both; }
-  .mg-play-panel--admin-preview .mg-result-el { display:grid; align-content:center; width:min(100%,620px); min-height:32px; font-size:.85rem; line-height:1.55; }
-  .mg-play-panel--admin-preview .mg-result-message { color:var(--text-3); }
-  .mg-play-panel--admin-preview .mg-result-message.is-win { color:var(--gold-text); font-weight:700; }
-  .mg-play-panel--admin-preview .mg-play-btn { width:min(100%,480px); min-height:48px; margin:0; }
-  .mg-play-panel--admin-preview .hidden { display:none!important; }
+  /* The play surface uses the same core layout in the storefront and preview. */
+  .mg-result-el { width:100%; min-height:1.5rem; }
   .mg-preview-prizes { width:min(100%,760px); text-align:left; }
   .mg-preview-prizes-head { display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-bottom:8px; color:var(--text-2); font-size:.75rem; }
   .mg-preview-prizes-head span { color:var(--text-4); font-size:.68rem; }
@@ -206,15 +210,12 @@
   @media (max-width: 639px) {
     .mg-stage { height: 205px; }
     .mg-card-image { max-width: min(100%, 12rem); max-height: 10.5rem; }
-    .mg-play-panel--admin-preview { padding:14px; gap:12px; }
-    .mg-play-panel--admin-preview .mg-stage { height:166px; }
     .mg-preview-prizes-head { align-items:flex-start; flex-direction:column; gap:2px; }
     .mg-preview-prize { min-width:148px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .mg-play-panel--main-site .mg-box-scene, .mg-play-panel--main-site .mg-box, .mg-play-panel--main-site .mg-box.mg-shaking, .mg-play-panel--main-site .mg-box.mg-opening, .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid, .mg-play-panel--main-site .mg-box-scene.is-opening, .mg-play-panel--main-site .mg-box-scene.is-shaking .mg-box-aura,
-    .mg-play-panel--admin-preview .mg-box-scene, .mg-play-panel--admin-preview .mg-box, .mg-play-panel--admin-preview .mg-box.mg-shaking, .mg-play-panel--admin-preview .mg-box.mg-opening, .mg-play-panel--admin-preview .mg-box.mg-opening .mg-box-lid, .mg-play-panel--admin-preview .mg-box-scene.is-opening, .mg-play-panel--admin-preview .mg-box-scene.is-shaking .mg-box-aura { animation:none!important; transition-duration:.01ms!important; }
+    .mg-play-panel--main-site .mg-box-scene, .mg-play-panel--main-site .mg-box, .mg-play-panel--main-site .mg-box.mg-shaking, .mg-play-panel--main-site .mg-box.mg-opening, .mg-play-panel--main-site .mg-box.mg-opening .mg-box-lid, .mg-play-panel--main-site .mg-box-scene.is-opening, .mg-play-panel--main-site .mg-box-scene.is-shaking .mg-box-aura { animation:none!important; transition-duration:.01ms!important; }
     .mg-play-panel:not(.mg-play-panel--main-site) .mg-box, .mg-play-panel:not(.mg-play-panel--main-site) .mg-box.mg-shaking, .mg-play-panel:not(.mg-play-panel--main-site) .mg-box-scene.is-shaking .mg-box-aura { animation: none; }
   }
 </style>
@@ -229,7 +230,7 @@
     const boxScene = panel.querySelector('.mg-box-scene-el');
     const adminPreview = panel.classList.contains('mg-play-panel--admin-preview');
     const mainSiteExperience = panel.classList.contains('mg-play-panel--main-site');
-    const visualExperience = mainSiteExperience || panel.classList.contains('mg-play-panel--admin-preview');
+    const visualExperience = mainSiteExperience;
     const card = panel.querySelector('.mg-card-el');
     const cardIcon = panel.querySelector('.mg-card-icon-el');
     const cardImage = panel.querySelector('.mg-card-image-el');

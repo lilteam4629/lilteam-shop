@@ -74,7 +74,7 @@ assert.match(minigameRail, /new AbortController\(\)[\s\S]{0,180}10000/, 'rail pr
 assert.match(minigameRail, /function warmup\(now\)[\s\S]{0,420}requestAnimationFrame\(warmup\)/, 'rail must begin continuously moving while the result is being selected');
 assert.ok(minigameRail.indexOf('if(!reduceMotion)spinFrame=requestAnimationFrame(warmup)') < minigameRail.indexOf('await fetch('), 'rail movement must start before waiting for the weighted result');
 assert.match(minigameRail, /const prefersReducedMotion=window\.matchMedia/, 'shop rail still detects the visitor’s reduced-motion setting');
-assert.match(minigameRail, /const reduceMotion=prefersReducedMotion&&!adminPreview/, 'customer pages respect reduced motion while admin tests reproduce the real rail');
+assert.match(minigameRail, /const reduceMotion=prefersReducedMotion;/, 'customer pages and admin previews respect the same reduced-motion setting');
 assert.match(minigameRail, /Math\.max\(8500,Math\.min\(12000,distance\/420\*1000\)\)/, 'rail must travel through a long, progressive deceleration instead of a short jump');
 assert.match(minigameRail, /track\.children\[winnerIndex\]\.replaceWith\(item\(winner,true\)\)/, 'the reel must finish on the exact server-selected weighted reward');
 assert.match(minigameRail, /\[winnerIndex-1,winnerIndex\+1\]/, 'the selected item must remain visually distinct from an identical adjacent card');
@@ -89,12 +89,13 @@ assert.doesNotMatch(minigameExperiment, /catalogPreview\.select\(/, 'minigame pr
 assert.equal((minigameExperiment.match(/class="mgx-game-tabs"/g) || []).length, 1, 'box and rail preview tabs must remain exactly once');
 assert.doesNotMatch(minigameWidget, /lilteamLiveCatalogPreview\.pick\(catalog\.products\)/, 'box preview must follow the configured random weights');
 assert.doesNotMatch(minigameRail, /lilteamLiveCatalogPreview\.pick\(catalog\.products\)/, 'rail preview must follow the configured random weights');
-assert.match(minigameWidget, /mg-play-panel--admin-preview/, 'admin box preview must use its own layout instead of depending on Tailwind');
+assert.match(minigameWidget, /\.mg-play-panel \{[\s\S]{0,260}display: flex[\s\S]{0,120}padding: 1\.5rem/, 'box layout must be defined in the shared partial so admin and storefront match without a Tailwind dependency');
 assert.match(minigameWidget, /mg-preview-prize-list/, 'admin box preview must display its actual reward pool');
 assert.match(minigameWidget, /data-preview-unavailable="true"/, 'empty box previews must stay disabled after browser-cache recovery');
 assert.match(minigameRail, /rail-game--admin-preview/, 'admin rail preview must share its responsive game surface');
 assert.doesNotMatch(minigameExperimentCss, /\.mgx-product-picker|\.mgx-product-grid|\.mgx-product-card/, 'removed chooser styles must not remain in the minigame stylesheet');
-assert.match(minigameExperimentCss, /\.mgx-preview-panel \.mg-result-el\{[^}]*text-align:center/, 'box preview status must remain centered and readable');
+assert.doesNotMatch(minigameExperimentCss, /\.mgx-preview-panel \.(?:mg-stage|mg-result-el|mg-play-btn|rail-game|rail-window|rail-result)/, 'admin preview CSS must not change the customer game dimensions or motion surface');
+assert.doesNotMatch(minigameExperimentCss, /\.mgx-preview-panel \.mg-play-panel\{[^}]*\b(?:padding|height|min-height|display|gap):/, 'admin preview CSS must not resize the customer box surface');
 const liveCatalogFixture = buildLiveCatalogPreview({
   settings: { shopName: 'LILTeam Shop' },
   products: [

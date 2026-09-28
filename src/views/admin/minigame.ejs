@@ -89,7 +89,7 @@
       <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">🎁 ทดสอบเล่นเกมเปิดกล่อง</h3>
       <span class="text-[11px] text-[var(--gold-text)] bg-[var(--gold)]/10 px-2.5 py-0.5 rounded-full font-semibold">โหมดทดสอบ</span>
     </div>
-    <%- include('../partials/minigame-widget', { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, adminPreview: true, previewPrizes: prizes.filter(prize => prize.active && (prize.gameType || 'box') === 'box' && Number(prize.percent) > 0 && (prize.stock === null || Number(prize.stock) > 0)) }) %>
+    <%- include('../partials/minigame-widget', { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, mainSiteExperience: typeof isMainSite !== 'undefined' && isMainSite, adminPreview: true, previewPrizes: prizes.filter(prize => prize.active && (prize.gameType || 'box') === 'box' && Number(prize.percent) > 0 && (prize.stock === null || Number(prize.stock) > 0)) }) %>
   </div>
 
   <div class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 shadow-sm">
@@ -97,7 +97,7 @@
       <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">🎰 ทดสอบเล่นเกมรางเลื่อน</h3>
       <span class="text-[11px] text-[var(--gold-text)] bg-[var(--gold)]/10 px-2.5 py-0.5 rounded-full font-semibold">โหมดทดสอบ</span>
     </div>
-    <%- include('../partials/minigame-rail', { endpoint: '/admin/minigame/preview?mode=rail', cost: null, prizes: prizes.filter(p => p.active && (p.gameType || 'box') === 'rail' && Number(p.percent) > 0 && (p.stock === null || Number(p.stock) > 0)).map(p => ({ ...p, image: p.resolvedImage || p.image || null })), showLogin: false, balance: null, adminPreview: true }) %>
+    <%- include('../partials/minigame-rail', { endpoint: '/admin/minigame/preview?mode=rail', cost: null, prizes: prizes.filter(p => p.active && (p.gameType || 'box') === 'rail' && Number(p.percent) > 0 && (p.stock === null || Number(p.stock) > 0)).map(p => ({ ...p, image: p.resolvedImage || p.image || null })), showLogin: false, balance: null, mainSiteExperience: typeof isMainSite !== 'undefined' && isMainSite, adminPreview: true }) %>
   </div>
 </div>
 
