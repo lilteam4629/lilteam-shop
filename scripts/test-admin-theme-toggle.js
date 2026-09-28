@@ -6,7 +6,9 @@ const vm = require('node:vm');
 const path = require('node:path');
 
 const read = (file) => fs.readFileSync(path.join(__dirname, file), 'utf8');
-const bootstrapSource = read('../public/js/admin-theme-bootstrap-v1.js');
+const bootstrapSource = read('../src/views/partials/admin-theme-bootstrap.ejs')
+  .replace(/^\s*<script>\s*/, '')
+  .replace(/\s*<\/script>\s*$/, '');
 const toggleSource = read('../public/js/admin-theme-toggle-v1.js');
 const legacyLayout = read('../src/views/layouts/admin.ejs');
 const experimentLayout = read('../src/views/layouts/admin-experiment.ejs');
@@ -83,9 +85,10 @@ animationFrames.shift()();
 assert.equal(root.classList.contains('admin-theme-switching'), false, 'the no-transition guard should clear after two frames');
 
 for (const [name, layout] of [['legacy', legacyLayout], ['experiment', experimentLayout]]) {
-  const bootstrapIndex = layout.indexOf('admin-theme-bootstrap-v1.js');
+  const bootstrapIndex = layout.indexOf('partials/admin-theme-bootstrap');
   const stylesheetIndex = layout.indexOf('rel="stylesheet"');
   assert.ok(bootstrapIndex >= 0 && bootstrapIndex < stylesheetIndex, name + ' theme preference must be applied before stylesheets');
+  assert.doesNotMatch(layout, /admin-theme-bootstrap-v1\.js/, name + ' layout must not block first paint on a theme boot request');
   assert.match(layout, /admin-theme-toggle-v1\.js/, name + ' layout must install the switch handler');
   assert.match(layout, /admin-dark-mode-v1\.css/, name + ' layout must include the shared theme palette');
   assert.match(layout, /partials\/admin-theme-toggle/, name + ' layout must include the accessible theme control');

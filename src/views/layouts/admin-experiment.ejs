@@ -1,16 +1,27 @@
 <!doctype html>
-<% const hasBuiltAdminShell = typeof body === 'string' && /class="experiment-app(?:\s|\")/.test(body); %>
+<%
+  const routeStylesheetPattern = /<link\b(?=[^>]*\brel\s*=\s*(?:"stylesheet"|'stylesheet'))[^>]*\/?\s*>/gi;
+  const routeStylesheets = [];
+  const pageBody = typeof body === 'string'
+    ? body.replace(routeStylesheetPattern, (tag) => {
+      routeStylesheets.push(tag.replace(/\/?\s*>$/, (end) => ` data-route-stylesheet${end}`));
+      return '';
+    })
+    : body;
+  const routeStylesheetMarkup = routeStylesheets.join('\n');
+  const hasBuiltAdminShell = typeof body === 'string' && /class="experiment-app(?:\s|\")/.test(body);
+%>
 <% const pendingAdminNotificationCount = Math.max(0, Number(pendingTopupCount) || 0); %>
 <% const notificationLabel = pendingAdminNotificationCount ? `คำขอเติมเงินรอตรวจสอบ ${pendingAdminNotificationCount} รายการ` : 'ดูการแจ้งเตือน'; %>
 <% const notificationBadge = pendingAdminNotificationCount ? `<span class="experiment-notification-count" aria-hidden="true">${pendingAdminNotificationCount > 99 ? '99+' : pendingAdminNotificationCount}</span>` : ''; %>
 <% const adminThemeToggle = include('../partials/admin-theme-toggle'); %>
 <% const sharedAdminTopbar = '<header class="experiment-topbar"><span class="experiment-topbar-spacer" aria-hidden="true"></span><button class="experiment-icon-button experiment-menu-trigger" type="button" data-experiment-menu-open aria-label="เปิดเมนูหมวดหมู่" aria-controls="experiment-mobile-menu" aria-expanded="false" title="เปิดเมนูหมวดหมู่"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>' + adminThemeToggle + '<button class="experiment-icon-button" type="button" data-experiment-notifications aria-label="' + notificationLabel + '" title="' + notificationLabel + '"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>' + notificationBadge + '</button><span class="experiment-user-name" aria-label="ผู้ดูแลระบบ">admin</span></header>'; %>
-<% const normalizedAdminBody = hasBuiltAdminShell ? body.replace(/<header\b(?=[^>]*\bclass="[^"]*\bexperiment-topbar\b[^"]*")[^>]*>[\s\S]*?<\/header>/gi, sharedAdminTopbar) : body; %>
+<% const normalizedAdminBody = hasBuiltAdminShell ? pageBody.replace(/<header\b(?=[^>]*\bclass="[^"]*\bexperiment-topbar\b[^"]*")[^>]*>[\s\S]*?<\/header>/gi, sharedAdminTopbar) : pageBody; %>
 <html lang="th" data-admin-theme="light" class="admin-unified-site <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="<%= asset('js/admin-theme-bootstrap-v1.js') %>"></script>
+  <%- include('../partials/admin-theme-bootstrap') %>
   <title><%= title %> | <%= settings.shopName || 'ร้านค้า' %></title>
   <meta name="description" content="ระบบจัดการร้านค้า <%= settings.shopName || 'ร้านค้า' %>" />
   <% if (settings.branding && settings.branding.logoImage) { %><link rel="icon" href="<%= settings.branding.logoImage %>" /><% } %>
@@ -26,6 +37,7 @@
   <% } %>
   <link rel="stylesheet" href="<%= asset('css/admin-experiment-v1.css') %>" />
   <style><%- typeof adminBrandCss !== 'undefined' ? adminBrandCss : '' %></style>
+  <%- routeStylesheetMarkup %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-main-neutral-borders-v1.css') %>" /><% } %>
   <link rel="stylesheet" href="<%= asset('css/admin-dark-mode-v1.css') %>" />
 </head>
@@ -37,7 +49,7 @@
     <div class="experiment-app" data-experiment-framed-page>
       <div class="experiment-main">
         <%- sharedAdminTopbar %>
-        <main class="experiment-content"><div class="experiment-legacy-content"><%- body %></div></main>
+        <main class="experiment-content"><div class="experiment-legacy-content"><%- pageBody %></div></main>
       </div>
     </div>
     <nav class="experiment-mobile-nav" aria-label="เมนูมือถือ"><a href="/admin">⌂<span>ภาพรวม</span></a><a href="/admin/products">▦<span>สินค้า</span></a><a href="/admin/orders">▤<span>คำสั่งซื้อ</span></a><a href="/admin/topups">▭<span>การเงิน</span></a><a href="/admin/settings">⚙<span>ตั้งค่า</span></a></nav>

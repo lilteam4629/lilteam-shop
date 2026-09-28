@@ -46,6 +46,15 @@ async function fetchOk(requestPath, expectedType, headers = {}) {
   return response;
 }
 
+function assertStylesheetsInHead(html, page) {
+  const bodyIndex = html.indexOf('<body');
+  if (bodyIndex < 0) throw new Error(`${page} did not render a document body`);
+  const bodyMarkup = html.slice(bodyIndex);
+  if (/<link\b[^>]*\brel=["']stylesheet["']/i.test(bodyMarkup)) {
+    throw new Error(`${page} still loads a stylesheet after body paint`);
+  }
+}
+
 async function loginAsAdmin() {
   const body = 'username=admin&password=admin1234';
   const response = await request('/login', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
@@ -81,9 +90,14 @@ async function checkRecommendedCategoryHomepage(cookie) {
   if (saved.statusCode !== 302) throw new Error('product assignment to a recommended category failed');
 
   const home = await fetchOk('/', 'text/html');
+  assertStylesheetsInHead(home.body, '/');
   if (home.body.includes(`/game/${product.slug}`)) throw new Error('a categorized product still appears in the main homepage shelves');
   if (!home.body.includes(`/products?recommended=${encodeURIComponent(category.id)}`)) throw new Error('homepage category card does not lead to its selected product list');
   const categoryPage = await fetchOk(`/products?recommended=${encodeURIComponent(category.id)}`, 'text/html');
+  assertStylesheetsInHead(categoryPage.body, '/products?recommended=…');
+  if (!categoryPage.body.slice(0, categoryPage.body.indexOf('<body')).includes('data-route-stylesheet')) {
+    throw new Error('category page stylesheet was not promoted into the document head');
+  }
   if (!categoryPage.body.includes(`/game/${product.slug}`)) throw new Error('selected product is missing from its recommended category page');
 
   const disabled = await request(`/admin/recommended-categories/${encodeURIComponent(category.id)}/toggle`, { method: 'POST', headers: { cookie } });
@@ -116,6 +130,7 @@ async function checkMusicAcrossStorefront(cookie) {
   ];
   for (const page of pages) {
     const response = await fetchOk(page, 'text/html');
+    assertStylesheetsInHead(response.body, page);
     const widgets = response.body.match(/id="music-widget"/g) || [];
     if (widgets.length !== 1) throw new Error(`${page} should render exactly one persistent music widget, got ${widgets.length}`);
     if (!response.body.includes('data-video-id="abcdefghijk"')) throw new Error(`${page} rendered a different configured music track`);
@@ -455,12 +470,14 @@ async function crawlAdmin(cookie) {
     if (!page.body.includes('data-admin-theme-toggle') || !page.body.includes('data-admin-theme="light"')) {
       throw new Error(`main admin route is missing its default light theme or accessible theme switch: ${requestPath}`);
     }
-    if (!page.body.includes('/js/admin-theme-bootstrap-v1.js') || !page.body.includes('/js/admin-theme-toggle-v1.js') || page.body.includes('/js/admin-dark-surface-audit-v1.js') || !page.body.includes('/css/admin-dark-mode-v1.css')) {
+    if (!page.body.includes("localStorage.getItem('lilteam_admin_theme')") || !page.body.includes('/js/admin-theme-toggle-v1.js') || page.body.includes('/js/admin-theme-bootstrap-v1.js') || page.body.includes('/js/admin-dark-surface-audit-v1.js') || !page.body.includes('/css/admin-dark-mode-v1.css')) {
       throw new Error(`main admin route is missing the prepaint theme switch/palette or loaded a late recolor scan: ${requestPath}`);
     }
     if (page.body.includes('id="admin-sidebar"') || page.body.includes('ผู้ดูแลระบบ · รุ่นทดลอง')) {
       throw new Error(`legacy admin shell leaked into the main shop: ${requestPath}`);
     }
+    const adminBody = page.body.slice(page.body.indexOf('<body'));
+    if (/<link\b[^>]*\brel=["']stylesheet["']/i.test(adminBody)) throw new Error(`admin route stylesheet is being loaded after body paint: ${requestPath}`);
     for (const match of page.body.matchAll(/href=["']([^"'#]+)["']/g)) {
       if (!match[1].startsWith('/admin')) continue;
       const url = new URL(match[1], baseUrl);

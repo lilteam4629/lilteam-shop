@@ -8,6 +8,7 @@ const motionCss = read('public/css/scroll-motion-v1.css');
 const motionJs = read('public/js/scroll-motion-v1.js');
 const layout = read('src/views/layouts/main.ejs');
 const adminLayout = read('src/views/layouts/admin.ejs');
+const adminExperimentLayout = read('src/views/layouts/admin-experiment.ejs');
 const shopRoutes = read('src/routes/shop.js');
 const homeView = read('src/views/shop/home.ejs');
 const welcomePopupCss = read('public/css/storefront-welcome-popup-experiment-v1.css');
@@ -22,6 +23,19 @@ const productDetail = read('src/views/shop/product-detail.ejs');
 const productForm = read('src/views/admin/product-form.ejs');
 const adminProducts = read('src/views/admin/products.ejs');
 const rangerMarketJs = read('public/js/storefront-rangers-market-v1.js');
+
+for (const [name, routeLayout] of [['storefront', layout], ['admin', adminLayout], ['admin experiment', adminExperimentLayout]]) {
+  assert.match(routeLayout, /data-route-stylesheet/, `${name} must promote page stylesheets into the document head`);
+  assert.match(routeLayout, /routeStylesheetMarkup/, `${name} layout must render extracted page stylesheets before body content`);
+}
+const styleReadyIndex = layout.indexOf('await prepareRouteStyles');
+const shellSwapIndex = layout.indexOf('currentShell.replaceWith(nextShell)');
+assert.ok(styleReadyIndex >= 0 && styleReadyIndex < shellSwapIndex,
+  'seamless storefront navigation must finish loading destination styles before swapping the page shell');
+assert.match(layout, /waitForStylesheet\(link, signal\)/,
+  'route navigation must wait for stylesheet completion and support aborting stale requests');
+assert.match(layout, /commitRouteStyles\(routeStyles\)/,
+  'old route styles must be retired only as the new page is committed');
 
 assert.match(hero, /locker-hero-v1\.css/, 'large hero styles must be a cacheable asset');
 assert.doesNotMatch(hero, /<style>/, 'large hero CSS must not be repeated in every home response');

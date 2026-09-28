@@ -1,3 +1,14 @@
+<%
+  const routeStylesheetPattern = /<link\b(?=[^>]*\brel\s*=\s*(?:"stylesheet"|'stylesheet'))[^>]*\/?\s*>/gi;
+  const routeStylesheets = [];
+  const pageBody = typeof body === 'string'
+    ? body.replace(routeStylesheetPattern, (tag) => {
+      routeStylesheets.push(tag.replace(/\/?\s*>$/, (end) => ` data-route-stylesheet${end}`));
+      return '';
+    })
+    : body;
+  const routeStylesheetMarkup = routeStylesheets.join('\n');
+%>
 <!DOCTYPE html>
 <html lang="th" data-admin-theme="light" class="admin-unified-site <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 <head>
@@ -6,7 +17,7 @@
   <% const workspaceEnabled = false; %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <script src="<%= asset('js/admin-theme-bootstrap-v1.js') %>"></script>
+  <%- include('../partials/admin-theme-bootstrap') %>
   <title><%= title %> | ระบบจัดการหลังบ้าน - <%= settings.shopName || 'ร้านค้า' %></title>
   <% if (settings.branding && settings.branding.logoImage) { %>
     <link rel="icon" href="<%= settings.branding.logoImage %>" />
@@ -143,6 +154,7 @@
       animation: toast-slide-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
   </style>
+  <%- routeStylesheetMarkup %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-main-neutral-borders-v1.css') %>" /><% } %>
   <link rel="stylesheet" href="<%= asset('css/admin-dark-mode-v1.css') %>" />
 </head>
@@ -481,7 +493,7 @@
       <% } %>
 
       <!-- Primary Page Body -->
-      <%- body %>
+      <%- pageBody %>
 
     </main>
 

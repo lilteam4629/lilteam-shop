@@ -1,3 +1,16 @@
+<%
+  // Route views historically emitted stylesheets at the top of <body>.
+  // Promote them into <head> so route-specific CSS is ready before first paint.
+  const routeStylesheetPattern = /<link\b(?=[^>]*\brel\s*=\s*(?:"stylesheet"|'stylesheet'))[^>]*\/?\s*>/gi;
+  const routeStylesheets = [];
+  const pageBody = typeof body === 'string'
+    ? body.replace(routeStylesheetPattern, (tag) => {
+      routeStylesheets.push(tag.replace(/\/?\s*>$/, (end) => ` data-route-stylesheet${end}`));
+      return '';
+    })
+    : body;
+  const routeStylesheetMarkup = routeStylesheets.join('\n');
+%>
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -208,6 +221,7 @@
   <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-hero-cozy-v1.css') %>" /><% } %>
   <link rel="stylesheet" href="<%= asset('css/storefront-product-artwork-full-v1.css') %>" />
   <link rel="stylesheet" href="<%= asset('css/storefront-home-section-spacing-v1.css') %>" />
+  <%- routeStylesheetMarkup %>
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront ? ' storefront-unified' : '' %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh ? ' storefront-customer-refresh' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %>">
   <div id="page-loading-overlay" aria-hidden="true">
@@ -238,7 +252,7 @@
         <% }) %>
       </div>
     <% } %>
-    <%- body %>
+    <%- pageBody %>
   </main>
 
   <%- include('../partials/footer') %>
@@ -337,7 +351,89 @@
     // move around the storefront. Only the server-rendered page shell is replaced.
     (function () {
       const SHELL_ID = 'site-page-shell';
+      const ROUTE_STYLE_SELECTOR = 'link[data-route-stylesheet]';
       let activeRequest = null;
+
+      function routeStyleKey(link, baseUrl) {
+        const href = link.getAttribute('href');
+        if (!href) return '';
+        return new URL(href, baseUrl || window.location.href).href + '|' + (link.getAttribute('media') || 'all');
+      }
+
+      function waitForStylesheet(link, signal) {
+        return new Promise(function (resolve, reject) {
+          let settled = false;
+          const timer = setTimeout(function () { finish(new Error('Route stylesheet timed out.')); }, 10000);
+          function cleanup() {
+            clearTimeout(timer);
+            link.removeEventListener('load', onLoad);
+            link.removeEventListener('error', onError);
+            signal.removeEventListener('abort', onAbort);
+          }
+          function finish(error) {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            if (error) reject(error); else resolve();
+          }
+          function onLoad() { finish(); }
+          function onError() { finish(new Error('Route stylesheet failed to load.')); }
+          function onAbort() { finish(signal.reason || new Error('Navigation aborted.')); }
+          link.addEventListener('load', onLoad, { once: true });
+          link.addEventListener('error', onError, { once: true });
+          signal.addEventListener('abort', onAbort, { once: true });
+          if (signal.aborted) onAbort();
+        });
+      }
+
+      async function prepareRouteStyles(nextDocument, nextShell, baseUrl, signal) {
+        const sources = Array.from(nextDocument.head.querySelectorAll(ROUTE_STYLE_SELECTOR));
+        // Keep compatibility with older templates while all view links move to
+        // <head>; never let a missed body link paint with unstyled content.
+        nextShell.querySelectorAll('link[rel="stylesheet"]').forEach(function (link) {
+          link.dataset.routeStylesheet = 'true';
+          sources.push(link);
+        });
+        const existing = new Map(Array.from(document.head.querySelectorAll(ROUTE_STYLE_SELECTOR)).map(function (link) {
+          return [routeStyleKey(link), link];
+        }));
+        const keep = [];
+        const created = [];
+        const pending = [];
+        try {
+          sources.forEach(function (source) {
+            const key = routeStyleKey(source, baseUrl);
+            if (!key) return;
+            let link = existing.get(key);
+            if (!link) {
+              link = document.createElement('link');
+              Array.from(source.attributes).forEach(function (attribute) {
+                if (attribute.name === 'href') link.href = new URL(attribute.value, baseUrl).href;
+                else link.setAttribute(attribute.name, attribute.value);
+              });
+              link.dataset.routeStylesheet = 'true';
+              created.push(link);
+              pending.push(waitForStylesheet(link, signal));
+              document.head.appendChild(link);
+              existing.set(key, link);
+            }
+            keep.push(link);
+          });
+          await Promise.all(pending);
+          if (signal.aborted) throw (signal.reason || new Error('Navigation aborted.'));
+          return { keep: Array.from(new Set(keep)), created: created };
+        } catch (error) {
+          created.forEach(function (link) { link.remove(); });
+          throw error;
+        }
+      }
+
+      function commitRouteStyles(routeStyles) {
+        const keep = new Set(routeStyles.keep);
+        document.head.querySelectorAll(ROUTE_STYLE_SELECTOR).forEach(function (link) {
+          if (!keep.has(link)) link.remove();
+        });
+      }
 
       function samePageHashOnly(url) {
         return url.pathname === window.location.pathname
@@ -434,10 +530,13 @@
             return;
           }
 
+          const routeStyles = await prepareRouteStyles(nextDocument, nextShell, finalUrl, request.signal);
+
           if (options.history !== 'pop') saveScrollPosition();
           document.dispatchEvent(new CustomEvent('lilteam:page-unloading'));
           const swapPage = function () {
             currentShell.replaceWith(nextShell);
+            commitRouteStyles(routeStyles);
             document.title = nextDocument.title;
             runPageScripts(nextShell);
           };
