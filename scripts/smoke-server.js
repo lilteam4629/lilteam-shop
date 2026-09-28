@@ -779,6 +779,8 @@ async function run() {
     if (!productDetail.body.includes('ตัวที่มีในไอดีนี้') || !productDetail.body.includes('แนะนำ')) {
       throw new Error('product detail is missing its assigned filter information');
     }
+    const missingProduct = await request('/game/smoke-product-that-does-not-exist');
+    if (missingProduct.statusCode !== 404) throw new Error(`missing product returned HTTP ${missingProduct.statusCode} instead of 404`);
     await fetchOk('/css/storefront-mobile-v1.css', 'text/css');
     const scrollMotionCss = await fetchOk('/css/scroll-motion-v1.css', 'text/css');
     if (scrollMotionCss.body.includes('content-visibility:auto')) {
