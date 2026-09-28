@@ -458,6 +458,7 @@ const assertTenantMobileHeaderSpacing = (breakpoint, selector, expectedGap, prop
 };
 assertTenantMobileHeaderSpacing(900, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions', 8);
 assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', 8);
+assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner', 8, 'margin-inline');
 assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions', 8);
 
 const listingHtml = read('src/views/shop/listing.ejs');
