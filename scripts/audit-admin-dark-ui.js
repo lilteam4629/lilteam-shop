@@ -5,17 +5,17 @@ const fs = require('fs');
 const http = require('http');
 const os = require('os');
 const path = require('path');
+const { chromium } = require('playwright-core');
 
 const root = path.join(__dirname, '..');
-const profilePrefix = path.join(os.tmpdir(), 'lilteam-admin-dark-audit-');
 const dbPath = path.join(os.tmpdir(), `lilteam-admin-dark-audit-${process.pid}.json`);
 const browserPath = findBrowser();
-const profilePath = fs.mkdtempSync(profilePrefix);
 let server;
 let browser;
+let browserContext;
+let browserPage;
 let cdp;
 let dbPort;
-let debugPort;
 
 function findBrowser() {
   const candidates = [
@@ -77,7 +77,10 @@ async function waitForServer(port) {
 async function discoverAdminRoutes(cookie) {
   const queue = ['/admin'];
   const seen = new Set();
+  const queuedRouteKeys = new Set(['/admin']);
   const routes = [];
+  const routeKey = requestPath => new URL(requestPath, `http://127.0.0.1:${dbPort}`).pathname
+    .replace(/\/(?:\d+|[a-f0-9]{24})(?=\/|$)/gi, '/:id');
   while (queue.length) {
     const requestPath = queue.shift();
     if (seen.has(requestPath)) continue;
@@ -92,7 +95,11 @@ async function discoverAdminRoutes(cookie) {
       if (!match[1].startsWith('/admin')) continue;
       const url = new URL(match[1].replace(/&amp;/g, '&'), `http://127.0.0.1:${dbPort}`);
       const nextPath = url.pathname + url.search;
-      if (!seen.has(nextPath)) queue.push(nextPath);
+      const key = routeKey(nextPath);
+      if (!seen.has(nextPath) && !queuedRouteKeys.has(key)) {
+        queuedRouteKeys.add(key);
+        queue.push(nextPath);
+      }
     }
   }
   if (routes.length < 15) throw new Error(`Only found ${routes.length} admin pages; expected at least 15.`);
@@ -100,60 +107,41 @@ async function discoverAdminRoutes(cookie) {
 }
 
 class DevTools {
-  constructor(url) {
-    this.socket = new WebSocket(url);
-    this.nextId = 0;
-    this.pending = new Map();
-    this.events = new Map();
-    this.ready = new Promise((resolve, reject) => {
-      this.socket.addEventListener('open', resolve, { once: true });
-      this.socket.addEventListener('error', reject, { once: true });
-    });
-    this.socket.addEventListener('message', event => {
-      let message;
-      try { message = JSON.parse(event.data); } catch (_) { return; }
-      if (message.id) {
-        const entry = this.pending.get(message.id);
-        if (!entry) return;
-        this.pending.delete(message.id);
-        if (message.error) entry.reject(new Error(message.error.message));
-        else entry.resolve(message.result || {});
-        return;
-      }
-      for (const listener of this.events.get(message.method) || []) listener(message.params || {});
-    });
-  }
-
   async command(method, params = {}) {
-    await this.ready;
-    const id = ++this.nextId;
-    return new Promise((resolve, reject) => {
-      this.pending.set(id, { resolve, reject });
-      this.socket.send(JSON.stringify({ id, method, params }));
-    });
+    if (method === 'Page.enable' || method === 'Runtime.enable' || method === 'Network.enable') return {};
+    if (method === 'Page.addScriptToEvaluateOnNewDocument') {
+      await browserPage.addInitScript(params.source);
+      return {};
+    }
+    if (method === 'Network.setCookie') {
+      await browserContext.addCookies([{ name: params.name, value: params.value, url: params.url }]);
+      return {};
+    }
+    if (method === 'Network.setBlockedURLs') {
+      await browserPage.route(url => /fonts\.googleapis\.com|fonts\.gstatic\.com/.test(url.href), route => route.abort());
+      return {};
+    }
+    if (method === 'Emulation.setDeviceMetricsOverride') {
+      await browserPage.setViewportSize({ width: params.width, height: params.height });
+      return {};
+    }
+    if (method === 'Page.navigate') {
+      await browserPage.goto(params.url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+      return {};
+    }
+    if (method === 'Runtime.evaluate') {
+      const value = await browserPage.evaluate(source => eval(source), params.expression);
+      return { result: { value } };
+    }
+    throw new Error(`Unsupported browser audit operation: ${method}`);
   }
-
-  close() {
-    try { this.socket.close(); } catch (_) {}
-  }
-}
-
-async function waitForDebugEndpoint(port) {
-  for (let i = 0; i < 60; i += 1) {
-    try {
-      const response = await fetch(`http://127.0.0.1:${port}/json/version`);
-      if (response.ok) return response.json();
-    } catch (_) {}
-    await new Promise(resolve => setTimeout(resolve, 200));
-  }
-  throw new Error('Browser DevTools did not start.');
 }
 
 async function waitForPage() {
   const deadline = Date.now() + 30000;
   while (Date.now() < deadline) {
     const state = await cdp.command('Runtime.evaluate', { expression: 'document.readyState', returnByValue: true });
-    if (state.result?.value === 'complete') return;
+    if (state.result?.value !== 'loading') return;
     await new Promise(resolve => setTimeout(resolve, 80));
   }
   throw new Error('A page did not finish loading in the browser.');
@@ -166,14 +154,26 @@ async function evaluate(expression) {
 }
 
 async function auditPage(requestPath, viewport) {
+  console.log(`Checking ${viewport.name} ${requestPath}`);
   await cdp.command('Emulation.setDeviceMetricsOverride', {
     width: viewport.width, height: viewport.height, deviceScaleFactor: 1, mobile: viewport.mobile,
   });
   await cdp.command('Page.navigate', { url: `http://127.0.0.1:${dbPort}${requestPath}` });
   await waitForPage();
+  const surfaceScanComplete = await browserPage.waitForFunction(
+    () => window.__adminDarkSurfaceAuditComplete === true,
+    null,
+    { timeout: 20000 },
+  ).then(() => true).catch(() => false);
   if (requestPath === '/admin') {
     const probeResult = await cdp.command('Runtime.evaluate', { expression: `(() => { const dialog = document.querySelector('.experiment-menu-dialog'); if (dialog && !dialog.open) dialog.showModal(); const probe = document.createElement('div'); probe.id = 'admin-dark-audit-probe'; probe.textContent = 'probe'; probe.style.cssText = 'position:fixed;z-index:2147483647;left:2px;bottom:2px;width:40px;height:40px;background:#fff;color:#111'; document.body.appendChild(probe); const srgbProbe = document.createElement('div'); srgbProbe.id = 'admin-dark-srgb-probe'; srgbProbe.textContent = 'srgb'; srgbProbe.style.cssText = 'position:fixed;z-index:2147483647;left:48px;bottom:2px;width:40px;height:40px;background-color:color(srgb 0.92 0.91 0.87);background-image:linear-gradient(color(srgb 0.92 0.91 0.87),color(srgb 0.85 0.84 0.8));color:#111'; document.body.appendChild(srgbProbe); })()`, returnByValue: true });
     if (probeResult.exceptionDetails) throw new Error(probeResult.exceptionDetails.exception?.description || probeResult.exceptionDetails.text || 'Probe injection failed.');
+    await browserPage.waitForFunction(() => {
+      const probe = document.querySelector('#admin-dark-audit-probe');
+      const srgbProbe = document.querySelector('#admin-dark-srgb-probe');
+      return probe && srgbProbe && probe.hasAttribute('data-admin-dark-bg') && probe.hasAttribute('data-admin-dark-ink')
+        && srgbProbe.hasAttribute('data-admin-dark-bg') && srgbProbe.hasAttribute('data-admin-dark-ink');
+    }, null, { timeout: 4000 }).catch(() => {});
   }
   await new Promise(resolve => setTimeout(resolve, 120));
   const result = await evaluate(`(() => {
@@ -278,30 +278,28 @@ async function auditPage(requestPath, viewport) {
     const auditScript = Array.from(document.scripts).find(script => script.src.includes('admin-dark-surface-audit-v1.js'));
     const scriptTiming = performance.getEntriesByType('resource').find(entry => entry.name.includes('admin-dark-surface-audit-v1.js'));
     const probe = document.querySelector('#admin-dark-audit-probe');
-    const dynamicProbe = probe ? { background: getComputedStyle(probe).backgroundColor, color: getComputedStyle(probe).color, bgMarker: probe.getAttribute('data-admin-dark-bg'), inkMarker: probe.getAttribute('data-admin-dark-ink') } : null;
+    const probeTextContrast = element => { const foreground = color(getComputedStyle(element).color); return foreground ? contrast(composite(foreground, { r: 0, g: 0, b: 0 }), { r: 0, g: 0, b: 0 }) : 0; };
+    const dynamicProbe = probe ? { background: getComputedStyle(probe).backgroundColor, color: getComputedStyle(probe).color, textContrast: probeTextContrast(probe), bgMarker: probe.getAttribute('data-admin-dark-bg'), inkMarker: probe.getAttribute('data-admin-dark-ink') } : null;
     const srgbProbe = document.querySelector('#admin-dark-srgb-probe');
-    const dynamicSrgbProbe = srgbProbe ? { background: getComputedStyle(srgbProbe).backgroundColor, image: getComputedStyle(srgbProbe).backgroundImage, color: getComputedStyle(srgbProbe).color, bgMarker: srgbProbe.getAttribute('data-admin-dark-bg'), inkMarker: srgbProbe.getAttribute('data-admin-dark-ink') } : null;
+    const dynamicSrgbProbe = srgbProbe ? { background: getComputedStyle(srgbProbe).backgroundColor, image: getComputedStyle(srgbProbe).backgroundImage, color: getComputedStyle(srgbProbe).color, textContrast: probeTextContrast(srgbProbe), bgMarker: srgbProbe.getAttribute('data-admin-dark-bg'), inkMarker: srgbProbe.getAttribute('data-admin-dark-ink') } : null;
     return { title: document.title, viewportWidth: innerWidth, status: body.innerText.trim().slice(0, 55), dark: root.dataset.adminTheme, toggle: !!document.querySelector('[data-admin-theme-toggle]'), bodyVisible: getComputedStyle(body).visibility !== 'hidden', booting: root.classList.contains('admin-theme-booting'), bootTrace: window.__adminDarkBootTrace || null, bodyClass: body.className, bodyBackground: getComputedStyle(body).backgroundColor, canvasBackground: getComputedStyle(root).backgroundColor, dynamicProbe, dynamicSrgbProbe, auditScript: auditScript && { src: auditScript.src, loaded: auditScript.readyState || 'present' }, scriptTransferSize: scriptTiming && scriptTiming.transferSize, markedBackgrounds: body.querySelectorAll('[data-admin-dark-bg]').length, lightSurfaces: offenders.slice(0, 8), offBlackNeutrals: offBlackNeutrals.slice(0, 8), lowContrast: lowContrast.slice(0, 8), lightSurfaceCount: offenders.length, offBlackNeutralCount: offBlackNeutrals.length, lowContrastCount: lowContrast.length };
   })()`);
   if (requestPath === '/admin') await cdp.command('Runtime.evaluate', { expression: `document.querySelector('#admin-dark-audit-probe')?.remove(); document.querySelector('.experiment-menu-dialog')?.close()` });
+  result.surfaceScanComplete = surfaceScanComplete;
   return result;
 }
 
 async function cleanup() {
-  if (cdp) cdp.close();
-  if (browser && !browser.killed) browser.kill();
+  if (browser) {
+    try { await browser.close(); } catch (_) {}
+  }
   if (server && !server.killed) server.kill();
   await new Promise(resolve => setTimeout(resolve, 400));
   try { fs.unlinkSync(dbPath); } catch (_) {}
-  const resolvedProfile = path.resolve(profilePath);
-  if (resolvedProfile.startsWith(path.resolve(os.tmpdir()) + path.sep) && path.basename(resolvedProfile).startsWith('lilteam-admin-dark-audit-')) {
-    try { fs.rmSync(resolvedProfile, { recursive: true, force: true }); } catch (_) {}
-  }
 }
 
 (async () => {
   dbPort = await freePort();
-  debugPort = await freePort();
   server = spawn(process.execPath, ['src/app.js'], {
     cwd: root,
     env: { ...process.env, PORT: String(dbPort), NODE_ENV: 'test', TEST_DB_PATH: dbPath, MONGODB_URI: '', DISCORD_BOT_TOKEN: '', LICENSE_GATE: 'off' },
@@ -316,25 +314,23 @@ async function cleanup() {
   const [cookieName, ...cookieValueParts] = cookie.split('=');
   const cookieValue = cookieValueParts.join('=');
   const routes = await discoverAdminRoutes(cookie);
+  console.log(`Browser audit discovered ${routes.length} distinct admin page templates.`);
 
-  browser = spawn(browserPath, [
-    '--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check', '--disable-background-networking',
-    '--disable-features=Translate,MediaRouter', '--remote-allow-origins=*', `--remote-debugging-port=${debugPort}`,
-    `--user-data-dir=${profilePath}`, 'about:blank',
-  ], { stdio: 'ignore' });
-  const version = await waitForDebugEndpoint(debugPort);
-  const targetsResponse = await fetch(`http://127.0.0.1:${debugPort}/json/list`);
-  const targets = await targetsResponse.json();
-  const target = targets.find(item => item.type === 'page');
-  if (!target) throw new Error('Browser did not expose a page target.');
-  cdp = new DevTools(target.webSocketDebuggerUrl);
-  await cdp.ready;
+  console.log(`Starting isolated headless audit browser: ${path.basename(browserPath)}.`);
+  browser = await chromium.launch({
+    headless: true,
+    executablePath: browserPath,
+    args: ['--disable-gpu', '--no-first-run', '--no-default-browser-check', '--disable-background-networking', '--disable-features=Translate,MediaRouter'],
+  });
+  browserContext = await browser.newContext({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 1 });
+  browserPage = await browserContext.newPage();
+  cdp = new DevTools(browserPage);
   await cdp.command('Page.enable');
   await cdp.command('Runtime.enable');
   await cdp.command('Network.enable');
   await cdp.command('Network.setBlockedURLs', { urls: ['https://fonts.googleapis.com/*', 'https://fonts.gstatic.com/*'] });
   await cdp.command('Network.setCookie', { name: cookieName, value: cookieValue, url: `http://127.0.0.1:${dbPort}` });
-  await cdp.command('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('lilteam_admin_theme', 'dark'); } catch (_) {}\nwindow.__adminDarkBootTrace = { visibilityWhileBooting: null, visibilityAfterScan: null };\nconst bootTraceObserver = new MutationObserver(() => { const trace = window.__adminDarkBootTrace; const root = document.documentElement; if (!trace || !document.body) return; if (root.classList.contains('admin-theme-booting') && trace.visibilityWhileBooting === null) trace.visibilityWhileBooting = getComputedStyle(document.body).visibility; if (trace.visibilityWhileBooting !== null && !root.classList.contains('admin-theme-booting')) { trace.visibilityAfterScan = getComputedStyle(document.body).visibility; bootTraceObserver.disconnect(); } });\nbootTraceObserver.observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });` });
+  await cdp.command('Page.addScriptToEvaluateOnNewDocument', { source: `try { localStorage.setItem('lilteam_admin_theme', 'dark'); } catch (_) {}\nwindow.__adminDarkBootTrace = { firstBodyVisibility: null, hiddenVisibilitySeen: false };\nconst bootTraceObserver = new MutationObserver(() => { const trace = window.__adminDarkBootTrace; if (!trace || !document.body) return; const visibility = getComputedStyle(document.body).visibility; if (trace.firstBodyVisibility === null) trace.firstBodyVisibility = visibility; if (visibility === 'hidden') trace.hiddenVisibilitySeen = true; });\nbootTraceObserver.observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });` });
 
   const failures = [];
   let checked = 0;
@@ -344,16 +340,19 @@ async function cleanup() {
     for (const route of routes.slice(0, routeLimit)) {
       const result = await auditPage(route, viewport);
       checked += 1;
+      if (checked % 5 === 0 || checked === routes.length * viewports.length) {
+        console.log(`Browser audit checked ${checked}/${Math.min(routeLimit, routes.length) * viewports.length} page views.`);
+      }
       const testedRoute = `${viewport.name}:${route}`;
       if (result.dark !== 'dark' || !result.toggle) failures.push({ route: testedRoute, problem: 'theme did not initialize or toggle missing', result });
-      if (!result.bodyVisible || result.booting) failures.push({ route: testedRoute, problem: 'dark-mode first-paint cloak did not clear after the initial scan', result });
-      if (!result.bootTrace || result.bootTrace.visibilityWhileBooting !== 'hidden' || result.bootTrace.visibilityAfterScan !== 'visible') failures.push({ route: testedRoute, problem: 'first content was not hidden until dark surfaces finished scanning', result: { bootTrace: result.bootTrace } });
+      if (!result.bodyVisible || result.booting || result.bootTrace?.hiddenVisibilitySeen) failures.push({ route: testedRoute, problem: 'admin content was hidden while the dark theme initialized', result: { bootTrace: result.bootTrace } });
+      if (!result.surfaceScanComplete) failures.push({ route: testedRoute, problem: 'dark surface audit did not finish within 20 seconds', result: { title: result.title, bodyClass: result.bodyClass } });
       if (result.lightSurfaceCount || result.lowContrastCount) failures.push({ route: testedRoute, problem: 'computed colors remain too light / low contrast', result: { title: result.title, viewportWidth: result.viewportWidth, bodyClass: result.bodyClass, bodyBackground: result.bodyBackground, auditScript: result.auditScript, scriptTransferSize: result.scriptTransferSize, markedBackgrounds: result.markedBackgrounds, lightSurfaceCount: result.lightSurfaceCount, lowContrastCount: result.lowContrastCount, lightSurfaces: result.lightSurfaces, lowContrast: result.lowContrast } });
       if (result.offBlackNeutralCount) failures.push({ route: testedRoute, problem: 'neutral UI surfaces are not pure black', result: { offBlackNeutralCount: result.offBlackNeutralCount, offBlackNeutrals: result.offBlackNeutrals } });
-      if (route === '/admin' && (!result.dynamicProbe || result.dynamicProbe.bgMarker !== 'surface' || result.dynamicProbe.inkMarker !== 'primary' || result.dynamicProbe.background !== 'rgb(0, 0, 0)')) {
+      if (route === '/admin' && (!result.dynamicProbe || result.dynamicProbe.bgMarker !== 'surface' || (result.dynamicProbe.inkMarker !== 'primary' && result.dynamicProbe.textContrast < 4.5) || result.dynamicProbe.background !== 'rgb(0, 0, 0)')) {
         failures.push({ route: testedRoute, problem: 'new dynamic content did not inherit a dark surface and readable ink', result: { dynamicProbe: result.dynamicProbe } });
       }
-      if (route === '/admin' && (!result.dynamicSrgbProbe || result.dynamicSrgbProbe.bgMarker !== 'surface' || result.dynamicSrgbProbe.inkMarker !== 'primary' || result.dynamicSrgbProbe.background !== 'rgb(0, 0, 0)' || result.dynamicSrgbProbe.image !== 'none')) {
+      if (route === '/admin' && (!result.dynamicSrgbProbe || result.dynamicSrgbProbe.bgMarker !== 'surface' || (result.dynamicSrgbProbe.inkMarker !== 'primary' && result.dynamicSrgbProbe.textContrast < 4.5) || result.dynamicSrgbProbe.background !== 'rgb(0, 0, 0)' || result.dynamicSrgbProbe.image !== 'none')) {
         failures.push({ route: testedRoute, problem: 'modern sRGB colors did not get converted to black surfaces', result: { dynamicSrgbProbe: result.dynamicSrgbProbe } });
       }
       const bodyColor = result.bodyBackground.match(/([\d.]+)/g)?.slice(0, 3).map(Number) || [];
@@ -376,6 +375,10 @@ async function cleanup() {
     failures.push({ route: firstRoute, problem: 'light/dark toggle did not switch and persist correctly', result: { lightMode, darkMode } });
   }
 
+  const problemCounts = failures.reduce((counts, failure) => {
+    counts[failure.problem] = (counts[failure.problem] || 0) + 1;
+    return counts;
+  }, {});
   const summary = failures.map(failure => ({
     route: failure.route,
     problem: failure.problem,
@@ -387,7 +390,7 @@ async function cleanup() {
     toggleCheck: failure.result?.lightMode ? { lightMode: failure.result.lightMode, darkMode: failure.result.darkMode } : undefined,
     examples: [...(failure.result?.lightSurfaces || []), ...(failure.result?.offBlackNeutrals || []), ...(failure.result?.lowContrast || [])].slice(0, 4).map(example => ({ ...example, ancestors: example.ancestors?.slice(0, 3) })),
   }));
-  console.log(JSON.stringify({ browser: path.basename(browserPath), browserVersion: version.Browser, adminPagesDiscovered: routes.length, viewportSizes: viewports.map(viewport => ({ name: viewport.name, width: viewport.width, height: viewport.height })), pagesChecked: checked, failureCount: failures.length, failures: summary.slice(0, 16), omittedFailures: Math.max(0, summary.length - 16) }, null, 2));
+  console.log(JSON.stringify({ browser: path.basename(browserPath), browserVersion: await browser.version(), adminPagesDiscovered: routes.length, viewportSizes: viewports.map(viewport => ({ name: viewport.name, width: viewport.width, height: viewport.height })), pagesChecked: checked, failureCount: failures.length, problemCounts, failures: summary.slice(0, 16), omittedFailures: Math.max(0, summary.length - 16) }, null, 2));
   if (failures.length) process.exitCode = 1;
 })().catch(error => {
   console.error(error.stack || error);

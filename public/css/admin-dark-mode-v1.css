@@ -4,8 +4,8 @@
   --ex-surface: #000000;
   --ex-ink: #ffffff;
   --ex-muted: #b3b3b3;
-  --ex-line: #242424;
-  --ex-sidebar: #000000;
+  --ex-line: #454545;
+  --ex-sidebar: #101010;
   --ex-shadow: 0 12px 30px rgba(0, 0, 0, .2);
   --ex-green-soft: #23352b;
   --ex-orange-soft: #3d2e1a;
@@ -14,7 +14,7 @@
   --admin-dark-surface: #000000;
   --admin-dark-raised: #000000;
   --admin-dark-input: #000000;
-  --admin-dark-line: #242424;
+  --admin-dark-line: #777777;
   --admin-dark-text: #ffffff;
   --admin-dark-muted: #b3b3b3;
   --bg: var(--admin-dark-canvas) !important;
@@ -23,7 +23,7 @@
   --theme-card-surface: var(--admin-dark-surface) !important;
   --theme-control-surface: var(--admin-dark-input) !important;
   --border: var(--admin-dark-line) !important;
-  --border-light: #303030 !important;
+  --border-light: #777777 !important;
   --input: var(--admin-dark-input) !important;
   --brand: var(--admin-brand-accent, #936344) !important;
   --gold: var(--admin-brand-fill, #70533c) !important;
@@ -67,6 +67,15 @@ html[data-admin-theme="dark"] body.experiment-admin {
   color-scheme: dark;
   color: var(--admin-dark-text) !important;
   background: var(--admin-dark-canvas) !important;
+}
+
+/* Keep background/text changes immediate so theme flips and late annotations
+   never fade through a white frame. Preserve motion that does not repaint
+   surfaces or text. */
+html[data-admin-theme="dark"] body.experiment-admin *,
+html[data-admin-theme="dark"] body.experiment-admin *::before,
+html[data-admin-theme="dark"] body.experiment-admin *::after {
+  transition-property: border-color, outline-color, box-shadow, opacity, transform, width, height, max-height !important;
 }
 
 html[data-admin-theme="dark"] .experiment-sidebar,
@@ -128,6 +137,8 @@ html[data-admin-theme="dark"] body.experiment-admin :is(input:not([type="checkbo
   color: var(--admin-dark-text) !important;
   background-color: var(--admin-dark-input) !important;
   border-color: var(--admin-dark-line) !important;
+  border-style: solid;
+  border-width: 1px;
   accent-color: var(--admin-brand-fill, #966746);
 }
 html[data-admin-theme="dark"] body.experiment-admin :is(input, textarea, [contenteditable="true"])::placeholder { color: #aaa69a; opacity: 1; }
@@ -137,6 +148,8 @@ html[data-admin-theme="dark"] body.experiment-admin :is(button, .btn, [role="but
   color: var(--admin-dark-text);
   background-color: var(--admin-dark-raised);
   border-color: var(--admin-dark-line);
+  border-style: solid;
+  border-width: 1px;
 }
 html[data-admin-theme="dark"] body.experiment-admin :is(.experiment-button.primary, button.primary, .btn-primary, button[class*="submit"], input[type="submit"]) {
   color: var(--admin-brand-contrast, #fffaf3);
@@ -185,14 +198,6 @@ html[data-admin-theme="dark"] body.experiment-admin :focus-visible { outline-col
 html[data-admin-theme="dark"] body.experiment-admin ::-webkit-scrollbar-track { background: #000000; }
 html[data-admin-theme="dark"] body.experiment-admin ::-webkit-scrollbar-thumb { background-color: #484848; }
 
-@media (prefers-reduced-motion: no-preference) {
-  body.experiment-admin,
-  body.experiment-admin :is(.experiment-topbar, .experiment-sidebar, .experiment-card, .experiment-panel, input, select, textarea, button) {
-    transition-property: background-color, border-color, color, box-shadow;
-    transition-duration: 160ms;
-    transition-timing-function: ease-out;
-  }
-}
 html[data-admin-theme="dark"] body.experiment-admin [data-admin-dark-bg="surface"] {
   color: var(--admin-dark-text) !important;
   background-color: var(--admin-dark-surface) !important;

@@ -19,7 +19,7 @@ function bootstrap(savedTheme, storageThrows = false) {
       contains(name) { return classNames.has(name); },
     },
   };
-  let bootFallback;
+  let bootTimeouts = 0;
   const localStorage = {
     getItem(key) {
       assert.equal(key, 'lilteam_admin_theme');
@@ -30,9 +30,9 @@ function bootstrap(savedTheme, storageThrows = false) {
   vm.runInNewContext(bootstrapSource, {
     document: { documentElement: root },
     localStorage,
-    window: { setTimeout(callback) { bootFallback = callback; } },
+    window: { setTimeout() { bootTimeouts += 1; } },
   });
-  root.releaseBootCloak = () => bootFallback?.();
+  root.bootTimeouts = bootTimeouts;
   return root;
 }
 
@@ -71,10 +71,10 @@ assert.equal(invalidBoot.classList.contains('admin-theme-booting'), false);
 const unavailableStorageBoot = bootstrap('dark', true);
 assert.equal(unavailableStorageBoot.dataset.adminTheme, 'light');
 assert.equal(unavailableStorageBoot.classList.contains('admin-theme-booting'), false);
-const bootingPage = bootstrap('dark');
-assert.equal(bootingPage.classList.contains('admin-theme-booting'), true);
-bootingPage.releaseBootCloak();
-assert.equal(bootingPage.classList.contains('admin-theme-booting'), false);
+const darkBoot = bootstrap('dark');
+assert.equal(darkBoot.dataset.adminTheme, 'dark');
+assert.equal(darkBoot.classList.contains('admin-theme-booting'), false);
+assert.equal(darkBoot.bootTimeouts, 0);
 
 const page = createPage('dark');
 assert.equal(page.root.dataset.adminTheme, 'dark');

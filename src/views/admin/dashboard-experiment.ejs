@@ -46,17 +46,27 @@
               <p>กดชื่อสินค้าเพื่อเปิดหน้าจัดการสต๊อกโดยตรง</p>
             </div>
             <div class="experiment-alert-tools">
-              <button type="button" data-experiment-alert-toggle aria-expanded="false" aria-controls="experiment-stock-alert-list">ดูทั้งหมด</button>
+              <% if (lowStockProducts.length > 24) { %><button type="button" data-experiment-alert-toggle aria-expanded="false" aria-controls="experiment-stock-alert-list">ดูทั้งหมด</button><% } %>
             </div>
           </div>
           <div class="experiment-alert-list" id="experiment-stock-alert-list">
-            <% lowStockProducts.forEach(product => { %>
+            <% lowStockProducts.slice(0, 24).forEach(product => { %>
               <a class="experiment-stock-chip" href="/admin/products/<%= product.id %>/stock">
                 <span class="experiment-stock-chip-name" title="<%= product.title %>"><%= product.title %></span>
                 <em><%= (product.stockCount || 0) === 0 ? 'หมดแล้ว' : `${product.stockCount} เหลือ` %></em>
               </a>
             <% }) %>
           </div>
+          <% if (lowStockProducts.length > 24) { %>
+            <template id="experiment-stock-alert-more">
+              <% lowStockProducts.slice(24).forEach(product => { %>
+                <a class="experiment-stock-chip" href="/admin/products/<%= product.id %>/stock">
+                  <span class="experiment-stock-chip-name" title="<%= product.title %>"><%= product.title %></span>
+                  <em><%= (product.stockCount || 0) === 0 ? 'หมดแล้ว' : `${product.stockCount} เหลือ` %></em>
+                </a>
+              <% }) %>
+            </template>
+          <% } %>
         </section>
       <% } %>
 

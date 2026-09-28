@@ -10,7 +10,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="<%= asset('js/admin-theme-bootstrap-v1.js') %>"></script>
-  <style>html.admin-theme-booting{background:#000!important}html.admin-theme-booting body{visibility:hidden!important;background:#000!important}html.admin-theme-booting,html.admin-theme-booting *,html.admin-theme-booting *::before,html.admin-theme-booting *::after{transition:none!important;animation:none!important}</style>
   <script defer src="<%= asset('js/admin-dark-surface-audit-v1.js') %>"></script>
   <title><%= title %> | LILTeam Shop</title>
   <meta name="description" content="ระบบจัดการร้านค้า LILTeam Shop" />
@@ -199,6 +198,14 @@
           const alert = document.querySelector('[data-experiment-stock-alert]');
           if (!alert) return;
           const expanded = alert.classList.toggle('expanded');
+          if (expanded) {
+            const list = alert.querySelector('#experiment-stock-alert-list');
+            const more = alert.querySelector('#experiment-stock-alert-more');
+            if (list && more) {
+              list.appendChild(more.content);
+              more.remove();
+            }
+          }
           button.textContent = expanded ? 'ย่อรายการ' : 'ดูทั้งหมด';
           button.setAttribute('aria-expanded', String(expanded));
         });

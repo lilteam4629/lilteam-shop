@@ -6,6 +6,9 @@
   if (!documentElement || !body || !body.classList.contains('experiment-admin')) return;
 
   var neutralCanvas = { r: 0, g: 0, b: 0 };
+  var scanBatchSize = 64;
+  var pendingRoots = [];
+  var scanActive = false;
 
   function parseColor(value) {
     if (!value) return null;
@@ -127,21 +130,35 @@
     return 'primary';
   }
 
-  function nearestSurface(element) {
+  function nearestSurface(element, surfaceCache) {
     var current = element;
+    var trail = [];
+    var result = neutralCanvas;
     while (current && current !== body) {
+      if (current.hasAttribute('data-admin-dark-bg')) {
+        result = neutralCanvas;
+        surfaceCache.set(current, result);
+        break;
+      }
+      if (surfaceCache.has(current)) {
+        result = surfaceCache.get(current);
+        break;
+      }
       var currentStyle = window.getComputedStyle(current);
       var color = parseColor(currentStyle.backgroundColor);
       if (color && color.a > 0.02) {
         var effective = blend(color, neutralCanvas);
-        if (current.hasAttribute('data-admin-dark-bg')) {
-          return neutralCanvas;
+        if (color.a > 0.92) {
+          result = effective;
+          surfaceCache.set(current, result);
+          break;
         }
-        if (color.a > 0.92) return effective;
       }
+      trail.push(current);
       current = current.parentElement;
     }
-    return neutralCanvas;
+    trail.forEach(function (ancestor) { surfaceCache.set(ancestor, result); });
+    return result;
   }
 
   function annotateBackground(element) {
@@ -159,7 +176,7 @@
     else element.removeAttribute('data-admin-dark-bg');
   }
 
-  function annotateInk(element) {
+  function annotateInk(element, surfaceCache) {
     if (element.hasAttribute('data-admin-dark-ink')) return;
     var hasOwnText = false;
     for (var i = 0; i < element.childNodes.length; i += 1) {
@@ -172,7 +189,7 @@
     }
     var color = parseColor(window.getComputedStyle(element).color);
     if (!color || color.a <= 0.02) return;
-    var surface = nearestSurface(element);
+    var surface = nearestSurface(element, surfaceCache);
     if (contrast(blend(color, surface), surface) >= 4.5) {
       element.removeAttribute('data-admin-dark-ink');
       return;
@@ -197,19 +214,93 @@
     }
   }
 
-  function scan(root) {
-    if (!root || (root.nodeType === 1 && isVisualAsset(root))) return;
-    var elements = [];
-    if (root.nodeType === 1) elements.push(root);
-    if (root.querySelectorAll) elements.push.apply(elements, Array.from(root.querySelectorAll('*')));
-    elements = elements.filter(function (element) { return !isVisualAsset(element); });
+  function requestScanSlice(callback) {
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(callback, { timeout: 220 });
+    } else {
+      window.setTimeout(function () {
+        callback({ didTimeout: true, timeRemaining: function () { return 8; } });
+      }, 16);
+    }
+  }
 
-    elements.forEach(annotateBackground);
-    elements.forEach(function (element) {
-      annotateInk(element);
-      annotatePseudo(element, '::before', 'before');
-      annotatePseudo(element, '::after', 'after');
+  function scan(root, onComplete) {
+    if (!root || (root.nodeType === 1 && isVisualAsset(root))) {
+      onComplete();
+      return;
+    }
+    // TreeWalker keeps startup work bounded. Building an array from
+    // querySelectorAll('*') would still synchronously enumerate the full admin
+    // page before the first idle callback could yield.
+    var walker = document.createTreeWalker(root, window.NodeFilter.SHOW_ELEMENT);
+    var nextElement = root.nodeType === 1 ? root : walker.nextNode();
+    var surfaceCache = new WeakMap();
+    function scanSlice(deadline, elementBudget, timeBudget) {
+      var sliceStart = Date.now();
+      var processed = 0;
+      while (nextElement && processed < elementBudget) {
+        if (processed >= 8 && (Date.now() - sliceStart >= timeBudget
+          || (deadline && !deadline.didTimeout && deadline.timeRemaining() <= 2))) break;
+        var element = nextElement;
+        nextElement = walker.nextNode();
+        if (!isVisualAsset(element)) {
+          annotateBackground(element);
+          annotateInk(element, surfaceCache);
+          annotatePseudo(element, '::before', 'before');
+          annotatePseudo(element, '::after', 'after');
+        }
+        processed += 1;
+      }
+      if (nextElement) requestScanSlice(function (nextDeadline) { scanSlice(nextDeadline, scanBatchSize, 6); });
+      else {
+        if (root === body) window.__adminDarkSurfaceAuditComplete = true;
+        onComplete();
+      }
+    }
+    if (root === body && typeof window.requestAnimationFrame === 'function') {
+      // Correct the first viewport before its first repaint, then continue
+      // the full-page pass in idle slices to keep large admin pages responsive.
+      window.requestAnimationFrame(function () {
+        scanSlice({ didTimeout: true, timeRemaining: function () { return 8; } }, 24, 4);
+      });
+    } else if (root === body) requestScanSlice(function (deadline) { scanSlice(deadline, scanBatchSize, 6); });
+    else {
+      // Mutation observers run before paint. Patch a small visible prefix now
+      // so newly inserted white panels do not flash while the rest is deferred.
+      scanSlice({ didTimeout: true, timeRemaining: function () { return 8; } }, 12, 3);
+    }
+  }
+
+  function containsNode(ancestor, node) {
+    var current = node;
+    while (current) {
+      if (current === ancestor) return true;
+      current = current.parentElement;
+    }
+    return false;
+  }
+
+  function runNextScan() {
+    if (scanActive || !pendingRoots.length) return;
+    var root = pendingRoots.shift();
+    scanActive = true;
+    scan(root, function () {
+      scanActive = false;
+      runNextScan();
     });
+  }
+
+  function scheduleScan(root) {
+    if (!root || documentElement.dataset.adminTheme !== 'dark') return;
+    if (root === body) {
+      window.__adminDarkSurfaceAuditComplete = false;
+      pendingRoots = [body];
+    } else {
+      if (pendingRoots.some(function (pending) { return containsNode(pending, root); })) return;
+      pendingRoots = pendingRoots.filter(function (pending) { return !containsNode(root, pending); });
+      pendingRoots.push(root);
+    }
+    runNextScan();
   }
 
   function clearOwnAnnotations(root) {
@@ -221,29 +312,25 @@
     ].forEach(function (attribute) { root.removeAttribute(attribute); });
   }
 
-  scan(body);
   documentElement.classList.remove('admin-theme-booting');
+  window.__adminDarkSurfaceAuditComplete = false;
   new MutationObserver(function (mutations) {
     mutations.forEach(function (mutation) {
       if (mutation.type === 'attributes') {
         if (mutation.target === documentElement && mutation.attributeName === 'data-admin-theme') {
-          if (documentElement.dataset.adminTheme === 'dark') scan(body);
+          if (documentElement.dataset.adminTheme === 'dark') scheduleScan(body);
         } else if (mutation.attributeName === 'class' || mutation.attributeName === 'style') {
           clearOwnAnnotations(mutation.target);
-          scan(mutation.target);
+          scheduleScan(mutation.target);
         }
         return;
       }
       mutation.addedNodes.forEach(function (node) {
         if (node.nodeType !== 1) return;
-        if (/^(STYLE|LINK)$/.test(node.tagName)) scan(body);
-        else scan(node);
+        if (/^(STYLE|LINK)$/.test(node.tagName)) scheduleScan(body);
+        else scheduleScan(node);
       });
     });
   }).observe(documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['data-admin-theme', 'class', 'style'] });
-  document.addEventListener('load', function (event) {
-    var target = event.target;
-    if (!target || target.tagName !== 'LINK' || target.rel !== 'stylesheet') return;
-    scan(body);
-  }, true);
+  scheduleScan(body);
 })();
