@@ -21,6 +21,7 @@ const ownerHeroLayoutCss = read('public/css/storefront-owner-home-hero-v22.css')
 const heroCozyCss = read('public/css/storefront-home-hero-cozy-v1.css');
 const musicWidgetCss = read('public/css/storefront-music-unified-v1.css');
 const accountMenuCss = read('public/css/storefront-account-menu-cozy-v1.css');
+const productArtworkCss = read('public/css/storefront-product-artwork-full-v1.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*true/,
   'the updated home should be served to both the primary store and tenant stores');
@@ -61,6 +62,18 @@ assert.doesNotMatch(layout, /storefront-owner-home-v18\.css/,
   'the superseded split hero styling must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,
   'the replaced 3D scene stylesheet and script must no longer load');
+const productArtworkLink = layout.split(/\r?\n/).find(line => line.includes('storefront-product-artwork-full-v1.css')) || '';
+assert.ok(productArtworkLink && !productArtworkLink.includes('<% if'),
+  'the full-product-image override must load for every storefront, including rentals');
+for (const selector of ['.catalog-image > img', '.premium-product-card img', '.owner-home-v21-media > img', '.new-product-card__media img', '.v6-product-card__media img']) {
+  assert.ok(productArtworkCss.includes(selector), `shared product image rules must cover ${selector}`);
+}
+assert.match(productArtworkCss, /object-fit:\s*contain\s*!important/,
+  'storefront product artwork must use the full image rather than crop to fill');
+assert.match(productArtworkCss, /object-position:\s*center\s*!important/,
+  'full product artwork must stay centered within its media frame');
+assert.match(productArtworkCss, /transform:\s*none\s*!important/,
+  'product hover effects must not zoom the image and clip its edges');
 assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
   'the rejected oversized banner treatment must no longer load');
 assert.match(home, /if \(ownerHomeV20\) \{[\s\S]*?<div class="owner-home-v20-shell" data-owner-home-layout="cozy-marketplace">[\s\S]*?<div class="owner-home-v20-main">/,

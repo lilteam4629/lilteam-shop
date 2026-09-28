@@ -1,0 +1,31 @@
+/* Storefront product artwork should remain fully visible across every shop
+   and card model, regardless of older per-theme cover rules. */
+body.storefront-customer-refresh :is(
+  .catalog-image > img,
+  .premium-product-card img,
+  .owner-home-v21-media > img,
+  .owner-home-v20-poster img,
+  .owner-home-v23-spotlight img,
+  .owner-v2-product__image img,
+  .owner-v3-rail-card img,
+  .owner-v3-spotlight__image img,
+  .v4-hero-card img,
+  .v4-product-card__media img,
+  .v4-event-card__image img,
+  .v5-spotlight__media img,
+  .v5-queue-image img,
+  .v5-radar-card img,
+  .v5-launch-card__image img,
+  .v6-product-card__media img,
+  .new-product-card__media img,
+  .fan-card > img,
+  .locker-product img,
+  .rm-image img,
+  .rm-lineup img,
+  .latest-order-image,
+  .product-detail-primary-image
+) {
+  object-fit: contain !important;
+  object-position: center !important;
+  transform: none !important;
+}
