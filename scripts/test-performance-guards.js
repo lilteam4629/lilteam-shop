@@ -34,8 +34,10 @@ assert.match(motionCss, /scroll-reveal-admin\{transform:translate3d\(0,24px,0\) 
 assert.match(motionCss, /:not\(\.scroll-reveal-admin\)/, 'mobile performance overrides must not flatten the admin bounce');
 assert.doesNotMatch(layout, /mobile-is-scrolling[^\n]{0,120}(return|continue)/,
   'rain must not freeze while a touch device scrolls');
-assert.match(layout, /contain:layout paint size;transform:translateZ\(0\);will-change:transform/,
+assert.match(layout, /contain:layout paint size/,
   'rain canvas must stay isolated from page layout and paint');
+assert.doesNotMatch(layout, /id="store-rain"[^>]*(?:translateZ\(0\)|will-change:transform)/,
+  'full-screen rain canvas must not force a GPU layer that can flash large black polygons');
 assert.match(layout, /Math\.min\(\.08,Math\.max\(\.001,\(now-last\)\/1000\)\)/,
   'rain must preserve its velocity after a dropped frame');
 assert.match(layout, /function start\(\).*function stop\(\)/s,
