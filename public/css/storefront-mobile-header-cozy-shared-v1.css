@@ -1,8 +1,8 @@
 /* Mobile-only header layout for the all storefronts. */
 @media (max-width: 900px) {
   .store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner {
-    width: calc(100% - 41px) !important;
-    margin-inline: 24px 17px !important;
+    width: 100% !important;
+    margin-inline: 0 !important;
   }
 
   .store-nav--cozy-owner .store-nav__inner {
@@ -49,7 +49,7 @@
   .store-nav--cozy-owner .store-nav__brand:not(.store-nav__brand--image) strong { font-size: 14px !important; }
 
   .store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions {
-    gap: 10px !important;
+    gap: 6px !important;
     margin-left: auto !important;
   }
 
@@ -104,13 +104,13 @@
 }
 
 @media (max-width: 380px) {
-  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner { width: calc(100% - 16px) !important; margin-inline: 8px !important; padding-inline: 10px !important; gap: 8px !important; }
+  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner { width: 100% !important; margin-inline: 0 !important; padding-inline: 10px !important; gap: 6px !important; }
   .store-nav--cozy-owner .store-nav__mobile-toggle { width: 40px !important; min-width: 40px !important; flex-basis: 40px !important; }
   .store-nav--cozy-owner .store-nav__theme,
   .store-nav--cozy-owner .store-nav__cart,
   .store-nav--cozy-owner .store-nav__account summary { width: 38px !important; min-width: 38px !important; }
   .store-nav--cozy-owner .store-nav__mobile-topup { width: 42px !important; min-width: 42px !important; flex-basis: 42px !important; }
-  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions { gap: 8px !important; }
+  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions { gap: 1px !important; }
   .store-nav--cozy-owner:not(.store-nav--main) .store-nav__login { padding-inline: 10px !important; }
   .store-nav--cozy-owner .store-nav__brand--image img { max-width: 72px !important; }
 }
