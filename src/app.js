@@ -197,6 +197,10 @@ app.use(flash());
 app.use(attachUser);
 
 app.use((req, res, next) => {
+  // Layout-wide controls (including storefront music) must also work on
+  // route-level 404/500 renders that do not pass page settings explicitly.
+  // store.data resolves through this request's AsyncLocalStorage tenant scope.
+  res.locals.settings = store.data.settings;
   res.locals.messages = {
     success: req.flash('success'),
     error: req.flash('error'),

@@ -121,6 +121,15 @@ async function checkMusicAcrossStorefront(cookie) {
     if (!response.body.includes('data-video-id="abcdefghijk"')) throw new Error(`${page} rendered a different configured music track`);
     if (!response.body.includes('/css/storefront-music-unified-v1.css')) throw new Error(`${page} is missing the owner storefront music skin`);
   }
+  for (const page of ['/game/smoke-product-that-does-not-exist', '/definitely-missing']) {
+    const response = await request(page);
+    if (response.statusCode !== 404) throw new Error(`${page} returned HTTP ${response.statusCode} instead of 404`);
+    const widgets = response.body.match(/id="music-widget"/g) || [];
+    if (widgets.length !== 1 || !response.body.includes('data-video-id="abcdefghijk"')) {
+      throw new Error(`${page} is missing the configured persistent music widget`);
+    }
+    if (!response.body.includes('/css/storefront-music-unified-v1.css')) throw new Error(`${page} is missing the owner storefront music skin`);
+  }
 
   const savedSettings = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).settings.music;
   if (savedSettings.startSeconds !== 75 || savedSettings.endSeconds !== 150 || savedSettings.defaultVolume !== 38) {
