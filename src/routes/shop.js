@@ -115,7 +115,6 @@ function latestOrderCards() {
 }
 
 const HOME_PAGE_SIZE = 24;
-const UNPAGINATED_HOME_TENANTS = new Set(['moopee-shop']);
 
 function storefrontFilterTags() {
   return visibleStorefrontCategories(store.data.filterTags);
@@ -126,7 +125,7 @@ function storefrontRecommendedCategories() {
     .filter(category => category.enabled !== false);
 }
 
-function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts = false, req = null) {
+function homeViewData(heroPreviewV2 = false, requestedPage = 1, req = null) {
   const stockCounts = availableStockCounts();
   const remote = syndicatedProducts(req);
   const recommendedCategories = storefrontRecommendedCategories();
@@ -169,11 +168,9 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
   // Every product is still reachable (nothing is silently capped) — just
   // paginated instead of rendering the entire catalog in one page load,
   // which was ballooning page weight/DOM size once a shop had 50+ products.
-  const totalPages = showAllProducts ? 1 : Math.max(1, Math.ceil(active.length / HOME_PAGE_SIZE));
-  const page = showAllProducts ? 1 : Math.min(totalPages, Math.max(1, Number(requestedPage) || 1));
-  const pageProducts = showAllProducts
-    ? active
-    : active.slice((page - 1) * HOME_PAGE_SIZE, page * HOME_PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(active.length / HOME_PAGE_SIZE));
+  const page = Math.min(totalPages, Math.max(1, Number(requestedPage) || 1));
+  const pageProducts = active.slice((page - 1) * HOME_PAGE_SIZE, page * HOME_PAGE_SIZE);
   return {
     title: 'หน้าแรก',
     welcomePopupExperiment: false,
@@ -220,9 +217,7 @@ router.get('/', (req, res) => {
   const view = req.tenantShop?.isSystemLab && model === 'rangers-market'
     ? 'shop/home-rangers-market'
     : 'shop/home';
-  const tenantSlug = String(req.tenantShop?.slug || '').toLowerCase();
-  const showAllProducts = UNPAGINATED_HOME_TENANTS.has(tenantSlug);
-  const viewData = homeViewData(false, req.query.page, showAllProducts, req);
+  const viewData = homeViewData(false, req.query.page, req);
   const localExperimentHost = ['localhost', '127.0.0.1', '::1'].includes(String(req.hostname || '').toLowerCase());
   viewData.welcomePopupExperiment = !req.tenantShop && localExperimentHost && req.query.welcomePopupExperiment === '1';
   // All storefront hosts use the same presentation. The active store data,

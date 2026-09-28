@@ -75,12 +75,12 @@
       <p class="owner-home-v20-description"><%= settings.tagline || 'เลือกสินค้าที่ใช่ พร้อมลุยในแบบของคุณ' %></p>
       <% if (settings.openHours) { %>
         <div class="owner-home-v20-meta owner-home-v20-hours" aria-label="เวลาเปิดร้าน <%= settings.openHours %>">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
           <span class="owner-home-v20-hours-copy"><small>เวลาเปิดร้าน</small><strong><%= settings.openHours %></strong></span>
         </div>
       <% } %>
       <div class="owner-home-v20-actions">
-        <a class="owner-home-v20-primary" href="#home-catalog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg> เลือกสินค้า</a>
+        <a class="owner-home-v20-primary" href="#home-catalog"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg> เลือกสินค้า</a>
         <a class="owner-home-v20-secondary" href="/help">วิธีสั่งซื้อ</a>
       </div>
     </div>
@@ -197,7 +197,7 @@
   <% announcements.forEach(a => { %>
     <div class="announce-hud relative flex items-start gap-3 rounded-xl px-4 py-3 text-[var(--text)] text-sm overflow-hidden">
       <div class="announce-hud-glow"></div>
-      <span class="announce-hud-icon relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"><svg><use href="#ui-megaphone"/></svg></span>
+      <span class="announce-hud-icon relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"><svg width="24" height="24"><use href="#ui-megaphone"/></svg></span>
       <p class="relative z-[1] min-w-0 leading-relaxed"><b class="text-[var(--gold-text)]"><%= a.title %></b> — <%= a.body %></p>
     </div>
   <% }) %>
@@ -278,9 +278,9 @@
 <section class="home-category-rail" id="home-categories" aria-label="หมวดหมู่สินค้า">
   <% if (ownerHomeV20) { %>
     <header class="home-catalog-heading-row home-category-heading-row">
-      <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2>หมวดหมู่แนะนำ</h2><p>Recommended Categories</p></span></div>
+      <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2>หมวดหมู่แนะนำ</h2><p>Recommended Categories</p></span></div>
       <span class="home-catalog-heading-rule" aria-hidden="true"></span>
-      <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </header>
   <% } else { %>
     <div class="home-category-head"><div class="home-category-heading"><span class="home-category-icon">◇</span><span><b>หมวดหมู่แนะนำ</b><small>Recommended Categories</small></span></div><a href="<%= (typeof isAdmin !== 'undefined' && isAdmin) ? '/admin/home-sections?ui=experiment' : '/products' %>"><%= (typeof isAdmin !== 'undefined' && isAdmin) ? 'เพิ่มหมวด ›' : 'ดูทั้งหมด ›' %></a></div>
@@ -415,7 +415,7 @@
   <% announcements.forEach(a => { %>
     <div class="announce-hud relative flex items-start gap-3 rounded-xl px-4 py-3 text-[var(--text)] text-sm overflow-hidden">
       <div class="announce-hud-glow"></div>
-      <span class="announce-hud-icon relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"><svg><use href="#ui-megaphone"/></svg></span>
+      <span class="announce-hud-icon relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"><svg width="24" height="24"><use href="#ui-megaphone"/></svg></span>
       <p class="relative z-[1] min-w-0 leading-relaxed"><b class="text-[var(--gold-text)]"><%= a.title %></b> — <%= a.body %></p>
     </div>
   <% }) %>
@@ -472,8 +472,8 @@
           </div>
           <% if (showWelcomePopupRedesign) { %>
             <button type="button" class="welcome-popup-carousel-toggle" data-welcome-popup-carousel-toggle aria-label="หยุดสลับรูปภาพ">
-              <svg data-carousel-pause viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" /></svg>
-              <svg data-carousel-play viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m8 5 12 7-12 7z" /></svg>
+              <svg width="24" height="24" data-carousel-pause viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" /></svg>
+              <svg width="24" height="24" data-carousel-play viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m8 5 12 7-12 7z" /></svg>
             </button>
           <% } %>
         <% } %>
@@ -487,8 +487,8 @@
       </div>
     <% } %>
     <div class="flex divide-x divide-[var(--border)] border-t border-[var(--border)] welcome-popup-actions">
-      <button type="button" id="welcome-popup-close" class="flex-1 py-3 text-sm font-medium text-[var(--text-2)] hover:bg-[var(--input)]"><% if (showWelcomePopupRedesign) { %><svg class="welcome-popup-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><% } else { %>✕ <% } %>เข้าสู่เว็บไซต์</button>
-      <button type="button" id="welcome-popup-mute" class="flex-1 py-3 text-sm font-medium text-[var(--coral)] hover:bg-[var(--input)]"><% if (showWelcomePopupRedesign) { %><svg class="welcome-popup-action-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><% } else { %>🕐 <% } %>ไม่แสดงผลอีกครั้งใน 1 วัน</button>
+      <button type="button" id="welcome-popup-close" class="flex-1 py-3 text-sm font-medium text-[var(--text-2)] hover:bg-[var(--input)]"><% if (showWelcomePopupRedesign) { %><svg width="24" height="24" class="welcome-popup-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><% } else { %>✕ <% } %>เข้าสู่เว็บไซต์</button>
+      <button type="button" id="welcome-popup-mute" class="flex-1 py-3 text-sm font-medium text-[var(--coral)] hover:bg-[var(--input)]"><% if (showWelcomePopupRedesign) { %><svg width="24" height="24" class="welcome-popup-action-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><% } else { %>🕐 <% } %>ไม่แสดงผลอีกครั้งใน 1 วัน</button>
     </div>
   </div>
 </div>
@@ -656,7 +656,7 @@
               toggle.className = 'welcome-popup-carousel-toggle';
               toggle.dataset.welcomePopupCarouselToggle = '';
               toggle.setAttribute('aria-label', 'หยุดสลับรูปภาพ');
-              toggle.innerHTML = '<svg data-carousel-pause viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" /></svg><svg data-carousel-play viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m8 5 12 7-12 7z" /></svg>';
+              toggle.innerHTML = '<svg width="24" height="24" data-carousel-pause viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5v14M15 5v14" /></svg><svg width="24" height="24" data-carousel-play viewBox="0 0 24 24" aria-hidden="true" hidden><path d="m8 5 12 7-12 7z" /></svg>';
               slider.appendChild(toggle);
             }
           }
@@ -849,9 +849,9 @@
       <section id="home-section-<%= section.id %>" class="scroll-mt-28">
       <% if (ownerHomeV20) { %>
         <header class="home-catalog-heading-row home-section-heading-row">
-          <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1-.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2><%= section.title %></h2><p><%= /ขายดี/.test(section.title) ? 'Best Sellers' : 'Featured Products' %>&nbsp; • &nbsp;<%= section.products.length %> รายการ</p></span></div>
+          <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1-.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2><%= section.title %></h2><p><%= /ขายดี/.test(section.title) ? 'Best Sellers' : 'Featured Products' %>&nbsp; • &nbsp;<%= section.products.length %> รายการ</p></span></div>
           <span class="home-catalog-heading-rule" aria-hidden="true"></span>
-          <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+          <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </header>
       <% } else { %>
         <%- include('../partials/section-hud-header', { icon: '✨', title: section.title, subtitle: '', href: null }) %>
@@ -864,9 +864,9 @@
   <% } else if (!products.length && !(recommendedCategoryHomeMode && productCatalogTotal > 0)) { %>
     <% if (ownerHomeV20) { %>
       <header class="home-catalog-heading-row home-section-heading-row">
-        <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1-.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2>เกมมาใหม่</h2><p>New Arrivals</p></span></div>
+        <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1-.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2>เกมมาใหม่</h2><p>New Arrivals</p></span></div>
         <span class="home-catalog-heading-rule" aria-hidden="true"></span>
-        <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </header>
     <% } else { %>
       <%- include('../partials/section-hud-header', { icon: '✨', title: 'เกมมาใหม่', subtitle: 'New Arrivals', href: null }) %>
@@ -878,14 +878,14 @@
 
   <% if (ownerHomeV20) { %>
     <header class="home-catalog-heading-row" id="catalog-search">
-      <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2><%= recommendedCategoryHomeMode ? 'สินค้าอื่นๆ' : 'สินค้าทั้งหมด' %></h2><p><%= recommendedCategoryHomeMode ? 'ยังไม่อยู่ในหมวดแนะนำ' : 'All Products' %>&nbsp; • &nbsp;<%= productTotal %> รายการ</p></span></div>
+      <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2><%= recommendedCategoryHomeMode ? 'สินค้าอื่นๆ' : 'สินค้าทั้งหมด' %></h2><p><%= recommendedCategoryHomeMode ? 'ยังไม่อยู่ในหมวดแนะนำ' : 'All Products' %>&nbsp; • &nbsp;<%= productTotal %> รายการ</p></span></div>
       <span class="home-catalog-heading-rule" aria-hidden="true"></span>
-      <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+      <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </header>
   <% } else { %>
     <div class="home-catalog-head" id="catalog-search">
-      <div class="home-catalog-title"><span><svg><use href="#ui-box"/></svg></span><div><h2><%= recommendedCategoryHomeMode ? 'สินค้าอื่นๆ' : 'สินค้าทั้งหมด' %></h2><p><%= recommendedCategoryHomeMode ? 'ยังไม่อยู่ในหมวดแนะนำ' : 'All Products' %>&nbsp; • &nbsp;<%= productTotal %> รายการ</p></div></div>
-      <label class="home-catalog-search"><svg><use href="#ui-search"/></svg><input id="homeCatalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off"></label>
+      <div class="home-catalog-title"><span><svg width="24" height="24"><use href="#ui-box"/></svg></span><div><h2><%= recommendedCategoryHomeMode ? 'สินค้าอื่นๆ' : 'สินค้าทั้งหมด' %></h2><p><%= recommendedCategoryHomeMode ? 'ยังไม่อยู่ในหมวดแนะนำ' : 'All Products' %>&nbsp; • &nbsp;<%= productTotal %> รายการ</p></div></div>
+      <label class="home-catalog-search"><svg width="24" height="24"><use href="#ui-search"/></svg><input id="homeCatalogSearch" type="search" placeholder="ค้นหาสินค้า เช่น lilteam-001, นักเตะ, ไอดี..." autocomplete="off"></label>
       <div class="home-catalog-filters" aria-label="กรองสินค้า"><button type="button" class="is-active" data-home-stock="all">ทั้งหมด</button><button type="button" data-home-stock="available"><i></i> พร้อมขาย</button><button type="button" data-home-stock="sold"><i></i> สินค้าหมด</button></div>
     </div>
   <% } %>
@@ -1039,7 +1039,7 @@
             <div class="mg-prize-chip mg-tier-<%= tier %> <%= outOfStock ? 'opacity-50' : '' %>">
               <% if (p.image) { %>
                 <button type="button" class="mg-prize-image-link" data-prize-image="<%= p.image %>" data-prize-name="<%= p.name %>" title="กดเพื่อดูรูป <%= p.name %> ขนาดใหญ่" aria-label="ดูรูป <%= p.name %> ขนาดใหญ่">
-                  <img src="<%= p.image %>" alt="<%= p.name %>" class="mg-prize-image" />
+                  <img src="<%= p.image %>" alt="<%= p.name %>" width="72" height="88" loading="lazy" decoding="async" fetchpriority="low" class="mg-prize-image" />
                   <span class="mg-prize-zoom" aria-hidden="true">⌕</span>
                 </button>
               <% } else { %>
@@ -1234,7 +1234,7 @@
           <div class="mg-prize-chip <%= p.stock !== null && p.stock <= 0 ? 'opacity-50' : '' %>">
             <% if (p.image) { %>
               <button type="button" class="mg-prize-image-link" data-prize-image="<%= p.image %>" data-prize-name="<%= p.name %>" title="กดเพื่อดูรูป <%= p.name %> ขนาดใหญ่" aria-label="ดูรูป <%= p.name %> ขนาดใหญ่">
-                <img src="<%= p.image %>" alt="<%= p.name %>" class="mg-prize-image" />
+                <img src="<%= p.image %>" alt="<%= p.name %>" width="72" height="88" loading="lazy" decoding="async" fetchpriority="low" class="mg-prize-image" />
                 <span class="mg-prize-zoom" aria-hidden="true">⌕</span>
               </button>
             <% } else { %><div class="text-2xl"><%= p.isPrize ? '🎁' : '💨' %></div><% } %>
