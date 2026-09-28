@@ -1,5 +1,5 @@
-/* Main-shop-only finance settings refresh. Tenant admin pages keep their current UI. */
-.admin-topups-owner {
+/* Shared finance settings refresh. Tenant-owned payment values remain request-scoped. */
+.admin-topups-refreshed {
   --finance-green: var(--admin-brand-fill, #087a5b);
   --finance-green-strong: var(--admin-brand-readable, #06664d);
   --finance-green-soft: #153b2f;
@@ -9,20 +9,20 @@
   --finance-shadow: 0 14px 36px rgba(17, 46, 34, .055);
 }
 
-html.light .admin-topups-owner {
+html.light .admin-topups-refreshed {
   --finance-green-soft: var(--admin-brand-soft, #eaf8f1);
   --finance-line: var(--admin-brand-fill, #d9e6df);
   --finance-muted: #52645b;
   --finance-on-soft: var(--admin-brand-soft, #075c44);
 }
 
-.admin-topups-owner > .space-y-6 {
+.admin-topups-refreshed > .space-y-6 {
   width: min(100%, 1510px);
   margin-inline: auto;
   gap: 20px;
 }
 
-.admin-topups-owner .admin-finance-header {
+.admin-topups-refreshed .admin-finance-header {
   align-items: center;
   padding: 18px 22px;
   border: 1px solid var(--finance-line);
@@ -31,14 +31,14 @@ html.light .admin-topups-owner {
   box-shadow: var(--finance-shadow);
 }
 
-.admin-topups-owner .admin-finance-title {
+.admin-topups-refreshed .admin-finance-title {
   gap: 12px;
   font-size: clamp(22px, 2vw, 29px);
   line-height: 1.3;
   letter-spacing: -.035em;
 }
 
-.admin-topups-owner .admin-finance-title-icon {
+.admin-topups-refreshed .admin-finance-title-icon {
   display: grid;
   width: 44px;
   height: 44px;
@@ -50,7 +50,7 @@ html.light .admin-topups-owner {
   background: var(--finance-green-soft);
 }
 
-.admin-topups-owner .admin-finance-title-icon svg {
+.admin-topups-refreshed .admin-finance-title-icon svg {
   width: 23px;
   height: 23px;
   fill: none;
@@ -60,7 +60,7 @@ html.light .admin-topups-owner {
   stroke-linejoin: round;
 }
 
-.admin-topups-owner .admin-finance-header > div:first-child > p {
+.admin-topups-refreshed .admin-finance-header > div:first-child > p {
   max-width: 760px;
   margin-top: 7px;
   color: var(--finance-muted);
@@ -68,7 +68,7 @@ html.light .admin-topups-owner {
   line-height: 1.6;
 }
 
-.admin-topups-owner .admin-finance-pending {
+.admin-topups-refreshed .admin-finance-pending {
   min-height: 42px;
   padding-inline: 13px;
   border-color: #f1d79f;
@@ -78,13 +78,13 @@ html.light .admin-topups-owner {
   font-size: 12px;
 }
 
-.admin-topups-owner .admin-finance-pending.is-clear {
+.admin-topups-refreshed .admin-finance-pending.is-clear {
   border-color: #c5e7d5;
   color: #096548;
   background: #eef9f3;
 }
 
-.admin-topups-owner .admin-finance-tabs {
+.admin-topups-refreshed .admin-finance-tabs {
   gap: 8px;
   padding: 0 0 10px;
   border-color: var(--finance-line);
@@ -92,7 +92,7 @@ html.light .admin-topups-owner {
   scrollbar-color: #bdcfc5 transparent;
 }
 
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn {
   display: inline-flex;
   min-height: 48px;
   align-items: center;
@@ -109,13 +109,13 @@ html.light .admin-topups-owner {
   transition: color .16s ease, background-color .16s ease, border-color .16s ease;
 }
 
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn:hover {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn:hover {
   border-color: var(--finance-line);
   color: var(--finance-green-strong);
   background: color-mix(in srgb, var(--card) 82%, var(--finance-green-soft));
 }
 
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn[aria-selected="true"] {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn[aria-selected="true"] {
   border-color: var(--admin-brand-border, #b8e0cb);
   color: var(--finance-on-soft);
   background: var(--finance-green-soft);
@@ -123,14 +123,14 @@ html.light .admin-topups-owner {
   font-weight: 700;
 }
 
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn:focus-visible,
-.admin-topups-owner .admin-provider-option:focus-visible,
-.admin-topups-owner .admin-bank-settings :is(input, select, button, a):focus-visible {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn:focus-visible,
+.admin-topups-refreshed .admin-provider-option:focus-visible,
+.admin-topups-refreshed .admin-bank-settings :is(input, select, button, a):focus-visible {
   outline: 3px solid color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 35%, transparent);
   outline-offset: 2px;
 }
 
-.admin-topups-owner .admin-finance-tab-icon {
+.admin-topups-refreshed .admin-finance-tab-icon {
   display: grid;
   width: 26px;
   height: 26px;
@@ -141,7 +141,7 @@ html.light .admin-topups-owner {
   background: color-mix(in srgb, var(--card) 70%, var(--finance-green-soft));
 }
 
-.admin-topups-owner .admin-finance-tab-icon svg {
+.admin-topups-refreshed .admin-finance-tab-icon svg {
   width: 16px;
   height: 16px;
   fill: none;
@@ -151,16 +151,16 @@ html.light .admin-topups-owner {
   stroke-linejoin: round;
 }
 
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn[aria-selected="true"] .admin-finance-tab-icon {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn[aria-selected="true"] .admin-finance-tab-icon {
   color: #fff;
   background: var(--finance-green);
 }
 
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn > span:not(.admin-finance-tab-icon) {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn > span:not(.admin-finance-tab-icon) {
   line-height: 1.35;
 }
 
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn > span:not(.admin-finance-tab-icon) span {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn > span:not(.admin-finance-tab-icon) span {
   display: inline-flex;
   min-width: 20px;
   min-height: 20px;
@@ -173,12 +173,12 @@ html.light .admin-topups-owner {
   font-size: 11px;
 }
 
-.admin-topups-owner .topup-tab-content[role="tabpanel"]:focus-visible {
+.admin-topups-refreshed .topup-tab-content[role="tabpanel"]:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 25%, transparent);
   outline-offset: 4px;
 }
 
-.admin-topups-owner .admin-bank-settings {
+.admin-topups-refreshed .admin-bank-settings {
   width: min(100%, 1120px);
   margin-inline: auto;
   padding: clamp(18px, 3vw, 30px);
@@ -189,13 +189,13 @@ html.light .admin-topups-owner {
   gap: 20px;
 }
 
-.admin-topups-owner .admin-bank-settings > .flex.items-center.gap-3 {
+.admin-topups-refreshed .admin-bank-settings > .flex.items-center.gap-3 {
   min-height: 64px;
   padding-bottom: 17px;
   border-color: var(--finance-line);
 }
 
-.admin-topups-owner .admin-bank-title-icon {
+.admin-topups-refreshed .admin-bank-title-icon {
   width: 44px;
   height: 44px;
   border-radius: 13px;
@@ -203,9 +203,9 @@ html.light .admin-topups-owner {
   background: var(--finance-green-soft);
 }
 
-.admin-topups-owner .admin-bank-title-icon svg,
-.admin-topups-owner .admin-bank-section-icon,
-.admin-topups-owner .admin-finance-save svg {
+.admin-topups-refreshed .admin-bank-title-icon svg,
+.admin-topups-refreshed .admin-bank-section-icon,
+.admin-topups-refreshed .admin-finance-save svg {
   width: 20px;
   height: 20px;
   fill: none;
@@ -215,45 +215,45 @@ html.light .admin-topups-owner {
   stroke-linejoin: round;
 }
 
-.admin-topups-owner .admin-bank-section-icon {
+.admin-topups-refreshed .admin-bank-section-icon {
   color: var(--finance-green);
 }
 
-.admin-topups-owner .admin-bank-settings h2 {
+.admin-topups-refreshed .admin-bank-settings h2 {
   font-size: 18px;
   letter-spacing: -.02em;
 }
 
-.admin-topups-owner .admin-bank-settings p {
+.admin-topups-refreshed .admin-bank-settings p {
   font-size: 12px;
   line-height: 1.6;
 }
 
-.admin-topups-owner .admin-provider-picker {
+.admin-topups-refreshed .admin-provider-picker {
   padding: 18px;
   border-color: var(--finance-line);
   border-radius: 16px;
   background: color-mix(in srgb, var(--card) 91%, var(--finance-green-soft));
 }
 
-.admin-topups-owner .admin-provider-picker-head {
+.admin-topups-refreshed .admin-provider-picker-head {
   align-items: center;
   margin-bottom: 15px;
 }
 
-.admin-topups-owner .admin-provider-picker-head h3 {
+.admin-topups-refreshed .admin-provider-picker-head h3 {
   color: var(--text);
   font-size: 16px;
   letter-spacing: -.015em;
 }
 
-.admin-topups-owner .admin-provider-picker-head p {
+.admin-topups-refreshed .admin-provider-picker-head p {
   margin-top: 4px;
   color: var(--finance-muted);
   font-size: 12px;
 }
 
-.admin-topups-owner .admin-provider-picker-head > a {
+.admin-topups-refreshed .admin-provider-picker-head > a {
   display: inline-flex;
   min-height: 42px;
   align-items: center;
@@ -268,18 +268,18 @@ html.light .admin-topups-owner {
   text-decoration: none;
 }
 
-.admin-topups-owner .admin-provider-picker-head > a:hover {
+.admin-topups-refreshed .admin-provider-picker-head > a:hover {
   border-color: #9fd4b8;
   background: var(--finance-green-soft);
 }
 
-.admin-topups-owner .admin-provider-grid {
+.admin-topups-refreshed .admin-provider-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
 
-.admin-topups-owner .admin-provider-option {
+.admin-topups-refreshed .admin-provider-option {
   position: relative;
   min-width: 0;
   min-height: 76px;
@@ -292,23 +292,23 @@ html.light .admin-topups-owner {
   transition: border-color .16s ease, background-color .16s ease, box-shadow .16s ease;
 }
 
-.admin-topups-owner .admin-provider-option:hover {
+.admin-topups-refreshed .admin-provider-option:hover {
   border-color: var(--admin-brand-fill, #8cc9aa) !important;
   background: var(--finance-green-soft) !important;
   box-shadow: 0 5px 15px rgba(17, 46, 34, .06);
 }
 
-.admin-topups-owner .admin-provider-option.is-active {
+.admin-topups-refreshed .admin-provider-option.is-active {
   border-color: #a9d9bf !important;
   background: var(--finance-green-soft) !important;
 }
 
-.admin-topups-owner .admin-provider-option.is-editing {
+.admin-topups-refreshed .admin-provider-option.is-editing {
   border-color: var(--finance-green) !important;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 10%, transparent);
 }
 
-.admin-topups-owner .admin-provider-icon {
+.admin-topups-refreshed .admin-provider-icon {
   display: grid;
   width: 42px;
   height: 42px;
@@ -320,7 +320,7 @@ html.light .admin-topups-owner {
   background: var(--finance-green-soft);
 }
 
-.admin-topups-owner .admin-provider-icon svg {
+.admin-topups-refreshed .admin-provider-icon svg {
   width: 21px;
   height: 21px;
   fill: none;
@@ -330,14 +330,14 @@ html.light .admin-topups-owner {
   stroke-linejoin: round;
 }
 
-.admin-topups-owner .admin-provider-copy {
+.admin-topups-refreshed .admin-provider-copy {
   display: grid;
   min-width: 0;
   flex: 1 1 auto;
   gap: 4px;
 }
 
-.admin-topups-owner .admin-provider-copy b {
+.admin-topups-refreshed .admin-provider-copy b {
   overflow: hidden;
   color: var(--text);
   font-size: 14px;
@@ -345,7 +345,7 @@ html.light .admin-topups-owner {
   white-space: nowrap;
 }
 
-.admin-topups-owner .admin-provider-copy small {
+.admin-topups-refreshed .admin-provider-copy small {
   overflow: hidden;
   color: var(--finance-muted);
   font-size: 11px;
@@ -354,7 +354,7 @@ html.light .admin-topups-owner {
   white-space: nowrap;
 }
 
-.admin-topups-owner .admin-provider-status {
+.admin-topups-refreshed .admin-provider-status {
   display: inline-flex;
   min-height: 26px;
   flex: 0 0 auto;
@@ -369,13 +369,13 @@ html.light .admin-topups-owner {
   white-space: nowrap;
 }
 
-.admin-topups-owner .admin-provider-status.is-active {
+.admin-topups-refreshed .admin-provider-status.is-active {
   border-color: #c8e9d7;
   color: #075f45;
   background: #eaf8f1;
 }
 
-.admin-topups-owner .admin-provider-arrow {
+.admin-topups-refreshed .admin-provider-arrow {
   display: grid;
   width: 30px;
   height: 30px;
@@ -384,7 +384,7 @@ html.light .admin-topups-owner {
   color: #62736b;
 }
 
-.admin-topups-owner .admin-provider-arrow svg {
+.admin-topups-refreshed .admin-provider-arrow svg {
   width: 17px;
   height: 17px;
   fill: none;
@@ -394,18 +394,18 @@ html.light .admin-topups-owner {
   stroke-linejoin: round;
 }
 
-.admin-topups-owner .admin-provider-editor-head {
+.admin-topups-refreshed .admin-provider-editor-head {
   min-height: 44px;
   padding: 3px 0;
 }
 
-.admin-topups-owner .admin-provider-editor-head a {
+.admin-topups-refreshed .admin-provider-editor-head a {
   display: inline-flex;
   min-height: 42px;
   align-items: center;
 }
 
-.admin-topups-owner .admin-provider-help {
+.admin-topups-refreshed .admin-provider-help {
   border-color: #cfe4f0;
   border-radius: 12px;
   background: #f4faff;
@@ -414,22 +414,22 @@ html.light .admin-topups-owner {
   line-height: 1.65;
 }
 
-.admin-topups-owner .admin-bank-transfer {
+.admin-topups-refreshed .admin-bank-transfer {
   padding: 20px;
   border-color: var(--finance-line);
   border-radius: 16px;
   background: color-mix(in srgb, var(--card) 92%, #f0f5f2);
 }
 
-.admin-topups-owner .admin-bank-transfer h3 {
+.admin-topups-refreshed .admin-bank-transfer h3 {
   font-size: 15px;
 }
 
-.admin-topups-owner .admin-bank-grid {
+.admin-topups-refreshed .admin-bank-grid {
   gap: 14px;
 }
 
-.admin-topups-owner .admin-bank-transfer label {
+.admin-topups-refreshed .admin-bank-transfer label {
   display: block;
   margin-bottom: 6px;
   color: var(--text);
@@ -438,7 +438,7 @@ html.light .admin-topups-owner {
   line-height: 1.5;
 }
 
-.admin-topups-owner .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) {
+.admin-topups-refreshed .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) {
   min-height: 46px;
   padding: 10px 12px;
   border-color: var(--admin-brand-border, #d4e1da);
@@ -449,7 +449,7 @@ html.light .admin-topups-owner {
   font-size: 14px;
 }
 
-.admin-topups-owner .admin-bank-transfer input[type="file"] {
+.admin-topups-refreshed .admin-bank-transfer input[type="file"] {
   min-height: 46px;
   padding: 7px;
   border: 1px dashed #bfd3c8;
@@ -458,18 +458,18 @@ html.light .admin-topups-owner {
   font-size: 12px;
 }
 
-.admin-topups-owner .admin-bank-transfer :is(input, select):focus {
+.admin-topups-refreshed .admin-bank-transfer :is(input, select):focus {
   border-color: var(--admin-brand-fill, #49a986);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-brand-fill, rgb(8, 122, 91)) 12%, transparent);
 }
 
-.admin-topups-owner .admin-finance-save-row {
+.admin-topups-refreshed .admin-finance-save-row {
   display: flex;
   justify-content: flex-end;
   padding-top: 0;
 }
 
-.admin-topups-owner .admin-finance-save {
+.admin-topups-refreshed .admin-finance-save {
   display: inline-flex;
   min-width: 210px;
   min-height: 48px;
@@ -485,39 +485,39 @@ html.light .admin-topups-owner {
   font-size: 13px;
 }
 
-.admin-topups-owner .admin-finance-save:hover {
+.admin-topups-refreshed .admin-finance-save:hover {
   background: var(--finance-green-strong);
 }
 
 @media (max-width: 760px) {
-  .admin-topups-owner > .space-y-6 { gap: 15px; }
-  .admin-topups-owner .admin-finance-header { align-items: flex-start; padding: 16px; }
-  .admin-topups-owner .admin-finance-title { font-size: 22px; }
-  .admin-topups-owner .admin-finance-tabs { margin-inline: -3px; }
-  .admin-topups-owner .admin-finance-tabs .topup-tab-btn { min-height: 48px; padding: 8px 11px; font-size: 12px; }
-  .admin-topups-owner .admin-bank-settings { padding: 17px; gap: 16px; }
-  .admin-topups-owner .admin-provider-picker { padding: 14px; }
-  .admin-topups-owner .admin-bank-transfer { padding: 15px; }
+  .admin-topups-refreshed > .space-y-6 { gap: 15px; }
+  .admin-topups-refreshed .admin-finance-header { align-items: flex-start; padding: 16px; }
+  .admin-topups-refreshed .admin-finance-title { font-size: 22px; }
+  .admin-topups-refreshed .admin-finance-tabs { margin-inline: -3px; }
+  .admin-topups-refreshed .admin-finance-tabs .topup-tab-btn { min-height: 48px; padding: 8px 11px; font-size: 12px; }
+  .admin-topups-refreshed .admin-bank-settings { padding: 17px; gap: 16px; }
+  .admin-topups-refreshed .admin-provider-picker { padding: 14px; }
+  .admin-topups-refreshed .admin-bank-transfer { padding: 15px; }
 }
 
 @media (max-width: 520px) {
-  .admin-topups-owner .admin-finance-header { gap: 12px; }
-  .admin-topups-owner .admin-finance-title { align-items: flex-start; font-size: 20px; }
-  .admin-topups-owner .admin-finance-title-icon { width: 40px; height: 40px; }
-  .admin-topups-owner .admin-finance-pending { min-height: 40px; align-self: flex-start; }
-  .admin-topups-owner .admin-provider-grid { grid-template-columns: minmax(0, 1fr); }
-  .admin-topups-owner .admin-provider-option { min-height: 72px; padding: 10px; }
-  .admin-topups-owner .admin-provider-icon { width: 38px; height: 38px; }
-  .admin-topups-owner .admin-provider-status { font-size: 9px; }
-  .admin-topups-owner .admin-provider-picker-head { align-items: flex-start; }
-  .admin-topups-owner .admin-provider-picker-head > a { min-height: 40px; }
-  .admin-topups-owner .admin-provider-editor-head { align-items: flex-start; flex-direction: column; }
-  .admin-topups-owner .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) { font-size: 16px; }
-  .admin-topups-owner .admin-finance-save-row,
-  .admin-topups-owner .admin-finance-save { width: 100%; }
+  .admin-topups-refreshed .admin-finance-header { gap: 12px; }
+  .admin-topups-refreshed .admin-finance-title { align-items: flex-start; font-size: 20px; }
+  .admin-topups-refreshed .admin-finance-title-icon { width: 40px; height: 40px; }
+  .admin-topups-refreshed .admin-finance-pending { min-height: 40px; align-self: flex-start; }
+  .admin-topups-refreshed .admin-provider-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-topups-refreshed .admin-provider-option { min-height: 72px; padding: 10px; }
+  .admin-topups-refreshed .admin-provider-icon { width: 38px; height: 38px; }
+  .admin-topups-refreshed .admin-provider-status { font-size: 9px; }
+  .admin-topups-refreshed .admin-provider-picker-head { align-items: flex-start; }
+  .admin-topups-refreshed .admin-provider-picker-head > a { min-height: 40px; }
+  .admin-topups-refreshed .admin-provider-editor-head { align-items: flex-start; flex-direction: column; }
+  .admin-topups-refreshed .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) { font-size: 16px; }
+  .admin-topups-refreshed .admin-finance-save-row,
+  .admin-topups-refreshed .admin-finance-save { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .admin-topups-owner .admin-finance-tabs .topup-tab-btn,
-  .admin-topups-owner .admin-provider-option { transition: none; }
+  .admin-topups-refreshed .admin-finance-tabs .topup-tab-btn,
+  .admin-topups-refreshed .admin-provider-option { transition: none; }
 }

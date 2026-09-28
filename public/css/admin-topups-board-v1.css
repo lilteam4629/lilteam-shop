@@ -1,5 +1,5 @@
-/* Main-store finance review board. Loaded only on the owner's admin site. */
-.admin-topups-owner {
+/* Shared finance review board, themed with the active shop's admin accent. */
+.admin-topups-refreshed {
   --finance-board-accent: var(--gold, #c8a63f);
   --finance-board-accent-text: var(--gold-text, #725515);
   --finance-board-accent-contrast: var(--gold-contrast, #171717);
@@ -10,9 +10,9 @@
   --finance-board-shadow: 0 12px 28px color-mix(in srgb, var(--text) 7%, transparent);
 }
 
-.admin-topups-owner > .space-y-6 { gap: 22px; }
+.admin-topups-refreshed > .space-y-6 { gap: 22px; }
 
-.admin-topups-owner .admin-finance-header {
+.admin-topups-refreshed .admin-finance-header {
   position: relative;
   isolation: isolate;
   overflow: visible;
@@ -25,7 +25,7 @@
 }
 
 /* Decorative paper clip, echoing the supplied stationery references. */
-.admin-topups-owner .admin-finance-header::before {
+.admin-topups-refreshed .admin-finance-header::before {
   position: absolute;
   z-index: 2;
   top: -10px;
@@ -41,8 +41,8 @@
   pointer-events: none;
 }
 
-.admin-topups-owner .admin-finance-title { gap: 12px; line-height: 1.35; }
-.admin-topups-owner .admin-finance-title-icon {
+.admin-topups-refreshed .admin-finance-title { gap: 12px; line-height: 1.35; }
+.admin-topups-refreshed .admin-finance-title-icon {
   width: 46px;
   height: 46px;
   border: 1px solid var(--finance-board-line);
@@ -51,42 +51,42 @@
   background: var(--finance-board-soft);
   box-shadow: 0 3px 0 color-mix(in srgb, var(--finance-board-accent) 18%, transparent);
 }
-.admin-topups-owner .admin-finance-header > div:first-child > p {
+.admin-topups-refreshed .admin-finance-header > div:first-child > p {
   max-width: 780px;
   line-height: 1.65;
 }
 
-.admin-topups-owner .admin-finance-tabs {
+.admin-topups-refreshed .admin-finance-tabs {
   gap: 8px;
   padding: 2px 0 12px;
   border-color: var(--finance-board-line);
   scrollbar-color: color-mix(in srgb, var(--finance-board-accent) 36%, var(--border)) transparent;
 }
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn {
   min-height: 48px;
   border: 1px solid transparent;
   border-radius: 13px;
   transition: color .16s ease, background-color .16s ease, border-color .16s ease, transform .16s ease;
 }
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn:hover {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn:hover {
   border-color: var(--finance-board-line);
   color: var(--finance-board-accent-text);
   background: var(--finance-board-softer);
   transform: translateY(-1px);
 }
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn[aria-selected="true"] {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn[aria-selected="true"] {
   border-color: var(--finance-board-accent);
   color: var(--finance-board-accent-contrast);
   background: var(--finance-board-accent);
   box-shadow: 0 4px 0 color-mix(in srgb, var(--finance-board-accent) 35%, transparent);
 }
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn[aria-selected="true"] .admin-finance-tab-icon {
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn[aria-selected="true"] .admin-finance-tab-icon {
   color: var(--finance-board-accent-contrast);
   background: color-mix(in srgb, var(--finance-board-accent-contrast) 14%, var(--finance-board-accent));
 }
-.admin-topups-owner .admin-finance-tab-icon { border-radius: 9px; }
+.admin-topups-refreshed .admin-finance-tab-icon { border-radius: 9px; }
 
-.admin-topups-owner .admin-finance-search {
+.admin-topups-refreshed .admin-finance-search {
   gap: 10px;
   padding: 12px !important;
   border: 1px solid var(--finance-board-line) !important;
@@ -94,36 +94,36 @@
   background: var(--finance-board-softer);
   box-shadow: 0 5px 15px color-mix(in srgb, var(--text) 4%, transparent) !important;
 }
-.admin-topups-owner .admin-finance-search :is(input, select) {
+.admin-topups-refreshed .admin-finance-search :is(input, select) {
   min-height: 46px;
   border-color: var(--finance-board-line) !important;
   border-radius: 11px !important;
   background: var(--card) !important;
   font-size: 14px;
 }
-.admin-topups-owner .admin-finance-search input::placeholder { color: var(--text-3); opacity: 1; }
-.admin-topups-owner .admin-finance-search :is(input, select):focus-visible,
-.admin-topups-owner .topup-request-buttons :is(button, a):focus-visible,
-.admin-topups-owner .topup-request-info > a:focus-visible,
-.admin-topups-owner .admin-finance-tabs .topup-tab-btn:focus-visible {
+.admin-topups-refreshed .admin-finance-search input::placeholder { color: var(--text-3); opacity: 1; }
+.admin-topups-refreshed .admin-finance-search :is(input, select):focus-visible,
+.admin-topups-refreshed .topup-request-buttons :is(button, a):focus-visible,
+.admin-topups-refreshed .topup-request-info > a:focus-visible,
+.admin-topups-refreshed .admin-finance-tabs .topup-tab-btn:focus-visible {
   border-color: var(--finance-board-accent) !important;
   outline: 3px solid var(--gold-text, #725515);
   outline-offset: 2px;
 }
-.admin-topups-owner .admin-finance-search-submit {
+.admin-topups-refreshed .admin-finance-search-submit {
   min-height: 46px;
   border: 1px solid var(--finance-board-accent-hover) !important;
   border-radius: 11px !important;
   color: var(--finance-board-accent-contrast) !important;
   background: var(--finance-board-accent) !important;
 }
-.admin-topups-owner .admin-finance-search-submit:hover {
+.admin-topups-refreshed .admin-finance-search-submit:hover {
   color: var(--gold-hover-text, var(--finance-board-accent-contrast)) !important;
   background: var(--finance-board-accent-hover) !important;
 }
 
-.admin-topups-owner .admin-finance-queue-title { gap: 10px; }
-.admin-topups-owner .admin-finance-queue-title svg {
+.admin-topups-refreshed .admin-finance-queue-title { gap: 10px; }
+.admin-topups-refreshed .admin-finance-queue-title svg {
   width: 34px;
   height: 34px;
   padding: 7px;
@@ -132,7 +132,7 @@
   color: var(--finance-board-accent-text);
   background: var(--finance-board-soft);
 }
-.admin-topups-owner .admin-finance-count {
+.admin-topups-refreshed .admin-finance-count {
   min-width: 27px;
   min-height: 27px;
   border-radius: 9px;
@@ -141,7 +141,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.admin-topups-owner .topup-request-card {
+.admin-topups-refreshed .topup-request-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(290px, 340px);
   align-items: center;
@@ -156,7 +156,7 @@
   box-shadow: 0 8px 20px color-mix(in srgb, var(--text) 5%, transparent) !important;
   transition: border-color .16s ease, box-shadow .16s ease, transform .16s ease;
 }
-.admin-topups-owner .topup-request-card::before {
+.admin-topups-refreshed .topup-request-card::before {
   position: absolute;
   z-index: 2;
   top: -9px;
@@ -170,14 +170,14 @@
   content: "";
   pointer-events: none;
 }
-.admin-topups-owner .topup-request-card:hover {
+.admin-topups-refreshed .topup-request-card:hover {
   border-color: color-mix(in srgb, var(--finance-board-accent) 48%, var(--border)) !important;
   border-inline-start-color: var(--finance-board-accent) !important;
   box-shadow: 0 12px 25px color-mix(in srgb, var(--text) 8%, transparent) !important;
   transform: translateY(-1px);
 }
-.admin-topups-owner .topup-request-info { gap: 16px !important; }
-.admin-topups-owner .topup-request-info img {
+.admin-topups-refreshed .topup-request-info { gap: 16px !important; }
+.admin-topups-refreshed .topup-request-info img {
   width: 88px;
   height: 100px;
   padding: 4px;
@@ -186,16 +186,16 @@
   background: var(--card);
   box-shadow: 0 3px 8px color-mix(in srgb, var(--text) 7%, transparent);
 }
-.admin-topups-owner .topup-request-copy { line-height: 1.6; }
-.admin-topups-owner .topup-request-copy > div:first-child { font-size: 15px; }
-.admin-topups-owner .admin-finance-request-meta { line-height: 1.8; }
-.admin-topups-owner .admin-finance-request-status { min-height: 25px; vertical-align: middle; }
-.admin-topups-owner .admin-finance-request-amount {
+.admin-topups-refreshed .topup-request-copy { line-height: 1.6; }
+.admin-topups-refreshed .topup-request-copy > div:first-child { font-size: 15px; }
+.admin-topups-refreshed .admin-finance-request-meta { line-height: 1.8; }
+.admin-topups-refreshed .admin-finance-request-status { min-height: 25px; vertical-align: middle; }
+.admin-topups-refreshed .admin-finance-request-amount {
   color: var(--gold-text, var(--text)) !important;
   font-size: 25px;
   font-variant-numeric: tabular-nums;
 }
-.admin-topups-owner .topup-request-actions {
+.admin-topups-refreshed .topup-request-actions {
   display: flex;
   flex-direction: column;
   min-height: 100%;
@@ -207,40 +207,40 @@
   border-radius: 14px;
   background: color-mix(in srgb, var(--card) 88%, var(--gold, #c8a63f) 12%);
 }
-.admin-topups-owner .topup-request-buttons {
+.admin-topups-refreshed .topup-request-buttons {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 48px;
   width: 100%;
   gap: 8px !important;
 }
-.admin-topups-owner .topup-request-buttons form { display: flex; min-width: 0; margin: 0; }
-.admin-topups-owner .topup-request-buttons button {
+.admin-topups-refreshed .topup-request-buttons form { display: flex; min-width: 0; margin: 0; }
+.admin-topups-refreshed .topup-request-buttons button {
   min-height: 46px;
   width: 100%;
   border-radius: 11px !important;
   font-size: 12px !important;
 }
-.admin-topups-owner .topup-request-buttons .admin-finance-approve {
+.admin-topups-refreshed .topup-request-buttons .admin-finance-approve {
   border-color: #087a5b !important;
   color: #fff !important;
   background: #087a5b !important;
 }
-.admin-topups-owner .topup-request-buttons .admin-finance-approve:hover { background: #06664d !important; }
-.admin-topups-owner .topup-request-buttons .admin-finance-reject { min-width: 76px; }
-.admin-topups-owner .admin-finance-history-card {
+.admin-topups-refreshed .topup-request-buttons .admin-finance-approve:hover { background: #06664d !important; }
+.admin-topups-refreshed .topup-request-buttons .admin-finance-reject { min-width: 76px; }
+.admin-topups-refreshed .admin-finance-history-card {
   border-color: var(--finance-board-line) !important;
   border-radius: 14px !important;
   background: var(--finance-board-softer);
 }
 
 @media (max-width: 760px) {
-  .admin-topups-owner .admin-finance-header { padding: 22px 17px 17px; }
-  .admin-topups-owner .admin-finance-header::before { left: 24%; }
-  .admin-topups-owner .topup-request-card {
+  .admin-topups-refreshed .admin-finance-header { padding: 22px 17px 17px; }
+  .admin-topups-refreshed .admin-finance-header::before { left: 24%; }
+  .admin-topups-refreshed .topup-request-card {
     grid-template-columns: minmax(0, 1fr);
     padding: 17px 14px !important;
   }
-  .admin-topups-owner .topup-request-actions {
+  .admin-topups-refreshed .topup-request-actions {
     min-height: 0;
     flex-direction: row;
     align-items: flex-end !important;
@@ -254,20 +254,20 @@
 }
 
 @media (max-width: 420px) {
-  .admin-topups-owner .admin-finance-search { padding: 9px !important; }
-  .admin-topups-owner .admin-finance-tabs .topup-tab-btn { min-height: 46px; }
-  .admin-topups-owner .topup-request-info img { width: 68px; height: 80px; }
-  .admin-topups-owner .topup-request-buttons { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) 42px; }
-  .admin-topups-owner .topup-request-buttons button { min-height: 48px; padding-inline: 5px !important; font-size: 11px !important; }
+  .admin-topups-refreshed .admin-finance-search { padding: 9px !important; }
+  .admin-topups-refreshed .admin-finance-tabs .topup-tab-btn { min-height: 46px; }
+  .admin-topups-refreshed .topup-request-info img { width: 68px; height: 80px; }
+  .admin-topups-refreshed .topup-request-buttons { grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr) 42px; }
+  .admin-topups-refreshed .topup-request-buttons button { min-height: 48px; padding-inline: 5px !important; font-size: 11px !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .admin-topups-owner .admin-finance-tabs .topup-tab-btn,
-  .admin-topups-owner .topup-request-card { transition: none; transform: none; }
+  .admin-topups-refreshed .admin-finance-tabs .topup-tab-btn,
+  .admin-topups-refreshed .topup-request-card { transition: none; transform: none; }
 }
 
 /* Bank-receiving settings: a paper-backed setup sheet using this shop's theme. */
-.admin-topups-owner .admin-bank-settings {
+.admin-topups-refreshed .admin-bank-settings {
   position: relative;
   isolation: isolate;
   overflow: visible;
@@ -276,7 +276,7 @@
   box-shadow: var(--finance-board-shadow), inset 0 1px 0 color-mix(in srgb, var(--card) 78%, white) !important;
 }
 
-.admin-topups-owner .admin-bank-settings::before {
+.admin-topups-refreshed .admin-bank-settings::before {
   position: absolute;
   z-index: 2;
   top: -10px;
@@ -292,27 +292,27 @@
   pointer-events: none;
 }
 
-.admin-topups-owner .admin-bank-settings > .flex.items-center.gap-3 {
+.admin-topups-refreshed .admin-bank-settings > .flex.items-center.gap-3 {
   position: relative;
   padding-bottom: 18px;
   border-color: var(--finance-board-line) !important;
 }
 
-.admin-topups-owner .admin-bank-title-icon,
-.admin-topups-owner .admin-bank-section-icon {
+.admin-topups-refreshed .admin-bank-title-icon,
+.admin-topups-refreshed .admin-bank-section-icon {
   color: var(--finance-board-accent-text) !important;
 }
-.admin-topups-owner .admin-bank-title-icon {
+.admin-topups-refreshed .admin-bank-title-icon {
   border: 1px solid var(--finance-board-line);
   background: var(--finance-board-soft) !important;
   box-shadow: 0 3px 0 color-mix(in srgb, var(--finance-board-accent) 16%, transparent);
 }
-.admin-topups-owner .admin-bank-settings > .flex.items-center.gap-3 p {
+.admin-topups-refreshed .admin-bank-settings > .flex.items-center.gap-3 p {
   max-width: 680px;
   color: var(--text-3);
 }
 
-.admin-topups-owner .admin-provider-picker {
+.admin-topups-refreshed .admin-provider-picker {
   position: relative;
   padding: 19px;
   border: 1px solid var(--finance-board-line) !important;
@@ -320,7 +320,7 @@
   background: linear-gradient(135deg, var(--finance-board-softer), var(--card) 65%) !important;
   box-shadow: 0 5px 15px color-mix(in srgb, var(--text) 4%, transparent);
 }
-.admin-topups-owner .admin-provider-picker::before {
+.admin-topups-refreshed .admin-provider-picker::before {
   position: absolute;
   top: -6px;
   left: 50%;
@@ -333,35 +333,35 @@
   transform: translateX(-50%) rotate(-2deg);
   pointer-events: none;
 }
-.admin-topups-owner .admin-provider-picker-head { gap: 12px; }
-.admin-topups-owner .admin-provider-picker-head h3 {
+.admin-topups-refreshed .admin-provider-picker-head { gap: 12px; }
+.admin-topups-refreshed .admin-provider-picker-head h3 {
   font-size: 16px;
   letter-spacing: -.015em;
 }
-.admin-topups-owner .admin-provider-picker-head p {
+.admin-topups-refreshed .admin-provider-picker-head p {
   max-width: 720px;
   color: var(--text-3);
   line-height: 1.65;
 }
-.admin-topups-owner .admin-provider-picker-head > a {
+.admin-topups-refreshed .admin-provider-picker-head > a {
   border-color: var(--finance-board-line);
   color: var(--finance-board-accent-text);
   background: var(--card);
   transition: border-color .16s ease, background-color .16s ease, transform .16s ease;
 }
-.admin-topups-owner .admin-provider-picker-head > a:hover {
+.admin-topups-refreshed .admin-provider-picker-head > a:hover {
   border-color: var(--gold);
   background: var(--finance-board-soft);
   transform: translateY(-1px);
 }
 
-.admin-topups-owner .admin-provider-grid {
+.admin-topups-refreshed .admin-provider-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 11px;
 }
-.admin-topups-owner .admin-provider-option,
-.admin-topups-owner .admin-provider-option.is-active,
-.admin-topups-owner .admin-provider-option.is-active.is-editing {
+.admin-topups-refreshed .admin-provider-option,
+.admin-topups-refreshed .admin-provider-option.is-active,
+.admin-topups-refreshed .admin-provider-option.is-active.is-editing {
   min-height: 84px;
   border: 1px solid var(--finance-board-line) !important;
   border-radius: 13px !important;
@@ -369,71 +369,71 @@
   background: var(--card) !important;
   box-shadow: 0 2px 7px color-mix(in srgb, var(--text) 3%, transparent);
 }
-.admin-topups-owner .admin-provider-option:hover {
+.admin-topups-refreshed .admin-provider-option:hover {
   border-color: color-mix(in srgb, var(--gold) 62%, var(--border)) !important;
   background: var(--finance-board-softer) !important;
   box-shadow: 0 6px 15px color-mix(in srgb, var(--text) 7%, transparent);
   transform: translateY(-1px);
 }
 /* Active provider = theme-tinted paper; editing provider = stronger theme outline. */
-.admin-topups-owner .admin-provider-option.is-active {
+.admin-topups-refreshed .admin-provider-option.is-active {
   border-color: color-mix(in srgb, var(--gold) 45%, var(--finance-board-line)) !important;
   background: color-mix(in srgb, var(--gold) 8%, var(--card)) !important;
   box-shadow: inset 4px 0 0 var(--gold), 0 3px 10px color-mix(in srgb, var(--text) 4%, transparent);
 }
-.admin-topups-owner .admin-provider-option.is-active .admin-provider-copy b,
-.admin-topups-owner .admin-provider-option.is-active .admin-provider-copy small {
+.admin-topups-refreshed .admin-provider-option.is-active .admin-provider-copy b,
+.admin-topups-refreshed .admin-provider-option.is-active .admin-provider-copy small {
   color: var(--text) !important;
 }
-.admin-topups-owner .admin-provider-option.is-editing {
+.admin-topups-refreshed .admin-provider-option.is-editing {
   border: 2px solid var(--gold) !important;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 18%, transparent), 0 4px 12px color-mix(in srgb, var(--text) 5%, transparent) !important;
 }
-.admin-topups-owner .admin-provider-option.is-active.is-editing {
+.admin-topups-refreshed .admin-provider-option.is-active.is-editing {
   background: color-mix(in srgb, var(--gold) 11%, var(--card)) !important;
 }
-.admin-topups-owner .admin-provider-icon {
+.admin-topups-refreshed .admin-provider-icon {
   border-color: var(--finance-board-line);
   color: var(--finance-board-accent-text);
   background: var(--finance-board-soft);
 }
-.admin-topups-owner .admin-provider-option.is-active .admin-provider-icon {
+.admin-topups-refreshed .admin-provider-option.is-active .admin-provider-icon {
   border-color: color-mix(in srgb, var(--gold) 32%, var(--finance-board-line));
   color: var(--finance-board-accent-text);
   background: var(--card);
 }
-.admin-topups-owner .admin-provider-status {
+.admin-topups-refreshed .admin-provider-status {
   border-color: var(--finance-board-line);
   color: var(--text-3);
   background: var(--finance-board-softer);
 }
 /* Status stays semantic green; selection/highlight follows the store theme. */
-.admin-topups-owner .admin-provider-status.is-active {
+.admin-topups-refreshed .admin-provider-status.is-active {
   border-color: color-mix(in srgb, var(--success, #087a5b) 24%, var(--card));
   color: var(--success, #087a5b);
   background: color-mix(in srgb, var(--success, #087a5b) 9%, var(--card));
 }
-.admin-topups-owner .admin-provider-arrow { color: var(--text-3); }
-.admin-topups-owner .admin-provider-option:focus-visible,
-.admin-topups-owner .admin-provider-picker-head > a:focus-visible,
-.admin-topups-owner .admin-provider-editor-head a:focus-visible,
-.admin-topups-owner .admin-bank-settings :is(input, select, button, a):focus-visible {
+.admin-topups-refreshed .admin-provider-arrow { color: var(--text-3); }
+.admin-topups-refreshed .admin-provider-option:focus-visible,
+.admin-topups-refreshed .admin-provider-picker-head > a:focus-visible,
+.admin-topups-refreshed .admin-provider-editor-head a:focus-visible,
+.admin-topups-refreshed .admin-bank-settings :is(input, select, button, a):focus-visible {
   outline: 3px solid color-mix(in srgb, var(--gold) 58%, transparent);
   outline-offset: 3px;
 }
 
-.admin-topups-owner .admin-provider-editor-head {
+.admin-topups-refreshed .admin-provider-editor-head {
   min-height: 48px;
   padding: 7px 10px;
   border: 1px dashed var(--finance-board-line);
   border-radius: 11px;
   background: var(--finance-board-softer);
 }
-.admin-topups-owner .admin-provider-editor-head a {
+.admin-topups-refreshed .admin-provider-editor-head a {
   color: var(--finance-board-accent-text);
   font-weight: 700;
 }
-.admin-topups-owner .admin-provider-help {
+.admin-topups-refreshed .admin-provider-help {
   border-color: var(--finance-board-line) !important;
   border-inline-start: 4px solid var(--gold);
   border-radius: 11px !important;
@@ -442,29 +442,29 @@
   line-height: 1.7;
 }
 
-.admin-topups-owner .admin-bank-transfer {
+.admin-topups-refreshed .admin-bank-transfer {
   padding: clamp(16px, 2vw, 22px);
   border-color: var(--finance-board-line) !important;
   border-radius: 15px !important;
   background: linear-gradient(145deg, var(--finance-board-softer), var(--card) 52%) !important;
 }
-.admin-topups-owner .admin-bank-transfer > h3 {
+.admin-topups-refreshed .admin-bank-transfer > h3 {
   min-height: 38px;
   padding-bottom: 12px;
   border-bottom: 1px solid var(--finance-board-line);
   font-size: 15px;
 }
-.admin-topups-owner .admin-bank-transfer > h3 svg {
+.admin-topups-refreshed .admin-bank-transfer > h3 svg {
   width: 21px;
   height: 21px;
 }
-.admin-topups-owner .admin-bank-grid { gap: 13px; }
-.admin-topups-owner .admin-bank-transfer label {
+.admin-topups-refreshed .admin-bank-grid { gap: 13px; }
+.admin-topups-refreshed .admin-bank-transfer label {
   color: var(--text-2);
   font-size: 13px;
   line-height: 1.5;
 }
-.admin-topups-owner .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) {
+.admin-topups-refreshed .admin-bank-transfer :is(input:not([type="checkbox"]):not([type="file"]), select) {
   min-width: 0;
   min-height: 48px;
   border: 1px solid var(--finance-board-line) !important;
@@ -473,20 +473,20 @@
   background: var(--card) !important;
   box-shadow: inset 0 1px 2px color-mix(in srgb, var(--text) 3%, transparent);
 }
-.admin-topups-owner .admin-bank-transfer :is(input, select)::placeholder {
+.admin-topups-refreshed .admin-bank-transfer :is(input, select)::placeholder {
   color: var(--text-4);
   opacity: 1;
 }
-.admin-topups-owner .admin-bank-transfer :is(input, select):hover {
+.admin-topups-refreshed .admin-bank-transfer :is(input, select):hover {
   border-color: color-mix(in srgb, var(--gold) 38%, var(--border)) !important;
 }
-.admin-topups-owner .admin-bank-transfer :is(input, select):focus-visible {
+.admin-topups-refreshed .admin-bank-transfer :is(input, select):focus-visible {
   border-color: var(--gold) !important;
   outline: 3px solid color-mix(in srgb, var(--gold) 20%, transparent);
   outline-offset: 1px;
   box-shadow: none;
 }
-.admin-topups-owner .admin-bank-transfer input[type="file"] {
+.admin-topups-refreshed .admin-bank-transfer input[type="file"] {
   min-height: 48px;
   padding: 7px;
   border: 1px dashed var(--finance-board-line);
@@ -494,7 +494,7 @@
   color: var(--text-2);
   background: var(--card);
 }
-.admin-topups-owner .admin-bank-transfer input[type="file"]::file-selector-button {
+.admin-topups-refreshed .admin-bank-transfer input[type="file"]::file-selector-button {
   min-height: 32px;
   margin-right: 9px;
   padding: 5px 10px;
@@ -505,13 +505,13 @@
   font: inherit;
   font-weight: 700;
 }
-.admin-topups-owner .admin-bank-transfer img[alt="QR ธนาคาร"] {
+.admin-topups-refreshed .admin-bank-transfer img[alt="QR ธนาคาร"] {
   border: 1px solid var(--finance-board-line);
   box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 6%, transparent);
 }
 
-.admin-topups-owner .admin-finance-save-row { padding-top: 0; }
-.admin-topups-owner .admin-finance-save {
+.admin-topups-refreshed .admin-finance-save-row { padding-top: 0; }
+.admin-topups-refreshed .admin-finance-save {
   min-height: 50px;
   min-width: min(100%, 260px);
   border: 1px solid var(--finance-board-accent-hover) !important;
@@ -521,41 +521,41 @@
   box-shadow: 0 5px 13px color-mix(in srgb, var(--gold) 20%, transparent) !important;
   font-size: 13px;
 }
-.admin-topups-owner .admin-finance-save:hover {
+.admin-topups-refreshed .admin-finance-save:hover {
   border-color: var(--finance-board-accent-hover) !important;
   background: var(--finance-board-accent-hover) !important;
   transform: translateY(-1px);
 }
-.admin-topups-owner .admin-finance-save:active { transform: translateY(0); }
+.admin-topups-refreshed .admin-finance-save:active { transform: translateY(0); }
 
 @media (max-width: 760px) {
-  .admin-topups-owner .admin-bank-settings { padding: 18px; gap: 16px; }
-  .admin-topups-owner .admin-bank-settings::before { left: 25%; }
-  .admin-topups-owner .admin-provider-grid { grid-template-columns: minmax(0, 1fr); }
-  .admin-topups-owner .admin-bank-grid { grid-template-columns: minmax(0, 1fr); }
-  .admin-topups-owner .admin-provider-option { min-height: 76px; }
+  .admin-topups-refreshed .admin-bank-settings { padding: 18px; gap: 16px; }
+  .admin-topups-refreshed .admin-bank-settings::before { left: 25%; }
+  .admin-topups-refreshed .admin-provider-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-topups-refreshed .admin-bank-grid { grid-template-columns: minmax(0, 1fr); }
+  .admin-topups-refreshed .admin-provider-option { min-height: 76px; }
 }
 @media (max-width: 520px) {
-  .admin-topups-owner .admin-bank-settings { padding: 16px 13px; }
-  .admin-topups-owner .admin-provider-picker { padding: 15px 12px; }
-  .admin-topups-owner .admin-provider-option { gap: 9px; padding: 10px; }
-  .admin-topups-owner .admin-provider-copy b { font-size: 14px; }
-  .admin-topups-owner .admin-provider-copy small { white-space: normal; }
-  .admin-topups-owner .admin-provider-status { font-size: 10px; }
-  .admin-topups-owner .admin-provider-icon { width: 38px; height: 38px; }
-  .admin-topups-owner .admin-provider-editor-head { align-items: flex-start; flex-direction: column; }
-  .admin-topups-owner .admin-finance-save-row,
-  .admin-topups-owner .admin-finance-save { width: 100%; }
+  .admin-topups-refreshed .admin-bank-settings { padding: 16px 13px; }
+  .admin-topups-refreshed .admin-provider-picker { padding: 15px 12px; }
+  .admin-topups-refreshed .admin-provider-option { gap: 9px; padding: 10px; }
+  .admin-topups-refreshed .admin-provider-copy b { font-size: 14px; }
+  .admin-topups-refreshed .admin-provider-copy small { white-space: normal; }
+  .admin-topups-refreshed .admin-provider-status { font-size: 10px; }
+  .admin-topups-refreshed .admin-provider-icon { width: 38px; height: 38px; }
+  .admin-topups-refreshed .admin-provider-editor-head { align-items: flex-start; flex-direction: column; }
+  .admin-topups-refreshed .admin-finance-save-row,
+  .admin-topups-refreshed .admin-finance-save { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .admin-topups-owner .admin-provider-option,
-  .admin-topups-owner .admin-provider-picker-head > a,
-  .admin-topups-owner .admin-finance-save { transition: none; transform: none; }
+  .admin-topups-refreshed .admin-provider-option,
+  .admin-topups-refreshed .admin-provider-picker-head > a,
+  .admin-topups-refreshed .admin-finance-save { transition: none; transform: none; }
 }
 
 /* TrueMoney and payment-alert tabs: keep the finance setup in one paper-ledger style. */
-.admin-topups-owner #topup-tab-content-truemoney > form,
-.admin-topups-owner #topup-tab-content-autoverify > form {
+.admin-topups-refreshed #topup-tab-content-truemoney > form,
+.admin-topups-refreshed #topup-tab-content-autoverify > form {
   position: relative;
   isolation: isolate;
   overflow: visible;
@@ -565,8 +565,8 @@
   background: linear-gradient(145deg, var(--card) 0%, var(--card) 74%, var(--finance-board-softer) 100%) !important;
   box-shadow: var(--finance-board-shadow), inset 0 1px 0 color-mix(in srgb, var(--card) 78%, white) !important;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form::before,
-.admin-topups-owner #topup-tab-content-autoverify > form::before {
+.admin-topups-refreshed #topup-tab-content-truemoney > form::before,
+.admin-topups-refreshed #topup-tab-content-autoverify > form::before {
   position: absolute;
   z-index: 2;
   top: -10px;
@@ -583,12 +583,12 @@
 }
 
 /* TrueMoney: clear enable state, wallet number, and usage note. */
-.admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:first-of-type {
   min-height: 70px;
   padding-bottom: 18px;
   border-color: var(--finance-board-line) !important;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type > div:first-child {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:first-of-type > div:first-child {
   display: grid;
   width: 48px;
   height: 48px;
@@ -601,26 +601,26 @@
   box-shadow: 0 3px 0 color-mix(in srgb, var(--gold) 16%, transparent);
   font-size: 22px;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type h2 {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:first-of-type h2 {
   font-size: clamp(17px, 2vw, 20px);
   letter-spacing: -.02em;
   line-height: 1.35;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type p {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:first-of-type p {
   max-width: 720px;
   margin-top: 4px;
   color: var(--text-3);
   line-height: 1.65;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) {
   position: relative;
   padding: clamp(15px, 2.2vw, 22px) !important;
   border: 1px solid var(--finance-board-line) !important;
   border-radius: 16px !important;
   background: linear-gradient(135deg, var(--finance-board-softer), var(--card) 64%) !important;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2)::before,
-.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2)::before {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2)::before,
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(2)::before {
   position: absolute;
   top: -6px;
   left: 50%;
@@ -633,7 +633,7 @@
   transform: translateX(-50%) rotate(-2deg);
   pointer-events: none;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:first-of-type {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:first-of-type {
   min-height: 76px;
   gap: 18px;
   padding: 15px 17px !important;
@@ -641,29 +641,29 @@
   border-radius: 12px !important;
   background: var(--card) !important;
 }
-.admin-topups-owner #topup-tab-content-truemoney #tm_enabled:focus-visible + div {
+.admin-topups-refreshed #topup-tab-content-truemoney #tm_enabled:focus-visible + div {
   outline: 3px solid color-mix(in srgb, var(--gold) 54%, transparent);
   outline-offset: 3px;
 }
-.admin-topups-owner #topup-tab-content-truemoney #tm_enabled + div {
+.admin-topups-refreshed #topup-tab-content-truemoney #tm_enabled + div {
   min-width: 44px;
   min-height: 26px;
   border-color: var(--finance-board-line) !important;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) label {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) label {
   color: var(--text-2);
   font-size: 13px;
   line-height: 1.55;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) label[for="tm_enabled"] {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) label[for="tm_enabled"] {
   color: var(--text);
   font-size: 15px;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(2) {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(2) {
   max-width: 540px;
   padding: 2px 4px;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(2) > label:first-child {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(2) > label:first-child {
   display: block;
   margin-bottom: 6px;
   color: var(--text-2);
@@ -672,7 +672,7 @@
   letter-spacing: 0;
   text-transform: none;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) input[name="truemoneyPhone"] {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) input[name="truemoneyPhone"] {
   min-height: 50px;
   border: 1px solid var(--finance-board-line) !important;
   border-radius: 10px !important;
@@ -681,19 +681,19 @@
   font-size: 16px;
   letter-spacing: .04em;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) input[name="truemoneyPhone"]:focus-visible,
-.admin-topups-owner #topup-tab-content-autoverify > form input[name="topupWebhookUrl"]:focus-visible {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) input[name="truemoneyPhone"]:focus-visible,
+.admin-topups-refreshed #topup-tab-content-autoverify > form input[name="topupWebhookUrl"]:focus-visible {
   border-color: var(--gold) !important;
   outline: 3px solid color-mix(in srgb, var(--gold) 22%, transparent);
   outline-offset: 1px;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(2) > p {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(2) > p {
   margin-top: 7px;
   color: var(--text-3);
   font-size: 12px;
   line-height: 1.65;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(3) {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(3) {
   position: relative;
   padding: 18px 16px 14px !important;
   border: 1px dashed var(--finance-board-line) !important;
@@ -703,17 +703,17 @@
   font-size: 13px;
   line-height: 1.75;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(3) > div:first-child {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:nth-of-type(3) > div:first-child {
   margin-bottom: 5px;
   color: var(--finance-board-accent-text) !important;
   font-size: 14px;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(3),
-.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(3) {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(3),
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(3) {
   padding-top: 0 !important;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(3) button,
-.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(3) button {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(3) button,
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(3) button {
   display: inline-flex;
   min-height: 48px;
   align-items: center;
@@ -728,14 +728,14 @@
   font-size: 13px !important;
   font-weight: 700;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(3) button:hover,
-.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(3) button:hover {
+.admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(3) button:hover,
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(3) button:hover {
   background: var(--finance-board-accent-hover) !important;
   transform: translateY(-1px);
 }
 
 /* Verification summary card and Discord notification settings. */
-.admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type {
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:first-of-type {
   position: relative;
   overflow: visible;
   padding: 20px !important;
@@ -745,7 +745,7 @@
   background: linear-gradient(120deg, var(--finance-board-soft), var(--card) 68%) !important;
   box-shadow: 0 5px 14px color-mix(in srgb, var(--text) 4%, transparent) !important;
 }
-.admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type > div.flex.items-center.gap-3\.5 > div:first-child {
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:first-of-type > div.flex.items-center.gap-3\.5 > div:first-child {
   width: 48px;
   height: 48px;
   flex: 0 0 auto;
@@ -755,7 +755,7 @@
   background: var(--card) !important;
   box-shadow: 0 3px 0 color-mix(in srgb, var(--gold) 15%, transparent);
 }
-.admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type a {
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:first-of-type a {
   min-height: 46px;
   justify-content: center;
   border: 1px solid var(--finance-board-accent-hover) !important;
@@ -764,35 +764,35 @@
   background: var(--finance-board-accent) !important;
   box-shadow: 0 4px 11px color-mix(in srgb, var(--gold) 18%, transparent) !important;
 }
-.admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type a:hover {
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:first-of-type a:hover {
   background: var(--finance-board-accent-hover) !important;
   transform: translateY(-1px);
 }
-.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) {
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(2) {
   position: relative;
   padding: 19px !important;
   border: 1px solid var(--finance-board-line) !important;
   border-radius: 15px !important;
   background: linear-gradient(145deg, var(--finance-board-softer), var(--card) 70%) !important;
 }
-.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) h3 {
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(2) h3 {
   min-height: 34px;
   padding-bottom: 10px;
   border-bottom: 1px solid var(--finance-board-line);
   font-size: 15px;
 }
-.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) > p {
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(2) > p {
   max-width: 760px;
   color: var(--text-3);
   font-size: 13px;
   line-height: 1.65;
 }
-.admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) label {
+.admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(2) label {
   color: var(--text-2);
   font-size: 13px;
   font-weight: 650;
 }
-.admin-topups-owner #topup-tab-content-autoverify > form input[name="topupWebhookUrl"] {
+.admin-topups-refreshed #topup-tab-content-autoverify > form input[name="topupWebhookUrl"] {
   min-height: 50px;
   border: 1px solid var(--finance-board-line) !important;
   border-radius: 10px !important;
@@ -801,37 +801,37 @@
   font-size: 14px;
   overflow-wrap: anywhere;
 }
-.admin-topups-owner #topup-tab-content-autoverify > form input[name="topupWebhookUrl"]::placeholder {
+.admin-topups-refreshed #topup-tab-content-autoverify > form input[name="topupWebhookUrl"]::placeholder {
   color: var(--text-4);
   opacity: 1;
 }
-.admin-topups-owner #topup-tab-content-truemoney > form :is(button, a):focus-visible,
-.admin-topups-owner #topup-tab-content-autoverify > form :is(button, a):focus-visible {
+.admin-topups-refreshed #topup-tab-content-truemoney > form :is(button, a):focus-visible,
+.admin-topups-refreshed #topup-tab-content-autoverify > form :is(button, a):focus-visible {
   outline: 3px solid color-mix(in srgb, var(--gold) 56%, transparent);
   outline-offset: 3px;
 }
 
 @media (max-width: 760px) {
-  .admin-topups-owner #topup-tab-content-truemoney > form,
-  .admin-topups-owner #topup-tab-content-autoverify > form { padding: 18px !important; }
-  .admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type { align-items: flex-start; }
+  .admin-topups-refreshed #topup-tab-content-truemoney > form,
+  .admin-topups-refreshed #topup-tab-content-autoverify > form { padding: 18px !important; }
+  .admin-topups-refreshed #topup-tab-content-autoverify > form > div:first-of-type { align-items: flex-start; }
 }
 @media (max-width: 520px) {
-  .admin-topups-owner #topup-tab-content-truemoney > form,
-  .admin-topups-owner #topup-tab-content-autoverify > form { padding: 16px 13px !important; }
-  .admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type { align-items: flex-start; }
-  .admin-topups-owner #topup-tab-content-truemoney > form > div:first-of-type > div:first-child { width: 42px; height: 42px; }
-  .admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) { padding: 13px !important; }
-  .admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:first-of-type { align-items: flex-start; gap: 12px; padding: 13px !important; }
-  .admin-topups-owner #topup-tab-content-truemoney > form > div:nth-of-type(3) button,
-  .admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(3) button { width: 100%; }
-  .admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type { padding: 15px !important; }
-  .admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type > div.flex.items-center.gap-3\.5 { align-items: flex-start; }
-  .admin-topups-owner #topup-tab-content-autoverify > form > div:first-of-type a { width: 100%; }
-  .admin-topups-owner #topup-tab-content-autoverify > form > div:nth-of-type(2) { padding: 14px !important; }
-  .admin-topups-owner #topup-tab-content-autoverify > form input[name="topupWebhookUrl"] { font-size: 16px; }
+  .admin-topups-refreshed #topup-tab-content-truemoney > form,
+  .admin-topups-refreshed #topup-tab-content-autoverify > form { padding: 16px 13px !important; }
+  .admin-topups-refreshed #topup-tab-content-truemoney > form > div:first-of-type { align-items: flex-start; }
+  .admin-topups-refreshed #topup-tab-content-truemoney > form > div:first-of-type > div:first-child { width: 42px; height: 42px; }
+  .admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) { padding: 13px !important; }
+  .admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(2) > div:first-of-type { align-items: flex-start; gap: 12px; padding: 13px !important; }
+  .admin-topups-refreshed #topup-tab-content-truemoney > form > div:nth-of-type(3) button,
+  .admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(3) button { width: 100%; }
+  .admin-topups-refreshed #topup-tab-content-autoverify > form > div:first-of-type { padding: 15px !important; }
+  .admin-topups-refreshed #topup-tab-content-autoverify > form > div:first-of-type > div.flex.items-center.gap-3\.5 { align-items: flex-start; }
+  .admin-topups-refreshed #topup-tab-content-autoverify > form > div:first-of-type a { width: 100%; }
+  .admin-topups-refreshed #topup-tab-content-autoverify > form > div:nth-of-type(2) { padding: 14px !important; }
+  .admin-topups-refreshed #topup-tab-content-autoverify > form input[name="topupWebhookUrl"] { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .admin-topups-owner #topup-tab-content-truemoney > form button,
-  .admin-topups-owner #topup-tab-content-autoverify > form :is(button, a) { transition: none; transform: none; }
+  .admin-topups-refreshed #topup-tab-content-truemoney > form button,
+  .admin-topups-refreshed #topup-tab-content-autoverify > form :is(button, a) { transition: none; transform: none; }
 }

@@ -789,7 +789,7 @@ async function main() {
       const filename = path.join(root, 'src/views', view + '.ejs');
       const html = ejs.render(fs.readFileSync(filename, 'utf8'), {
         settings: tenantViewData.settings, currentUser: tenantViewData.users[0], messages: { success: [], error: [] },
-        isMainSite: false, pendingTopupCount: 0, ...values,
+        isMainSite: false, pendingTopupCount: 0, asset: value => '/' + value, ...values,
       }, { filename });
       assert.doesNotMatch(html, /data-provider-quota-details/);
       assert.doesNotMatch(html, /central-key-must-stay-private/);
@@ -863,6 +863,41 @@ async function main() {
     else if (filename.endsWith('.ejs')) { require('ejs').compile(fs.readFileSync(filename, 'utf8'), { filename }); templates++; }
   } }
   scan(path.join(root, 'src'));
+  const topupsTemplate = fs.readFileSync(path.join(root, 'src/views/admin/topups.ejs'), 'utf8');
+  const topupsRefreshCss = fs.readFileSync(path.join(root, 'public/css/admin-topups-owner-v1.css'), 'utf8');
+  const topupsBoardCss = fs.readFileSync(path.join(root, 'public/css/admin-topups-board-v1.css'), 'utf8');
+  const slipTemplate = fs.readFileSync(path.join(root, 'src/views/admin/slip-verification.ejs'), 'utf8');
+  const slipRefreshCss = fs.readFileSync(path.join(root, 'public/css/admin-slip-verification-owner-v1.css'), 'utf8');
+  const postcss = require('postcss');
+  check('Rental finance pages share the refreshed theme while keeping each shop’s payment controls', () => {
+    assert.match(topupsTemplate, /<link rel="stylesheet" href="<%= asset\('css\/admin-topups-owner-v1\.css'\) %>&amp;rev=1" \/>/);
+    assert.match(topupsTemplate, /<link rel="stylesheet" href="<%= asset\('css\/admin-topups-board-v1\.css'\) %>&amp;board=1&amp;rev=1" \/>/);
+    assert.doesNotMatch(topupsTemplate, /if \(typeof isMainSite[^\n]*admin-topups-(?:owner|board)/);
+    assert.match(topupsTemplate, /workspace-topups admin-topups-refreshed/);
+    assert.match(topupsTemplate, /name="truemoneyPhone"/);
+    assert.match(topupsTemplate, /id="tm_enabled"/);
+    assert.match(topupsTemplate, /action="\/admin\/topups\/payment-settings"/);
+    assert.match(topupsTemplate, /role="tablist"[\s\S]*?role="tab"[\s\S]*?role="tabpanel"/);
+    for (const css of [topupsRefreshCss, topupsBoardCss]) {
+      const stylesheet = postcss.parse(css);
+      stylesheet.walkRules(rule => {
+        if (rule.parent && rule.parent.type === 'atrule' && /keyframes$/i.test(rule.parent.name)) return;
+        for (const selector of rule.selectors) assert.ok(selector.includes('.admin-topups-refreshed'), `finance CSS escaped its page scope: ${selector}`);
+      });
+      assert.match(css, /var\(--(?:admin-brand-fill|gold)/);
+    }
+  });
+  check('Rental slip settings use the shared themed panel without changing tenant provider options', () => {
+    assert.match(slipTemplate, /<div class="slip-owner-page" data-slip-owner-page>/);
+    assert.match(slipTemplate, /<link rel="stylesheet" href="<%= asset\('css\/admin-slip-verification-owner-v1\.css'\) %>&amp;rev=1" \/>/);
+    assert.match(slipTemplate, /payment\.slipApiMode \|\| 'shared'/);
+    assert.match(slipTemplate, /if \(!isMainSite\)/);
+    const stylesheet = postcss.parse(slipRefreshCss);
+    stylesheet.walkRules(rule => {
+      if (rule.parent && rule.parent.type === 'atrule' && /keyframes$/i.test(rule.parent.name)) return;
+      for (const selector of rule.selectors) assert.ok(/\[data-(?:slip-owner|provider)[-\w]*/.test(selector), `slip CSS escaped its page scope: ${selector}`);
+    });
+  });
   console.log(JSON.stringify({ checks, js, templates, customerDataAccessed: false }));
 }
 main().catch(err => { console.error(err); process.exitCode = 1; });

@@ -1,6 +1,6 @@
-<% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-topups-owner-v1.css') %>" /><% } %>
-<% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-topups-board-v1.css') + '&board=1' %>" /><% } %>
-<div class="admin-workspace-view workspace-topups <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-topups-owner' : '' %>">
+<link rel="stylesheet" href="<%= asset('css/admin-topups-owner-v1.css') %>&amp;rev=1" />
+<link rel="stylesheet" href="<%= asset('css/admin-topups-board-v1.css') %>&amp;board=1&amp;rev=1" />
+<div class="admin-workspace-view workspace-topups admin-topups-refreshed">
 <% const publicSlipMessage = (message) => String(message || '')
   .replace(/Slip\s*XEPHT/gi, 'ระบบตรวจสอบ')
   .replace(/slip\.xepht\.com/gi, 'ระบบภายนอก')
@@ -43,8 +43,8 @@
   </div>
 
   <!-- Subsystem Navigation Tabs -->
-  <div class="admin-finance-tabs flex border-b border-[var(--border)] gap-2 overflow-x-auto pb-px" <%- isMainSite ? 'role="tablist" aria-label="ส่วนจัดการระบบรับเงิน"' : '' %>>
-    <button type="button" <%- isMainSite ? 'role="tab" aria-selected="true" aria-controls="topup-tab-content-requests" tabindex="0"' : '' %> onclick="switchTopupTab('requests')" id="topup-tab-btn-requests" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-sm transition border-[var(--gold)] text-[var(--gold-text)] bg-[var(--gold)]/5 rounded-t-xl">
+  <div class="admin-finance-tabs flex border-b border-[var(--border)] gap-2 overflow-x-auto pb-px" role="tablist" aria-label="ส่วนจัดการระบบรับเงิน">
+    <button type="button" role="tab" aria-selected="true" aria-controls="topup-tab-content-requests" tabindex="0" onclick="switchTopupTab('requests')" id="topup-tab-btn-requests" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-bold text-sm transition border-[var(--gold)] text-[var(--gold-text)] bg-[var(--gold)]/5 rounded-t-xl">
       <% if (isMainSite) { %>
       <span class="admin-finance-tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4h10v17H5V6h2M9 3h6v3H9zM8 11h6M8 15h6"/></svg></span>
       <% } else { %><span class="text-base">📋</span><% } %>
@@ -53,13 +53,13 @@
         <span class="text-[10px] bg-[var(--gold)] text-[var(--gold-contrast)] font-bold px-1.5 py-0.2 rounded-full"><%= pendingCount %></span>
       <% } %>
     </button>
-    <button type="button" <%- isMainSite ? 'role="tab" aria-selected="false" aria-controls="topup-tab-content-bank" tabindex="-1"' : '' %> onclick="switchTopupTab('bank')" id="topup-tab-btn-bank" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
+    <button type="button" role="tab" aria-selected="false" aria-controls="topup-tab-content-bank" tabindex="-1" onclick="switchTopupTab('bank')" id="topup-tab-btn-bank" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
       <% if (isMainSite) { %>
       <span class="admin-finance-tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M7 15h4"/></svg></span>
       <% } else { %><span class="text-base">💳</span><% } %>
       <span>บัญชีธนาคารรับเงิน</span>
     </button>
-    <button type="button" <%- isMainSite ? 'role="tab" aria-selected="false" aria-controls="topup-tab-content-truemoney" tabindex="-1"' : '' %> onclick="switchTopupTab('truemoney')" id="topup-tab-btn-truemoney" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
+    <button type="button" role="tab" aria-selected="false" aria-controls="topup-tab-content-truemoney" tabindex="-1" onclick="switchTopupTab('truemoney')" id="topup-tab-btn-truemoney" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
       <% if (isMainSite) { %>
       <span class="admin-finance-tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><path d="M7 6V4h10v2M3 10h18M8 15h.01"/></svg></span>
       <% } else { %><span class="text-base">🧧</span><% } %>
@@ -68,7 +68,7 @@
         <span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-1.5 py-0.5 rounded">เปิด</span>
       <% } %>
     </button>
-    <button type="button" <%- isMainSite ? 'role="tab" aria-selected="false" aria-controls="topup-tab-content-autoverify" tabindex="-1"' : '' %> onclick="switchTopupTab('autoverify')" id="topup-tab-btn-autoverify" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
+    <button type="button" role="tab" aria-selected="false" aria-controls="topup-tab-content-autoverify" tabindex="-1" onclick="switchTopupTab('autoverify')" id="topup-tab-btn-autoverify" class="topup-tab-btn flex items-center gap-2 px-5 py-3 border-b-2 font-semibold text-sm transition border-transparent text-[var(--text-3)] hover:text-[var(--text)] rounded-t-xl">
       <% if (isMainSite) { %>
       <span class="admin-finance-tab-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 7.7 7.5 9.5 4.4-1.8 7.5-4.9 7.5-9.5V6z"/><path d="m8.5 12 2.3 2.3 4.8-4.8"/></svg></span>
       <% } else { %><span class="text-base">🤖</span><% } %>
@@ -79,7 +79,7 @@
   <!-- ========================================== -->
   <!-- TAB 1: รายการเติมเงิน & ตรวจสลิป (Requests) -->
   <!-- ========================================== -->
-  <div id="topup-tab-content-requests" class="topup-tab-content space-y-6" <%- isMainSite ? 'role="tabpanel" aria-labelledby="topup-tab-btn-requests" tabindex="0"' : '' %>>
+  <div id="topup-tab-content-requests" class="topup-tab-content space-y-6" role="tabpanel" aria-labelledby="topup-tab-btn-requests" tabindex="0">
 
     <!-- Search & Filter Bar -->
     <form method="get" action="/admin/topups" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row gap-3">
@@ -278,7 +278,7 @@
   <!-- ========================================== -->
   <!-- TAB 2: บัญชีธนาคารสำหรับโอนเงิน -->
   <!-- ========================================== -->
-  <div id="topup-tab-content-bank" class="topup-tab-content hidden space-y-6" <%- isMainSite ? 'role="tabpanel" aria-labelledby="topup-tab-btn-bank" tabindex="0"' : '' %>>
+  <div id="topup-tab-content-bank" class="topup-tab-content hidden space-y-6" role="tabpanel" aria-labelledby="topup-tab-btn-bank" tabindex="0">
     <form action="/admin/topups/payment-settings" method="post" enctype="multipart/form-data" class="admin-bank-settings bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
       <% if (receiverProvider) { %><input type="hidden" name="receiverProvider" value="<%= receiverProvider %>" /><% } %>
 
@@ -418,7 +418,7 @@
   <!-- ========================================== -->
   <!-- TAB 3: ซองของขวัญ TrueMoney Wallet (Angpao) -->
   <!-- ========================================== -->
-  <div id="topup-tab-content-truemoney" class="topup-tab-content hidden space-y-6" <%- isMainSite ? 'role="tabpanel" aria-labelledby="topup-tab-btn-truemoney" tabindex="0"' : '' %>>
+  <div id="topup-tab-content-truemoney" class="topup-tab-content hidden space-y-6" role="tabpanel" aria-labelledby="topup-tab-btn-truemoney" tabindex="0">
     <form action="/admin/topups/payment-settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
 
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
@@ -485,7 +485,7 @@
   <!-- ========================================== -->
   <!-- TAB 4: ตรวจสลิปอัตโนมัติ & Discord Webhook -->
   <!-- ========================================== -->
-  <div id="topup-tab-content-autoverify" class="topup-tab-content hidden space-y-6" <%- isMainSite ? 'role="tabpanel" aria-labelledby="topup-tab-btn-autoverify" tabindex="0"' : '' %>>
+  <div id="topup-tab-content-autoverify" class="topup-tab-content hidden space-y-6" role="tabpanel" aria-labelledby="topup-tab-btn-autoverify" tabindex="0">
     <form action="/admin/topups/payment-settings" method="post" class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-6 shadow-sm space-y-6">
 
       <!-- Preserve Other Tab Settings as Hidden Inputs -->
@@ -559,10 +559,8 @@
 <script>
   function switchTopupTab(tabId) {
     document.querySelectorAll('.topup-tab-btn').forEach(btn => {
-      <% if (isMainSite) { %>
       btn.setAttribute('aria-selected', String(btn.id === 'topup-tab-btn-' + tabId));
       btn.tabIndex = btn.id === 'topup-tab-btn-' + tabId ? 0 : -1;
-      <% } %>
       btn.classList.remove('border-[var(--gold)]', 'text-[var(--gold-text)]', 'bg-[var(--gold)]/5', 'font-bold');
       btn.classList.add('border-transparent', 'text-[var(--text-3)]', 'font-semibold');
     });
@@ -600,7 +598,6 @@
     }
   })();
 
-  <% if (isMainSite) { %>
   document.querySelector('[role="tablist"]')?.addEventListener('keydown', event => {
     const tabs = [...document.querySelectorAll('.topup-tab-btn')];
     const currentIndex = tabs.indexOf(document.activeElement);
@@ -615,7 +612,6 @@
     tabs[nextIndex].focus();
     switchTopupTab(tabs[nextIndex].id.replace('topup-tab-btn-', ''));
   });
-  <% } %>
 </script>
 
 </div>

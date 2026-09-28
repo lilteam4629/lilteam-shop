@@ -1,7 +1,7 @@
 <!-- Slip Verification API Provider Hub Header -->
 <% const activeProvider = effectiveProvider || payment.slipProvider || 'auto'; %>
-<% if (isMainSite) { %><div class="slip-owner-page" data-slip-owner-page><% } %>
-<% if (isMainSite) { %><style>@import url("<%= asset('css/admin-slip-verification-owner-v1.css') %>");</style><% } %>
+<div class="slip-owner-page" data-slip-owner-page>
+<link rel="stylesheet" href="<%= asset('css/admin-slip-verification-owner-v1.css') %>&amp;rev=1" />
 <p data-slip-owner-intro class="mb-4 rounded-xl border p-4"><%= isMainSite ? 'เว็บหลักใช้ API ของคุณเอง' : ((payment.slipApiMode || 'shared') === 'shared' ? 'ร้านนี้ใช้ระบบตรวจสลิปกลางของเว็บ รวมพูล SlipCheck ทุกคีย์ให้อัตโนมัติและไม่ต้องกรอกคีย์ในร้านเช่า' : 'ร้านนี้ใช้ API และโควตาของตัวเอง') %></p>
 <div data-slip-owner-header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
@@ -333,4 +333,4 @@ async function testOwnProvider(provider) {
   }
 }
 </script>
-<% if (isMainSite) { %></div><% } %>
+</div>
