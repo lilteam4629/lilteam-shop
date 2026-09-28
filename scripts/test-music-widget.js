@@ -15,12 +15,14 @@ const script = [...layout.matchAll(/<script>([\s\S]*?)<\/script>/g)]
 assert.ok(script, 'storefront music script should exist');
 const widgetMarkup = layout.slice(layout.indexOf('<div id="music-widget"'), layout.indexOf('<div id="music-yt-player"'));
 assert.equal((layout.match(/id="music-widget"/g) || []).length, 1, 'one shared player must be rendered by the public layout');
-assert.match(layout, /^  <link rel="stylesheet" href="<%= asset\('css\/storefront-music-unified-v1\.css'\) %>&amp;rev=1" \/>$/m,
-  'the shared music skin must load in the storefront layout');
+assert.match(layout, /^  <% if \(typeof isMainSite !== 'undefined' && isMainSite\) \{ %><link rel="stylesheet" href="<%= asset\('css\/storefront-music-unified-v1\.css'\) %>&amp;rev=1" \/><% } %>$/m,
+  'the unified music skin must load on every page of the owner storefront only');
 assert.doesNotMatch(widgetMarkup, /storefrontOwnerHomeV7|music-minimize-btn|music-expand-btn/,
   'music markup must not switch structure on the homepage');
 assert.match(widgetMarkup, /music-widget__artwork[\s\S]*music-collapsed-title[\s\S]*music-collapsed-state[\s\S]*music-widget__expand/,
-  'every storefront page must use the same player controls');
+  'the owner storefront must use the shared player controls');
+assert.match(widgetMarkup, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*music-widget__artwork[\s\S]*else \{ %>[\s\S]*id="music-icon" class="relative z-10">🎵/,
+  'rental storefronts must retain their existing player markup');
 
 function makeHarness(defaultVolume) {
   const elements = new Map();

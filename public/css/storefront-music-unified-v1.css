@@ -1,4 +1,4 @@
-/* One compact, theme-aware player shared by every public storefront page. */
+/* One compact, theme-aware player shared across the primary LilTeam storefront. */
 #music-widget {
   display: flex;
   align-items: center;

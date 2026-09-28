@@ -36,8 +36,9 @@ assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n
   'the banner-only hero stylesheet must be cache-busted for the main store only');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
   'the cozy homepage layer must only load on the main storefront');
-assert.match(layout, /<link rel="stylesheet" href="<%= asset\('css\/storefront-music-unified-v1\.css'\) %>&amp;rev=1" \/>/,
-  'one cache-busted music skin must load for every storefront page');
+const musicWidgetLink = layout.split(/\r?\n/).find(line => line.includes('storefront-music-unified-v1.css')) || '';
+assert.ok(musicWidgetLink.includes('if (typeof isMainSite') && musicWidgetLink.includes('isMainSite') && !musicWidgetLink.includes('storefrontOwnerHomeV7'),
+  'one cache-busted music skin must load on every owner-store page and stay off rental storefronts');
 assert.doesNotMatch(layout, /storefront-music-widget-cozy-v1\.css/,
   'the homepage-only player skin must not create a second page-specific appearance');
 assert.match(layout, /storefront-mobile-header-cozy-v3\.css[\s\S]*?if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-account-menu-mobile-v1\.css[^\n]*rev=3/,
