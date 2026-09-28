@@ -12,6 +12,7 @@ const {
   shouldShowFullRecommendedCategoryImages,
 } = require('../services/recommended-category-home');
 const { MAIN_SITE_URL } = require('../middleware/tenant');
+const { visibleStorefrontCategories } = require('../services/storefront-category-visibility');
 
 function publishTime(product) {
   if (!product.publishAt) return 0;
@@ -116,10 +117,19 @@ function latestOrderCards() {
 const HOME_PAGE_SIZE = 24;
 const UNPAGINATED_HOME_TENANTS = new Set(['moopee-shop']);
 
+function storefrontFilterTags() {
+  return visibleStorefrontCategories(store.data.filterTags);
+}
+
+function storefrontRecommendedCategories() {
+  return visibleStorefrontCategories(store.data.recommendedCategories)
+    .filter(category => category.enabled !== false);
+}
+
 function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts = false, req = null) {
   const stockCounts = availableStockCounts();
   const remote = syndicatedProducts(req);
-  const recommendedCategories = (store.data.recommendedCategories || []).filter(category => category.enabled !== false);
+  const recommendedCategories = storefrontRecommendedCategories();
   // The main storefront hides assigned products only for banners it actually
   // renders; Bank Shop renders category cards even when they use the fallback image.
   const homeVisibleRecommendedCategories = req?.tenantShop
@@ -189,7 +199,7 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, showAllProducts 
     announcements: store.data.announcements.filter(a => a.active),
     latestOrders: latestOrderCards(),
     scheduledProducts,
-    filterTags: store.data.filterTags,
+    filterTags: storefrontFilterTags(),
     activeFilterTags: [],
     filterProductCount: active.length,
     miniGamePrizes: store.data.miniGamePrizes.filter(p => p.active),
@@ -262,7 +272,7 @@ router.get('/products', (req, res) => {
   let products = store.data.products.filter(product => isProductVisible(product) && isAvailableOnThisShop(product, req)).map(product => withStock(product, stockCounts, req)).concat(syndicatedProducts(req));
   const recommendedId = String(req.query.recommended || '').trim();
   const recommendedCategory = recommendedId
-    ? (store.data.recommendedCategories || []).find(category => String(category.id) === recommendedId)
+    ? storefrontRecommendedCategories().find(category => String(category.id) === recommendedId)
     : null;
   if (recommendedId && !recommendedCategory) return res.status(404).render('shop/404', { title: 'ไม่พบหมวดหมู่' });
   if (recommendedCategory) {
@@ -270,8 +280,9 @@ router.get('/products', (req, res) => {
     products = products.filter(product => productIds.has(String(product.id)));
   }
   const requestedIds = String(req.query.tags || req.query.tag || '').split(',').map(s => s.trim()).filter(Boolean);
+  const publicFilterTags = storefrontFilterTags();
   const activeFilterTags = requestedIds
-    .map(id => store.data.filterTags.find(tag => tag.id === id))
+    .map(id => publicFilterTags.find(tag => String(tag.id) === id))
     .filter(Boolean);
   // AND match: a product must carry every selected tag (it can have MORE
   // tags beyond those selected — extra tags on the product don't exclude
@@ -292,7 +303,7 @@ router.get('/products', (req, res) => {
     products,
     listType: 'products',
     sort: req.query.sort || '',
-    filterTags: store.data.filterTags,
+    filterTags: publicFilterTags,
     activeFilterTags,
     filterProductCount: products.length,
     catalogApiNotice: Boolean(req.tenantShop && store.data.settings.catalogApi?.enabled),
@@ -404,7 +415,7 @@ router.get('/game/:slug', (req, res) => {
   })();
   const reviews = remoteProduct ? [] : store.data.reviews.filter(r => r.productId === product.id);
   const selectedFilterTagIds = new Set((product.filterTagIds || []).map(String));
-  const productFilterTags = store.data.filterTags.filter(tag => selectedFilterTagIds.has(String(tag.id)));
+  const productFilterTags = storefrontFilterTags().filter(tag => selectedFilterTagIds.has(String(tag.id)));
   const productRangers = rangersSource.resolveCodes(
     remoteProduct ? [] : store.data.settings.rangersCatalog?.productAssignments?.[product.id] || [],
   );

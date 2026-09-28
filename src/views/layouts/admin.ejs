@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" class="<%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
+<html lang="th" class="light <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 <head>
   <% const protectedSlipPage = ['slip-verification', 'api-providers'].includes(typeof active === 'undefined' ? '' : active); %>
   <% const referenceEnabled = !protectedSlipPage; %>
@@ -13,7 +13,6 @@
   <script>
     (function () {
       try {
-        if (localStorage.getItem('lilteam_theme') === 'light') document.documentElement.classList.add('light');
         if (localStorage.getItem('lilteam_admin_sidebar') === 'collapsed' && window.innerWidth >= 1024) {
           document.documentElement.classList.add('sidebar-collapsed');
         }
@@ -168,9 +167,6 @@
       </div>
     </a>
     <div class="flex items-center gap-2">
-      <button id="theme-toggle-btn" type="button" title="สลับโหมดมืด/สว่าง" class="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--input)]/80 border border-[var(--border-light)] text-sm active:scale-95 transition">
-        <span id="theme-toggle-icon">🌙</span>
-      </button>
       <button id="admin-menu-btn" type="button" aria-label="เปิดเมนู" class="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--input)]/80 border border-[var(--border-light)] text-[var(--text)] active:scale-95 transition">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
       </button>
@@ -419,11 +415,6 @@
           </div>
         <% } %>
 
-        <!-- Theme Toggle Button -->
-        <button id="theme-toggle-btn-desktop" type="button" title="สลับโหมดมืด/สว่าง" class="w-8 h-8 flex items-center justify-center rounded-xl bg-[var(--input)] border border-[var(--border-light)] hover:border-[var(--gold)]/60 text-xs transition">
-          <span id="theme-toggle-icon-desktop">🌙</span>
-        </button>
-
         <!-- Quick View Storefront Button -->
         <a href="/" class="flex items-center gap-1.5 bg-[var(--input)] hover:bg-[var(--card-hover)] border border-[var(--border-light)] text-[var(--text-2)] hover:text-[var(--gold-text)] px-3 py-1.5 rounded-xl text-xs font-medium transition">
           <span>หน้าร้าน</span>
@@ -629,24 +620,7 @@
       }
     })();
 
-    // Dark/Light Theme Switcher
-    (function () {
-      const icons = [document.getElementById('theme-toggle-icon'), document.getElementById('theme-toggle-icon-desktop')].filter(Boolean);
-      const buttons = [document.getElementById('theme-toggle-btn'), document.getElementById('theme-toggle-btn-desktop')].filter(Boolean);
-      function isLight() { return document.documentElement.classList.contains('light'); }
-      function updateIcons() { icons.forEach(function (i) { i.textContent = isLight() ? '☀️' : '🌙'; }); }
-      updateIcons();
-      buttons.forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          const root = document.documentElement;
-          root.classList.add('theme-switching');
-          root.classList.toggle('light');
-          try { localStorage.setItem('lilteam_theme', isLight() ? 'light' : 'dark'); } catch (e) {}
-          updateIcons();
-          requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.remove('theme-switching'); }); });
-        });
-      });
-    })();
+    // Admin theme switching is paused; the html.light class keeps every page readable.
 
     // Public admin images upload straight from the browser to Cloudflare R2.
     // The VPS only receives the resulting URLs, so large batches cannot fill RAM.

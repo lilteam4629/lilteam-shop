@@ -1,5 +1,6 @@
 const store = require('../data/store');
 const theme = require('../services/theme');
+const { visibleStorefrontCategories } = require('../services/storefront-category-visibility');
 
 function currentUser(req) {
   if (!req.session.userId) return null;
@@ -35,7 +36,8 @@ function attachUser(req, res, next) {
     contactFacebook: normalizeExternalLink(store.data.settings.contactFacebook),
     contactMessenger: normalizeExternalLink(store.data.settings.contactMessenger),
   };
-  res.locals.navFilterTags = Array.isArray(store.data.filterTags) ? store.data.filterTags : [];
+  // Keep the mini-game category configured in storage; omit it only from public storefront navigation.
+  res.locals.navFilterTags = visibleStorefrontCategories(store.data.filterTags);
   res.locals.themeCss = theme.renderCss(store.data.settings.theme);
   res.locals.adminBrandCss = theme.renderAdminAccentCss(store.data.settings.theme);
   next();

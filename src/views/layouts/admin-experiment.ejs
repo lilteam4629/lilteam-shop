@@ -3,14 +3,13 @@
 <% const pendingAdminNotificationCount = Math.max(0, Number(pendingTopupCount) || 0); %>
 <% const notificationLabel = pendingAdminNotificationCount ? `คำขอเติมเงินรอตรวจสอบ ${pendingAdminNotificationCount} รายการ` : 'ดูการแจ้งเตือน'; %>
 <% const notificationBadge = pendingAdminNotificationCount ? `<span class="experiment-notification-count" aria-hidden="true">${pendingAdminNotificationCount > 99 ? '99+' : pendingAdminNotificationCount}</span>` : ''; %>
-<% const sharedAdminTopbar = '<header class="experiment-topbar"><span class="experiment-topbar-spacer" aria-hidden="true"></span><button class="experiment-icon-button experiment-menu-trigger" type="button" data-experiment-menu-open aria-label="เปิดเมนูหมวดหมู่" aria-controls="experiment-mobile-menu" aria-expanded="false" title="เปิดเมนูหมวดหมู่"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><button class="experiment-icon-button" type="button" data-experiment-notifications aria-label="' + notificationLabel + '" title="' + notificationLabel + '"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>' + notificationBadge + '</button><button class="experiment-icon-button experiment-theme-toggle" type="button" data-admin-theme-toggle aria-label="เปลี่ยนเป็นโหมดมืด" aria-pressed="false" title="เปลี่ยนเป็นโหมดมืด"><svg class="experiment-theme-icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.9 13A8.5 8.5 0 0 1 11 3.1 8.5 8.5 0 1 0 20.9 13Z"/></svg><svg class="experiment-theme-icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg></button><span class="experiment-user-name" aria-label="ผู้ดูแลระบบ">admin</span></header>'; %>
+<% const sharedAdminTopbar = '<header class="experiment-topbar"><span class="experiment-topbar-spacer" aria-hidden="true"></span><button class="experiment-icon-button experiment-menu-trigger" type="button" data-experiment-menu-open aria-label="เปิดเมนูหมวดหมู่" aria-controls="experiment-mobile-menu" aria-expanded="false" title="เปิดเมนูหมวดหมู่"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button><button class="experiment-icon-button" type="button" data-experiment-notifications aria-label="' + notificationLabel + '" title="' + notificationLabel + '"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>' + notificationBadge + '</button><span class="experiment-user-name" aria-label="ผู้ดูแลระบบ">admin</span></header>'; %>
 <% const normalizedAdminBody = hasBuiltAdminShell ? body.replace(/<header\b(?=[^>]*\bclass="[^"]*\bexperiment-topbar\b[^"]*")[^>]*>[\s\S]*?<\/header>/gi, sharedAdminTopbar) : body; %>
-<html lang="th" class="<%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
+<html lang="th" data-admin-theme="light" class="<%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <script src="<%= asset('js/admin-theme-bootstrap-v1.js') %>"></script>
-  <script defer src="<%= asset('js/admin-dark-surface-audit-v1.js') %>"></script>
   <title><%= title %> | LILTeam Shop</title>
   <meta name="description" content="ระบบจัดการร้านค้า LILTeam Shop" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -26,7 +25,6 @@
   <link rel="stylesheet" href="<%= asset('css/admin-experiment-v1.css') %>" />
   <style><%- typeof adminBrandCss !== 'undefined' ? adminBrandCss : '' %></style>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-main-neutral-borders-v1.css') %>" /><% } %>
-  <link rel="stylesheet" href="<%= asset('css/admin-dark-mode-v1.css') %>" />
 </head>
 <body class="experiment-admin admin-site <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite && active === 'welcome-popup' ? 'admin-main-site' : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite && active === 'announcements' ? 'main-admin-announcements' : '' %>">
   <div id="experiment-canonical-sidebar-template" hidden><%- include('../partials/admin-experiment-sidebar-effects') %></div>
@@ -237,6 +235,5 @@
     })();
   </script>
   <script src="<%= asset('js/admin-live-compat-v1.js') %>" defer></script>
-  <script src="<%= asset('js/admin-theme-toggle-v1.js') %>" defer></script>
 </body>
 </html>

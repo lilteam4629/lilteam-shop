@@ -1,13 +1,8 @@
 (function () {
   'use strict';
 
-  var theme = 'light';
-  try {
-    var savedTheme = localStorage.getItem('lilteam_admin_theme');
-    if (savedTheme === 'dark' || savedTheme === 'light') theme = savedTheme;
-  } catch (_) {}
-
+  // Admin dark mode is paused. Start every admin page in light mode before CSS paints.
   var root = document.documentElement;
-  root.dataset.adminTheme = theme;
-  root.style.colorScheme = theme;
+  root.dataset.adminTheme = 'light';
+  root.style.colorScheme = 'light';
 })();
