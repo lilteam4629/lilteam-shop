@@ -115,9 +115,13 @@
   (() => {
     const gameTabs = [...document.querySelectorAll('[data-mgx-game-tab]')];
     const gamePanels = [...document.querySelectorAll('[data-mgx-game-panel]')];
+    let activeGameTab = gameTabs.find(item => item.getAttribute('aria-selected') === 'true')?.dataset.mgxGameTab || gameTabs[0]?.dataset.mgxGameTab;
     const selectGameTab = tab => {
+      const previousGameTab = activeGameTab;
+      activeGameTab = tab.dataset.mgxGameTab;
       gameTabs.forEach(item => { const active = item === tab; item.classList.toggle('is-active', active); item.setAttribute('aria-selected', String(active)); });
       gamePanels.forEach(panel => { panel.hidden = panel.dataset.mgxGamePanel !== tab.dataset.mgxGameTab; });
+      if (previousGameTab && previousGameTab !== activeGameTab) document.dispatchEvent(new CustomEvent('mgx:preview-tab-change', { detail: { from: previousGameTab, to: activeGameTab } }));
       requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
     };
     gameTabs.forEach((tab, index) => {

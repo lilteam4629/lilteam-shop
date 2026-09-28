@@ -691,6 +691,7 @@ async function main() {
   const railTemplate = fs.readFileSync(path.join(root, 'src/views/partials/minigame-rail.ejs'), 'utf8');
   const widgetLegacy = ejs.render(widgetTemplate, { endpoint: '/minigame/play', cost: 5, ctaLabel: 'เปิดกล่อง', showLogin: false, balance: 20, mainSiteExperience: false });
   const widgetMain = ejs.render(widgetTemplate, { endpoint: '/minigame/play', cost: 5, ctaLabel: 'เปิดกล่อง', showLogin: false, balance: 20, mainSiteExperience: true });
+  const boxPreview = ejs.render(widgetTemplate, { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, adminPreview: true, previewPrizes: [{ name: 'รางวัลเช่า', percent: 25, active: true, isPrize: true, image: '/tenant-prize.png' }] });
   const railBase = { endpoint: '/minigame/play?mode=rail', cost: 5, prizes: [{ name: 'รางวัล', image: null, isPrize: true }], showLogin: false, balance: 20 };
   const railLegacy = ejs.render(railTemplate, { ...railBase, mainSiteExperience: false });
   const railMain = ejs.render(railTemplate, { ...railBase, mainSiteExperience: true });
@@ -704,7 +705,6 @@ async function main() {
     assert.doesNotMatch(widgetLegacyMarkup, /mg-box-scene-el|mg-result-gift/);
     assert.match(widgetMainMarkup, /mg-play-panel--main-site/);
     assert.match(widgetMainMarkup, /mg-box-scene-el|mg-result-gift/);
-    const boxPreview = ejs.render(widgetTemplate, { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, adminPreview: true, previewPrizes: [{ name: 'รางวัลเช่า', percent: 25, active: true, isPrize: true, image: '/tenant-prize.png' }] });
     assert.match(boxPreview, /mg-play-panel--admin-preview/);
     assert.match(boxPreview, /รางวัลที่อยู่ในกล่อง/);
     assert.match(boxPreview, /25%/);
@@ -716,6 +716,79 @@ async function main() {
     assert.match(railAdminEmpty, /เพิ่มรางวัลรางเลื่อนที่เปิดใช้งาน/);
     assert.match(railTemplate, /prefers-reduced-motion: reduce/);
     assert.match(railMainMarkup, /rail-game--main-site/);
+  });
+  check('Admin box previews always return to a closed idle state after browser restore or switching games', () => {
+    const boxPreviewMain = ejs.render(widgetTemplate, { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, mainSiteExperience: true, adminPreview: true, previewPrizes: [{ name: 'รางวัล', percent: 100, active: true, isPrize: true }] });
+    for (const rendered of [boxPreview, boxPreviewMain]) {
+      assert.match(rendered, /class="mg-card mg-card-el" aria-hidden="true"/);
+      assert.match(rendered, /visibility: hidden; opacity: 0/);
+      assert.match(rendered, /visibility: visible; opacity: 1/);
+      const widgetScript = rendered.match(/<script>([\s\S]*?)<\/script>/)?.[1];
+      assert.ok(widgetScript, 'admin widget includes its reset controller');
+      assert.match(widgetScript, /if \(adminPreview && !btn\.hasAttribute\('aria-busy'\)\) return;/, 'an aborted preview cannot overwrite the reset state later');
+
+      const listeners = {};
+      const makeClassList = (...initial) => {
+        const values = new Set(initial);
+        return {
+          add: (...tokens) => tokens.forEach(token => values.add(token)),
+          remove: (...tokens) => tokens.forEach(token => values.delete(token)),
+          contains: token => values.has(token),
+          toggle(token, force) { if (force === undefined ? !values.has(token) : force) values.add(token); else values.delete(token); return values.has(token); },
+        };
+      };
+      const makeElement = (...classes) => ({ classList: makeClassList(...classes), textContent: '', innerHTML: '', attributes: {}, addEventListener() {}, setAttribute(name, value) { this.attributes[name] = value; }, removeAttribute(name) { delete this.attributes[name]; if (name === 'src') this.src = ''; }, hasAttribute(name) { return Object.prototype.hasOwnProperty.call(this.attributes, name); } });
+      const box = makeElement('mg-hidden', 'mg-shaking', 'mg-opening');
+      const scene = makeElement('is-opening', 'is-shaking');
+      const card = makeElement('mg-revealed');
+      const icon = makeElement('is-miss', 'hidden');
+      const image = makeElement(); image.src = '/stale-prize.png'; image.alt = 'old prize'; image.onerror = () => {};
+      const cardName = makeElement(); cardName.textContent = 'stale prize';
+      const confetti = makeElement(); confetti.innerHTML = 'stale confetti';
+      const result = makeElement(); result.textContent = 'stale preview result';
+      const panel = {
+        dataset: {},
+        classList: makeClassList('mg-play-panel--admin-preview'),
+        querySelector(selector) { return ({ '.mg-box-el': box, '.mg-box-scene-el': scene, '.mg-card-el': card, '.mg-card-icon-el': icon, '.mg-card-image-el': image, '.mg-card-name-el': cardName, '.mg-confetti-el': confetti, '.mg-result-el': result, '.mg-balance-el': null })[selector] || null; },
+      };
+      const button = makeElement();
+      button.dataset = { previewUnavailable: 'false' };
+      button.disabled = true;
+      button.closest = () => panel;
+      button.hasAttribute = name => Object.prototype.hasOwnProperty.call(button.attributes, name);
+      button.setAttribute = (name, value) => { button.attributes[name] = value; };
+      button.setAttribute('aria-busy', 'true');
+      const documentMock = { querySelectorAll: () => [button], addEventListener(name, handler) { listeners[name] = handler; } };
+      const windowMock = { addEventListener(name, handler) { listeners[`window:${name}`] = handler; } };
+      new vm.Script(widgetScript, { filename: 'minigame-widget-preview.js' }).runInNewContext({ document: documentMock, window: windowMock, clearTimeout() {}, setTimeout() {}, AbortController, Date, Math });
+      listeners['window:pageshow']({ persisted: true });
+      assert.equal(card.classList.contains('mg-revealed'), false, 'old prize card is hidden after returning to the page');
+      assert.equal(card.attributes['aria-hidden'], 'true');
+      assert.equal(box.classList.contains('mg-hidden'), false, 'gift box is restored');
+      assert.equal(box.classList.contains('mg-opening'), false);
+      assert.equal(scene.classList.contains('is-opening'), false);
+      assert.equal(icon.classList.contains('hidden'), false);
+      assert.equal(image.classList.contains('hidden'), true);
+      assert.equal(image.src, '');
+      assert.equal(cardName.textContent, '');
+      assert.equal(confetti.innerHTML, '');
+      assert.equal(result.textContent, 'พร้อมเปิดกล่อง');
+      assert.equal(button.disabled, false);
+      assert.equal(button.hasAttribute('aria-busy'), false);
+
+      card.classList.add('mg-revealed');
+      box.classList.add('mg-hidden');
+      result.textContent = 'stale preview result';
+      listeners['mgx:preview-tab-change']({ detail: { from: 'box', to: 'rail' } });
+      assert.equal(card.classList.contains('mg-revealed'), false, 'switching games also clears a completed preview');
+      assert.equal(box.classList.contains('mg-hidden'), false);
+      assert.equal(result.textContent, 'พร้อมเปิดกล่อง');
+    }
+    const experimentTemplate = fs.readFileSync(path.join(root, 'src/views/admin/minigame-experiment.ejs'), 'utf8');
+    assert.match(experimentTemplate, /mgx:preview-tab-change/);
+    assert.match(experimentTemplate, /previousGameTab !== activeGameTab/);
+    assert.match(railTemplate, /if\(adminPreview&&!spinning\)return;/, 'an aborted rail preview cannot publish an old result after switching tabs');
+    assert.match(railTemplate, /mgx:preview-tab-change/);
   });
   let pages = 0;
   for (const url of ['/', '/products', '/products/new', '/filter-tags', '/home-sections', '/scheduled-products', '/orders', '/users', '/topups', '/slip-verification', '/coupons', '/minigame', '/settings', '/appearance']) {

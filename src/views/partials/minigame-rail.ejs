@@ -94,6 +94,7 @@
     if(game.dataset.bound==='1') return;
     game.dataset.bound='1';
     const mainSiteExperience=game.classList.contains('rail-game--main-site');
+    const adminPreview=game.classList.contains('rail-game--admin-preview');
     const visualExperience=mainSiteExperience||game.classList.contains('rail-game--admin-preview');
     let prizes=JSON.parse(game.dataset.prizes||'[]');
     const track=game.querySelector('.rail-track');
@@ -163,7 +164,9 @@
       if(!spinning&&game.isConnected&&entries.some(function(entry){return entry.contentRect.width>0}))seed();
     });
     if(railResizeObserver)railResizeObserver.observe(windowEl);
-    window.addEventListener('pageshow',function(event){if((event.persisted||(button&&button.hasAttribute('aria-busy')))&&(!button||button.dataset.previewUnavailable!=='true'))releaseSpin('พร้อมเริ่มเลื่อนอีกครั้ง',true)});
+    function resetAdminPreviewRail(){releaseSpin('',true);result.textContent=button&&button.dataset.previewUnavailable==='true'?'เพิ่มรางวัลที่พร้อมใช้เพื่อเริ่มทดลอง':'พร้อมทดลองเลื่อนอีกครั้ง'}
+    window.addEventListener('pageshow',function(event){if(adminPreview)resetAdminPreviewRail();else if((event.persisted||(button&&button.hasAttribute('aria-busy')))&&(!button||button.dataset.previewUnavailable!=='true'))releaseSpin('พร้อมเริ่มเลื่อนอีกครั้ง',true)});
+    if(adminPreview)document.addEventListener('mgx:preview-tab-change',function(event){if(event.detail&&event.detail.from!==event.detail.to)resetAdminPreviewRail()});
     document.addEventListener('lilteam:page-unloading',function(){window.removeEventListener('resize',handleRailResize);if(railResizeObserver)railResizeObserver.disconnect();releaseSpin()},{once:true});
     if(!button)return;
     button.addEventListener('click',async function(){
@@ -180,6 +183,7 @@
       }
       if(!reduceMotion)spinFrame=requestAnimationFrame(warmup);
       let response,data;activeController=new AbortController();requestTimer=setTimeout(function(){activeController&&activeController.abort()},10000);try{response=await fetch(button.dataset.endpoint,{method:'POST',credentials:'same-origin',signal:activeController.signal});data=await response.json()}catch(e){data=null}finally{clearTimeout(requestTimer);requestTimer=0;activeController=null}
+      if(adminPreview&&!spinning)return;
       if(!response||!response.ok||!data){releaseSpin((data&&data.error)||'ระบบตอบช้า กรุณากดลองใหม่',true);return}
       if(spinFrame){cancelAnimationFrame(spinFrame);spinFrame=0}
       const winner={name:data.prizeName,image:data.image||null,isPrize:data.isWin};
