@@ -25,7 +25,7 @@ assert.strictEqual(randomBox.parseDrawCount(undefined), 1, 'a missing count keep
 assert.strictEqual(randomBox.parseDrawCount('7'), 7, 'buyers can request multiple draws');
 assert.strictEqual(randomBox.parseDrawCount('101'), 101, 'a batch may exceed the previous 100-draw limit');
 assert.strictEqual(randomBox.parseDrawCount('500'), 500, 'the maximum batch size is accepted');
-for (const invalidCount of ['', '0', '-1', '1.5', '501', '2e2']) {
+for (const invalidCount of ['', '0', '-1', '1.5', '501', '2e3']) {
   assert.throws(() => randomBox.parseDrawCount(invalidCount), error => error.code === 'INVALID_DRAW_COUNT', `invalid draw count ${invalidCount} is rejected`);
 }
 
@@ -106,6 +106,7 @@ assert.strictEqual(data.orders.at(-1).status, 'completed', 'the winning order is
 assert.strictEqual(data.orders.at(-1).items[0].fulfillmentMode, 'automatic');
 assert.strictEqual(data.orders.at(-1).items[0].stockItemId, 'direct-stock-1', 'the bottom stock line is delivered without requiring a prize category');
 assert.strictEqual(data.orders.at(-1).items.length, 1, 'the prize is fulfilled on the paid draw without a manual-contact line');
+assert.strictEqual(data.orders.at(-1).items[0].randomBoxDraw.prizeCount, 1, 'legacy direct box stock remains a one-item award');
 
 const beforeReplay = {
   balance: data.users[1].walletBalance,
@@ -205,6 +206,82 @@ const multiReplay = randomBox.drawRandomBox(multiDrawData, {
 assert.strictEqual(multiReplay.replay, true, 'a replayed batch request returns the original order');
 assert.strictEqual(multiDrawData.users[0].walletBalance, 17, 'a batch replay never charges twice');
 assert.strictEqual(multiDrawData.orders.length, 1, 'a batch replay never creates another order');
+
+const bundleData = {
+  users: [{ id: 'bundle-buyer', status: 'active', walletBalance: 10 }],
+  products: [
+    { id: 'bundle-box', slug: 'bundle-box', title: 'กล่องสุ่ม', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } },
+    { id: 'prize-30', title: 'รางวัล 30', price: 30, status: 'active', fulfillmentMode: 'automatic', images: ['/30.png'] },
+    { id: 'prize-40', title: 'รางวัล 40', price: 40, status: 'active', fulfillmentMode: 'automatic', images: ['/40.png'] },
+    { id: 'manual-prize', title: 'รับที่ร้าน', price: 100, status: 'active', fulfillmentMode: 'contact' },
+    { id: 'other-box', title: 'กล่องอื่น', price: 100, status: 'active', specialType: randomBox.RANDOM_BOX_KIND },
+    { id: 'hidden-prize', title: 'สินค้าซ่อน', price: 100, status: 'hidden', fulfillmentMode: 'automatic' },
+  ],
+  stockItems: [
+    { id: 'reward-30-a', productId: 'prize-30', username: 'a', status: 'available', fulfillmentMode: 'automatic' },
+    { id: 'reward-30-b', productId: 'prize-30', username: 'b', status: 'available', fulfillmentMode: 'automatic' },
+    { id: 'reward-40', productId: 'prize-40', username: 'c', status: 'available', fulfillmentMode: 'automatic' },
+    { id: 'manual-reward', productId: 'manual-prize', username: 'manual', status: 'available', fulfillmentMode: 'contact' },
+    { id: 'other-box-reward', productId: 'other-box', username: 'other', status: 'available', fulfillmentMode: 'automatic' },
+    { id: 'hidden-reward', productId: 'hidden-prize', username: 'hidden', status: 'available', fulfillmentMode: 'automatic' },
+  ],
+  walletTransactions: [], orders: [], randomBoxRounds: {},
+};
+assert.strictEqual(randomBox.availablePrizeStockCount(bundleData, bundleData.products[0]), 3, 'only active automatic main-store product stock is eligible');
+assert.strictEqual(randomBox.hasAvailablePrizeBundle(bundleData, bundleData.products[0]), true, 'a mixed-price set can form an award bundle');
+const bundledDraw = randomBox.drawRandomBox(bundleData, {
+  productId: 'bundle-box', userId: 'bundle-buyer', idempotencyKey: 'multi-prize-bundle-request', drawCount: 3,
+  now: 1_800_000_400_000, randomInt: deterministicRandom, genId,
+});
+const bundledDrawItem = bundleData.orders[0].items[0];
+assert.strictEqual(bundledDraw.result.drawCount, 1, 'the batch stops after consuming its only complete bundle');
+assert.strictEqual(bundledDraw.result.total, 1, 'only the completed paid draw is charged');
+assert.strictEqual(bundledDraw.result.winCount, 1, 'the item bundle is one winning draw');
+assert.strictEqual(bundledDraw.result.prizeCount, 3, 'the winning draw reports all three delivered items');
+assert.strictEqual(bundledDrawItem.randomBoxDraw.prizeItems.length, 3, 'all component rewards are snapshotted on one purchase line');
+assert.strictEqual(bundledDrawItem.randomBoxDraw.prizeItems.reduce((sum, item) => sum + item.price, 0), 100, 'the combined award value is within the configured payout band');
+assert.deepStrictEqual(bundledDrawItem.randomBoxDraw.prizeItems.map(item => item.stockItemId).sort(), ['reward-30-a', 'reward-30-b', 'reward-40']);
+assert.ok(bundleData.stockItems.slice(0, 3).every(item => item.status === 'sold' && item.soldOrderId === bundledDraw.orderId), 'every item in the award bundle is atomically tied to its order');
+assert.ok(bundleData.stockItems.slice(3).every(item => item.status === 'available'), 'manual, random-box, and hidden product stock is not consumed');
+assert.strictEqual(bundleData.users[0].walletBalance, 9, 'multi-item awards do not charge more than the one-baht draw');
+
+const noBundleData = {
+  users: [{ id: 'no-bundle-buyer', status: 'active', walletBalance: 5 }],
+  products: [
+    { id: 'no-bundle-box', title: 'กล่องสุ่ม', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 1 } },
+    { id: 'too-low-a', title: 'รางวัล 30', price: 30, status: 'active' },
+    { id: 'too-low-b', title: 'รางวัล 40', price: 40, status: 'active' },
+  ],
+  stockItems: [
+    { id: 'too-low-stock-a', productId: 'too-low-a', status: 'available' },
+    { id: 'too-low-stock-b', productId: 'too-low-b', status: 'available' },
+  ],
+  walletTransactions: [], orders: [], randomBoxRounds: {},
+};
+assert.strictEqual(randomBox.hasAvailablePrizeBundle(noBundleData, noBundleData.products[0]), false, 'inventory below the complete bundle value cannot activate draws');
+assert.throws(() => randomBox.drawRandomBox(noBundleData, {
+  productId: 'no-bundle-box', userId: 'no-bundle-buyer', idempotencyKey: 'no-complete-prize-bundle', randomInt: deterministicRandom, genId,
+}), error => error.code === 'NO_PRIZES');
+assert.strictEqual(noBundleData.users[0].walletBalance, 5, 'an incomplete award bundle never charges the buyer');
+assert.strictEqual(noBundleData.orders.length, 0, 'an incomplete award bundle never creates an order');
+assert.deepStrictEqual(noBundleData.randomBoxRounds, {}, 'an incomplete award bundle does not advance the shared round');
+
+const singleRewardData = {
+  users: [{ id: 'single-reward-buyer', status: 'active', walletBalance: 1 }],
+  products: [
+    { id: 'single-box', title: 'กล่องสุ่ม', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } },
+    { id: 'single-99', title: 'ของรางวัลชิ้นเดียว', price: 99, status: 'active', images: ['/single.png'] },
+  ],
+  stockItems: [{ id: 'single-99-stock', productId: 'single-99', username: 'winner', status: 'available' }],
+  walletTransactions: [], orders: [], randomBoxRounds: {},
+};
+const singleReward = randomBox.drawRandomBox(singleRewardData, {
+  productId: 'single-box', userId: 'single-reward-buyer', idempotencyKey: 'single-priced-reward-request',
+  now: 1_800_000_500_000, randomInt: deterministicRandom, genId,
+});
+assert.strictEqual(singleReward.result.prizeCount, 1, 'a single qualifying stock item remains a one-item award');
+assert.strictEqual(singleReward.result.prizeName, 'ของรางวัลชิ้นเดียว', 'the customer-facing award name uses the catalog item');
+assert.strictEqual(singleRewardData.stockItems[0].status, 'sold', 'single-item awards also consume their source product stock');
 
 const orderedDrawData = {
   users: [{ id: 'ordered-buyer', status: 'active', walletBalance: 3 }],

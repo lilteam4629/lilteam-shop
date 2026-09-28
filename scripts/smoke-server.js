@@ -238,7 +238,8 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const appendedStockRow = stockPage.body.indexOf('appended-key');
   if (!stockPage.body.includes('ส่งคีย์/ไอดีจากสต็อกให้อัตโนมัติ') || !stockPage.body.includes('smoke-user')
     || stockPage.body.includes('สินค้า 1 ชิ้น ต่อ') || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*\d+\s*[–-]\s*\d+/.test(stockPage.body)
-    || !stockPage.body.includes('สินค้าใหม่ต่อท้ายด้านล่าง')
+    || !stockPage.body.includes('ระบบยังนำสินค้าสต็อกพร้อมขายรายการอื่นในเว็บหลักมาจัดเป็นชุดรางวัลให้อัตโนมัติ')
+    || !stockPage.body.includes('รายการสินค้าที่นำมาเป็นรางวัลได้')
     || !stockPage.body.includes('รายการคีย์ / ไอดีที่พร้อมขาย (3)')
     || !(firstStockRow < secondStockRow && secondStockRow < appendedStockRow)
     || !/<th[^>]*>ลำดับ<\/th>/.test(stockPage.body) || !/>1<\/td>/.test(stockPage.body) || !/>2<\/td>/.test(stockPage.body)) {

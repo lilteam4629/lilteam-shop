@@ -879,9 +879,14 @@ router.get('/orders/:id', (req, res) => {
   const itemsWithCreds = order.items.map(oi => {
     const product = store.data.products.find(p => p.id === oi.productId);
     const stockItem = store.data.stockItems.find(s => s.id === oi.stockItemId);
+    const prizeItems = (oi.randomBoxDraw?.prizeItems || []).map(prize => ({
+      ...prize,
+      credentials: store.data.stockItems.find(stock => String(stock.id) === String(prize.stockItemId)),
+    }));
     return {
       ...oi,
       credentials: oi.credentials || stockItem,
+      prizeItems,
       productTitle: oi.title || product?.title || 'สินค้า',
       productImage: oi.productImage || product?.images?.[0] || '',
     };

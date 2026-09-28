@@ -596,7 +596,7 @@ router.get('/products', (req, res) => {
     const stockCount = store.data.stockItems.filter(s => s.productId === p.id && s.status === 'available').length;
     const selectedFilterTags = (p.filterTagIds || []).map(id => filterTagById.get(id)).filter(Boolean);
     const randomBoxAvailablePrizeCount = p.specialType === randomBox.RANDOM_BOX_KIND
-      ? randomBox.availableStockCount(store.data.stockItems, p.id)
+      ? randomBox.availablePrizeStockCount(store.data, p)
       : 0;
     return { ...p, stockCount, randomBoxAvailablePrizeCount, selectedFilterTags };
   });
@@ -1557,6 +1557,8 @@ router.get('/products/:id/stock', (req, res) => {
     return res.render('admin/product-stock', {
       title: `สต็อกกล่องสุ่ม: ${product.title}`, active: 'products', product, stockItems,
       randomBoxStockCount: randomBox.availableStockCount(stockItems),
+      randomBoxAvailablePrizeCount: randomBox.availablePrizeStockCount(store.data, product),
+      randomBoxCanDraw: randomBox.hasAvailablePrizeBundle(store.data, product),
     });
   }
   res.render('admin/product-stock', { title: `สต๊อกสินค้า: ${product.title}`, active: 'products', product, stockItems });
@@ -1770,9 +1772,14 @@ router.get('/orders/:id', (req, res) => {
     : undefined);
   const itemsWithCreds = order.items.map(oi => {
     const product = store.data.products.find(p => p.id === oi.productId);
+    const prizeItems = (oi.randomBoxDraw?.prizeItems || []).map(prize => ({
+      ...prize,
+      credentials: store.data.stockItems.find(stock => String(stock.id) === String(prize.stockItemId)),
+    }));
     return {
       ...oi,
       credentials: store.data.stockItems.find(s => s.id === oi.stockItemId),
+      prizeItems,
       productImage: oi.productImage || product?.images?.[0] || '',
       importedFileCode: oi.importedFileCode || product?.internalNote || '',
     };

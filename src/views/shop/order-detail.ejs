@@ -10,7 +10,7 @@
     </div>
   <% } %>
 
-  <% if (order.randomBoxOrder) { const boxProduct = itemsWithCreds[0] || {}; const winCount = itemsWithCreds.filter(item => item.randomBoxDraw?.isWin).length; %>
+  <% if (order.randomBoxOrder) { const boxProduct = itemsWithCreds[0] || {}; const winCount = itemsWithCreds.filter(item => item.randomBoxDraw?.isWin).length; const prizeCount = itemsWithCreds.reduce((sum, item) => sum + (Number(item.randomBoxDraw?.prizeCount) || item.prizeItems?.length || (item.randomBoxDraw?.isWin ? 1 : 0)), 0); %>
     <section class="mb-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]" data-random-box-product>
       <div class="flex items-center gap-4 p-4 sm:p-5">
         <div class="relative flex w-28 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--input)] p-1 sm:w-36">
@@ -38,18 +38,32 @@
               </div>
               <div class="ml-12 mt-3 break-words text-sm">
                 <% if (isWin) { %>
-                  <div class="font-bold text-[var(--gold-text)]">🎉 <%= i.randomBoxDraw.prizeName || 'รางวัลจากสต็อก' %></div>
-                  <% if (i.credentials) { %>
-                    <div class="mt-2 rounded-lg border border-[var(--border-light)] bg-[var(--bg)] p-3 font-mono text-xs">
-                      <div class="break-all">ข้อมูลบน: <strong class="text-emerald-500"><%= i.credentials.username %></strong></div>
-                      <% if (i.credentials.password) { %><div class="mt-1 break-all">ข้อมูลล่าง: <strong class="text-emerald-500"><%= i.credentials.password %></strong></div><% } %>
-                      <% if (i.credentials.extra) { %><div class="mt-1 break-words font-sans text-[var(--text-3)]"><%= i.credentials.extra %></div><% } %>
+                  <div class="font-bold text-[var(--gold-text)]">🎉 คุณได้รับ <%= i.randomBoxDraw.prizeName || 'รางวัลจากสต็อก' %></div>
+                  <% const prizeItems = i.prizeItems?.length ? i.prizeItems : (i.credentials ? [{ productTitle: i.randomBoxDraw.prizeName || 'รางวัลจากสต็อก', credentials: i.credentials }] : []); %>
+                  <% if (prizeItems.length) { %>
+                    <div class="mt-2 space-y-2">
+                      <% prizeItems.forEach((prize, prizeIndex) => { %>
+                        <div class="flex min-w-0 items-start gap-3 rounded-lg border border-[var(--border-light)] bg-[var(--bg)] p-3" data-random-box-prize-item>
+                          <% if (prize.productImage) { %><div class="grid size-14 shrink-0 place-items-center rounded-md bg-[var(--input)] p-1"><img src="<%= prize.productImage %>" alt="รูปสินค้า <%= prize.productTitle %>" loading="lazy" decoding="async" class="max-h-full max-w-full object-contain" /></div><% } %>
+                          <div class="min-w-0 flex-1">
+                            <div class="font-sans text-xs font-bold text-[var(--text)]"><%= prize.productTitle || `รางวัลชิ้นที่ ${prizeIndex + 1}` %></div>
+                            <% if (prize.credentials) { %>
+                              <div class="mt-1 font-mono text-xs">
+                                <div class="break-all">ข้อมูลบน: <strong class="text-emerald-500"><%= prize.credentials.username %></strong></div>
+                                <% if (prize.credentials.password) { %><div class="mt-1 break-all">ข้อมูลล่าง: <strong class="text-emerald-500"><%= prize.credentials.password %></strong></div><% } %>
+                                <% if (prize.credentials.extra) { %><div class="mt-1 break-words font-sans text-[var(--text-3)]"><%= prize.credentials.extra %></div><% } %>
+                              </div>
+                            <% } else { %><div class="mt-1 font-sans text-xs text-[var(--coral)]">ไม่พบคีย์/ไอดีของรางวัลชิ้นนี้ กรุณาติดต่อร้าน</div><% } %>
+                          </div>
+                        </div>
+                      <% }) %>
                     </div>
-                  <% } else { %><div class="mt-2 text-xs text-[var(--coral)]">รางวัลนี้ยังไม่มีคีย์/ไอดีในสต็อก กรุณาติดต่อร้าน</div><% } %>
+                  <% } else { %><div class="mt-2 text-xs text-[var(--coral)]">ไม่พบคีย์/ไอดีของรางวัล กรุณาติดต่อร้าน</div><% } %>
                   <div class="mt-3 grid justify-items-start gap-1" data-contact-order-container>
                     <textarea class="contact-order-message hidden">สวัสดีครับ ต้องการติดต่อรับรางวัลจากกล่องสุ่ม
 หมายเลขคำสั่งซื้อ: #<%= order.id %>
 สินค้า: <%= boxProduct.productTitle || 'กล่องสุ่ม' %>
+รางวัล: <%= (i.prizeItems || []).map(prize => prize.productTitle).join(', ') || i.randomBoxDraw.prizeName || 'รางวัลจากสต็อก' %>
 ผลสุ่มครั้งที่: <%= drawIndex + 1 %>
 ชื่อลูกค้า: <%= currentUser.username %></textarea>
                     <button type="button" data-contact-url="<%= contactSettings.contactMessenger || contactSettings.contactFacebook || '/contact' %>" class="contact-order-btn inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-4 py-2 text-sm font-bold text-[var(--gold-contrast)] transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2">
@@ -67,7 +81,7 @@
         </ol>
       </div>
       <div class="flex flex-wrap justify-between gap-2 border-t border-[var(--border)] px-4 py-3 text-sm">
-        <span class="text-[var(--text-3)]">สุ่ม <%= itemsWithCreds.length.toLocaleString('th-TH') %> ครั้ง · ได้รับรางวัล <%= winCount.toLocaleString('th-TH') %> ชิ้น</span>
+        <span class="text-[var(--text-3)]">สุ่ม <%= itemsWithCreds.length.toLocaleString('th-TH') %> ครั้ง · ถูกรางวัล <%= winCount.toLocaleString('th-TH') %> ครั้ง · ได้รับสินค้า <%= prizeCount.toLocaleString('th-TH') %> ชิ้น</span>
         <strong class="text-[var(--gold-text)]">รวม ฿<%= Number(order.total || 0).toLocaleString('th-TH') %>.00</strong>
       </div>
     </section>

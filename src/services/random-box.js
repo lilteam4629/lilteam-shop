@@ -1,4 +1,5 @@
 const crypto = require('crypto');
+const { effectivePrice } = require('./pricing');
 
 const RANDOM_BOX_KIND = 'random-box';
 const RANDOM_BOX_PRICE = 1;
@@ -8,6 +9,10 @@ const MAX_RANDOM_BOX_DRAWS = 500;
 const DEFAULT_RANDOM_BOX_RATE = 1;
 const RANDOM_BOX_MIN_TARGET = 85;
 const RANDOM_BOX_MAX_TARGET = 110;
+const RANDOM_BOX_MIN_PRIZE_VALUE = 85;
+const RANDOM_BOX_MAX_PRIZE_VALUE = 110;
+const MAX_RANDOM_BOX_PRIZE_ITEMS = 5;
+const RANDOM_BOX_VALUE_CENTS = RANDOM_BOX_MAX_PRIZE_VALUE * 100;
 const DEFAULT_MISS_MESSAGE = 'ยังไม่ได้รับรางวัลในครั้งนี้';
 const MAX_MISS_MESSAGE_LENGTH = 300;
 
@@ -91,12 +96,144 @@ function availableStockCount(stockItems = [], productId = null) {
   return availableStockItems(stockItems, productId).length;
 }
 
+function shuffle(items, randomInt = crypto.randomInt) {
+  const result = [...items];
+  for (let index = result.length - 1; index > 0; index -= 1) {
+    const swapIndex = randomInt(0, index + 1);
+    [result[index], result[swapIndex]] = [result[swapIndex], result[index]];
+  }
+  return result;
+}
+
 function isPublished(product, now) {
   if (!product || product.status !== 'active') return false;
   if (!product.publishAt) return true;
   const value = String(product.publishAt);
   const time = Date.parse(/[zZ]|[+-]\d\d:\d\d$/.test(value) ? value : `${value}:00+07:00`);
   return Number.isFinite(time) && time <= now;
+}
+
+function eligiblePrizeInventory(data, boxProduct, now = Date.now(), randomInt = crypto.randomInt) {
+  const productsById = new Map((Array.isArray(data?.products) ? data.products : [])
+    .map(product => [String(product?.id), product]));
+  const priceGroups = new Map();
+  const legacyItems = [];
+  let eligibleStockCount = 0;
+
+  for (const stockItem of Array.isArray(data?.stockItems) ? data.stockItems : []) {
+    if (!stockItem || stockItem.status !== 'available' || stockItem.fulfillmentMode === 'contact') continue;
+    const productId = String(stockItem.productId || '');
+    if (productId === String(boxProduct?.id)) {
+      // Older boxes may still have keys entered directly in their own stock.
+      // Keep each as a standalone legacy award while new awards use priced products.
+      legacyItems.push({
+        productId,
+        productTitle: getStockPrizeName(stockItem),
+        productImage: '',
+        price: 100,
+        priceCents: 100 * 100,
+        stockItem,
+        legacy: true,
+      });
+      eligibleStockCount += 1;
+      continue;
+    }
+
+    const product = productsById.get(productId);
+    if (!product || product.specialType === RANDOM_BOX_KIND || product.fulfillmentMode === 'contact'
+      || !isPublished(product, now)) continue;
+    const price = effectivePrice(product, now);
+    if (!Number.isFinite(price) || price <= 0) continue;
+    const priceCents = Math.round(price * 100);
+    if (priceCents > RANDOM_BOX_VALUE_CENTS) continue;
+
+    eligibleStockCount += 1;
+    if (!priceGroups.has(priceCents)) priceGroups.set(priceCents, []);
+    priceGroups.get(priceCents).push({
+      productId: product.id,
+      productTitle: product.title || 'สินค้า',
+      productImage: product.images?.find(Boolean) || '',
+      price: Math.round(priceCents) / 100,
+      priceCents,
+      stockItem,
+      legacy: false,
+    });
+  }
+
+  const legacyById = new Map(legacyItems.map(item => [String(item.stockItem?.id), item]));
+  const newestLegacyFirst = availableStockItems(data?.stockItems, boxProduct?.id).reverse()
+    .map(item => legacyById.get(String(item.id))).filter(Boolean);
+
+  // A bundle can contain at most five items, so retaining five random stock
+  // rows per identical price keeps the search bounded without changing which
+  // bundle sizes or totals are possible.
+  const candidates = [];
+  for (const rows of priceGroups.values()) candidates.push(...shuffle(rows, randomInt).slice(0, MAX_RANDOM_BOX_PRIZE_ITEMS));
+  return {
+    candidates: shuffle(candidates, randomInt),
+    legacyItems: newestLegacyFirst,
+    eligibleStockCount,
+  };
+}
+
+function buildPrizeBundle(candidates, legacyItems = [], randomInt = crypto.randomInt) {
+  const maxCents = RANDOM_BOX_VALUE_CENTS;
+  const dp = Array.from({ length: MAX_RANDOM_BOX_PRIZE_ITEMS + 1 }, () => Array(maxCents + 1).fill(null));
+  dp[0][0] = [];
+
+  for (const candidate of candidates) {
+    const value = candidate.priceCents;
+    if (!Number.isInteger(value) || value < 1 || value > maxCents) continue;
+    for (let count = MAX_RANDOM_BOX_PRIZE_ITEMS; count >= 1; count -= 1) {
+      for (let total = maxCents; total >= value; total -= 1) {
+        if (dp[count][total] === null && dp[count - 1][total - value] !== null) {
+          dp[count][total] = [...dp[count - 1][total - value], candidate];
+        }
+      }
+    }
+  }
+
+  const feasibleByCount = Array.from({ length: MAX_RANDOM_BOX_PRIZE_ITEMS + 1 }, () => []);
+  for (let count = 1; count <= MAX_RANDOM_BOX_PRIZE_ITEMS; count += 1) {
+    for (let total = RANDOM_BOX_MIN_PRIZE_VALUE * 100; total <= maxCents; total += 1) {
+      if (dp[count][total] !== null) feasibleByCount[count].push({ count, total, items: dp[count][total] });
+    }
+  }
+  // Keep existing manually entered box stock usable as a single-item award.
+  // It has no catalog price, so it must not be combined with priced stock.
+  legacyItems.forEach(item => feasibleByCount[1].push({ count: 1, total: item.priceCents, items: [item] }));
+  const availableCounts = feasibleByCount.map((items, count) => items.length ? count : null).filter(count => count !== null);
+  if (!availableCounts.length) return null;
+  const count = availableCounts[randomInt(0, availableCounts.length)];
+  const options = feasibleByCount[count];
+  return options[randomInt(0, options.length)];
+}
+
+function availablePrizeStockCount(data, boxProduct, now = Date.now()) {
+  return eligiblePrizeInventory(data, boxProduct, now).eligibleStockCount;
+}
+
+function hasAvailablePrizeBundle(data, boxProduct, now = Date.now()) {
+  if (!boxProduct) return false;
+  const deterministicRandom = min => min;
+  const inventory = eligiblePrizeInventory(data, boxProduct, now, deterministicRandom);
+  return Boolean(buildPrizeBundle(inventory.candidates, inventory.legacyItems, deterministicRandom));
+}
+
+function selectPrizeBundle(data, boxProduct, now = Date.now(), randomInt = crypto.randomInt) {
+  const inventory = eligiblePrizeInventory(data, boxProduct, now, randomInt);
+  return buildPrizeBundle(inventory.candidates, inventory.legacyItems, randomInt);
+}
+
+function formatPrizeName(prizeItems) {
+  const counts = new Map();
+  prizeItems.forEach(item => {
+    const key = `${item.productId}\u0000${item.productTitle}`;
+    const current = counts.get(key) || { title: item.productTitle, count: 0 };
+    current.count += 1;
+    counts.set(key, current);
+  });
+  return [...counts.values()].map(item => item.count > 1 ? `${item.title} ×${item.count}` : item.title).join(' · ');
 }
 
 function fail(code, message) {
@@ -140,8 +277,8 @@ function drawRandomBox(data, {
   if (product.specialType !== RANDOM_BOX_KIND) fail('NOT_RANDOM_BOX', 'สินค้านี้ไม่ใช่กล่องสุ่ม');
   product.fulfillmentMode = 'automatic';
   product.fulfillmentInstructions = '';
-  const prizeStockItems = availableStockItems(data.stockItems, product.id);
-  if (!prizeStockItems.length) fail('NO_PRIZES', 'สต็อกของรางวัลหมดชั่วคราว กรุณาลองใหม่ภายหลัง');
+  let nextPrizeBundle = selectPrizeBundle(data, product, now, randomInt);
+  if (!nextPrizeBundle) fail('NO_PRIZES', 'สต็อกของรางวัลยังไม่พร้อม กรุณาลองใหม่ภายหลัง');
 
   const user = data.users.find(item => String(item.id) === String(userId));
   if (!user || user.status === 'disabled' || user.status === 'banned') fail('USER_UNAVAILABLE', 'ไม่พบบัญชีผู้ใช้หรือบัญชีถูกระงับ');
@@ -175,8 +312,7 @@ function drawRandomBox(data, {
   const orderItems = [];
 
   for (let index = 0; index < requestedDrawCount; index += 1) {
-    const availablePrizes = availableStockItems(data.stockItems, product.id);
-    if (!availablePrizes.length) break;
+    if (!nextPrizeBundle) break;
 
     const progressBefore = Math.max(0, Math.floor(Number(round.progress) || 0));
     const progressAfter = progressBefore + 1;
@@ -184,18 +320,30 @@ function drawRandomBox(data, {
     const target = Number(round.target);
     const isWin = progressAfter >= target;
     let prizeName = null;
-    let prizeStockItem = null;
+    let prizeBundle = null;
+    let prizeItems = [];
 
     if (isWin) {
-      prizeStockItem = availablePrizes[availablePrizes.length - 1];
-      prizeName = getStockPrizeName(prizeStockItem);
-      prizeStockItem.status = 'sold';
-      prizeStockItem.soldOrderId = orderId;
+      prizeBundle = nextPrizeBundle;
+      if (!prizeBundle) fail('NO_PRIZES', 'สต็อกของรางวัลยังไม่พร้อม กรุณาลองใหม่ภายหลัง');
+      prizeItems = prizeBundle.items.map(item => {
+        item.stockItem.status = 'sold';
+        item.stockItem.soldOrderId = orderId;
+        return {
+          productId: item.productId,
+          productTitle: item.productTitle,
+          productImage: item.productImage,
+          price: item.price,
+          stockItemId: item.stockItem.id,
+        };
+      });
+      prizeName = formatPrizeName(prizeItems);
       round.progress = 0;
       round.target = randomTarget(randomInt, rate);
       round.rate = rate;
       round.roundNumber = roundNumber + 1;
       round.totalAwards = (Number(round.totalAwards) || 0) + 1;
+      nextPrizeBundle = selectPrizeBundle(data, product, now, randomInt);
     } else {
       round.progress = progressAfter;
     }
@@ -212,6 +360,9 @@ function drawRandomBox(data, {
       nextRoundProgress: Number(round.progress) || 0,
       nextRoundTarget: Number(round.target),
       prizeName,
+      prizeItems: isWin ? prizeItems : [],
+      prizeCount: prizeItems.length,
+      prizeValue: prizeBundle ? prizeBundle.total / 100 : 0,
       missMessage: isWin ? null : getMissMessage(product),
     };
     drawResults.push(drawResult);
@@ -220,7 +371,7 @@ function drawRandomBox(data, {
       title: product.title,
       price: RANDOM_BOX_PRICE,
       productImage: product.images?.[0] || '',
-      stockItemId: prizeStockItem?.id || null,
+      stockItemId: prizeItems[0]?.stockItemId || null,
       fulfillmentMode: 'automatic',
       randomBoxDraw: drawResult,
     });
@@ -232,12 +383,14 @@ function drawRandomBox(data, {
   drawResults.forEach(draw => { draw.walletBalance = user.walletBalance; });
   const winResults = drawResults.filter(draw => draw.isWin);
   const missResults = drawResults.filter(draw => !draw.isWin);
+  const prizeCount = winResults.reduce((sum, draw) => sum + (Number(draw.prizeCount) || 0), 0);
   const result = {
     ...(drawResults.length === 1 ? drawResults[0] : {}),
     isWin: winResults.length > 0,
     drawCount: drawResults.length,
     requestedDrawCount,
     winCount: winResults.length,
+    prizeCount,
     missCount: missResults.length,
     missMessage: missResults[0]?.missMessage || null,
     stockExhausted: drawResults.length < requestedDrawCount,
@@ -284,6 +437,9 @@ module.exports = {
   RANDOM_BOX_PRICE,
   RANDOM_BOX_MIN_TARGET,
   RANDOM_BOX_MAX_TARGET,
+  RANDOM_BOX_MIN_PRIZE_VALUE,
+  RANDOM_BOX_MAX_PRIZE_VALUE,
+  MAX_RANDOM_BOX_PRIZE_ITEMS,
   RANDOM_BOX_MIN_RATE,
   RANDOM_BOX_MAX_RATE,
   MAX_RANDOM_BOX_DRAWS,
@@ -301,6 +457,11 @@ module.exports = {
   stockItemsOldestFirst,
   availableStockItems,
   availableStockCount,
+  eligiblePrizeInventory,
+  availablePrizeStockCount,
+  buildPrizeBundle,
+  hasAvailablePrizeBundle,
+  selectPrizeBundle,
   isPublished,
   drawRandomBox,
 };

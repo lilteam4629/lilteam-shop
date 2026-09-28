@@ -32,11 +32,12 @@ router.post('/:productId/draw', requireLogin, async (req, res) => {
     const drawCount = Number(summary.drawCount) || 1;
     const total = Number(summary.total) || drawCount * randomBox.RANDOM_BOX_PRICE;
     const winCount = Number(summary.winCount) || (summary.isWin ? 1 : 0);
+    const prizeCount = Number(summary.prizeCount) || winCount;
     const missCount = Number(summary.missCount) || Math.max(0, drawCount - winCount);
     const missMessage = String(summary.missMessage || randomBox.DEFAULT_MISS_MESSAGE).trim();
     const stockNote = summary.stockExhausted ? ' · สต็อกรางวัลหมด จึงหยุดสุ่มเท่านี้' : '';
     const resultCopy = winCount
-      ? `ได้รับรางวัล ${winCount} ชิ้น${missCount ? ` · ไม่ได้รับรางวัล ${missCount} ครั้ง · ${missMessage}` : ''}`
+      ? `ถูกรางวัล ${winCount} ครั้ง ได้รับสินค้า ${prizeCount} ชิ้น${missCount ? ` · ไม่ได้รับรางวัล ${missCount} ครั้ง · ${missMessage}` : ''}`
       : `ไม่ได้รับรางวัล · ${missMessage}`;
     req.flash('success', `${resultCopy} · สุ่ม ${drawCount} ครั้ง ใช้เงิน ฿${total.toLocaleString('th-TH')}${stockNote}`);
     return res.redirect(`/account/orders/${encodeURIComponent(result.orderId)}`);

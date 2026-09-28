@@ -39,7 +39,7 @@ function withStock(product, counts, req = null) {
   if (product?.specialType === randomBox.RANDOM_BOX_KIND) {
     const active = randomBox.supportsRandomBox(req)
       && product.status === 'active'
-      && randomBox.availableStockCount(store.data.stockItems, product.id) > 0;
+      && randomBox.hasAvailablePrizeBundle(store.data, product);
     return { ...withEffectivePrice({ ...product, price: randomBox.RANDOM_BOX_PRICE, originalPrice: 0, priceOptions: [] }), stockCount: active ? 1 : 0 };
   }
   const stockCount = counts
@@ -411,7 +411,7 @@ router.get('/game/:slug', (req, res) => {
   const randomBoxDetails = product.specialType === randomBox.RANDOM_BOX_KIND ? {
     maxDrawCount: randomBox.MAX_RANDOM_BOX_DRAWS,
     pricePerDraw: randomBox.RANDOM_BOX_PRICE,
-    availableStockCount: randomBox.availableStockCount(store.data.stockItems, product.id),
+    availableStockCount: randomBox.availablePrizeStockCount(store.data, product),
     requestId: require('crypto').randomUUID(),
   } : null;
   res.render('shop/product-detail', {
