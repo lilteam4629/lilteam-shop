@@ -55,6 +55,10 @@ function assertStylesheetsInHead(html, page) {
   }
 }
 
+function firstPartyStylesheetCount(html) {
+  return [...html.matchAll(/<link\b(?=[^>]*\brel=["']stylesheet["'])[^>]*\bhref=["']\/css\//gi)].length;
+}
+
 async function loginAsAdmin() {
   const body = 'username=admin&password=admin1234';
   const response = await request('/login', { method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body });
@@ -131,10 +135,11 @@ async function checkMusicAcrossStorefront(cookie) {
   for (const page of pages) {
     const response = await fetchOk(page, 'text/html');
     assertStylesheetsInHead(response.body, page);
+    if (firstPartyStylesheetCount(response.body) > 8) throw new Error(`${page} exceeded the first-party stylesheet budget`);
     const widgets = response.body.match(/id="music-widget"/g) || [];
     if (widgets.length !== 1) throw new Error(`${page} should render exactly one persistent music widget, got ${widgets.length}`);
     if (!response.body.includes('data-video-id="abcdefghijk"')) throw new Error(`${page} rendered a different configured music track`);
-    if (!response.body.includes('/css/storefront-music-unified-v1.css')) throw new Error(`${page} is missing the owner storefront music skin`);
+    if (!response.body.includes('/css/storefront-pre-unified-v1.css') && !response.body.includes('/css/storefront-pre-home-v1.css')) throw new Error(`${page} is missing the bundled owner storefront music skin`);
   }
   for (const page of ['/game/smoke-product-that-does-not-exist', '/definitely-missing']) {
     const response = await request(page);
@@ -143,7 +148,7 @@ async function checkMusicAcrossStorefront(cookie) {
     if (widgets.length !== 1 || !response.body.includes('data-video-id="abcdefghijk"')) {
       throw new Error(`${page} is missing the configured persistent music widget`);
     }
-    if (!response.body.includes('/css/storefront-music-unified-v1.css')) throw new Error(`${page} is missing the owner storefront music skin`);
+    if (!response.body.includes('/css/storefront-pre-unified-v1.css') && !response.body.includes('/css/storefront-pre-home-v1.css')) throw new Error(`${page} is missing the bundled owner storefront music skin`);
   }
 
   const savedSettings = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).settings.music;
@@ -463,6 +468,8 @@ async function crawlAdmin(cookie) {
     checked.add(requestPath);
     if (checked.size > 160) throw new Error('admin crawl exceeded the safety limit');
     const page = await fetchOk(requestPath, 'text/html', { cookie });
+    const stylesheetCount = firstPartyStylesheetCount(page.body);
+    if (stylesheetCount > 10) throw new Error(`admin route ${requestPath} loaded ${stylesheetCount} first-party stylesheets (budget 10)`);
     if (page.body.includes('admin-mobile-motion.js') || page.body.includes('admin-scroll-motion-v1.css') || page.body.includes('admin-page-surface')) throw new Error(`removed admin motion still loaded: ${requestPath}`);
     if (!/class="experiment-admin admin-site(?:\s|")/.test(page.body) || !page.body.includes('data-experiment-sidebar')) {
       throw new Error(`main admin route did not use the unified sidebar shell: ${requestPath}`);
@@ -674,9 +681,15 @@ async function run() {
     await fetchOk('/health', 'application/json');
     const home = await fetchOk('/', 'text/html');
     if (!home.body.includes('/css/tailwind.generated.css')) throw new Error('home is missing the precompiled Tailwind stylesheet');
+    if (firstPartyStylesheetCount(home.body) > 6) throw new Error(`home loaded ${firstPartyStylesheetCount(home.body)} first-party stylesheets instead of using the compact bundle`);
     if (!home.body.includes('class="relative flex-1 storefront-owner-home-v7"')) throw new Error('main home is missing its page-scoped redesign marker');
-    if (!home.body.includes('/css/storefront-owner-home-v7.css')) throw new Error('main home is missing its isolated redesign stylesheet');
-    if (!home.body.includes('data-owner-home-layout="cozy-marketplace"') || !home.body.includes('/css/storefront-owner-home-v20.css') || !home.body.includes('/css/storefront-home-cozy-v1.css')) throw new Error('main home is missing the cozy marketplace layout');
+    if (!home.body.includes('/css/storefront-pre-home-v1.css') || !home.body.includes('/css/storefront-post-home-v1.css')) throw new Error('main home is missing its combined theme-aware stylesheets');
+    if (!home.body.includes('data-owner-home-layout="cozy-marketplace"') || !home.body.includes('/css/storefront-home-popup-v1.css')) throw new Error('main home is missing the cozy marketplace styles');
+    const homePreCss = await fetchOk('/css/storefront-pre-home-v1.css', 'text/css');
+    const homePostCss = await fetchOk('/css/storefront-post-home-v1.css', 'text/css');
+    const homePopupCss = await fetchOk('/css/storefront-home-popup-v1.css', 'text/css');
+    if (!homePreCss.body.includes('.owner-home-v20-shell') || !homePostCss.body.includes('.owner-home-v20-hero')) throw new Error('combined homepage CSS is missing the selected storefront layers');
+    if (!homePopupCss.body.includes('.welcome-popup-redesign')) throw new Error('combined welcome popup CSS is missing its redesigned layer');
     const homeSectionOrder = ['class="owner-home-v20-hero ', 'class="store-status-section', 'class="store-announcements', 'class="store-filter-section', 'id="home-catalog"'];
     const sectionPositions = homeSectionOrder.map(marker => home.body.indexOf(marker));
     if (sectionPositions.some(position => position < 0) || sectionPositions.some((position, index) => index && position <= sectionPositions[index - 1])) throw new Error('main home discovery sections are out of order');

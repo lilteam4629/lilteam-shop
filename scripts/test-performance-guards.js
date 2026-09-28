@@ -1,5 +1,6 @@
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
+const { checkCssBundles } = require('./build-css-bundles');
 
 const read = file => fs.readFileSync(require.resolve(`../${file}`), 'utf8');
 const hero = read('src/views/partials/locker-hero.ejs');
@@ -24,6 +25,17 @@ const productDetail = read('src/views/shop/product-detail.ejs');
 const productForm = read('src/views/admin/product-form.ejs');
 const adminProducts = read('src/views/admin/products.ejs');
 const rangerMarketJs = read('public/js/storefront-rangers-market-v1.js');
+
+assert.deepEqual(checkCssBundles(), { ok: true, staleFiles: [] },
+  'storefront CSS bundles must stay in sync with the source stylesheets');
+assert.match(layout, /storefront-pre-home-v1\.css/,
+  'the home page must use one pre-theme bundle instead of its full stylesheet chain');
+assert.match(layout, /storefront-pre-unified-v1\.css/,
+  'every other unified storefront page must use one pre-theme bundle');
+assert.match(layout, /storefront-post-home-v1\.css/,
+  'the home page must use one post-theme bundle');
+assert.match(layout, /storefront-post-unified-v1\.css/,
+  'every other unified storefront page must use one post-theme bundle');
 
 for (const [name, routeLayout] of [['storefront', layout], ['admin', adminLayout], ['admin experiment', adminExperimentLayout]]) {
   assert.match(routeLayout, /data-route-stylesheet/, `${name} must promote page stylesheets into the document head`);
@@ -71,7 +83,7 @@ assert.match(shopRoutes, /viewData\.storefrontOwnerHomeV7 = true/, 'every standa
 assert.match(layout, /id="storefront-home-critical-fallback"/, 'homepage grid and cards must stay bounded if a cached theme layer is delayed');
 assert.match(shopRoutes, /welcomePopupRedesign: false/, 'tenant and secondary storefront renders must keep the legacy welcome popup by default');
 assert.match(shopRoutes, /viewData\.welcomePopupRedesign = true/, 'the accessible welcome popup redesign must be enabled for every tenant storefront');
-assert.match(homeView, /<% if \(showWelcomePopupRedesign\) \{ %><link rel="stylesheet" href="<%= asset\('css\/storefront-welcome-popup-experiment-v1\.css'\) %>" \/>/, 'main shop must load the redesigned welcome popup styles');
+assert.match(homeView, /<% if \(showWelcomePopupRedesign\) \{ %><link rel="stylesheet" href="<%= asset\('css\/storefront-home-popup-v1\.css'\) %>" \/>/, 'main shop must load the combined redesigned welcome popup styles');
 assert.match(homeView, /const showWelcomePopupRedesign = Boolean\(welcomePopupRedesign \|\| welcomePopupExperiment\)/, 'local popup experiments must keep working independently of production rollout');
 assert.match(welcomePopupCss, /welcome-popup-slider img\{object-fit: contain;object-position: center\}/, 'announcement images must remain fully visible without cropping');
 const homeSvgTags = [...homeView.matchAll(/<svg\b[^>]*>/g)];

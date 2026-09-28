@@ -56,32 +56,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="<%= asset('css/storefront-navbar-v1.css') %>" />
-  <link rel="stylesheet" href="<%= asset('css/storefront-home-v1.css') %>" />
-  <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v1.css') %>" /><% } %>
-  <link rel="stylesheet" href="<%= asset('css/storefront-mobile-v1.css') %>" />
-  <link rel="stylesheet" href="<%= asset('css/storefront-catalog-v1.css') %>" />
-  <link rel="stylesheet" href="<%= asset('css/storefront-auth-v1.css') %>" />
-  <link rel="stylesheet" href="<%= asset('css/scroll-motion-v1.css') %>" />
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v7.css') %>" /> <% } %>
-  <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-main-v2.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v20.css') %>&amp;rev=4" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v21.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-hero-v22.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-hero-v23.css') %>&amp;rev=5" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-category-images-v1.css') %>&amp;rev=1" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-category-gallery-cozy-v2.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-section-chrome-v1.css') %>" /><% } %>
-  <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-main-v3.css') %>&amp;rev=16" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/latest-orders-3d-v1.css') %>" /><% } %>
-  <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %><link rel="stylesheet" href="<%= asset('css/storefront-announcement-width-v1.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-compact-v1.css') %>&amp;rev=1" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-mobile-v1.css') %>&amp;rev=2" /><% } %>
-  <link rel="stylesheet" href="<%= asset('css/storefront-theme-cohesion-v1.css') %>" />
-  <link rel="stylesheet" href="<%= asset('css/storefront-music-unified-v1.css') %>&amp;rev=2" />
-  <link rel="stylesheet" href="<%= asset('css/storefront-navbar-shared-v1.css') %>&amp;rev=1" />
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
-  <style id="storefront-home-critical-fallback">
+  <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %>
+    <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
+      <link rel="stylesheet" href="<%= asset('css/storefront-pre-home-v1.css') %>" />
+    <% } else { %>
+      <link rel="stylesheet" href="<%= asset('css/storefront-pre-unified-v1.css') %>" />
+    <% } %>
+  <% } else { %>
+    <link rel="stylesheet" href="<%= asset('css/storefront-navbar-v1.css') %>" />
+    <link rel="stylesheet" href="<%= asset('css/storefront-home-v1.css') %>" />
+    <link rel="stylesheet" href="<%= asset('css/storefront-mobile-v1.css') %>" />
+    <link rel="stylesheet" href="<%= asset('css/storefront-catalog-v1.css') %>" />
+    <link rel="stylesheet" href="<%= asset('css/storefront-auth-v1.css') %>" />
+    <link rel="stylesheet" href="<%= asset('css/scroll-motion-v1.css') %>" />
+  <% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>  <style id="storefront-home-critical-fallback">
     /* Bound the home layout before a mobile WebView restores its cached theme layers. */
     #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .home-category-grid,
     #site-page-shell.storefront-owner-home-v7 .owner-home-v20-main .store-product-gallery .product-grid,
@@ -251,16 +240,24 @@
       #page-loading-overlay .loading-ring::before { animation-duration: 1.6s; }
     }
   </style>
-  <link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v1.css') %>" />
-  <link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v2.css') %>" />
-  <link rel="stylesheet" href="<%= asset('css/storefront-mobile-header-cozy-shared-v1.css') %>&amp;rev=1" />
-  <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %><link rel="stylesheet" href="<%= asset('css/storefront-mobile-header-cozy-v3.css') %>&amp;rev=4" /><% } %>
-  <link rel="stylesheet" href="<%= asset('css/storefront-account-menu-cozy-v1.css') %>&amp;rev=1" />
-  <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %><link rel="stylesheet" href="<%= asset('css/storefront-account-menu-mobile-v1.css') %>&amp;rev=3" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-cozy-v1.css') %>" /><% } %>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-hero-cozy-v1.css') %>" /><% } %>
-  <link rel="stylesheet" href="<%= asset('css/storefront-product-artwork-full-v1.css') %>" />
-  <link rel="stylesheet" href="<%= asset('css/storefront-home-section-spacing-v1.css') %>" />
+  <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %>
+    <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
+      <link rel="stylesheet" href="<%= asset('css/storefront-post-home-v1.css') %>" />
+    <% } else { %>
+      <link rel="stylesheet" href="<%= asset('css/storefront-post-unified-v1.css') %>" />
+    <% } %>
+  <% } else { %>
+    <link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v1.css') %>" />
+    <link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v2.css') %>" />
+    <link rel="stylesheet" href="<%= asset('css/storefront-mobile-header-cozy-shared-v1.css') %>" />
+    <link rel="stylesheet" href="<%= asset('css/storefront-account-menu-cozy-v1.css') %>" />
+    <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
+      <link rel="stylesheet" href="<%= asset('css/storefront-home-cozy-v1.css') %>" />
+      <link rel="stylesheet" href="<%= asset('css/storefront-home-hero-cozy-v1.css') %>" />
+    <% } %>
+    <link rel="stylesheet" href="<%= asset('css/storefront-product-artwork-full-v1.css') %>" />
+    <link rel="stylesheet" href="<%= asset('css/storefront-home-section-spacing-v1.css') %>" />
+  <% } %>
   <%- routeStylesheetMarkup %>
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront ? ' storefront-unified' : '' %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh ? ' storefront-customer-refresh' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %>">

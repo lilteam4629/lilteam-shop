@@ -138,6 +138,10 @@ assert.deepEqual(theme.getBgPresets({ mainShopOnly: true }).map((item) => item.k
 console.log('Main-shop monochrome surfaces and tenant palette isolation passed');
 
 const mainLayout = fs.readFileSync(path.join(__dirname, '../src/views/layouts/main.ejs'), 'utf8');
-assert(mainLayout.includes("asset('css/storefront-theme-cohesion-v1.css')"), 'every storefront page must load the shared theme layer');
+const storefrontBundles = require('./build-css-bundles').BUNDLES;
+assert(storefrontBundles['storefront-pre-unified-v1.css'].includes('storefront-theme-cohesion-v1.css')
+  && storefrontBundles['storefront-pre-home-v1.css'].includes('storefront-theme-cohesion-v1.css'),
+'every storefront page must load the shared theme layer');
+assert(mainLayout.includes("asset('css/storefront-pre-unified-v1.css')"), 'shared storefront styles must use the cache-busted bundle asset');
 assert(fs.existsSync(path.join(__dirname, '../public/css/storefront-theme-cohesion-v1.css')), 'shared storefront theme layer must exist');
 console.log('Shared storefront theme layer is connected to the public layout');

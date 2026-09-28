@@ -16,8 +16,12 @@ assert.ok(script, 'storefront music script should exist');
 const widgetMarkup = layout.slice(layout.indexOf('<div id="music-widget"'), layout.indexOf('<div id="music-yt-player"'));
 const compactMusicCss = fs.readFileSync(path.join(__dirname, '..', 'public/css/storefront-music-unified-v1.css'), 'utf8');
 assert.equal((layout.match(/id="music-widget"/g) || []).length, 1, 'one shared player must be rendered by the public layout');
-assert.match(layout, /<link rel="stylesheet" href="<%= asset\('css\/storefront-music-unified-v1\.css'\) %>&amp;rev=2" \/>/,
+const storefrontBundles = require('./build-css-bundles').BUNDLES;
+assert.ok(storefrontBundles['storefront-pre-unified-v1.css'].includes('storefront-music-unified-v1.css')
+  && storefrontBundles['storefront-pre-home-v1.css'].includes('storefront-music-unified-v1.css'),
   'the unified music skin must load across every storefront');
+assert.match(layout, /asset\('css\/storefront-pre-unified-v1\.css'\)/,
+  'the music skin bundle must use the shared cache-busting asset helper');
 assert.doesNotMatch(widgetMarkup, /storefrontOwnerHomeV7|music-minimize-btn|music-expand-btn/,
   'music markup must not switch structure on the homepage');
 assert.match(widgetMarkup, /music-widget__artwork[\s\S]*music-collapsed-title[\s\S]*music-collapsed-state[\s\S]*music-widget__expand/,

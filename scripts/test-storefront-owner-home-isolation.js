@@ -25,36 +25,46 @@ const productArtworkCss = read('public/css/storefront-product-artwork-full-v1.cs
 const homeSectionSpacingCss = read('public/css/storefront-home-section-spacing-v1.css');
 const latestOrdersCss = read('public/css/latest-orders-3d-v1.css');
 const latestOrdersJs = read('public/js/latest-orders-3d-v1.js');
+const { BUNDLES } = require('./build-css-bundles');
+const hasBundleSource = (bundleName, sourceName) => BUNDLES[bundleName]?.includes(sourceName) === true;
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*true/,
   'the updated home should be served to both the primary store and tenant stores');
 assert.match(route, /viewData\.welcomePopupRedesign\s*=\s*true/,
   'tenant welcome popups must use the accessible shared design');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v7\.css/,
-  'the shared home stylesheet must be available when the refreshed home is active');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-pre-home-v1\.css/,
+  'the home stylesheet bundle must be available when the refreshed home is active');
+assert.ok(hasBundleSource('storefront-pre-home-v1.css', 'storefront-owner-home-v7.css'),
+  'the refreshed home bundle must preserve its shared home stylesheet');
 assert.doesNotMatch(layout, /storefront-owner-home-v(?:8|9|10|11|14|15)\.css/,
   'superseded main-home design layers must no longer be loaded');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v20\.css/,
-  'the media-storefront stylesheet must load only on refreshed home pages');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v21\.css/,
-  'the readable product-card layer must load only on refreshed home pages');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*storefront-owner-home-hero-v23\.css[^\n]*rev=5/,
-  'the banner-only hero stylesheet must be cache-busted for all refreshed shops');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
+assert.ok(hasBundleSource('storefront-pre-home-v1.css', 'storefront-owner-home-v20.css'),
+  'the media-storefront stylesheet must be bundled only for refreshed home pages');
+assert.ok(hasBundleSource('storefront-pre-home-v1.css', 'storefront-owner-home-v21.css'),
+  'the readable product-card layer must be bundled only for refreshed home pages');
+assert.ok(hasBundleSource('storefront-pre-home-v1.css', 'storefront-owner-home-hero-v23.css'),
+  'the banner-only hero stylesheet must remain in the refreshed-home bundle');
+assert.match(layout, /asset\('css\/storefront-pre-home-v1\.css'\)/,
+  'the refreshed-home bundle must use the shared asset cache-busting helper');
+assert.ok(hasBundleSource('storefront-post-home-v1.css', 'storefront-home-cozy-v1.css'),
   'the cozy homepage layer must load for all refreshed stores');
-const homeSectionSpacingLink = layout.split(/\r?\n/).find(line => line.includes('storefront-home-section-spacing-v1.css')) || '';
-assert.ok(homeSectionSpacingLink && !homeSectionSpacingLink.includes('<% if'),
-  'homepage announcement spacing must load for every customer storefront');
+assert.ok(hasBundleSource('storefront-post-unified-v1.css', 'storefront-home-section-spacing-v1.css'),
+  'homepage announcement spacing must be bundled for every customer storefront');
 assert.match(homeSectionSpacingCss, /#site-page-shell \.store-announcements \+ #latest-orders\.latest-orders-section\s*\{\s*margin-top:\s*24px\s*!important/s,
   'homepage announcements must have a clear 24px gap before recent orders on desktop');
 assert.match(homeSectionSpacingCss, /@media\s*\(max-width:\s*640px\)[\s\S]*?#site-page-shell \.store-announcements \+ #latest-orders\.latest-orders-section\s*\{\s*margin-top:\s*20px\s*!important/s,
   'homepage announcements must have a clear 20px gap before recent orders on mobile');
-const musicWidgetLink = layout.split(/\r?\n/).find(line => line.includes('storefront-music-unified-v1.css')) || '';
-assert.ok(!musicWidgetLink.includes('if (') && musicWidgetLink.includes('rev=2'),
-  'one cache-busted music skin must load on every customer-facing shop page');
+assert.ok(hasBundleSource('storefront-pre-unified-v1.css', 'storefront-music-unified-v1.css')
+  && hasBundleSource('storefront-pre-home-v1.css', 'storefront-music-unified-v1.css'),
+  'one shared music skin must be included in every customer-facing shop bundle');
+assert.match(layout, /asset\('css\/storefront-pre-unified-v1\.css'\)/,
+  'shared storefront bundles must use the asset cache-busting helper');
 assert.doesNotMatch(layout, /storefront-music-widget-cozy-v1\.css/,
   'the homepage-only player skin must not create a second page-specific appearance');
-assert.match(layout, /storefront-mobile-header-cozy-shared-v1\.css[\s\S]*?storefront-account-menu-cozy-v1\.css/,
+assert.ok(hasBundleSource('storefront-post-unified-v1.css', 'storefront-mobile-header-cozy-shared-v1.css')
+  && hasBundleSource('storefront-post-unified-v1.css', 'storefront-account-menu-cozy-v1.css')
+  && hasBundleSource('storefront-post-home-v1.css', 'storefront-mobile-header-cozy-shared-v1.css')
+  && hasBundleSource('storefront-post-home-v1.css', 'storefront-account-menu-cozy-v1.css'),
   'the shared mobile header and account menu styles must load for every shop');
 assert.match(accountMenuCss, /\.store-nav--cozy-owner \.store-nav__account-menu--main\s*\{[^}]*box-shadow:\s*0 18px 46px/s,
   'the account menu must read as a calm, elevated surface above the mobile storefront');
@@ -72,8 +82,8 @@ assert.doesNotMatch(layout, /storefront-owner-home-v18\.css/,
   'the superseded split hero styling must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,
   'the replaced 3D scene stylesheet and script must no longer load');
-const productArtworkLink = layout.split(/\r?\n/).find(line => line.includes('storefront-product-artwork-full-v1.css')) || '';
-assert.ok(productArtworkLink && !productArtworkLink.includes('<% if'),
+assert.ok(hasBundleSource('storefront-post-unified-v1.css', 'storefront-product-artwork-full-v1.css')
+  && hasBundleSource('storefront-post-home-v1.css', 'storefront-product-artwork-full-v1.css'),
   'the full-product-image override must load for every storefront, including rentals');
 for (const selector of ['.catalog-image > img', '.premium-product-card img', '.owner-home-v21-media > img', '.owner-home-v16-product-card img', '.v4-product-card__image img', '.new-product-card__media img', '.v6-product-card__media img']) {
   assert.ok(productArtworkCss.includes(selector), `shared product image rules must cover ${selector}`);
@@ -136,7 +146,7 @@ assert.match(home, /include\('\.\.\/partials\/latest-orders-rail', \{ latestOrde
   'the main homepage order rail must use its shared live-data partial');
 assert.match(read('src/views/partials/latest-orders-rail.ejs'), /latestOrders\.forEach\(order => \{/,
   'the shared order rail must render live order data');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*latest-orders-3d-v1\.css/,
+assert.ok(hasBundleSource('storefront-pre-home-v1.css', 'latest-orders-3d-v1.css'),
   'the order rail styling must load on every refreshed main or rental homepage');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*latest-orders-3d-v1\.js/,
   'the order rail behavior must load on every refreshed main or rental homepage');
@@ -466,7 +476,8 @@ assert.doesNotMatch(sharedNavbarCss, /#[0-9a-f]{3,8}/i,
   'the redesigned header must not introduce a fixed palette');
 assert.ok(sharedNavbarRuleCount > 0, 'the shared header redesign must include scoped styles');
 const layoutHtml = read('src/views/layouts/main.ejs');
-assert.match(layoutHtml, /storefront-navbar-shared-v1\.css/,
+assert.ok(hasBundleSource('storefront-pre-unified-v1.css', 'storefront-navbar-shared-v1.css')
+  && hasBundleSource('storefront-pre-home-v1.css', 'storefront-navbar-shared-v1.css'),
   'the shared redesigned navigation stylesheet must be loaded for storefronts');
 assert.match(read('src/views/partials/navbar.ejs'), /store-nav--cozy-owner/,
   'rental shop headers must opt into the shared navigation layout');

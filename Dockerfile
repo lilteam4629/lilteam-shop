@@ -9,6 +9,7 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY public ./public
 COPY src ./src
 COPY scripts ./scripts
+RUN node scripts/build-css-bundles.js
 
 EXPOSE 3000
 CMD ["node", "src/app.js"]
