@@ -450,8 +450,8 @@ assert.match(app, /res\.locals\.storefrontCustomerRefresh\s*=\s*true/,
   'the shared storefront theme applies across rental routes without changing tenant data scope');
 assert.match(app, /res\.locals\.storefrontCozyNav\s*=\s*true/,
   'the updated storefront navigation is enabled across primary and rental shops');
-assert.match(app, /res\.locals\.settings\s*=\s*store\.data\.settings/,
-  'layout branding continues to read settings from the request-scoped shop');
+assert.match(app, /res\.locals\.settings\s*=\s*requestShopSettings\(store\.data\.settings, req\.tenantShop\)/,
+  'layout branding continues to resolve settings inside the request-scoped shop');
 assert.match(route, /const active = req\?\.tenantShop \? localProducts : localProducts\.concat\(remote\)/,
   'a rental storefront must keep rendering its own catalog records instead of the main-shop catalog');
 
