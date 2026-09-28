@@ -22,6 +22,7 @@ const heroCozyCss = read('public/css/storefront-home-hero-cozy-v1.css');
 const musicWidgetCss = read('public/css/storefront-music-unified-v1.css');
 const accountMenuCss = read('public/css/storefront-account-menu-cozy-v1.css');
 const productArtworkCss = read('public/css/storefront-product-artwork-full-v1.css');
+const homeSectionSpacingCss = read('public/css/storefront-home-section-spacing-v1.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*true/,
   'the updated home should be served to both the primary store and tenant stores');
@@ -39,6 +40,13 @@ assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && store
   'the banner-only hero stylesheet must be cache-busted for all refreshed shops');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
   'the cozy homepage layer must load for all refreshed stores');
+const homeSectionSpacingLink = layout.split(/\r?\n/).find(line => line.includes('storefront-home-section-spacing-v1.css')) || '';
+assert.ok(homeSectionSpacingLink && !homeSectionSpacingLink.includes('<% if'),
+  'homepage announcement spacing must load for every customer storefront');
+assert.match(homeSectionSpacingCss, /#site-page-shell \.store-announcements \+ #latest-orders\.latest-orders-section\s*\{\s*margin-top:\s*24px\s*!important/s,
+  'homepage announcements must have a clear 24px gap before recent orders on desktop');
+assert.match(homeSectionSpacingCss, /@media\s*\(max-width:\s*640px\)[\s\S]*?#site-page-shell \.store-announcements \+ #latest-orders\.latest-orders-section\s*\{\s*margin-top:\s*20px\s*!important/s,
+  'homepage announcements must have a clear 20px gap before recent orders on mobile');
 const musicWidgetLink = layout.split(/\r?\n/).find(line => line.includes('storefront-music-unified-v1.css')) || '';
 assert.ok(!musicWidgetLink.includes('if (') && musicWidgetLink.includes('rev=2'),
   'one cache-busted music skin must load on every customer-facing shop page');

@@ -1,0 +1,10 @@
+/* Keep adjacent homepage modules distinct on every storefront theme. */
+#site-page-shell .store-announcements + #latest-orders.latest-orders-section {
+  margin-top: 24px !important;
+}
+
+@media (max-width: 640px) {
+  #site-page-shell .store-announcements + #latest-orders.latest-orders-section {
+    margin-top: 20px !important;
+  }
+}
