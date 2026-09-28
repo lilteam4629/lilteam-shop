@@ -44,6 +44,7 @@ const authSource = fs.readFileSync(path.join(root, 'src/middleware/auth.js'), 'u
 const adminLayout = fs.readFileSync(path.join(root, 'src/views/layouts/admin.ejs'), 'utf8');
 const experimentLayout = fs.readFileSync(path.join(root, 'src/views/layouts/admin-experiment.ejs'), 'utf8');
 const experimentSidebar = fs.readFileSync(path.join(root, 'src/views/partials/admin-experiment-sidebar-effects.ejs'), 'utf8');
+const themeView = fs.readFileSync(path.join(root, 'src/views/admin/theme.ejs'), 'utf8');
 const adminViews = fs.readdirSync(path.join(root, 'src/views/admin'))
   .filter(file => file.endsWith('-experiment.ejs'))
   .map(file => fs.readFileSync(path.join(root, 'src/views/admin', file), 'utf8'));
@@ -57,8 +58,18 @@ assert.match(experimentLayout, /settings\.branding && settings\.branding\.logoIm
 assert.doesNotMatch(experimentLayout, /LILTeam Shop|LILTEAM SHOP/);
 assert.match(experimentSidebar, /settings\.branding\.logoImage/);
 assert.match(experimentSidebar, /settings\.shopName/);
+const liveStoreBrand = themeView.match(/<span class="admin-theme-store-logo"[\s\S]*?<span class="admin-theme-store-brand">[\s\S]*?<\/span>/)?.[0];
+assert.ok(liveStoreBrand, 'the live theme preview includes its store identity');
+assert.doesNotMatch(liveStoreBrand, /<strong>LiTeam Shop<\/strong>/, 'the live theme preview must not hardcode the platform brand');
+assert.match(liveStoreBrand, /settings\.shopName/, 'the live theme preview uses the resolved current shop name');
+const ejs = require('ejs');
+for (const shopName of ['Mango Market', 'Bank Market']) {
+  const renderedBrand = ejs.render(liveStoreBrand, { settings: { shopName } });
+  assert.match(renderedBrand, new RegExp(`<strong>${shopName}<\\/strong>`), `the live preview renders ${shopName}`);
+  assert.match(renderedBrand, /class="admin-theme-store-logo"[^>]*>\w/);
+}
 for (const [index, view] of adminViews.entries()) {
   assert.doesNotMatch(view, /LILTeam Shop|LILTEAM SHOP/, `admin experiment view ${index} must not hardcode the platform brand`);
 }
 
-console.log('Shop branding checks passed: per-tenant names, isolated logos, owner overrides, admin titles, and both admin shells');
+console.log('Shop branding checks passed: per-tenant names, isolated logos, owner overrides, live theme preview, admin titles, and both admin shells');

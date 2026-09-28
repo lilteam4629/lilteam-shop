@@ -212,8 +212,8 @@
 
           <div class="admin-theme-store" data-theme-store-preview data-mode="dark" data-style="<%= safeStyle %>">
             <div class="admin-theme-store-nav">
-              <span class="admin-theme-store-logo" data-theme-store-logo>L</span>
-              <span class="admin-theme-store-brand"><strong>LiTeam Shop</strong><small>ร้านค้าออนไลน์</small></span>
+              <span class="admin-theme-store-logo" data-theme-store-logo><%= String(settings.shopName || 'L').trim().charAt(0).toLocaleUpperCase('th-TH') || 'L' %></span>
+              <span class="admin-theme-store-brand"><strong><%= settings.shopName || 'ร้านค้า' %></strong><small>ร้านค้าออนไลน์</small></span>
               <span class="admin-theme-store-nav-action" aria-hidden="true"><i></i><i></i></span>
             </div>
             <div class="admin-theme-store-content">

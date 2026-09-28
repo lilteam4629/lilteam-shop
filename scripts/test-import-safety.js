@@ -412,19 +412,21 @@ async function main() {
   });
   const themeGet = admin.stack.find(layer => layer.route?.path === '/theme' && layer.route.methods.get).route.stack.at(-1).handle;
   const mainThemeFixture = model.fixture();
+  mainThemeFixture.settings.shopName = 'Main Theme Preview';
   mainThemeFixture.settings.theme = { accent: '#c8a63f', bgPreset: 'warmDark', bgColor: '', style: 'normal' };
   let mainThemeRender;
   als.run(mainThemeFixture, () => themeGet({ tenantShop: null }, { render(view, values) { mainThemeRender = { view, values }; } }));
   const tenantThemeFixture = model.fixture();
+  tenantThemeFixture.settings.shopName = 'Tenant Theme Preview';
   let tenantThemeRender;
   als.run(tenantThemeFixture, () => themeGet({ tenantShop: { id: 'theme-tenant-fixture' } }, { render(view, values) { tenantThemeRender = { view, values }; } }));
   const themeTemplatePath = path.join(root, 'src/views/admin/theme.ejs');
   const themeEjs = require('ejs');
-  const renderTheme = render => themeEjs.render(fs.readFileSync(themeTemplatePath, 'utf8'), {
-    messages: { success: [], error: [] }, asset: value => '/' + value, ...render.values,
+  const renderTheme = (render, settings) => themeEjs.render(fs.readFileSync(themeTemplatePath, 'utf8'), {
+    messages: { success: [], error: [] }, asset: value => '/' + value, settings, ...render.values,
   }, { filename: themeTemplatePath });
-  const mainThemeHtml = renderTheme(mainThemeRender);
-  const tenantThemeHtml = renderTheme(tenantThemeRender);
+  const mainThemeHtml = renderTheme(mainThemeRender, mainThemeFixture.settings);
+  const tenantThemeHtml = renderTheme(tenantThemeRender, tenantThemeFixture.settings);
   check('Main theme offers only an automatic pure black/white background while tenants retain all legacy options', () => {
     assert.equal(mainThemeRender.view, 'admin/theme');
     assert.equal(mainThemeRender.values.mainAdminUi, true);
@@ -434,10 +436,13 @@ async function main() {
     assert.match(mainThemeHtml, /โหมดสว่าง/);
     assert.match(mainThemeHtml, /#FFFFFF/);
     assert.doesNotMatch(mainThemeHtml, /data-theme-bg-choice="custom"/);
+    assert.match(mainThemeHtml, /<strong>Main Theme Preview<\/strong>/);
     assert.equal(tenantThemeRender.values.mainAdminUi, false);
     assert.equal(tenantThemeRender.values.bgPresets.length, 6);
     assert.match(tenantThemeHtml, /data-theme-bg-choice="custom"/);
     assert.match(tenantThemeHtml, /สร้างชุดสีจากสีที่เลือก/);
+    assert.match(tenantThemeHtml, /<strong>Tenant Theme Preview<\/strong>/);
+    assert.doesNotMatch(tenantThemeHtml, /<strong>Main Theme Preview<\/strong>/);
   });
   const themePost = admin.stack.find(layer => layer.route?.path === '/theme' && layer.route.methods.post).route.stack.at(-1).handle;
   const mainThemePostFixture = model.fixture();
