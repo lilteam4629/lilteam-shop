@@ -65,7 +65,7 @@ assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,
 const productArtworkLink = layout.split(/\r?\n/).find(line => line.includes('storefront-product-artwork-full-v1.css')) || '';
 assert.ok(productArtworkLink && !productArtworkLink.includes('<% if'),
   'the full-product-image override must load for every storefront, including rentals');
-for (const selector of ['.catalog-image > img', '.premium-product-card img', '.owner-home-v21-media > img', '.new-product-card__media img', '.v6-product-card__media img']) {
+for (const selector of ['.catalog-image > img', '.premium-product-card img', '.owner-home-v21-media > img', '.owner-home-v16-product-card img', '.v4-product-card__image img', '.new-product-card__media img', '.v6-product-card__media img']) {
   assert.ok(productArtworkCss.includes(selector), `shared product image rules must cover ${selector}`);
 }
 assert.match(productArtworkCss, /object-fit:\s*contain\s*!important/,
