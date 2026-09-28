@@ -13,6 +13,14 @@ const script = [...layout.matchAll(/<script>([\s\S]*?)<\/script>/g)]
   .map(match => match[1])
   .find(source => source.includes("const STORAGE_PLAYING = 'lilteam_music_playing'"));
 assert.ok(script, 'storefront music script should exist');
+const widgetMarkup = layout.slice(layout.indexOf('<div id="music-widget"'), layout.indexOf('<div id="music-yt-player"'));
+assert.equal((layout.match(/id="music-widget"/g) || []).length, 1, 'one shared player must be rendered by the public layout');
+assert.match(layout, /^  <link rel="stylesheet" href="<%= asset\('css\/storefront-music-unified-v1\.css'\) %>&amp;rev=1" \/>$/m,
+  'the shared music skin must load in the storefront layout');
+assert.doesNotMatch(widgetMarkup, /storefrontOwnerHomeV7|music-minimize-btn|music-expand-btn/,
+  'music markup must not switch structure on the homepage');
+assert.match(widgetMarkup, /music-widget__artwork[\s\S]*music-collapsed-title[\s\S]*music-collapsed-state[\s\S]*music-widget__expand/,
+  'every storefront page must use the same player controls');
 
 function makeHarness(defaultVolume) {
   const elements = new Map();
@@ -48,20 +56,21 @@ function makeHarness(defaultVolume) {
           ? { classList: { toggle() {} } }
           : null;
       },
-      contains() { return true; },
+      contains(target) { return Boolean(target && target.insideWidget); },
       focus() {},
       remove() { this.removed = true; },
     };
   }
   const document = {
     hidden: false,
+    listeners: {},
     getElementById(id) {
       if (!elements.has(id)) elements.set(id, element(id));
       return elements.get(id);
     },
     createElement() { return element('youtube-api-script'); },
     head: { appendChild(item) { scripts.push(item); } },
-    addEventListener() {},
+    addEventListener(name, callback) { this.listeners[name] = callback; },
   };
   const window = {
     location: { search: '', pathname: '/', hash: '' },
@@ -96,16 +105,24 @@ function makeHarness(defaultVolume) {
 const harness = makeHarness('145');
 assert.equal(harness.elements.get('music-volume').value, 100, 'volume is clamped to the slider range');
 assert.equal(harness.elements.get('music-toggle-btn').hidden, false, 'music control initializes without storage');
-harness.elements.get('music-minimize-btn').listeners.click();
-assert.equal(harness.elements.get('music-expand-btn').hidden, false, 'minimize works when storage is blocked');
-harness.elements.get('music-expand-btn').listeners.click();
-assert.equal(harness.elements.get('music-toggle-btn').hidden, false, 'restore works when storage is blocked');
+harness.elements.get('music-settings-btn').listeners.click();
+assert.equal(harness.elements.get('music-panel').classList.contains('hidden'), false, 'settings opens without storage');
+assert.equal(harness.elements.get('music-settings-btn').attributes['aria-expanded'], 'true');
+assert.equal(harness.elements.get('music-settings-btn').attributes['aria-label'], 'ปิดแผงควบคุมเพลง');
+harness.elements.get('music-collapse-btn').listeners.click();
+assert.equal(harness.elements.get('music-panel').classList.contains('hidden'), true, 'close hides the settings panel');
+assert.equal(harness.elements.get('music-settings-btn').attributes['aria-expanded'], 'false');
+harness.elements.get('music-settings-btn').listeners.click();
+assert.equal(harness.elements.get('music-panel').classList.contains('hidden'), false);
+harness.context.document.listeners.click({ target: {} });
+assert.equal(harness.elements.get('music-panel').classList.contains('hidden'), true, 'outside click closes the panel');
+assert.equal(harness.elements.get('music-settings-btn').attributes['aria-expanded'], 'false');
 
 harness.elements.get('music-toggle-btn').listeners.click();
 assert.equal(harness.scripts.length, 1, 'first tap requests YouTube');
 harness.scripts[0].onerror();
 assert.equal(harness.scripts[0].removed, true, 'failed script is removed');
-assert.match(harness.elements.get('music-state-label').textContent, /แตะเพื่อลองใหม่/);
+assert.match(harness.elements.get('music-collapsed-state').textContent, /แตะเพื่อลองใหม่/);
 harness.elements.get('music-toggle-btn').listeners.click();
 assert.equal(harness.scripts.length, 2, 'next tap retries YouTube');
 
@@ -138,9 +155,26 @@ harness.elements.get('music-toggle-btn').listeners.click();
 assert.equal(playerCalls.pauses, 1);
 assert.equal(harness.elements.get('music-widget').classList.contains('is-playing'), false);
 
+const loadingHarness = makeHarness('40');
+loadingHarness.elements.get('music-volume').value = '73';
+loadingHarness.elements.get('music-volume').listeners.input();
+loadingHarness.context.YT = {
+  PlayerState: { PLAYING: 1, PAUSED: 2, ENDED: 0 },
+  Player: function (_id, options) {
+    options.events.onReady({ target: {
+      setVolume(value) { playerCalls.volume = value; },
+      unMute() {},
+      playVideo() {},
+    } });
+  },
+};
+loadingHarness.window.YT = loadingHarness.context.YT;
+loadingHarness.window.onYouTubeIframeAPIReady();
+assert.equal(playerCalls.volume, 73, 'volume changes made during player loading are applied on ready');
+
 assert.equal((script.match(/localStorage\.(?:getItem|setItem)\(/g) || []).length, 2,
   'all persistence access must go through the guarded helpers');
 const fallbackHarness = makeHarness('not-a-number');
 assert.equal(fallbackHarness.elements.get('music-volume').value, 50, 'invalid volume falls back to a safe default');
 
-console.log('Music widget checks passed: blocked storage, safe volume, retry, playback, and pause');
+console.log('Music widget checks passed: shared page markup, controls, blocked storage, volume, retry, playback, and pause');

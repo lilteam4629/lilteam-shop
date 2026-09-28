@@ -19,7 +19,7 @@ const cozyHeroCss = read('public/css/storefront-home-hero-cozy-v1.css');
 const ownerHeroFxCss = read('public/css/storefront-owner-home-hero-v23.css');
 const ownerHeroLayoutCss = read('public/css/storefront-owner-home-hero-v22.css');
 const heroCozyCss = read('public/css/storefront-home-hero-cozy-v1.css');
-const musicDockCss = read('public/css/storefront-music-widget-cozy-v1.css');
+const musicWidgetCss = read('public/css/storefront-music-unified-v1.css');
 const accountMenuCss = read('public/css/storefront-account-menu-mobile-v1.css');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
@@ -36,8 +36,10 @@ assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n
   'the banner-only hero stylesheet must be cache-busted for the main store only');
 assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
   'the cozy homepage layer must only load on the main storefront');
-assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*storefront-music-widget-cozy-v1\.css[^\n]*rev=4/,
-  'the compact music dock must be cache-busted and enabled only for the main storefront');
+assert.match(layout, /<link rel="stylesheet" href="<%= asset\('css\/storefront-music-unified-v1\.css'\) %>&amp;rev=1" \/>/,
+  'one cache-busted music skin must load for every storefront page');
+assert.doesNotMatch(layout, /storefront-music-widget-cozy-v1\.css/,
+  'the homepage-only player skin must not create a second page-specific appearance');
 assert.match(layout, /storefront-mobile-header-cozy-v3\.css[\s\S]*?if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-account-menu-mobile-v1\.css[^\n]*rev=3/,
   'the redesigned main account menu must load after the main-store theme layers');
 assert.match(accountMenuCss, /\.store-nav--main \.store-nav__account-menu--main\s*\{[^}]*box-shadow:\s*0 18px 46px/s,
@@ -46,10 +48,12 @@ assert.match(accountMenuCss, /\.store-nav--main \.store-nav__account-balance\s*\
   'the wallet balance must remain visually distinct and theme-aware');
 assert.match(accountMenuCss, /\.store-nav--main \.store-nav__balance-action\s*\{[^}]*min-height:\s*44px/s,
   'the top-up action must retain a mobile-sized touch target');
-assert.match(musicDockCss, /#music-widget\.is-collapsed\s*\{[^}]*width:\s*max-content[^}]*max-width:\s*min\(168px,\s*calc\(100vw - 24px\)\)/s,
-  'the collapsed music dock must stay compact on narrow screens');
-assert.match(musicDockCss, /#music-widget\.is-collapsed \.music-dock-restore:not\(\[hidden\]\)\s*\{[^}]*height:\s*36px/s,
-  'the collapsed music control must fit a low-profile floating chip');
+assert.match(musicWidgetCss, /#music-widget\s*\{[^}]*width:\s*min\(286px,\s*calc\(100vw - 24px\)\)/s,
+  'the shared music widget must fit desktop and mobile widths');
+assert.match(musicWidgetCss, /\.music-widget__toggle[\s\S]*?\.music-widget__expand/s,
+  'the shared music skin must style its play and settings controls together');
+assert.doesNotMatch(read('public/css/storefront-navbar-main-v3.css'), /music-widget-main-v[12]\.css/,
+  'legacy primary-store music styles must not override the shared player');
 assert.doesNotMatch(layout, /storefront-owner-home-v18\.css/,
   'the superseded split hero styling must no longer load');
 assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,

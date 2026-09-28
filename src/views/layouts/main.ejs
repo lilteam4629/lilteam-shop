@@ -59,13 +59,13 @@
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-category-images-v1.css') %>&amp;rev=1" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-category-gallery-cozy-v2.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-section-chrome-v1.css') %>" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-main-v3.css') %>&amp;rev=15" /><% } %>
+  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-main-v3.css') %>&amp;rev=16" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/latest-orders-3d-v1.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-announcement-width-v1.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-compact-v1.css') %>&amp;rev=1" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-mobile-v1.css') %>&amp;rev=2" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-music-widget-cozy-v1.css') %>&amp;rev=4" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-theme-cohesion-v1.css') %>" /><% } %>
+  <link rel="stylesheet" href="<%= asset('css/storefront-music-unified-v1.css') %>&amp;rev=1" />
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
 
@@ -543,30 +543,18 @@
   %>
   <% if (musicVideoId) { %>
   <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>" data-start-seconds="<%= settings.music.startSeconds || 0 %>" data-end-seconds="<%= settings.music.endSeconds || 0 %>">
-    <button id="music-toggle-btn" type="button" aria-label="เล่นเพลง" title="เล่นเพลง / หยุดเพลง" class="relative w-14 h-14 rounded-full bg-[var(--card)] border border-[var(--border)] shadow-lg flex items-center justify-center text-xl overflow-hidden hover:border-[var(--gold)]/60 transition">
-      <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
-      <span class="music-cover" aria-hidden="true">
-        <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="" />
-        <span id="music-icon" class="relative z-10" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17V5l12-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-        <span id="music-playing-ring" class="hidden absolute inset-0 rounded-xl border-2 border-[var(--gold)]"></span>
+    <button id="music-toggle-btn" type="button" aria-label="เล่นเพลง" title="เล่นเพลง / หยุดเพลง" class="music-widget__toggle relative flex items-center text-left">
+      <span class="music-widget__artwork" aria-hidden="true">
+        <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="" />
+        <span id="music-icon"><svg viewBox="0 0 24 24" focusable="false"><path d="M9 18V5l12-2v13M9 18c0 1.66-1.57 3-3.5 3S2 19.66 2 18s1.57-3 3.5-3S9 16.34 9 18Zm12-2c0 1.66-1.57 3-3.5 3S14 17.66 14 16s1.57-3 3.5-3S21 14.34 21 16Z" /></svg></span>
       </span>
-      <span class="music-copy" aria-hidden="true"><strong>เพลงร้าน</strong><small id="music-state-label">แตะเพื่อเล่น</small></span>
-      <% } else { %>
-      <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="" />
-      <span id="music-icon" class="relative z-10">🎵</span>
-      <span id="music-playing-ring" class="hidden absolute inset-0 rounded-full border-2 border-[var(--gold)] animate-ping"></span>
-      <% } %>
+      <span class="music-widget__copy" aria-hidden="true">
+        <span id="music-collapsed-title" class="music-widget__title">เพลงร้าน</span>
+        <span id="music-collapsed-state" class="music-widget__state">แตะเพื่อเล่นเพลง</span>
+      </span>
+      <span id="music-playing-ring" class="hidden absolute inset-0 rounded-[inherit] border border-[var(--gold)] pointer-events-none"></span>
     </button>
-    <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
-    <button id="music-minimize-btn" type="button" aria-label="ย่อแถบเพลง" title="ย่อแถบเพลง" class="music-dock-action" aria-controls="music-toggle-btn" aria-expanded="true"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
-    <button id="music-expand-btn" type="button" aria-label="เปิดแถบเพลง" title="เปิดแถบเพลง" class="music-dock-restore" aria-controls="music-toggle-btn" aria-expanded="false" hidden>
-      <span class="music-restore-cover" aria-hidden="true"><img src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="" /><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 17V5l12-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg></span>
-      <span class="music-restore-copy" aria-hidden="true"><strong id="music-restore-title">เพลงร้าน</strong><small id="music-restore-state-label">แตะเพื่อเปิด</small></span>
-      <span class="music-restore-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></span>
-    </button>
-    <% } else { %>
-    <button id="music-settings-btn" type="button" aria-label="ตั้งค่าเพลง" title="ระดับเสียงและข้อมูลเพลง" class="absolute -top-2 -left-2 z-20 w-7 h-7 rounded-full bg-[var(--input)] border border-[var(--border-light)] text-xs shadow-lg hover:border-[var(--gold)]"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.6 2.8-.2-.1a1.7 1.7 0 0 0-1.8.2l-.2.1h-3.2l-.1-.2a1.7 1.7 0 0 0-1.5-1l-.2.1-2.8-1.6.1-.2a1.7 1.7 0 0 0-.2-1.8l-.1-.2v-3.2l.2-.1a1.7 1.7 0 0 0 1-1.5l-.1-.2L11 7.3l.2.1a1.7 1.7 0 0 0 1.8-.2l.2-.1h3.2l.1.2a1.7 1.7 0 0 0 1.5 1l.2-.1 2.8 1.6-.1.2a1.7 1.7 0 0 0 .2 1.8l.1.2v3.2z" transform="translate(-3 -3) scale(1.25)"/></svg></button>
-    <% } %>
+    <button id="music-settings-btn" type="button" aria-label="เปิดแผงควบคุมเพลง" title="ระดับเสียงและข้อมูลเพลง" class="music-widget__expand" aria-expanded="false" aria-controls="music-panel"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6" /></svg></button>
 
     <div id="music-panel" class="hidden absolute bottom-16 right-0 w-64 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden text-[var(--text)]">
       <div class="relative aspect-video bg-[#0c0a06]">
@@ -595,24 +583,19 @@
       const videoId = widget.dataset.videoId;
       const toggleBtn = document.getElementById('music-toggle-btn');
       const settingsBtn = document.getElementById('music-settings-btn');
-      const minimizeBtn = document.getElementById('music-minimize-btn');
-      const expandBtn = document.getElementById('music-expand-btn');
       const panel = document.getElementById('music-panel');
       const collapseBtn = document.getElementById('music-collapse-btn');
       const playBtn = document.getElementById('music-play-btn');
       const volumeSlider = document.getElementById('music-volume');
-      const icon = document.getElementById('music-icon');
       const playingRing = document.getElementById('music-playing-ring');
       const titleEl = document.getElementById('music-title');
-      const musicStateLabel = document.getElementById('music-state-label');
-      const musicRestoreStateLabel = document.getElementById('music-restore-state-label');
-      const musicRestoreTitle = document.getElementById('music-restore-title');
+      const collapsedTitleEl = document.getElementById('music-collapsed-title');
+      const collapsedStateEl = document.getElementById('music-collapsed-state');
 
       const STORAGE_PLAYING = 'lilteam_music_playing';
       const STORAGE_VOLUME = 'lilteam_music_volume';
       const STORAGE_TIME = 'lilteam_music_time';
       const STORAGE_TS = 'lilteam_music_ts';
-      const STORAGE_WIDGET_COLLAPSED = 'lilteam_music_widget_collapsed';
 
       // Privacy modes and embedded browsers can deny persistent storage. Keep
       // playback usable for the current page even when preferences cannot save.
@@ -642,8 +625,7 @@
           script.remove();
           setPlayingUI(false);
           const retryMessage = 'โหลดเพลงไม่สำเร็จ แตะเพื่อลองใหม่';
-          if (musicStateLabel) musicStateLabel.textContent = retryMessage;
-          if (musicRestoreStateLabel) musicRestoreStateLabel.textContent = retryMessage;
+          if (collapsedStateEl) collapsedStateEl.textContent = retryMessage;
         };
         document.head.appendChild(script);
       }
@@ -652,38 +634,8 @@
       const defaultVolume = parseInt(widget.dataset.defaultVolume, 10);
       const initialVolume = Math.max(0, Math.min(100,
         Number.isFinite(savedVolume) ? savedVolume : (Number.isFinite(defaultVolume) ? defaultVolume : 50)));
+      let currentVolume = initialVolume;
       volumeSlider.value = initialVolume;
-      if (minimizeBtn && expandBtn) {
-        const collapsed = storageGet(STORAGE_WIDGET_COLLAPSED) === 'true';
-        widget.classList.toggle('is-collapsed', collapsed);
-        toggleBtn.hidden = collapsed;
-        minimizeBtn.hidden = collapsed;
-        expandBtn.hidden = !collapsed;
-        minimizeBtn.setAttribute('aria-expanded', String(!collapsed));
-        expandBtn.setAttribute('aria-expanded', String(collapsed));
-        minimizeBtn.addEventListener('click', function () {
-          widget.classList.add('is-collapsed');
-          toggleBtn.hidden = true;
-          minimizeBtn.hidden = true;
-          expandBtn.hidden = false;
-          minimizeBtn.setAttribute('aria-expanded', 'false');
-          expandBtn.setAttribute('aria-expanded', 'true');
-          panel.classList.add('hidden');
-          storageSet(STORAGE_WIDGET_COLLAPSED, 'true');
-          expandBtn.focus({ preventScroll: true });
-        });
-        expandBtn.addEventListener('click', function () {
-          widget.classList.remove('is-collapsed');
-          toggleBtn.hidden = false;
-          minimizeBtn.hidden = false;
-          expandBtn.hidden = true;
-          minimizeBtn.setAttribute('aria-expanded', 'true');
-          expandBtn.setAttribute('aria-expanded', 'false');
-          storageSet(STORAGE_WIDGET_COLLAPSED, 'false');
-          toggleBtn.focus({ preventScroll: true });
-        });
-      }
-
       // Clean up the old registration autoplay hint if present (superseded by default-on below).
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('music')) {
@@ -715,12 +667,19 @@
         playBtn.textContent = playing ? '⏸' : '▶';
         playBtn.setAttribute('aria-label', playing ? 'หยุดเพลง' : 'เล่นเพลง');
         playBtn.title = playing ? 'หยุดเพลง' : 'เล่นเพลง';
-        if (icon.querySelector('svg')) icon.classList.toggle('is-playing', playing);
-        else icon.textContent = playing ? '🎶' : '🎵';
-        if (musicStateLabel) musicStateLabel.textContent = playing ? 'กำลังเล่น' : 'แตะเพื่อเล่น';
-        if (musicRestoreStateLabel) musicRestoreStateLabel.textContent = playing ? 'กำลังเล่น' : 'แตะเพื่อเปิด';
+        widget.dataset.playing = String(playing);
+        if (collapsedStateEl) collapsedStateEl.textContent = playing ? 'กำลังเล่นเพลง' : 'แตะเพื่อเล่นเพลง';
         widget.classList.toggle('is-playing', playing);
         playingRing.classList.toggle('hidden', !playing);
+      }
+
+      function setPanelOpen(open) {
+        if (!panel || !settingsBtn) return;
+        panel.classList.toggle('hidden', !open);
+        const label = open ? 'ปิดแผงควบคุมเพลง' : 'เปิดแผงควบคุมเพลง';
+        settingsBtn.setAttribute('aria-expanded', String(open));
+        settingsBtn.setAttribute('aria-label', label);
+        settingsBtn.title = label;
       }
 
       function recoverPlayback(delay) {
@@ -780,7 +739,7 @@
           },
           events: {
             onReady: function (e) {
-              e.target.setVolume(initialVolume);
+              e.target.setVolume(currentVolume);
               if (playbackWanted) {
                 // Try once. If the browser blocks autoplay the UI remains paused;
                 // an explicit tap on the music button will start it reliably.
@@ -819,7 +778,7 @@
         .then(function (data) {
           if (data && data.title) {
             titleEl.textContent = data.title;
-            if (musicRestoreTitle) musicRestoreTitle.textContent = data.title;
+            if (collapsedTitleEl) collapsedTitleEl.textContent = data.title;
           }
         })
         .catch(function () {});
@@ -829,14 +788,14 @@
       });
       if (settingsBtn) {
         settingsBtn.addEventListener('click', function () {
-          panel.classList.toggle('hidden');
+          setPanelOpen(panel.classList.contains('hidden'));
         });
       }
       collapseBtn.addEventListener('click', function () {
-        panel.classList.add('hidden');
+        setPanelOpen(false);
       });
       document.addEventListener('click', function (e) {
-        if (!widget.contains(e.target)) panel.classList.add('hidden');
+        if (!widget.contains(e.target)) setPanelOpen(false);
       });
 
       playBtn.addEventListener('click', function () {
@@ -845,8 +804,9 @@
 
       volumeSlider.addEventListener('input', function () {
         const v = parseInt(volumeSlider.value, 10);
-        if (player) player.setVolume(v);
-        storageSet(STORAGE_VOLUME, v);
+        currentVolume = Math.max(0, Math.min(100, Number.isFinite(v) ? v : initialVolume));
+        if (player) player.setVolume(currentVolume);
+        storageSet(STORAGE_VOLUME, currentVolume);
       });
 
       window.addEventListener('beforeunload', function () {
