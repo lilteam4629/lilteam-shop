@@ -383,8 +383,8 @@ const mainProductCss = ownerBaseCss.slice(mainProductCssStart);
 const mainProductStylesheet = postcss.parse(mainProductCss, { from: 'main-store-product-cards.css' });
 mainProductStylesheet.walkRules(rule => {
   for (const selector of rule.selectors) {
-    assert.ok(selector.startsWith('body.storefront-owner-lilteam #site-page-shell'),
-      `full-image and stock-title styles must not affect tenant storefronts: ${selector}`);
+    assert.ok(selector.startsWith('body.storefront-unified #site-page-shell'),
+      `full-image and stock-title styles must follow the shared storefront design: ${selector}`);
   }
 });
 assert.match(mainProductCss, /\.main-store-product-card img\s*\{[^}]*object-fit:\s*contain\s*!important/s,

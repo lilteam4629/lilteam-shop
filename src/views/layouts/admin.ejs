@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" class="light <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
+<html lang="th" class="light admin-unified-site <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 <head>
   <% const protectedSlipPage = ['slip-verification', 'api-providers'].includes(typeof active === 'undefined' ? '' : active); %>
   <% const referenceEnabled = !protectedSlipPage; %>

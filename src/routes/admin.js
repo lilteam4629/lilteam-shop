@@ -1012,13 +1012,35 @@ router.post('/filter-tags/reorder', async (req, res) => {
 // This deliberately does not change the storefront model; it only creates
 // reusable image tags that work with the classic filter panel and product
 // assignment UI.
+router.get('/filter-tags/efootball/import', (req, res) => {
+  if (!usesMainAdminUi(req)) return res.sendStatus(404);
+  const sourceItems = efootballSource.queryCatalog({}).items;
+  const sourceIds = new Set(sourceItems.map(player => String(player.id)));
+  const existingIds = new Set(store.data.filterTags.map(tag => String(tag.id)));
+  const staleTags = store.data.filterTags.filter(tag => String(tag.id).startsWith('efootball-')
+    && !sourceIds.has(String(tag.sourceId || tag.id).replace(/^efootball-/, '')));
+  res.locals.layout = 'layouts/admin-experiment';
+  res.render('admin/filter-tags-efootball-import-experiment', {
+    title: 'นำเข้าการ์ดผู้เล่น',
+    active: 'filter-tags',
+    sourceInfo: efootballSource.status(),
+    players: sourceItems.map(player => ({
+      ...player,
+      alreadyImported: existingIds.has(`efootball-${player.id}`),
+    })),
+    staleCount: staleTags.length,
+  });
+});
+
 router.post('/filter-tags/efootball/import', async (req, res) => {
   const sourceItems = efootballSource.queryCatalog({}).items;
   const sourceIds = new Set(sourceItems.map(player => String(player.id)));
   const staleIds = new Set(store.data.filterTags
     .filter(tag => String(tag.id).startsWith('efootball-') && !sourceIds.has(String(tag.sourceId || tag.id).replace(/^efootball-/, '')))
     .map(tag => String(tag.id)));
-  if (staleIds.size) {
+  const mainAdminUi = usesMainAdminUi(req);
+  const removeStale = mainAdminUi ? req.body?.removeStale === '1' : true;
+  if (removeStale && staleIds.size) {
     store.data.filterTags = store.data.filterTags.filter(tag => !staleIds.has(String(tag.id)));
     store.data.products.forEach(product => {
       product.filterTagIds = (product.filterTagIds || []).filter(id => !staleIds.has(String(id)));
@@ -1026,6 +1048,7 @@ router.post('/filter-tags/efootball/import', async (req, res) => {
   }
   const existing = new Map(store.data.filterTags.map(tag => [String(tag.id), tag]));
   let created = 0;
+  let updated = 0;
   sourceItems.forEach(player => {
     const id = `efootball-${player.id}`;
     const current = existing.get(id);
@@ -1034,6 +1057,7 @@ router.post('/filter-tags/efootball/import', async (req, res) => {
       current.image = player.imageUrl;
       current.source = 'eFHUB';
       current.sourceId = player.id;
+      updated += 1;
       return;
     }
     const tag = {
@@ -1049,7 +1073,10 @@ router.post('/filter-tags/efootball/import', async (req, res) => {
     created += 1;
   });
   await store.save();
-  req.flash('success', `นำเข้ารูปผู้เล่นจาก eFHUB New Players เป็นแท็กตัวกรองแล้ว ${sourceItems.length} รายการ (เพิ่มใหม่ ${created}${staleIds.size ? ` ลบรายการเก่า ${staleIds.size}` : ''})`);
+  const successMessage = mainAdminUi
+    ? `นำเข้าการ์ดผู้เล่นจาก eFHUB แล้ว ${sourceItems.length} รายการ (เพิ่มใหม่ ${created} · อัปเดต ${updated}${removeStale && staleIds.size ? ` · ลบรายการเก่า ${staleIds.size}` : ''})`
+    : `นำเข้ารูปผู้เล่นจาก eFHUB New Players เป็นแท็กตัวกรองแล้ว ${sourceItems.length} รายการ (เพิ่มใหม่ ${created}${staleIds.size ? ` ลบรายการเก่า ${staleIds.size}` : ''})`;
+  req.flash('success', successMessage);
   res.redirect(filterTagsRedirect(req));
 });
 

@@ -234,6 +234,7 @@
     var statusUrl = '/account/topup/<%= request.id %>/status';
     var detailUrl = '/account/topup/<%= request.id %>';
     var attempts = 0;
+    var verificationDeadline = Date.now() + 125000;
     var pageActive = true;
     document.addEventListener('lilteam:page-unloading', function () { pageActive = false; }, { once: true });
 
@@ -247,7 +248,13 @@
 
     function checkStatus() {
       if (!pageActive) return;
-      fetch(statusUrl, { headers: { Accept: 'application/json' }, cache: 'no-store' })
+      if (Date.now() >= verificationDeadline) {
+        window.location.replace(detailUrl);
+        return;
+      }
+      var controller = typeof AbortController === 'function' ? new AbortController() : null;
+      var requestTimeout = setTimeout(function () { if (controller) controller.abort(); }, 8000);
+      fetch(statusUrl, { headers: { Accept: 'application/json' }, cache: 'no-store', signal: controller ? controller.signal : undefined })
         .then(function (response) {
           if (!response.ok) throw new Error('status request failed');
           return response.json();
@@ -264,8 +271,10 @@
         .catch(function () {
           if (!pageActive) return;
           attempts += 1;
-          setTimeout(checkStatus, attempts < 10 ? 1500 : 3000);
-        });
+          if (Date.now() >= verificationDeadline) window.location.replace(detailUrl);
+          else setTimeout(checkStatus, attempts < 10 ? 1500 : 3000);
+        })
+        .finally(function () { clearTimeout(requestTimeout); });
     }
 
     checkStatus();

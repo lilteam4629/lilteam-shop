@@ -470,7 +470,7 @@ router.get('/topup/:id/status', async (req, res) => {
 
   // A restart drops the in-memory task while the persisted request can remain
   // "verifying". Recover an expired lease so the customer never polls forever.
-  if (request.status === 'verifying' && !activeVerifications.has(request.id)) {
+  if (request.status === 'verifying') {
     const startedAt = Date.parse(request.verificationStartedAt || '');
     const stale = Number.isFinite(startedAt)
       ? Date.now() - startedAt >= STALE_VERIFICATION_MS
@@ -478,7 +478,11 @@ router.get('/topup/:id/status', async (req, res) => {
     if (stale) {
       await withTopupStore(request, () => store.transact(data => {
         const fresh = data.topupRequests.find(item => item.id === request.id);
-        if (fresh && fresh.status === 'verifying' && !activeVerifications.has(fresh.id)) {
+        const freshStartedAt = Date.parse(fresh?.verificationStartedAt || '');
+        const freshStale = Number.isFinite(freshStartedAt)
+          ? Date.now() - freshStartedAt >= STALE_VERIFICATION_MS
+          : Date.now() - verificationProcessStartedAt >= LEGACY_VERIFICATION_GRACE_MS;
+        if (fresh && fresh.status === 'verifying' && freshStale) {
           fresh.status = 'pending';
           fresh.verificationStartedAt = null;
           fresh.slipCheck = {

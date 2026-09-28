@@ -221,7 +221,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const form = await fetchOk('/admin/products/new', 'text/html', { cookie: adminCookie });
   if (!form.body.includes('name="productKind"') || !form.body.includes('name="randomBoxRate"')
     || !form.body.includes('min="1"') || !form.body.includes('max="10"')
-    || !form.body.includes('random-box-product-fields-v1.css')) {
+    || !form.body.includes('admin-random-box-product-fields-v1.css')) {
     throw new Error('random-box setup form is missing editable rate and price controls');
   }
   const title = 'random-box-smoke-' + process.pid;

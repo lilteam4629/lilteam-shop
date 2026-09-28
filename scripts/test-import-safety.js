@@ -833,6 +833,17 @@ async function main() {
     assert.match(topupDetail, /ภายใน 5 นาทีล่าสุด/);
     assert.match(accountSource, /slipAge > 5 \* 60 \* 1000/);
   });
+  check('Automatic slip verification recovers stale jobs and never polls forever', () => {
+    const topupDetail = fs.readFileSync(path.join(root, 'src/views/shop/topup-detail.ejs'), 'utf8');
+    const accountSource = fs.readFileSync(path.join(root, 'src/routes/account.js'), 'utf8');
+    const slipOkSource = fs.readFileSync(path.join(root, 'src/services/slipok.js'), 'utf8');
+    assert.match(accountSource, /const STALE_VERIFICATION_MS = 120 \* 1000/);
+    assert.match(accountSource, /freshStartedAt[\s\S]{0,500}freshStale[\s\S]{0,240}fresh\.status = 'pending'/);
+    assert.match(topupDetail, /verificationDeadline = Date\.now\(\) \+ 125000/);
+    assert.match(topupDetail, /new AbortController\(\)[\s\S]{0,180}8000/);
+    assert.match(topupDetail, /Date\.now\(\) >= verificationDeadline[\s\S]{0,160}location\.replace\(detailUrl\)/);
+    assert.match(slipOkSource, /timeout: 30000/);
+  });
   check('Storefront background survives every storefront model', () => {
     const mainLayout = fs.readFileSync(path.join(root, 'src/views/layouts/main.ejs'), 'utf8');
     const marketView = fs.readFileSync(path.join(root, 'src/views/shop/home-rangers-market.ejs'), 'utf8');

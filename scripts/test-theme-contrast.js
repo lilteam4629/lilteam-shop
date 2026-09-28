@@ -48,8 +48,12 @@ const legacyLayout = fs.readFileSync(path.join(__dirname, '../src/views/layouts/
 const experimentCss = fs.readFileSync(path.join(__dirname, '../public/css/admin-experiment-v1.css'), 'utf8');
 const couponCss = fs.readFileSync(path.join(__dirname, '../public/css/admin-experiment-coupons-v1.css'), 'utf8');
 assert.match(experimentLayout, /admin-main-site/);
+assert.match(experimentLayout, /class="admin-unified-site/,
+  'saved admin accent variables must apply to every store, not only the primary shop');
 assert.match(experimentLayout, /adminBrandCss/);
 assert.match(legacyLayout, /admin-main-site/);
+assert.match(legacyLayout, /class="light admin-unified-site/,
+  'legacy admin pages must receive the selected accent for every store too');
 assert.match(legacyLayout, /adminBrandCss/);
 assert.match(experimentCss, /--ex-green:\s*var\(--admin-brand-fill,/);
 assert.match(experimentCss, /--ex-green-dark:\s*var\(--admin-brand-readable,/);
