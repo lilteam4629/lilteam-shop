@@ -43,8 +43,8 @@
   .store-nav--cozy-owner .store-nav__brand--image strong { display: none !important; }
   .store-nav--cozy-owner .store-nav__brand:not(.store-nav__brand--image) strong { font-size: 14px !important; }
 
-  .store-nav--cozy-owner .store-nav__actions {
-    gap: 3px !important;
+  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions {
+    gap: 8px !important;
     margin-left: auto !important;
   }
 
@@ -95,12 +95,12 @@
 }
 
 @media (max-width: 380px) {
-  .store-nav--cozy-owner .store-nav__inner { padding-inline: 10px !important; gap: 6px !important; }
+  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__inner { padding-inline: 10px !important; gap: 8px !important; }
   .store-nav--cozy-owner .store-nav__mobile-toggle { width: 40px !important; min-width: 40px !important; flex-basis: 40px !important; }
   .store-nav--cozy-owner .store-nav__theme,
   .store-nav--cozy-owner .store-nav__cart,
   .store-nav--cozy-owner .store-nav__account summary { width: 38px !important; min-width: 38px !important; }
   .store-nav--cozy-owner .store-nav__mobile-topup { width: 42px !important; min-width: 42px !important; flex-basis: 42px !important; }
-  .store-nav--cozy-owner .store-nav__actions { gap: 1px !important; }
+  .store-nav--cozy-owner:not(.store-nav--main) .store-nav__actions { gap: 8px !important; }
   .store-nav--cozy-owner .store-nav__brand--image img { max-width: 72px !important; }
 }
