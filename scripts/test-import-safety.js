@@ -20,6 +20,7 @@ function load(file, mocks = {}, extra = '') {
 async function main() {
   const appSource = fs.readFileSync(path.join(root, 'src/app.js'), 'utf8');
   const storeSource = fs.readFileSync(path.join(root, 'src/data/store.js'), 'utf8');
+  const vpsCompose = fs.readFileSync(path.join(root, 'deploy/community/compose.yml'), 'utf8');
   const storeInitSource = storeSource.slice(storeSource.indexOf('async function init()'), storeSource.indexOf('async function healthCheck()'));
   const { shouldRunStartupTenantRollouts } = require('../src/services/startup-policy');
   check('Local startup cannot roll out changes to rented shops unless explicitly enabled', () => {
@@ -32,6 +33,9 @@ async function main() {
   check('Production sessions reject the demo secret fallback', () => {
     assert.match(appSource, /NODE_ENV === 'production'[^\n]+configuredSessionSecret\.length < 32/);
     assert.match(appSource, /SESSION_SECRET must be configured/);
+  });
+  check('VPS health reports the commit tag used by its blue-green deploy', () => {
+    assert.match(vpsCompose, /COMMIT_SHA:\s*\$\{LILTEAM_IMAGE_TAG:-\}/);
   });
   check('Startup receiving-account marker updates only the main shop record', () => {
     assert.match(storeInitSource, /mongoCollection\.updateOne\(\s*\{\s*_id:\s*'main'/);

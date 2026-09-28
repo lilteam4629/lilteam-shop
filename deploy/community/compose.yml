@@ -27,6 +27,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      COMMIT_SHA: ${LILTEAM_IMAGE_TAG:-}
       MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGODB_DB_NAME:-lilteam_shop}?authSource=admin
     depends_on:
       mongodb:
