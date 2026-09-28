@@ -19,6 +19,13 @@ function normalizeMissMessage(message) {
   return String(message ?? '').replace(/\r\n?/g, '\n').trim().slice(0, MAX_MISS_MESSAGE_LENGTH);
 }
 
+function getStockPrizeName(stock, fallback = '') {
+  const name = [stock?.rewardName, stock?.displayName, stock?.name, stock?.title, stock?.username]
+    .map(value => String(value ?? '').replace(/[\u0000-\u001f\u007f\r\n]+/g, ' ').trim())
+    .find(Boolean);
+  return (name || String(fallback || '').trim()).slice(0, 120);
+}
+
 function getMissMessage(product) {
   return normalizeMissMessage(product?.randomBox?.missMessage) || DEFAULT_MISS_MESSAGE;
 }
@@ -316,7 +323,7 @@ function stockPrize(stock, product, orderId) {
   delete stock.randomBoxPoolId;
   return {
     productId: product.id,
-    productTitle: 'รางวัลกล่องสุ่ม',
+    productTitle: getStockPrizeName(stock, 'รางวัลกล่องสุ่ม'),
     productImage: '',
     stockItemId: stock.id,
   };
@@ -571,6 +578,7 @@ module.exports = {
   validatePrice,
   configuredPrice,
   normalizeMissMessage,
+  getStockPrizeName,
   validateRate,
   parseDrawCount,
   stockItemsOldestFirst,

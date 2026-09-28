@@ -15,6 +15,7 @@ const truemoney = require('../services/truemoney');
 const { resolveSlipProvider } = require('../services/slip-provider');
 const { publicSlipMessage } = require('../services/public-slip');
 const discordBot = require('../services/discord-bot');
+const randomBox = require('../services/random-box');
 const { requireLogin, currentUser } = require('../middleware/auth');
 
 router.use(requireLogin);
@@ -879,7 +880,15 @@ router.get('/orders/:id', (req, res) => {
   const itemsWithCreds = order.items.map(oi => {
     const product = store.data.products.find(p => p.id === oi.productId);
     const stockItem = store.data.stockItems.find(s => s.id === oi.stockItemId);
-    const prizeItems = (oi.randomBoxDraw?.prizeItems || []).map(prize => ({ ...prize }));
+    const prizeItems = (oi.randomBoxDraw?.prizeItems || []).map((prize, prizeIndex) => {
+      const prizeStock = store.data.stockItems.find(item => String(item.id) === String(prize.stockItemId));
+      const storedName = randomBox.getStockPrizeName(prizeStock, '');
+      const oldGenericName = !prize.productTitle || prize.productTitle === 'รางวัลกล่องสุ่ม';
+      return {
+        ...prize,
+        productTitle: oldGenericName ? (storedName || `รางวัลชิ้นที่ ${prizeIndex + 1}`) : prize.productTitle,
+      };
+    });
     return {
       ...oi,
       credentials: oi.randomBoxDraw ? null : (oi.credentials || stockItem),

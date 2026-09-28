@@ -10,7 +10,7 @@
     </div>
   <% } %>
 
-  <% if (order.randomBoxOrder) { const boxProduct = itemsWithCreds[0] || {}; const winCount = itemsWithCreds.filter(item => item.randomBoxDraw?.isWin).length; const prizeCount = itemsWithCreds.reduce((sum, item) => sum + (Number(item.randomBoxDraw?.prizeCount) || item.prizeItems?.length || (item.randomBoxDraw?.isWin ? 1 : 0)), 0); %>
+  <% if (order.randomBoxOrder) { const boxProduct = itemsWithCreds[0] || {}; const resultRows = itemsWithCreds.map((item, index) => ({ item, drawNumber: index + 1 })).sort((a, b) => Number(Boolean(b.item.randomBoxDraw?.isWin)) - Number(Boolean(a.item.randomBoxDraw?.isWin)) || a.drawNumber - b.drawNumber); const winCount = itemsWithCreds.filter(item => item.randomBoxDraw?.isWin).length; const prizeCount = itemsWithCreds.reduce((sum, item) => sum + (Number(item.randomBoxDraw?.prizeCount) || item.prizeItems?.length || (item.randomBoxDraw?.isWin ? 1 : 0)), 0); %>
     <section class="mb-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]" data-random-box-product>
       <div class="flex items-center gap-4 p-4 sm:p-5">
         <div class="relative flex w-28 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--input)] p-1 sm:w-36">
@@ -26,20 +26,20 @@
       </div>
       <div class="border-t border-[var(--border)] px-4 sm:px-5">
         <ol class="divide-y divide-[var(--border)]" data-random-box-purchase-list aria-label="รายการผลการสุ่ม">
-          <% itemsWithCreds.forEach((i, drawIndex) => { const isWin = Boolean(i.randomBoxDraw?.isWin); %>
-            <li class="py-4 sm:py-5" data-random-box-draw-row="<%= drawIndex + 1 %>">
+          <% resultRows.forEach(row => { const i = row.item; const drawNumber = row.drawNumber; const isWin = Boolean(i.randomBoxDraw?.isWin); %>
+            <li class="py-4 sm:py-5" data-random-box-draw-row="<%= drawNumber %>" data-random-box-result-order="<%= isWin ? 'win' : 'miss' %>">
               <div class="flex items-center gap-3">
-                <span class="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--input)] text-xs font-black text-[var(--text-2)]"><%= (drawIndex + 1).toLocaleString('th-TH') %></span>
+                <span class="grid size-9 shrink-0 place-items-center rounded-full bg-[var(--input)] text-xs font-black text-[var(--text-2)]"><%= drawNumber.toLocaleString('th-TH') %></span>
                 <div class="min-w-0 flex-1">
-                  <div class="text-xs text-[var(--text-3)]">ครั้งที่ <%= (drawIndex + 1).toLocaleString('th-TH') %></div>
+                  <div class="text-xs text-[var(--text-3)]">ครั้งที่ <%= drawNumber.toLocaleString('th-TH') %></div>
                   <div class="mt-1 font-bold text-[var(--text)]" data-random-box-result-status="<%= isWin ? 'win' : 'miss' %>" role="status"><%= isWin ? 'ได้รับรางวัล' : 'ไม่ได้รับรางวัล' %></div>
                 </div>
                 <span class="shrink-0 rounded-full border px-3 py-1 text-xs font-bold <%= isWin ? 'border-[var(--gold)]/30 bg-[var(--gold)]/10 text-[var(--gold-text)]' : 'border-[var(--border)] bg-[var(--input)]/60 text-[var(--text-2)]' %>"><%= isWin ? 'ได้รับรางวัล' : 'ไม่ได้รับรางวัล' %></span>
               </div>
               <div class="ml-12 mt-3 break-words text-sm">
                 <% if (isWin) { %>
-                  <div class="font-bold text-[var(--gold-text)]">🎉 คุณได้รับ <%= i.randomBoxDraw.prizeName || 'รางวัลจากสต็อก' %></div>
                   <% const prizeItems = i.prizeItems?.length ? i.prizeItems : []; %>
+                  <div class="font-bold text-[var(--gold-text)]">🎉 คุณได้รับรางวัล <%= i.randomBoxDraw.prizeCount || prizeItems.length || 1 %> ชิ้น</div>
                   <% if (prizeItems.length) { %>
                     <div class="mt-2 space-y-2">
                       <% prizeItems.forEach((prize, prizeIndex) => { %>
@@ -55,7 +55,7 @@
 หมายเลขคำสั่งซื้อ: #<%= order.id %>
 สินค้า: <%= boxProduct.productTitle || 'กล่องสุ่ม' %>
 รางวัล: <%= (i.prizeItems || []).map(prize => prize.productTitle).join(', ') || i.randomBoxDraw.prizeName || 'รางวัลจากสต็อก' %>
-ผลสุ่มครั้งที่: <%= drawIndex + 1 %>
+ผลสุ่มครั้งที่: <%= drawNumber %>
 ชื่อลูกค้า: <%= currentUser.username %></textarea>
                     <button type="button" data-contact-url="<%= contactSettings.contactMessenger || contactSettings.contactFacebook || '/contact' %>" class="contact-order-btn inline-flex min-h-10 items-center justify-center gap-2 rounded-xl bg-[var(--gold)] px-4 py-2 text-sm font-bold text-[var(--gold-contrast)] transition hover:brightness-105 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--gold)] focus-visible:ring-offset-2">
                       💬 ติดต่อร้านเพื่อรับสินค้า

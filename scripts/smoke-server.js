@@ -249,11 +249,11 @@ async function checkRandomBoxWorkflow(adminCookie) {
 
   const addStock = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/add', {
     method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ bulk: 'smoke-user:smoke-key\nraw-key-only\nremove-this-key' }).toString(),
+    body: new URLSearchParams({ bulk: 'George Best:private-prize-secret-1\nCarlos Puyol:private-prize-secret-2\nREMOVE ITEM:private-prize-secret-removed' }).toString(),
   });
   if (addStock.statusCode !== 302) throw new Error('direct unpriced prize keys could not be added');
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
-  const removable = data.stockItems.find(item => item.productId === productId && item.username === 'remove-this-key');
+  const removable = data.stockItems.find(item => item.productId === productId && item.username === 'REMOVE ITEM');
   if (!removable || data.stockItems.filter(item => item.productId === productId && item.status === 'available').length !== 3
     || data.stockItems.some(item => item.productId === productId && Object.prototype.hasOwnProperty.call(item, 'prizeValue'))) {
     throw new Error('each direct stock line was not saved as one prize without a value');
@@ -264,7 +264,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (deleted.statusCode !== 302) throw new Error('unused prize could not be removed');
   const appended = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/add', {
     method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ bulk: 'appended-key' }).toString(),
+    body: new URLSearchParams({ bulk: 'Sergio Aguero:private-prize-secret-3' }).toString(),
   });
   if (appended.statusCode !== 302) throw new Error('new prize could not be appended');
 
@@ -332,11 +332,19 @@ async function checkRandomBoxWorkflow(adminCookie) {
   }
   const orderPage = await fetchOk(batch.headers.location, 'text/html', { cookie: customerCookie });
   const rows = orderPage.body.match(/<li[^>]*data-random-box-draw-row=/g) || [];
+  const resultOrder = [...orderPage.body.matchAll(/data-random-box-result-order="(win|miss)"/g)].map(match => match[1]);
+  const firstMissIndex = resultOrder.indexOf('miss');
+  if (resultOrder.length !== order.items.length || firstMissIndex < 1
+    || resultOrder.slice(0, firstMissIndex).some(status => status !== 'win')
+    || resultOrder.slice(firstMissIndex).some(status => status !== 'miss')) {
+    throw new Error('random-box order page did not list all winning draws before all misses');
+  }
   if (rows.length !== order.items.length || !orderPage.body.includes('ได้รับรางวัล')
     || !orderPage.body.includes('ไม่ได้รับรางวัล') || !orderPage.body.includes('ติดต่อร้านเพื่อรับสินค้า')
     || (orderPage.body.match(/data-random-box-product-image/g) || []).length !== 1
-    || orderPage.body.includes('smoke-user') || orderPage.body.includes('smoke-key')
-    || orderPage.body.includes('raw-key-only') || orderPage.body.includes('appended-key')
+    || !orderPage.body.includes('George Best') || !orderPage.body.includes('Carlos Puyol')
+    || !orderPage.body.includes('Sergio Aguero')
+    || orderPage.body.includes('private-prize-secret') || orderPage.body.includes('REMOVE ITEM')
     || orderPage.body.includes('recoveryTargetDraws')) {
     throw new Error('order history leaks secrets or omits outcomes and the contact action');
   }

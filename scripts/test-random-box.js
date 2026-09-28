@@ -63,7 +63,7 @@ function makeScenario({ count, rate, price, seed = 1 }) {
   const stockItems = Array.from({ length: count }, (_, index) => ({
     id: `key-${count}-${rate}-${price}-${index + 1}`,
     productId: product.id,
-    username: `private-key-${index + 1}`,
+    username: `Prize ${index + 1}`,
     password: `private-password-${index + 1}`,
     extra: '',
     fulfillmentMode: 'automatic',
@@ -135,7 +135,7 @@ assert.strictEqual(activeExamplePool.recoveryMilestones.reduce((sum, milestone) 
 assert.strictEqual(activeExamplePool.recoveryMilestones.at(-1).atDraws, 1500);
 assert.ok(!('recoveryTargetDraws' in firstExampleOrder.result));
 assert.ok(!JSON.stringify(firstExampleOrder.result).includes('1500'));
-assert.ok(!JSON.stringify(firstExampleOrder.result).includes('private-key'));
+assert.ok(targetExample.data.orders[0].items.some(item => item.randomBoxDraw.prizeItems.some(prize => prize.productTitle.startsWith('Prize '))));
 assert.ok(!JSON.stringify(firstExampleOrder.result).includes('private-password'));
 assert.strictEqual(targetExample.data.users[0].walletBalance, 4_999_900);
 
@@ -214,7 +214,7 @@ for (const [index, scenarioConfig] of matrix.entries()) {
       assert.ok(draw.price === scenarioConfig.price);
       if (draw.randomBoxDraw.isWin) assert.ok(draw.randomBoxDraw.prizeCount >= 1 && draw.randomBoxDraw.prizeCount <= 5);
       assert.ok(!JSON.stringify(draw.randomBoxDraw).includes('private-password'));
-      assert.ok(!JSON.stringify(draw.randomBoxDraw).includes('private-key'));
+      if (draw.randomBoxDraw.isWin) assert.ok(JSON.stringify(draw.randomBoxDraw).includes('Prize '));
     }
   }
 }
