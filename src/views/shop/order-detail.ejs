@@ -13,9 +13,9 @@
   <% if (order.randomBoxOrder) { const boxProduct = itemsWithCreds[0] || {}; const winCount = itemsWithCreds.filter(item => item.randomBoxDraw?.isWin).length; %>
     <section class="mb-6 overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--card)]" data-random-box-product>
       <div class="flex items-center gap-4 p-4 sm:p-5">
-        <div class="relative grid aspect-video w-28 shrink-0 place-items-center overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--input)] sm:w-36">
+        <div class="relative flex w-28 shrink-0 items-center justify-center rounded-xl border border-[var(--border)] bg-[var(--input)] p-1 sm:w-36">
           <span class="absolute inset-0 grid place-items-center text-2xl text-[var(--text-4)]" aria-hidden="true">▧</span>
-          <% if (boxProduct.productImage) { %><img data-random-box-product-image src="<%= boxProduct.productImage %>" alt="รูปสินค้า <%= boxProduct.productTitle %>" width="960" height="540" loading="eager" decoding="async" class="relative z-[1] block h-full w-full bg-[var(--input)] object-contain object-center" onerror="this.hidden=true" /><% } %>
+          <% if (boxProduct.productImage) { %><img data-random-box-product-image src="<%= boxProduct.productImage %>" alt="รูปสินค้า <%= boxProduct.productTitle %>" loading="eager" decoding="async" class="relative z-[1] block h-auto max-h-32 w-full bg-[var(--input)] object-contain object-center" onerror="this.hidden=true" /><% } %>
         </div>
         <div class="min-w-0 flex-1">
           <div class="text-xs text-[var(--text-3)]">กล่องสุ่ม · สุ่ม <%= itemsWithCreds.length.toLocaleString('th-TH') %> ครั้ง</div>
@@ -67,9 +67,9 @@
     <% itemsWithCreds.forEach((i, drawIndex) => { %>
       <div class="bg-[var(--card)] border border-[var(--border)] rounded-xl p-4">
         <div class="flex items-start gap-3 sm:gap-4 mb-4">
-          <div class="relative w-28 sm:w-36 aspect-video shrink-0 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--input)] grid place-items-center">
+          <div class="relative w-28 sm:w-36 shrink-0 rounded-xl border border-[var(--border)] bg-[var(--input)] p-1 grid place-items-center">
             <span class="absolute inset-0 grid place-items-center text-2xl text-[var(--text-4)]" aria-hidden="true">▧</span>
-            <% if (i.productImage) { %><img src="<%= i.productImage %>" alt="รูปสินค้า <%= i.productTitle %>" width="960" height="540" loading="eager" decoding="async" class="relative z-[1] block w-full h-full object-contain object-center bg-[var(--input)]" onerror="this.hidden=true" /><% } %>
+            <% if (i.productImage) { %><img src="<%= i.productImage %>" alt="รูปสินค้า <%= i.productTitle %>" loading="eager" decoding="async" class="relative z-[1] block h-auto max-h-32 w-full object-contain object-center bg-[var(--input)]" onerror="this.hidden=true" /><% } %>
           </div>
           <div class="min-w-0 flex-1 flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1.5">
             <div class="min-w-0"><div class="text-[10px] text-[var(--text-4)] mb-0.5"><%= i.randomBoxDraw ? `ผลสุ่มครั้งที่ ${drawIndex + 1}` : 'สินค้า' %></div><h2 class="font-bold text-base sm:text-lg leading-snug break-words"><%= i.productTitle %></h2></div>

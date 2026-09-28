@@ -278,7 +278,8 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const customerOrderPage = await fetchOk(firstDraw.headers.location, 'text/html', { cookie: customerCookie });
   if (!customerOrderPage.body.includes(missMessage) || !customerOrderPage.body.includes('ไม่ได้รับรางวัล')
     || !customerOrderPage.body.includes('data-random-box-result-status="miss"')
-    || !customerOrderPage.body.includes('object-contain object-center')
+    || !customerOrderPage.body.includes('h-auto max-h-32 w-full bg-[var(--input)] object-contain object-center')
+    || /<img data-random-box-product-image[^>]*\b(?:width|height)=/.test(customerOrderPage.body)
     || !customerOrderPage.body.includes('data-random-box-product')
     || !customerOrderPage.body.includes('data-random-box-purchase-list')
     || !customerOrderPage.body.includes('ชื่อรายการ') || !customerOrderPage.body.includes('ของรางวัล')
