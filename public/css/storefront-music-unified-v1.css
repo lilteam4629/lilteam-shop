@@ -1,29 +1,33 @@
-/* One compact, theme-aware player shared across the primary LilTeam storefront. */
+/* Small, theme-aware music dock shared across the primary LilTeam storefront. */
 #music-widget {
   display: flex;
   align-items: center;
-  gap: 8px;
-  width: min(286px, calc(100vw - 24px));
-  padding: 7px;
-  border: 1px solid color-mix(in srgb, var(--theme-line, var(--border)) 82%, transparent);
-  border-radius: 18px;
+  justify-content: space-between;
+  gap: 4px;
+  width: 104px;
+  height: 54px;
+  padding: 4px;
+  border: 0;
+  border-radius: 26px;
   background: var(--theme-card-surface, var(--card));
-  box-shadow: 0 10px 28px color-mix(in srgb, var(--theme-ink, var(--text)) 14%, transparent),
-    0 2px 6px color-mix(in srgb, var(--theme-ink, var(--text)) 8%, transparent);
+  box-shadow: 0 3px 12px color-mix(in srgb, var(--theme-ink, var(--text)) 14%, transparent);
   color: var(--theme-ink, var(--text));
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 #music-widget .music-widget__toggle {
-  min-width: 0;
-  min-height: 54px;
-  flex: 1 1 auto;
-  gap: 11px;
+  display: grid;
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  min-height: 46px;
+  flex: 0 0 46px;
+  place-items: center;
   padding: 0;
   overflow: hidden;
   border: 0;
-  border-radius: 14px;
+  border-radius: 50%;
   background: transparent;
   color: inherit;
   cursor: pointer;
@@ -45,12 +49,12 @@
 #music-widget .music-widget__artwork {
   position: relative;
   display: grid;
-  width: 48px;
-  height: 48px;
-  flex: 0 0 48px;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   place-items: center;
   overflow: hidden;
-  border-radius: 10px;
+  border-radius: 50%;
   background: color-mix(in srgb, var(--theme-accent, var(--gold)) 13%, var(--theme-card-surface, var(--card)));
   color: var(--theme-accent-ink, var(--gold-contrast));
 }
@@ -75,8 +79,8 @@
   right: 3px;
   bottom: 3px;
   display: grid;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   place-items: center;
   border: 1px solid color-mix(in srgb, var(--theme-line, var(--border)) 78%, transparent);
   border-radius: 50%;
@@ -98,11 +102,7 @@
 }
 
 #music-widget .music-widget__copy {
-  display: grid;
-  min-width: 0;
-  flex: 1 1 auto;
-  gap: 3px;
-  text-align: left;
+  display: none;
 }
 
 #music-widget .music-widget__title {
@@ -126,35 +126,53 @@
 }
 
 #music-widget .music-widget__expand {
+  position: relative;
   display: grid;
-  width: 42px;
-  height: 42px;
-  min-width: 42px;
-  min-height: 42px;
-  flex: 0 0 42px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  flex: 0 0 44px;
   place-items: center;
-  border: 1px solid var(--theme-line, var(--border));
-  border-radius: 14px;
-  background: color-mix(in srgb, var(--theme-accent, var(--gold)) 8%, var(--theme-card-surface, var(--card)));
+  border: 0;
+  border-radius: 26px;
+  background: transparent;
   color: var(--theme-accent, var(--gold));
   cursor: pointer;
   line-height: 1;
   transition: background-color 160ms ease, color 160ms ease, transform 160ms ease;
 }
 
-#music-widget .music-widget__expand:hover {
+#music-widget .music-widget__expand::before {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 27px;
+  height: 27px;
+  transform: translate(-50%, -50%);
+  border: 1px solid var(--theme-line, var(--border));
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--theme-accent, var(--gold)) 8%, var(--theme-card-surface, var(--card)));
+  content: "";
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+#music-widget .music-widget__expand:hover::before {
+  border-color: transparent;
   background: var(--theme-accent, var(--gold));
+}
+
+#music-widget .music-widget__expand:hover {
   color: var(--theme-accent-ink, var(--gold-contrast));
 }
 
 #music-widget .music-widget__expand[aria-expanded="true"] svg { transform: rotate(180deg); }
-#music-widget .music-widget__expand svg { width: 20px; height: 20px; transition: transform 160ms ease; }
-#music-widget #music-panel { z-index: 1; max-width: calc(100vw - 24px); }
-#music-widget #music-playing-ring { border-radius: 14px; }
+#music-widget .music-widget__expand svg { position: relative; z-index: 1; width: 14px; height: 14px; transition: transform 160ms ease; }
+#music-widget #music-panel { z-index: 1; right: 0; bottom: 64px; max-width: calc(100vw - 24px); }
+#music-widget #music-playing-ring { border-radius: 50%; }
 
 @media (max-width: 480px) {
   #music-widget { right: max(12px, env(safe-area-inset-right)); bottom: max(12px, env(safe-area-inset-bottom)); }
-  #music-widget #music-panel { right: 0; bottom: 68px; width: min(300px, calc(100vw - 24px)); }
+  #music-widget #music-panel { right: 0; bottom: 64px; width: min(280px, calc(100vw - 24px)); }
 }
 
 @media (prefers-reduced-motion: reduce) {

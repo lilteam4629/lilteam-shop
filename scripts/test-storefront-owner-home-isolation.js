@@ -49,8 +49,8 @@ assert.match(accountMenuCss, /\.store-nav--main \.store-nav__account-balance\s*\
   'the wallet balance must remain visually distinct and theme-aware');
 assert.match(accountMenuCss, /\.store-nav--main \.store-nav__balance-action\s*\{[^}]*min-height:\s*44px/s,
   'the top-up action must retain a mobile-sized touch target');
-assert.match(musicWidgetCss, /#music-widget\s*\{[^}]*width:\s*min\(286px,\s*calc\(100vw - 24px\)\)/s,
-  'the shared music widget must fit desktop and mobile widths');
+assert.match(musicWidgetCss, /#music-widget\s*\{[^}]*width:\s*104px;[^}]*height:\s*54px;/s,
+  'the shared music widget must remain a small dock on desktop and mobile');
 assert.match(musicWidgetCss, /\.music-widget__toggle[\s\S]*?\.music-widget__expand/s,
   'the shared music skin must style its play and settings controls together');
 assert.doesNotMatch(read('public/css/storefront-navbar-main-v3.css'), /music-widget-main-v[12]\.css/,

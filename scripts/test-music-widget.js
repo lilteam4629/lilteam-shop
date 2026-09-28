@@ -14,6 +14,7 @@ const script = [...layout.matchAll(/<script>([\s\S]*?)<\/script>/g)]
   .find(source => source.includes("const STORAGE_PLAYING = 'lilteam_music_playing'"));
 assert.ok(script, 'storefront music script should exist');
 const widgetMarkup = layout.slice(layout.indexOf('<div id="music-widget"'), layout.indexOf('<div id="music-yt-player"'));
+const compactMusicCss = fs.readFileSync(path.join(__dirname, '..', 'public/css/storefront-music-unified-v1.css'), 'utf8');
 assert.equal((layout.match(/id="music-widget"/g) || []).length, 1, 'one shared player must be rendered by the public layout');
 assert.match(layout, /^  <% if \(typeof isMainSite !== 'undefined' && isMainSite\) \{ %><link rel="stylesheet" href="<%= asset\('css\/storefront-music-unified-v1\.css'\) %>&amp;rev=1" \/><% } %>$/m,
   'the unified music skin must load on every page of the owner storefront only');
@@ -21,6 +22,14 @@ assert.doesNotMatch(widgetMarkup, /storefrontOwnerHomeV7|music-minimize-btn|musi
   'music markup must not switch structure on the homepage');
 assert.match(widgetMarkup, /music-widget__artwork[\s\S]*music-collapsed-title[\s\S]*music-collapsed-state[\s\S]*music-widget__expand/,
   'the owner storefront must use the shared player controls');
+assert.match(compactMusicCss, /#music-widget\s*\{[^}]*width:\s*104px;[^}]*height:\s*54px;/s,
+  'the minimized owner music dock should stay compact instead of showing a wide title bar');
+assert.match(compactMusicCss, /#music-widget \.music-widget__copy\s*\{\s*display:\s*none;/,
+  'the compact dock should keep track copy inside the expanded player panel');
+assert.match(compactMusicCss, /#music-widget \.music-widget__expand\s*\{[^}]*width:\s*44px;[^}]*height:\s*44px;/s,
+  'the compact dock should retain an accessible, separate control to open the player panel');
+assert.match(compactMusicCss, /#music-widget \.music-widget__expand::before\s*\{[^}]*width:\s*27px;[^}]*height:\s*27px;/s,
+  'the player-panel control should look small while keeping an accessible tap target');
 assert.match(widgetMarkup, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*music-widget__artwork[\s\S]*else \{ %>[\s\S]*id="music-icon" class="relative z-10">🎵/,
   'rental storefronts must retain their existing player markup');
 
