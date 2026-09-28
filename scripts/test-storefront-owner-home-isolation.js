@@ -78,13 +78,16 @@ for (const selector of [
   'body.storefront-customer-refresh #site-page-shell .owner-home-v20-shell .owner-home-v21-product-card .owner-home-v21-media',
   'body.storefront-customer-refresh #site-page-shell .catalog-card .catalog-image',
   'body.storefront-customer-refresh #site-page-shell .premium-natural-card > div:first-child > div',
+  'body.storefront-customer-refresh #site-page-shell .premium-product-card > div:first-child',
 ]) {
   assert.ok(productArtworkCss.includes(selector), `shared artwork sizing must reset the image frame for ${selector}`);
 }
-assert.match(productArtworkCss, /owner-home-v21-media,[\s\S]*?aspect-ratio:\s*16\s*\/\s*9\s*!important/,
-  'rental storefront product cards must keep a consistent, uncropped artwork frame');
-assert.match(productArtworkCss, /owner-home-v21-media\s*>\s*img,[\s\S]*?height:\s*100%\s*!important;[\s\S]*?object-fit:\s*contain\s*!important/,
-  'every shared card must fit the whole uploaded image inside its frame');
+assert.match(productArtworkCss, /owner-home-v21-media,[\s\S]*?aspect-ratio:\s*auto\s*!important;[\s\S]*?background:\s*transparent\s*!important/,
+  'rental product image frames must use the artwork dimensions without black letterbox bars');
+assert.match(productArtworkCss, /owner-home-v21-media\s*>\s*img,[\s\S]*?height:\s*auto\s*!important;[\s\S]*?object-fit:\s*contain\s*!important/,
+  'rental cards must show the full uploaded image at its natural aspect ratio');
+assert.doesNotMatch(productArtworkCss, /aspect-ratio:\s*16\s*\/\s*9\s*!important/,
+  'shared product art must not be forced into a fixed frame that adds side bars');
 assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
   'the rejected oversized banner treatment must no longer load');
 assert.match(home, /if \(ownerHomeV20\) \{[\s\S]*?<div class="owner-home-v20-shell" data-owner-home-layout="cozy-marketplace">[\s\S]*?<div class="owner-home-v20-main">/,

@@ -32,23 +32,29 @@ body.storefront-customer-refresh :is(
   transform: none !important;
 }
 
-/* The refreshed homepage is shared by rental shops, but the old image-frame
-   reset was limited to the primary store. Keep consistent card frames while
-   fitting each complete upload inside them on every tenant storefront. */
+/* Let product cards follow the uploaded artwork's real dimensions. A fixed
+   frame plus `contain` creates blank side bars around portrait artwork. */
 body.storefront-customer-refresh #site-page-shell .owner-home-v20-shell .owner-home-v21-product-card .owner-home-v21-media,
 body.storefront-customer-refresh #site-page-shell .catalog-card .catalog-image,
-body.storefront-customer-refresh #site-page-shell .premium-natural-card > div:first-child > div {
+body.storefront-customer-refresh #site-page-shell .premium-natural-card > div:first-child > div,
+body.storefront-customer-refresh #site-page-shell .premium-product-card > div:first-child {
+  height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
-  aspect-ratio: 16 / 9 !important;
+  aspect-ratio: auto !important;
+  overflow: visible !important;
+  background: transparent !important;
 }
 
 body.storefront-customer-refresh #site-page-shell .owner-home-v20-shell .owner-home-v21-product-card .owner-home-v21-media > img,
 body.storefront-customer-refresh #site-page-shell .catalog-card .catalog-image > img,
-body.storefront-customer-refresh #site-page-shell .premium-natural-card > div:first-child > div > img {
+body.storefront-customer-refresh #site-page-shell .premium-natural-card > div:first-child > div > img,
+body.storefront-customer-refresh #site-page-shell .premium-product-card > div:first-child > img {
+  position: static !important;
+  inset: auto !important;
   display: block !important;
   width: 100% !important;
-  height: 100% !important;
+  height: auto !important;
   min-height: 0 !important;
   max-height: none !important;
   aspect-ratio: auto !important;
