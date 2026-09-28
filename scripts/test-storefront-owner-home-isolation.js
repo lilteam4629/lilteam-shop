@@ -23,6 +23,8 @@ const musicWidgetCss = read('public/css/storefront-music-unified-v1.css');
 const accountMenuCss = read('public/css/storefront-account-menu-cozy-v1.css');
 const productArtworkCss = read('public/css/storefront-product-artwork-full-v1.css');
 const homeSectionSpacingCss = read('public/css/storefront-home-section-spacing-v1.css');
+const latestOrdersCss = read('public/css/latest-orders-3d-v1.css');
+const latestOrdersJs = read('public/js/latest-orders-3d-v1.js');
 
 assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*true/,
   'the updated home should be served to both the primary store and tenant stores');
@@ -140,6 +142,24 @@ assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && store
   'the order rail behavior must load on every refreshed main or rental homepage');
 assert.doesNotMatch(layout, /isMainSite[^\n]*latest-orders-3d-v1\.(?:css|js)/,
   'the order rail must not depend on the main-shop identity');
+assert.match(css, /\.latest-orders-track\s*\{[^}]*width:\s*max-content/s,
+  'the refreshed-home stylesheet may set rail sizing but must leave carousel motion to the shared rail layer');
+assert.doesNotMatch(css, /\.latest-orders-track\s*\{[^}]*animation\s*:\s*none\s*!important/s,
+  'the refreshed-home stylesheet must not cancel the shared automatic order rail');
+assert.doesNotMatch(css, /\.latest-orders-group\[aria-hidden="true"\]\s*\{\s*display:\s*none\s*!important/s,
+  'the refreshed-home stylesheet must keep duplicated cards available for seamless looping');
+assert.doesNotMatch(home, /#site-page-shell\.storefront-owner-home-v7 #latest-orders \.latest-orders-track\s*\{[^}]*animation:\s*none\s*!important/s,
+  'the homepage inline stylesheet must not override the shared autoplay styles');
+assert.match(latestOrdersCss, /\.latest-orders-shell\.is-visible[^}]*animation-play-state:\s*running\s*!important/s,
+  'the recent-orders carousel must autoplay whenever visible');
+assert.match(latestOrdersCss, /\.is-motion-reduced \.latest-orders-track\s*\{\s*animation:\s*none\s*!important/s,
+  'the carousel must stop autoplay for reduced-motion preferences');
+assert.match(latestOrdersCss, /\.is-user-paused \.latest-orders-track|:is\(:active, \.is-user-paused\)/,
+  'the carousel must pause while customers interact with the rail');
+assert.match(latestOrdersJs, /data-latest-orders-clone/,
+  'the rail must create and refresh enough inert duplicate cards for continuous motion');
+assert.match(latestOrdersJs, /pointerdown[\s\S]*pointerup[\s\S]*scroll/,
+  'customers must be able to pause the motion and manually swipe or scroll the rail');
 assert.doesNotMatch(home, /id="home-new-arrivals"|owner-home-v24-/,
   'the new-arrivals showcase must be removed from the main homepage');
 assert.doesNotMatch(layout, /storefront-new-arrivals-(?:v1|mobile-v2|cozy-v2)\.css/,

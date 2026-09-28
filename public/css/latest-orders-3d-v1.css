@@ -60,7 +60,8 @@
 #site-page-shell .latest-orders-section .latest-orders-shell {
   position: relative;
   isolation: isolate;
-  overflow: hidden !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
   padding: 18px 14px 23px !important;
   border: 1px solid var(--orders-line) !important;
   border-radius: 18px !important;
@@ -71,6 +72,8 @@
   -webkit-mask-image: none !important;
   mask-image: none !important;
   scrollbar-width: none;
+  overscroll-behavior-inline: contain;
+  -webkit-overflow-scrolling: touch;
   touch-action: pan-x pan-y;
 }
 #site-page-shell .latest-orders-shell::-webkit-scrollbar { display: none; }
@@ -99,8 +102,12 @@
   animation-play-state: running !important;
   will-change: translate;
 }
-#site-page-shell .latest-orders-section .latest-orders-shell:active .latest-orders-track {
+#site-page-shell .latest-orders-section .latest-orders-shell:is(:active, .is-user-paused) .latest-orders-track {
   animation-play-state: paused !important;
+}
+#site-page-shell .latest-orders-section .latest-orders-shell.is-motion-reduced .latest-orders-track {
+  animation: none !important;
+  will-change: auto !important;
 }
 #site-page-shell .latest-orders-section .latest-orders-group { display: flex; gap: 14px !important; }
 
@@ -274,14 +281,6 @@
 @media (prefers-reduced-motion: reduce) {
   #site-page-shell .latest-orders-section .latest-orders-shell { overflow-x: auto !important; scrollbar-width: thin; }
   #site-page-shell .latest-orders-section .latest-orders-track { animation: none !important; will-change: auto !important; }
-  #site-page-shell .latest-orders-section .latest-orders-shell.is-motion-opt-in { overflow-x: hidden !important; }
-  #site-page-shell .latest-orders-section .latest-orders-shell.is-motion-opt-in .latest-orders-track {
-    animation: latest-orders-3d-run var(--latest-orders-duration, 32s) linear infinite !important;
-    animation-play-state: paused !important;
-  }
-  #site-page-shell .latest-orders-section .latest-orders-shell.is-motion-opt-in.is-visible:not(:hover):not(:focus-within) .latest-orders-track {
-    animation-play-state: running !important;
-  }
   #site-page-shell .latest-orders-section .latest-order-card,
   #site-page-shell .latest-orders-section .latest-order-card:hover,
   #site-page-shell .latest-orders-section .latest-order-card:focus-visible { transform: perspective(750px) rotateX(4deg) translateY(0) !important; transition: none; }

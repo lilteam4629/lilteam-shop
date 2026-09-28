@@ -158,11 +158,7 @@ body.storefront-global-background #site-page-shell.storefront-owner-home-v7 {
 }
 #site-page-shell.storefront-owner-home-v7 .latest-orders-track {
   width: max-content;
-  animation: none !important;
-  transform: none !important;
-  will-change: auto !important;
 }
-#site-page-shell.storefront-owner-home-v7 .latest-orders-group[aria-hidden="true"] { display: none !important; }
 #site-page-shell.storefront-owner-home-v7 .latest-order-card {
   width: clamp(230px, 25vw, 310px) !important;
   min-height: 82px !important;

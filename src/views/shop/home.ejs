@@ -975,15 +975,14 @@
   }
   #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-shell::-webkit-scrollbar { display: none; }
   #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-track {
-    width: max-content !important; gap: 0 !important; animation: none !important; transform: none !important;
-    will-change: scroll-position;
+    width: max-content !important;
   }
   #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-group {
-    flex: 0 0 auto; gap: 15px !important; padding-right: 15px;
+    flex: 0 0 auto; gap: 14px !important;
   }
-  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-shell:is(.is-static, .is-motion-reduced) .latest-orders-group[aria-hidden="true"] { display: none !important; }
+  #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-shell.is-motion-reduced .latest-orders-group[aria-hidden="true"] { display: none !important; }
   @media (max-width: 639px) {
-    #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-group { gap: 10px !important; padding-right: 10px; }
+    #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-group { gap: 10px !important; }
   }
   @media (prefers-reduced-motion: reduce) {
     #site-page-shell.storefront-owner-home-v7 #latest-orders .latest-orders-track { scroll-behavior: auto !important; }

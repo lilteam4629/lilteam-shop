@@ -18,9 +18,11 @@
     var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     var visible = false;
     var resizeFrame = 0;
+    var resumeTimer = 0;
 
     function measure() {
       resizeFrame = 0;
+      track.querySelectorAll('[data-latest-orders-clone]').forEach(function (copy) { copy.remove(); });
       var styles = getComputedStyle(track);
       var gap = parseFloat(styles.columnGap || styles.gap) || 0;
       var groupWidth = original.getBoundingClientRect().width;
@@ -32,6 +34,8 @@
       while (track.scrollWidth - step < shell.clientWidth + 24 && track.children.length < 16) {
         var copy = original.cloneNode(true);
         copy.setAttribute('aria-hidden', 'true');
+        copy.setAttribute('inert', '');
+        copy.setAttribute('data-latest-orders-clone', '');
         copy.querySelectorAll('a, button, input, select, textarea').forEach(function (element) {
           element.setAttribute('tabindex', '-1');
         });
@@ -50,9 +54,20 @@
 
     function update() {
       var reduced = reducedMotion.matches;
-      // The owner storefront rail autoplays; reduced motion only removes tilt.
-      shell.classList.toggle('is-motion-opt-in', reduced);
+      shell.classList.toggle('is-motion-reduced', reduced);
       shell.classList.toggle('is-visible', visible && !document.hidden);
+    }
+
+    function pauseForInteraction() {
+      window.clearTimeout(resumeTimer);
+      shell.classList.add('is-user-paused');
+    }
+
+    function resumeAfterInteraction() {
+      window.clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(function () {
+        shell.classList.remove('is-user-paused');
+      }, 1400);
     }
 
     function onMotionChange() {
@@ -62,8 +77,12 @@
     function onShellKeydown(event) {
       if (event.target !== shell || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
       event.preventDefault();
+      pauseForInteraction();
       shell.scrollBy({ left: event.key === 'ArrowRight' ? 220 : -220, behavior: 'smooth' });
+      resumeAfterInteraction();
     }
+
+    function onShellScroll() { pauseForInteraction(); resumeAfterInteraction(); }
 
     var observer = null;
     if ('IntersectionObserver' in window) {
@@ -85,6 +104,12 @@
     }
 
     shell.addEventListener('keydown', onShellKeydown);
+    shell.addEventListener('pointerdown', pauseForInteraction, { passive: true });
+    shell.addEventListener('pointerup', resumeAfterInteraction, { passive: true });
+    shell.addEventListener('pointercancel', resumeAfterInteraction, { passive: true });
+    shell.addEventListener('wheel', pauseForInteraction, { passive: true });
+    shell.addEventListener('wheel', resumeAfterInteraction, { passive: true });
+    shell.addEventListener('scroll', onShellScroll, { passive: true });
     document.addEventListener('visibilitychange', update);
     if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', onMotionChange);
     else reducedMotion.addListener(onMotionChange);
@@ -94,10 +119,17 @@
 
     teardown = function () {
       if (resizeFrame) cancelAnimationFrame(resizeFrame);
+      window.clearTimeout(resumeTimer);
       if (observer) observer.disconnect();
       if (resizeObserver) resizeObserver.disconnect();
       else window.removeEventListener('resize', scheduleMeasure);
       shell.removeEventListener('keydown', onShellKeydown);
+      shell.removeEventListener('pointerdown', pauseForInteraction);
+      shell.removeEventListener('pointerup', resumeAfterInteraction);
+      shell.removeEventListener('pointercancel', resumeAfterInteraction);
+      shell.removeEventListener('wheel', pauseForInteraction);
+      shell.removeEventListener('wheel', resumeAfterInteraction);
+      shell.removeEventListener('scroll', onShellScroll);
       document.removeEventListener('visibilitychange', update);
       if (reducedMotion.removeEventListener) reducedMotion.removeEventListener('change', onMotionChange);
       else reducedMotion.removeListener(onMotionChange);
