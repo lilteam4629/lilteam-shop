@@ -35,6 +35,14 @@ const prizeStock = [
 assert.strictEqual(randomBox.availableStockCount(prizeStock, 'box-1'), 2, 'all available lines count as one prize each, including old categorized stock');
 assert.strictEqual(randomBox.availableStockCount(prizeStock, 'other-box'), 1, 'stock counts stay scoped to their product');
 assert.deepStrictEqual(randomBox.availableStockItems(prizeStock, 'other-box').map(item => item.id), ['other-box-key'], 'stock belonging to another box never leaks into this one');
+const outOfOrderStock = [
+  { id: 'row-3', productId: 'box-1', addedAt: '2026-09-03T00:00:00.000Z' },
+  { id: 'row-2', productId: 'box-1', addedAt: '2026-09-02T00:00:00.000Z' },
+  { id: 'row-1', productId: 'box-1', addedAt: '2026-09-01T00:00:00.000Z' },
+  { id: 'row-2-added-later', productId: 'box-1', addedAt: '2026-09-02T00:00:00.000Z' },
+];
+assert.deepStrictEqual(randomBox.stockItemsOldestFirst(outOfOrderStock).map(item => item.id),
+  ['row-1', 'row-2', 'row-2-added-later', 'row-3'], 'stock rows are oldest-first with stable ordering for equal timestamps');
 
 const data = {
   users: [
@@ -79,12 +87,12 @@ const winner = randomBox.drawRandomBox(data, {
 });
 assert.strictEqual(winner.result.isWin, true, 'the draw that reaches target wins');
 assert.strictEqual(winner.result.roundProgress, 85);
-assert.strictEqual(winner.result.prizeName, 'winner-a:key-a', 'a win uses the selected stock entry as its prize label');
+assert.strictEqual(winner.result.prizeName, 'winner-b', 'a win takes the newest stock row at the bottom first');
 assert.strictEqual(winner.result.missMessage, null, 'winning draws do not include the miss message');
 assert.strictEqual(winner.result.missCount, 0, 'winning draw summaries count no misses');
 assert.strictEqual(Object.hasOwn(winner.result, 'prizePercent'), false, 'draw results no longer depend on prize percentages');
-assert.strictEqual(data.stockItems[0].status, 'sold', 'the selected key is consumed from inventory once');
-assert.strictEqual(data.stockItems[0].soldOrderId, winner.orderId, 'inventory is linked to the winning order');
+assert.strictEqual(data.stockItems[1].status, 'sold', 'the selected key is consumed from inventory once');
+assert.strictEqual(data.stockItems[1].soldOrderId, winner.orderId, 'inventory is linked to the winning order');
 assert.strictEqual(data.randomBoxRounds['box-1'].progress, 0, 'new global round starts after a win');
 assert.strictEqual(data.randomBoxRounds['box-1'].roundNumber, 2);
 assert.strictEqual(data.users[1].walletBalance, 57, 'winning attempt still costs exactly one baht');
@@ -93,14 +101,14 @@ assert.strictEqual(data.orders.at(-1).total, 1);
 assert.strictEqual(data.orders.at(-1).items[0].price, 1);
 assert.strictEqual(data.orders.at(-1).status, 'completed', 'the winning order is complete after immediate automatic delivery');
 assert.strictEqual(data.orders.at(-1).items[0].fulfillmentMode, 'automatic');
-assert.strictEqual(data.orders.at(-1).items[0].stockItemId, 'legacy-stock-1', 'one inventory line is delivered without requiring a prize category');
+assert.strictEqual(data.orders.at(-1).items[0].stockItemId, 'direct-stock-1', 'the bottom stock line is delivered without requiring a prize category');
 assert.strictEqual(data.orders.at(-1).items.length, 1, 'the prize is fulfilled on the paid draw without a manual-contact line');
 
 const beforeReplay = {
   balance: data.users[1].walletBalance,
   orderCount: data.orders.length,
   ledgerCount: data.walletTransactions.length,
-  prizeStock: data.stockItems[0].status,
+  prizeStock: data.stockItems[1].status,
 };
 const replay = randomBox.drawRandomBox(data, {
   productId: 'box-1', userId: 'buyer-b', idempotencyKey: winKey,
@@ -111,7 +119,7 @@ assert.strictEqual(replay.orderId, winner.orderId);
 assert.strictEqual(data.users[1].walletBalance, beforeReplay.balance, 'replay does not debit twice');
 assert.strictEqual(data.orders.length, beforeReplay.orderCount, 'replay does not create another order');
 assert.strictEqual(data.walletTransactions.length, beforeReplay.ledgerCount, 'replay does not create another ledger entry');
-assert.strictEqual(data.stockItems[0].status, beforeReplay.prizeStock, 'replay does not consume another key');
+assert.strictEqual(data.stockItems[1].status, beforeReplay.prizeStock, 'replay does not consume another key');
 
 data.products[0].randomBox.rate = 2;
 for (let draw = 1; draw <= 45; draw += 1) {
@@ -122,8 +130,8 @@ for (let draw = 1; draw <= 45; draw += 1) {
   assert.strictEqual(result.result.isWin, draw === 45, `rate two draw ${draw} follows the 45–60 target`);
   if (draw === 45) {
     assert.strictEqual(result.result.roundTarget, 45);
-    assert.strictEqual(result.result.prizeName, 'winner-b', 'a single-field stock entry is used as the prize label');
-    assert.strictEqual(data.orders.at(-1).items[0].stockItemId, 'direct-stock-1');
+    assert.strictEqual(result.result.prizeName, 'winner-a:key-a', 'the next award moves upward to the prior stock row');
+    assert.strictEqual(data.orders.at(-1).items[0].stockItemId, 'legacy-stock-1');
   }
 }
 assert.strictEqual(data.randomBoxRounds['box-1'].rate, 2, 'rate change starts a fresh round at the selected rate');
@@ -182,7 +190,7 @@ assert.strictEqual(multiDraw.result.drawCount, 3, 'a batch performs the requeste
 assert.strictEqual(multiDraw.result.winCount, 1, 'each draw in a batch advances the shared round in order');
 assert.strictEqual(multiOrder.items.length, 3, 'each draw has its own auditable order line');
 assert.strictEqual(multiOrder.items[0].randomBoxDraw.isWin, true, 'the first draw reaches the existing pooled target');
-assert.strictEqual(multiOrder.items[0].stockItemId, 'multi-prize-a', 'a batch win consumes and records its stock item');
+assert.strictEqual(multiOrder.items[0].stockItemId, 'multi-prize-b', 'a batch win consumes the bottom stock row first');
 assert.strictEqual(multiOrder.total, 3, 'the batch order charges one baht per completed draw');
 assert.strictEqual(multiDrawData.users[0].walletBalance, 17, 'the wallet is debited once for the batch total');
 assert.strictEqual(multiDrawData.walletTransactions[0].amount, -3, 'the ledger records the exact batch debit');
@@ -194,6 +202,24 @@ const multiReplay = randomBox.drawRandomBox(multiDrawData, {
 assert.strictEqual(multiReplay.replay, true, 'a replayed batch request returns the original order');
 assert.strictEqual(multiDrawData.users[0].walletBalance, 17, 'a batch replay never charges twice');
 assert.strictEqual(multiDrawData.orders.length, 1, 'a batch replay never creates another order');
+
+const orderedDrawData = {
+  users: [{ id: 'ordered-buyer', status: 'active', walletBalance: 3 }],
+  products: [{ id: 'ordered-box', slug: 'ordered-box', title: 'ordered box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } }],
+  stockItems: [
+    { id: 'newest-row', productId: 'ordered-box', username: 'newest', addedAt: '2026-09-03T00:00:00.000Z', status: 'available' },
+    { id: 'oldest-row', productId: 'ordered-box', username: 'oldest', addedAt: '2026-09-01T00:00:00.000Z', status: 'available' },
+    { id: 'middle-row', productId: 'ordered-box', username: 'middle', addedAt: '2026-09-02T00:00:00.000Z', status: 'available' },
+  ],
+  walletTransactions: [], orders: [], randomBoxRounds: {},
+};
+const orderedDraw = randomBox.drawRandomBox(orderedDrawData, {
+  productId: 'ordered-box', userId: 'ordered-buyer', idempotencyKey: 'ordered-stock-request', drawCount: 3,
+  now: 1_800_000_250_000, randomInt: deterministicRandom, genId,
+});
+assert.deepStrictEqual(orderedDrawData.orders[0].items.map(item => item.stockItemId),
+  ['newest-row', 'middle-row', 'oldest-row'], 'consecutive wins deliver bottom-to-top through row one');
+assert.strictEqual(orderedDraw.result.winCount, 3, 'the ordered stock fixture wins each draw at a 100% test rate');
 
 const exhaustedBatchData = {
   users: [{ id: 'last-buyer', status: 'active', walletBalance: 10 }],

@@ -227,12 +227,22 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (directStockItems.length !== 2 || directStockItems.some(item => item.username === 'remove-this-key')) {
     throw new Error('removing an unused stock line did not update the available inventory count');
   }
+  const appendStock = await request(`/admin/products/${encodeURIComponent(productId)}/stock/add`, {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ bulk: 'appended-key' }).toString(),
+  });
+  if (appendStock.statusCode !== 302) throw new Error('new random-box stock could not be appended');
   const stockPage = await fetchOk(`/admin/products/${encodeURIComponent(productId)}/stock`, 'text/html', { cookie: adminCookie });
+  const firstStockRow = stockPage.body.indexOf('smoke-user');
+  const secondStockRow = stockPage.body.indexOf('raw-key-only');
+  const appendedStockRow = stockPage.body.indexOf('appended-key');
   if (!stockPage.body.includes('ส่งคีย์/ไอดีจากสต็อกให้อัตโนมัติ') || !stockPage.body.includes('smoke-user')
     || stockPage.body.includes('สินค้า 1 ชิ้น ต่อ') || /สินค้า\s*1\s*ชิ้น\s*(?:ต่อ|ในช่วง)\s*\d+\s*[–-]\s*\d+/.test(stockPage.body)
-    || !stockPage.body.includes('รายการคีย์ / ไอดีที่พร้อมขาย (2)')
+    || !stockPage.body.includes('สินค้าใหม่ต่อท้ายด้านล่าง')
+    || !stockPage.body.includes('รายการคีย์ / ไอดีที่พร้อมขาย (3)')
+    || !(firstStockRow < secondStockRow && secondStockRow < appendedStockRow)
     || !/<th[^>]*>ลำดับ<\/th>/.test(stockPage.body) || !/>1<\/td>/.test(stockPage.body) || !/>2<\/td>/.test(stockPage.body)) {
-    throw new Error('random-box stock page does not show direct inventory or reveals the payout range');
+    throw new Error('random-box stock page does not append new stock at the bottom or reveals the payout range');
   }
 
   const scheduled = await request('/admin/scheduled-products', {

@@ -1549,8 +1549,10 @@ router.get('/products/:id/stock', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
   if (product.specialType === randomBox.RANDOM_BOX_KIND && !randomBox.supportsRandomBox(req)) return res.sendStatus(404);
-  const stockItems = store.data.stockItems.filter(s => s.productId === product.id)
-    .sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
+  const productStockItems = store.data.stockItems.filter(s => s.productId === product.id);
+  const stockItems = product.specialType === randomBox.RANDOM_BOX_KIND
+    ? randomBox.stockItemsOldestFirst(productStockItems)
+    : productStockItems.sort((a, b) => new Date(b.addedAt) - new Date(a.addedAt));
   if (product.specialType === randomBox.RANDOM_BOX_KIND) {
     return res.render('admin/product-stock', {
       title: `สต็อกกล่องสุ่ม: ${product.title}`, active: 'products', product, stockItems,

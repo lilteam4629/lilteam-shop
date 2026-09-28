@@ -68,10 +68,23 @@ function validateRate(rate) {
   return null;
 }
 
-function availableStockItems(stockItems = [], productId = null) {
+function stockItemsOldestFirst(stockItems = [], productId = null) {
   if (!Array.isArray(stockItems)) return [];
-  return stockItems.filter(item => item && item.status === 'available'
-    && (productId === null || String(item.productId) === String(productId)));
+  return stockItems
+    .map((item, index) => ({ item, index, addedAt: Date.parse(item?.addedAt) }))
+    .filter(({ item }) => item && (productId === null || String(item.productId) === String(productId)))
+    .sort((a, b) => {
+      const aHasDate = Number.isFinite(a.addedAt);
+      const bHasDate = Number.isFinite(b.addedAt);
+      if (aHasDate && bHasDate && a.addedAt !== b.addedAt) return a.addedAt - b.addedAt;
+      if (aHasDate !== bHasDate) return aHasDate ? 1 : -1;
+      return a.index - b.index;
+    })
+    .map(({ item }) => item);
+}
+
+function availableStockItems(stockItems = [], productId = null) {
+  return stockItemsOldestFirst(stockItems, productId).filter(item => item.status === 'available');
 }
 
 function availableStockCount(stockItems = [], productId = null) {
@@ -174,11 +187,7 @@ function drawRandomBox(data, {
     let prizeStockItem = null;
 
     if (isWin) {
-      const selectedIndex = randomInt(0, availablePrizes.length);
-      const safeIndex = Number.isInteger(selectedIndex) && selectedIndex >= 0 && selectedIndex < availablePrizes.length
-        ? selectedIndex
-        : 0;
-      prizeStockItem = availablePrizes[safeIndex];
+      prizeStockItem = availablePrizes[availablePrizes.length - 1];
       prizeName = getStockPrizeName(prizeStockItem);
       prizeStockItem.status = 'sold';
       prizeStockItem.soldOrderId = orderId;
@@ -289,6 +298,7 @@ module.exports = {
   normalizeMissMessage,
   validateRate,
   parseDrawCount,
+  stockItemsOldestFirst,
   availableStockItems,
   availableStockCount,
   isPublished,
