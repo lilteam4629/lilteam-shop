@@ -452,11 +452,11 @@ async function crawlAdmin(cookie) {
     if (!/class="experiment-admin admin-site(?:\s|")/.test(page.body) || !page.body.includes('data-experiment-sidebar')) {
       throw new Error(`main admin route did not use the unified sidebar shell: ${requestPath}`);
     }
-    if (page.body.includes('data-admin-theme-toggle') || page.body.includes('theme-toggle-btn-desktop') || !page.body.includes('data-admin-theme="light"')) {
-      throw new Error(`main admin route did not stay in light mode without a theme switch: ${requestPath}`);
+    if (!page.body.includes('data-admin-theme-toggle') || !page.body.includes('data-admin-theme="light"')) {
+      throw new Error(`main admin route is missing its default light theme or accessible theme switch: ${requestPath}`);
     }
-    if (!page.body.includes('/js/admin-theme-bootstrap-v1.js') || page.body.includes('/js/admin-theme-toggle-v1.js') || page.body.includes('/js/admin-dark-surface-audit-v1.js') || page.body.includes('/css/admin-dark-mode-v1.css')) {
-      throw new Error(`main admin route loaded a paused dark-mode control or scan: ${requestPath}`);
+    if (!page.body.includes('/js/admin-theme-bootstrap-v1.js') || !page.body.includes('/js/admin-theme-toggle-v1.js') || page.body.includes('/js/admin-dark-surface-audit-v1.js') || !page.body.includes('/css/admin-dark-mode-v1.css')) {
+      throw new Error(`main admin route is missing the prepaint theme switch/palette or loaded a late recolor scan: ${requestPath}`);
     }
     if (page.body.includes('id="admin-sidebar"') || page.body.includes('ผู้ดูแลระบบ · รุ่นทดลอง')) {
       throw new Error(`legacy admin shell leaked into the main shop: ${requestPath}`);

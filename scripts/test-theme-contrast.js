@@ -30,15 +30,26 @@ for (const accent of accents) {
   const fill = adminCss.match(/--admin-brand-fill:\s*(#[0-9a-f]{6})/i)?.[1];
   const text = adminCss.match(/--admin-brand-readable:\s*(#[0-9a-f]{6})/i)?.[1];
   const contrast = adminCss.match(/--admin-brand-contrast:\s*(#[0-9a-f]{6})/i)?.[1];
+  const darkFill = adminCss.match(/--admin-brand-fill-dark:\s*(#[0-9a-f]{6})/i)?.[1];
+  const darkText = adminCss.match(/--admin-brand-readable-dark:\s*(#[0-9a-f]{6})/i)?.[1];
+  const darkContrast = adminCss.match(/--admin-brand-contrast-dark:\s*(#[0-9a-f]{6})/i)?.[1];
   assert.match(adminCss, /^html\.admin-unified-site\s*\{/,
     'admin accent variables must be scoped to the shop admin root');
-  assert(fill && text && contrast, `admin accent tokens missing for ${accent}`);
+  assert(fill && text && contrast && darkFill && darkText && darkContrast, `admin accent tokens missing for ${accent}`);
   assert(theme.contrastRatio(fill, '#ffffff') >= 4.5,
     `admin accent fill is not readable with white controls: ${accent}`);
   assert(theme.contrastRatio(text, '#ffffff') >= 4.5,
     `admin accent text is not readable on white surfaces: ${accent}`);
   assert(theme.contrastRatio(contrast, fill) >= 4.5,
     `admin accent foreground is not readable on its fill: ${accent}`);
+  for (const surface of ['#1e2220', '#252b27', '#272c29', '#333a35', '#202623']) {
+    assert(theme.contrastRatio(darkFill, surface) >= 4.5,
+      `dark admin accent fill is not distinct from its surfaces: ${accent} on ${surface}`);
+    assert(theme.contrastRatio(darkText, surface) >= 4.5,
+      `dark admin accent text is not readable: ${accent} on ${surface}`);
+  }
+  assert(theme.contrastRatio(darkContrast, darkFill) >= 4.5,
+    `dark admin button text is not readable: ${accent}`);
   assert.doesNotMatch(adminCss, /--(?:bg|card|text):/,
     'admin accent CSS must not overwrite the separate admin surface palette');
 }
@@ -52,8 +63,8 @@ assert.match(experimentLayout, /class="admin-unified-site/,
   'saved admin accent variables must apply to every store, not only the primary shop');
 assert.match(experimentLayout, /adminBrandCss/);
 assert.match(legacyLayout, /admin-main-site/);
-assert.match(legacyLayout, /class="light admin-unified-site/,
-  'legacy admin pages must receive the selected accent for every store too');
+assert.match(legacyLayout, /data-admin-theme="light" class="admin-unified-site/,
+  'legacy admin pages must boot in a known theme and receive the selected accent for every store');
 assert.match(legacyLayout, /adminBrandCss/);
 assert.match(experimentCss, /--ex-green:\s*var\(--admin-brand-fill,/);
 assert.match(experimentCss, /--ex-green-dark:\s*var\(--admin-brand-readable,/);

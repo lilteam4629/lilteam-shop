@@ -369,6 +369,13 @@ function renderAdminAccentCss(theme) {
     : darken(accentFill, 0.12);
   const accentStrong = darken(accentFill, 0.42);
   const accentText = readableAccentOn(accent, surfaces);
+  const darkSurfaces = ['#1e2220', '#252b27', '#272c29', '#333a35', '#202623'];
+  const darkAccentFill = visibleAccentOn(accent, darkSurfaces, 4.5);
+  const darkAccentHover = relativeLuminance(darkAccentFill) < 0.5
+    ? lighten(darkAccentFill, 0.14)
+    : darken(darkAccentFill, 0.12);
+  const darkAccentStrong = darken(darkAccentFill, 0.3);
+  const darkAccentText = readableAccentOn(accent, darkSurfaces);
 
   return `html.admin-unified-site {
     --admin-brand-accent: ${accent};
@@ -379,6 +386,13 @@ function renderAdminAccentCss(theme) {
     --admin-brand-contrast: ${contrastTextFor(accentFill)};
     --admin-brand-soft: color-mix(in srgb, ${accentFill} 10%, #ffffff);
     --admin-brand-border: color-mix(in srgb, ${accentFill} 28%, #ffffff);
+    --admin-brand-fill-dark: ${darkAccentFill};
+    --admin-brand-hover-dark: ${darkAccentHover};
+    --admin-brand-strong-dark: ${darkAccentStrong};
+    --admin-brand-readable-dark: ${darkAccentText};
+    --admin-brand-contrast-dark: ${contrastTextFor(darkAccentFill)};
+    --admin-brand-soft-dark: color-mix(in srgb, ${accent} 18%, #272c29);
+    --admin-brand-border-dark: color-mix(in srgb, ${accent} 44%, #4a534d);
     --ex-green: ${accentFill};
     --ex-green-dark: ${accentText};
     --ex-green-soft: color-mix(in srgb, ${accentFill} 10%, #ffffff);

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
-<html lang="th" class="light admin-unified-site <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
+<html lang="th" data-admin-theme="light" class="admin-unified-site <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 <head>
   <% const protectedSlipPage = ['slip-verification', 'api-providers'].includes(typeof active === 'undefined' ? '' : active); %>
   <% const referenceEnabled = !protectedSlipPage; %>
   <% const workspaceEnabled = false; %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="<%= asset('js/admin-theme-bootstrap-v1.js') %>"></script>
   <title><%= title %> | ระบบจัดการหลังบ้าน - <%= settings.shopName || 'ร้านค้า' %></title>
   <% if (settings.branding && settings.branding.logoImage) { %>
     <link rel="icon" href="<%= settings.branding.logoImage %>" />
@@ -143,6 +144,7 @@
     }
   </style>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-main-neutral-borders-v1.css') %>" /><% } %>
+  <link rel="stylesheet" href="<%= asset('css/admin-dark-mode-v1.css') %>" />
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--gold-contrast)] admin-site <%= referenceEnabled ? `admin-reference-ui admin-page-${active || 'page'}` : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 
@@ -167,6 +169,7 @@
       </div>
     </a>
     <div class="flex items-center gap-2">
+      <%- include('../partials/admin-theme-toggle') %>
       <button id="admin-menu-btn" type="button" aria-label="เปิดเมนู" class="w-9 h-9 flex items-center justify-center rounded-xl bg-[var(--input)]/80 border border-[var(--border-light)] text-[var(--text)] active:scale-95 transition">
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
       </button>
@@ -405,6 +408,7 @@
 
       <!-- Header Right Utilities -->
       <div class="flex items-center gap-3">
+        <%- include('../partials/admin-theme-toggle') %>
 
         <!-- Live Store Status Badge -->
         <% if (typeof persistentStorageEnabled !== 'undefined' && !persistentStorageEnabled) { %>
@@ -778,5 +782,6 @@
     });
   </script>
   <script src="<%= asset('js/interaction-performance-v1.js') %>" defer></script>
+  <script src="<%= asset('js/admin-theme-toggle-v1.js') %>" defer></script>
 </body>
 </html>
