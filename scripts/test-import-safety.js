@@ -789,6 +789,10 @@ async function main() {
     assert.match(experimentTemplate, /previousGameTab !== activeGameTab/);
     assert.match(railTemplate, /if\(adminPreview&&!spinning\)return;/, 'an aborted rail preview cannot publish an old result after switching tabs');
     assert.match(railTemplate, /mgx:preview-tab-change/);
+    assert.match(railTemplate, /const reduceMotion=prefersReducedMotion&&!adminPreview;/, 'admin preview follows the real rail motion even on reduced-motion devices');
+    assert.match(railTemplate, /const total=72,startIndex=7/);
+    assert.match(railTemplate, /Math\.ceil\(visibleIndex\)\+28/);
+    assert.match(railTemplate, /Math\.max\(8500,Math\.min\(12000,distance\/420\*1000\)\)/, 'normal rail plays have a measured, gradual 8.5–12 second stop');
   });
   let pages = 0;
   for (const url of ['/', '/products', '/products/new', '/filter-tags', '/home-sections', '/scheduled-products', '/orders', '/users', '/topups', '/slip-verification', '/coupons', '/minigame', '/settings', '/appearance']) {

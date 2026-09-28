@@ -73,8 +73,9 @@ assert.match(minigameRail, /\.rail-window{[^}]*overflow:hidden/, 'rail preview m
 assert.match(minigameRail, /new AbortController\(\)[\s\S]{0,180}10000/, 'rail preview must time out a stalled request');
 assert.match(minigameRail, /function warmup\(now\)[\s\S]{0,420}requestAnimationFrame\(warmup\)/, 'rail must begin continuously moving while the result is being selected');
 assert.ok(minigameRail.indexOf('if(!reduceMotion)spinFrame=requestAnimationFrame(warmup)') < minigameRail.indexOf('await fetch('), 'rail movement must start before waiting for the weighted result');
-assert.match(minigameRail, /const reduceMotion=window\.matchMedia/, 'every shop rail must respect the visitor’s reduced-motion setting');
-assert.match(minigameRail, /Math\.max\(5200,Math\.min\(8200,distance\/560\*1000\)\)/, 'rail must travel through a long, progressive deceleration instead of a short jump');
+assert.match(minigameRail, /const prefersReducedMotion=window\.matchMedia/, 'shop rail still detects the visitor’s reduced-motion setting');
+assert.match(minigameRail, /const reduceMotion=prefersReducedMotion&&!adminPreview/, 'customer pages respect reduced motion while admin tests reproduce the real rail');
+assert.match(minigameRail, /Math\.max\(8500,Math\.min\(12000,distance\/420\*1000\)\)/, 'rail must travel through a long, progressive deceleration instead of a short jump');
 assert.match(minigameRail, /track\.children\[winnerIndex\]\.replaceWith\(item\(winner,true\)\)/, 'the reel must finish on the exact server-selected weighted reward');
 assert.match(minigameRail, /\[winnerIndex-1,winnerIndex\+1\]/, 'the selected item must remain visually distinct from an identical adjacent card');
 assert.match(minigameRail, /cubic-bezier\(\.5,\.3,\.12,1\)/, 'the rail must ease into its selected prize without an abrupt stop');
