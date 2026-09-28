@@ -1,6 +1,7 @@
 const store = require('../data/store');
 const theme = require('../services/theme');
 const { visibleStorefrontCategories } = require('../services/storefront-category-visibility');
+const { requestShopSettings } = require('../services/shop-branding');
 
 function currentUser(req) {
   if (!req.session.userId) return null;
@@ -27,7 +28,7 @@ function attachUser(req, res, next) {
   res.locals.currentUser = currentUser(req);
   res.locals.cartCount = (req.session.cart || []).length;
   res.locals.settings = {
-    ...store.data.settings,
+    ...requestShopSettings(store.data.settings, req.tenantShop),
     // Rangers Market is an isolated System Lab experiment. A stale value
     // previously saved on another shop must never activate the trial UI.
     storefrontModel: req.tenantShop?.isSystemLab
