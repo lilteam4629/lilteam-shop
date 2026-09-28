@@ -527,6 +527,7 @@
       if (validId(value)) return value;
       try {
         const parsed = new URL(value);
+        if (!['http:', 'https:'].includes(parsed.protocol)) return null;
         const host = parsed.hostname.replace(/^www\./, '').replace(/^music\./, '');
         if (host === 'youtu.be') return validId(parsed.pathname.split('/').filter(Boolean)[0]);
         if (host === 'youtube.com' || host === 'm.youtube.com') {
@@ -607,8 +608,9 @@
 
       const STORAGE_PLAYING = 'lilteam_music_playing';
       const STORAGE_VOLUME = 'lilteam_music_volume';
-      const STORAGE_TIME = 'lilteam_music_time';
-      const STORAGE_TS = 'lilteam_music_ts';
+      // Resume independently per configured track; a new song must never
+      // inherit the previous song's playhead.
+      const STORAGE_TIME = 'lilteam_music_time_' + videoId;
 
       // Privacy modes and embedded browsers can deny persistent storage. Keep
       // playback usable for the current page even when preferences cannot save.
@@ -621,26 +623,32 @@
 
       let player = null;
       let apiRequested = false;
+      let playerInitialized = false;
       let isPlaying = false;
+      let playbackPending = false;
       let segmentTimer = null;
       let recoveryTimer = null;
       const startSeconds = parseInt(widget.dataset.startSeconds, 10) || 0;
       const endSeconds = parseInt(widget.dataset.endSeconds, 10) || 0;
 
       function loadYouTubeApi() {
-        if (apiRequested || window.YT) return;
+        if (playerInitialized) return;
+        if (window.YT && typeof window.YT.Player === 'function') {
+          initializePlayer();
+          return;
+        }
+        if (apiRequested) return;
         apiRequested = true;
+        if (playbackWanted) setPlaybackPending(true);
         const script = document.createElement('script');
         script.src = 'https://www.youtube.com/iframe_api';
         script.async = true;
         script.onerror = function () {
           apiRequested = false;
+          playbackPending = false;
           script.remove();
           setPlayingUI(false);
-          const retryMessage = 'โหลดเพลงไม่สำเร็จ แตะเพื่อลองใหม่';
-          if (collapsedStateEl) collapsedStateEl.textContent = retryMessage;
-          if (musicStateLabel) musicStateLabel.textContent = retryMessage;
-          if (musicRestoreStateLabel) musicRestoreStateLabel.textContent = retryMessage;
+          setPlaybackMessage('โหลดเพลงไม่สำเร็จ แตะเพื่อลองใหม่');
         };
         document.head.appendChild(script);
       }
@@ -677,13 +685,14 @@
 
       function setPlayingUI(playing) {
         isPlaying = playing;
-        toggleBtn.setAttribute('aria-label', playing ? 'หยุดเพลง' : 'เล่นเพลง');
-        toggleBtn.title = playing ? 'หยุดเพลง' : 'เล่นเพลง';
+        const actionLabel = playing ? 'หยุดเพลง' : (playbackPending ? 'ยกเลิกการเปิดเพลง' : 'เล่นเพลง');
+        toggleBtn.setAttribute('aria-label', actionLabel);
+        toggleBtn.title = actionLabel;
         playBtn.textContent = playing ? '⏸' : '▶';
-        playBtn.setAttribute('aria-label', playing ? 'หยุดเพลง' : 'เล่นเพลง');
-        playBtn.title = playing ? 'หยุดเพลง' : 'เล่นเพลง';
+        playBtn.setAttribute('aria-label', actionLabel);
+        playBtn.title = actionLabel;
         widget.dataset.playing = String(playing);
-        if (collapsedStateEl) collapsedStateEl.textContent = playing ? 'กำลังเล่นเพลง' : 'แตะเพื่อเล่นเพลง';
+        if (collapsedStateEl) collapsedStateEl.textContent = playing ? 'กำลังเล่นเพลง' : (playbackPending ? 'กำลังโหลดเพลง…' : 'แตะเพื่อเล่นเพลง');
         if (icon) {
           if (icon.querySelector('svg')) icon.classList.toggle('is-playing', playing);
           else icon.textContent = playing ? '🎶' : '🎵';
@@ -692,6 +701,17 @@
         if (musicRestoreStateLabel) musicRestoreStateLabel.textContent = playing ? 'กำลังเล่น' : 'แตะเพื่อเปิด';
         widget.classList.toggle('is-playing', playing);
         playingRing.classList.toggle('hidden', !playing);
+      }
+
+      function setPlaybackMessage(message) {
+        if (collapsedStateEl) collapsedStateEl.textContent = message;
+        if (musicStateLabel) musicStateLabel.textContent = message;
+        if (musicRestoreStateLabel) musicRestoreStateLabel.textContent = message;
+      }
+
+      function setPlaybackPending(pending) {
+        playbackPending = Boolean(pending);
+        if (!isPlaying) setPlayingUI(false);
       }
 
       function setPanelOpen(open) {
@@ -708,7 +728,10 @@
         if (recoveryTimer) clearTimeout(recoveryTimer);
         recoveryTimer = setTimeout(function () {
           recoveryTimer = null;
-          if (playbackWanted && !document.hidden && player && player.playVideo) player.playVideo();
+          if (playbackWanted && !document.hidden && player && player.playVideo) {
+            setPlaybackPending(true);
+            player.playVideo();
+          }
         }, delay || 700);
       }
 
@@ -718,14 +741,17 @@
         playbackWanted = wanted;
         storageSet(STORAGE_PLAYING, wanted ? 'true' : 'false');
         if (!player || typeof player.playVideo !== 'function') {
-          loadYouTubeApi();
+          setPlaybackPending(wanted);
+          if (wanted) loadYouTubeApi();
           setPlayingUI(false);
           return;
         }
         if (wanted) {
+          setPlaybackPending(true);
           player.unMute();
           player.playVideo();
         } else {
+          playbackPending = false;
           if (recoveryTimer) clearTimeout(recoveryTimer);
           player.pauseVideo();
           setPlayingUI(false);
@@ -737,16 +763,20 @@
         segmentTimer = setInterval(function () {
           if (!player || typeof player.getCurrentTime !== 'function') return;
           const t = player.getCurrentTime();
+          let resumeTime = t;
           if (endSeconds > startSeconds && t >= endSeconds) {
             player.seekTo(startSeconds, true);
+            resumeTime = startSeconds;
           }
-          storageSet(STORAGE_TIME, t);
-          storageSet(STORAGE_TS, Date.now());
+          storageSet(STORAGE_TIME, resumeTime);
         }, 1500);
       }
 
-      window.onYouTubeIframeAPIReady = function () {
-        player = new YT.Player('music-yt-player', {
+      function initializePlayer() {
+        const youtubeApi = window.YT || (typeof YT !== 'undefined' ? YT : null);
+        if (playerInitialized || !youtubeApi || typeof youtubeApi.Player !== 'function') return;
+        playerInitialized = true;
+        player = new youtubeApi.Player('music-yt-player', {
           videoId: videoId,
           playerVars: {
             autoplay: 0,
@@ -762,34 +792,62 @@
             onReady: function (e) {
               e.target.setVolume(currentVolume);
               if (playbackWanted) {
-                // Try once. If the browser blocks autoplay the UI remains paused;
-                // an explicit tap on the music button will start it reliably.
+                setPlaybackPending(true);
                 e.target.unMute();
                 e.target.playVideo();
               }
             },
             onStateChange: function (e) {
-              if (e.data === YT.PlayerState.PLAYING) {
+              if (e.data === youtubeApi.PlayerState.PLAYING) {
+                playbackPending = false;
                 setPlayingUI(true);
                 watchSegment();
-              } else if (e.data === YT.PlayerState.PAUSED || e.data === YT.PlayerState.ENDED) {
+              } else if (e.data === youtubeApi.PlayerState.BUFFERING) {
+                playbackPending = playbackWanted;
+                setPlayingUI(false);
+              } else if (e.data === youtubeApi.PlayerState.PAUSED || e.data === youtubeApi.PlayerState.ENDED) {
+                playbackPending = false;
                 setPlayingUI(false);
                 if (segmentTimer) clearInterval(segmentTimer);
-                if (e.data === YT.PlayerState.ENDED && playbackWanted) {
+                if (e.data === youtubeApi.PlayerState.ENDED && playbackWanted) {
+                  setPlaybackPending(true);
+                  storageSet(STORAGE_TIME, startSeconds);
                   player.seekTo(startSeconds, true);
                   player.playVideo();
-                } else if (e.data === YT.PlayerState.PAUSED && playbackWanted) {
+                } else if (e.data === youtubeApi.PlayerState.PAUSED && playbackWanted) {
                   recoverPlayback(900);
                 }
               }
             },
             onError: function () {
-              // Playback failed (e.g. blocked/restricted video) — don't get stuck claiming "playing".
+              // Invalid, private, or restricted videos should show a useful
+              // state instead of appearing to silently pause.
+              playbackWanted = false;
+              playbackPending = false;
+              storageSet(STORAGE_PLAYING, 'false');
               setPlayingUI(false);
+              setPlaybackMessage('เปิดเพลงนี้ไม่ได้ ลองตรวจลิงก์ YouTube');
+            },
+            onAutoplayBlocked: function () {
+              // YouTube reports browser autoplay policy separately from player
+              // errors. A user tap can then retry with a direct interaction.
+              playbackPending = false;
+              setPlayingUI(false);
+              setPlaybackMessage('เบราว์เซอร์บล็อกเพลง แตะเพื่อเล่น');
             },
           },
         });
+      }
+
+      const previousYouTubeReady = window.onYouTubeIframeAPIReady;
+      window.onYouTubeIframeAPIReady = function () {
+        if (typeof previousYouTubeReady === 'function' && previousYouTubeReady !== window.onYouTubeIframeAPIReady) {
+          try { previousYouTubeReady.call(window); } catch (e) {}
+        }
+        initializePlayer();
       };
+      // The API may already be available after a cached shell or another embed.
+      if (window.YT && typeof window.YT.Player === 'function') initializePlayer();
 
       if ('requestIdleCallback' in window) requestIdleCallback(loadYouTubeApi, { timeout: 3500 });
       else setTimeout(loadYouTubeApi, 1800);
@@ -806,7 +864,7 @@
         .catch(function () {});
 
       toggleBtn.addEventListener('click', function () {
-        requestPlayback(!isPlaying);
+        requestPlayback(!(isPlaying || playbackPending));
       });
       if (settingsBtn) {
         settingsBtn.addEventListener('click', function () {
@@ -821,7 +879,7 @@
       });
 
       playBtn.addEventListener('click', function () {
-        requestPlayback(!isPlaying);
+        requestPlayback(!(isPlaying || playbackPending));
       });
 
       volumeSlider.addEventListener('input', function () {
@@ -834,7 +892,6 @@
       window.addEventListener('beforeunload', function () {
         if (player && typeof player.getCurrentTime === 'function') {
           storageSet(STORAGE_TIME, player.getCurrentTime());
-          storageSet(STORAGE_TS, Date.now());
         }
       });
 

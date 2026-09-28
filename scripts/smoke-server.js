@@ -92,6 +92,59 @@ async function checkRecommendedCategoryHomepage(cookie) {
   if (!homeAfterDisable.body.includes(`/game/${product.slug}`)) throw new Error('a product in a hidden category did not return to the homepage catalog');
 }
 
+async function checkMusicAcrossStorefront(cookie) {
+  const saved = await request('/admin/music-player', {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      enabled: 'on',
+      youtubeUrl: 'https://www.youtube.com/watch?v=abcdefghijk',
+      defaultVolume: '38',
+      startTime: '1:15',
+      endTime: '2:30',
+    }).toString(),
+  });
+  if (saved.statusCode !== 302) throw new Error('valid background music settings could not be saved');
+  const effects = await fetchOk('/admin/effects', 'text/html', { cookie });
+  for (const value of ['https://www.youtube.com/watch?v=abcdefghijk', 'value="1:15"', 'value="2:30"', 'value="38"']) {
+    if (!effects.body.includes(value)) throw new Error(`music settings page did not show the saved value ${value}`);
+  }
+
+  const pages = [
+    '/', '/products', '/search?q=music', '/game/shadow-realm-chronicles',
+    '/cart', '/help', '/contact', '/cookie-policy', '/login', '/register',
+  ];
+  for (const page of pages) {
+    const response = await fetchOk(page, 'text/html');
+    const widgets = response.body.match(/id="music-widget"/g) || [];
+    if (widgets.length !== 1) throw new Error(`${page} should render exactly one persistent music widget, got ${widgets.length}`);
+    if (!response.body.includes('data-video-id="abcdefghijk"')) throw new Error(`${page} rendered a different configured music track`);
+    if (!response.body.includes('/css/storefront-music-unified-v1.css')) throw new Error(`${page} is missing the owner storefront music skin`);
+  }
+
+  const savedSettings = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).settings.music;
+  if (savedSettings.startSeconds !== 75 || savedSettings.endSeconds !== 150 || savedSettings.defaultVolume !== 38) {
+    throw new Error('music settings were not stored consistently');
+  }
+
+  const invalid = await request('/admin/music-player', {
+    method: 'POST',
+    headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      enabled: 'on',
+      youtubeUrl: 'https://www.youtube.com/watch?v=lmnopqrstuv',
+      defaultVolume: '40',
+      startTime: '1:99',
+      endTime: '3:00',
+    }).toString(),
+  });
+  if (invalid.statusCode !== 302) throw new Error('malformed music times did not return through validation');
+  const afterInvalidSave = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).settings.music;
+  if (afterInvalidSave.youtubeUrl !== savedSettings.youtubeUrl || afterInvalidSave.startSeconds !== 75) {
+    throw new Error('invalid music time input overwrote the last valid settings');
+  }
+}
+
 async function checkScheduledProductWorkflow(cookie) {
   const form = await fetchOk('/admin/products/new', 'text/html', { cookie });
   if (/name="(?:publishAt|eventBadge|eventDescription)"/.test(form.body)) {
@@ -758,6 +811,7 @@ async function run() {
     if (!mainLayoutSource.includes("addEventListener('pageshow'")) throw new Error('rain does not resume after a back-forward cache restore');
     await checkCustomerOrderDetail();
     const cookie = await loginAsAdmin();
+    await checkMusicAcrossStorefront(cookie);
     await checkRecommendedCategoryHomepage(cookie);
     await checkScheduledProductWorkflow(cookie);
     const mainAdmin = await fetchOk('/admin', 'text/html', { cookie });

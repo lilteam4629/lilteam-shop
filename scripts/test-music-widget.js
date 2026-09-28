@@ -24,9 +24,12 @@ assert.match(widgetMarkup, /music-widget__artwork[\s\S]*music-collapsed-title[\s
 assert.match(widgetMarkup, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*music-widget__artwork[\s\S]*else \{ %>[\s\S]*id="music-icon" class="relative z-10">🎵/,
   'rental storefronts must retain their existing player markup');
 
-function makeHarness(defaultVolume) {
+function makeHarness(defaultVolume, options = {}) {
   const elements = new Map();
   const scripts = [];
+  const intervals = new Map();
+  let nextIntervalId = 0;
+  const storage = new Map(Object.entries(options.storage || {}));
   function element(id) {
     const classes = new Set(id === 'music-panel' ? ['hidden'] : []);
     const classList = {
@@ -42,7 +45,8 @@ function makeHarness(defaultVolume) {
     return {
       id,
       dataset: id === 'music-widget' ? {
-        videoId: 'abcdefghijk', defaultVolume: String(defaultVolume), startSeconds: '0', endSeconds: '0',
+        videoId: options.videoId || 'abcdefghijk', defaultVolume: String(defaultVolume),
+        startSeconds: String(options.startSeconds ?? 0), endSeconds: String(options.endSeconds ?? 0),
       } : {},
       listeners: {},
       attributes: {},
@@ -73,15 +77,23 @@ function makeHarness(defaultVolume) {
     createElement() { return element('youtube-api-script'); },
     head: { appendChild(item) { scripts.push(item); } },
     addEventListener(name, callback) { this.listeners[name] = callback; },
+    querySelector() { return null; },
   };
   const window = {
     location: { search: '', pathname: '/', hash: '' },
     history: { replaceState() {} },
     addEventListener() {},
     requestIdleCallback() {},
+    YT: options.preloadedYT || undefined,
   };
   Object.defineProperty(window, 'localStorage', {
-    get() { throw new Error('storage blocked'); },
+    get() {
+      if (options.blockStorage !== false) throw new Error('storage blocked');
+      return {
+        getItem(key) { return storage.has(key) ? storage.get(key) : null; },
+        setItem(key, value) { storage.set(key, String(value)); },
+      };
+    },
   });
   const context = {
     window,
@@ -91,8 +103,8 @@ function makeHarness(defaultVolume) {
     requestIdleCallback() {},
     setTimeout: () => 1,
     clearTimeout() {},
-    setInterval: () => 1,
-    clearInterval() {},
+    setInterval(callback) { const id = ++nextIntervalId; intervals.set(id, callback); return id; },
+    clearInterval(id) { intervals.delete(id); },
     console,
     Number,
     Math,
@@ -101,7 +113,7 @@ function makeHarness(defaultVolume) {
     parseFloat,
   };
   vm.runInNewContext(script, context, { filename: 'storefront-music-widget.ejs' });
-  return { context, elements, scripts, window };
+  return { context, elements, scripts, window, storage, intervals };
 }
 
 const harness = makeHarness('145');
@@ -122,6 +134,10 @@ assert.equal(harness.elements.get('music-settings-btn').attributes['aria-expande
 
 harness.elements.get('music-toggle-btn').listeners.click();
 assert.equal(harness.scripts.length, 1, 'first tap requests YouTube');
+assert.equal(harness.elements.get('music-collapsed-state').textContent, 'กำลังโหลดเพลง…', 'loading state is visible');
+harness.elements.get('music-toggle-btn').listeners.click();
+assert.equal(harness.elements.get('music-toggle-btn').attributes['aria-label'], 'เล่นเพลง', 'a second tap cancels pending playback');
+assert.equal(harness.scripts.length, 1, 'cancelling does not inject duplicate API scripts');
 harness.scripts[0].onerror();
 assert.equal(harness.scripts[0].removed, true, 'failed script is removed');
 assert.match(harness.elements.get('music-collapsed-state').textContent, /แตะเพื่อลองใหม่/);
@@ -156,6 +172,14 @@ assert.equal(harness.elements.get('music-widget').classList.contains('is-playing
 harness.elements.get('music-toggle-btn').listeners.click();
 assert.equal(playerCalls.pauses, 1);
 assert.equal(harness.elements.get('music-widget').classList.contains('is-playing'), false);
+// A browser policy block must be visible and leave the next direct tap able to retry.
+harness.elements.get('music-toggle-btn').listeners.click();
+playerConfig.events.onAutoplayBlocked({ target: {} });
+assert.match(harness.elements.get('music-collapsed-state').textContent, /เบราว์เซอร์บล็อกเพลง/);
+harness.elements.get('music-toggle-btn').listeners.click();
+assert.equal(playerCalls.plays, 3, 'a tap retries after the browser blocks autoplay');
+playerConfig.events.onError({ data: 100 });
+assert.match(harness.elements.get('music-collapsed-state').textContent, /ตรวจลิงก์ YouTube/);
 
 const loadingHarness = makeHarness('40');
 loadingHarness.elements.get('music-volume').value = '73';
@@ -179,4 +203,74 @@ assert.equal((script.match(/localStorage\.(?:getItem|setItem)\(/g) || []).length
 const fallbackHarness = makeHarness('not-a-number');
 assert.equal(fallbackHarness.elements.get('music-volume').value, 50, 'invalid volume falls back to a safe default');
 
-console.log('Music widget checks passed: shared page markup, controls, blocked storage, volume, retry, playback, and pause');
+function mockYouTubeApi() {
+  let config;
+  const api = {
+    PlayerState: { PLAYING: 1, PAUSED: 2, ENDED: 0 },
+    Player: function (_id, options) {
+      config = options;
+      options.events.onReady({ target: {
+        setVolume() {}, unMute() {}, playVideo() {}, pauseVideo() {},
+      } });
+    },
+  };
+  return { api, getConfig: () => config };
+}
+
+const trackStorage = {
+  lilteam_music_time_abcdefghijk: '84',
+  lilteam_music_time_lmnopqrstuv: '19',
+  lilteam_music_time: '999', // Legacy global playhead must not leak into either song.
+};
+const firstTrackHarness = makeHarness(50, { blockStorage: false, storage: trackStorage });
+const firstTrackApi = mockYouTubeApi();
+firstTrackHarness.window.YT = firstTrackApi.api;
+firstTrackHarness.context.YT = firstTrackApi.api;
+firstTrackHarness.window.onYouTubeIframeAPIReady();
+assert.equal(firstTrackApi.getConfig().playerVars.start, 84, 'the saved playhead is restored for its own video');
+const secondTrackHarness = makeHarness(50, { blockStorage: false, storage: trackStorage, videoId: 'lmnopqrstuv' });
+const secondTrackApi = mockYouTubeApi();
+secondTrackHarness.window.YT = secondTrackApi.api;
+secondTrackHarness.context.YT = secondTrackApi.api;
+secondTrackHarness.window.onYouTubeIframeAPIReady();
+assert.equal(secondTrackApi.getConfig().playerVars.start, 19, 'a different configured video uses only its own playhead');
+
+const preloadedApi = mockYouTubeApi();
+const preloadedHarness = makeHarness(50, { preloadedYT: preloadedApi.api });
+assert.ok(preloadedApi.getConfig(), 'an already-ready YouTube API initializes the player without waiting for its callback');
+assert.equal(preloadedHarness.scripts.length, 0, 'an already-ready API does not load a duplicate script');
+
+const segmentHarness = makeHarness(50, { blockStorage: false, startSeconds: 5, endSeconds: 10 });
+const segmentCalls = { plays: 0, pauses: 0, seeks: [] };
+let segmentPlayerConfig;
+const segmentApi = {
+  PlayerState: { PLAYING: 1, PAUSED: 2, ENDED: 0, BUFFERING: 3 },
+  Player: function (_id, options) {
+    segmentPlayerConfig = options;
+    let time = 12;
+    const player = {
+      setVolume() {}, unMute() {}, playVideo() { segmentCalls.plays++; },
+      pauseVideo() { segmentCalls.pauses++; }, getCurrentTime() { return time; },
+      seekTo(value) { segmentCalls.seeks.push(value); time = value; },
+    };
+    options.events.onReady({ target: player });
+    return player;
+  },
+};
+segmentHarness.context.YT = segmentApi;
+segmentHarness.window.YT = segmentApi;
+segmentHarness.window.onYouTubeIframeAPIReady();
+segmentPlayerConfig.events.onStateChange({ data: segmentApi.PlayerState.PLAYING });
+assert.equal(segmentHarness.intervals.size, 1, 'segment watcher starts when playback begins');
+for (const callback of segmentHarness.intervals.values()) callback();
+assert.deepEqual(segmentCalls.seeks, [5], 'playback seeks back when it passes the segment end');
+assert.equal(segmentHarness.storage.get('lilteam_music_time_abcdefghijk'), '5', 'the saved playhead matches the loop point');
+segmentPlayerConfig.events.onStateChange({ data: segmentApi.PlayerState.ENDED });
+assert.equal(segmentCalls.seeks.at(-1), 5, 'the configured segment restarts when the video ends');
+assert.equal(segmentHarness.storage.get('lilteam_music_time_abcdefghijk'), '5', 'video end stores the configured segment start');
+segmentPlayerConfig.events.onStateChange({ data: segmentApi.PlayerState.BUFFERING });
+assert.equal(segmentHarness.elements.get('music-collapsed-state').textContent, 'กำลังโหลดเพลง…', 'buffering is not shown as active playback');
+segmentHarness.elements.get('music-toggle-btn').listeners.click();
+assert.equal(segmentCalls.pauses, 1, 'pending or buffering playback can be cancelled');
+
+console.log('Music widget checks passed: shared page markup, cancellation, API retry/readiness, autoplay errors, track-specific resume, storage, volume, playback, and pause');

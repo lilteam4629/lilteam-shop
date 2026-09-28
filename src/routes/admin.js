@@ -27,6 +27,7 @@ const r2 = require('../services/r2');
 const efootballSource = require('../services/efootball-catalog');
 const catalogSyndication = require('../services/catalog-syndication');
 const { MAIN_SITE_URL } = require('../middleware/tenant');
+const { parseTimeToSeconds, extractYouTubeVideoId } = require('../services/music-player');
 
 const toArr = value => Array.isArray(value) ? value : (value === undefined ? [] : [value]);
 
@@ -2907,47 +2908,21 @@ router.post('/settings', async (req, res) => {
 
 // ---------- Music player ----------
 const effectsRedirect = () => '/admin/effects';
-function parseTimeToSeconds(str) {
-  if (!str) return 0;
-  const s = str.trim();
-  if (!s) return 0;
-  if (s.includes(':')) {
-    const parts = s.split(':').map((p) => parseInt(p, 10) || 0);
-    return parts.reduce((acc, p) => acc * 60 + p, 0);
-  }
-  const n = parseInt(s, 10);
-  return Number.isNaN(n) ? 0 : n;
-}
-
-function extractYouTubeVideoId(input) {
-  const value = (input || '').trim();
-  const validId = id => (/^[a-zA-Z0-9_-]{11}$/.test(id || '') ? id : null);
-  if (validId(value)) return value;
-  try {
-    const url = new URL(value);
-    const host = url.hostname.replace(/^www\./, '').replace(/^music\./, '');
-    if (host === 'youtu.be') return validId(url.pathname.split('/').filter(Boolean)[0]);
-    if (host === 'youtube.com' || host === 'm.youtube.com') {
-      const queryId = url.searchParams.get('v');
-      if (queryId) return validId(queryId);
-      const parts = url.pathname.split('/').filter(Boolean);
-      if (['embed', 'shorts', 'live'].includes(parts[0])) return validId(parts[1]);
-    }
-  } catch (err) {
-    return null;
-  }
-  return null;
-}
-
 router.post('/music-player', async (req, res) => {
   const enabled = req.body.enabled === 'on';
   const youtubeUrl = (req.body.youtubeUrl || '').trim();
-  let defaultVolume = parseInt(req.body.defaultVolume, 10);
-  if (Number.isNaN(defaultVolume)) defaultVolume = 50;
+  const volumeInput = String(req.body.defaultVolume ?? '').trim();
+  let defaultVolume = /^\d+$/.test(volumeInput) ? Number(volumeInput) : 50;
   defaultVolume = Math.max(0, Math.min(100, defaultVolume));
 
-  const startSeconds = Math.max(0, parseTimeToSeconds(req.body.startTime));
-  const endSeconds = Math.max(0, parseTimeToSeconds(req.body.endTime));
+  const parsedStart = parseTimeToSeconds(req.body.startTime);
+  const parsedEnd = parseTimeToSeconds(req.body.endTime);
+  if (enabled && (parsedStart === null || parsedEnd === null)) {
+    req.flash('error', 'รูปแบบเวลาไม่ถูกต้อง กรุณาใช้วินาที, นาที:วินาที หรือ ชั่วโมง:นาที:วินาที');
+    return res.redirect(effectsRedirect(req));
+  }
+  const startSeconds = parsedStart ?? 0;
+  const endSeconds = parsedEnd ?? 0;
 
   if (enabled && !youtubeUrl) {
     req.flash('error', 'กรุณาใส่ลิงก์ YouTube ก่อนเปิดใช้งานเพลง');
