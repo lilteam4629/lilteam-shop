@@ -330,13 +330,14 @@ function stockPrize(stock, product, orderId) {
   };
 }
 
-function takePrizeItems(data, pool, count, product, orderId, randomInt) {
+function takePrizeItems(data, pool, count, product, orderId) {
   const remaining = poolRemainingStock(data, pool);
   const takeCount = Math.min(count, remaining.length);
   const chosen = [];
   for (let index = 0; index < takeCount; index += 1) {
-    const choice = randomInt(0, remaining.length);
-    const [stock] = remaining.splice(choice, 1);
+    // Admin stock rows are displayed oldest-first, so the newest item sits at
+    // the bottom. Consume that last item first to keep payouts bottom-to-top.
+    const stock = remaining.pop();
     chosen.push(stockPrize(stock, product, orderId));
     pool.remainingStockIds = pool.remainingStockIds.filter(id => String(id) !== String(stock.id));
   }
@@ -549,7 +550,7 @@ function drawRandomBox(data, {
       if (pool.entryProgressDraws >= pool.entryTargetDraws) {
         const available = poolRemainingStock(data, pool).length;
         const awardCount = available <= 1 ? available : randomAwardCount(Math.min(available - 1, MAX_RANDOM_BOX_PRIZE_ITEMS), randomInt);
-        prizeItems = takePrizeItems(data, pool, awardCount, product, orderId, randomInt);
+        prizeItems = takePrizeItems(data, pool, awardCount, product, orderId);
         pool.entryPrizeCount = prizeItems.length;
         pool.totalAwards += 1;
         pool.totalPrizeItems += prizeItems.length;
@@ -559,7 +560,7 @@ function drawRandomBox(data, {
       pool.recoveryProgressDraws += 1;
       const milestone = pool.recoveryMilestones[pool.recoveryMilestoneIndex];
       if (milestone && pool.recoveryProgressDraws >= milestone.atDraws) {
-        prizeItems = takePrizeItems(data, pool, milestone.count, product, orderId, randomInt);
+        prizeItems = takePrizeItems(data, pool, milestone.count, product, orderId);
         pool.recoveryMilestoneIndex += 1;
         pool.totalAwards += 1;
         pool.totalPrizeItems += prizeItems.length;

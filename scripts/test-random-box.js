@@ -111,6 +111,23 @@ function completeAllPrizes(scenario, { firstDraw = 500 } = {}) {
   return orders;
 }
 
+// Stock is displayed oldest-first in admin, placing the newest prize at the
+// bottom. Payouts must consume that bottom row first, even if storage order
+// differs from display order.
+const bottomToTopScenario = makeScenario({ count: 4, rate: 1, price: 1, seed: 401 });
+bottomToTopScenario.data.stockItems.forEach((stock, index) => {
+  stock.addedAt = new Date(Date.UTC(2026, 0, index + 1)).toISOString();
+});
+bottomToTopScenario.data.stockItems.reverse();
+const adminRowOrder = randomBox.stockItemsOldestFirst(
+  bottomToTopScenario.data.stockItems, bottomToTopScenario.product.id,
+).map(stock => stock.id);
+completeAllPrizes(bottomToTopScenario);
+const payoutOrder = bottomToTopScenario.data.orders.flatMap(order => order.items.flatMap(item =>
+  item.randomBoxDraw.prizeItems.map(prize => prize.stockItemId)));
+assert.deepStrictEqual(payoutOrder, [...adminRowOrder].reverse(),
+  'prizes are delivered from the bottom admin row to the top row');
+
 // User's worked example: 15 prizes, rate 1, ฿1 per draw. The first event
 // collects ฿100 and awards five; the remaining ten receive a separate,
 // hidden recovery target based on the original 15-prize stock batch.
