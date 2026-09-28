@@ -20,34 +20,36 @@ const ownerHeroFxCss = read('public/css/storefront-owner-home-hero-v23.css');
 const ownerHeroLayoutCss = read('public/css/storefront-owner-home-hero-v22.css');
 const heroCozyCss = read('public/css/storefront-home-hero-cozy-v1.css');
 const musicWidgetCss = read('public/css/storefront-music-unified-v1.css');
-const accountMenuCss = read('public/css/storefront-account-menu-mobile-v1.css');
+const accountMenuCss = read('public/css/storefront-account-menu-cozy-v1.css');
 
-assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*!req\.tenantShop/,
-  'the redesign must be enabled for the main store only');
-assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*?storefront-owner-home-v7\.css/,
-  'the owner stylesheet must be available for seamless navigation on the main site');
+assert.match(route, /viewData\.storefrontOwnerHomeV7\s*=\s*true/,
+  'the updated home should be served to both the primary store and tenant stores');
+assert.match(route, /viewData\.welcomePopupRedesign\s*=\s*true/,
+  'tenant welcome popups must use the accessible shared design');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v7\.css/,
+  'the shared home stylesheet must be available when the refreshed home is active');
 assert.doesNotMatch(layout, /storefront-owner-home-v(?:8|9|10|11|14|15)\.css/,
   'superseded main-home design layers must no longer be loaded');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v20\.css/,
-  'the new media-storefront stylesheet must only load on the owner storefront');
+  'the media-storefront stylesheet must load only on refreshed home pages');
 assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-owner-home-v21\.css/,
-  'the new readable product-card layer must only load on the owner storefront');
-assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-owner-home-hero-v23\.css[^\n]*rev=4/,
-  'the banner-only hero stylesheet must be cache-busted for the main store only');
-assert.match(layout, /if \(typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
-  'the cozy homepage layer must only load on the main storefront');
+  'the readable product-card layer must load only on refreshed home pages');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*storefront-owner-home-hero-v23\.css[^\n]*rev=5/,
+  'the banner-only hero stylesheet must be cache-busted for all refreshed shops');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[\s\S]*?storefront-home-cozy-v1\.css/,
+  'the cozy homepage layer must load for all refreshed stores');
 const musicWidgetLink = layout.split(/\r?\n/).find(line => line.includes('storefront-music-unified-v1.css')) || '';
-assert.ok(musicWidgetLink.includes('if (typeof isMainSite') && musicWidgetLink.includes('isMainSite') && !musicWidgetLink.includes('storefrontOwnerHomeV7'),
-  'one cache-busted music skin must load on every owner-store page and stay off rental storefronts');
+assert.ok(!musicWidgetLink.includes('if (') && musicWidgetLink.includes('rev=2'),
+  'one cache-busted music skin must load on every customer-facing shop page');
 assert.doesNotMatch(layout, /storefront-music-widget-cozy-v1\.css/,
   'the homepage-only player skin must not create a second page-specific appearance');
-assert.match(layout, /storefront-mobile-header-cozy-v3\.css[\s\S]*?if \(typeof isMainSite !== 'undefined' && isMainSite\)[^\n]*storefront-account-menu-mobile-v1\.css[^\n]*rev=3/,
-  'the redesigned main account menu must load after the main-store theme layers');
-assert.match(accountMenuCss, /\.store-nav--main \.store-nav__account-menu--main\s*\{[^}]*box-shadow:\s*0 18px 46px/s,
+assert.match(layout, /storefront-mobile-header-cozy-shared-v1\.css[\s\S]*?storefront-account-menu-cozy-v1\.css/,
+  'the shared mobile header and account menu styles must load for every shop');
+assert.match(accountMenuCss, /\.store-nav--cozy-owner \.store-nav__account-menu--main\s*\{[^}]*box-shadow:\s*0 18px 46px/s,
   'the account menu must read as a calm, elevated surface above the mobile storefront');
-assert.match(accountMenuCss, /\.store-nav--main \.store-nav__account-balance\s*\{[^}]*background:\s*color-mix/s,
+assert.match(accountMenuCss, /\.store-nav--cozy-owner \.store-nav__account-balance\s*\{[^}]*background:\s*color-mix/s,
   'the wallet balance must remain visually distinct and theme-aware');
-assert.match(accountMenuCss, /\.store-nav--main \.store-nav__balance-action\s*\{[^}]*min-height:\s*44px/s,
+assert.match(accountMenuCss, /\.store-nav--cozy-owner \.store-nav__balance-action\s*\{[^}]*min-height:\s*44px/s,
   'the top-up action must retain a mobile-sized touch target');
 assert.match(musicWidgetCss, /#music-widget\s*\{[^}]*width:\s*104px;[^}]*height:\s*54px;/s,
   'the shared music widget must remain a small dock on desktop and mobile');
@@ -62,11 +64,11 @@ assert.doesNotMatch(layout, /storefront-owner-home-v16\.(?:css|js)/,
 assert.doesNotMatch(layout, /storefront-owner-home-v13\.css/,
   'the rejected oversized banner treatment must no longer load');
 assert.match(home, /if \(ownerHomeV20\) \{[\s\S]*?<div class="owner-home-v20-shell" data-owner-home-layout="cozy-marketplace">[\s\S]*?<div class="owner-home-v20-main">/,
-  'the full-width content layout must be wrapped only for the main store');
+  'the shared full-width home layout must be wrapped when its route flag is active');
 assert.doesNotMatch(home, /owner-home-v20-sidebar|owner-home-v20-nav/,
   'the removed main-store sidebar must not render or remain as dead navigation');
 assert.match(home, /if \(ownerHomeV20\) \{ %><\/div><\/div><% \}/,
-  'the main-store content wrapper must close before shared lower page modules');
+  'the shared home content wrapper must close before lower page modules');
 assert.doesNotMatch(ownerHeroFxCss, /perspective\s*\(|rotate[XYZ]\s*\(|translateZ\s*\(|filter\s*:\s*blur\s*\(/i,
   'the main hero must avoid 3D transforms and blurred compositor layers that paint as black shapes on some mobile GPUs');
 assert.doesNotMatch(ownerHeroFxCss, /owner-home-v23-banner-(?:float|glint)[^}]*infinite|animation:[^;}]*owner-home-v23-banner-(?:float|glint)/i,
@@ -86,7 +88,7 @@ assert.match(home, /owner-home-v20-hero--banner-only[\s\S]*?if \(!ownerHomeBanne
 assert.doesNotMatch(home, /owner-home-v20-hero-note/,
   'the enlarged banner must not carry a floating text badge');
 assert.match(ownerHeroFxCss, /owner-home-v20-hero--banner-only[\s\S]*?width:\s*100%[\s\S]*?owner-home-v20-artwork[\s\S]*?width:\s*100%[\s\S]*?object-fit:\s*contain/s,
-  'the main-store banner must use the available width and preserve the full image');
+  'each shop banner must use the available width and preserve the full image');
 assert.match(heroCozyCss, /@media \(min-width:\s*901px\)[\s\S]*?owner-home-v20-hero--banner-only[\s\S]*?max-height:\s*none !important;[\s\S]*?height:\s*auto !important;[\s\S]*?object-fit:\s*contain !important;/,
   'the desktop banner must use its full row width at the original aspect ratio');
 assert.doesNotMatch(heroCozyCss, /max-height:\s*min\(52vh,\s*460px\)/,
@@ -102,7 +104,7 @@ assert.doesNotMatch(home, /id="home-new-arrivals"|owner-home-v24-/,
 assert.doesNotMatch(layout, /storefront-new-arrivals-(?:v1|mobile-v2|cozy-v2)\.css/,
   'the main homepage must not load styles for the removed new-arrivals section');
 assert.equal((home.match(/ownerHomeProductCard: ownerHomeV20/g) || []).length, 2,
-  'both main-store product grids must opt in to the new product-card design without affecting tenants');
+  'both refreshed product grids must use the same product-card design');
 assert.match(productCard, /const isMainStorefrontCard = typeof isMainSite !== 'undefined' && isMainSite/,
   'the shared product card must opt in to owner-only changes without altering tenant cards');
 assert.match(productCard, /if \(useOwnerHomeShowcase\) \{ %>[\s\S]*?owner-home-v21-product-card main-store-product-card[\s\S]*?owner-home-v21-summary[\s\S]*?owner-home-v21-name[\s\S]*?owner-home-v21-stock-badge[\s\S]*?owner-home-v21-purchase-row[\s\S]*?owner-home-v21-price-values[\s\S]*?owner-home-v21-buy/,
@@ -114,7 +116,7 @@ assert.match(productCard, /if \(isMainStorefrontCard\) \{[\s\S]*?main-store-prod
 assert.match(productCard, /owner-home-v21-media[\s\S]*?width="960" height="540"/,
   'the new card must reserve image space and preserve the full product image');
 assert.match(listing, /isMainStorefrontListing[\s\S]*?main-store-product-title-row[\s\S]*?main-store-product-stock/,
-  'the main catalog page must place each product stock badge beside its title');
+  'the shared catalog page must place each product stock badge beside its title');
 assert.doesNotMatch(home, /owner-home-v17-hero-shell|owner-home-v17-visual|owner-home-v17-banner-frame/,
   'the former split-text and framed-screen hero must be removed from the active homepage template');
 assert.doesNotMatch(home, /owner-home-v16|data-scene-motion-toggle|anime/i,
@@ -363,58 +365,75 @@ assert.match(mainProductCss, /\.main-store-product-card :is\(\.catalog-image, \.
 assert.match(mainProductCss, /\.main-store-product-stock\s*\{[^}]*var\(--gold\)/s,
   'stock badges beside product titles must use the saved storefront accent');
 
-const mainNavbarCss = read('public/css/storefront-navbar-main-v3.css');
-const mainNavbarStylesheet = postcss.parse(mainNavbarCss, { from: 'storefront-navbar-main-v3.css' });
-let mainNavbarRuleCount = 0;
-mainNavbarStylesheet.walkRules(rule => {
-  mainNavbarRuleCount += 1;
+const sharedNavbarCss = read('public/css/storefront-navbar-shared-v1.css');
+const sharedNavbarStylesheet = postcss.parse(sharedNavbarCss, { from: 'storefront-navbar-shared-v1.css' });
+let sharedNavbarRuleCount = 0;
+sharedNavbarStylesheet.walkRules(rule => {
+  sharedNavbarRuleCount += 1;
   for (const selector of rule.selectors) {
-    assert.ok(selector.includes('.store-nav--main'),
-      `the redesigned navigation must only apply to the main shop: ${selector}`);
+    assert.ok(selector.includes('.store-nav--cozy-owner'),
+      `shared navigation styles must stay scoped to the redesigned store header: ${selector}`);
   }
 });
-assert.match(mainNavbarCss, /grid-template-columns:\s*minmax\(170px, 1fr\) auto 38px auto/,
+assert.match(sharedNavbarCss, /grid-template-columns:\s*minmax\(170px, 1fr\) auto 38px auto/,
   'the redesigned header must keep the brand left and place navigation, search, and actions to its right');
-assert.match(mainNavbarCss, /justify-content:\s*flex-end/,
+assert.match(sharedNavbarCss, /justify-content:\s*flex-end/,
   'the navigation links must align to the right side of the header');
-assert.match(mainNavbarCss, /border-radius:\s*999px/,
+assert.match(sharedNavbarCss, /border-radius:\s*999px/,
   'the signup action must use the rounded treatment shown in the reference');
-assert.match(mainNavbarCss, /\.store-nav--main \.store-nav__mobile-toggle\s*\{\s*display:\s*none !important/s,
+assert.match(sharedNavbarCss, /\.store-nav--cozy-owner \.store-nav__mobile-toggle\s*\{\s*display:\s*none !important/s,
   'the mobile hamburger must not create an extra row on desktop');
-assert.match(mainNavbarCss, /min-height:\s*60px !important/,
+assert.match(sharedNavbarCss, /min-height:\s*60px !important/,
   'the desktop header must remain compact');
-assert.match(mainNavbarCss, /background:\s*var\(--gold\)/,
+assert.match(sharedNavbarCss, /background:\s*var\(--gold\)/,
   'header action colors must follow the accent selected in the admin theme');
-assert.match(mainNavbarCss, /background:\s*var\(--card\)/,
+assert.match(sharedNavbarCss, /background:\s*var\(--card\)/,
   'header surfaces must follow the background selected in the admin theme');
-assert.doesNotMatch(mainNavbarCss, /#[0-9a-f]{3,8}/i,
+assert.doesNotMatch(sharedNavbarCss, /#[0-9a-f]{3,8}/i,
   'the redesigned header must not introduce a fixed palette');
-assert.ok(mainNavbarRuleCount > 0, 'the main-store header redesign must include isolated styles');
+assert.ok(sharedNavbarRuleCount > 0, 'the shared header redesign must include scoped styles');
 const layoutHtml = read('src/views/layouts/main.ejs');
-const navbarV3Link = layoutHtml.split(/\r?\n/).find(line => line.includes('storefront-navbar-main-v3.css')) || '';
-assert.ok(navbarV3Link.includes('isMainSite') && navbarV3Link.includes('if ('),
-  'the new header stylesheet must only load on the main store');
+assert.match(layoutHtml, /storefront-navbar-shared-v1\.css/,
+  'the shared redesigned navigation stylesheet must be loaded for storefronts');
+assert.match(read('src/views/partials/navbar.ejs'), /store-nav--cozy-owner/,
+  'rental shop headers must opt into the shared navigation layout');
 
 const listingHtml = read('src/views/shop/listing.ejs');
-const mainCatalogCss = read('public/css/storefront-catalog-main-v2.css');
-assert.match(listingHtml, /if \(isMainStorefrontListing\)[\s\S]*?storefront-catalog-main-v2\.css/,
-  'the redesigned catalogue stylesheet must only load for the main store');
+const sharedCatalogCss = read('public/css/storefront-catalog-shared-v1.css');
+assert.match(listingHtml, /if \(isMainStorefrontListing\)[\s\S]*?storefront-catalog-shared-v1\.css/,
+  'the redesigned catalogue stylesheet must load for all refreshed shops');
 assert.match(listingHtml, /main-storefront-catalog-page/,
-  'the main-store listing must expose its isolated catalogue scope');
-const mainCatalogStylesheet = postcss.parse(mainCatalogCss, { from: 'storefront-catalog-main-v2.css' });
-let mainCatalogRuleCount = 0;
-mainCatalogStylesheet.walkRules(rule => {
+  'the storefront listing must expose its catalog styling scope');
+const sharedCatalogStylesheet = postcss.parse(sharedCatalogCss, { from: 'storefront-catalog-shared-v1.css' });
+let sharedCatalogRuleCount = 0;
+sharedCatalogStylesheet.walkRules(rule => {
   if (rule.parent && rule.parent.type === 'atrule' && /keyframes$/i.test(rule.parent.name)) return;
-  mainCatalogRuleCount += 1;
+  sharedCatalogRuleCount += 1;
   for (const selector of rule.selectors) {
-    assert.ok(selector.includes('body.storefront-owner-lilteam') && selector.includes('.main-storefront-catalog-page'),
-      `main catalogue style could leak into tenant storefronts: ${selector}`);
+    assert.ok(selector.includes('body.storefront-customer-refresh') && selector.includes('.main-storefront-catalog-page'),
+      `shared catalog style must be scoped to updated storefronts: ${selector}`);
   }
 });
-assert.match(mainCatalogCss, /\.catalog-grid\s*\{\s*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/,
-  'the main catalogue must show four products per desktop row');
-assert.match(mainCatalogCss, /@media\s*\(max-width:\s*760px\)[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/,
-  'the main catalogue must retain a readable two-column mobile layout');
-assert.ok(mainCatalogRuleCount > 0, 'main catalogue styles must remain scoped to the primary storefront');
+assert.match(sharedCatalogCss, /\.catalog-grid\s*\{\s*grid-template-columns:\s*repeat\(4,\s*minmax\(0,\s*1fr\)\)/,
+  'the shared catalogue must show four products per desktop row');
+assert.match(sharedCatalogCss, /@media\s*\(max-width:\s*760px\)[\s\S]*?grid-template-columns:\s*repeat\(2,\s*minmax\(0,\s*1fr\)\)/,
+  'the shared catalogue must retain a readable two-column mobile layout');
+assert.ok(sharedCatalogRuleCount > 0, 'shared catalogue styles must stay scoped to refreshed shops');
 
-console.log(`Owner homepage isolation checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount + productCardRuleCount + heroV23RuleCount + mainNavbarRuleCount + mainCatalogRuleCount} scoped CSS rules).`);
+assert.match(home, /settings\.shopName \|\| 'ร้านค้า'/,
+  'each tenant home must use that shop\'s own name in its refreshed hero');
+assert.match(home, /settings\.hero\.bannerImage/,
+  'each tenant home must read its configured banner from the active shop settings');
+assert.match(productCard, /src="<%= p\.images\[0\] %>"/,
+  'refreshed product cards must read image URLs from the active shop product records');
+const app = read('src/app.js');
+assert.match(app, /res\.locals\.storefrontCustomerRefresh\s*=\s*true/,
+  'the shared storefront theme applies across rental routes without changing tenant data scope');
+assert.match(app, /res\.locals\.storefrontCozyNav\s*=\s*true/,
+  'the updated storefront navigation is enabled across primary and rental shops');
+assert.match(app, /res\.locals\.settings\s*=\s*store\.data\.settings/,
+  'layout branding continues to read settings from the request-scoped shop');
+assert.match(route, /const active = req\?\.tenantShop \? localProducts : localProducts\.concat\(remote\)/,
+  'a rental storefront must keep rendering its own catalog records instead of the main-shop catalog');
+
+console.log(`Shared tenant storefront checks passed (${ruleCount + redesignRuleCount + gameWorldRuleCount + cinematicRuleCount + productCardRuleCount + heroV23RuleCount + sharedNavbarRuleCount + sharedCatalogRuleCount} scoped CSS rules).`);

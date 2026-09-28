@@ -51,7 +51,7 @@
 </style>
 <% } %>
 
-<% const ownerHomeV20 = typeof isMainSite !== 'undefined' && isMainSite; %>
+<% const ownerHomeV20 = typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7; %>
 <% if (ownerHomeV20) { %>
 <div class="owner-home-v20-shell" data-owner-home-layout="cozy-marketplace">
   <div class="owner-home-v20-main">
@@ -70,7 +70,7 @@
   <section class="owner-home-v20-hero owner-home-v23-hero<%= ownerHomeBanner ? ' owner-home-v20-hero--banner owner-home-v20-hero--banner-only' : '' %><%= ownerHomeBanner || ownerHomeHeroProduct ? '' : ' owner-home-v20-hero--no-art' %>" id="home-top" <%= ownerHomeBanner ? `aria-label="${settings.shopName || 'LILTeam Shop'}"` : 'aria-labelledby="owner-home-v20-title"' %>>
     <% if (!ownerHomeBanner) { %>
     <div class="owner-home-v20-hero-content">
-      <p class="owner-home-v20-eyebrow"><span></span> LILTEAM SHOP <i>·</i> FEATURED STORE</p>
+      <p class="owner-home-v20-eyebrow"><span></span> <%= settings.shopName || 'ร้านค้า' %> <i>·</i> FEATURED STORE</p>
       <h1 id="owner-home-v20-title"><%= settings.shopName || 'LILTeam Shop' %></h1>
       <p class="owner-home-v20-description"><%= settings.tagline || 'เลือกสินค้าที่ใช่ พร้อมลุยในแบบของคุณ' %></p>
       <% if (settings.openHours) { %>

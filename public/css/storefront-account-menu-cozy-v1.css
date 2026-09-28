@@ -1,0 +1,291 @@
+/* Warm, calm account hierarchy for the storefronts. */
+.store-nav--cozy-owner .store-nav__account-menu--main {
+  display: grid !important;
+  gap: 0 !important;
+  width: min(370px, calc(100vw - 24px)) !important;
+  max-height: calc(100dvh - 84px - max(12px, env(safe-area-inset-bottom))) !important;
+  padding: 15px !important;
+  overflow-x: hidden !important;
+  overflow-y: auto !important;
+  overscroll-behavior: contain;
+  border: 1px solid color-mix(in srgb, var(--theme-line, var(--border)) 90%, var(--gold)) !important;
+  border-radius: 18px !important;
+  background: color-mix(in srgb, var(--theme-card-surface, var(--card)) 98%, var(--gold)) !important;
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--text) 16%, transparent), inset 0 1px color-mix(in srgb, white 52%, transparent) !important;
+  backdrop-filter: none !important;
+  isolation: isolate;
+  scrollbar-color: var(--border) transparent;
+  scrollbar-width: thin;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main::before,
+.store-nav--cozy-owner .store-nav__account-menu--main::after {
+  display: none !important;
+  content: none !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__profile-card {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+.store-nav--cozy-owner .store-nav__profile-person {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 11px;
+  padding: 1px 1px 2px;
+}
+
+.store-nav--cozy-owner .store-nav__profile-avatar {
+  flex: none;
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 14px !important;
+  font-size: 14px !important;
+}
+
+.store-nav--cozy-owner .store-nav__profile-person > span:last-child {
+  min-width: 0;
+}
+
+.store-nav--cozy-owner .store-nav__profile-person strong {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 750;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.store-nav--cozy-owner .store-nav__profile-person small {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.store-nav--cozy-owner .store-nav__profile-person small svg {
+  width: 13px;
+  height: 13px;
+  color: var(--gold-text);
+}
+
+.store-nav--cozy-owner .store-nav__account-balance {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 10px 11px;
+  border: 1px solid color-mix(in srgb, var(--gold) 12%, var(--theme-line, var(--border)));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--gold) 5%, var(--theme-card-surface, var(--card)));
+}
+
+.store-nav--cozy-owner .store-nav__account-balance > span small {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--text-3);
+  font-size: 10px;
+}
+
+.store-nav--cozy-owner .store-nav__account-balance > span strong {
+  color: var(--gold-text);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 800;
+}
+
+.store-nav--cozy-owner .store-nav__balance-action {
+  display: inline-flex;
+  min-height: 44px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 15%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--gold) 10%, var(--theme-card-surface, var(--card)));
+  color: var(--gold-text);
+  font-size: 12px;
+  font-weight: 700;
+  transition: background-color .16s ease;
+}
+
+.store-nav--cozy-owner .store-nav__balance-action:hover {
+  background: color-mix(in srgb, var(--gold) 16%, var(--theme-card-surface, var(--card)));
+}
+
+.store-nav--cozy-owner .store-nav__balance-action svg {
+  width: 16px;
+  height: 16px;
+}
+
+.store-nav--cozy-owner .store-nav__account-section {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 2px !important;
+  margin: 12px 0 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-section-title {
+  margin: 0 0 3px;
+  padding: 0 5px;
+  color: var(--text-3);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .015em;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__admin-link {
+  min-height: 49px !important;
+  margin: 0 !important;
+  padding: 6px 9px !important;
+  border: 0 !important;
+  border-radius: 14px !important;
+  background: color-mix(in srgb, var(--gold) 9%, var(--theme-card-surface, var(--card))) !important;
+  color: var(--gold-text) !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__admin-link i {
+  width: 29px !important;
+  height: 29px !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: var(--gold-text) !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__admin-link strong {
+  font-size: 13px;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__admin-link small {
+  color: var(--text-3) !important;
+  font-size: 10px !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__menu-group > a {
+  display: flex !important;
+  min-height: 45px !important;
+  align-items: center !important;
+  gap: 10px !important;
+  padding: 6px 8px !important;
+  border-radius: 14px !important;
+  color: var(--text-2) !important;
+  font-size: 13px !important;
+  font-weight: 650 !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__menu-group > a + a {
+  border-top: 0 !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__menu-group > a i {
+  display: grid;
+  width: 29px !important;
+  height: 29px !important;
+  flex: none;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--gold) 9%, transparent);
+  border-radius: 10px !important;
+  background: color-mix(in srgb, var(--gold) 5%, var(--theme-card-surface, var(--card))) !important;
+  color: var(--gold-text) !important;
+  font-style: normal;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__menu-group > a i svg {
+  width: 17px !important;
+  height: 17px !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__menu-group > a em {
+  margin-left: auto;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__menu-group > a:hover {
+  background: color-mix(in srgb, var(--gold) 7%, var(--theme-card-surface, var(--card))) !important;
+  color: var(--text) !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main a:focus-visible {
+  outline: 2px solid var(--gold) !important;
+  outline-offset: 2px;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__logout {
+  display: flex;
+  min-height: 45px !important;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0 0 !important;
+  padding: 7px 8px !important;
+  border-top: 1px solid color-mix(in srgb, var(--theme-line, var(--border)) 85%, transparent) !important;
+  border-radius: 14px !important;
+  transition: background-color .16s ease;
+  color: var(--coral) !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__logout:hover {
+  background: color-mix(in srgb, var(--coral) 7%, var(--theme-card-surface, var(--card))) !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__logout i {
+  display: grid;
+  width: 29px;
+  height: 29px;
+  flex: none;
+  place-items: center;
+  background: transparent !important;
+  color: var(--coral) !important;
+}
+
+.store-nav--cozy-owner .store-nav__account-menu--main .store-nav__logout svg {
+  width: 17px;
+  height: 17px;
+}
+
+@media (max-width: 640px) {
+  .store-nav--cozy-owner .store-nav__account-menu--main {
+    position: fixed !important;
+    z-index: 1000 !important;
+    top: max(68px, calc(env(safe-area-inset-top) + 56px)) !important;
+    right: 12px !important;
+    left: auto !important;
+    width: min(370px, calc(100vw - 24px)) !important;
+    max-height: calc(100dvh - 80px - max(12px, env(safe-area-inset-bottom))) !important;
+    padding: 12px !important;
+    border-radius: 18px !important;
+  }
+
+  .store-nav--cozy-owner .store-nav__account-menu--main .store-nav__profile-person {
+    gap: 10px;
+  }
+
+  .store-nav--cozy-owner .store-nav__account-menu--main .store-nav__account-section {
+    margin-top: 10px !important;
+  }
+
+  .store-nav--cozy-owner .store-nav__account-menu--main .store-nav__account-section-title {
+    margin-bottom: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .store-nav--cozy-owner .store-nav__balance-action {
+    transition: none;
+  }
+}

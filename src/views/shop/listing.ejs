@@ -1,6 +1,6 @@
-<% const isMainStorefrontListing = typeof isMainSite !== 'undefined' && isMainSite; %>
+<% const isMainStorefrontListing = typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh; %>
 <% const mainCatalogLayout = isMainStorefrontListing && listType; %>
-<% if (isMainStorefrontListing) { %><link rel="stylesheet" href="<%= asset('css/storefront-catalog-main-v2.css') %>" /><link rel="stylesheet" href="<%= asset('css/storefront-catalog-main-v3.css') %>" /><% } %>
+<% if (isMainStorefrontListing) { %><link rel="stylesheet" href="<%= asset('css/storefront-catalog-shared-v1.css') %>" /><link rel="stylesheet" href="<%= asset('css/storefront-catalog-shared-v2.css') %>" /><% } %>
 <style>.catalog-card[hidden]{display:none!important}</style>
 <section class="catalog-page w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-8<%= isMainStorefrontListing ? ' main-storefront-catalog-page' : '' %>">
   <% if (isMainStorefrontListing) { %>

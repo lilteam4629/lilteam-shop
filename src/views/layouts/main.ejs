@@ -50,22 +50,23 @@
   <link rel="stylesheet" href="<%= asset('css/storefront-catalog-v1.css') %>" />
   <link rel="stylesheet" href="<%= asset('css/storefront-auth-v1.css') %>" />
   <link rel="stylesheet" href="<%= asset('css/scroll-motion-v1.css') %>" />
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v7.css') %>" /> <% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v7.css') %>" /> <% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-main-v2.css') %>" /><% } %>
   <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v20.css') %>&amp;rev=4" /><% } %>
   <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-v21.css') %>" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-hero-v22.css') %>" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-hero-v23.css') %>&amp;rev=4" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-category-images-v1.css') %>&amp;rev=1" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-category-gallery-cozy-v2.css') %>" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-section-chrome-v1.css') %>" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-hero-v22.css') %>" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-owner-home-hero-v23.css') %>&amp;rev=5" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-category-images-v1.css') %>&amp;rev=1" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-category-gallery-cozy-v2.css') %>" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-section-chrome-v1.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-main-v3.css') %>&amp;rev=16" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/latest-orders-3d-v1.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-announcement-width-v1.css') %>" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-compact-v1.css') %>&amp;rev=1" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-mobile-v1.css') %>&amp;rev=2" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-theme-cohesion-v1.css') %>" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-music-unified-v1.css') %>&amp;rev=1" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-compact-v1.css') %>&amp;rev=1" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-mobile-v1.css') %>&amp;rev=2" /><% } %>
+  <link rel="stylesheet" href="<%= asset('css/storefront-theme-cohesion-v1.css') %>" />
+  <link rel="stylesheet" href="<%= asset('css/storefront-music-unified-v1.css') %>&amp;rev=2" />
+  <link rel="stylesheet" href="<%= asset('css/storefront-navbar-shared-v1.css') %>&amp;rev=1" />
   <style>
     <%- typeof themeCss !== 'undefined' ? themeCss : '' %>
 
@@ -196,12 +197,14 @@
       #page-loading-overlay .loading-ring::before { animation-duration: 1.6s; }
     }
   </style>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v1.css') %>" /><link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v2.css') %>" /><link rel="stylesheet" href="<%= asset('css/storefront-mobile-header-cozy-v3.css') %>&amp;rev=4" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-account-menu-mobile-v1.css') %>&amp;rev=3" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite && typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-cozy-v1.css') %>" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-hero-cozy-v1.css') %>" /><% } %>
+  <link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v1.css') %>" />
+  <link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v2.css') %>" />
+  <link rel="stylesheet" href="<%= asset('css/storefront-mobile-header-cozy-shared-v1.css') %>&amp;rev=1" />
+  <link rel="stylesheet" href="<%= asset('css/storefront-account-menu-cozy-v1.css') %>&amp;rev=1" />
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-cozy-v1.css') %>" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-hero-cozy-v1.css') %>" /><% } %>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %>">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh ? ' storefront-customer-refresh' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %>">
   <div id="page-loading-overlay" aria-hidden="true">
     <div class="loading-ring">
       <% if (settings.branding && settings.branding.logoImage) { %>
@@ -544,7 +547,6 @@
   %>
   <% if (musicVideoId) { %>
   <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>" data-start-seconds="<%= settings.music.startSeconds || 0 %>" data-end-seconds="<%= settings.music.endSeconds || 0 %>">
-    <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
     <button id="music-toggle-btn" type="button" aria-label="เล่นเพลง" title="เล่นเพลง / หยุดเพลง" class="music-widget__toggle relative flex items-center text-left">
       <span class="music-widget__artwork" aria-hidden="true">
         <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="" />
@@ -557,14 +559,6 @@
       <span id="music-playing-ring" class="hidden absolute inset-0 rounded-[inherit] border border-[var(--gold)] pointer-events-none"></span>
     </button>
     <button id="music-settings-btn" type="button" aria-label="เปิดแผงควบคุมเพลง" title="ระดับเสียงและข้อมูลเพลง" class="music-widget__expand" aria-expanded="false" aria-controls="music-panel"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6" /></svg></button>
-    <% } else { %>
-    <button id="music-toggle-btn" type="button" aria-label="เล่นเพลง" title="เล่นเพลง / หยุดเพลง" class="relative w-14 h-14 rounded-full bg-[var(--card)] border border-[var(--border)] shadow-lg flex items-center justify-center text-xl overflow-hidden hover:border-[var(--gold)]/60 transition">
-      <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" class="absolute inset-0 w-full h-full object-cover opacity-40" alt="" />
-      <span id="music-icon" class="relative z-10">🎵</span>
-      <span id="music-playing-ring" class="hidden absolute inset-0 rounded-full border-2 border-[var(--gold)] animate-ping"></span>
-    </button>
-    <button id="music-settings-btn" type="button" aria-label="ตั้งค่าเพลง" title="ระดับเสียงและข้อมูลเพลง" class="absolute -top-2 -left-2 z-20 w-7 h-7 rounded-full bg-[var(--input)] border border-[var(--border-light)] text-xs shadow-lg hover:border-[var(--gold)]"><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-1.6 2.8-.2-.1a1.7 1.7 0 0 0-1.8.2l-.2.1h-3.2l-.1-.2a1.7 1.7 0 0 0-1.5-1l-.2.1-2.8-1.6.1-.2a1.7 1.7 0 0 0-.2-1.8l-.1-.2v-3.2l.2-.1a1.7 1.7 0 0 0 1-1.5l-.1-.2L11 7.3l.2.1a1.7 1.7 0 0 0 1.8-.2l.2-.1h3.2l.1.2a1.7 1.7 0 0 0 1.5 1l.2-.1 2.8 1.6-.1.2a1.7 1.7 0 0 0 .2 1.8l.1.2v3.2z" transform="translate(-3 -3) scale(1.25)"/></svg></button>
-    <% } %>
 
     <div id="music-panel" class="music-panel hidden absolute bottom-16 right-0 w-64 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden text-[var(--text)]">
       <div class="music-panel__media relative aspect-video bg-[#0c0a06]">

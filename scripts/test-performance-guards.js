@@ -50,7 +50,7 @@ assert.match(shopRoutes, /const HOME_PAGE_SIZE = 24/, 'home must cap the initial
 assert.match(shopRoutes, /active\.slice\(\(page - 1\) \* HOME_PAGE_SIZE, page \* HOME_PAGE_SIZE\)/, 'home must paginate without dropping catalog products');
 assert.match(shopRoutes, /UNPAGINATED_HOME_TENANTS = new Set\(\['moopee-shop'\]\)/, 'Moopee Shop must be the only tenant with an unpaginated home catalog');
 assert.match(shopRoutes, /welcomePopupRedesign: false/, 'tenant and secondary storefront renders must keep the legacy welcome popup by default');
-assert.match(shopRoutes, /viewData\.welcomePopupRedesign = !req\.tenantShop/, 'welcome popup redesign must be enabled for the main shop only');
+assert.match(shopRoutes, /viewData\.welcomePopupRedesign = true/, 'the accessible welcome popup redesign must be enabled for every tenant storefront');
 assert.match(homeView, /<% if \(showWelcomePopupRedesign\) \{ %><link rel="stylesheet" href="<%= asset\('css\/storefront-welcome-popup-experiment-v1\.css'\) %>" \/>/, 'main shop must load the redesigned welcome popup styles');
 assert.match(homeView, /const showWelcomePopupRedesign = Boolean\(welcomePopupRedesign \|\| welcomePopupExperiment\)/, 'local popup experiments must keep working independently of production rollout');
 assert.match(welcomePopupCss, /welcome-popup-slider img\{object-fit: contain;object-position: center\}/, 'announcement images must remain fully visible without cropping');

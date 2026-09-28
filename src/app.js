@@ -209,6 +209,10 @@ app.use((req, res, next) => {
   // configuration from a rented shop's own credentials.
   res.locals.isMainSite = !req.tenantShop;
   res.locals.isSystemLab = !!req.tenantShop?.isSystemLab;
+  // Storefront presentation is shared by the platform and rented shops. Each
+  // request still reads its theme and content from the active tenant context.
+  res.locals.storefrontCozyNav = true;
+  res.locals.storefrontCustomerRefresh = true;
   // Absolute URL of the current page, for the og:url share tag — falls back
   // to this when a route doesn't pass its own ogUrl.
   res.locals.currentRequestUrl = `${req.protocol}://${req.get('host')}${req.originalUrl}`;

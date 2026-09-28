@@ -16,12 +16,12 @@ assert.ok(script, 'storefront music script should exist');
 const widgetMarkup = layout.slice(layout.indexOf('<div id="music-widget"'), layout.indexOf('<div id="music-yt-player"'));
 const compactMusicCss = fs.readFileSync(path.join(__dirname, '..', 'public/css/storefront-music-unified-v1.css'), 'utf8');
 assert.equal((layout.match(/id="music-widget"/g) || []).length, 1, 'one shared player must be rendered by the public layout');
-assert.match(layout, /^  <% if \(typeof isMainSite !== 'undefined' && isMainSite\) \{ %><link rel="stylesheet" href="<%= asset\('css\/storefront-music-unified-v1\.css'\) %>&amp;rev=1" \/><% } %>$/m,
-  'the unified music skin must load on every page of the owner storefront only');
+assert.match(layout, /<link rel="stylesheet" href="<%= asset\('css\/storefront-music-unified-v1\.css'\) %>&amp;rev=2" \/>/,
+  'the unified music skin must load across every storefront');
 assert.doesNotMatch(widgetMarkup, /storefrontOwnerHomeV7|music-minimize-btn|music-expand-btn/,
   'music markup must not switch structure on the homepage');
 assert.match(widgetMarkup, /music-widget__artwork[\s\S]*music-collapsed-title[\s\S]*music-collapsed-state[\s\S]*music-widget__expand/,
-  'the owner storefront must use the shared player controls');
+  'every shop must use the shared player controls');
 assert.match(compactMusicCss, /#music-widget\s*\{[^}]*width:\s*104px;[^}]*height:\s*54px;/s,
   'the minimized owner music dock should stay compact instead of showing a wide title bar');
 assert.match(compactMusicCss, /#music-widget \.music-widget__copy\s*\{\s*display:\s*none;/,
@@ -38,8 +38,8 @@ assert.match(compactMusicCss, /#music-widget #music-panel\s*\{[^}]*width:\s*min\
   'the expanded panel should use the redesigned responsive width and clean surface');
 assert.match(compactMusicCss, /#music-widget \.music-panel__state\s*\{[^}]*font-size:\s*10px;/s,
   'the expanded player should show a readable playback status');
-assert.match(widgetMarkup, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*music-widget__artwork[\s\S]*else \{ %>[\s\S]*id="music-icon" class="relative z-10">🎵/,
-  'rental storefronts must retain their existing player markup');
+assert.doesNotMatch(widgetMarkup, /typeof isMainSite|class="relative z-10">🎵/,
+  'rental storefronts must not fall back to the old player markup');
 
 function makeHarness(defaultVolume, options = {}) {
   const elements = new Map();
