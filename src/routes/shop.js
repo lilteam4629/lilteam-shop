@@ -115,6 +115,7 @@ function latestOrderCards() {
 }
 
 const HOME_PAGE_SIZE = 24;
+const HOME_SECTION_PREVIEW_SIZE = 8;
 
 function storefrontFilterTags() {
   return visibleStorefrontCategories(store.data.filterTags);
@@ -163,7 +164,12 @@ function homeViewData(heroPreviewV2 = false, requestedPage = 1, req = null) {
       ? (Array.isArray(section.productIds) ? section.productIds : [])
         .map(id => byId.get(String(id))).filter(Boolean)
       : newestProducts.slice(0, section.limit || 5);
-    return { id: section.id, title: section.title, products };
+    return {
+      id: section.id,
+      title: section.title,
+      totalProducts: products.length,
+      products: products.slice(0, HOME_SECTION_PREVIEW_SIZE),
+    };
   }).filter(section => section.products.length);
   // Every product is still reachable (nothing is silently capped) — just
   // paginated instead of rendering the entire catalog in one page load,

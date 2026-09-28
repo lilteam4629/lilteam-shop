@@ -62,6 +62,9 @@ assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigati
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
 assert.doesNotMatch(adminLayout, /closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/, 'ordinary admin links must navigate directly like rent-app');
 assert.match(shopRoutes, /const HOME_PAGE_SIZE = 24/, 'home must cap the initial product DOM to 24 items');
+assert.match(shopRoutes, /const HOME_SECTION_PREVIEW_SIZE = 8/, 'featured home sections must cap the initial product DOM to eight cards each');
+assert.match(shopRoutes, /totalProducts: products\.length,[\s\S]{0,100}products: products\.slice\(0, HOME_SECTION_PREVIEW_SIZE\)/, 'featured section previews must keep the full item count while rendering only the initial cards');
+assert.match(homeView, /section\.totalProducts \|\| section\.products\.length/, 'featured section headings must continue to show the full item count');
 assert.match(shopRoutes, /active\.slice\(\(page - 1\) \* HOME_PAGE_SIZE, page \* HOME_PAGE_SIZE\)/, 'every storefront must paginate without dropping catalog products');
 assert.doesNotMatch(shopRoutes, /UNPAGINATED_HOME_TENANTS|showAllProducts/, 'no storefront may bypass the initial home catalog page limit');
 assert.match(shopRoutes, /viewData\.storefrontOwnerHomeV7 = true/, 'every standard storefront home must enable the shared layout fallback');

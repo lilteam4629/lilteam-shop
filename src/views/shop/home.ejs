@@ -849,7 +849,7 @@
       <section id="home-section-<%= section.id %>" class="scroll-mt-28">
       <% if (ownerHomeV20) { %>
         <header class="home-catalog-heading-row home-section-heading-row">
-          <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1-.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2><%= section.title %></h2><p><%= /ขายดี/.test(section.title) ? 'Best Sellers' : 'Featured Products' %>&nbsp; • &nbsp;<%= section.products.length %> รายการ</p></span></div>
+          <div class="home-catalog-heading-title"><span class="home-catalog-heading-icon" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24"><path d="m12 2 1.65 6.35L20 10l-6.35 1.65L12 18l-1.65-6.35L4 10l6.35-1.65L12 2Z"/><path d="m19 15 .9 2.1L22 18l-2.1-.9L19 21l-.9-2.1L16 18l2.1-.9L19 15Z"/></svg></span><span><h2><%= section.title %></h2><p><%= /ขายดี/.test(section.title) ? 'Best Sellers' : 'Featured Products' %>&nbsp; • &nbsp;<%= section.totalProducts || section.products.length %> รายการ</p></span></div>
           <span class="home-catalog-heading-rule" aria-hidden="true"></span>
           <a class="home-catalog-heading-cta" href="/products">ดูเพิ่มเติม <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </header>
