@@ -1,0 +1,51 @@
+<link rel="stylesheet" href="<%= asset('css/admin-experiment-efootball-import-v1.css') %>" />
+<div class="experiment-app efhub-import-page">
+  <div class="experiment-main">
+    <header class="experiment-topbar"><span class="experiment-live-page-title">นำเข้าการ์ดผู้เล่น</span><span class="experiment-user-name"><%= currentUser?.username || 'admin' %></span></header>
+    <main class="experiment-content efhub-import-content">
+      <a class="efhub-back-link" href="/admin/filter-tags"><span aria-hidden="true">←</span> กลับคลังตัวกรอง</a>
+      <section class="efhub-hero">
+        <div class="efhub-hero-copy">
+          <span class="efhub-kicker">eFOOTBALL · PLAYER CARD LIBRARY</span>
+          <h1>ตรวจชุดการ์ดก่อนนำเข้า</h1>
+          <p>เลือกนำรูปการ์ดจาก eFHUB มาเป็นแท็กตัวกรองสินค้า ตรวจดูรายชื่อและรายการที่จะเปลี่ยนก่อนยืนยัน</p>
+          <a class="efhub-source-link" href="<%= sourceInfo.sourceUrl %>" target="_blank" rel="noopener noreferrer">แหล่งข้อมูล: <%= sourceInfo.source %> <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="efhub-hero-mark" aria-hidden="true"><svg viewBox="0 0 48 48"><path d="M10 7h20l8 8v26H10z"/><path d="M30 7v9h8M17 24h14M17 31h14"/><circle cx="19" cy="16" r="4"/></svg></div>
+      </section>
+
+      <section class="efhub-summary" aria-label="สรุปชุดนำเข้า">
+        <div><span>การ์ดในชุดนี้</span><strong><%= players.length %></strong><small>รายการจาก eFHUB</small></div>
+        <div><span>มีอยู่แล้ว</span><strong><%= players.filter(player => player.alreadyImported).length %></strong><small>นำเข้าอีกครั้งจะอัปเดตข้อมูล</small></div>
+        <div><span>เพิ่มใหม่</span><strong><%= players.filter(player => !player.alreadyImported).length %></strong><small>สร้างแท็กตัวกรองใหม่</small></div>
+        <div class="efhub-summary-note"><span class="efhub-note-icon" aria-hidden="true">i</span><p>การนำเข้านี้เพิ่มเฉพาะรูปในคลังตัวกรอง <b>ไม่สร้างสินค้า</b> และไม่เปลี่ยนหน้าร้านจนกว่าจะผูกแท็กกับสินค้า</p></div>
+      </section>
+
+      <section class="efhub-player-panel" aria-labelledby="efhub-player-title">
+        <div class="efhub-section-head">
+          <div><span class="efhub-section-kicker">IMPORT PREVIEW</span><h2 id="efhub-player-title">การ์ดที่จะนำเข้า</h2><p>ตรวจชื่อ ตำแหน่ง และเรตติ้งได้ก่อนยืนยัน</p></div>
+          <span class="efhub-total"><%= players.length %> ใบ</span>
+        </div>
+        <% if (players.length) { %>
+          <div class="efhub-player-grid">
+            <% players.forEach(player => { %>
+              <article class="efhub-player-card">
+                <div class="efhub-player-art"><img src="<%= player.imageUrl %>" alt="การ์ดผู้เล่น <%= player.name %>" loading="lazy" decoding="async" /><span class="efhub-rating"><%= player.rating %></span></div>
+                <div class="efhub-player-copy"><strong title="<%= player.name %>"><%= player.name %></strong><div><span class="efhub-position"><%= player.position %></span><span class="efhub-import-state <%= player.alreadyImported ? 'is-existing' : 'is-new' %>"><%= player.alreadyImported ? 'อัปเดตข้อมูลเดิม' : 'เพิ่มใหม่' %></span></div></div>
+              </article>
+            <% }) %>
+          </div>
+        <% } else { %>
+          <div class="efhub-empty"><strong>ไม่พบการ์ดในชุดนำเข้า</strong><p>กลับไปคลังตัวกรองแล้วลองใหม่ภายหลัง</p></div>
+        <% } %>
+      </section>
+
+      <form class="efhub-import-form" action="/admin/filter-tags/efootball/import" method="post">
+        <% if (staleCount) { %>
+          <label class="efhub-cleanup-option"><input type="checkbox" name="removeStale" value="1" /><span class="efhub-checkbox-mark" aria-hidden="true">✓</span><span><strong>ลบการ์ดเก่าที่ไม่มีในชุดต้นทาง <b><%= staleCount %></b></strong><small>การลบนี้จะถอดแท็กเหล่านั้นออกจากสินค้าที่ผูกไว้ด้วย ถ้าไม่เลือก ระบบจะเก็บแท็กเก่าไว้</small></span></label>
+        <% } %>
+        <div class="efhub-import-footer"><a href="/admin/filter-tags">ยกเลิกและกลับคลังตัวกรอง</a><button class="experiment-button primary" type="submit" <%= players.length ? '' : 'disabled' %>><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> ยืนยันนำเข้า <%= players.length %> การ์ด</button></div>
+      </form>
+    </main>
+  </div>
+</div>

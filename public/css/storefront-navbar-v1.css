@@ -241,3 +241,9 @@ html:not(.light) .store-nav__account-name,html:not(.light) .store-nav__chevron{c
   }
   .store-nav__mobile-toggle>span{width:16px!important;height:1.6px!important}
 }
+
+/* The main storefront styles also make every round utility button visible.
+   Keep the hamburger out of the desktop grid even when those styles load later. */
+@media(min-width:1101px){
+  .store-nav__inner > .store-nav__round.store-nav__mobile-toggle{display:none!important}
+}

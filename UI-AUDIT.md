@@ -32,3 +32,11 @@
 ## Reference boundary
 
 โครงลำดับแบบ editorial (hero → proof → benefits → products → process → FAQ) ได้แรงบันดาลใจจาก [kiddyxstore.com](https://kiddyxstore.com/) แต่ใช้ copy, routes, metrics, stock และระบบชำระเงินจริงของ LilTeam เท่านั้น ไม่คัดลอก assets หรือ claims ของเว็บอ้างอิง
+
+## Theme propagation — 2026-09-26
+
+- ต่อ semantic surface/ink/accent tokens จาก `src/services/theme.js` เข้ากับ shared public layout เพื่อให้ทุก route ที่ใช้ `layouts/main` อ่านธีมร้านเดียวกัน รวมถึงหน้ารายการสินค้า รายละเอียดสินค้า บัญชี ตะกร้า ติดต่อ และช่วยเหลือ
+- เพิ่ม `public/css/storefront-theme-cohesion-v1.css` สำหรับพื้นผิวการ์ด/ตัวกรอง/ฟอร์ม/เมนู/ปุ่มสถานะ และทำให้ปุ่มรองกับสินค้าหมดไม่ล็อกสีดำในโหมดสว่าง
+- ตรวจ `/products` บน localhost ทั้งโหมดสว่างและมืด; `npm run test:theme` ผ่านครบ 616 ชุดสี
+- `npm run test:smoke` ยังหยุดที่ assertion เดิมของ `/admin` เรื่อง unified sidebar shell; ไม่เกี่ยวกับการเปลี่ยนธีมหน้าร้านรอบนี้
+- ไม่มีการ deploy

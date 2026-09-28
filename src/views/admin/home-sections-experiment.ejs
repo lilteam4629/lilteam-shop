@@ -9,6 +9,7 @@
 %>
 <link rel="stylesheet" href="<%= asset('css/admin-experiment-home-sections-v1.css') %>" />
 <link rel="stylesheet" href="<%= asset('css/admin-home-sections-v2.css') %>" />
+<link rel="stylesheet" href="<%= asset('css/admin-home-sections-cards-v1.css') %>" />
 
 <div class="experiment-app experiment-home-sections-page">
   <div class="experiment-main">
@@ -40,7 +41,7 @@
         <article class="hsx-stat hsx-stat-total"><span>หมวดหมู่ทั้งหมด</span><strong><%= sectionRows.length %></strong><small>แถวสินค้าที่ตั้งค่าไว้</small></article>
         <article class="hsx-stat"><span>กำลังแสดง</span><strong><%= shownCount %></strong><small>มองเห็นได้บนหน้าร้าน</small></article>
         <article class="hsx-stat"><span>สินค้าใหม่อัตโนมัติ</span><strong><%= automaticCount %></strong><small>อัปเดตรายการล่าสุดให้</small></article>
-        <article class="hsx-stat"><span>เลือกสินค้าเอง</span><strong><%= manualCount %></strong><small><%= hiddenCount %> หมวดซ่อนอยู่</small></article>
+        <article class="hsx-stat"><span>เลือกสินค้าเอง</span><strong><%= manualCount %></strong><small>กำหนดรายการสินค้าด้วยตัวเอง</small></article>
       </section>
 
       <section class="hsx-board" aria-labelledby="hsx-board-title">
@@ -73,23 +74,26 @@
             const selectedIds = Array.isArray(section.productIds) ? section.productIds.map(String) : [];
             const pickedProducts = selectableProducts.filter(product => selectedIds.includes(String(product.id)));
             const previewProducts = section.mode === 'manual' ? pickedProducts : selectableProducts.slice(0, Math.max(1, Number(section.limit) || 5));
+            const coverProducts = previewProducts.filter(product => Array.isArray(product.images) && product.images[0]).slice(0, 3);
             const isVisible = section.enabled !== false;
           %>
             <article class="hsx-card" data-hsx-card data-name="<%= String(section.title || '').toLocaleLowerCase('th-TH') %>" data-status="<%= isVisible ? 'enabled' : 'disabled' %>">
-              <div class="hsx-card-rank"><span>ลำดับ</span><strong><%= String(index + 1).padStart(2, '0') %></strong></div>
+              <div class="hsx-card-art" data-art-count="<%= coverProducts.length %>" role="img" aria-label="ภาพตัวอย่างสินค้าจริงในหมวด <%= section.title %>">
+                <span class="hsx-art-index"><%= String(index + 1).padStart(2, '0') %><small>หมวด</small></span>
+                <div class="hsx-art-products" aria-hidden="true">
+                  <% coverProducts.forEach((product, artIndex) => { %>
+                    <span class="hsx-art-product hsx-art-product-<%= artIndex + 1 %>"><img src="<%= product.images[0] %>" alt="" loading="lazy" decoding="async" onerror="this.parentElement.hidden=true" /></span>
+                  <% }); %>
+                  <span class="hsx-art-empty" <%= coverProducts.length ? 'hidden' : '' %>><svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><path d="M9 16.5h30v23H9zM6 11h36v8H6zM24 11v28M24 11c-7 0-12-1-12-5 0-3 4-4 7-2l5 7Zm0 0c7 0 12-1 12-5 0-3-4-4-7-2l-5 7Z" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg><span>เพิ่มสินค้าเพื่อแสดงภาพ</span></span>
+                </div>
+                <span class="hsx-art-caption"><%= coverProducts.length ? `ภาพตัวอย่างสินค้า ${coverProducts.length} รายการ` : 'ยังไม่มีภาพสินค้า' %></span>
+              </div>
               <div class="hsx-card-main">
                 <div class="hsx-card-title-row">
                   <h3><%= section.title %></h3>
                   <span class="hsx-state <%= isVisible ? 'is-on' : 'is-off' %>"><i></i><%= isVisible ? 'กำลังแสดง' : 'ซ่อนอยู่' %></span>
                 </div>
                 <div class="hsx-card-meta"><span class="hsx-mode <%= section.mode === 'manual' ? 'is-manual' : '' %>"><%= section.mode === 'manual' ? 'เลือกสินค้าเอง' : 'ใหม่ล่าสุดอัตโนมัติ' %></span><span><%= section.mode === 'manual' ? `${pickedProducts.length} รายการที่เลือก` : `${previewProducts.length} รายการ · จำกัด ${section.limit || 5}` %></span></div>
-                <div class="hsx-product-preview" aria-label="ตัวอย่างสินค้าในหมวด <%= section.title %>">
-                  <% previewProducts.slice(0, 6).forEach(product => { %>
-                    <span class="hsx-product-thumb" title="<%= product.title %>"><% if (product.images && product.images[0]) { %><img src="<%= product.images[0] %>" alt="<%= product.title %>" loading="lazy" onerror="this.hidden=true" /><% } else { %><span aria-hidden="true">◇</span><% } %></span>
-                  <% }); %>
-                  <% if (previewProducts.length > 6) { %><span class="hsx-product-more">+<%= previewProducts.length - 6 %></span><% } %>
-                  <% if (!previewProducts.length) { %><span class="hsx-no-products">ยังไม่มีสินค้าในแถวนี้</span><% } %>
-                </div>
               </div>
               <div class="hsx-card-actions">
                 <div class="hsx-move-actions" aria-label="เปลี่ยนลำดับหมวดหมู่">
@@ -141,6 +145,30 @@
 
 <script>
 (function () {
+  function refreshProductArt(art) {
+    if (!art) return;
+    var tiles = Array.prototype.slice.call(art.querySelectorAll('.hsx-art-product')).filter(function (tile) { return !tile.hidden; });
+    var count = tiles.length;
+    art.dataset.artCount = String(count);
+    tiles.forEach(function (tile, index) {
+      tile.style.gridColumn = count === 1 ? '1 / 3' : count === 2 ? String(index + 1) : index === 0 ? '1' : '2';
+      tile.style.gridRow = count === 1 || count === 2 || index === 0 ? '1 / 3' : String(index);
+      tile.style.width = count === 1 ? 'min(68%, 220px)' : '';
+      tile.style.justifySelf = count === 1 ? 'center' : '';
+    });
+    var emptyState = art.querySelector('.hsx-art-empty');
+    if (emptyState) emptyState.hidden = count > 0;
+  }
+  document.querySelectorAll('.hsx-art-product img').forEach(function (image) {
+    function hideBrokenImage() {
+      var tile = image.closest('.hsx-art-product');
+      if (tile) tile.hidden = true;
+      refreshProductArt(image.closest('.hsx-card-art'));
+    }
+    image.addEventListener('error', hideBrokenImage);
+    if (image.complete && !image.naturalWidth) hideBrokenImage();
+  });
+
   var createDialog = document.querySelector('[data-hsx-create-dialog]');
   document.querySelectorAll('[data-hsx-open-create]').forEach(function (button) { button.addEventListener('click', function () { if (createDialog && !createDialog.open) createDialog.showModal(); }); });
   document.querySelectorAll('[data-hsx-close-create]').forEach(function (button) { button.addEventListener('click', function () { if (createDialog && createDialog.open) createDialog.close(); }); });

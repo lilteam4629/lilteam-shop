@@ -968,7 +968,7 @@
    The legacy 1480px header container makes the logo sit well outside the
    narrower 1360px homepage shell on wide screens. */
 @media (min-width: 1321px) {
-  body.storefront-owner-lilteam:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell)
+  body.storefront-unified:has(#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell)
   header.store-nav.store-nav--main .store-nav__inner {
     box-sizing: border-box !important;
     width: min(1360px, calc(100% - 48px)) !important;

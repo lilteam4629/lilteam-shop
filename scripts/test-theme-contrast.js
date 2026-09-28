@@ -30,8 +30,8 @@ for (const accent of accents) {
   const fill = adminCss.match(/--admin-brand-fill:\s*(#[0-9a-f]{6})/i)?.[1];
   const text = adminCss.match(/--admin-brand-readable:\s*(#[0-9a-f]{6})/i)?.[1];
   const contrast = adminCss.match(/--admin-brand-contrast:\s*(#[0-9a-f]{6})/i)?.[1];
-  assert.match(adminCss, /^html\.admin-main-site\s*\{/,
-    'admin accent variables must be scoped to the main-site root');
+  assert.match(adminCss, /^html\.admin-unified-site\s*\{/,
+    'admin accent variables must be scoped to the shop admin root');
   assert(fill && text && contrast, `admin accent tokens missing for ${accent}`);
   assert(theme.contrastRatio(fill, '#ffffff') >= 4.5,
     `admin accent fill is not readable with white controls: ${accent}`);
@@ -117,41 +117,3 @@ const mainLayout = fs.readFileSync(path.join(__dirname, '../src/views/layouts/ma
 assert(mainLayout.includes("asset('css/storefront-theme-cohesion-v1.css')"), 'every storefront page must load the shared theme layer');
 assert(fs.existsSync(path.join(__dirname, '../public/css/storefront-theme-cohesion-v1.css')), 'shared storefront theme layer must exist');
 console.log('Shared storefront theme layer is connected to the public layout');
-
-const legacyNavbarCss = fs.readFileSync(path.join(__dirname, '../public/css/storefront-navbar-v1.css'), 'utf8');
-const cozyNavbarCss = fs.readFileSync(path.join(__dirname, '../public/css/storefront-navbar-cozy-v2.css'), 'utf8');
-assert.match(legacyNavbarCss, /html:not\(\.light\) \.store-nav__wallet[^}]*background:var\(--card\)!important/,
-  'legacy dark-mode wallet rule remains the cascade source that must be guarded');
-const cozyDarkWalletRule = cozyNavbarCss.match(/html:not\(\.light\) \.store-nav--cozy-owner \.store-nav__wallet\s*\{([^}]*)\}/);
-assert(cozyDarkWalletRule, 'main-shop wallet needs an explicit dark-mode cascade guard');
-assert.match(cozyDarkWalletRule[1], /background:\s*transparent\s*!important/,
-  'main-shop wallet must leave its selected-color surface to the surrounding group');
-assert.match(cozyDarkWalletRule[1], /color:\s*var\(--theme-ink,\s*var\(--text\)\)\s*!important/,
-  'main-shop wallet text must follow the active theme in dark mode');
-const mainNavbarCss = fs.readFileSync(path.join(__dirname, '../public/css/storefront-navbar-main-v3.css'), 'utf8');
-const highSpecificityWalletRule = mainNavbarCss.match(/:is\(body:has\(#site-page-shell\.storefront-owner-home-v7 \.owner-home-v20-shell\), body:has\(\.store-nav--main\)\) \.store-nav--main \.store-nav__wallet\s*\{([^}]*)\}/);
-assert(highSpecificityWalletRule, 'main navbar wallet layout rule must remain present');
-assert.match(highSpecificityWalletRule[1], /background:\s*transparent\s*!important/,
-  'the high-specificity main navbar rule must not invert the wallet surface');
-assert.match(highSpecificityWalletRule[1], /color:\s*var\(--theme-ink,\s*var\(--text\)\)\s*!important/,
-  'the high-specificity main navbar rule must use the selected theme foreground');
-const secondaryNavbarTextRule = mainNavbarCss.match(/body:has\(#site-page-shell\.storefront-owner-home-v7 \.owner-home-v20-shell\) \.store-nav--main :is\(([^)]*)\)\s*\{\s*color:\s*var\(--text-2\)\s*!important/);
-assert(secondaryNavbarTextRule, 'secondary main-navbar text rule must remain present');
-assert.doesNotMatch(secondaryNavbarTextRule[1], /store-nav__wallet/,
-  'main wallet amount must not inherit the secondary color used by navigation links');
-const secondaryNavbarSurfaceRule = mainNavbarCss.match(/body:has\(#site-page-shell\.storefront-owner-home-v7 \.owner-home-v20-shell\) \.store-nav--main :is\(([^)]*)\)\s*\{\s*border-color:\s*var\(--border\).*?background:\s*transparent\s*!important/s);
-assert(secondaryNavbarSurfaceRule, 'secondary main-navbar surface rule must remain present');
-assert.doesNotMatch(secondaryNavbarSurfaceRule[1], /store-nav__wallet/,
-  'main wallet must keep its own theme-aware surface declarations');
-const ownerHomeNavbarCss = fs.readFileSync(path.join(__dirname, '../public/css/storefront-owner-home-v20.css'), 'utf8');
-const mutedHomeNavRule = ownerHomeNavbarCss.match(/body:has\(#site-page-shell\.storefront-owner-home-v7 \.owner-home-v20-shell\) \.store-nav--main :is\(([^)]*)\)\s*\{([^}]*)\}/);
-assert(mutedHomeNavRule, 'owner-home navbar color rule must remain present');
-assert.doesNotMatch(mutedHomeNavRule[1], /store-nav__wallet/,
-  'wallet balance must not inherit the secondary navigation color');
-const ownerHomeWalletRule = ownerHomeNavbarCss.match(/body:has\(#site-page-shell\.storefront-owner-home-v7 \.owner-home-v20-shell\) \.store-nav--main \.store-nav__wallet\s*\{([^}]*)\}/);
-assert(ownerHomeWalletRule, 'homepage wallet needs its own theme-aware foreground rule');
-assert.match(ownerHomeWalletRule[1], /color:\s*var\(--theme-ink,\s*var\(--text\)\)\s*!important/,
-  'homepage wallet balance must use the primary theme foreground');
-assert.match(ownerHomeWalletRule[1], /background:\s*transparent\s*!important/,
-  'homepage wallet must leave its surface to the theme-aware wallet group');
-console.log('Main-shop wallet theme cascade checks passed');

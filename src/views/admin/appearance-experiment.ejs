@@ -101,10 +101,10 @@
         </article>
       </div>
       <details class="as-banner-details as-banner-details-panel">
-        <summary><span><strong>ตั้งค่าการแสดงแบนเนอร์</strong><small>เลือกรูปแบบส่วนบนหน้าแรกและลิงก์เมื่อคลิก</small></span></summary>
+        <summary><span><strong>ตั้งค่าการแสดงแบนเนอร์</strong><small>เปิดหรือปิดแบนเนอร์ และกำหนดลิงก์เมื่อคลิก</small></span></summary>
         <form class="as-banner-settings" action="/admin/hero-banner/mode" method="post">
           <label class="as-field"><span>ลิงก์เมื่อคลิกแบนเนอร์ <small>(ไม่บังคับ)</small></span><input type="text" name="bannerLink" value="<%= heroSettings.bannerLink || '' %>" placeholder="/products หรือ https://example.com"></label>
-          <fieldset><legend>รูปแบบส่วนบนหน้าแรก</legend><label><input type="radio" name="mode" value="default" <%= heroSettings.mode !== 'banner' ? 'checked' : '' %>><span><b>การ์ดเกมแบบเดิม</b><small>แสดงส่วนเกมตามปกติ</small></span></label><label><input type="radio" name="mode" value="banner" <%= heroSettings.mode === 'banner' ? 'checked' : '' %>><span><b>ใช้ภาพแบนเนอร์</b><small>ใช้ภาพแทนการ์ดเกม</small></span></label></fieldset>
+          <label class="as-banner-mode-control"><input type="checkbox" name="useBanner" value="1" <%= heroSettings.mode === 'banner' ? 'checked' : '' %>><span><b>ใช้ภาพแบนเนอร์</b><small>ปิดไว้เพื่อแสดงหน้าแรกตามปกติ</small></span></label>
           <button class="experiment-button primary" type="submit">บันทึกรูปแบบหน้าแรก</button>
         </form>
       </details>

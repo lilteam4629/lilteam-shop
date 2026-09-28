@@ -1,5 +1,5 @@
 /* Main-store category gallery: let the category artwork lead, with unboxed captions. */
-body.storefront-owner-lilteam #site-page-shell #home-categories {
+body.storefront-unified #site-page-shell #home-categories {
   display: block !important;
   width: min(1420px, calc(100% - 48px)) !important;
   max-width: 1420px !important;
@@ -12,7 +12,7 @@ body.storefront-owner-lilteam #site-page-shell #home-categories {
   overflow: visible !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-grid {
+body.storefront-unified #site-page-shell #home-categories .home-category-grid {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   align-items: start !important;
@@ -24,7 +24,7 @@ body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-g
   background: transparent !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card {
+body.storefront-unified #site-page-shell #home-categories .home-category-card {
   position: relative !important;
   display: block !important;
   min-width: 0 !important;
@@ -42,19 +42,19 @@ body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-c
   transform: none !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card::before,
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card::after {
+body.storefront-unified #site-page-shell #home-categories .home-category-card::before,
+body.storefront-unified #site-page-shell #home-categories .home-category-card::after {
   display: none !important;
   content: none !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card:focus-visible {
+body.storefront-unified #site-page-shell #home-categories .home-category-card:focus-visible {
   outline: 3px solid var(--gold-text) !important;
   outline-offset: 4px !important;
   border-radius: 15px !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-image {
+body.storefront-unified #site-page-shell #home-categories .home-category-image {
   display: grid !important;
   place-items: center !important;
   width: 100% !important;
@@ -69,7 +69,7 @@ body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-i
   line-height: 0 !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-image img {
+body.storefront-unified #site-page-shell #home-categories .home-category-image img {
   display: block !important;
   width: 100% !important;
   height: 100% !important;
@@ -85,19 +85,19 @@ body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-i
   transition: transform .28s cubic-bezier(.2, .7, .2, 1), filter .28s ease !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-card:hover .home-category-image img {
+body.storefront-unified #site-page-shell #home-categories .home-category-card:hover .home-category-image img {
   transform: scale(1.025) !important;
   filter: saturate(1.04) !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-fallback {
+body.storefront-unified #site-page-shell #home-categories .home-category-fallback {
   color: var(--text-2) !important;
   font-size: 14px !important;
   font-weight: 700 !important;
   line-height: 1.4 !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy {
+body.storefront-unified #site-page-shell #home-categories .home-category-copy {
   display: flex !important;
   align-items: baseline !important;
   justify-content: space-between !important;
@@ -109,7 +109,7 @@ body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-c
   background: transparent !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy b {
+body.storefront-unified #site-page-shell #home-categories .home-category-copy b {
   display: block !important;
   min-width: 0 !important;
   overflow: hidden !important;
@@ -121,7 +121,7 @@ body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-c
   white-space: nowrap !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy small {
+body.storefront-unified #site-page-shell #home-categories .home-category-copy small {
   display: block !important;
   flex: 0 0 auto !important;
   margin: 0 !important;
@@ -132,42 +132,42 @@ body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-c
   white-space: nowrap !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-arrow {
+body.storefront-unified #site-page-shell #home-categories .home-category-arrow {
   display: none !important;
 }
 
 @media (max-width: 760px) {
-  body.storefront-owner-lilteam #site-page-shell #home-categories {
+  body.storefront-unified #site-page-shell #home-categories {
     width: calc(100% - 32px) !important;
     padding: 10px 0 14px !important;
   }
 
-  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-grid {
+  body.storefront-unified #site-page-shell #home-categories .home-category-grid {
     grid-template-columns: minmax(0, 1fr) !important;
     gap: 17px !important;
   }
 
-  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-image {
+  body.storefront-unified #site-page-shell #home-categories .home-category-image {
     aspect-ratio: 2.45 / 1 !important;
     border-radius: 13px !important;
   }
 
-  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy {
+  body.storefront-unified #site-page-shell #home-categories .home-category-copy {
     margin-top: 7px !important;
     gap: 8px !important;
   }
 
-  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy b {
+  body.storefront-unified #site-page-shell #home-categories .home-category-copy b {
     font-size: 13px !important;
   }
 
-  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-copy small {
+  body.storefront-unified #site-page-shell #home-categories .home-category-copy small {
     font-size: 10px !important;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.storefront-owner-lilteam #site-page-shell #home-categories .home-category-image img {
+  body.storefront-unified #site-page-shell #home-categories .home-category-image img {
     transition: none !important;
   }
 }

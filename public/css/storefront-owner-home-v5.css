@@ -1,6 +1,6 @@
 /* LILTeam owner homepage v5 — editorial marketplace / dark command center */
-.storefront-owner-lilteam{--v5-ink:#0c0d0f;--v5-panel:color-mix(in srgb,var(--card) 90%,#0c0d0f);--v5-lime:#d8ff3e;--v5-lime-text:color-mix(in srgb,var(--gold-text) 76%,#d8ff3e);--v5-muted:var(--text-4);--v5-rule:color-mix(in srgb,var(--text) 14%,transparent)}
-.storefront-owner-lilteam #site-page-shell{background:radial-gradient(circle at 92% 8%,rgba(216,255,62,.08),transparent 28%),linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--bg) 92%,#0c0d0f))}
+.storefront-unified{--v5-ink:#0c0d0f;--v5-panel:color-mix(in srgb,var(--card) 90%,#0c0d0f);--v5-lime:#d8ff3e;--v5-lime-text:color-mix(in srgb,var(--gold-text) 76%,#d8ff3e);--v5-muted:var(--text-4);--v5-rule:color-mix(in srgb,var(--text) 14%,transparent)}
+.storefront-unified #site-page-shell{background:radial-gradient(circle at 92% 8%,rgba(216,255,62,.08),transparent 28%),linear-gradient(180deg,var(--bg),color-mix(in srgb,var(--bg) 92%,#0c0d0f))}
 .owner-v5-home{width:min(1440px,calc(100% - 56px));margin:0 auto;padding:18px 0 88px;color:var(--text)}
 .v5-topline{display:flex;justify-content:space-between;gap:16px;padding:0 2px 12px;border-bottom:1px solid var(--v5-rule);color:var(--text-4);font:700 9px/1.2 ui-monospace,SFMono-Regular,monospace;letter-spacing:.1em;text-transform:uppercase}.v5-topline strong{color:var(--text);letter-spacing:0}.v5-live-dot{display:inline-block;width:6px;height:6px;margin-right:3px;border-radius:50%;background:#49dd90;box-shadow:0 0 0 4px rgba(73,221,144,.12)}
 .v5-eyebrow{display:block;color:var(--v5-lime-text);font:800 10px/1.2 ui-monospace,SFMono-Regular,monospace;letter-spacing:.16em}.v5-eyebrow i{margin-left:5px;color:var(--text-4);font-style:normal;letter-spacing:0}

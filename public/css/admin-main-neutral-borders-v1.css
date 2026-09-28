@@ -1,25 +1,25 @@
-/* Main-shop back office only. Important declarations in this first layer also
-   beat page-level !important borders; tenant/rental pages never load it. */
+/* Shared back-office edge treatment. Important declarations in this first
+   layer also beat page-level !important borders. */
 @layer admin-main-neutral-borders {
-  body.admin-site.admin-main-site,
-  body.admin-site.admin-main-site :where(*, *::before, *::after) {
+  body.admin-site.admin-unified-site,
+  body.admin-site.admin-unified-site :where(*, *::before, *::after) {
     border-color: transparent !important;
     outline-color: transparent !important;
   }
 
   /* Selected/editing states sometimes use inset shadows as accent-colored edges. */
-  body.admin-site.admin-main-site
+  body.admin-site.admin-unified-site
     :where([aria-selected="true"], [aria-pressed="true"], [aria-current="page"], [data-state="active"], .is-active, .is-selected, .is-editing, .selected, .active) {
     box-shadow: none !important;
   }
 
   /* Remove colored focus glows; use a restrained gray ring for keyboard focus. */
-  body.admin-site.admin-main-site :where(:focus, :focus-visible, :focus-within) {
+  body.admin-site.admin-unified-site :where(:focus, :focus-visible, :focus-within) {
     outline-color: transparent !important;
     box-shadow: none !important;
   }
 
-  body.admin-site.admin-main-site :where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  body.admin-site.admin-unified-site :where(a, button, input, select, textarea, [tabindex]):focus-visible {
     outline: 2px solid #a3aaa7 !important;
     outline-offset: 2px !important;
   }

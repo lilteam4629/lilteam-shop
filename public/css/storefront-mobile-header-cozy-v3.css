@@ -1,12 +1,12 @@
-/* Mobile-only header layout for the primary LilTeam storefront. */
+/* Mobile-only storefront header composition for the main shop. */
 @media (max-width: 900px) {
-  .store-nav--main.store-nav--cozy-owner .store-nav__inner {
+  .store-nav--cozy .store-nav__inner {
     min-height: 68px !important;
     padding: 10px 14px !important;
     gap: 8px !important;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__mobile-toggle {
+  .store-nav--cozy .store-nav__mobile-toggle {
     flex-basis: 42px !important;
     width: 42px !important;
     min-width: 42px !important;
@@ -15,42 +15,40 @@
     border-radius: 14px !important;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__mobile-toggle > span {
+  .store-nav--cozy .store-nav__mobile-toggle > span {
     width: 18px !important;
     height: 2px !important;
     border-radius: 2px;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__brand {
+  .store-nav--cozy .store-nav__brand {
     flex: 1 1 auto !important;
     gap: 0 !important;
     min-width: 40px !important;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__brand--image img {
+  .store-nav--cozy .store-nav__brand--image img {
     display: block !important;
     width: auto !important;
     max-width: min(92px, 100%) !important;
     height: 34px !important;
-    padding: 4px 7px !important;
-    border: 1px solid var(--theme-line, var(--border)) !important;
-    border-radius: 12px !important;
-    background: var(--theme-card-surface, var(--card)) !important;
-    box-shadow: inset 0 1px color-mix(in srgb, white 42%, transparent) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
     object-fit: contain !important;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__brand--image strong { display: none !important; }
-  .store-nav--main.store-nav--cozy-owner .store-nav__brand:not(.store-nav__brand--image) strong { font-size: 14px !important; }
+  .store-nav--cozy .store-nav__brand--image strong { display: none !important; }
+  .store-nav--cozy .store-nav__brand:not(.store-nav__brand--image) strong { font-size: 14px !important; }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__actions {
+  .store-nav--cozy .store-nav__actions {
     gap: 3px !important;
     margin-left: auto !important;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__theme,
-  .store-nav--main.store-nav--cozy-owner .store-nav__cart,
-  .store-nav--main.store-nav--cozy-owner .store-nav__account summary {
+  .store-nav--cozy .store-nav__theme,
+  .store-nav--cozy .store-nav__cart,
+  .store-nav--cozy .store-nav__account summary {
     width: 40px !important;
     min-width: 40px !important;
     height: 40px !important;
@@ -58,16 +56,16 @@
     border-radius: 13px !important;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__theme {
+  .store-nav--cozy .store-nav__theme {
     border-color: transparent !important;
     background: transparent !important;
     color: var(--theme-ink, var(--text)) !important;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__theme svg,
-  .store-nav--main.store-nav--cozy-owner .store-nav__cart > svg { width: 19px !important; height: 19px !important; }
+  .store-nav--cozy .store-nav__theme svg,
+  .store-nav--cozy .store-nav__cart > svg { width: 19px !important; height: 19px !important; }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__mobile-topup {
+  .store-nav--cozy .store-nav__mobile-topup {
     flex-basis: 44px !important;
     width: 44px !important;
     min-width: 44px !important;
@@ -78,14 +76,14 @@
     box-shadow: 0 3px 9px color-mix(in srgb, var(--theme-accent, var(--gold)) 18%, transparent) !important;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__mobile-topup svg { width: 20px !important; height: 20px !important; }
+  .store-nav--cozy .store-nav__mobile-topup svg { width: 20px !important; height: 20px !important; }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__account summary {
+  .store-nav--cozy .store-nav__account summary {
     border-color: var(--theme-line, var(--border)) !important;
     border-radius: 15px !important;
   }
 
-  .store-nav--main.store-nav--cozy-owner .store-nav__avatar {
+  .store-nav--cozy .store-nav__avatar {
     width: 30px !important;
     height: 30px !important;
     border-radius: 10px !important;
@@ -95,12 +93,12 @@
 }
 
 @media (max-width: 380px) {
-  .store-nav--main.store-nav--cozy-owner .store-nav__inner { padding-inline: 10px !important; gap: 6px !important; }
-  .store-nav--main.store-nav--cozy-owner .store-nav__mobile-toggle { width: 40px !important; min-width: 40px !important; flex-basis: 40px !important; }
-  .store-nav--main.store-nav--cozy-owner .store-nav__theme,
-  .store-nav--main.store-nav--cozy-owner .store-nav__cart,
-  .store-nav--main.store-nav--cozy-owner .store-nav__account summary { width: 38px !important; min-width: 38px !important; }
-  .store-nav--main.store-nav--cozy-owner .store-nav__mobile-topup { width: 42px !important; min-width: 42px !important; flex-basis: 42px !important; }
-  .store-nav--main.store-nav--cozy-owner .store-nav__actions { gap: 1px !important; }
-  .store-nav--main.store-nav--cozy-owner .store-nav__brand--image img { max-width: 72px !important; }
+  .store-nav--cozy .store-nav__inner { padding-inline: 10px !important; gap: 6px !important; }
+  .store-nav--cozy .store-nav__mobile-toggle { width: 40px !important; min-width: 40px !important; flex-basis: 40px !important; }
+  .store-nav--cozy .store-nav__theme,
+  .store-nav--cozy .store-nav__cart,
+  .store-nav--cozy .store-nav__account summary { width: 38px !important; min-width: 38px !important; }
+  .store-nav--cozy .store-nav__mobile-topup { width: 42px !important; min-width: 42px !important; flex-basis: 42px !important; }
+  .store-nav--cozy .store-nav__actions { gap: 1px !important; }
+  .store-nav--cozy .store-nav__brand--image img { max-width: 72px !important; }
 }

@@ -370,7 +370,7 @@ function renderAdminAccentCss(theme) {
   const accentStrong = darken(accentFill, 0.42);
   const accentText = readableAccentOn(accent, surfaces);
 
-  return `html.admin-main-site {
+  return `html.admin-unified-site {
     --admin-brand-accent: ${accent};
     --admin-brand-fill: ${accentFill};
     --admin-brand-hover: ${accentHover};

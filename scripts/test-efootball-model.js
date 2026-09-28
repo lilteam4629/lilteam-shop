@@ -26,6 +26,16 @@ const modelAdmin = fs.readFileSync('src/views/admin/storefront-models.ejs', 'utf
 assert.ok(!modelAdmin.includes('value="efootball"'), 'eFootball must stay out of storefront model selection');
 const filterAdmin = fs.readFileSync('src/views/admin/filter-tags.ejs', 'utf8');
 assert.match(filterAdmin, /filter-tags\/efootball\/import/);
+const mainFilterAdmin = fs.readFileSync('src/views/admin/filter-tags-experiment.ejs', 'utf8');
+assert.match(mainFilterAdmin, /href="\/admin\/filter-tags\/efootball\/import"/);
+assert.doesNotMatch(mainFilterAdmin, /action="\/admin\/filter-tags\/efootball\/import" method="post"/);
+const importPreview = fs.readFileSync('src/views/admin/filter-tags-efootball-import-experiment.ejs', 'utf8');
+assert.match(importPreview, /IMPORT PREVIEW/);
+assert.match(importPreview, /การ์ดที่จะนำเข้า/);
+assert.match(importPreview, /name="removeStale" value="1"/);
+assert.match(importPreview, /จะถอดแท็กเหล่านั้นออกจากสินค้าที่ผูกไว้ด้วย/);
+assert.match(adminRoute, /router\.get\('\/filter-tags\/efootball\/import',[\s\S]*?if \(!usesMainAdminUi\(req\)\) return res\.sendStatus\(404\)/);
+assert.match(adminRoute, /const mainAdminUi = usesMainAdminUi\(req\);\s*const removeStale = mainAdminUi \? req\.body\?\.removeStale === '1' : true/);
 const shopRoute = fs.readFileSync('src/routes/shop.js', 'utf8');
 assert.ok(!shopRoute.includes('home-efootball'), 'eFootball must not replace the existing storefront');
 console.log('eFootball filter checks passed: eFHUB player cards, deterministic tags, and classic filter import');

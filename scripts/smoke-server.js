@@ -728,6 +728,13 @@ async function run() {
     await checkScheduledProductWorkflow(cookie);
     const mainAdmin = await fetchOk('/admin', 'text/html', { cookie });
     if (!mainAdmin.body.includes('admin-site')) throw new Error('admin is missing its motion scope');
+    const filterTagsPage = await fetchOk('/admin/filter-tags', 'text/html', { cookie });
+    if (!filterTagsPage.body.includes('href="/admin/filter-tags/efootball/import"')) throw new Error('player-card import does not open its review page');
+    const playerImportPreview = await fetchOk('/admin/filter-tags/efootball/import', 'text/html', { cookie });
+    if (!playerImportPreview.body.includes('IMPORT PREVIEW') || !playerImportPreview.body.includes('การ์ดที่จะนำเข้า')) throw new Error('player-card import preview is missing its review UI');
+    if (!playerImportPreview.body.includes('ยืนยันนำเข้า')) throw new Error('player-card import preview is missing its confirmation action');
+    const playerImportCss = await fetchOk('/css/admin-experiment-efootball-import-v1.css', 'text/css');
+    if (!playerImportCss.body.includes('.efhub-player-grid')) throw new Error('player-card import preview is missing its responsive styles');
     if (mainAdmin.body.includes('admin-scroll-motion-v1.css') || mainAdmin.body.includes('admin-mobile-motion.js')) throw new Error('admin still loads the removed motion system');
     if (mainAdmin.body.includes('backdrop-filter: blur(4px)')) throw new Error('admin navigation overlay still forces full-screen blur compositing');
     if (/closest\('a\[href\]'\)[\s\S]{0,500}markNavigating\(\)/.test(mainAdmin.body)) throw new Error('ordinary admin links still trigger a blocking navigation spinner');

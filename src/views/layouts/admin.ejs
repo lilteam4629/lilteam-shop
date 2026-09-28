@@ -367,8 +367,12 @@
 
       <div class="flex items-center justify-between px-2 pt-2 border-t border-[var(--border)]/60">
         <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center text-[var(--gold-contrast)] font-bold text-xs shrink-0">
-            <%= (currentUser.username || 'A')[0].toUpperCase() %>
+          <div class="w-7 h-7 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center overflow-hidden shrink-0">
+            <% if (settings.branding && settings.branding.logoImage) { %>
+              <img src="<%= settings.branding.logoImage %>" class="w-full h-full object-contain" alt="โลโก้ร้าน <%= settings.shopName || '' %>" />
+            <% } else { %>
+              <span class="w-full h-full rounded-full bg-gradient-to-tr from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center text-[var(--gold-contrast)] font-bold text-xs"><%= (currentUser.username || 'A')[0].toUpperCase() %></span>
+            <% } %>
           </div>
           <div class="sidebar-user-details flex flex-col min-w-0">
             <span class="text-xs font-medium text-[var(--text)] truncate"><%= currentUser.username %></span>
@@ -423,8 +427,12 @@
 
         <!-- Admin Profile Pill -->
         <div class="flex items-center gap-2 pl-2 border-l border-[var(--border)]">
-          <div class="w-7 h-7 rounded-full bg-gradient-to-tr from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center text-[var(--gold-contrast)] font-bold text-xs">
-            <%= (currentUser.username || 'A')[0].toUpperCase() %>
+          <div class="w-7 h-7 rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center overflow-hidden">
+            <% if (settings.branding && settings.branding.logoImage) { %>
+              <img src="<%= settings.branding.logoImage %>" class="w-full h-full object-contain" alt="โลโก้ร้าน <%= settings.shopName || '' %>" />
+            <% } else { %>
+              <span class="w-full h-full rounded-full bg-gradient-to-tr from-[var(--gold)] to-[var(--gold-dark)] flex items-center justify-center text-[var(--gold-contrast)] font-bold text-xs"><%= (currentUser.username || 'A')[0].toUpperCase() %></span>
+            <% } %>
           </div>
           <span class="text-xs font-semibold text-[var(--text)]"><%= currentUser.username %></span>
         </div>

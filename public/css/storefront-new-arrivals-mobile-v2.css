@@ -1,6 +1,6 @@
 /* Touch-first new-arrivals rail for the main LilTeam storefront only. */
 @media (max-width: 700px) {
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals {
     position: relative;
     margin-top: 30px !important;
     padding: 18px 13px 10px !important;
@@ -13,19 +13,19 @@
     box-shadow: 0 18px 38px -30px color-mix(in srgb, var(--text) 38%, transparent);
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals > .owner-home-v20-section-head {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals > .owner-home-v20-section-head {
     align-items: center;
     gap: 10px;
     margin: 0 0 13px;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head h2 {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head h2 {
     font-size: clamp(21px, 6vw, 25px) !important;
     line-height: 1.18;
     letter-spacing: -.045em;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head h2::before {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head h2::before {
     display: inline-block;
     width: 7px;
     height: 7px;
@@ -36,14 +36,14 @@
     content: '';
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head p {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head p {
     max-width: 32ch;
     margin-top: 4px;
     font-size: 11px;
     line-height: 1.5;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head > a {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head > a {
     min-width: 82px;
     min-height: 44px;
     justify-content: center;
@@ -57,7 +57,7 @@
     font-weight: 800;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-rail {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-rail {
     grid-auto-columns: min(78vw, 312px);
     gap: 12px;
     padding: 3px 3px 13px;
@@ -68,11 +68,11 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-rail::-webkit-scrollbar {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-rail::-webkit-scrollbar {
     display: none;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card {
     min-width: 0;
     overflow: hidden;
     border: 1px solid color-mix(in srgb, var(--gold) 18%, var(--border));
@@ -84,12 +84,12 @@
     -webkit-tap-highlight-color: color-mix(in srgb, var(--gold) 17%, transparent);
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-poster {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-poster {
     aspect-ratio: 1.48;
     background: color-mix(in srgb, var(--text) 3%, var(--input));
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-poster-tag {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-poster-tag {
     top: 9px;
     left: 9px;
     min-height: 26px;
@@ -106,7 +106,7 @@
     backdrop-filter: blur(8px);
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     gap: 9px;
@@ -114,14 +114,14 @@
     padding: 12px 13px 14px;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-title-row {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-title-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info b {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info b {
     min-width: 0;
     color: var(--text);
     font-size: 14px;
@@ -129,7 +129,7 @@
     line-height: 1.35;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-stock {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-stock {
     min-height: 27px;
     flex: 0 0 auto;
     gap: 5px;
@@ -143,7 +143,7 @@
     white-space: nowrap;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-stock i {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-stock i {
     width: 6px;
     height: 6px;
     flex: 0 0 6px;
@@ -152,18 +152,18 @@
     box-shadow: 0 0 0 3px color-mix(in srgb, #16835d 13%, transparent);
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-stock[data-stock-state="sold"] {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-stock[data-stock-state="sold"] {
     border-color: var(--border);
     background: var(--input);
     color: var(--text-3);
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-stock[data-stock-state="sold"] i {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-stock[data-stock-state="sold"] i {
     background: #8b8b8b;
     box-shadow: 0 0 0 3px color-mix(in srgb, #8b8b8b 15%, transparent);
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info > strong {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-info > strong {
     justify-self: start;
     color: var(--gold-text);
     font-size: 22px;
@@ -172,31 +172,31 @@
     line-height: 1.15;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card:focus-visible,
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head > a:focus-visible {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card:focus-visible,
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-section-head > a:focus-visible {
     outline: 3px solid var(--gold);
     outline-offset: 3px;
   }
 }
 
 @media (max-width: 380px) {
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals {
     padding-inline: 10px !important;
     border-radius: 18px;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-rail {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-rail {
     grid-auto-columns: 80vw;
   }
 
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-title-row {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .main-store-product-title-row {
     align-items: flex-start;
     flex-direction: column;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.storefront-owner-lilteam #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card {
+  body.storefront-unified #site-page-shell.storefront-owner-home-v7 #home-new-arrivals .owner-home-v20-product-card {
     scroll-behavior: auto;
     transition: none;
   }

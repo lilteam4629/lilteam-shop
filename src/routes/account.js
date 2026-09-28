@@ -463,10 +463,34 @@ router.get('/topup/:id', async (req, res) => {
   });
 });
 
-router.get('/topup/:id/status', (req, res) => {
+router.get('/topup/:id/status', async (req, res) => {
   const user = currentUser(req);
-  const request = findTopupRequestForUser(req.params.id, user.id);
+  let request = findTopupRequestForUser(req.params.id, user.id);
   if (!request) return res.status(404).json({ ok: false, error: 'ไม่พบคำขอนี้' });
+
+  // A restart drops the in-memory task while the persisted request can remain
+  // "verifying". Recover an expired lease so the customer never polls forever.
+  if (request.status === 'verifying' && !activeVerifications.has(request.id)) {
+    const startedAt = Date.parse(request.verificationStartedAt || '');
+    const stale = Number.isFinite(startedAt)
+      ? Date.now() - startedAt >= STALE_VERIFICATION_MS
+      : Date.now() - verificationProcessStartedAt >= LEGACY_VERIFICATION_GRACE_MS;
+    if (stale) {
+      await withTopupStore(request, () => store.transact(data => {
+        const fresh = data.topupRequests.find(item => item.id === request.id);
+        if (fresh && fresh.status === 'verifying' && !activeVerifications.has(fresh.id)) {
+          fresh.status = 'pending';
+          fresh.verificationStartedAt = null;
+          fresh.slipCheck = {
+            ...(fresh.slipCheck || {}), checked: false, verified: false,
+            retryable: true,
+            message: 'การตรวจสอบหยุดก่อนเสร็จสมบูรณ์ กรุณาลองตรวจสลิปเดิมอีกครั้งหรือรอแอดมินตรวจสอบ',
+          };
+        }
+      }));
+      request = findTopupRequestForUser(req.params.id, user.id) || request;
+    }
+  }
 
   res.setHeader('Cache-Control', 'private, no-store');
   res.json({
@@ -506,6 +530,9 @@ router.get('/topup/:id/slip-file', async (req, res, next) => {
 // bound tenant context — nothing here can rely on the original request's
 // context still being current.
 const activeVerifications = new Set();
+const verificationProcessStartedAt = Date.now();
+const STALE_VERIFICATION_MS = 120 * 1000;
+const LEGACY_VERIFICATION_GRACE_MS = 30 * 1000;
 
 function receiverCredentials(payment = {}, method = 'bank_transfer', ...fallbackPayments) {
   // The storefront renders the active flat payment settings, while provider
@@ -673,6 +700,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       } else {
         freshRequest.status = 'pending';
       }
+      freshRequest.verificationStartedAt = null;
       finalRequest = freshRequest;
       return true;
     };
@@ -700,6 +728,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
       const request = data.topupRequests.find(t => t.id === requestId);
       if (request && request.status === 'verifying') {
         request.status = 'pending';
+        request.verificationStartedAt = null;
         request.slipCheck = { checked: false, verified: false, message: 'ระบบตรวจสลิปขัดข้องชั่วคราว อยู่ระหว่างรอแอดมินตรวจสอบ' };
       }
     })).catch(saveErr => console.error('[topup] could not persist verification failure:', saveErr.message));
@@ -710,7 +739,10 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
         && t.id === requestId) : null);
     await withTopupStore(fallbackRequest, () => store.transact((data) => {
       const request = data.topupRequests.find(t => t.id === requestId);
-      if (request && request.status === 'verifying') request.status = 'pending';
+      if (request && request.status === 'verifying') {
+        request.status = 'pending';
+        request.verificationStartedAt = null;
+      }
     })).catch(saveErr => console.error('[topup] could not finalize verification:', saveErr.message));
     activeVerifications.delete(requestId);
   }
@@ -774,11 +806,13 @@ async function attachSlipToTopupRequest({ requestId, user, fileBuffer, fileOptio
       target.slipStorageId = storageId;
       target.slipPath = `/account/topup/${target.id}/slip-file`;
       target.status = automatic ? 'verifying' : 'pending';
+      target.verificationStartedAt = automatic ? new Date().toISOString() : null;
       if (!automatic) target.slipCheck = { checked: false, verified: false, message: 'รอแอดมินตรวจสอบสลิป', provider: 'manual' };
     }));
     request.slipStorageId = storageId;
     request.slipPath = `/account/topup/${request.id}/slip-file`;
     request.status = automatic ? 'verifying' : 'pending';
+    request.verificationStartedAt = automatic ? new Date().toISOString() : null;
     if (!automatic) request.slipCheck = { checked: false, verified: false, message: 'รอแอดมินตรวจสอบสลิป', provider: 'manual' };
     if (!automatic) return { ok: true, request, automatic: false };
   } catch (saveError) {
@@ -807,16 +841,20 @@ async function retryTopupSlipVerification({ requestId, origin }) {
   for await (const chunk of media.stream) chunks.push(Buffer.from(chunk));
   await withTopupStore(request, () => store.transact((data) => {
     const fresh = data.topupRequests.find(t => t.id === requestId);
-    if (fresh && fresh.status === 'pending') fresh.status = 'verifying';
+    if (fresh && (fresh.status === 'pending' || fresh.status === 'verifying')) {
+      fresh.status = 'verifying';
+      fresh.verificationStartedAt = new Date().toISOString();
+    }
   }));
-  await verifySlipInBackground({
+  const backgroundVerify = store.bindTenantContext(verifySlipInBackground);
+  backgroundVerify({
     requestId: request.id,
     userId: user.id,
     fileBuffer: Buffer.concat(chunks),
     fileOptions: { filename: media.file.filename || media.file.metadata?.filename || 'slip.jpg', contentType: media.file.metadata?.contentType || 'image/jpeg' },
     origin,
     retryStored: true,
-  });
+  }).catch(error => console.error('[topup] background retry failed:', error.message));
   return { ok: true };
 }
 

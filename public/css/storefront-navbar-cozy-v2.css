@@ -1,6 +1,6 @@
 /* Main LilTeam storefront navigation: a calm, three-zone header with the
    wallet and its top-up action treated as one related control. */
-.store-nav--cozy-owner {
+.store-nav--cozy {
   z-index: 50;
   color: var(--theme-ink, var(--text)) !important;
   border-bottom: 1px solid color-mix(in srgb, var(--theme-line, var(--border)) 84%, var(--theme-accent, var(--gold))) !important;
@@ -9,7 +9,7 @@
   backdrop-filter: saturate(1.04) blur(10px);
 }
 
-.store-nav--cozy-owner .store-nav__inner {
+.store-nav--cozy .store-nav__inner {
   display: grid !important;
   grid-template-columns: minmax(160px, .9fr) minmax(380px, 1.25fr) minmax(380px, 1fr) !important;
   align-items: center !important;
@@ -18,8 +18,8 @@
   min-height: 74px !important;
 }
 
-.store-nav--cozy-owner .store-nav__mobile-toggle { display: none !important; }
-.store-nav--cozy-owner .store-nav__brand {
+.store-nav--cozy .store-nav__mobile-toggle { display: none !important; }
+.store-nav--cozy .store-nav__brand {
   grid-column: 1 !important;
   display: flex !important;
   align-items: center;
@@ -29,8 +29,8 @@
   font-size: 17px !important;
   letter-spacing: -.025em;
 }
-.store-nav--cozy-owner .store-nav__brand img,
-.store-nav--cozy-owner .store-nav__logo-fallback {
+.store-nav--cozy .store-nav__brand img,
+.store-nav--cozy .store-nav__logo-fallback {
   display: grid !important;
   width: 38px !important;
   height: 38px !important;
@@ -41,14 +41,7 @@
   box-shadow: none !important;
 }
 
-/* The uploaded primary-shop wordmark is dark; keep its transparent pixels on
-   a light tile so it stays visible when the storefront switches to dark mode. */
-html:not(.light) .store-nav--cozy-owner .store-nav__brand img {
-  border-color: color-mix(in srgb, #fff 24%, transparent) !important;
-  background: #fff !important;
-}
-
-.store-nav--cozy-owner .store-nav__links {
+.store-nav--cozy .store-nav__links {
   grid-column: 2 !important;
   display: flex !important;
   align-items: center;
@@ -57,8 +50,8 @@ html:not(.light) .store-nav--cozy-owner .store-nav__brand img {
   min-width: 0;
   margin: 0 !important;
 }
-.store-nav--cozy-owner .store-nav__links > a,
-.store-nav--cozy-owner .store-nav__category > summary {
+.store-nav--cozy .store-nav__links > a,
+.store-nav--cozy .store-nav__category > summary {
   position: relative;
   display: flex !important;
   align-items: center;
@@ -74,26 +67,26 @@ html:not(.light) .store-nav--cozy-owner .store-nav__brand img {
   text-decoration: none;
   transition: background-color .16s ease, color .16s ease;
 }
-.store-nav--cozy-owner .store-nav__links > a svg,
-.store-nav--cozy-owner .store-nav__category > summary svg { display: none !important; }
-.store-nav--cozy-owner .store-nav__category > summary::-webkit-details-marker { display: none; }
-.store-nav--cozy-owner .store-nav__links > a:hover,
-.store-nav--cozy-owner .store-nav__links > a.is-active,
-.store-nav--cozy-owner .store-nav__category > summary:hover,
-.store-nav--cozy-owner .store-nav__category[open] > summary {
+.store-nav--cozy .store-nav__links > a svg,
+.store-nav--cozy .store-nav__category > summary svg { display: none !important; }
+.store-nav--cozy .store-nav__category > summary::-webkit-details-marker { display: none; }
+.store-nav--cozy .store-nav__links > a:hover,
+.store-nav--cozy .store-nav__links > a.is-active,
+.store-nav--cozy .store-nav__category > summary:hover,
+.store-nav--cozy .store-nav__category[open] > summary {
   background: color-mix(in srgb, var(--theme-accent, var(--gold)) 11%, var(--theme-card-surface, var(--card))) !important;
   color: var(--theme-accent, var(--gold)) !important;
 }
-.store-nav--cozy-owner .store-nav__category-menu,
-.store-nav--cozy-owner .store-nav__account-menu {
+.store-nav--cozy .store-nav__category-menu,
+.store-nav--cozy .store-nav__account-menu {
   border: 1px solid var(--theme-line, var(--border)) !important;
   border-radius: 14px !important;
   background: var(--theme-card-surface, var(--card)) !important;
   box-shadow: 0 16px 40px color-mix(in srgb, var(--theme-ink, var(--text)) 13%, transparent) !important;
 }
 
-.store-nav--cozy-owner .store-nav__search { display: none !important; }
-.store-nav--cozy-owner .store-nav__actions {
+.store-nav--cozy .store-nav__search { display: none !important; }
+.store-nav--cozy .store-nav__actions {
   grid-column: 3 !important;
   display: flex !important;
   align-items: center;
@@ -102,8 +95,8 @@ html:not(.light) .store-nav--cozy-owner .store-nav__brand img {
   min-width: 0;
   margin: 0 !important;
 }
-.store-nav--cozy-owner .store-nav__theme,
-.store-nav--cozy-owner .store-nav__cart {
+.store-nav--cozy .store-nav__theme,
+.store-nav--cozy .store-nav__cart {
   display: grid !important;
   place-items: center;
   width: 36px !important;
@@ -115,15 +108,15 @@ html:not(.light) .store-nav--cozy-owner .store-nav__brand img {
   box-shadow: none !important;
   transition: background-color .16s ease, color .16s ease;
 }
-.store-nav--cozy-owner .store-nav__theme:hover,
-.store-nav--cozy-owner .store-nav__cart:hover {
+.store-nav--cozy .store-nav__theme:hover,
+.store-nav--cozy .store-nav__cart:hover {
   border-color: var(--theme-line, var(--border)) !important;
   background: var(--theme-card-surface, var(--card)) !important;
   color: var(--theme-ink, var(--text)) !important;
 }
-.store-nav--cozy-owner .store-nav__theme svg,
-.store-nav--cozy-owner .store-nav__cart > svg { width: 17px !important; height: 17px !important; }
-.store-nav--cozy-owner .store-nav__cart b {
+.store-nav--cozy .store-nav__theme svg,
+.store-nav--cozy .store-nav__cart > svg { width: 17px !important; height: 17px !important; }
+.store-nav--cozy .store-nav__cart b {
   top: -2px;
   right: -2px;
   border-color: var(--theme-page-surface, var(--bg));
@@ -131,7 +124,7 @@ html:not(.light) .store-nav--cozy-owner .store-nav__brand img {
   color: var(--theme-accent-ink, var(--gold-contrast));
 }
 
-.store-nav--cozy-owner .store-nav__wallet-group {
+.store-nav--cozy .store-nav__wallet-group {
   display: flex;
   align-items: center;
   gap: 3px;
@@ -141,7 +134,7 @@ html:not(.light) .store-nav--cozy-owner .store-nav__brand img {
   border-radius: 12px;
   background: var(--theme-card-surface, var(--card));
 }
-.store-nav--cozy-owner .store-nav__wallet {
+.store-nav--cozy .store-nav__wallet {
   display: flex !important;
   align-items: center;
   min-width: 80px;
@@ -155,23 +148,14 @@ html:not(.light) .store-nav--cozy-owner .store-nav__brand img {
   font-weight: 750 !important;
   font-variant-numeric: tabular-nums;
 }
-.store-nav--cozy-owner .store-nav__wallet span { display: flex; align-items: baseline; gap: 5px; }
-.store-nav--cozy-owner .store-nav__wallet small {
+.store-nav--cozy .store-nav__wallet span { display: flex; align-items: baseline; gap: 5px; }
+.store-nav--cozy .store-nav__wallet small {
   color: var(--theme-muted-ink, var(--text-3));
   font-size: 9px;
   font-weight: 500;
 }
-.store-nav--cozy-owner .store-nav__wallet b { display: none !important; }
-
-/* The legacy navbar stylesheet uses a more specific dark-mode rule for every
-   wallet link. Keep that rule from painting a second surface over this
-   transparent balance control; the surrounding group owns the surface. */
-html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
-  border: 0 !important;
-  background: transparent !important;
-  color: var(--theme-ink, var(--text)) !important;
-}
-.store-nav--cozy-owner .store-nav__desktop-topup {
+.store-nav--cozy .store-nav__wallet b { display: none !important; }
+.store-nav--cozy .store-nav__desktop-topup {
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -186,11 +170,11 @@ html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
   font-size: 11px !important;
   font-weight: 750 !important;
 }
-.store-nav--cozy-owner .store-nav__desktop-topup:hover { filter: brightness(1.04); }
-.store-nav--cozy-owner .store-nav__desktop-topup svg { width: 15px; height: 15px; }
-.store-nav--cozy-owner .store-nav__mobile-topup { display: none !important; }
-.store-nav--cozy-owner .store-nav__register,
-.store-nav--cozy-owner .store-nav__login {
+.store-nav--cozy .store-nav__desktop-topup:hover { filter: brightness(1.04); }
+.store-nav--cozy .store-nav__desktop-topup svg { width: 15px; height: 15px; }
+.store-nav--cozy .store-nav__mobile-topup { display: none !important; }
+.store-nav--cozy .store-nav__register,
+.store-nav--cozy .store-nav__login {
   height: 38px !important;
   padding-inline: 13px !important;
   border: 1px solid var(--theme-line, var(--border)) !important;
@@ -199,17 +183,17 @@ html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
   color: var(--theme-ink, var(--text)) !important;
   font-size: 11px !important;
 }
-.store-nav--cozy-owner .store-nav__login {
+.store-nav--cozy .store-nav__login {
   border-color: var(--theme-accent, var(--gold)) !important;
   background: var(--theme-accent, var(--gold)) !important;
   color: var(--theme-accent-ink, var(--gold-contrast)) !important;
 }
-.store-nav--cozy-owner .store-nav__account {
+.store-nav--cozy .store-nav__account {
   margin-left: 3px;
   padding-left: 10px;
   border-left: 1px solid var(--theme-line, var(--border));
 }
-.store-nav--cozy-owner .store-nav__account summary {
+.store-nav--cozy .store-nav__account summary {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -221,28 +205,28 @@ html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
   color: var(--theme-ink, var(--text)) !important;
   font-size: 11px !important;
 }
-.store-nav--cozy-owner .store-nav__avatar {
+.store-nav--cozy .store-nav__avatar {
   width: 32px !important;
   height: 32px !important;
   background: color-mix(in srgb, var(--theme-accent, var(--gold)) 15%, var(--theme-card-surface, var(--card))) !important;
   color: var(--theme-accent, var(--gold)) !important;
 }
-.store-nav--cozy-owner :is(a, button, summary):focus-visible {
+.store-nav--cozy :is(a, button, summary):focus-visible {
   outline: 2px solid var(--theme-accent, var(--gold)) !important;
   outline-offset: 3px !important;
 }
 
 @media (min-width: 901px) and (max-width: 1100px) {
-  .store-nav--cozy-owner .store-nav__inner {
+  .store-nav--cozy .store-nav__inner {
     grid-template-columns: minmax(150px, 1fr) auto !important;
     grid-template-rows: 58px 45px;
     width: calc(100% - 36px) !important;
     gap: 0 12px !important;
     min-height: 104px !important;
   }
-  .store-nav--cozy-owner .store-nav__brand { grid-column: 1; grid-row: 1; }
-  .store-nav--cozy-owner .store-nav__actions { grid-column: 2; grid-row: 1; }
-  .store-nav--cozy-owner .store-nav__links {
+  .store-nav--cozy .store-nav__brand { grid-column: 1; grid-row: 1; }
+  .store-nav--cozy .store-nav__actions { grid-column: 2; grid-row: 1; }
+  .store-nav--cozy .store-nav__links {
     grid-column: 1 / -1 !important;
     grid-row: 2;
     justify-content: flex-start !important;
@@ -251,7 +235,7 @@ html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
 }
 
 @media (max-width: 900px) {
-  .store-nav--cozy-owner .store-nav__inner {
+  .store-nav--cozy .store-nav__inner {
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
@@ -259,7 +243,7 @@ html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
     padding: 8px 14px !important;
     gap: 10px !important;
   }
-  .store-nav--cozy-owner .store-nav__mobile-toggle {
+  .store-nav--cozy .store-nav__mobile-toggle {
     display: grid !important;
     place-items: center;
     flex: 0 0 40px !important;
@@ -274,16 +258,16 @@ html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
     color: var(--theme-ink, var(--text)) !important;
     box-shadow: none !important;
   }
-  .store-nav--cozy-owner .store-nav__mobile-toggle > span { width: 17px !important; margin: 0 !important; }
-  .store-nav--cozy-owner .store-nav__links {
+  .store-nav--cozy .store-nav__mobile-toggle > span { width: 17px !important; margin: 0 !important; }
+  .store-nav--cozy .store-nav__links {
     display: none !important;
     grid-column: auto !important;
     grid-row: auto !important;
   }
-  .store-nav--cozy-owner .store-nav__brand { flex: 1 1 auto !important; min-width: 0 !important; }
-  .store-nav--cozy-owner .store-nav__brand strong { overflow: hidden; font-size: 15px !important; text-overflow: ellipsis; white-space: nowrap; }
-  .store-nav--cozy-owner .store-nav__wallet-group { display: none !important; }
-  .store-nav--cozy-owner .store-nav__mobile-topup {
+  .store-nav--cozy .store-nav__brand { flex: 1 1 auto !important; min-width: 0 !important; }
+  .store-nav--cozy .store-nav__brand strong { overflow: hidden; font-size: 15px !important; text-overflow: ellipsis; white-space: nowrap; }
+  .store-nav--cozy .store-nav__wallet-group { display: none !important; }
+  .store-nav--cozy .store-nav__mobile-topup {
     display: flex !important;
     align-items: center;
     justify-content: center;
@@ -297,11 +281,11 @@ html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
     background: var(--theme-accent, var(--gold)) !important;
     color: var(--theme-accent-ink, var(--gold-contrast)) !important;
   }
-  .store-nav--cozy-owner .store-nav__actions { flex: 0 0 auto !important; gap: 4px !important; margin-left: auto !important; }
-  .store-nav--cozy-owner .store-nav__theme,
-  .store-nav--cozy-owner .store-nav__cart { width: 38px !important; height: 38px !important; }
-  .store-nav--cozy-owner .store-nav__account { margin: 0; padding: 0; border: 0; }
-  .store-nav--cozy-owner .store-nav__account summary {
+  .store-nav--cozy .store-nav__actions { flex: 0 0 auto !important; gap: 4px !important; margin-left: auto !important; }
+  .store-nav--cozy .store-nav__theme,
+  .store-nav--cozy .store-nav__cart { width: 38px !important; height: 38px !important; }
+  .store-nav--cozy .store-nav__account { margin: 0; padding: 0; border: 0; }
+  .store-nav--cozy .store-nav__account summary {
     display: flex !important;
     justify-content: center;
     width: 38px;
@@ -311,268 +295,32 @@ html:not(.light) .store-nav--cozy-owner .store-nav__wallet {
     border-radius: 11px !important;
     background: var(--theme-card-surface, var(--card)) !important;
   }
-  .store-nav--cozy-owner .store-nav__avatar { width: 28px !important; height: 28px !important; }
-  .store-nav--cozy-owner .store-nav__account-name,
-  .store-nav--cozy-owner .store-nav__chevron { display: none !important; }
-  .store-nav--cozy-owner .store-nav__login,
-  .store-nav--cozy-owner .store-nav__register { height: 38px !important; padding-inline: 10px !important; }
-  .store-nav--cozy-owner .store-nav__mobile-row { background: var(--theme-card-surface, var(--card)) !important; }
+  .store-nav--cozy .store-nav__avatar { width: 28px !important; height: 28px !important; }
+  .store-nav--cozy .store-nav__account-name,
+  .store-nav--cozy .store-nav__chevron { display: none !important; }
+  .store-nav--cozy .store-nav__login,
+  .store-nav--cozy .store-nav__register { height: 38px !important; padding-inline: 10px !important; }
+  .store-nav--cozy .store-nav__mobile-row { background: var(--theme-card-surface, var(--card)) !important; }
 }
 
 @media (max-width: 520px) {
-  .store-nav--cozy-owner .store-nav__inner { padding-inline: 10px !important; gap: 6px !important; }
-  .store-nav--cozy-owner .store-nav__mobile-toggle,
-  .store-nav--cozy-owner .store-nav__mobile-topup { width: 36px !important; min-width: 36px !important; height: 36px !important; min-height: 36px !important; flex-basis: 36px !important; }
-  .store-nav--cozy-owner .store-nav__mobile-topup { padding: 0 !important; }
-  .store-nav--cozy-owner .store-nav__mobile-topup span { display: none !important; }
-  .store-nav--cozy-owner .store-nav__theme,
-  .store-nav--cozy-owner .store-nav__cart,
-  .store-nav--cozy-owner .store-nav__account summary { width: 34px !important; height: 34px !important; }
-  .store-nav--cozy-owner .store-nav__actions { gap: 2px !important; }
-  .store-nav--cozy-owner .store-nav__brand img,
-  .store-nav--cozy-owner .store-nav__logo-fallback { width: 30px !important; height: 30px !important; }
-  .store-nav--cozy-owner .store-nav__brand strong { font-size: 14px !important; }
-  .store-nav--cozy-owner .store-nav__login { min-width: 34px !important; padding-inline: 8px !important; }
+  .store-nav--cozy .store-nav__inner { padding-inline: 10px !important; gap: 6px !important; }
+  .store-nav--cozy .store-nav__mobile-toggle,
+  .store-nav--cozy .store-nav__mobile-topup { width: 36px !important; min-width: 36px !important; height: 36px !important; min-height: 36px !important; flex-basis: 36px !important; }
+  .store-nav--cozy .store-nav__mobile-topup { padding: 0 !important; }
+  .store-nav--cozy .store-nav__mobile-topup span { display: none !important; }
+  .store-nav--cozy .store-nav__theme,
+  .store-nav--cozy .store-nav__cart,
+  .store-nav--cozy .store-nav__account summary { width: 34px !important; height: 34px !important; }
+  .store-nav--cozy .store-nav__actions { gap: 2px !important; }
+  .store-nav--cozy .store-nav__brand img,
+  .store-nav--cozy .store-nav__logo-fallback { width: 30px !important; height: 30px !important; }
+  .store-nav--cozy .store-nav__brand strong { font-size: 14px !important; }
+  .store-nav--cozy .store-nav__login { min-width: 34px !important; padding-inline: 8px !important; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .store-nav--cozy-owner *,
-  .store-nav--cozy-owner *::before,
-  .store-nav--cozy-owner *::after { transition-duration: .01ms !important; }
-}
-
-/* A calm, scrollable mobile navigation for the primary storefront only. */
-@media (max-width: 900px) {
-  .store-nav--cozy-owner .store-nav__mobile-backdrop {
-    z-index: 10010 !important;
-    background: rgb(23 23 23 / 38%) !important;
-    opacity: 0;
-    transition: opacity .22s ease, visibility .22s ease !important;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-backdrop.is-open { opacity: 1; }
-  .store-nav--cozy-owner .store-nav__mobile-row {
-    display: flex !important;
-    flex-direction: column !important;
-    align-content: flex-start !important;
-    z-index: 10020 !important;
-    inset: 0 auto 0 0 !important;
-    width: min(420px, 92vw) !important;
-    height: 100vh !important;
-    height: 100dvh !important;
-    padding: env(safe-area-inset-top, 0px) 20px max(18px, env(safe-area-inset-bottom, 0px)) !important;
-    box-sizing: border-box !important;
-    gap: 0 !important;
-    align-items: stretch !important;
-    justify-content: flex-start !important;
-    border: 0 !important;
-    border-right: 1px solid var(--theme-line, var(--border)) !important;
-    border-radius: 0 18px 18px 0 !important;
-    background: var(--theme-card-surface, var(--card)) !important;
-    color: var(--theme-ink, #171717) !important;
-    box-shadow: 18px 0 48px rgb(23 23 23 / 14%) !important;
-    opacity: 0;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    overscroll-behavior: contain !important;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-    scrollbar-color: var(--theme-line, #deded8) transparent;
-    transform: translateX(-102%);
-    transition: transform .28s cubic-bezier(.2,.75,.25,1), opacity .2s ease, visibility .28s ease !important;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-row.is-open {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  .store-nav--cozy-owner .store-nav__mobile-row > header {
-    position: sticky;
-    z-index: 2;
-    top: calc(-1 * env(safe-area-inset-top, 0px));
-    flex: 0 0 auto;
-    height: 82px !important;
-    min-height: 82px !important;
-    box-sizing: border-box !important;
-    margin: 0 -20px 14px !important;
-    padding: 10px 20px !important;
-    border-bottom: 1px solid var(--theme-line, var(--border)) !important;
-    background: var(--theme-card-surface, var(--card)) !important;
-  }
-  .store-nav--cozy-owner .store-nav__drawer-brand {
-    display: flex !important;
-    flex: 1 1 auto !important;
-    align-items: center !important;
-    min-width: 0;
-    max-width: calc(100% - 56px);
-    gap: 11px !important;
-    color: var(--theme-ink, #171717) !important;
-    font-size: 13px !important;
-    font-weight: 750 !important;
-    letter-spacing: -.025em;
-  }
-  .store-nav--cozy-owner .store-nav__drawer-brand img,
-  .store-nav--cozy-owner .store-nav__drawer-brand > span {
-    flex: 0 0 50px;
-    width: 50px !important;
-    height: 50px !important;
-    border: 1px solid var(--theme-line, var(--border)) !important;
-    border-radius: 14px !important;
-    background: var(--theme-accent-soft, #f4ead5) !important;
-    color: var(--theme-accent-deep, #8c5e12) !important;
-  }
-  .store-nav--cozy-owner .store-nav__drawer-brand img { padding: 3px; object-fit: contain; }
-  .store-nav--cozy-owner .store-nav__drawer-brand strong {
-    flex: 1 1 auto;
-    min-width: 0;
-    overflow: hidden;
-    white-space: normal;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    line-height: 1.2;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-close {
-    flex: 0 0 44px;
-    width: 44px !important;
-    height: 44px !important;
-    border: 1px solid var(--theme-line, var(--border)) !important;
-    border-radius: 14px !important;
-    background: var(--theme-card-surface, #fff) !important;
-    color: var(--theme-ink, #171717) !important;
-    line-height: 1 !important;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
-  .store-nav--cozy-owner .store-nav__mobile-close:focus-visible,
-  .store-nav--cozy-owner .store-nav__mobile-row form button:focus-visible,
-  .store-nav--cozy-owner .store-nav__drawer-auth a:focus-visible {
-    outline: 2px solid var(--theme-accent-deep, #8c5e12) !important;
-    outline-offset: 2px;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-row form {
-    position: relative;
-    z-index: 1;
-    top: auto;
-    flex: 0 0 48px !important;
-    height: 48px !important;
-    margin: 0 0 18px !important;
-    border: 1px solid var(--theme-line, var(--border)) !important;
-    border-radius: 14px !important;
-    background: var(--theme-card-surface, #fff) !important;
-    box-shadow: 0 3px 10px rgb(23 23 23 / 4%);
-  }
-  .store-nav--cozy-owner .store-nav__mobile-row input {
-    min-width: 0;
-    padding: 0 14px !important;
-    color: var(--theme-ink, #171717) !important;
-    font-size: 14px !important;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-row input::placeholder { color: var(--theme-muted, #6b6b68) !important; }
-  .store-nav--cozy-owner .store-nav__mobile-row form button {
-    display: grid;
-    width: 48px;
-    place-items: center;
-    color: var(--theme-accent-deep, #8c5e12) !important;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-row form button svg { width: 19px; height: 19px; }
-  .store-nav--cozy-owner .store-nav__mobile-row nav {
-    display: grid !important;
-    flex: 0 0 auto !important;
-    width: 100%;
-    height: max-content !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    align-content: start !important;
-    grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: none !important;
-    grid-auto-rows: minmax(49px, max-content) !important;
-    gap: 3px !important;
-    overflow: visible !important;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-row nav a {
-    min-width: 0;
-    min-height: 49px !important;
-    gap: 14px !important;
-    padding: 0 12px !important;
-    border: 0 !important;
-    border-radius: 14px !important;
-    background: transparent !important;
-    color: var(--theme-ink, #171717) !important;
-    font-size: 13px !important;
-    font-weight: 650 !important;
-    line-height: 1.35;
-    text-decoration: none;
-    transition: background .16s ease, color .16s ease !important;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-row nav a:hover,
-  .store-nav--cozy-owner .store-nav__mobile-row nav a:focus-visible {
-    outline: 0;
-    background: var(--theme-accent-soft, #f4ead5) !important;
-    color: var(--theme-accent-deep, #8c5e12) !important;
-  }
-  .store-nav--cozy-owner .store-nav__mobile-row nav a svg {
-    flex: 0 0 21px;
-    width: 21px !important;
-    height: 21px !important;
-    color: var(--theme-muted, #6b6b68) !important;
-    stroke-width: 1.7;
-  }
-  .store-nav--cozy-owner .store-nav__drawer-section {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 18px 0 7px !important;
-    color: var(--theme-muted, #6b6b68) !important;
-    font-size: 10px !important;
-    font-weight: 700;
-    letter-spacing: .04em !important;
-  }
-  .store-nav--cozy-owner .store-nav__drawer-section::before,
-  .store-nav--cozy-owner .store-nav__drawer-section::after {
-    content: "";
-    flex: 1;
-    height: 1px;
-    background: var(--theme-line, #deded8);
-  }
-  .store-nav--cozy-owner .store-nav__drawer-section b { font-weight: 700; }
-  .store-nav--cozy-owner .store-nav__drawer-auth { gap: 8px !important; margin: 15px 0 4px !important; }
-  .store-nav--cozy-owner .store-nav__drawer-auth a {
-    min-height: 46px !important;
-    border: 1px solid var(--theme-line, var(--border)) !important;
-    border-radius: 14px !important;
-    background: var(--theme-card-surface, #fff) !important;
-    color: var(--theme-ink, #171717) !important;
-    font-size: 13px !important;
-    font-weight: 700 !important;
-  }
-  .store-nav--cozy-owner .store-nav__drawer-auth a:last-child {
-    border-color: var(--theme-accent, #c58a24) !important;
-    background: var(--theme-accent, #c58a24) !important;
-    color: #fff !important;
-  }
-  .store-nav--cozy-owner .store-nav__drawer-logout { color: var(--theme-accent-deep, #8c5e12) !important; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .store-nav--cozy-owner .store-nav__mobile-row,
-  .store-nav--cozy-owner .store-nav__mobile-backdrop { transition-duration: .01ms !important; }
-}
-
-/* Show the uploaded wordmark at its natural aspect ratio instead of shrinking
-   it into the square logo tile. */
-.store-nav--cozy-owner .store-nav__brand--image img {
-  display: block !important;
-  width: auto !important;
-  height: 48px !important;
-  max-width: min(150px, 30vw) !important;
-  min-width: 0 !important;
-  flex: 0 1 auto !important;
-  aspect-ratio: auto !important;
-  object-fit: contain !important;
-  object-position: center !important;
-}
-
-@media (max-width: 760px) {
-  .store-nav--cozy-owner .store-nav__brand--image img {
-    height: 40px !important;
-    max-width: min(124px, 34vw) !important;
-  }
+  .store-nav--cozy *,
+  .store-nav--cozy *::before,
+  .store-nav--cozy *::after { transition-duration: .01ms !important; }
 }

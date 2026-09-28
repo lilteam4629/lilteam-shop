@@ -12,9 +12,22 @@
     <main class="experiment-content welcome-live-content">
       <section class="welcome-live-hero">
         <div>
-          <span class="experiment-kicker">STOREFRONT · WELCOME EXPERIENCE</span>
+          <span class="experiment-kicker">STORE CONTROL · WELCOME</span>
           <h1>ป๊อปอัปต้อนรับ</h1>
-          <p>จัดการข้อความและภาพสไลด์ที่ลูกค้าเห็นเมื่อเข้าหน้าร้าน การเปลี่ยนแปลงจะมีผลหลังบันทึก</p>
+          <p>จัดการข้อความและรูปประกาศที่ลูกค้าจะเห็นเมื่อเข้าหน้าร้าน</p>
+        </div>
+        <div class="welcome-live-hero-art" aria-hidden="true">
+          <i class="welcome-live-art-spark welcome-live-art-spark-one"></i>
+          <i class="welcome-live-art-spark welcome-live-art-spark-two"></i>
+          <span class="welcome-live-art-tile welcome-live-art-main">
+            <svg viewBox="0 0 48 48"><path d="M13 20a11 11 0 0 1 22 0c0 12 5 12 5 15H8c0-3 5-3 5-15Z" fill="#fff"/><path d="M19 39c1 3 3 4 5 4s4-1 5-4" fill="none" stroke="#087a5b" stroke-width="3" stroke-linecap="round"/><circle cx="36" cy="12" r="6" fill="#f1b84b"/><circle cx="36" cy="12" r="2" fill="#fff4d1"/></svg>
+          </span>
+          <span class="welcome-live-art-tile welcome-live-art-picture">
+            <svg viewBox="0 0 48 48"><rect x="9" y="10" width="30" height="28" rx="7" fill="#fff"/><circle cx="29" cy="19" r="4" fill="#f1b84b"/><path d="m12 33 9-10 6 6 4-4 6 8" fill="none" stroke="#6655d8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span class="welcome-live-art-tile welcome-live-art-copy">
+            <svg viewBox="0 0 48 48"><rect x="10" y="8" width="28" height="32" rx="7" fill="#fff"/><path d="M17 18h14M17 24h14M17 30h9" stroke="#c17b12" stroke-width="3" stroke-linecap="round"/><path d="M31 8v7h7" fill="#ffe3a3"/></svg>
+          </span>
         </div>
         <div class="welcome-live-hero-actions">
           <span class="welcome-live-status <%= popup.enabled ? 'is-active' : '' %>" data-welcome-status><i></i><span><%= popup.enabled ? 'กำลังแสดงบนหน้าร้าน' : 'ปิดการแสดงอยู่' %></span></span>
@@ -23,9 +36,9 @@
       </section>
 
       <section class="welcome-live-stats" aria-label="สรุปป๊อปอัปต้อนรับ">
-        <article><span class="welcome-live-stat-icon" aria-hidden="true">◉</span><div><small>สถานะ</small><strong data-welcome-stat-status><%= popup.enabled ? 'เปิดใช้งาน' : 'ปิดไว้' %></strong></div></article>
-        <article><span class="welcome-live-stat-icon" aria-hidden="true">▧</span><div><small>ภาพสไลด์ที่บันทึก</small><strong><%= popupImages.length %> รูป</strong></div></article>
-        <article><span class="welcome-live-stat-icon" aria-hidden="true">Aa</span><div><small>ข้อความที่แสดง</small><strong><%= (popup.showTitle !== false ? 1 : 0) + (popup.showContent !== false ? 1 : 0) %> ส่วน</strong></div></article>
+        <article class="welcome-live-stat is-green"><span class="welcome-live-stat-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="17" fill="#fff"/><path d="m16 24 5 5 11-12" fill="none" stroke="#078262" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><small>สถานะป๊อปอัป</small><strong data-welcome-stat-status><%= popup.enabled ? 'เปิดใช้งาน' : 'ปิดไว้' %></strong></div></article>
+        <article class="welcome-live-stat is-violet"><span class="welcome-live-stat-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="8" y="10" width="32" height="28" rx="6" fill="#fff"/><circle cx="30" cy="19" r="4" fill="#f1b84b"/><path d="m11 33 10-11 7 7 4-4 6 8" fill="none" stroke="#6655d8" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></span><div><small>รูปที่บันทึกไว้</small><strong><%= popupImages.length %> รูป</strong></div></article>
+        <article class="welcome-live-stat is-amber"><span class="welcome-live-stat-icon" aria-hidden="true"><svg viewBox="0 0 48 48"><rect x="10" y="7" width="28" height="34" rx="7" fill="#fff"/><path d="M17 18h14M17 25h14M17 32h9" stroke="#c17b12" stroke-width="3" stroke-linecap="round"/></svg></span><div><small>ส่วนที่แสดง</small><strong><%= (popup.showTitle !== false ? 1 : 0) + (popup.showContent !== false ? 1 : 0) %> ส่วน</strong></div></article>
       </section>
 
       <form action="/admin/welcome-popup" method="post" enctype="multipart/form-data" class="welcome-live-form" data-welcome-form>
@@ -118,10 +131,10 @@
 
   function render() {
     var isEnabled = enabled.checked;
+    var imageTotal = form.querySelectorAll('[data-welcome-remove]:not(:checked)').length + selectedFiles.length;
     pageStatus.classList.toggle('is-active', isEnabled);
     pageStatus.querySelector('span').textContent = isEnabled ? 'กำลังแสดงบนหน้าร้าน' : 'ปิดการแสดงอยู่';
     statStatus.textContent = isEnabled ? 'เปิดใช้งาน' : 'ปิดไว้';
-    var imageTotal = form.querySelectorAll('[data-welcome-remove]:not(:checked)').length + selectedFiles.length;
     imageCount.textContent = imageTotal + ' รูป';
     if (keptCount) keptCount.textContent = form.querySelectorAll('[data-welcome-remove]:not(:checked)').length + ' รูป';
     if (galleryEmpty) galleryEmpty.hidden = imageTotal > 0;

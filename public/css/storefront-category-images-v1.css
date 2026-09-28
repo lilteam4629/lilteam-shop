@@ -1,63 +1,65 @@
-/* Owner homepage only: show category artwork without the surrounding panels. */
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories {
+/* Recommended categories are the uploaded artwork itself, without a card or outer frame. */
+#site-page-shell .home-category-rail.home-category-images-only {
+  /* Let the section shrink to the artwork. A full-width rail looked like an
+     empty bordered panel when only one banner was configured. */
   display: block !important;
-  width: min(1800px, calc(100% - 24px)) !important;
-  max-width: 1800px !important;
+  width: fit-content !important;
+  max-width: calc(100% - 16px) !important;
   margin: 0 auto !important;
-  padding: 8px 0 4px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+#site-page-shell .home-category-images-only .home-category-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  gap: 14px !important;
+  overflow: visible !important;
+  padding: 0 !important;
   border: 0 !important;
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  overflow: visible !important;
+}
+#site-page-shell .home-category-images-only .home-category-grid--single {
+  width: fit-content !important;
+  max-width: min(640px, 100%) !important;
+  justify-content: center !important;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-grid {
-  display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  align-items: stretch !important;
-  gap: 14px !important;
-  padding: 0 !important;
-  overflow: visible !important;
-  background: transparent !important;
-}
-
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-card {
-  position: relative !important;
+#site-page-shell .home-category-images-only .home-category-card,
+#site-page-shell .home-category-images-only .home-category-card:hover {
   display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
+  width: fit-content !important;
+  max-width: min(640px, 100%) !important;
+  min-width: 0;
   padding: 0 !important;
   overflow: visible !important;
-  border: 1px solid var(--border-light) !important;
-  border-radius: 14px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
   outline: 0 !important;
-  background: var(--card) !important;
+  background: transparent !important;
   box-shadow: none !important;
-  color: inherit !important;
-  text-decoration: none !important;
   transform: none !important;
-  transition: none !important;
+}
+#site-page-shell .home-category-images-only .home-category-card::before,
+#site-page-shell .home-category-images-only .home-category-card::after { content: none !important; display: none !important; }
+#site-page-shell .home-category-images-only .home-category-card:focus-visible {
+  outline: 3px solid var(--gold) !important;
+  outline-offset: 4px;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-card::before,
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-card::after {
-  display: none !important;
-  content: none !important;
-}
-
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-card:focus-visible {
-  outline: 2px solid var(--gold-text) !important;
-  outline-offset: 4px !important;
-}
-
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-image {
+#site-page-shell .home-category-images-only .home-category-image {
   display: block !important;
-  width: 100% !important;
+  width: fit-content !important;
   max-width: 100% !important;
   height: auto !important;
   min-height: 0 !important;
@@ -67,53 +69,51 @@
   border-radius: 0 !important;
   background: transparent !important;
   box-shadow: none !important;
-  line-height: 0 !important;
 }
-
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-image img {
+#site-page-shell .home-category-images-only .home-category-image img {
   display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
+  width: auto !important;
+  max-width: min(640px, 100%) !important;
   height: auto !important;
   max-height: none !important;
-  border: 0 !important;
-  border-radius: 0 !important;
-  outline: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
   object-fit: contain !important;
   object-position: center !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
-
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-copy {
-  display: block !important;
-  min-width: 0;
-  padding: 11px 14px 13px !important;
-  border-top: 1px solid var(--border);
-  background: var(--card);
-}
-
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-copy b,
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-copy small {
-  display: block;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-copy b {
+#site-page-shell .home-category-images-only .home-category-fallback {
+  display: grid;
+  min-height: 120px;
+  place-items: center;
+  padding: 16px;
+  background: var(--input);
   color: var(--text);
-  font-size: 14px;
-  font-weight: 850;
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
 }
 
-#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-copy small {
-  margin-top: 4px;
-  color: var(--text-4);
-  font-size: 11px;
+@media (max-width: 900px) {
+  #site-page-shell .home-category-images-only .home-category-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    flex-direction: column !important;
+    align-items: center !important;
+  }
+  #site-page-shell .home-category-images-only .home-category-card { max-width: 100% !important; }
+  #site-page-shell .home-category-images-only .home-category-image img { max-width: 100% !important; }
 }
-
-@media (max-width: 860px) {
-  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories { width: calc(100% - 24px) !important; padding: 8px 0 2px !important; }
-  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell .owner-home-v20-main > #home-categories .home-category-grid { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+@media (max-width: 640px) {
+  #site-page-shell .home-category-rail.home-category-images-only {
+    width: fit-content !important;
+    max-width: calc(100% - 16px) !important;
+    padding: 0 !important;
+  }
+  #site-page-shell .home-category-images-only .home-category-grid {
+    width: fit-content !important;
+    max-width: 100% !important;
+    gap: 10px !important;
+  }
 }

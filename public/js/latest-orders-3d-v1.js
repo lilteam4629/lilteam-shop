@@ -15,8 +15,8 @@
     var original = track && track.querySelector('.latest-orders-group');
     if (!shell || !track || !original) return;
 
+    var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
     var visible = false;
-    var userPaused = false;
     var resizeFrame = 0;
 
     function measure() {
@@ -49,20 +49,19 @@
     }
 
     function update() {
+      var reduced = reducedMotion.matches;
+      // The owner storefront rail autoplays; reduced motion only removes tilt.
+      shell.classList.toggle('is-motion-opt-in', reduced);
       shell.classList.toggle('is-visible', visible && !document.hidden);
-      shell.classList.toggle('is-user-paused', userPaused);
     }
 
-    function pauseForInteraction() {
-      if (userPaused) return;
-      userPaused = true;
+    function onMotionChange() {
       update();
     }
 
     function onShellKeydown(event) {
       if (event.target !== shell || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
       event.preventDefault();
-      pauseForInteraction();
       shell.scrollBy({ left: event.key === 'ArrowRight' ? 220 : -220, behavior: 'smooth' });
     }
 
@@ -85,10 +84,10 @@
       window.addEventListener('resize', scheduleMeasure, { passive: true });
     }
 
-    shell.addEventListener('pointerdown', pauseForInteraction, { passive: true });
-    shell.addEventListener('wheel', pauseForInteraction, { passive: true });
     shell.addEventListener('keydown', onShellKeydown);
     document.addEventListener('visibilitychange', update);
+    if (reducedMotion.addEventListener) reducedMotion.addEventListener('change', onMotionChange);
+    else reducedMotion.addListener(onMotionChange);
 
     scheduleMeasure();
     update();
@@ -98,10 +97,10 @@
       if (observer) observer.disconnect();
       if (resizeObserver) resizeObserver.disconnect();
       else window.removeEventListener('resize', scheduleMeasure);
-      shell.removeEventListener('pointerdown', pauseForInteraction);
-      shell.removeEventListener('wheel', pauseForInteraction);
       shell.removeEventListener('keydown', onShellKeydown);
       document.removeEventListener('visibilitychange', update);
+      if (reducedMotion.removeEventListener) reducedMotion.removeEventListener('change', onMotionChange);
+      else reducedMotion.removeListener(onMotionChange);
     };
   }
 

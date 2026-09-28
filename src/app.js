@@ -209,6 +209,21 @@ app.use((req, res, next) => {
   // Mark the platform site so provider settings can distinguish platform
   // configuration from a rented shop's own credentials.
   res.locals.isMainSite = !req.tenantShop;
+  // Keep tenant-specific data and permissions, while allowing every shop to
+  // use the same maintained storefront presentation.
+  res.locals.isUnifiedStorefront = true;
+  // The animated latest-orders rail remains exclusive to the owner's
+  // lilteam.site storefront; shared page styling does not expose its order data.
+  const requestHost = String(req.hostname || req.get('host') || '')
+    .toLowerCase()
+    .replace(/:\d+$/, '');
+  res.locals.isLilteamPrimaryStorefront = !req.tenantShop && (
+    process.env.NODE_ENV !== 'production' ||
+    requestHost === 'localhost' ||
+    requestHost === '127.0.0.1' ||
+    requestHost === 'lilteam.site' ||
+    requestHost === 'www.lilteam.site'
+  );
   res.locals.isSystemLab = !!req.tenantShop?.isSystemLab;
   // Storefront presentation is shared by the platform and rented shops. Each
   // request still reads its theme and content from the active tenant context.

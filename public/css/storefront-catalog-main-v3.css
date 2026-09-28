@@ -1,12 +1,12 @@
 /* Main-store product catalog: warm, quiet filter rail with a spacious results field. */
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page {
   width: min(1540px, calc(100% - 40px)) !important;
   max-width: none !important;
   margin-inline: auto !important;
   padding: 24px 0 64px !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-head {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-head {
   grid-template-columns: minmax(250px, .8fr) minmax(360px, 1.2fr);
   grid-template-areas: "title search" "title status";
   align-items: center;
@@ -18,13 +18,13 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ca
   box-shadow: 0 12px 32px -29px color-mix(in srgb, var(--text) 28%, transparent);
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-title {
   grid-area: title;
   align-self: center;
   white-space: normal;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title-icon {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-title-icon {
   width: 46px;
   height: 46px;
   border-color: var(--border);
@@ -33,12 +33,12 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ca
   box-shadow: none;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title h1 {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-title h1 {
   font-size: clamp(23px, 2.2vw, 30px);
   letter-spacing: -.025em;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-search {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-search {
   grid-area: search;
   min-height: 48px;
   border-color: var(--border);
@@ -46,18 +46,18 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ca
   background: var(--input);
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-status-tabs {
   grid-area: status;
   gap: 8px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
   min-height: 40px;
   padding-inline: 14px;
   border-radius: 10px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-catalog-workspace {
+body.storefront-unified #site-page-shell .main-catalog-workspace {
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
   align-items: start;
@@ -65,7 +65,7 @@ body.storefront-owner-lilteam #site-page-shell .main-catalog-workspace {
   margin-top: 21px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-catalog-filter-rail {
+body.storefront-unified #site-page-shell .main-catalog-filter-rail {
   position: sticky;
   top: 88px;
   min-width: 0;
@@ -75,7 +75,7 @@ body.storefront-owner-lilteam #site-page-shell .main-catalog-filter-rail {
   background: var(--card);
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-catalog-filter-heading {
+body.storefront-unified #site-page-shell .main-catalog-filter-heading {
   display: flex;
   align-items: center;
   gap: 9px;
@@ -83,7 +83,7 @@ body.storefront-owner-lilteam #site-page-shell .main-catalog-filter-heading {
   border-bottom: 1px solid var(--border);
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-catalog-filter-heading svg {
+body.storefront-unified #site-page-shell .main-catalog-filter-heading svg {
   width: 16px;
   height: 16px;
   fill: none;
@@ -91,12 +91,12 @@ body.storefront-owner-lilteam #site-page-shell .main-catalog-filter-heading svg 
   stroke-width: 1.8;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-catalog-filter-heading h2 {
+body.storefront-unified #site-page-shell .main-catalog-filter-heading h2 {
   font-size: 13px;
   font-weight: 750;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter {
   margin: 7px 0 0;
   border: 0;
   border-radius: 0;
@@ -104,24 +104,24 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ma
   overflow: visible;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter > summary {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter > summary {
   min-height: 44px;
   padding: 0 1px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter > summary span {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter > summary span {
   font-size: 11px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter > summary small {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter > summary small {
   font-size: 10px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter > div {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .catalog-advanced-filter > div {
   padding: 8px 0 0;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget {
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
@@ -130,19 +130,19 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ma
   box-shadow: none !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .simple-filter-heading {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .simple-filter-heading {
   margin: 0 0 9px !important;
   font-size: 11px !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .simple-filter-grid {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .simple-filter-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   gap: 9px !important;
 }
 
 /* filter-panel.ejs includes older high-priority horizontal-rail rules; reset those
    on desktop so the new sidebar actually behaves like a compact filter panel. */
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   flex-flow: initial !important;
@@ -154,7 +154,7 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ma
   scroll-snap-type: none !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip {
   display: grid !important;
   flex: initial !important;
   grid-template-columns: minmax(0, 1fr) !important;
@@ -165,22 +165,22 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ma
   height: auto !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip > .simple-filter-image {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip > .simple-filter-image {
   width: 100% !important;
   height: auto !important;
   aspect-ratio: 1 / 1 !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip > .simple-filter-name {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip > .simple-filter-name {
   width: 100% !important;
   max-width: none !important;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-catalog-results {
+body.storefront-unified #site-page-shell .main-catalog-results {
   min-width: 0;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row {
   min-height: 45px;
   margin: 0 0 13px;
   padding: 0 1px 12px;
@@ -188,27 +188,27 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ma
   font-size: 11px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row select {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row select {
   min-height: 40px;
   border-color: var(--border);
   border-radius: 10px;
   background: var(--card);
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-active-tags {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-active-tags {
   margin: 0 0 13px;
   border-color: var(--border);
   border-radius: 11px;
   background: color-mix(in srgb, var(--gold) 7%, var(--card));
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-grid {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 15px;
   perspective: none;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card {
   border-color: var(--border);
   border-radius: 15px;
   background: var(--card);
@@ -216,99 +216,99 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .ma
   transform: none;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card:hover {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card:hover {
   border-color: color-mix(in srgb, var(--gold) 48%, var(--border));
   box-shadow: 0 15px 30px -24px color-mix(in srgb, var(--text) 30%, transparent);
   transform: translateY(-2px);
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-image {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-image {
   background: var(--input);
   background-image: none;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card-body {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card-body {
   padding: 12px 13px 13px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card-title {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card-title {
   font-size: 14px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-price b {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-price b {
   font-size: 19px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-cta {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-cta {
   min-height: 43px;
   border-radius: 10px;
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-empty {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-empty {
   padding: 54px 18px;
   border: 1px dashed var(--border);
   border-radius: 15px;
   background: var(--card);
 }
 
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page :is(a, button, input, select, summary):focus-visible {
+body.storefront-unified #site-page-shell .main-storefront-catalog-page :is(a, button, input, select, summary):focus-visible {
   outline: 3px solid color-mix(in srgb, var(--gold) 45%, transparent);
   outline-offset: 3px;
 }
 
 @media (min-width: 1580px) {
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-grid {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 1180px) {
-  body.storefront-owner-lilteam #site-page-shell .main-catalog-workspace {
+  body.storefront-unified #site-page-shell .main-catalog-workspace {
     grid-template-columns: 220px minmax(0, 1fr);
     gap: 17px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-grid {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 760px) {
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page {
     width: calc(100% - 24px) !important;
     padding-top: 17px !important;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-head {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-head {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas: "title" "search" "status";
     gap: 12px;
     padding: 15px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-status-tabs {
     overflow-x: auto;
     scrollbar-width: none;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
     flex: 1 0 auto;
     justify-content: center;
     white-space: nowrap;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-catalog-workspace {
+  body.storefront-unified #site-page-shell .main-catalog-workspace {
     grid-template-columns: minmax(0, 1fr);
     gap: 12px;
     margin-top: 14px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-catalog-filter-rail {
+  body.storefront-unified #site-page-shell .main-catalog-filter-rail {
     position: static;
     padding: 11px 12px;
     border-radius: 13px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-catalog-filter-heading {
+  body.storefront-unified #site-page-shell .main-catalog-filter-heading {
     padding-bottom: 9px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .simple-filter-grid {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail .simple-filter-grid {
     grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)) !important;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags {
     display: flex !important;
     flex-flow: row nowrap !important;
     max-height: none !important;
@@ -317,7 +317,7 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page :is
     padding: 2px 1px 7px !important;
     scroll-snap-type: x proximity !important;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip {
     display: flex !important;
     flex: 0 0 64px !important;
     width: 64px !important;
@@ -326,57 +326,57 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page :is
     grid-template-rows: none !important;
     scroll-snap-align: start !important;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip > .simple-filter-image {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-filter-rail #filterWidget #filterTags > .filter-chip > .simple-filter-image {
     width: 58px !important;
     height: 78px !important;
     aspect-ratio: auto !important;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row {
     align-items: center;
     flex-direction: row;
     gap: 8px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row form {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row form {
     display: flex;
     gap: 7px;
   }
 }
 
 @media (max-width: 480px) {
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-head {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .catalog-head {
     padding: 13px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row {
     align-items: flex-start;
     flex-direction: column;
     padding-bottom: 10px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row form {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row form {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
     width: 100%;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row select {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-sort-row select {
     width: 100%;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-grid {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-image {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-image {
     aspect-ratio: 1 / 1;
     padding: 5px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card-body {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card-body {
     padding: 9px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card-title {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card-title {
     font-size: 12px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-price b {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-price b {
     font-size: 16px;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-cta {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-cta {
     min-height: 40px;
     padding-inline: 5px;
     font-size: 10px;
@@ -384,274 +384,10 @@ body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page :is
 }
 
 @media (prefers-reduced-motion: reduce) {
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card {
     transition: none !important;
   }
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card:hover {
+  body.storefront-unified #site-page-shell .main-storefront-catalog-page .main-catalog-results .catalog-card:hover {
     transform: none;
-  }
-}
-
-/* Match the homepage's light editorial section heading while keeping catalog tools visible. */
-@media (min-width: 1101px) {
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-head {
-    grid-template-columns: minmax(240px, .9fr) minmax(320px, 1.4fr) auto;
-    grid-template-areas: "title search status";
-    gap: 16px 20px;
-    padding: 0 0 16px;
-    border: 0;
-    border-bottom: 1px solid var(--border);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title {
-    white-space: normal;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-search {
-    min-width: 0;
-  }
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--input);
-  box-shadow: none;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title h1 {
-  font-size: clamp(22px, 2vw, 27px);
-  letter-spacing: -.025em;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title small {
-  margin-top: 3px;
-  font-size: 11px;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-search {
-  min-height: 44px;
-  border-radius: 11px;
-  background: var(--input);
-  box-shadow: none;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
-  min-height: 40px;
-  border-radius: 10px;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button.active {
-  border-color: #171717;
-  background: #171717;
-  color: #fff;
-}
-
-@media (max-width: 1100px) {
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-head {
-    grid-template-columns: minmax(0, 1fr) auto;
-    grid-template-areas: "title status" "search search";
-    gap: 14px 18px;
-    padding: 0 0 16px;
-    border: 0;
-    border-bottom: 1px solid var(--border);
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
-  }
-}
-
-@media (max-width: 700px) {
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-head {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "title" "search" "status";
-    gap: 12px;
-    padding-bottom: 14px;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title-icon {
-    width: 38px;
-    height: 38px;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
-    flex: 0 0 auto;
-  }
-}
-
-/* Editorial heading like the recommended-products section; filters stay in their own toolbar. */
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-row {
-  display: grid;
-  grid-template-columns: max-content minmax(48px, 1fr) max-content;
-  grid-template-areas: "heading rule cta";
-  align-items: center;
-  gap: 16px;
-  min-height: 58px;
-  margin: 0 0 16px;
-  padding: 0 0 12px;
-  border: 0;
-  border-bottom: 1px solid var(--border);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title {
-  grid-area: heading !important;
-  display: flex;
-  align-items: center;
-  gap: 13px;
-  min-width: 0;
-  white-space: normal;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title-icon {
-  display: grid;
-  flex: 0 0 38px;
-  place-items: center;
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--border);
-  border-radius: 11px;
-  color: var(--text);
-  background: var(--input);
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title-icon svg {
-  width: 19px;
-  height: 19px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.5;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title h1 {
-  margin: 0;
-  font-size: clamp(20px, 2vw, 26px);
-  line-height: 1.15;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-title small {
-  display: block;
-  margin-top: 4px;
-  color: var(--text-2);
-  font-size: 11px;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-rule {
-  grid-area: rule;
-  height: 1px;
-  background: linear-gradient(90deg, var(--border), transparent);
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-cta {
-  grid-area: cta;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  min-height: 42px;
-  padding: 0 18px;
-  border: 1px solid #111;
-  border-radius: 9px;
-  color: #fff;
-  background: #111;
-  font-size: 12px;
-  font-weight: 800;
-  text-decoration: none;
-  transition: background-color .16s ease, transform .16s ease;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-cta:hover {
-  transform: translateY(-1px);
-  background: #34302d;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-cta svg {
-  width: 15px;
-  height: 15px;
-  fill: none;
-  stroke: currentColor;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.8;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-tools-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  margin: 0 0 18px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-search {
-  width: min(100%, 460px);
-  min-height: 42px;
-  border-radius: 10px;
-  background: var(--card);
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs {
-  display: flex;
-  flex: 0 0 auto;
-  gap: 7px;
-}
-
-body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
-  min-height: 38px;
-  padding: 0 13px;
-  border-radius: 9px;
-}
-
-@media (max-width: 700px) {
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-row {
-    grid-template-columns: minmax(0, 1fr) max-content;
-    grid-template-areas: "heading cta";
-    gap: 8px 12px;
-    margin-bottom: 13px;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-rule {
-    display: none;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-heading-cta {
-    min-height: 38px;
-    padding-inline: 12px;
-    font-size: 11px;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-tools-row {
-    align-items: stretch;
-    flex-direction: column;
-    margin-bottom: 15px;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-search {
-    width: 100%;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  body.storefront-owner-lilteam #site-page-shell .main-storefront-catalog-page .catalog-status-tabs button {
-    flex: 0 0 auto;
   }
 }
