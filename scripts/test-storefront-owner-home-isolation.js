@@ -341,7 +341,7 @@ cozyHeroStylesheet.walkAtRules('media', mediaRule => {
       if (rule.selector.includes('.owner-home-v20-hero--banner-only')
         && declarations.display === 'none'
         && rule.nodes.some(node => node.type === 'decl' && node.prop === 'display' && node.important)
-        && rule.selector.includes('.owner-home-v20-hero--banner')) {
+        && rule.selector.includes('#site-page-shell.storefront-owner-home-v7 #home-top.owner-home-v20-hero--banner-only')) {
         mobileCoverHidden = true;
       }
       if (declarations.height === 'auto' && declarations['aspect-ratio'] === 'auto') {
