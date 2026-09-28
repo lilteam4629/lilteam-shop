@@ -393,6 +393,10 @@ async function checkRandomBoxWorkflow(adminCookie) {
     || (deliveredPage.body.match(/data-random-box-product-image/g) || []).length !== 1
     || (deliveredPage.body.match(/<li[^>]*data-random-box-draw-row=/g) || []).length !== 1
     || !deliveredPage.body.includes('ได้รับรางวัล')
+    || !deliveredPage.body.includes('ติดต่อร้านเพื่อรับสินค้า')
+    || !deliveredPage.body.includes('data-contact-order-container')
+    || !/data-contact-url="[^"]+"/.test(deliveredPage.body)
+    || !deliveredPage.body.includes(`ผลสุ่มครั้งที่: 1`)
     || !deliveredPage.body.includes(expectedPrizeLabel)
     || deliveredStock?.status !== 'sold' || deliveredStock.soldOrderId !== winningOrderId
     || !deliveredStock || !deliveredPage.body.includes(deliveredStock.username)
