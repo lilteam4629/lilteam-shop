@@ -640,3 +640,10 @@
     aspect-ratio: auto !important;
   }
 }
+
+/* Hide image-only homepage covers on phones; keep text-led heroes and desktop art intact. */
+@media (max-width: 900px) {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero.owner-home-v20-hero--banner.owner-home-v20-hero--banner-only {
+    display: none !important;
+  }
+}

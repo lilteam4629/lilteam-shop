@@ -328,16 +328,22 @@ cozyHeroStylesheet.walkAtRules('media', mediaRule => {
 assert.ok(desktopBannerUsesIntrinsicRatio,
   'the main-store banner must fill its row while preserving its original aspect ratio');
 let mobileBannerUsesIntrinsicRatio = false;
+let mobileCoverHidden = false;
 let phoneBannerHasCompactBottomSpacing = false;
 cozyHeroStylesheet.walkAtRules('media', mediaRule => {
   if (mediaRule.params === '(max-width: 900px)') {
     let artworkFollowsImageHeight = false;
     let imageKeepsItsNaturalRatio = false;
     mediaRule.walkRules(rule => {
-      if (!rule.selector.includes('.owner-home-v20-hero--banner .owner-home-v20-artwork')) return;
       const declarations = Object.fromEntries(rule.nodes
         .filter(node => node.type === 'decl')
         .map(node => [node.prop, node.value]));
+      if (rule.selector.includes('.owner-home-v20-hero--banner-only')
+        && declarations.display === 'none'
+        && rule.nodes.some(node => node.type === 'decl' && node.prop === 'display' && node.important)
+        && rule.selector.includes('.owner-home-v20-hero--banner')) {
+        mobileCoverHidden = true;
+      }
       if (declarations.height === 'auto' && declarations['aspect-ratio'] === 'auto') {
         artworkFollowsImageHeight = true;
       }
@@ -346,7 +352,7 @@ cozyHeroStylesheet.walkAtRules('media', mediaRule => {
         imageKeepsItsNaturalRatio = true;
       }
     });
-    mobileBannerUsesIntrinsicRatio = artworkFollowsImageHeight && imageKeepsItsNaturalRatio;
+    mobileBannerUsesIntrinsicRatio = mobileBannerUsesIntrinsicRatio || (artworkFollowsImageHeight && imageKeepsItsNaturalRatio);
   }
   if (mediaRule.params === '(max-width: 640px)') {
     mediaRule.walkRules(rule => {
@@ -358,6 +364,8 @@ cozyHeroStylesheet.walkAtRules('media', mediaRule => {
     });
   }
 });
+assert.ok(mobileCoverHidden,
+  'the image-only homepage cover must be hidden on phone widths');
 assert.ok(mobileBannerUsesIntrinsicRatio,
   'the mobile banner frame must follow the full, uncropped image height');
 assert.ok(phoneBannerHasCompactBottomSpacing,
