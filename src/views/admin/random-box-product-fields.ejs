@@ -16,7 +16,6 @@
       <span class="random-box-price-pill">฿<%= Number(product?.price) || 1 %> / ครั้ง</span>
     </div>
     <label class="random-box-rate-field"><span>เรทออกรางวัล</span><input name="randomBoxRate" type="number" min="1" max="10" step="1" value="<%= Number(product?.randomBox?.rate) || 1 %>" placeholder="1–10" data-random-box-required /><small>เปลี่ยนเรทหรือราคาแล้วจะมีผลกับสต็อกรางวัลชุดใหม่ · ผู้ซื้อทุกคนใช้รอบสะสมร่วมกัน</small></label>
-    <div class="random-box-rule" role="note"><strong>รางวัลใช้สต็อกกล่องสุ่มเท่านั้น</strong><span>เพิ่มคีย์/ไอดีในหน้าสต็อก · 1 บรรทัดเท่ากับ 1 รางวัล · ระบบทยอยสุ่มออกครั้งละ 1–5 รางวัล</span></div>
     <% if (isBoxProduct) { %><a class="random-box-prize-add inline-flex items-center" href="/admin/products/<%= product.id %>/stock#add-stock">ไปเพิ่มคีย์/ไอดีในสต็อก →</a><% } %>
   </section>
   <script>
