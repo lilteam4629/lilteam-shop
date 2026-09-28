@@ -60,7 +60,7 @@
   <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-category-gallery-cozy-v2.css') %>" /><% } %>
   <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-section-chrome-v1.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-navbar-main-v3.css') %>&amp;rev=16" /><% } %>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/latest-orders-3d-v1.css') %>" /><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/latest-orders-3d-v1.css') %>" /><% } %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/storefront-announcement-width-v1.css') %>" /><% } %>
   <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-compact-v1.css') %>&amp;rev=1" /><% } %>
   <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><link rel="stylesheet" href="<%= asset('css/storefront-home-mobile-v1.css') %>&amp;rev=2" /><% } %>
@@ -1040,6 +1040,6 @@
 </script>
   <script src="<%= asset('js/scroll-motion-v1.js') %>" defer></script>
   <script src="<%= asset('js/interaction-performance-v1.js') %>" defer></script>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><script src="<%= asset('js/latest-orders-3d-v1.js') %>" defer></script><% } %>
+  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><script src="<%= asset('js/latest-orders-3d-v1.js') %>" defer></script><% } %>
 </body>
 </html>

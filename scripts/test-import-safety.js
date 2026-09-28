@@ -349,11 +349,11 @@ async function main() {
   als.run(model.fixture(), () => shellMiddleware({ tenantShop: { id: 'tenant-shell-fixture' } }, applyTenantShell, () => {}));
   mainShellLayout = applyMainShell.locals.layout;
   tenantShellLayout = applyTenantShell.locals.layout;
-  check('Every main-shop admin route defaults to the unified shell while rental admins retain the old shell', () => {
+  check('Every admin route, including rentals, defaults to the unified light shell', () => {
     assert.equal(mainShellLayout, 'layouts/admin-experiment');
-    assert.equal(tenantShellLayout, 'layouts/admin');
+    assert.equal(tenantShellLayout, 'layouts/admin-experiment');
   });
-  const { normalizeMainAdminUi, normalizeTenantAdminUi, usesMainAdminUi } = require('../src/services/admin-ui-mode');
+  const { normalizeMainAdminUi, usesMainAdminUi } = require('../src/services/admin-ui-mode');
   const mainPostRequest = { method: 'POST', query: {}, tenantShop: null };
   let mainPostContinued = false;
   normalizeMainAdminUi(mainPostRequest, {}, () => { mainPostContinued = true; });
@@ -371,21 +371,8 @@ async function main() {
     assert.equal(mainUiRedirect, '302:/admin/settings?q=sample');
     assert.deepEqual(mainPostRequest.query, {});
   });
-  let tenantUiRedirect = '';
-  normalizeTenantAdminUi(
-    { method: 'GET', query: { ui: 'experiment', q: 'sample' }, tenantShop: { id: 'tenant-ui-fixture' }, originalUrl: '/admin/users?ui=experiment&q=sample' },
-    { redirect(status, url) { tenantUiRedirect = `${status}:${url}`; } },
-    () => assert.fail('tenant experiment GET should redirect before rendering'),
-  );
-  const tenantPostUi = { method: 'POST', query: { ui: 'experiment', q: 'sample' }, tenantShop: { id: 'tenant-ui-fixture' } };
-  let tenantPostContinued = false;
-  normalizeTenantAdminUi(tenantPostUi, {}, () => { tenantPostContinued = true; });
-  check('Tenant experiment URLs are normalized to the legacy UI without dropping other query data', () => {
-    assert.equal(tenantUiRedirect, '302:/admin/users?q=sample');
-    assert.equal(tenantPostContinued, true);
-    assert.equal(tenantPostUi.query.ui, 'legacy');
-    assert.equal(tenantPostUi.query.q, 'sample');
-    assert.equal(usesMainAdminUi(tenantPostUi), false);
+  check('Main-shop-only admin gates remain independent from the shared presentation', () => {
+    assert.equal(usesMainAdminUi({ query: { ui: 'experiment' }, tenantShop: { id: 'tenant-ui-fixture' } }), false);
     assert.equal(usesMainAdminUi({ query: { ui: 'experiment' }, tenantShop: null }), true);
   });
   const settingsGet = admin.stack.find(layer => layer.route?.path === '/settings' && layer.route.methods.get).route.stack.at(-1).handle;
@@ -393,9 +380,9 @@ async function main() {
   let settingsTenantView = '';
   settingsGet({ query: {}, tenantShop: null }, { locals: {}, render(view) { settingsMainView = view; } });
   settingsGet({ query: {}, tenantShop: { id: 'tenant-ui-fixture' } }, { locals: {}, render(view) { settingsTenantView = view; } });
-  check('Main settings use the production management screen while tenant settings stay on the old template', () => {
+  check('Main and tenant settings use the same current management screen', () => {
     assert.equal(settingsMainView, 'admin/settings-experiment');
-    assert.equal(settingsTenantView, 'admin/settings');
+    assert.equal(settingsTenantView, 'admin/settings-experiment');
   });
   const settingsPost = admin.stack.find(layer => layer.route?.path === '/settings' && layer.route.methods.post).route.stack.at(-1).handle;
   const settingsFixture = model.fixture();
@@ -471,7 +458,7 @@ async function main() {
   const welcomePopupHandler = admin.stack.find(layer => layer.route?.path === '/welcome-popup' && layer.route.methods.get).route.stack.at(-1).handle;
   let tenantWelcomePopupView = '';
   welcomePopupHandler({ tenantShop: { id: 'popup-tenant-fixture' } }, { render(view) { tenantWelcomePopupView = view; } });
-  check('Tenant welcome-popup administration keeps its existing screen', () => assert.equal(tenantWelcomePopupView, 'admin/welcome-popup'));
+  check('Tenant welcome-popup administration uses the shared redesigned screen', () => assert.equal(tenantWelcomePopupView, 'admin/welcome-popup-main'));
   const popupFixture = model.fixture();
   popupFixture.settings.welcomePopup = { enabled: true, showTitle: true, showContent: true, title: 'ยินดีต้อนรับร้านหลัก', content: 'ข้อความตัวอย่างจากข้อมูลร้าน', images: ['/media/welcome-fixture.webp'] };
   const popupTemplatePath = path.join(root, 'src/views/admin/welcome-popup-main.ejs');
@@ -498,8 +485,8 @@ async function main() {
     { query: { status: 'banned', role: 'customer' }, tenantShop: { id: 'tenant-ui-fixture' } },
     { locals: {}, render(view, values) { tenantUsersView = { view, ...values }; } },
   ));
-  check('Experimental member filters do not change the tenant legacy member list', () => {
-    assert.equal(tenantUsersView.view, 'admin/users');
+  check('The redesigned member list continues to read the current tenant and ignores platform-only filters', () => {
+    assert.equal(tenantUsersView.view, 'admin/users-experiment');
     assert.equal(tenantUsersView.users.length, 2);
   });
   const liveCatalog = admin.stack.find(layer => layer.route?.path === '/minigame/live-catalog' && layer.route.methods.get).route.stack.at(-1).handle;
@@ -675,13 +662,34 @@ async function main() {
     const res = { locals, redirect() {}, render(view, values) {
       const filename = path.join(root, 'src/views', view + '.ejs');
       const html = ejs.render(fs.readFileSync(filename, 'utf8'), { ...locals, ...values }, { filename });
-      const layoutFile = path.join(root, 'src/views/layouts/admin.ejs');
+      const layoutFile = path.join(root, 'src/views/layouts/admin-experiment.ejs');
       ejs.render(fs.readFileSync(layoutFile, 'utf8'), { ...locals, ...values, body: html }, { filename: layoutFile });
       assert.ok(html.length > 0); pages++;
     } };
     await als.run(viewData, () => handler(req, res));
   }
   check('Updated admin pages render with migrated fixtures', () => assert.equal(pages, 14));
+  const scheduledPageHandler = admin.stack.find(layer => layer.route?.path === '/scheduled-products' && layer.route.methods.get).route.stack.at(-1).handle;
+  const scheduledCreateHandler = admin.stack.find(layer => layer.route?.path === '/scheduled-products' && layer.route.methods.post).route.stack.at(-1).handle;
+  const rentalScheduleFixture = model.fixture();
+  const scheduledProduct = rentalScheduleFixture.products[0];
+  let rentalScheduleView = '';
+  await als.run(rentalScheduleFixture, () => scheduledPageHandler(
+    { query: {}, tenantShop: { id: 'tenant-schedule-fixture' }, flash: () => [] },
+    { render(view, values) { rentalScheduleView = view; assert.equal(values.unscheduledProducts.some(item => item.id === scheduledProduct.id), true); } },
+  ));
+  const scheduleRedirects = [];
+  await als.run(rentalScheduleFixture, () => scheduledCreateHandler(
+    { body: { productId: scheduledProduct.id, publishAt: '2099-01-01T18:00', eventBadge: 'เปิดขายใหม่', eventDescription: 'พร้อมจำหน่าย' },
+      tenantShop: { id: 'tenant-schedule-fixture' }, flash(message) { scheduleRedirects.push(message); } },
+    { redirect(pathname) { scheduleRedirects.push(pathname); }, sendStatus(code) { scheduleRedirects.push(code); } },
+  ));
+  check('Rental admins can use the shared scheduled-sales UI on their own store data', () => {
+    assert.equal(rentalScheduleView, 'admin/scheduled-products-experiment');
+    assert.equal(scheduledProduct.publishAt, '2099-01-01T18:00');
+    assert.equal(scheduledProduct.eventBadge, 'เปิดขายใหม่');
+    assert.ok(scheduleRedirects.includes('/admin/scheduled-products'));
+  });
   let experimentHomeSectionsView;
   const homeSectionsHandler = admin.stack.find(layer => layer.route?.path === '/home-sections' && layer.route.methods.get).route.stack.at(-1).handle;
   await als.run(viewData, () => homeSectionsHandler(
@@ -710,13 +718,13 @@ async function main() {
     assert.match(page, /data-experiment-confirm-dialog/);
     assert.match(page, /จัดหมวดหมู่หน้าแรก/);
   });
-  check('Tenant home sections remain on the legacy view even with an experiment query', () => {
+  check('Tenant home sections use the new editor with tenant-owned product data', () => {
     let tenantView;
     als.run(viewData, () => homeSectionsHandler(
       { query: { ui: 'experiment' }, tenantShop: { id: 'tenant-fixture' }, flash: () => [] },
       { locals: { layout: 'layouts/admin' }, render(view) { tenantView = view; } },
     ));
-    assert.equal(tenantView, 'admin/home-sections');
+    assert.equal(tenantView, 'admin/home-sections-experiment');
   });
   const appearanceHandler = admin.stack.find(layer => layer.route?.path === '/appearance' && layer.route.methods.get).route.stack.at(-1).handle;
   let mainAppearanceView;
@@ -747,13 +755,13 @@ async function main() {
       new vm.Script(match[1], { filename: `${layoutFile}#script-${index + 1}` });
     }
   });
-  check('Tenant appearance remains on the original view', () => {
+  check('Tenant appearance uses the new media manager without changing its saved settings', () => {
     let tenantView;
     appearanceHandler(
-      { query: { ui: 'experiment' }, tenantShop: { id: 'tenant-fixture' } },
+      { query: { ui: 'experiment' }, tenantShop: { id: 'tenant-fixture' }, flash: () => [] },
       { locals: { layout: 'layouts/admin' }, render(view) { tenantView = view; } },
     );
-    assert.equal(tenantView, 'admin/appearance');
+    assert.equal(tenantView, 'admin/appearance-experiment');
   });
   const rangersCatalogGuard = admin.stack.find(layer => layer.route?.path === '/rangers-catalog' && layer.route.methods.get).route.stack[0].handle;
   let rangersMainDenied = false;
@@ -785,7 +793,7 @@ async function main() {
   platformFixture.settings.payment.slipProvider = 'slipcheck';
   let sharedTopupView;
   await als.run(tenantViewData, () => tenantTopups(
-     { query: { receiverProvider: 'slipcheck' }, tenantShop: { id: 'tenant-fixture' } },
+     { query: { receiverProvider: 'slipcheck' }, tenantShop: { id: 'tenant-fixture' }, flash: () => [] },
     { render(view, values) { sharedTopupView = values; } },
   ));
   check('Shared tenant can edit only the provider selected by the platform', () => {
@@ -798,7 +806,7 @@ async function main() {
   ownTenantViewData.settings.payment.slipProvider = 'rdcw';
   let ownTopupView;
   await als.run(ownTenantViewData, () => tenantTopups(
-    { query: { receiverProvider: 'slip2go' }, tenantShop: { id: 'tenant-own-fixture' } },
+    { query: { receiverProvider: 'slip2go' }, tenantShop: { id: 'tenant-own-fixture' }, flash: () => [] },
     { render(view, values) { ownTopupView = values; } },
   ));
   check('Own-API tenant can keep separate receiver settings for every provider', () => {

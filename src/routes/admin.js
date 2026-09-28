@@ -5,8 +5,7 @@ const bcrypt = require('bcryptjs');
 const store = require('../data/store');
 const { pickPrize, findProductForPrize, getPrizeImage, buildLiveCatalogPreview } = require('../services/minigame');
 const randomBox = require('../services/random-box');
-const { usesMainAdminUi, normalizeTenantAdminUi, normalizeMainAdminUi } = require('../services/admin-ui-mode');
-const { shouldUseModernRecommendedCategoryAdmin } = require('../services/recommended-category-home');
+const { usesMainAdminUi, normalizeMainAdminUi } = require('../services/admin-ui-mode');
 const license = require('../services/license');
 const banks = require('../data/thai-banks');
 const slipok = require('../services/slipok');
@@ -116,13 +115,11 @@ const popupImageUpload = multer({
 });
 
 router.use(requireAdmin);
-router.use(normalizeTenantAdminUi);
 router.use(normalizeMainAdminUi);
 router.use((req, res, next) => {
-  // Keep one admin shell throughout the main shop, including live routes that
-  // still use their established data-backed page body. Rental shops retain the
-  // existing admin shell and page styling.
-  res.locals.layout = usesMainAdminUi(req) ? 'layouts/admin-experiment' : 'layouts/admin';
+  // Use the same light admin shell for every shop. Data and feature access
+  // remain tenant-scoped in store and are still guarded by usesMainAdminUi.
+  res.locals.layout = 'layouts/admin-experiment';
   res.locals.pendingTopupCount = store.data.topupRequests.filter(t => t.status === 'pending' || t.status === 'verifying').length;
   res.locals.persistentStorageEnabled = store.isPersistent();
   next();
@@ -221,8 +218,6 @@ router.get('/products/bulk-import/progress/:jobId', (req, res) => {
 
 // ---------- Dashboard ----------
 router.get('/', (req, res) => {
-  const mainAdminUi = usesMainAdminUi(req);
-  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
   const { orders, users, products, stockItems } = store.data;
   const paidOrders = orders.filter(order => order.status !== 'cancelled' && order.salesChannel !== 'catalog-api-fulfillment');
   const revenue = paidOrders.reduce((sum, o) => sum + o.total, 0);
@@ -278,7 +273,7 @@ router.get('/', (req, res) => {
   });
   const recentOrders = [...orders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 8);
   const pendingTopups = store.data.topupRequests.filter(t => t.status === 'pending').length;
-  res.render(mainAdminUi ? 'admin/dashboard-experiment' : 'admin/dashboard', {
+  res.render('admin/dashboard-experiment', {
     title: 'แดชบอร์ด', active: 'dashboard',
     stats: {
       revenue,
@@ -590,8 +585,6 @@ function randomBoxProductFormError(req, existingProduct = null) {
 }
 
 router.get('/products', (req, res) => {
-  const mainAdminUi = usesMainAdminUi(req);
-  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
   const filterTagById = new Map(store.data.filterTags.map(tag => [tag.id, tag]));
   const availableStockCountByProduct = new Map();
   const inventoryCountByProduct = new Map();
@@ -619,7 +612,7 @@ router.get('/products', (req, res) => {
     const inventoryCount = inventoryCountByProduct.get(product.id) || 0;
     return sum + ((Number(product.price) || 0) * inventoryCount);
   }, 0);
-  res.render(mainAdminUi ? 'admin/products-experiment' : 'admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
+  res.render('admin/products-experiment', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
 });
 
 router.post('/products/card-style', async (req, res) => {
@@ -630,11 +623,7 @@ router.post('/products/card-style', async (req, res) => {
 });
 
 router.get('/products/new', (req, res) => {
-  if (usesMainAdminUi(req)) {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'เพิ่มสินค้า', active: 'products', product: null, filterTags: store.data.filterTags || [], allowRandomBox: randomBox.supportsRandomBox(req) });
-  }
-  res.render('admin/product-form', { title: 'เพิ่มสินค้าใหม่', active: 'products', product: null, genres: store.data.settings.genres, filterTags: store.data.filterTags, allowRandomBox: randomBox.supportsRandomBox(req) });
+  res.render('admin/product-schedule-form-experiment', { title: 'เพิ่มสินค้า', active: 'products', product: null, filterTags: store.data.filterTags || [], allowRandomBox: randomBox.supportsRandomBox(req) });
 });
 
 router.post('/products/new', (req, res) => {
@@ -778,11 +767,7 @@ router.post('/products/bulk-import', (req, res) => {
 router.get('/products/:id/edit', (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
-  if (usesMainAdminUi(req)) {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขสินค้า', active: 'products', product, filterTags: store.data.filterTags || [], allowRandomBox: randomBox.supportsRandomBox(req) });
-  }
-  res.render('admin/product-form', { title: 'แก้ไขสินค้า', active: 'products', product, genres: store.data.settings.genres, filterTags: store.data.filterTags, allowRandomBox: randomBox.supportsRandomBox(req) });
+  res.render('admin/product-schedule-form-experiment', { title: 'แก้ไขสินค้า', active: 'products', product, filterTags: store.data.filterTags || [], allowRandomBox: randomBox.supportsRandomBox(req) });
 });
 
 router.post('/products/:id/price', async (req, res) => {
@@ -989,9 +974,7 @@ router.get('/filter-tags', (req, res) => {
     status: p.status,
     filterTagIds: p.filterTagIds || [],
   }));
-  const mainAdminUi = usesMainAdminUi(req);
-  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(mainAdminUi ? 'admin/filter-tags-experiment' : 'admin/filter-tags', { title: mainAdminUi ? 'แท็กและจัดหมวดสินค้า' : 'ตัวกรองสินค้า', active: 'filter-tags', filterTags, products });
+  res.render('admin/filter-tags-experiment', { title: 'แท็กและจัดหมวดสินค้า', active: 'filter-tags', filterTags, products });
 });
 
 // Persist the order used by the admin library and storefront filter panel.
@@ -1228,16 +1211,9 @@ router.post('/filter-tags/:id/edit', async (req, res) => {
 router.get('/home-sections', (req, res) => {
   const products = (store.data.products || []).filter(isHomeSectionSelectableProduct);
   const homeSections = store.data.homeSections || [];
-  const mainAdminUi = usesMainAdminUi(req);
-  if (mainAdminUi) {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/home-sections-experiment', {
-      title: 'จัดหมวดหมู่หน้าแรก', active: 'home-sections', homeSections, products,
-      successMessages: req.flash('success'), errorMessages: req.flash('error'),
-    });
-  }
-  res.render('admin/home-sections', {
+  res.render('admin/home-sections-experiment', {
     title: 'จัดหมวดหมู่หน้าแรก', active: 'home-sections', homeSections, products,
+    successMessages: req.flash('success'), errorMessages: req.flash('error'),
   });
 });
 
@@ -1329,9 +1305,7 @@ const recommendedCategoriesRedirect = () => '/admin/recommended-categories';
 router.get('/recommended-categories', (req, res) => {
   const categories = store.data.recommendedCategories || [];
   const products = (store.data.products || []).filter(p => p.status === 'active');
-  const mainAdminUi = usesMainAdminUi(req) || shouldUseModernRecommendedCategoryAdmin(req);
-  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(mainAdminUi ? 'admin/recommended-categories-experiment' : 'admin/recommended-categories', {
+  res.render('admin/recommended-categories-experiment', {
     title: 'หมวดหมู่แนะนำ', active: 'recommended-categories', categories, products,
   });
 });
@@ -1577,21 +1551,16 @@ router.get('/scheduled-products', (req, res) => {
   const products = store.data.products
     .filter(product => product.publishAt)
     .sort((a, b) => String(a.publishAt).localeCompare(String(b.publishAt)));
-  if (usesMainAdminUi(req)) {
-    const unscheduledProducts = store.data.products
-      .filter(product => !product.publishAt)
-      .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'th'));
-    const scheduleTargetId = unscheduledProducts.some(product => product.id === req.query.productId)
-      ? String(req.query.productId)
-      : '';
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/scheduled-products-experiment', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products, unscheduledProducts, scheduleTargetId });
-  }
-  res.render('admin/scheduled-products', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products });
+  const unscheduledProducts = store.data.products
+    .filter(product => !product.publishAt)
+    .sort((a, b) => String(a.title || '').localeCompare(String(b.title || ''), 'th'));
+  const scheduleTargetId = unscheduledProducts.some(product => product.id === req.query.productId)
+    ? String(req.query.productId)
+    : '';
+  res.render('admin/scheduled-products-experiment', { title: 'ตั้งเวลาเปิดขาย', active: 'scheduled-products', products, unscheduledProducts, scheduleTargetId });
 });
 
 router.post('/scheduled-products', async (req, res) => {
-  if (!usesMainAdminUi(req)) return res.sendStatus(404);
   const product = store.data.products.find(item => item.id === String(req.body.productId || ''));
   if (!product) {
     req.flash('error', 'ไม่พบสินค้าที่เลือก กรุณาเลือกสินค้าอีกครั้ง');
@@ -1613,7 +1582,6 @@ router.post('/scheduled-products', async (req, res) => {
 });
 
 router.post('/scheduled-products/:id', async (req, res) => {
-  if (!usesMainAdminUi(req)) return res.sendStatus(404);
   const product = store.data.products.find(item => item.id === req.params.id);
   if (!product) {
     req.flash('error', 'ไม่พบสินค้าที่ต้องการแก้ไขเวลา');
@@ -1804,9 +1772,7 @@ router.get('/orders', (req, res) => {
         searchTerms: [o.id, buyer?.username, buyer?.email, ...itemSearchTerms].filter(Boolean).join(' '),
       };
     });
-  const mainAdminUi = usesMainAdminUi(req);
-  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(mainAdminUi ? 'admin/orders-experiment' : 'admin/orders', { title: 'คำสั่งซื้อ', active: 'orders', orders });
+  res.render('admin/orders-experiment', { title: 'คำสั่งซื้อ', active: 'orders', orders });
 });
 
 router.get('/orders/:id', (req, res) => {
@@ -1829,9 +1795,7 @@ router.get('/orders/:id', (req, res) => {
       importedFileCode: oi.importedFileCode || product?.internalNote || '',
     };
   });
-  const mainAdminUi = usesMainAdminUi(req);
-  if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
-  res.render(mainAdminUi ? 'admin/order-detail-experiment' : 'admin/order-detail', { title: `คำสั่งซื้อ #${order.id}`, active: 'orders', order, buyer, itemsWithCreds });
+  res.render('admin/order-detail-experiment', { title: `คำสั่งซื้อ #${order.id}`, active: 'orders', order, buyer, itemsWithCreds });
 });
 
 router.post('/orders/:id/status', async (req, res) => {
@@ -1913,12 +1877,10 @@ router.get('/users', async (req, res) => {
     ? allUsers.reduce((sum, user) => sum + (Number(user.catalogWalletBalance) || 0), 0)
     : store.data.users.reduce((sum, user) => sum + (Number(user.walletBalance) || 0), 0);
 
-  if (mainAdminUi) {
-    res.locals.layout = 'layouts/admin-experiment';
-    const platformUsers = source === 'api' ? store.data.users : allUsers;
-    const todayCustomers = allUsers.filter(user => user.role === 'customer'
-      && user.createdAt && bangkokDay(new Date(user.createdAt)) === todayKey).length;
-    return res.render('admin/users-experiment', {
+  const platformUsers = source === 'api' ? store.data.users : allUsers;
+  const todayCustomers = allUsers.filter(user => user.role === 'customer'
+    && user.createdAt && bangkokDay(new Date(user.createdAt)) === todayKey).length;
+  return res.render('admin/users-experiment', {
       title: source === 'api' ? 'ลูกค้า API' : 'จัดการสมาชิก', active: 'users', users, q, registered, status, role,
       source, apiShops, shopFilter,
       totalUsers: allUsers.length, totalWalletBalance, matchedCount: matched.length,
@@ -1932,14 +1894,6 @@ router.get('/users', async (req, res) => {
         shops: source === 'api' ? new Set(allUsers.map(user => user.tenantShopId)).size : 0,
       },
       platformMemberCount: platformUsers.length,
-    });
-  }
-
-  res.render('admin/users', {
-    title: 'สมาชิก', active: 'users', users, q, registered,
-    totalUsers: store.data.users.length,
-    totalWalletBalance, matchedCount: matched.length,
-    page, totalPages, pageSize, pageSizeOptions,
   });
 });
 
@@ -1961,26 +1915,19 @@ router.get('/users/:id', (req, res) => {
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const paidOrders = orders.filter(order => order.status !== 'cancelled');
 
-  if (usesMainAdminUi(req)) {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/user-detail-experiment', {
+  return res.render('admin/user-detail-experiment', {
       title: `สมาชิก ${user.username}`, active: 'users', user,
       orders: orders.slice(0, 10), topups: topups.slice(0, 10), transactions: transactions.slice(0, 10),
       orderCount: orders.length,
       totalSpent: paidOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0),
-    });
-  }
-
-  return res.render('admin/user-detail', {
-    title: `สมาชิก ${user.username}`, active: 'users', user,
-    orders: orders.slice(0, 10), topups: topups.slice(0, 10), transactions: transactions.slice(0, 10),
-    orderCount: orders.length,
-    totalSpent: paidOrders.reduce((sum, order) => sum + (Number(order.total) || 0), 0),
   });
 });
 
 router.post('/users/:id/wallet', async (req, res) => {
-  if (usesMainAdminUi(req)) {
+  const modernAdjustment = ['add', 'subtract'].includes(String(req.body?.operation || ''))
+    && req.body?.expectedBalance !== undefined
+    && String(req.body?.note || '').trim().length >= 3;
+  if (usesMainAdminUi(req) || modernAdjustment) {
     let returnTo = '/admin/users';
     try {
       const requested = new URL(String(req.body?.returnTo || ''), 'http://admin.local');
@@ -2183,8 +2130,7 @@ async function renderTopupsPage(req, res) {
   const receiverPayment = receiverProfiles.view(payment, receiverProvider
     || availableReceiverProviders[0]
     || (receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck'));
-  if (mainAdminUi && req.path !== '/topups/settings') {
-    res.locals.layout = 'layouts/admin-experiment';
+  if (req.path !== '/topups/settings') {
     return res.render('admin/topups-experiment', {
       title: 'เติมเงินและตรวจสอบ', active: 'topups', requests, pendingCount, requestStats, payment, receiverPayment,
       receiverProvider, availableReceiverProviders, activeReceiverProvider: effective.slipProvider, banks: bankOptions, q, status,
@@ -2562,32 +2508,28 @@ router.post('/topups/:id/delete', async (req, res) => {
 
 // ---------- Coupons ----------
 router.get('/coupons', (req, res) => {
-  if (usesMainAdminUi(req)) {
-    res.locals.layout = 'layouts/admin-experiment';
-    const allCoupons = Array.isArray(store.data.coupons) ? store.data.coupons : [];
-    const q = String(req.query.q || '').trim().slice(0, 100);
-    const status = ['active', 'inactive'].includes(req.query.status) ? req.query.status : '';
-    const normalizedQuery = q.toLocaleLowerCase('th-TH');
-    const coupons = allCoupons
-      .filter(coupon => !normalizedQuery || String(coupon.code || '').toLocaleLowerCase('th-TH').includes(normalizedQuery))
-      .filter(coupon => !status || (status === 'active' ? Boolean(coupon.active) : !coupon.active))
-      .sort((a, b) => (Date.parse(b.createdAt || '') || 0) - (Date.parse(a.createdAt || '') || 0));
-    const stats = {
-      total: allCoupons.length,
-      active: allCoupons.filter(coupon => Boolean(coupon.active)).length,
-      inactive: allCoupons.filter(coupon => !coupon.active).length,
-      uses: allCoupons.reduce((sum, coupon) => sum + Math.max(0, Number(coupon.usedCount) || 0), 0),
-      nearLimit: allCoupons.filter(coupon => {
-        const limit = Number(coupon.usageLimit) || 0;
-        return limit > 0 && (Number(coupon.usedCount) || 0) / limit >= 0.8;
-      }).length,
-    };
-    return res.render('admin/coupons-experiment', {
-      title: 'คูปองส่วนลด', active: 'coupons', coupons, allCoupons, stats, q, status,
-      successMessages: req.flash('success'), errorMessages: req.flash('error'),
-    });
-  }
-  res.render('admin/coupons', { title: 'คูปองส่วนลด', active: 'coupons', coupons: store.data.coupons });
+  const allCoupons = Array.isArray(store.data.coupons) ? store.data.coupons : [];
+  const q = String(req.query.q || '').trim().slice(0, 100);
+  const status = ['active', 'inactive'].includes(req.query.status) ? req.query.status : '';
+  const normalizedQuery = q.toLocaleLowerCase('th-TH');
+  const coupons = allCoupons
+    .filter(coupon => !normalizedQuery || String(coupon.code || '').toLocaleLowerCase('th-TH').includes(normalizedQuery))
+    .filter(coupon => !status || (status === 'active' ? Boolean(coupon.active) : !coupon.active))
+    .sort((a, b) => (Date.parse(b.createdAt || '') || 0) - (Date.parse(a.createdAt || '') || 0));
+  const stats = {
+    total: allCoupons.length,
+    active: allCoupons.filter(coupon => Boolean(coupon.active)).length,
+    inactive: allCoupons.filter(coupon => !coupon.active).length,
+    uses: allCoupons.reduce((sum, coupon) => sum + Math.max(0, Number(coupon.usedCount) || 0), 0),
+    nearLimit: allCoupons.filter(coupon => {
+      const limit = Number(coupon.usageLimit) || 0;
+      return limit > 0 && (Number(coupon.usedCount) || 0) / limit >= 0.8;
+    }).length,
+  };
+  res.render('admin/coupons-experiment', {
+    title: 'คูปองส่วนลด', active: 'coupons', coupons, allCoupons, stats, q, status,
+    successMessages: req.flash('success'), errorMessages: req.flash('error'),
+  });
 });
 
 const couponsReturnPath = () => '/admin/coupons';
@@ -2854,10 +2796,7 @@ router.post('/announcements/:id/delete', async (req, res) => {
 
 // ---------- Welcome Popup (separate from the plain text announcement bars above) ----------
 router.get('/welcome-popup', (req, res) => {
-  if (usesMainAdminUi(req)) {
-    return res.render('admin/welcome-popup-main', { title: 'ป๊อปอัปต้อนรับ', active: 'welcome-popup' });
-  }
-  res.render('admin/welcome-popup', { title: 'ป๊อปอัปต้อนรับ', active: 'welcome-popup' });
+  res.render('admin/welcome-popup-main', { title: 'ป๊อปอัปต้อนรับ', active: 'welcome-popup' });
 });
 
 router.post('/filter-tags/heading', async (req, res) => {
@@ -2897,31 +2836,17 @@ router.post('/welcome-popup', (req, res) => {
 
 // ---------- Settings ----------
 router.get('/settings', (req, res) => {
-  if (usesMainAdminUi(req)) {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/settings-experiment', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isGateOn() });
-  }
-  res.render('admin/settings', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isGateOn() });
+  res.render('admin/settings-experiment', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isGateOn() });
 });
 
 router.get('/effects', (req, res) => {
-  if (usesMainAdminUi(req)) {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/effects-experiment', { title: 'ลูกเล่นหน้าเว็บ', active: 'effects' });
-  }
-  res.render('admin/effects', { title: 'ลูกเล่นหน้าเว็บ', active: 'effects' });
+  res.render('admin/effects-experiment', { title: 'ลูกเล่นหน้าเว็บ', active: 'effects' });
 });
 
 router.get('/appearance', (req, res) => {
-  if (usesMainAdminUi(req)) {
-    res.locals.layout = 'layouts/admin-experiment';
-    return res.render('admin/appearance-experiment', {
-      title: 'รูปและแบนเนอร์', active: 'appearance',
-      successMessages: req.flash('success'), errorMessages: req.flash('error'),
-    });
-  }
-  res.render('admin/appearance', {
-    title: 'รูปหน้าเว็บและโลโก้', active: 'appearance',
+  res.render('admin/appearance-experiment', {
+    title: 'รูปและแบนเนอร์', active: 'appearance',
+    successMessages: req.flash('success'), errorMessages: req.flash('error'),
   });
 });
 

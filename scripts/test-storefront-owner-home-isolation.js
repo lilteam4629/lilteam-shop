@@ -99,6 +99,12 @@ assert.match(home, /include\('\.\.\/partials\/latest-orders-rail', \{ latestOrde
   'the main homepage order rail must use its shared live-data partial');
 assert.match(read('src/views/partials/latest-orders-rail.ejs'), /latestOrders\.forEach\(order => \{/,
   'the shared order rail must render live order data');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*latest-orders-3d-v1\.css/,
+  'the order rail styling must load on every refreshed main or rental homepage');
+assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*latest-orders-3d-v1\.js/,
+  'the order rail behavior must load on every refreshed main or rental homepage');
+assert.doesNotMatch(layout, /isMainSite[^\n]*latest-orders-3d-v1\.(?:css|js)/,
+  'the order rail must not depend on the main-shop identity');
 assert.doesNotMatch(home, /id="home-new-arrivals"|owner-home-v24-/,
   'the new-arrivals showcase must be removed from the main homepage');
 assert.doesNotMatch(layout, /storefront-new-arrivals-(?:v1|mobile-v2|cozy-v2)\.css/,

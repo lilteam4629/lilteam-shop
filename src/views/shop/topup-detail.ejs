@@ -3,7 +3,7 @@
   .replace(/slip\.xepht\.com/gi, 'ระบบภายนอก')
   .replace(/XEPHT/gi, 'ระบบตรวจสอบ'); %>
 <style>
-  <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+  <% if (typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh) { %>
   body:has(.topup-detail-page) #store-rain{display:none!important}
   .topup-detail-page{width:min(1100px,calc(100% - 32px));max-width:none;margin:0 auto;padding:34px 0 64px;color:var(--text)}
   .topup-detail-head{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"back back" "title amount";align-items:end;gap:5px 24px;margin-bottom:24px}
@@ -50,16 +50,14 @@
   <% } %>
 </style>
 <section class="topup-detail-page max-w-lg mx-auto px-4 py-10">
-  <header class="topup-detail-head" style="<%= typeof isMainSite !== 'undefined' && isMainSite ? '' : 'display:contents' %>">
+  <header class="topup-detail-head">
     <a href="/account" class="text-sm text-[var(--gold-text)]">← กลับไปหน้าบัญชี</a>
-    <div class="topup-detail-head-row" style="<%= typeof isMainSite !== 'undefined' && isMainSite ? '' : 'display:contents' %>">
-      <div class="topup-detail-heading" style="<%= typeof isMainSite !== 'undefined' && isMainSite ? '' : 'display:contents' %>">
+    <div class="topup-detail-head-row">
+      <div class="topup-detail-heading">
         <h1 class="text-2xl font-bold mt-2 mb-1">คำขอเติมเงิน #<%= request.refCode %></h1>
         <p class="text-sm text-[var(--text-3)] mb-6"><%= new Date(request.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></p>
       </div>
-      <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
-        <div class="topup-detail-amount"><span>ยอดที่ต้องโอน</span><strong>฿<%= request.amount.toLocaleString() %>.00</strong></div>
-      <% } %>
+      <div class="topup-detail-amount"><span>ยอดที่ต้องโอน</span><strong>฿<%= Number(request.amount || 0).toLocaleString('th-TH') %>.00</strong></div>
     </div>
   </header>
   <% if (catalogApiTopup) { %>
@@ -103,7 +101,7 @@
     </div>
   <% } %>
 
-  <div class="topup-detail-grid" style="<%= typeof isMainSite !== 'undefined' && isMainSite ? '' : 'display:contents' %>">
+  <div class="topup-detail-grid">
   <div class="topup-detail-summary bg-[var(--card)] border border-[var(--border)] rounded-xl p-6 space-y-4 mb-6">
     <div class="flex justify-between text-sm"><span class="text-[var(--text-3)]">ช่องทาง</span><span><%= request.method === 'truemoney_angpao' ? 'ซองของขวัญ TrueMoney' : (request.method === 'promptpay' ? 'พร้อมเพย์ (PromptPay)' : 'โอนผ่านธนาคาร') %></span></div>
 
