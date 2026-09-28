@@ -992,7 +992,7 @@ async function main() {
     assert.match(mainLayout, /body\.storefront-global-background #site-page-shell\.storefront-owner-home-v7:has\(\.owner-home-v20-shell\)\s*\{\s*background:\s*transparent !important;\s*background-color:\s*transparent !important;\s*background-image:\s*none !important;/);
     assert.match(mainLayout, /background-image: url\('<%= storefrontBackground %>'\)/);
     assert.ok(mainLayout.indexOf('id="storefront-background-override"') > mainLayout.indexOf('<%- body %>'));
-    assert.doesNotMatch(mainLayout, /body\.storefront-global-background\s*\{[^}]*background-image:\s*none/i);
+    assert.match(mainLayout, /@media \(max-width: 900px\)\s*\{\s*body\.storefront-global-background\s*\{\s*background-attachment:\s*scroll !important;\s*background-image:\s*none !important;/);
     assert.match(loginView, /authAppearance && settings\.authAppearance\.backgroundImage\)\s*\|\|\s*\(settings\.storefrontAppearance && settings\.storefrontAppearance\.backgroundImage\)/);
     assert.match(registerView, /authAppearance && settings\.authAppearance\.backgroundImage\)\s*\|\|\s*\(settings\.storefrontAppearance && settings\.storefrontAppearance\.backgroundImage\)/);
     assert.match(appearanceView, /authBackgroundPreview = authAppearance\.backgroundImage \|\| storefrontAppearance\.backgroundImage/);

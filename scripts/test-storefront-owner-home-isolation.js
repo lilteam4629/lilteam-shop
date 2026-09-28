@@ -206,6 +206,10 @@ assert.ok(shellBackground.nodes.some(node => node.prop === 'background-color' &&
 const uploadedBackgroundOverride = stylesheet.nodes.find(node =>
   node.type === 'rule' && node.selector === 'body.storefront-global-background #site-page-shell.storefront-owner-home-v7');
 assert.ok(uploadedBackgroundOverride, 'uploaded backgrounds must not show through this homepage');
+const mobileWallpaperRules = [...layout.matchAll(/@media \(max-width: 900px\)\s*\{\s*body\.storefront-global-background\s*\{([^}]+)\}/g)].map(match => match[1]);
+assert.ok(mobileWallpaperRules.length >= 2
+  && mobileWallpaperRules.every(rule => /background-image:\s*none\s*!important/.test(rule)),
+  'uploaded page backgrounds must be hidden on phones while banner artwork remains intact');
 assert.ok(ruleCount > 0, 'the owner-only stylesheet should contain the redesign rules');
 
 const redesignStylesheet = postcss.parse(redesignCss, { from: 'storefront-owner-home-v14.css' });
@@ -328,7 +332,7 @@ cozyHeroStylesheet.walkAtRules('media', mediaRule => {
 assert.ok(desktopBannerUsesIntrinsicRatio,
   'the main-store banner must fill its row while preserving its original aspect ratio');
 let mobileBannerUsesIntrinsicRatio = false;
-let mobileCoverHidden = false;
+let mobileBannerHidden = false;
 let phoneBannerHasCompactBottomSpacing = false;
 cozyHeroStylesheet.walkAtRules('media', mediaRule => {
   if (mediaRule.params === '(max-width: 900px)') {
@@ -342,7 +346,7 @@ cozyHeroStylesheet.walkAtRules('media', mediaRule => {
         && declarations.display === 'none'
         && rule.nodes.some(node => node.type === 'decl' && node.prop === 'display' && node.important)
         && rule.selector.includes('#site-page-shell.storefront-owner-home-v7 #home-top.owner-home-v20-hero--banner-only')) {
-        mobileCoverHidden = true;
+        mobileBannerHidden = true;
       }
       if (declarations.height === 'auto' && declarations['aspect-ratio'] === 'auto') {
         artworkFollowsImageHeight = true;
@@ -364,8 +368,8 @@ cozyHeroStylesheet.walkAtRules('media', mediaRule => {
     });
   }
 });
-assert.ok(mobileCoverHidden,
-  'the image-only homepage cover must be hidden on phone widths');
+assert.ok(!mobileBannerHidden,
+  'the homepage banner itself must remain visible on phone widths');
 assert.ok(mobileBannerUsesIntrinsicRatio,
   'the mobile banner frame must follow the full, uncropped image height');
 assert.ok(phoneBannerHasCompactBottomSpacing,
