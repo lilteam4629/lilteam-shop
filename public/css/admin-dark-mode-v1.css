@@ -529,3 +529,219 @@ html[data-admin-theme="dark"] body.admin-site .experiment-nav-item.active {
   background-color: #000000 !important;
   box-shadow: inset 3px 0 var(--admin-brand-fill);
 }
+
+/* Finish the dark palette across older admin widgets as well as the newer
+   shared components. Keep product art, charts, and explicit live previews
+   intact; every ordinary structural surface stays true black. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  div, section, article, aside, nav, header, footer, main, form, fieldset,
+  table, thead, tbody, tfoot, tr, th, td, dialog, details, summary, output, label,
+  a, [class*="-icon"], [class*="-mark"], [class*="-pill"], [class*="-role"],
+  [class*="-avatar"], [class*="-image"], [class*="-picture"], [role="alert"], [role="status"],
+  li, kbd, [class*="-count"], [class*="-total"], [class*="-position"],
+  [class*="-state"], [class*="-mode"], [class*="-caption"], [class*="-symbol"],
+  [class*="-step"], [class*="-index"], [class*="-tag"], [class*="-selected"],
+  [class*="-current"], [class*="-empty"], [class*="-footnote"], [class*="-safe"],
+  [class*="-cost"], [class*="-live"], [class*="-chip"], [class*="-sample"],
+  [class*="-product"], [class*="-badge"],
+  [class*="-rule"], [class*="-label"], [class*="disabled"], [role="tablist"], [role="tab"]
+):not(.admin-theme-store *):not(.admin-theme-swatch):not(.admin-theme-swatch *):not(.admin-theme-mono-color):not([data-admin-dark-preserve]):not([data-admin-dark-preserve] *):not(.admin-dark-mode-preserve):not(.admin-dark-mode-preserve *):not(.experiment-chart-bar):not([class*="chart-bar"]):not([class*="chart-line"]):not([class*="chart-area"]):not([class*="chart-fill"]):not(.model-preview-window):not(.model-preview-window *):not(.admin-theme-effect-sample):not(.admin-theme-effect-sample *):not(.effects-stage):not(.effects-stage *) {
+  background-color: #000000 !important;
+  background-image: none !important;
+}
+
+/* Inline styles from older scripts can bypass component-specific selectors.
+   CSSOM normalizes those declarations with spaces, so cover both common
+   serializations before the browser paints them. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  [style*="background: rgb(255" i], [style*="background:rgba(255" i],
+  [style*="background: rgba(255" i], [style*="background-color: rgb(255" i],
+  [style*="background-color:rgba(255" i], [style*="background-color: rgba(255" i],
+  [style*="background-color: color(srgb" i], [style*="background: color(srgb" i]
+):not(.admin-theme-store *):not(.admin-theme-swatch *):not([data-admin-dark-preserve] *):not([data-admin-dark-preserve]) {
+  background-color: #000000 !important;
+  background-image: none !important;
+}
+
+/* Normalize the ink across legacy cards, badges, custom controls, and links.
+   Accents and semantic feedback are restored below so the interface remains
+   easy to scan without bringing back pale text on black. */
+html[data-admin-theme="dark"] body.admin-site *:not(.admin-theme-store *):not(.admin-theme-swatch *):not([data-admin-dark-preserve] *):not(.admin-dark-mode-preserve *) {
+  color: #ffffff !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class*="success"], [class*="ready"], [class*="complete"], [class*="available"],
+  [class*="error"], [class*="danger"], [class*="failed"], [class*="negative"],
+  [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"],
+  [class*="alert"], [class*="notice"], [class*="toast"]
+):not(.admin-theme-store *):not([data-admin-dark-preserve] *) {
+  color: #f2daa2 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-button.primary, button.primary, .btn-primary, button[class*="submit"],
+  input[type="submit"], [class*="button-primary"]
+):not(.admin-theme-store *) {
+  color: var(--admin-brand-contrast, #fffaf3) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  button, .btn, [role="button"], input[type="button"], input[type="submit"],
+  select, textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"])
+):not(.admin-theme-store *) {
+  background-color: #000000 !important;
+  border-color: #777777 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  button, .btn, [role="button"], input[type="button"], input[type="submit"]
+):not(.primary):not([class*="primary"]):not([class*="success"]):not([class*="danger"]):not([class*="warning"]):not([class*="status"]):not([class*="badge"]):not(.admin-theme-store *) {
+  border-style: solid;
+  border-width: 1px;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
+  button[class*="submit"], input[type="submit"], [class*="button-primary"]
+):not(.admin-theme-store *) {
+  color: var(--admin-brand-contrast, #fffaf3) !important;
+  background-color: var(--admin-brand-fill, #70533c) !important;
+  background-image: none !important;
+  border-color: var(--admin-brand-fill, #70533c) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder {
+  color: #b8b8b8 !important;
+  opacity: 1;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-nav-item, a:not([role="button"])):not(.admin-theme-store *) {
+  color: #ffffff !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-kicker, .experiment-nav-label, .experiment-profile small,
+  .experiment-brand-sub, .experiment-page-head p, .experiment-panel-head p,
+  .experiment-summary-item small, .experiment-confirm-note, [class*="-foot"],
+  [class*="-subtitle"], [class*="-description"], [class*="-helper"]
+):not(.admin-theme-store *):not([data-admin-dark-preserve] *) {
+  color: #b8b8b8 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-kpi-icon, [class*="-icon"], [class*="-mark"]
+):not(.admin-theme-store *):not([class*="art"]):not([class*="avatar"]):not([class*="logo"]) {
+  color: #f2daa2 !important;
+  border-color: #777777 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is([class*="success"], [class*="ready"], [class*="complete"], [class*="available"], [class*="error"], [class*="danger"], [class*="failed"], [class*="negative"], [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"], [class*="alert"], [class*="notice"], [class*="toast"]) *:not(.admin-theme-store *):not([data-admin-dark-preserve] *) {
+  color: #f2daa2 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-filter.active b {
+  color: #000000 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .mgx-add-head > span {
+  color: #f2daa2 !important;
+  background-color: #000000 !important;
+  border: 1px solid #777777;
+}
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] > [data-slip-owner-intro] {
+  color: #ffffff !important;
+  background-color: #000000 !important;
+  background-image: none !important;
+  border-color: #777777 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .catalog-selection-progress i {
+  background-color: #000000 !important;
+  border: 1px solid #777777;
+}
+html[data-admin-theme="dark"] body.admin-site .catalog-selection-progress i.filled {
+  background-color: var(--admin-brand-fill, #70533c) !important;
+  border-color: var(--admin-brand-fill, #70533c);
+}
+html[data-admin-theme="dark"] body.admin-site .catalog-flow-steps i,
+html[data-admin-theme="dark"] body.admin-site .catalog-selection-rule b,
+html[data-admin-theme="dark"] body.admin-site .catalog-selector-filters b,
+html[data-admin-theme="dark"] body.admin-site .catalog-image-open > span,
+html[data-admin-theme="dark"] body.admin-site .announcement-filters button > span,
+html[data-admin-theme="dark"] body.admin-site .users-audience-tabs .active b,
+html[data-admin-theme="dark"] body.admin-site .experiment-filter.active b,
+html[data-admin-theme="dark"] body.admin-site .coupons-create-note > span {
+  color: #ffffff !important;
+  background-color: #000000 !important;
+  border: 1px solid #777777 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .catalog-selector-filters button.active b {
+  color: var(--admin-brand-readable, #e7c29e) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .effects-preview-foot > span {
+  color: #ffffff !important;
+  background-color: #000000 !important;
+  border: 1px solid #777777;
+}
+html[data-admin-theme="dark"] body.admin-site .effects-store-logo {
+  color: #000000 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .settings-preview-head > i {
+  color: #f2daa2 !important;
+  background-color: #000000 !important;
+  border: 1px solid #777777;
+}
+html[data-admin-theme="dark"] body.admin-site :focus-visible {
+  outline: 3px solid var(--admin-brand-readable, #e7c29e) !important;
+  outline-offset: 2px;
+}
+
+/* Keep compact badges and decorative markers legible on the true-black canvas. */
+html[data-admin-theme="dark"] body.admin-site .mgx-preview-footnote > span,
+html[data-admin-theme="dark"] body.admin-site .catalog-empty > span,
+html[data-admin-theme="dark"] body.admin-site .catalog-settlement-summary i,
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-active] span[class*="bg-[var(--gold)]"],
+html[data-admin-theme="dark"] body.admin-site [data-provider-check] {
+  color: #f2daa2 !important;
+  background-color: #000000 !important;
+  border: 1px solid #777777 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .hsx-board-mark {
+  background-color: var(--admin-brand-fill, #70533c) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .hsx-state i {
+  background-color: #20c997 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .hsx-state.is-off i {
+  background-color: #e7c29e !important;
+}
+html[data-admin-theme="dark"] body.admin-site .hsx-footnote > span {
+  color: #f2daa2 !important;
+  background-color: #000000 !important;
+  border: 1px solid #777777;
+}
+html[data-admin-theme="dark"] body.admin-site .catalog-selection-thumb > span {
+  color: #ffffff !important;
+  background-color: #000000 !important;
+  border-top: 1px solid #777777;
+}
+html[data-admin-theme="dark"] body.admin-site .admin-theme-preview-caption > span,
+html[data-admin-theme="dark"] body.admin-site .announcement-tip > span {
+  color: #f2daa2 !important;
+  background-color: #000000 !important;
+  border: 1px solid #777777 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-ready-chip i {
+  background-color: #20c997 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-switch-row > i,
+html[data-admin-theme="dark"] body.admin-site .effects-toggle i,
+html[data-admin-theme="dark"] body.admin-site .effects-switch i {
+  background-color: #000000 !important;
+  border: 1px solid #777777 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-switch-row:has(input:checked) > i,
+html[data-admin-theme="dark"] body.admin-site .effects-toggle input:checked + i,
+html[data-admin-theme="dark"] body.admin-site .effects-switch input:checked + i {
+  background-color: var(--admin-brand-fill, #70533c) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-switch-row > i::after,
+html[data-admin-theme="dark"] body.admin-site .effects-toggle i::after,
+html[data-admin-theme="dark"] body.admin-site .effects-switch i::after {
+  background-color: #e7c29e !important;
+  border: 1px solid #000000;
+}
+html[data-admin-theme="dark"] body.admin-site .effects-effect-art {
+  color: #f2daa2 !important;
+  background-color: #000000 !important;
+  border: 1px solid #777777;
+}

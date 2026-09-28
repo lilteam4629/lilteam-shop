@@ -215,15 +215,15 @@ async function auditPage(requestPath, viewport) {
       return style.display !== 'none' && style.visibility !== 'hidden' && +style.opacity !== 0;
     };
     for (const el of elements) {
-      if (/^(IMG|VIDEO|CANVAS|PICTURE|IFRAME|OBJECT|EMBED|SVG|PATH|CIRCLE|RECT|LINE|POLYGON|POLYLINE)$/.test(el.tagName) || el.matches('.experiment-chart-bar, .admin-theme-swatch, .admin-theme-store, .welcome-live-save-indicator') || el.closest('[data-admin-dark-preserve], .admin-dark-mode-preserve') || !visible(el)) continue;
+      if (/^(IMG|VIDEO|CANVAS|PICTURE|IFRAME|OBJECT|EMBED|SVG|PATH|CIRCLE|RECT|LINE|POLYGON|POLYLINE)$/.test(el.tagName) || el.matches('input[type="color"], input[type="range"], .experiment-chart-bar, .admin-theme-swatch, .admin-theme-store, .welcome-live-save-indicator') || el.closest('.admin-theme-store, .model-preview-window, .admin-theme-effect-sample, .admin-theme-mono-color.is-white, .effects-stage, .admin-theme-swatch, [data-admin-dark-preserve], .admin-dark-mode-preserve') || !visible(el)) continue;
       const style = getComputedStyle(el);
       const bg = color(style.backgroundColor);
       const rect = el.getBoundingClientRect();
       if (rect.width > 3 && rect.height > 3 && isLightNeutral(bg)) {
-        offenders.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 110), color: style.backgroundColor, marker: el.getAttribute('data-admin-dark-bg'), text: (el.childNodes.length && Array.from(el.childNodes).filter(n => n.nodeType === 3).map(n => n.nodeValue.trim()).join(' ').slice(0, 60)) || '' });
+        offenders.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 110), color: style.backgroundColor, marker: el.getAttribute('data-admin-dark-bg'), text: (el.childNodes.length && Array.from(el.childNodes).filter(n => n.nodeType === 3).map(n => n.nodeValue.trim()).join(' ').slice(0, 60)) || '', ancestors: [el.parentElement, el.parentElement?.parentElement].filter(Boolean).map(parent => ({ tag: parent.tagName.toLowerCase(), className: String(parent.className || '').slice(0, 75) })) });
       }
       if (rect.width > 3 && rect.height > 3 && !el.matches(semanticSurface) && !el.closest(semanticSurface) && isOffBlackNeutral(bg)) {
-        offBlackNeutrals.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 110), color: style.backgroundColor, marker: el.getAttribute('data-admin-dark-bg') });
+        offBlackNeutrals.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 110), color: style.backgroundColor, marker: el.getAttribute('data-admin-dark-bg'), ancestors: [el.parentElement, el.parentElement?.parentElement].filter(Boolean).map(parent => ({ tag: parent.tagName.toLowerCase(), className: String(parent.className || '').slice(0, 75) })) });
       }
       if (rect.width > 3 && rect.height > 3 && !el.matches(semanticSurface) && !el.closest(semanticSurface) && isOffBlackNeutralGradient(style.backgroundImage)) {
         offBlackNeutrals.push({ tag: el.tagName.toLowerCase(), className: String(el.className || '').slice(0, 110), image: style.backgroundImage, marker: el.getAttribute('data-admin-dark-bg') });
@@ -274,7 +274,29 @@ async function auditPage(requestPath, viewport) {
     const dynamicProbe = probe ? { background: getComputedStyle(probe).backgroundColor, color: getComputedStyle(probe).color, textContrast: probeTextContrast(probe), bgMarker: probe.getAttribute('data-admin-dark-bg'), inkMarker: probe.getAttribute('data-admin-dark-ink') } : null;
     const srgbProbe = document.querySelector('#admin-dark-srgb-probe');
     const dynamicSrgbProbe = srgbProbe ? { background: getComputedStyle(srgbProbe).backgroundColor, image: getComputedStyle(srgbProbe).backgroundImage, color: getComputedStyle(srgbProbe).color, textContrast: probeTextContrast(srgbProbe), bgMarker: srgbProbe.getAttribute('data-admin-dark-bg'), inkMarker: srgbProbe.getAttribute('data-admin-dark-ink') } : null;
-    return { title: document.title, viewportWidth: innerWidth, status: body.innerText.trim().slice(0, 55), dark: root.dataset.adminTheme, toggle: !!document.querySelector('[data-admin-theme-toggle]'), bodyVisible: getComputedStyle(body).visibility !== 'hidden', booting: root.classList.contains('admin-theme-booting'), bootTrace: window.__adminDarkBootTrace || null, bodyClass: body.className, bodyBackground: getComputedStyle(body).backgroundColor, canvasBackground: getComputedStyle(root).backgroundColor, dynamicProbe, dynamicSrgbProbe, auditScript: auditScript && { src: auditScript.src, loaded: auditScript.readyState || 'present' }, scriptTransferSize: scriptTiming && scriptTiming.transferSize, markedBackgrounds: body.querySelectorAll('[data-admin-dark-bg]').length, lightSurfaces: offenders.slice(0, 8), offBlackNeutrals: offBlackNeutrals.slice(0, 8), lowContrast: lowContrast.slice(0, 8), lightSurfaceCount: offenders.length, offBlackNeutralCount: offBlackNeutrals.length, lowContrastCount: lowContrast.length };
+    const selectorDiagnostics = ['.catalog-flow-steps i', '.catalog-selection-rule b', '.catalog-selector-filters b', '.catalog-image-open > span', '.announcement-filters button > span', '.users-audience-tabs .active b', '.coupons-create-note > span', '.effects-preview-foot > span', '.settings-preview-head > i', '[data-slip-owner-page] > [data-slip-owner-intro]', '.hsx-art-product'].flatMap(selector => Array.from(body.querySelectorAll(selector)).slice(0, 1).map(el => ({ selector, className: String(el.className || ''), matchesDarkSelector: el.matches('html[data-admin-theme="dark"] body.admin-site ' + selector), background: getComputedStyle(el).backgroundColor, color: getComputedStyle(el).color })));
+    const fontTargets = [body, ...body.querySelectorAll('h1,h2,h3,button,[role="button"],input,select,textarea,label,.experiment-nav-item')].filter(visible);
+    const wrongFonts = fontTargets.filter(el => {
+      const expected = el.matches('code,kbd,samp,pre,.font-mono,[class*="mono"]') ? /JetBrains Mono|monospace/i : /^(?:'|")?Kanit(?:'|")?(?:\s*,|$)/i;
+      return !expected.test(getComputedStyle(el).fontFamily.trim());
+    });
+    const buttonIssues = [];
+    for (const control of Array.from(body.querySelectorAll('button,[role="button"],input[type="button"],input[type="submit"]')).filter(visible)) {
+      const label = (control.innerText || control.value || control.getAttribute('aria-label') || '').trim();
+      if (!label) continue;
+      const rect = control.getBoundingClientRect();
+      if (rect.width < 24 || rect.height < 24) continue;
+      const fg = color(getComputedStyle(control).color);
+      let parent = control;
+      let bg = null;
+      while (parent && parent !== body) {
+        const candidate = color(getComputedStyle(parent).backgroundColor);
+        if (candidate && candidate.a > .92) { bg = composite(candidate, { r: 0, g: 0, b: 0 }); break; }
+        parent = parent.parentElement;
+      }
+      if (fg && bg && contrast(composite(fg, bg), bg) < 4.49) buttonIssues.push({ label: label.slice(0, 55), className: String(control.className || '').slice(0, 80), foreground: getComputedStyle(control).color, background: bg });
+    }
+    return { title: document.title, viewportWidth: innerWidth, status: body.innerText.trim().slice(0, 55), dark: root.dataset.adminTheme, rootInlineBackground: root.style.backgroundColor, rootInlineTheme: root.dataset.adminTheme, toggle: !!document.querySelector('[data-admin-theme-toggle]'), bodyVisible: getComputedStyle(body).visibility !== 'hidden', booting: root.classList.contains('admin-theme-booting'), bootTrace: window.__adminDarkBootTrace || null, bodyClass: body.className, bodyBackground: getComputedStyle(body).backgroundColor, canvasBackground: getComputedStyle(root).backgroundColor, dynamicProbe, dynamicSrgbProbe, selectorDiagnostics, auditScript: auditScript && { src: auditScript.src, loaded: auditScript.readyState || 'present' }, scriptTransferSize: scriptTiming && scriptTiming.transferSize, markedBackgrounds: body.querySelectorAll('[data-admin-dark-bg]').length, fontFamilies: { body: getComputedStyle(body).fontFamily, heading: body.querySelector('h1,h2,h3') ? getComputedStyle(body.querySelector('h1,h2,h3')).fontFamily : null, button: body.querySelector('button') ? getComputedStyle(body.querySelector('button')).fontFamily : null }, wrongFontCount: wrongFonts.length, wrongFontSamples: wrongFonts.slice(0, 5).map(el => ({ tag: el.tagName, className: String(el.className || '').slice(0, 75), family: getComputedStyle(el).fontFamily })), buttonIssues: buttonIssues.slice(0, 6), buttonIssueCount: buttonIssues.length, lightSurfaces: offenders.slice(0, 8), offBlackNeutrals: offBlackNeutrals.slice(0, 8), lowContrast: lowContrast.slice(0, 8), lightSurfaceCount: offenders.length, offBlackNeutralCount: offBlackNeutrals.length, lowContrastCount: lowContrast.length };
   })()`);
   if (requestPath === '/admin') await cdp.command('Runtime.evaluate', { expression: `document.querySelector('#admin-dark-audit-probe')?.remove(); document.querySelector('.experiment-menu-dialog')?.close()` });
   result.surfaceScanComplete = surfaceScanComplete;
@@ -338,9 +360,12 @@ async function cleanup() {
       const testedRoute = `${viewport.name}:${route}`;
       if (result.dark !== 'dark' || !result.toggle) failures.push({ route: testedRoute, problem: 'theme did not initialize or toggle missing', result });
       if (!result.bodyVisible || result.booting || result.bootTrace?.hiddenVisibilitySeen) failures.push({ route: testedRoute, problem: 'admin content was hidden while the dark theme initialized', result: { bootTrace: result.bootTrace } });
+      if (result.rootInlineTheme !== 'dark' || result.rootInlineBackground !== 'rgb(0, 0, 0)') failures.push({ route: testedRoute, problem: 'dark mode was not applied synchronously before the page styles', result: { rootInlineTheme: result.rootInlineTheme, rootInlineBackground: result.rootInlineBackground, bootTrace: result.bootTrace } });
       if (!result.surfaceScanComplete) failures.push({ route: testedRoute, problem: 'dark surface audit did not finish within 20 seconds', result: { title: result.title, bodyClass: result.bodyClass } });
       if (result.lightSurfaceCount || result.lowContrastCount) failures.push({ route: testedRoute, problem: 'computed colors remain too light / low contrast', result: { title: result.title, viewportWidth: result.viewportWidth, bodyClass: result.bodyClass, bodyBackground: result.bodyBackground, auditScript: result.auditScript, scriptTransferSize: result.scriptTransferSize, markedBackgrounds: result.markedBackgrounds, lightSurfaceCount: result.lightSurfaceCount, lowContrastCount: result.lowContrastCount, lightSurfaces: result.lightSurfaces, lowContrast: result.lowContrast } });
       if (result.offBlackNeutralCount) failures.push({ route: testedRoute, problem: 'neutral UI surfaces are not pure black', result: { offBlackNeutralCount: result.offBlackNeutralCount, offBlackNeutrals: result.offBlackNeutrals } });
+      if (result.wrongFontCount) failures.push({ route: testedRoute, problem: 'admin text and controls do not consistently use Kanit', result: { fontFamilies: result.fontFamilies, wrongFontCount: result.wrongFontCount, wrongFontSamples: result.wrongFontSamples } });
+      if (result.buttonIssueCount) failures.push({ route: testedRoute, problem: 'button labels are not readable against their surfaces', result: { buttonIssueCount: result.buttonIssueCount, buttonIssues: result.buttonIssues } });
     if (route === '/admin' && (!result.dynamicProbe || result.dynamicProbe.textContrast < 4.5 || result.dynamicProbe.background !== 'rgb(0, 0, 0)')) {
       failures.push({ route: testedRoute, problem: 'new dynamic content did not inherit a dark surface and readable ink', result: { dynamicProbe: result.dynamicProbe } });
     }
@@ -349,13 +374,15 @@ async function cleanup() {
       }
       const bodyColor = result.bodyBackground.match(/([\d.]+)/g)?.slice(0, 3).map(Number) || [];
       if (bodyColor.length === 3 && bodyColor.some(channel => channel !== 0)) failures.push({ route: testedRoute, problem: 'admin canvas is not pure black', result });
+      const rootColor = result.canvasBackground.match(/([\d.]+)/g)?.slice(0, 3).map(Number) || [];
+      if (rootColor.length === 3 && rootColor.some(channel => channel !== 0)) failures.push({ route: testedRoute, problem: 'document canvas is not pure black', result: { canvasBackground: result.canvasBackground, rootClass: result.rootClass, dark: result.dark } });
     }
   }
 
   const firstRoute = routes[0];
   await cdp.command('Runtime.evaluate', { expression: `document.querySelector('[data-admin-theme-toggle]').click()` });
   await new Promise(resolve => setTimeout(resolve, 230));
-  const lightMode = await evaluate(`(() => { const surfaces = Array.from(document.querySelectorAll('[data-admin-dark-bg]')).slice(0, 8).map(surface => ({ className: String(surface.className || ''), role: surface.dataset.adminDarkBg, color: getComputedStyle(surface).backgroundColor })); return { theme: document.documentElement.dataset.adminTheme, colorScheme: document.documentElement.style.colorScheme, saved: localStorage.getItem('lilteam_admin_theme'), surfaces }; })()`);
+  const lightMode = await evaluate(`(() => { const surfaces = Array.from(document.querySelectorAll('.experiment-content,main,.experiment-card,button,input,textarea')).filter(el => { const rect = el.getBoundingClientRect(); return rect.width > 8 && rect.height > 8 && getComputedStyle(el).display !== 'none'; }).slice(0, 8).map(surface => ({ className: String(surface.className || ''), tag: surface.tagName, color: getComputedStyle(surface).backgroundColor })); return { theme: document.documentElement.dataset.adminTheme, colorScheme: document.documentElement.style.colorScheme, saved: localStorage.getItem('lilteam_admin_theme'), surfaces }; })()`);
   await cdp.command('Runtime.evaluate', { expression: `document.querySelector('[data-admin-theme-toggle]').click()` });
   await new Promise(resolve => setTimeout(resolve, 230));
   const darkMode = await evaluate(`document.documentElement.dataset.adminTheme`);
@@ -377,12 +404,33 @@ async function cleanup() {
     lightSurfaceCount: failure.result?.lightSurfaceCount,
     lowContrastCount: failure.result?.lowContrastCount,
     offBlackNeutralCount: failure.result?.offBlackNeutralCount,
+    wrongFontCount: failure.result?.wrongFontCount,
+    fontFamilies: failure.result?.fontFamilies,
+    wrongFontSamples: failure.result?.wrongFontSamples,
+    buttonIssueCount: failure.result?.buttonIssueCount,
+    buttonIssues: failure.result?.buttonIssues,
     bootTrace: failure.result?.bootTrace,
     dynamicSrgbProbe: failure.result?.dynamicSrgbProbe,
     toggleCheck: failure.result?.lightMode ? { lightMode: failure.result.lightMode, darkMode: failure.result.darkMode } : undefined,
     examples: [...(failure.result?.lightSurfaces || []), ...(failure.result?.offBlackNeutrals || []), ...(failure.result?.lowContrast || [])].slice(0, 4).map(example => ({ ...example, ancestors: example.ancestors?.slice(0, 3) })),
   }));
-  console.log(JSON.stringify({ browser: path.basename(browserPath), browserVersion: await browser.version(), adminPagesDiscovered: routes.length, viewportSizes: viewports.map(viewport => ({ name: viewport.name, width: viewport.width, height: viewport.height })), pagesChecked: checked, failureCount: failures.length, problemCounts, failures: summary.slice(0, 16), omittedFailures: Math.max(0, summary.length - 16) }, null, 2));
+  const findings = new Map();
+  for (const failure of failures) {
+    const categories = [
+      ['light', failure.result?.lightSurfaces],
+      ['off-black', failure.result?.offBlackNeutrals],
+      ['contrast', failure.result?.lowContrast],
+    ];
+    for (const [kind, elements] of categories) {
+      for (const element of elements || []) {
+        const key = [kind, element.tag, element.className, element.color, element.image, element.text].join('|');
+        if (!findings.has(key)) findings.set(key, { kind, tag: element.tag, className: element.className, color: element.color, image: element.image, text: element.text, background: element.background, routeSet: new Set(), ancestors: element.ancestors?.slice(0, 3) });
+        findings.get(key).routeSet.add(failure.route);
+      }
+    }
+  }
+  const uniqueFindings = Array.from(findings.values()).map(finding => ({ ...finding, routes: Array.from(finding.routeSet) }));
+  console.log(JSON.stringify({ browser: path.basename(browserPath), browserVersion: await browser.version(), adminPagesDiscovered: routes.length, viewportSizes: viewports.map(viewport => ({ name: viewport.name, width: viewport.width, height: viewport.height })), pagesChecked: checked, failureCount: failures.length, problemCounts, uniqueFindings, failures: summary.slice(0, 16), omittedFailures: Math.max(0, summary.length - 16) }, null, 2));
   if (failures.length) process.exitCode = 1;
 })().catch(error => {
   console.error(error.stack || error);
