@@ -552,6 +552,19 @@ async function main() {
       assert.equal(preview.saveCalls, 0);
     }
   });
+  const minigameAdminPage = admin.stack.find(layer => layer.route?.path === '/minigame' && layer.route.methods.get).route.stack.at(-1).handle;
+  let minigameAdminRender;
+  const minigameAdminFixture = model.fixture();
+  await als.run(minigameAdminFixture, () => minigameAdminPage(
+    { query: {}, tenantShop: null },
+    { locals: {}, render(view, values) { minigameAdminRender = { view, values }; } },
+  ));
+  check('Main minigame administration scopes the actual shop theme to the live play previews', () => {
+    assert.equal(minigameAdminRender.view, 'admin/minigame-experiment');
+    assert.match(minigameAdminRender.values.minigamePreviewThemeCss, /^\.mgx-storefront-preview\s*\{/);
+    assert.match(minigameAdminRender.values.minigamePreviewThemeCss, /html\[data-storefront-theme="light"\] \.mgx-storefront-preview/);
+    assert.doesNotMatch(minigameAdminRender.values.minigamePreviewThemeCss, /:root\s*\{/);
+  });
   async function playImageFor(tenantShop) {
     const prize = { id: 'prize', name: 'รางวัลทดสอบ', gameType: 'box', image: '/configured-prize.png', isPrize: true, stock: null };
     const gameStore = {
@@ -691,12 +704,12 @@ async function main() {
   const railTemplate = fs.readFileSync(path.join(root, 'src/views/partials/minigame-rail.ejs'), 'utf8');
   const widgetLegacy = ejs.render(widgetTemplate, { endpoint: '/minigame/play', cost: 5, ctaLabel: 'เปิดกล่อง', showLogin: false, balance: 20, mainSiteExperience: false });
   const widgetMain = ejs.render(widgetTemplate, { endpoint: '/minigame/play', cost: 5, ctaLabel: 'เปิดกล่อง', showLogin: false, balance: 20, mainSiteExperience: true });
-  const boxPreview = ejs.render(widgetTemplate, { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, mainSiteExperience: false, adminPreview: true, previewPrizes: [{ name: 'รางวัลเช่า', percent: 25, active: true, isPrize: true, image: '/tenant-prize.png' }] });
+  const boxPreview = ejs.render(widgetTemplate, { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, mainSiteExperience: true, adminPreview: true, previewPrizes: [{ name: 'รางวัลเช่า', percent: 25, active: true, isPrize: true, image: '/tenant-prize.png' }] });
   const boxPreviewMainExperience = ejs.render(widgetTemplate, { endpoint: '/admin/minigame/preview', cost: null, ctaLabel: 'ทดลองเปิดกล่อง', showLogin: false, balance: null, mainSiteExperience: true, adminPreview: true, previewPrizes: [{ name: 'รางวัลหลัก', percent: 100, active: true, isPrize: true }] });
   const railBase = { endpoint: '/minigame/play?mode=rail', cost: 5, prizes: [{ name: 'รางวัล', image: null, isPrize: true }], showLogin: false, balance: 20 };
   const railLegacy = ejs.render(railTemplate, { ...railBase, mainSiteExperience: false });
   const railMain = ejs.render(railTemplate, { ...railBase, mainSiteExperience: true });
-  const railAdminEmpty = ejs.render(railTemplate, { ...railBase, prizes: [], mainSiteExperience: false, adminPreview: true });
+  const railAdminEmpty = ejs.render(railTemplate, { ...railBase, prizes: [], mainSiteExperience: true, adminPreview: true });
   const railAdminMainExperience = ejs.render(railTemplate, { ...railBase, mainSiteExperience: true, adminPreview: true });
   const widgetLegacyMarkup = widgetLegacy.split('<style>')[0];
   const widgetMainMarkup = widgetMain.split('<style>')[0];
@@ -710,10 +723,11 @@ async function main() {
     assert.match(boxPreview, /mg-play-panel--admin-preview/);
     assert.match(boxPreview, /รางวัลที่อยู่ในกล่อง/);
     assert.match(boxPreview, /25%/);
-    assert.doesNotMatch(boxPreview.split('<style>')[0], /mg-box-scene-el|mg-result-gift/, 'a rental preview must keep the same box rendering as its storefront');
+    assert.match(boxPreview, /mg-play-panel--main-site mg-play-panel--admin-preview/);
+    assert.match(boxPreview, /mg-box-scene-el|mg-result-gift/, 'rental admins use the same illustrated game as all storefronts');
     assert.match(boxPreviewMainExperience, /mg-play-panel--main-site mg-play-panel--admin-preview/);
-    assert.match(boxPreviewMainExperience, /mg-box-scene-el|mg-result-gift/, 'the main-shop preview must use the same illustrated game as its storefront');
-    assert.equal(boxPreviewMainExperience.match(/<style>([\s\S]*?)<\/style>/)?.[1], widgetMain.match(/<style>([\s\S]*?)<\/style>/)?.[1], 'the main-shop preview and actual box game share one stylesheet');
+    assert.match(boxPreviewMainExperience, /mg-box-scene-el|mg-result-gift/, 'the main-shop preview uses the same illustrated game as its storefront');
+    assert.equal(boxPreview.match(/<style>([\s\S]*?)<\/style>/)?.[1], widgetMain.match(/<style>([\s\S]*?)<\/style>/)?.[1], 'admin preview and actual box game share one stylesheet');
     assert.doesNotMatch(railLegacyMarkup, /rail-game--main-site|<svg viewBox="0 0 24 24"/);
     assert.match(railLegacyMarkup, /🎰 เริ่มเลื่อน/);
     assert.match(railAdminEmpty, /rail-game--admin-preview/);
@@ -721,7 +735,10 @@ async function main() {
     assert.match(railAdminEmpty, /เพิ่มรางวัลรางเลื่อนที่เปิดใช้งาน/);
     assert.match(railAdminMainExperience, /rail-game--main-site rail-game--admin-preview/);
     assert.doesNotMatch(railAdminMainExperience, /rail-game--admin-preview \.rail-window\{height/);
-    assert.equal(railAdminMainExperience.match(/<style>([\s\S]*?)<\/style>/)?.[1], railMain.match(/<style>([\s\S]*?)<\/style>/)?.[1], 'the main-shop preview and actual rail share one stylesheet');
+    assert.equal(railAdminEmpty.match(/<style>([\s\S]*?)<\/style>/)?.[1], railMain.match(/<style>([\s\S]*?)<\/style>/)?.[1], 'admin preview and actual rail share one stylesheet');
+    for (const file of ['src/views/shop/home.ejs', 'src/views/shop/home-original.ejs', 'src/views/shop/home-owner-v4.ejs', 'src/views/shop/home-owner-v5.ejs']) {
+      assert.match(fs.readFileSync(path.join(root, file), 'utf8'), /mainSiteExperience:\s*true/, `${file} uses the full shared minigame experience`);
+    }
     assert.match(railTemplate, /prefers-reduced-motion: reduce/);
     assert.match(railMainMarkup, /rail-game--main-site/);
   });
@@ -793,6 +810,9 @@ async function main() {
       assert.equal(result.textContent, 'พร้อมเปิดกล่อง');
     }
     const experimentTemplate = fs.readFileSync(path.join(root, 'src/views/admin/minigame-experiment.ejs'), 'utf8');
+    assert.match(experimentTemplate, /mgx-storefront-preview/);
+    assert.match(experimentTemplate, /minigamePreviewThemeCss/);
+    assert.match(experimentTemplate, /data-storefront-theme', mode/);
     assert.match(experimentTemplate, /mgx:preview-tab-change/);
     assert.match(experimentTemplate, /previousGameTab !== activeGameTab/);
     assert.match(railTemplate, /if\(adminPreview&&!spinning\)return;/, 'an aborted rail preview cannot publish an old result after switching tabs');

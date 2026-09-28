@@ -124,6 +124,15 @@ for (const darkSurface of ['black', 'white']) {
     }
   }
 }
+const scopedPreviewCss = theme.renderCss({ bgPreset: 'coolLight', accent: '#8a5a3a', style: 'gradient' }, { scopeSelector: '.mgx-storefront-preview' });
+assert.match(scopedPreviewCss, /^\.mgx-storefront-preview\s*\{/,
+  'minigame preview must receive the selected storefront palette on its own wrapper');
+assert.match(scopedPreviewCss, /html\[data-storefront-theme="light"\] \.mgx-storefront-preview\s*\{/,
+  'preview light mode must follow the storefront preference');
+assert.match(scopedPreviewCss, /\.mgx-storefront-preview a\[class\*=.*theme-gradient-flow/s,
+  'selected storefront accent effects must stay inside the preview');
+assert.doesNotMatch(scopedPreviewCss, /:root\s*\{|html\.light\s*\{/,
+  'scoped preview theme must not recolor the administration shell');
 assert.equal(theme.getBgPresets().some((item) => item.key === theme.MAIN_BG_PRESET_KEY), false, 'tenant preset list must not gain the main-only palette');
 assert.deepEqual(theme.getBgPresets({ mainShopOnly: true }).map((item) => item.key), [theme.MAIN_BG_PRESET_KEY]);
 console.log('Main-shop monochrome surfaces and tenant palette isolation passed');

@@ -2627,6 +2627,9 @@ router.get('/minigame', (req, res) => {
   if (isMainAdmin) res.locals.layout = 'layouts/admin-experiment';
   res.render(isMainAdmin ? 'admin/minigame-experiment' : 'admin/minigame', {
     title: 'มินิเกม', active: 'minigame',
+    minigamePreviewThemeCss: isMainAdmin
+      ? theme.renderCss(store.data.settings.theme, { scopeSelector: '.mgx-storefront-preview' })
+      : '',
     game: store.data.settings.miniGame,
     prizes: store.data.miniGamePrizes.map(prize => ({
       ...prize,

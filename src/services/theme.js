@@ -268,7 +268,11 @@ function generateBgFromColor(hex) {
  * Renders the CSS variable declarations for a shop's chosen theme, to be
  * dropped straight into a <style> tag in place of the hardcoded defaults.
  */
-function renderCss(theme) {
+function renderCss(theme, options = {}) {
+  const scopeSelector = options.scopeSelector || '';
+  if (scopeSelector && !/^\.[a-zA-Z_][\w-]*$/.test(scopeSelector)) {
+    throw new TypeError('Theme scope must be a single CSS class selector');
+  }
   const customBg = theme && /^#[0-9a-fA-F]{6}$/.test(theme.bgColor) ? theme.bgColor : null;
   let preset = customBg ? generateBgFromColor(customBg) : (BG_PRESETS[theme && theme.bgPreset] || BG_PRESETS.warmDark);
   if (!customBg && theme && theme.bgPreset === MAIN_BG_PRESET_KEY) {
@@ -320,6 +324,10 @@ function renderCss(theme) {
       --coral: ${readableAccentOn('#e2836f', [vars.bg, vars.card])};`;
   };
 
+  const scopedSelectors = selectors => scopeSelector
+    ? selectors.split(',').map(selector => `${scopeSelector} ${selector.trim()}`).join(', ')
+    : selectors;
+
   let extra = '';
   if (style === 'glow') {
     // Matches elements whose class attribute contains the literal
@@ -327,20 +335,30 @@ function renderCss(theme) {
     // a CSS class selector, so Tailwind's bracket syntax needs no escaping)
     // — adds a soft glow to every gold-filled button/badge across the site.
     extra = `
-    a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"], [data-theme-fill="accent"] {
+    ${scopedSelectors('a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"], [data-theme-fill="accent"]')} {
       box-shadow: 0 0 16px 1px color-mix(in srgb, var(--gold) 55%, transparent), 0 0 32px color-mix(in srgb, var(--gold) 25%, transparent);
     }
-    .premium-product-card, .ready-glow {
+    ${scopedSelectors('.premium-product-card, .ready-glow')} {
       box-shadow: 0 0 14px color-mix(in srgb, var(--gold) 35%, transparent);
     }`;
   } else if (style === 'gradient') {
     extra = `
     @keyframes theme-gradient-flow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"], [data-theme-fill="accent"] {
+    ${scopedSelectors('a[class*="bg-[var(--gold)]"], button[class*="bg-[var(--gold)]"], [data-theme-fill="accent"]')} {
       background: linear-gradient(120deg, var(--gold), var(--gold-hover), var(--gold-dark), var(--gold)) !important;
       background-size: 300% 300%;
       animation: theme-gradient-flow 6s ease infinite;
     }`;
+  }
+
+  if (scopeSelector) {
+    const lightScopeSelector = `html[data-storefront-theme="light"] ${scopeSelector}`;
+    return `${scopeSelector} {${block(preset.dark)}
+    }
+    ${lightScopeSelector} {${block(preset.light)}
+    }
+    ${lightScopeSelector} .premium-natural-card { background: var(--input); }
+    ${extra}`;
   }
 
   return `:root {${block(preset.dark)}
