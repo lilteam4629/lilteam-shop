@@ -16,7 +16,7 @@
 
   root.dataset.adminTheme = mode;
   root.style.colorScheme = mode;
-  root.style.backgroundColor = mode === 'dark' ? '#1e2220' : '#f6f8f8';
+  root.style.backgroundColor = mode === 'dark' ? '#000000' : '#f6f8f8';
   root.style.color = mode === 'dark' ? '#f2f4f1' : '#14201d';
   root.classList.toggle('light', mode === 'light');
   root.classList.toggle('dark', mode === 'dark');

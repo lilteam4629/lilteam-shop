@@ -33,11 +33,11 @@ const input = color('admin-dark-input');
 const line = color('admin-dark-line');
 const text = color('admin-dark-text');
 const muted = color('admin-dark-muted');
-assert.notEqual(canvas, '#000000', 'dark mode should use a softer charcoal canvas');
-assert.notEqual(surface, canvas, 'cards must remain distinct from the page canvas');
-assert.notEqual(raised, surface, 'raised controls must remain distinct from cards');
-assert.notEqual(input, surface, 'form fields must be distinguishable from cards');
-assert.ok(contrast(text, surface) >= 7, 'primary text must remain clear on cards');
+assert.equal(canvas, '#000000', 'dark canvas must be pure black');
+assert.equal(surface, '#000000', 'dark panels must be pure black');
+assert.equal(raised, '#000000', 'dark raised controls must be pure black');
+assert.equal(input, '#000000', 'dark form fields must be pure black');
+assert.ok(contrast(text, canvas) >= 7, 'primary text must remain clear on black');
 assert.ok(contrast(muted, input) >= 4.5, 'muted labels and placeholders must remain readable');
 assert.ok(contrast(line, canvas) >= 3, 'control borders must remain visible on the page canvas');
 assert.match(css, /html\[data-admin-theme="dark"\] body\.admin-site[\s\S]*?border:\s*1px solid var\(--admin-dark-line\)/,
@@ -46,10 +46,12 @@ assert.match(css, /\.admin-theme-switch\s*\{[\s\S]*?min-height:\s*38px/, 'theme 
 assert.doesNotMatch(css, /transition-property:\s*[^;]*background(?:-color)?/, 'theme changes must not fade through white backgrounds');
 assert.match(css, /html\.admin-theme-switching[\s\S]*transition:\s*none\s*!important/, 'theme changes must disable transitions while colors update');
 assert.match(css, /--admin-brand-fill:\s*var\(--admin-brand-fill-dark/, 'dark mode must use the selected store accent');
+assert.ok(css.includes('[style*="background:#fff" i]'), 'inline white surfaces must be overridden before painting');
+assert.ok(css.includes('[style*="background-color:color(srgb" i]'), 'modern inline color() fills must be overridden in pure-black mode');
 assert.doesNotMatch(css, /admin-dark-surface-audit-v1\.js/, 'the dark theme must not depend on a delayed recoloring scan');
 assert.match(adminLayout, /admin-dark-mode-v1\.css/);
 assert.match(legacyLayout, /admin-dark-mode-v1\.css/);
 assert.match(dashboard, /lowStockProducts\.slice\(0,\s*24\)/, 'the dashboard should initially render a bounded stock list');
 assert.match(dashboard, /<template id="experiment-stock-alert-more">/, 'remaining stock items should be deferred');
 
-console.log('Admin dark theme checks passed: charcoal surfaces, readable controls, selected accent, no late DOM repaint, and bounded dashboard rendering.');
+console.log('Admin dark theme checks passed: pure-black surfaces, readable controls, selected accent, no late DOM repaint, and bounded dashboard rendering.');
