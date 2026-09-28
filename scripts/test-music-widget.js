@@ -30,6 +30,14 @@ assert.match(compactMusicCss, /#music-widget \.music-widget__expand\s*\{[^}]*wid
   'the compact dock should retain an accessible, separate control to open the player panel');
 assert.match(compactMusicCss, /#music-widget \.music-widget__expand::before\s*\{[^}]*width:\s*27px;[^}]*height:\s*27px;/s,
   'the player-panel control should look small while keeping an accessible tap target');
+assert.match(widgetMarkup, /class="music-panel__media[\s\S]*?id="music-title"[\s\S]*?id="music-state-label"[\s\S]*?id="music-play-btn"[\s\S]*?id="music-volume"/,
+  'the expanded panel should keep its artwork, live state, playback, and volume controls');
+assert.match(widgetMarkup, /id="music-collapse-btn"[^>]*aria-label="ปิดแผงควบคุมเพลง"[\s\S]*?<svg[\s\S]*?id="music-state-label"/,
+  'the redesigned close control should stay accessible and drawn with the shop icon style');
+assert.match(compactMusicCss, /#music-widget #music-panel\s*\{[^}]*width:\s*min\(320px, calc\(100vw - 24px\)\)[^}]*border:\s*0/s,
+  'the expanded panel should use the redesigned responsive width and clean surface');
+assert.match(compactMusicCss, /#music-widget \.music-panel__state\s*\{[^}]*font-size:\s*10px;/s,
+  'the expanded player should show a readable playback status');
 assert.match(widgetMarkup, /if \(typeof isMainSite !== 'undefined' && isMainSite\)[\s\S]*music-widget__artwork[\s\S]*else \{ %>[\s\S]*id="music-icon" class="relative z-10">🎵/,
   'rental storefronts must retain their existing player markup');
 
@@ -178,9 +186,11 @@ assert.equal(playerCalls.volume, 100);
 assert.equal(playerCalls.unmuted, 1);
 assert.equal(playerCalls.plays, 1);
 assert.equal(harness.elements.get('music-widget').classList.contains('is-playing'), true);
+assert.equal(harness.elements.get('music-state-label').textContent, 'กำลังเล่น', 'the expanded panel reports active playback');
 harness.elements.get('music-toggle-btn').listeners.click();
 assert.equal(playerCalls.pauses, 1);
 assert.equal(harness.elements.get('music-widget').classList.contains('is-playing'), false);
+assert.equal(harness.elements.get('music-state-label').textContent, 'แตะเพื่อเล่น', 'the expanded panel reports the paused state');
 // A browser policy block must be visible and leave the next direct tap able to retry.
 harness.elements.get('music-toggle-btn').listeners.click();
 playerConfig.events.onAutoplayBlocked({ target: {} });
