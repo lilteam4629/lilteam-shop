@@ -525,11 +525,11 @@ function parseProductBody(body, uploadedImages = [], existingImages = []) {
     title: body.title,
     type: 'game',
     specialType: isRandomBox ? randomBox.RANDOM_BOX_KIND : 'standard',
-    randomBox: isRandomBox ? { rate: randomBox.parseRate(body), prizes: [] } : null,
+    randomBox: isRandomBox ? { rate: randomBox.parseRate(body) } : null,
     ...(isRandomBox ? { fulfillmentMode: 'automatic', fulfillmentInstructions: '' } : {}),
     genres,
     filterTagIds,
-    price: isRandomBox ? randomBox.RANDOM_BOX_PRICE : (parseInt(body.price, 10) || 0),
+    price: isRandomBox ? (randomBox.parsePrice(body.price) || randomBox.RANDOM_BOX_PRICE) : (parseInt(body.price, 10) || 0),
     originalPrice: isRandomBox ? 0 : (parseInt(body.originalPrice, 10) || 0),
     priceOptions: isRandomBox ? [] : priceOptions,
     flashSalePrice: isRandomBox || body.flashSalePrice === '' ? null : Math.max(0, parseInt(body.flashSalePrice, 10) || 0),
@@ -578,14 +578,14 @@ function parseScheduledProductBody(body) {
 
 function randomBoxProductFormError(req, existingProduct = null) {
   if (existingProduct?.specialType === randomBox.RANDOM_BOX_KIND && !randomBox.supportsRandomBox(req)) {
-    return 'กล่องสุ่มเปิดใช้เฉพาะเว็บหลักและ bank-shop';
+    return 'กล่องสุ่มเปิดใช้เฉพาะเว็บหลัก';
   }
   if (req.body.productKind !== randomBox.RANDOM_BOX_KIND) return null;
-  if (!randomBox.supportsRandomBox(req)) return 'ประเภทกล่องสุ่มเปิดใช้เฉพาะเว็บหลักและ bank-shop';
-  if (req.body.randomBoxRate) {
-    const rateError = randomBox.validateRate(req.body.randomBoxRate);
-    if (rateError) return rateError;
-  }
+  if (!randomBox.supportsRandomBox(req)) return 'ประเภทกล่องสุ่มเปิดใช้เฉพาะเว็บหลัก';
+  const rateError = randomBox.validateRate(req.body.randomBoxRate);
+  if (rateError) return rateError;
+  const priceError = randomBox.validatePrice(req.body.price);
+  if (priceError) return priceError;
   return null;
 }
 
@@ -593,19 +593,32 @@ router.get('/products', (req, res) => {
   const mainAdminUi = usesMainAdminUi(req);
   if (mainAdminUi) res.locals.layout = 'layouts/admin-experiment';
   const filterTagById = new Map(store.data.filterTags.map(tag => [tag.id, tag]));
+  const availableStockCountByProduct = new Map();
+  const inventoryCountByProduct = new Map();
+  store.data.stockItems.forEach(stock => {
+    if (stock.status === 'available') {
+      availableStockCountByProduct.set(stock.productId, (availableStockCountByProduct.get(stock.productId) || 0) + 1);
+    }
+    if (stock.status === 'available' || stock.status === 'reserved') {
+      inventoryCountByProduct.set(stock.productId, (inventoryCountByProduct.get(stock.productId) || 0) + 1);
+    }
+  });
   const products = store.data.products.map(p => {
-    const stockCount = store.data.stockItems.filter(s => s.productId === p.id && s.status === 'available').length;
+    const stockCount = availableStockCountByProduct.get(p.id) || 0;
     const selectedFilterTags = (p.filterTagIds || []).map(id => filterTagById.get(id)).filter(Boolean);
     const randomBoxAvailablePrizeCount = p.specialType === randomBox.RANDOM_BOX_KIND
       ? randomBox.availablePrizeStockCount(store.data, p)
       : 0;
     return { ...p, stockCount, randomBoxAvailablePrizeCount, selectedFilterTags };
   });
-  // Inventory value is based on IDs that are still available. Sold/issued
-  // IDs remain in history but must not inflate the amount shown to the admin.
+  // Reserved IDs still belong to inventory (including random-box prizes held
+  // until a round closes); only sold/issued rows leave the stock valuation.
   const countedInventory = products.filter(product => product.specialType !== randomBox.RANDOM_BOX_KIND);
   const totalAvailableProductCount = countedInventory.reduce((sum, product) => sum + product.stockCount, 0);
-  const totalProductPrice = countedInventory.reduce((sum, product) => sum + ((Number(product.price) || 0) * product.stockCount), 0);
+  const totalProductPrice = countedInventory.reduce((sum, product) => {
+    const inventoryCount = inventoryCountByProduct.get(product.id) || 0;
+    return sum + ((Number(product.price) || 0) * inventoryCount);
+  }, 0);
   res.render(mainAdminUi ? 'admin/products-experiment' : 'admin/products', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
 });
 
@@ -775,13 +788,11 @@ router.get('/products/:id/edit', (req, res) => {
 router.post('/products/:id/price', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) return res.status(404).json({ ok: false, message: 'ไม่พบสินค้า' });
-  if (product.specialType === randomBox.RANDOM_BOX_KIND) {
-    return res.status(400).json({ ok: false, message: 'กล่องสุ่มกำหนดราคาไว้ที่ 1 บาทต่อครั้ง' });
-  }
   const rawPrice = String(req.body.price == null ? '' : req.body.price).trim();
   const price = Number(rawPrice);
-  if (!rawPrice || !Number.isInteger(price) || price < 0 || price > 100000000) {
-    return res.status(400).json({ ok: false, message: 'กรุณากรอกราคาเป็นจำนวนเต็มตั้งแต่ 0 ถึง 100,000,000 บาท' });
+  const minPrice = product.specialType === randomBox.RANDOM_BOX_KIND ? 1 : 0;
+  if (!rawPrice || !Number.isInteger(price) || price < minPrice || price > 100000000) {
+    return res.status(400).json({ ok: false, message: `กรุณากรอกราคาเป็นจำนวนเต็มตั้งแต่ ${minPrice.toLocaleString('th-TH')} ถึง 100,000,000 บาท` });
   }
   product.price = price;
   await store.save();
@@ -803,7 +814,7 @@ router.post('/products/bulk-price', async (req, res) => {
     return res.redirect('/admin/products');
   }
   const targets = store.data.products.filter(product => scope === 'all' || selectedIds.has(String(product.id)));
-  const priceableTargets = targets.filter(product => product.specialType !== randomBox.RANDOM_BOX_KIND);
+  const priceableTargets = targets;
   if (!priceableTargets.length) {
     req.flash('error', 'ไม่พบสินค้าที่ต้องการปรับราคา');
     return res.redirect('/admin/products');
@@ -811,7 +822,8 @@ router.post('/products/bulk-price', async (req, res) => {
   const factor = operation === 'discount' ? 1 - (percentage / 100) : 1 + (percentage / 100);
   priceableTargets.forEach(product => {
     const currentPrice = Math.max(0, Number(product.price) || 0);
-    const nextPrice = Math.min(100000000, Math.max(0, Math.round(currentPrice * factor)));
+    const minimumPrice = product.specialType === randomBox.RANDOM_BOX_KIND ? 1 : 0;
+    const nextPrice = Math.min(100000000, Math.max(minimumPrice, Math.round(currentPrice * factor)));
     if (operation === 'discount' && nextPrice < currentPrice) {
       product.originalPrice = Math.max(Number(product.originalPrice) || 0, currentPrice);
     }
@@ -820,7 +832,7 @@ router.post('/products/bulk-price', async (req, res) => {
   await store.save();
   const actionLabel = operation === 'discount' ? 'ลด' : 'เพิ่ม';
   const skipped = targets.length - priceableTargets.length;
-  req.flash('success', `${actionLabel}ราคา ${percentage}% สำเร็จ ${priceableTargets.length} รายการ${skipped ? ` · ข้ามกล่องสุ่ม ${skipped} รายการเพราะราคา fix 1 บาท/ครั้ง` : ''}`);
+  req.flash('success', `${actionLabel}ราคา ${percentage}% สำเร็จ ${priceableTargets.length} รายการ${skipped ? ` · ข้าม ${skipped} รายการ` : ''}`);
   res.redirect('/admin/products');
 });
 
@@ -846,23 +858,10 @@ router.post('/products/:id/edit', (req, res) => {
         fields.eventBadge = product.eventBadge || '';
         fields.eventDescription = product.eventDescription || '';
       }
-      const previousRandomBoxRate = randomBox.normalizeRate(product.randomBox?.rate);
       if (fields.specialType === randomBox.RANDOM_BOX_KIND && product.specialType === randomBox.RANDOM_BOX_KIND) {
-        fields.randomBox.prizes = product.randomBox?.prizes || [];
+        fields.randomBox.missMessage = product.randomBox?.missMessage || '';
       }
       Object.assign(product, fields, { status: req.body.status || 'active' });
-      if (fields.specialType === randomBox.RANDOM_BOX_KIND && previousRandomBoxRate !== fields.randomBox.rate) {
-        const currentRound = store.data.randomBoxRounds?.[String(product.id)];
-        if (currentRound) {
-          store.data.randomBoxRounds[String(product.id)] = {
-            progress: 0,
-            rate: fields.randomBox.rate,
-            roundNumber: Math.max(1, Number(currentRound.roundNumber) || 1),
-            totalDraws: Math.max(0, Number(currentRound.totalDraws) || 0),
-            totalAwards: Math.max(0, Number(currentRound.totalAwards) || 0),
-          };
-        }
-      }
       await store.save();
       req.flash('success', 'บันทึกการแก้ไขและรูปสินค้าแล้ว');
       res.redirect('/admin/products');
@@ -874,6 +873,15 @@ router.post('/products/:id/edit', (req, res) => {
 });
 
 router.post('/products/:id/delete', async (req, res) => {
+  const reservedStock = store.data.stockItems.find(stock => String(stock.productId) === String(req.params.id)
+    && stock.status === 'reserved' && stock.randomBoxReservedFor);
+  if (reservedStock) {
+    req.flash('error', 'สินค้านี้ถูกจองเป็นรางวัลของกล่องสุ่มที่กำลังดำเนินรอบอยู่ ลบรอบนี้ไม่ได้');
+    return res.redirect('/admin/products');
+  }
+  const currentRound = store.data.randomBoxRounds?.[String(req.params.id)];
+  if (currentRound) randomBox.releaseRoundPrizeReservation(store.data, req.params.id, currentRound);
+  if (store.data.randomBoxRounds) delete store.data.randomBoxRounds[String(req.params.id)];
   store.data.products = store.data.products.filter(p => p.id !== req.params.id);
   store.data.stockItems = store.data.stockItems.filter(s => s.productId !== req.params.id);
   await store.save();
@@ -1559,7 +1567,7 @@ router.get('/products/:id/stock', (req, res) => {
       title: `สต็อกกล่องสุ่ม: ${product.title}`, active: 'products', product, stockItems,
       randomBoxStockCount: randomBox.availableStockCount(stockItems),
       randomBoxAvailablePrizeCount: randomBox.availablePrizeStockCount(store.data, product),
-      randomBoxCanDraw: randomBox.hasAvailablePrizeBundle(store.data, product),
+      randomBoxPoolSummary: randomBox.getPoolSummary(store.data, product),
     });
   }
   res.render('admin/product-stock', { title: `สต๊อกสินค้า: ${product.title}`, active: 'products', product, stockItems });
@@ -1723,6 +1731,15 @@ router.post('/products/:id/stock/:stockId/delete', async (req, res) => {
   if (!product || !stock) {
     req.flash('error', 'ไม่พบไอดีในสต๊อกของสินค้านี้');
     return res.redirect(`/admin/products/${req.params.id}/stock`);
+  }
+  if (stock.status === 'reserved' && stock.randomBoxReservedFor) {
+    req.flash('error', 'สินค้านี้ถูกสำรองไว้เป็นรางวัลของกล่องสุ่มที่กำลังดำเนินรอบ ลบตอนนี้ไม่ได้');
+    return res.redirect(`/admin/products/${product.id}/stock`);
+  }
+  const randomBoxPrizeOrder = stock.soldOrderId && store.data.orders.some(order => order.id === stock.soldOrderId && order.randomBoxOrder);
+  if (randomBoxPrizeOrder) {
+    req.flash('error', 'ลบสต็อกที่จ่ายเป็นรางวัลกล่องสุ่มแล้วไม่ได้ เพื่อเก็บประวัติการรับสินค้า');
+    return res.redirect(`/admin/products/${product.id}/stock`);
   }
   if (product.specialType === randomBox.RANDOM_BOX_KIND && stock.status !== 'available') {
     req.flash('error', 'ลบรายการที่ส่งให้ผู้ซื้อแล้วไม่ได้ เพื่อเก็บประวัติการสั่งซื้อ');

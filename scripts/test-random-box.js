@@ -2,353 +2,317 @@ const assert = require('assert');
 const randomBox = require('../src/services/random-box');
 const catalog = require('../src/services/catalog-syndication');
 
-assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: null }), true, 'main site supports random boxes');
-assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: { slug: 'bank-shop' } }), false, 'other shops cannot use random boxes');
-assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: { slug: 'other-shop' } }), false, 'other tenants cannot use them');
-assert.strictEqual(randomBox.randomTarget((min) => min), 85);
-assert.strictEqual(randomBox.randomTarget((min, max) => max - 1), 110);
-assert.strictEqual(randomBox.randomTarget((min) => min, 2), 45);
-assert.strictEqual(randomBox.randomTarget((min, max) => max - 1, 2), 60);
-assert.strictEqual(randomBox.getRateConfig(3).minTarget, 30, 'custom rates calculate their lower round bound');
-assert.strictEqual(randomBox.getRateConfig(3).maxTarget, 40, 'custom rates calculate their upper round bound');
-assert.strictEqual(randomBox.parseRate({}), 1, 'rate one is the default');
-assert.strictEqual(randomBox.parseRate({ randomBoxRate: '2' }), 2, 'the admin can select rate two');
-assert.strictEqual(randomBox.parseRate({ randomBoxRate: '3.25' }), 3.25, 'the admin can enter any rate with up to two decimals');
-assert.strictEqual(randomBox.validateRate('0.01'), null);
-assert.strictEqual(randomBox.validateRate('100'), null);
-assert.strictEqual(randomBox.getRateConfig(100).minTarget, 1, 'a 100% rate awards every draw');
-assert.notStrictEqual(randomBox.validateRate('1.001'), null);
-assert.strictEqual(randomBox.normalizeMissMessage('  เสียใจด้วยครับ\r\nลองใหม่อีกครั้ง  '), 'เสียใจด้วยครับ\nลองใหม่อีกครั้ง');
-assert.strictEqual(randomBox.normalizeMissMessage('x'.repeat(400)).length, randomBox.MAX_MISS_MESSAGE_LENGTH, 'miss copy is bounded');
-assert.strictEqual(randomBox.MAX_RANDOM_BOX_DRAWS, 500, 'the customer may select more than 100 draws at once');
-assert.strictEqual(randomBox.parseDrawCount(undefined), 1, 'a missing count keeps the single-draw default');
-assert.strictEqual(randomBox.parseDrawCount('7'), 7, 'buyers can request multiple draws');
-assert.strictEqual(randomBox.parseDrawCount('101'), 101, 'a batch may exceed the previous 100-draw limit');
-assert.strictEqual(randomBox.parseDrawCount('500'), 500, 'the maximum batch size is accepted');
-for (const invalidCount of ['', '0', '-1', '1.5', '501', '2e3']) {
-  assert.throws(() => randomBox.parseDrawCount(invalidCount), error => error.code === 'INVALID_DRAW_COUNT', `invalid draw count ${invalidCount} is rejected`);
+assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: null }), true);
+assert.strictEqual(randomBox.supportsRandomBox({ tenantShop: { slug: 'bank-shop' } }), false,
+  'random boxes are restricted to the main shop');
+
+const expectedRateBounds = new Map([
+  [1, [85, 110]], [2, [45, 60]], [3, [30, 40]], [4, [22, 27]], [5, [17, 22]],
+  [6, [15, 18]], [7, [13, 15]], [8, [11, 13]], [9, [10, 12]], [10, [9, 11]],
+]);
+for (const [rate, [minimum, maximum]] of expectedRateBounds) {
+  assert.deepStrictEqual(
+    [randomBox.getRateConfig(rate).minTarget, randomBox.getRateConfig(rate).maxTarget],
+    [minimum, maximum],
+    `rate ${rate} has a valid, decreasing draw interval`,
+  );
+  assert.strictEqual(randomBox.getRateConfig(rate).rate, rate);
+}
+assert.strictEqual(randomBox.parseRate({ randomBoxRate: '10' }), 10);
+assert.strictEqual(randomBox.validateRate('1'), null);
+assert.strictEqual(randomBox.validateRate('10'), null);
+for (const invalidRate of ['', '0', '11', '1.5', '-2', 'NaN']) {
+  assert.ok(randomBox.validateRate(invalidRate), `reject rate ${invalidRate}`);
+}
+assert.strictEqual(randomBox.parsePrice('1'), 1);
+assert.strictEqual(randomBox.parsePrice('2'), 2);
+for (const invalidPrice of ['', '0', '-1', '1.5', '100000001', 'NaN']) {
+  assert.strictEqual(randomBox.parsePrice(invalidPrice), null, `reject price ${invalidPrice}`);
+}
+assert.strictEqual(randomBox.validatePrice('2'), null);
+assert.ok(randomBox.validatePrice('0'));
+assert.strictEqual(randomBox.parseDrawCount('101'), 101);
+assert.throws(() => randomBox.parseDrawCount('501'), error => error.code === 'INVALID_DRAW_COUNT');
+assert.strictEqual(randomBox.normalizeMissMessage('  เกลือ  '), 'เกลือ');
+
+function seededRandom(seed) {
+  let state = seed >>> 0;
+  return (min, maxExclusive) => {
+    assert.ok(maxExclusive > min, `random range is valid (${min}, ${maxExclusive})`);
+    state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
+    return min + (state % (maxExclusive - min));
+  };
 }
 
-const prizeStock = [
-  { id: 'stock-legacy', productId: 'box-1', randomBoxPrizeId: 'legacy-prize', status: 'available', username: 'legacy-user', password: 'legacy-key' },
-  { id: 'stock-direct', productId: 'box-1', status: 'available', username: 'direct-key', password: '' },
-  { id: 'sold-key', productId: 'box-1', status: 'sold', username: 'used', password: 'used' },
-  { id: 'other-box-key', productId: 'other-box', status: 'available', username: 'other', password: 'box' },
-];
-assert.strictEqual(randomBox.availableStockCount(prizeStock, 'box-1'), 2, 'all available lines count as one prize each, including old categorized stock');
-assert.strictEqual(randomBox.availableStockCount(prizeStock, 'other-box'), 1, 'stock counts stay scoped to their product');
-assert.deepStrictEqual(randomBox.availableStockItems(prizeStock, 'other-box').map(item => item.id), ['other-box-key'], 'stock belonging to another box never leaks into this one');
-const outOfOrderStock = [
-  { id: 'row-3', productId: 'box-1', addedAt: '2026-09-03T00:00:00.000Z' },
-  { id: 'row-2', productId: 'box-1', addedAt: '2026-09-02T00:00:00.000Z' },
-  { id: 'row-1', productId: 'box-1', addedAt: '2026-09-01T00:00:00.000Z' },
-  { id: 'row-2-added-later', productId: 'box-1', addedAt: '2026-09-02T00:00:00.000Z' },
-];
-assert.deepStrictEqual(randomBox.stockItemsOldestFirst(outOfOrderStock).map(item => item.id),
-  ['row-1', 'row-2', 'row-2-added-later', 'row-3'], 'stock rows are oldest-first with stable ordering for equal timestamps');
-
-const data = {
-  users: [
-    { id: 'buyer-a', role: 'customer', status: 'active', walletBalance: 100 },
-    { id: 'buyer-b', role: 'customer', status: 'active', walletBalance: 100 },
-  ],
-  products: [{
-    id: 'box-1', slug: 'one-baht-box', title: 'กล่องสุ่ม', price: 999, originalPrice: 999,
-    specialType: randomBox.RANDOM_BOX_KIND, status: 'active', images: ['/box.png'],
-    randomBox: { rate: 1, missMessage: 'ขอบคุณที่ร่วมสนุก', prizes: [{ id: 'legacy-prize', name: 'รางวัลเดิม', percent: 99, active: true }] },
-  }],
-  stockItems: [
-    { id: 'legacy-stock-1', productId: 'box-1', randomBoxPrizeId: 'legacy-prize', username: 'winner-a', password: 'key-a', status: 'available' },
-    { id: 'direct-stock-1', productId: 'box-1', username: 'winner-b', password: '', status: 'available' },
-  ],
-  walletTransactions: [],
-  orders: [],
-  randomBoxRounds: {},
-};
-let generatedId = 0;
-const genId = length => String(++generatedId).padStart(length, '0').slice(-length);
-const deterministicRandom = (min) => min;
-
-for (let draw = 1; draw <= 84; draw += 1) {
-  const buyerId = draw % 2 ? 'buyer-a' : 'buyer-b';
-  const result = randomBox.drawRandomBox(data, {
-    productId: 'box-1', userId: buyerId, idempotencyKey: `draw-request-${String(draw).padStart(4, '0')}`,
-    now: 1_800_000_000_000, randomInt: deterministicRandom, genId,
-  });
-  assert.strictEqual(result.result.isWin, false, `draw ${draw} must not win before the global target`);
-  assert.strictEqual(result.result.missMessage, 'ขอบคุณที่ร่วมสนุก', 'each miss snapshots the configured customer message');
-  assert.strictEqual(result.result.missCount, 1, 'single miss summaries report their miss count');
+function idFactory() {
+  let value = 0;
+  return length => String(++value).padStart(length, '0').slice(-length);
 }
-assert.strictEqual(data.randomBoxRounds['box-1'].progress, 84, 'round count is global across buyers');
-assert.strictEqual(data.users[0].walletBalance, 58, 'first buyer pays for their own 42 attempts');
-assert.strictEqual(data.users[1].walletBalance, 58, 'second buyer pays for their own 42 attempts');
 
-const winKey = 'draw-request-0085';
-const winner = randomBox.drawRandomBox(data, {
-  productId: 'box-1', userId: 'buyer-b', idempotencyKey: winKey,
-  now: 1_800_000_000_000, randomInt: deterministicRandom, genId,
-});
-assert.strictEqual(winner.result.isWin, true, 'the draw that reaches target wins');
-assert.strictEqual(winner.result.roundProgress, 85);
-assert.strictEqual(winner.result.prizeName, 'winner-b', 'a win takes the newest stock row at the bottom first');
-assert.strictEqual(winner.result.missMessage, null, 'winning draws do not include the miss message');
-assert.strictEqual(winner.result.missCount, 0, 'winning draw summaries count no misses');
-assert.strictEqual(Object.hasOwn(winner.result, 'prizePercent'), false, 'draw results no longer depend on prize percentages');
-assert.strictEqual(data.stockItems[1].status, 'sold', 'the selected key is consumed from inventory once');
-assert.strictEqual(data.stockItems[1].soldOrderId, winner.orderId, 'inventory is linked to the winning order');
-assert.strictEqual(data.randomBoxRounds['box-1'].progress, 0, 'new global round starts after a win');
-assert.strictEqual(data.randomBoxRounds['box-1'].roundNumber, 2);
-assert.strictEqual(data.users[1].walletBalance, 57, 'winning attempt still costs exactly one baht');
-assert.strictEqual(data.orders.length, 85);
-assert.strictEqual(data.orders.at(-1).total, 1);
-assert.strictEqual(data.orders.at(-1).items[0].price, 1);
-assert.strictEqual(data.orders.at(-1).status, 'completed', 'the winning order is complete after immediate automatic delivery');
-assert.strictEqual(data.orders.at(-1).items[0].fulfillmentMode, 'automatic');
-assert.strictEqual(data.orders.at(-1).items[0].stockItemId, 'direct-stock-1', 'the bottom stock line is delivered without requiring a prize category');
-assert.strictEqual(data.orders.at(-1).items.length, 1, 'the prize is fulfilled on the paid draw without a manual-contact line');
-assert.strictEqual(data.orders.at(-1).items[0].randomBoxDraw.prizeCount, 1, 'legacy direct box stock remains a one-item award');
+function makeScenario({ count, rate, price, seed = 1 }) {
+  const product = {
+    id: `box-${count}-${rate}-${price}`,
+    slug: 'box',
+    title: 'กล่องสุ่ม',
+    price,
+    status: 'active',
+    specialType: randomBox.RANDOM_BOX_KIND,
+    randomBox: { rate, missMessage: 'เกลือ' },
+    images: ['/box.png'],
+  };
+  const stockItems = Array.from({ length: count }, (_, index) => ({
+    id: `key-${count}-${rate}-${price}-${index + 1}`,
+    productId: product.id,
+    username: `private-key-${index + 1}`,
+    password: `private-password-${index + 1}`,
+    extra: '',
+    fulfillmentMode: 'automatic',
+    status: 'available',
+  }));
+  return {
+    product,
+    data: {
+      users: [{ id: 'buyer', status: 'active', walletBalance: 5_000_000 }],
+      products: [product],
+      stockItems,
+      walletTransactions: [],
+      orders: [],
+      randomBoxPools: {},
+    },
+    randomInt: seededRandom(seed),
+    genId: idFactory(),
+  };
+}
 
-const beforeReplay = {
-  balance: data.users[1].walletBalance,
-  orderCount: data.orders.length,
-  ledgerCount: data.walletTransactions.length,
-  prizeStock: data.stockItems[1].status,
-};
-const replay = randomBox.drawRandomBox(data, {
-  productId: 'box-1', userId: 'buyer-b', idempotencyKey: winKey,
-  now: 1_800_000_000_001, randomInt: deterministicRandom, genId,
-});
-assert.strictEqual(replay.replay, true);
-assert.strictEqual(replay.orderId, winner.orderId);
-assert.strictEqual(data.users[1].walletBalance, beforeReplay.balance, 'replay does not debit twice');
-assert.strictEqual(data.orders.length, beforeReplay.orderCount, 'replay does not create another order');
-assert.strictEqual(data.walletTransactions.length, beforeReplay.ledgerCount, 'replay does not create another ledger entry');
-assert.strictEqual(data.stockItems[1].status, beforeReplay.prizeStock, 'replay does not consume another key');
-
-data.products[0].randomBox.rate = 2;
-for (let draw = 1; draw <= 45; draw += 1) {
-  const result = randomBox.drawRandomBox(data, {
-    productId: 'box-1', userId: draw % 2 ? 'buyer-a' : 'buyer-b', idempotencyKey: `rate-two-${draw}`,
-    now: 1_800_000_100_000 + draw, randomInt: deterministicRandom, genId,
+function performDraw(data, product, randomInt, genId, drawCount, requestNumber, now = 1_800_000_000_000) {
+  return randomBox.drawRandomBox(data, {
+    productId: product.id,
+    userId: 'buyer',
+    idempotencyKey: `request-${String(requestNumber).padStart(4, '0')}-unique`,
+    drawCount,
+    now: now + requestNumber,
+    randomInt,
+    genId,
   });
-  assert.strictEqual(result.result.isWin, draw === 45, `rate two draw ${draw} follows the 45–60 target`);
-  if (draw === 45) {
-    assert.strictEqual(result.result.roundTarget, 45);
-    assert.strictEqual(result.result.prizeName, 'winner-a:key-a', 'the next award moves upward to the prior stock row');
-    assert.strictEqual(data.orders.at(-1).items[0].stockItemId, 'legacy-stock-1');
+}
+
+function completeAllPrizes(scenario, { firstDraw = 500 } = {}) {
+  const { data, product, randomInt, genId } = scenario;
+  const orders = [];
+  let request = 1;
+  while (randomBox.availablePrizeStockCount(data, product) > 0) {
+    const opened = performDraw(data, product, randomInt, genId, firstDraw, request++);
+    orders.push(opened);
+    assert.ok(opened.result.drawCount >= 1 && opened.result.drawCount <= firstDraw);
+    assert.ok(opened.result.total > 0);
+    assert.ok(opened.result.total <= firstDraw * product.price);
+    if (request > 100) throw new Error('simulation did not consume all stock');
+  }
+  return orders;
+}
+
+// User's worked example: 15 prizes, rate 1, ฿1 per draw. The first event
+// collects ฿100 and awards five; the remaining ten receive a separate,
+// hidden recovery target based on the original 15-prize stock batch.
+const targetExample = makeScenario({ count: 15, rate: 1, price: 1, seed: 7 });
+const fixedExampleRandom = (min, maxExclusive) => {
+  if (min === 85 && maxExclusive === 111) return 100;
+  if (min === 1275 && maxExclusive === 1651) return 1500;
+  if (min === 1 && maxExclusive === 101) return 100;
+  if (min === 2 && maxExclusive === 6) return 3;
+  return min + Math.floor((maxExclusive - min - 1) / 2);
+};
+const firstExampleOrder = performDraw(targetExample.data, targetExample.product, fixedExampleRandom, targetExample.genId, 100, 1);
+assert.strictEqual(firstExampleOrder.result.total, 100);
+assert.strictEqual(firstExampleOrder.result.winCount, 1);
+assert.strictEqual(firstExampleOrder.result.prizeCount, 5);
+const activeExamplePool = randomBox.getActivePool(targetExample.data, targetExample.product.id);
+assert.strictEqual(activeExamplePool.initialCount, 15);
+assert.strictEqual(activeExamplePool.remainingStockIds.length, 10);
+assert.strictEqual(activeExamplePool.entryProgressDraws, 100);
+assert.strictEqual(activeExamplePool.recoveryTargetDraws, 1500);
+assert.strictEqual(activeExamplePool.recoveryMilestones.reduce((sum, milestone) => sum + milestone.count, 0), 10);
+assert.strictEqual(activeExamplePool.recoveryMilestones.at(-1).atDraws, 1500);
+assert.ok(!('recoveryTargetDraws' in firstExampleOrder.result));
+assert.ok(!JSON.stringify(firstExampleOrder.result).includes('1500'));
+assert.ok(!JSON.stringify(firstExampleOrder.result).includes('private-key'));
+assert.ok(!JSON.stringify(firstExampleOrder.result).includes('private-password'));
+assert.strictEqual(targetExample.data.users[0].walletBalance, 4_999_900);
+
+let exampleRequest = 2;
+while (randomBox.availablePrizeStockCount(targetExample.data, targetExample.product) > 0) {
+  performDraw(targetExample.data, targetExample.product, fixedExampleRandom, targetExample.genId, 500, exampleRequest++);
+  if (exampleRequest > 10) throw new Error('the 15-prize worked example did not finish');
+}
+const completedExample = targetExample.data.randomBoxPoolHistory.at(-1);
+assert.strictEqual(completedExample.initialCount, 15);
+assert.strictEqual(completedExample.totalPrizeItems, 15);
+assert.strictEqual(completedExample.entryProgressDraws, 100);
+assert.strictEqual(completedExample.recoveryTargetDraws, 1500);
+assert.strictEqual(completedExample.recoveryProgressDraws, 1500);
+assert.strictEqual(completedExample.totalCollected, 1600, 'the first ฿100 and the separate recovery total are both counted');
+assert.strictEqual(targetExample.data.stockItems.filter(stock => stock.status === 'sold').length, 15);
+
+// Rate and price cases: recovery budget follows the initial count × the saved
+// rate interval × saved per-draw price, and every key is paid exactly once.
+const matrix = [
+  { count: 1, rate: 1, price: 1 },
+  { count: 2, rate: 1, price: 2 },
+  { count: 6, rate: 2, price: 1 },
+  { count: 10, rate: 2, price: 2 },
+  { count: 15, rate: 3, price: 1 },
+  { count: 25, rate: 5, price: 2 },
+  { count: 8, rate: 7, price: 3 },
+  { count: 12, rate: 10, price: 2 },
+  ...Array.from({ length: 10 }, (_, index) => {
+    const rate = index + 1;
+    return { count: [1, 6, 15][index % 3], rate, price: rate % 2 ? 1 : 2 };
+  }),
+];
+const observedAwardSizes = new Set();
+for (const [index, scenarioConfig] of matrix.entries()) {
+  const scenario = makeScenario({ ...scenarioConfig, seed: 100 + index });
+  const orders = completeAllPrizes(scenario);
+  const history = scenario.data.randomBoxPoolHistory.at(-1);
+  observedAwardSizes.add(history.entryPrizeCount);
+  const { minTarget, maxTarget } = randomBox.getRateConfig(scenarioConfig.rate);
+  assert.strictEqual(history.initialCount, scenarioConfig.count);
+  assert.strictEqual(history.rate, scenarioConfig.rate);
+  assert.strictEqual(history.price, scenarioConfig.price);
+  assert.ok(history.entryProgressDraws >= minTarget && history.entryProgressDraws <= maxTarget,
+    `entry payout interval: ${JSON.stringify(scenarioConfig)}`);
+  if (scenarioConfig.count > 1) {
+    assert.ok(history.recoveryTargetDraws >= scenarioConfig.count * minTarget);
+    assert.ok(history.recoveryTargetDraws <= scenarioConfig.count * maxTarget);
+    assert.strictEqual(history.recoveryProgressDraws, history.recoveryTargetDraws);
+    assert.strictEqual(history.totalPrizeItems, scenarioConfig.count);
+    const recoveryPrizeCount = history.recoveryMilestones.reduce((sum, milestone) => sum + milestone.count, 0);
+    assert.strictEqual(recoveryPrizeCount, scenarioConfig.count - history.entryPrizeCount);
+    assert.ok(history.entryPrizeCount >= 1 && history.entryPrizeCount <= 5,
+      'the initial award also contains between one and five items');
+  } else {
+    assert.strictEqual(history.recoveryTargetDraws, 0);
+    assert.strictEqual(history.totalPrizeItems, 1);
+  }
+  const draws = orders.reduce((sum, opened) => sum + opened.result.drawCount, 0);
+  const collected = orders.reduce((sum, opened) => sum + opened.result.total, 0);
+  assert.strictEqual(draws, history.totalDraws);
+  assert.strictEqual(collected, history.totalCollected);
+  assert.strictEqual(collected, draws * scenarioConfig.price);
+  assert.strictEqual(scenario.data.stockItems.filter(stock => stock.status === 'sold').length, scenarioConfig.count);
+  assert.strictEqual(scenario.data.users[0].walletBalance, 5_000_000 - collected);
+  assert.strictEqual(orders.flatMap(opened => {
+    const order = scenario.data.orders.find(item => item.id === opened.orderId);
+    return order.items.map(item => item.randomBoxDraw);
+  }).filter(result => result.isWin).reduce((sum, result) => sum + result.prizeCount, 0), scenarioConfig.count);
+  for (const opened of orders) {
+    assert.ok(opened.result.total <= opened.result.drawCount * scenarioConfig.price);
+    assert.ok(!('rate' in opened.result));
+    assert.ok(!('roundTarget' in opened.result));
+    assert.ok(!('recoveryTargetDraws' in opened.result));
+    for (const draw of scenario.data.orders.find(order => order.id === opened.orderId).items) {
+      assert.ok(draw.price === scenarioConfig.price);
+      if (draw.randomBoxDraw.isWin) assert.ok(draw.randomBoxDraw.prizeCount >= 1 && draw.randomBoxDraw.prizeCount <= 5);
+      assert.ok(!JSON.stringify(draw.randomBoxDraw).includes('private-password'));
+      assert.ok(!JSON.stringify(draw.randomBoxDraw).includes('private-key'));
+    }
   }
 }
-assert.strictEqual(data.randomBoxRounds['box-1'].rate, 2, 'rate change starts a fresh round at the selected rate');
+assert.ok(observedAwardSizes.size >= 2, 'the initial award size varies between stocked batches');
+
+// Price snapshots survive an admin changing configuration mid-batch. The new
+// rate/price only applies after the captured stock batch finishes.
+const changedSettings = makeScenario({ count: 1, rate: 1, price: 1, seed: 99 });
+const oldPrice = randomBox.getDrawPrice(changedSettings.data, changedSettings.product);
+assert.strictEqual(oldPrice, 1);
+const stablePoolRandom = (min, maxExclusive) => {
+  if (min === 85 && maxExclusive === 111) return 85;
+  if (min === 1 && maxExclusive === 101) return 1;
+  return min;
+};
+performDraw(changedSettings.data, changedSettings.product, stablePoolRandom, changedSettings.genId, 84, 1);
+changedSettings.data.stockItems.push({
+  id: 'new-key-after-snapshot', productId: changedSettings.product.id, username: 'new-secret',
+  status: 'available', fulfillmentMode: 'automatic',
+});
+changedSettings.product.price = 2;
+changedSettings.product.randomBox.rate = 2;
+assert.strictEqual(randomBox.getDrawPrice(changedSettings.data, changedSettings.product), 1,
+  'the active pool uses its captured draw price');
+const finishOldPool = performDraw(changedSettings.data, changedSettings.product, stablePoolRandom, changedSettings.genId, 500, 2);
+assert.strictEqual(finishOldPool.result.drawCount, 1);
+assert.strictEqual(finishOldPool.result.total, 1);
+assert.strictEqual(finishOldPool.result.priceChanged, true,
+  'a request stops at the pool boundary instead of unexpectedly charging the new price');
+assert.strictEqual(randomBox.availablePrizeStockCount(changedSettings.data, changedSettings.product), 1,
+  'newly added stock remains for a separate request at the new price');
+const newPoolDraw = performDraw(changedSettings.data, changedSettings.product, stablePoolRandom, changedSettings.genId, 1, 3);
+assert.strictEqual(newPoolDraw.result.total, 2);
+assert.strictEqual(randomBox.getActivePool(changedSettings.data, changedSettings.product.id)?.price, 2);
+
+// Contributions are shared across different customers: the second buyer's
+// draw reaches the same active pool started by the first buyer.
+const sharedPool = makeScenario({ count: 5, rate: 1, price: 1, seed: 101 });
+sharedPool.data.users.push({ id: 'buyer-two', status: 'active', walletBalance: 100 });
+const sharedRandom = (min, maxExclusive) => {
+  if (min === 85 && maxExclusive === 111) return 100;
+  if (min === 1 && maxExclusive === 101) return 100;
+  return min;
+};
+const buyerOneContribution = randomBox.drawRandomBox(sharedPool.data, {
+  productId: sharedPool.product.id, userId: 'buyer', idempotencyKey: 'shared-buyer-one-00001',
+  drawCount: 50, randomInt: sharedRandom, genId: sharedPool.genId,
+});
+assert.strictEqual(buyerOneContribution.result.isWin, false);
+assert.strictEqual(randomBox.getActivePool(sharedPool.data, sharedPool.product.id).entryProgressDraws, 50);
+const buyerTwoContribution = randomBox.drawRandomBox(sharedPool.data, {
+  productId: sharedPool.product.id, userId: 'buyer-two', idempotencyKey: 'shared-buyer-two-00001',
+  drawCount: 50, randomInt: sharedRandom, genId: sharedPool.genId,
+});
+assert.strictEqual(buyerTwoContribution.result.winCount, 1);
+assert.strictEqual(buyerTwoContribution.result.prizeCount, 4);
+assert.strictEqual(sharedPool.data.users[0].walletBalance, 5_000_000 - 50);
+assert.strictEqual(sharedPool.data.users[1].walletBalance, 50);
+
+// An order idempotency retry must not charge again or consume another key.
+const replayCase = makeScenario({ count: 3, rate: 10, price: 2, seed: 4 });
+const replayRandom = seededRandom(77);
+const firstReplayAttempt = performDraw(replayCase.data, replayCase.product, replayRandom, replayCase.genId, 1, 1);
+const walletAfterFirst = replayCase.data.users[0].walletBalance;
+const stockAfterFirst = replayCase.data.stockItems.filter(stock => stock.status === 'sold').length;
+const replay = randomBox.drawRandomBox(replayCase.data, {
+  productId: replayCase.product.id,
+  userId: 'buyer',
+  idempotencyKey: 'request-0001-unique',
+  drawCount: 1,
+  now: 1_800_000_000_001,
+  randomInt: () => { throw new Error('replay must not draw again'); },
+  genId: replayCase.genId,
+});
+assert.strictEqual(replay.replay, true);
+assert.strictEqual(replay.orderId, firstReplayAttempt.orderId);
+assert.strictEqual(replayCase.data.users[0].walletBalance, walletAfterFirst);
+assert.strictEqual(replayCase.data.stockItems.filter(stock => stock.status === 'sold').length, stockAfterFirst);
+
+// A buyer with too little money cannot start a round or reserve the prize.
+const insufficient = makeScenario({ count: 3, rate: 1, price: 2, seed: 13 });
+insufficient.data.users[0].walletBalance = 1;
+assert.throws(() => performDraw(insufficient.data, insufficient.product, insufficient.randomInt, insufficient.genId, 1, 1),
+  error => error.code === 'INSUFFICIENT_BALANCE');
+assert.strictEqual(randomBox.getActivePool(insufficient.data, insufficient.product.id), null);
+assert.ok(insufficient.data.stockItems.every(stock => stock.status === 'available'));
+
+// Rate/price edits do not bring other catalog inventory into the prize pool.
+const directOnly = makeScenario({ count: 2, rate: 1, price: 1, seed: 35 });
+directOnly.data.products.push({ id: 'valuable-other', title: 'สินค้าราคาสูง', price: 999999, status: 'active' });
+directOnly.data.stockItems.push({ id: 'other-stock', productId: 'valuable-other', status: 'available' });
+assert.strictEqual(randomBox.availablePrizeStockCount(directOnly.data, directOnly.product), 2);
 
 const mainCatalog = {
-  products: [{ id: 'box', slug: 'box', title: 'box', price: 1, status: 'active', specialType: 'random-box' }],
-  stockItems: [],
-  settings: {},
+  products: [{ id: 'box', slug: 'box', title: 'box', price: 1, status: 'active', specialType: randomBox.RANDOM_BOX_KIND }],
+  stockItems: [], settings: {},
 };
-assert.strictEqual(catalog.getTenantProducts(mainCatalog, { settings: { catalogApi: { enabled: true } } }).products.length, 0, 'random boxes are never federated');
+assert.strictEqual(catalog.getTenantProducts(mainCatalog, { settings: { catalogApi: { enabled: true } } }).products.length, 0,
+  'random boxes never reach tenant catalogs');
 
-const noBalanceData = {
-  users: [{ id: 'broke', status: 'active', walletBalance: 0 }],
-  products: [{ id: 'box', title: 'box', status: 'active', specialType: 'random-box', randomBox: { rate: 1 } }],
-  stockItems: [{ id: 'available-prize', productId: 'box', username: 'user', password: 'key', status: 'available' }],
-  walletTransactions: [], orders: [], randomBoxRounds: {},
-};
-assert.throws(() => randomBox.drawRandomBox(noBalanceData, {
-  productId: 'box', userId: 'broke', idempotencyKey: 'insufficient-balance-request', randomInt: deterministicRandom, genId,
-}), error => error.code === 'INSUFFICIENT_BALANCE');
-assert.deepStrictEqual(noBalanceData.randomBoxRounds, {}, 'failed payment must not start or advance a round');
-assert.strictEqual(noBalanceData.orders.length, 0, 'failed payment must not create an order');
-
-noBalanceData.users[0].walletBalance = 1;
-assert.throws(() => randomBox.drawRandomBox(noBalanceData, {
-  productId: 'box', userId: 'broke', idempotencyKey: 'insufficient-batch-request', drawCount: 2,
-  randomInt: deterministicRandom, genId,
-}), error => error.code === 'INSUFFICIENT_BALANCE');
-assert.strictEqual(noBalanceData.users[0].walletBalance, 1, 'an unaffordable batch is rejected without a partial debit');
-assert.deepStrictEqual(noBalanceData.randomBoxRounds, {}, 'an unaffordable batch never advances the shared round');
-assert.strictEqual(noBalanceData.orders.length, 0, 'an unaffordable batch creates no order');
-noBalanceData.stockItems[0].status = 'sold';
-assert.throws(() => randomBox.drawRandomBox(noBalanceData, {
-  productId: 'box', userId: 'broke', idempotencyKey: 'no-prizes-request', randomInt: deterministicRandom, genId,
-}), error => error.code === 'NO_PRIZES');
-assert.strictEqual(noBalanceData.users[0].walletBalance, 1, 'a draw with no available prize must not charge the buyer');
-
-const multiDrawData = {
-  users: [{ id: 'multi-buyer', status: 'active', walletBalance: 20 }],
-  products: [{ id: 'multi-box', slug: 'multi-box', title: 'multi box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 1 } }],
-  stockItems: [
-    { id: 'multi-prize-a', productId: 'multi-box', username: 'multi-a', status: 'available' },
-    { id: 'multi-prize-b', productId: 'multi-box', username: 'multi-b', status: 'available' },
-  ],
-  walletTransactions: [],
-  orders: [],
-  randomBoxRounds: { 'multi-box': { progress: 84, target: 85, rate: 1, roundNumber: 1, totalDraws: 84, totalAwards: 0 } },
-};
-const multiDrawKey = 'multi-draw-request-0001';
-const multiDraw = randomBox.drawRandomBox(multiDrawData, {
-  productId: 'multi-box', userId: 'multi-buyer', idempotencyKey: multiDrawKey, drawCount: '3',
-  now: 1_800_000_200_000, randomInt: deterministicRandom, genId,
-});
-const multiOrder = multiDrawData.orders[0];
-assert.strictEqual(multiDraw.result.drawCount, 3, 'a batch performs the requested number of draws');
-assert.strictEqual(multiDraw.result.winCount, 1, 'each draw in a batch advances the shared round in order');
-assert.strictEqual(multiOrder.items.length, 3, 'each draw has its own auditable order line');
-assert.strictEqual(multiOrder.items[0].randomBoxDraw.isWin, true, 'the first draw reaches the existing pooled target');
-assert.strictEqual(multiOrder.items[0].stockItemId, 'multi-prize-b', 'a batch win consumes the bottom stock row first');
-assert.strictEqual(multiOrder.total, 3, 'the batch order charges one baht per completed draw');
-assert.strictEqual(multiDrawData.users[0].walletBalance, 17, 'the wallet is debited once for the batch total');
-assert.strictEqual(multiDrawData.walletTransactions[0].amount, -3, 'the ledger records the exact batch debit');
-assert.strictEqual(multiDrawData.randomBoxRounds['multi-box'].progress, 2, 'draws after a win continue the next shared round');
-const multiReplay = randomBox.drawRandomBox(multiDrawData, {
-  productId: 'multi-box', userId: 'multi-buyer', idempotencyKey: multiDrawKey, drawCount: '3',
-  now: 1_800_000_200_001, randomInt: deterministicRandom, genId,
-});
-assert.strictEqual(multiReplay.replay, true, 'a replayed batch request returns the original order');
-assert.strictEqual(multiDrawData.users[0].walletBalance, 17, 'a batch replay never charges twice');
-assert.strictEqual(multiDrawData.orders.length, 1, 'a batch replay never creates another order');
-
-const bundleData = {
-  users: [{ id: 'bundle-buyer', status: 'active', walletBalance: 10 }],
-  products: [
-    { id: 'bundle-box', slug: 'bundle-box', title: 'กล่องสุ่ม', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } },
-    { id: 'prize-30', title: 'รางวัล 30', price: 30, status: 'active', fulfillmentMode: 'automatic', images: ['/30.png'] },
-    { id: 'prize-40', title: 'รางวัล 40', price: 40, status: 'active', fulfillmentMode: 'automatic', images: ['/40.png'] },
-    { id: 'manual-prize', title: 'รับที่ร้าน', price: 100, status: 'active', fulfillmentMode: 'contact' },
-    { id: 'other-box', title: 'กล่องอื่น', price: 100, status: 'active', specialType: randomBox.RANDOM_BOX_KIND },
-    { id: 'hidden-prize', title: 'สินค้าซ่อน', price: 100, status: 'hidden', fulfillmentMode: 'automatic' },
-  ],
-  stockItems: [
-    { id: 'reward-30-a', productId: 'prize-30', username: 'a', status: 'available', fulfillmentMode: 'automatic' },
-    { id: 'reward-30-b', productId: 'prize-30', username: 'b', status: 'available', fulfillmentMode: 'automatic' },
-    { id: 'reward-40', productId: 'prize-40', username: 'c', status: 'available', fulfillmentMode: 'automatic' },
-    { id: 'manual-reward', productId: 'manual-prize', username: 'manual', status: 'available', fulfillmentMode: 'contact' },
-    { id: 'other-box-reward', productId: 'other-box', username: 'other', status: 'available', fulfillmentMode: 'automatic' },
-    { id: 'hidden-reward', productId: 'hidden-prize', username: 'hidden', status: 'available', fulfillmentMode: 'automatic' },
-  ],
-  walletTransactions: [], orders: [], randomBoxRounds: {},
-};
-assert.strictEqual(randomBox.availablePrizeStockCount(bundleData, bundleData.products[0]), 3, 'only active automatic main-store product stock is eligible');
-assert.strictEqual(randomBox.hasAvailablePrizeBundle(bundleData, bundleData.products[0]), true, 'a mixed-price set can form an award bundle');
-const bundledDraw = randomBox.drawRandomBox(bundleData, {
-  productId: 'bundle-box', userId: 'bundle-buyer', idempotencyKey: 'multi-prize-bundle-request', drawCount: 3,
-  now: 1_800_000_400_000, randomInt: deterministicRandom, genId,
-});
-const bundledDrawItem = bundleData.orders[0].items[0];
-assert.strictEqual(bundledDraw.result.drawCount, 1, 'the batch stops after consuming its only complete bundle');
-assert.strictEqual(bundledDraw.result.total, 1, 'only the completed paid draw is charged');
-assert.strictEqual(bundledDraw.result.winCount, 1, 'the item bundle is one winning draw');
-assert.strictEqual(bundledDraw.result.prizeCount, 3, 'the winning draw reports all three delivered items');
-assert.strictEqual(bundledDrawItem.randomBoxDraw.prizeItems.length, 3, 'all component rewards are snapshotted on one purchase line');
-assert.strictEqual(bundledDrawItem.randomBoxDraw.prizeItems.reduce((sum, item) => sum + item.price, 0), 100, 'the combined award value is within the configured payout band');
-assert.deepStrictEqual(bundledDrawItem.randomBoxDraw.prizeItems.map(item => item.stockItemId).sort(), ['reward-30-a', 'reward-30-b', 'reward-40']);
-assert.ok(bundleData.stockItems.slice(0, 3).every(item => item.status === 'sold' && item.soldOrderId === bundledDraw.orderId), 'every item in the award bundle is atomically tied to its order');
-assert.ok(bundleData.stockItems.slice(3).every(item => item.status === 'available'), 'manual, random-box, and hidden product stock is not consumed');
-assert.strictEqual(bundleData.users[0].walletBalance, 9, 'multi-item awards do not charge more than the one-baht draw');
-
-const noBundleData = {
-  users: [{ id: 'no-bundle-buyer', status: 'active', walletBalance: 5 }],
-  products: [
-    { id: 'no-bundle-box', title: 'กล่องสุ่ม', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 1 } },
-    { id: 'too-low-a', title: 'รางวัล 30', price: 30, status: 'active' },
-    { id: 'too-low-b', title: 'รางวัล 40', price: 40, status: 'active' },
-  ],
-  stockItems: [
-    { id: 'too-low-stock-a', productId: 'too-low-a', status: 'available' },
-    { id: 'too-low-stock-b', productId: 'too-low-b', status: 'available' },
-  ],
-  walletTransactions: [], orders: [], randomBoxRounds: {},
-};
-assert.strictEqual(randomBox.hasAvailablePrizeBundle(noBundleData, noBundleData.products[0]), false, 'inventory below the complete bundle value cannot activate draws');
-assert.throws(() => randomBox.drawRandomBox(noBundleData, {
-  productId: 'no-bundle-box', userId: 'no-bundle-buyer', idempotencyKey: 'no-complete-prize-bundle', randomInt: deterministicRandom, genId,
-}), error => error.code === 'NO_PRIZES');
-assert.strictEqual(noBundleData.users[0].walletBalance, 5, 'an incomplete award bundle never charges the buyer');
-assert.strictEqual(noBundleData.orders.length, 0, 'an incomplete award bundle never creates an order');
-assert.deepStrictEqual(noBundleData.randomBoxRounds, {}, 'an incomplete award bundle does not advance the shared round');
-
-const singleRewardData = {
-  users: [{ id: 'single-reward-buyer', status: 'active', walletBalance: 1 }],
-  products: [
-    { id: 'single-box', title: 'กล่องสุ่ม', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } },
-    { id: 'single-99', title: 'ของรางวัลชิ้นเดียว', price: 99, status: 'active', images: ['/single.png'] },
-  ],
-  stockItems: [{ id: 'single-99-stock', productId: 'single-99', username: 'winner', status: 'available' }],
-  walletTransactions: [], orders: [], randomBoxRounds: {},
-};
-const singleReward = randomBox.drawRandomBox(singleRewardData, {
-  productId: 'single-box', userId: 'single-reward-buyer', idempotencyKey: 'single-priced-reward-request',
-  now: 1_800_000_500_000, randomInt: deterministicRandom, genId,
-});
-assert.strictEqual(singleReward.result.prizeCount, 1, 'a single qualifying stock item remains a one-item award');
-assert.strictEqual(singleReward.result.prizeName, 'ของรางวัลชิ้นเดียว', 'the customer-facing award name uses the catalog item');
-assert.strictEqual(singleRewardData.stockItems[0].status, 'sold', 'single-item awards also consume their source product stock');
-
-const orderedDrawData = {
-  users: [{ id: 'ordered-buyer', status: 'active', walletBalance: 3 }],
-  products: [{ id: 'ordered-box', slug: 'ordered-box', title: 'ordered box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } }],
-  stockItems: [
-    { id: 'newest-row', productId: 'ordered-box', username: 'newest', addedAt: '2026-09-03T00:00:00.000Z', status: 'available' },
-    { id: 'oldest-row', productId: 'ordered-box', username: 'oldest', addedAt: '2026-09-01T00:00:00.000Z', status: 'available' },
-    { id: 'middle-row', productId: 'ordered-box', username: 'middle', addedAt: '2026-09-02T00:00:00.000Z', status: 'available' },
-  ],
-  walletTransactions: [], orders: [], randomBoxRounds: {},
-};
-const orderedDraw = randomBox.drawRandomBox(orderedDrawData, {
-  productId: 'ordered-box', userId: 'ordered-buyer', idempotencyKey: 'ordered-stock-request', drawCount: 3,
-  now: 1_800_000_250_000, randomInt: deterministicRandom, genId,
-});
-assert.deepStrictEqual(orderedDrawData.orders[0].items.map(item => item.stockItemId),
-  ['newest-row', 'middle-row', 'oldest-row'], 'consecutive wins deliver bottom-to-top through row one');
-assert.strictEqual(orderedDraw.result.winCount, 3, 'the ordered stock fixture wins each draw at a 100% test rate');
-const largeBatchData = {
-  users: [{ id: 'large-buyer', status: 'active', walletBalance: 101 }],
-  products: [{ id: 'large-box', title: 'large box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 0.01 } }],
-  stockItems: [{ id: 'large-prize', productId: 'large-box', username: 'large-key', status: 'available' }],
-  walletTransactions: [], orders: [], randomBoxRounds: {},
-};
-const largeBatch = randomBox.drawRandomBox(largeBatchData, {
-  productId: 'large-box', userId: 'large-buyer', idempotencyKey: 'large-batch-request-0101', drawCount: 101,
-  now: 1_800_000_250_000, randomInt: deterministicRandom, genId,
-});
-assert.strictEqual(largeBatch.result.drawCount, 101, 'a request can complete more than 100 draws');
-assert.strictEqual(largeBatchData.orders[0].items.length, 101, 'every draw in a large batch remains separately recorded');
-assert.strictEqual(largeBatchData.orders[0].total, 101, 'a large batch charges exactly one baht per completed draw');
-assert.strictEqual(largeBatchData.users[0].walletBalance, 0, 'large batches debit only the selected total');
-assert.strictEqual(largeBatchData.randomBoxRounds['large-box'].progress, 101, 'all large-batch draws advance the shared round');
-
-const freshIntentData = {
-  users: [{ id: 'repeat-buyer', status: 'active', walletBalance: 2 }],
-  products: [{ id: 'repeat-box', title: 'repeat box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } }],
-  stockItems: [
-    { id: 'repeat-prize-a', productId: 'repeat-box', username: 'first-key', status: 'available' },
-    { id: 'repeat-prize-b', productId: 'repeat-box', username: 'second-key', status: 'available' },
-  ],
-  walletTransactions: [], orders: [], randomBoxRounds: {},
-};
-const firstIntent = randomBox.drawRandomBox(freshIntentData, {
-  productId: 'repeat-box', userId: 'repeat-buyer', idempotencyKey: 'intent-request-first-0001',
-  now: 1_800_000_260_000, randomInt: deterministicRandom, genId,
-});
-const secondIntent = randomBox.drawRandomBox(freshIntentData, {
-  productId: 'repeat-box', userId: 'repeat-buyer', idempotencyKey: 'intent-request-second-0002',
-  now: 1_800_000_260_001, randomInt: deterministicRandom, genId,
-});
-assert.notStrictEqual(secondIntent.orderId, firstIntent.orderId, 'a fresh submission key creates a new draw instead of replaying the old order');
-assert.strictEqual(freshIntentData.orders.length, 2, 'separate intentional draws create separate orders');
-assert.strictEqual(freshIntentData.users[0].walletBalance, 0, 'each fresh draw is charged exactly once');
-const exhaustedBatchData = {
-  users: [{ id: 'last-buyer', status: 'active', walletBalance: 10 }],
-  products: [{ id: 'last-box', title: 'last box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } }],
-  stockItems: [{ id: 'last-prize', productId: 'last-box', username: 'last-key', status: 'available' }],
-  walletTransactions: [], orders: [], randomBoxRounds: {},
-};
-const exhaustedBatch = randomBox.drawRandomBox(exhaustedBatchData, {
-  productId: 'last-box', userId: 'last-buyer', idempotencyKey: 'last-stock-batch-0001', drawCount: 5,
-  now: 1_800_000_300_000, randomInt: deterministicRandom, genId,
-});
-assert.strictEqual(exhaustedBatch.result.drawCount, 1, 'a batch stops when its prize inventory runs out');
-assert.strictEqual(exhaustedBatch.result.stockExhausted, true, 'a partial batch reports that inventory stopped the remaining draws');
-assert.strictEqual(exhaustedBatch.result.total, 1, 'only completed draws are charged when stock runs out mid-batch');
-assert.strictEqual(exhaustedBatchData.users[0].walletBalance, 9, 'unperformed draws are not charged');
-
-console.log('Random box checks passed: shop scope, rate mechanics, selectable multi-draws, pooled awards, exact debits, idempotency, inventory exhaustion, partner exclusion');
+console.log('Random box simulations passed: 1–10 rates, editable draw prices, 1–5 prize events, 15-prize recovery example, stock snapshots, secrecy, idempotency, and main-shop isolation');

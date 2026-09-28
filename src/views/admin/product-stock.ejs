@@ -1,4 +1,4 @@
-<% const isRandomBox = product.specialType === 'random-box'; const randomBoxAvailableCount = typeof randomBoxStockCount === 'undefined' ? stockItems.filter(item => item.status === 'available').length : randomBoxStockCount; const randomBoxMissMessage = String(product.randomBox?.missMessage || '').trim(); const availableStockItems = stockItems.filter(item => item.status === 'available'); const soldStockCount = stockItems.length - availableStockItems.length; %>
+<% const isRandomBox = product.specialType === 'random-box'; const randomBoxAvailableCount = typeof randomBoxStockCount === 'undefined' ? stockItems.filter(item => item.status === 'available').length : randomBoxStockCount; const randomBoxMissMessage = String(product.randomBox?.missMessage || '').trim(); const availableStockItems = stockItems.filter(item => item.status === 'available'); const visibleStockItems = isRandomBox ? stockItems.filter(item => item.status === 'available' || item.status === 'reserved') : availableStockItems; const reservedStockCount = stockItems.filter(item => item.status === 'reserved' && (item.randomBoxReservedFor || item.randomBoxPoolId)).length; const soldStockCount = stockItems.filter(item => item.status === 'sold').length; %>
 <!-- Stock Management Header -->
 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
@@ -22,11 +22,11 @@
 <% if (isRandomBox) { %>
   <section id="random-box-stock-info" class="mb-6 rounded-2xl border border-[var(--gold)]/30 bg-[var(--card)] p-4 sm:p-5 shadow-sm" aria-labelledby="random-box-stock-info-title">
     <div class="flex flex-wrap items-start justify-between gap-3">
-      <div><h2 id="random-box-stock-info-title" class="font-bold text-sm sm:text-base text-[var(--text)]">สต็อกเฉพาะของกล่องสุ่ม</h2><p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">คีย์ที่เพิ่มในส่วนนี้ยังใช้เป็นรางวัลเดี่ยวได้ · ระบบยังนำสินค้าสต็อกพร้อมขายรายการอื่นในเว็บหลักมาจัดเป็นชุดรางวัลให้อัตโนมัติ</p></div>
-      <span class="rounded-full bg-[var(--gold)]/10 px-3 py-1.5 text-xs font-bold text-[var(--gold-text)]">฿1 / ครั้ง</span>
+      <div><h2 id="random-box-stock-info-title" class="font-bold text-sm sm:text-base text-[var(--text)]">สต็อกรางวัลกล่องสุ่ม</h2><p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">คีย์/ไอดีที่ใส่ในหน้านี้คือรางวัลทั้งหมด · 1 บรรทัดนับเป็น 1 ชิ้น · สต็อกที่เพิ่มระหว่างรอบจะเริ่มในชุดถัดไป</p></div>
+      <span class="rounded-full bg-[var(--gold)]/10 px-3 py-1.5 text-xs font-bold text-[var(--gold-text)]">฿<%= Number(product.price || 1).toLocaleString('th-TH') %> / ครั้ง</span>
     </div>
     <div class="mt-4 grid gap-3 sm:grid-cols-2">
-      <div class="rounded-xl bg-[var(--input)] px-4 py-3"><span class="block text-[11px] text-[var(--text-4)]">รายการสินค้าที่นำมาเป็นรางวัลได้</span><strong class="mt-1 block text-base font-black text-[var(--text)]"><%= (randomBoxAvailablePrizeCount || 0).toLocaleString('th-TH') %> รายการ</strong><span class="mt-1 block text-[11px] text-[var(--text-3)]"><%= randomBoxCanDraw ? 'พร้อมสุ่ม · ระบบตัดสต็อกทุกชิ้นที่อยู่ในชุดรางวัล' : 'ยังจัดชุดรางวัลจากสต็อกพร้อมขายไม่ได้' %></span><span class="mt-1 block text-[11px] text-[var(--text-4)]">คีย์เฉพาะกล่องนี้พร้อมใช้งานอีก <%= randomBoxAvailableCount.toLocaleString('th-TH') %> ชิ้น</span></div>
+      <div class="rounded-xl bg-[var(--input)] px-4 py-3"><span class="block text-[11px] text-[var(--text-4)]">จำนวนรางวัลในสต็อก</span><strong class="mt-1 block text-base font-black text-[var(--text)]"><%= randomBoxAvailablePrizeCount.toLocaleString('th-TH') %> ชิ้น</strong><span class="mt-1 block text-[11px] text-[var(--text-3)]">พร้อมเริ่มรอบใหม่ <%= availableStockItems.length.toLocaleString('th-TH') %> ชิ้น · อยู่ในรอบปัจจุบัน <%= reservedStockCount.toLocaleString('th-TH') %> ชิ้น</span><% if (randomBoxPoolSummary) { %><span class="mt-1 block text-[11px] text-[var(--text-4)]">รอบปัจจุบันเริ่มจาก <%= randomBoxPoolSummary.initialCount.toLocaleString('th-TH') %> ชิ้น · เหลือ <%= randomBoxPoolSummary.remainingCount.toLocaleString('th-TH') %> ชิ้น</span><% } %></div>
       <form action="/admin/products/<%= product.id %>/stock/random-box-message" method="post" class="rounded-xl border border-[var(--border-light)] bg-[var(--card)] p-3.5">
         <label for="random-box-miss-message" class="block text-xs font-bold text-[var(--text)]">ข้อความเมื่อสุ่มไม่ได้รางวัล</label>
         <textarea id="random-box-miss-message" name="randomBoxMissMessage" rows="2" maxlength="300" placeholder="ยังไม่ได้รับรางวัลในครั้งนี้" class="mt-2 w-full resize-y rounded-lg border border-[var(--border-light)] bg-[var(--input)] px-3 py-2 text-xs leading-relaxed text-[var(--text)] outline-none transition focus:border-[var(--gold)]"><%= randomBoxMissMessage %></textarea>
@@ -80,8 +80,8 @@
   <!-- Left Column: Existing Stock Items Table -->
   <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
     <div class="p-4 border-b border-[var(--border)] flex items-center justify-between">
-      <h3 class="font-bold text-sm text-[var(--text)]">รายการคีย์ / ไอดีที่พร้อมขาย (<%= availableStockItems.length %>)</h3>
-      <span class="text-xs text-[var(--text-4)]">ขายแล้วซ่อนจากรายการ: <b class="text-rose-400"><%= soldStockCount %></b></span>
+      <h3 class="font-bold text-sm text-[var(--text)]"><%= isRandomBox ? 'รายการรางวัลในรอบและที่พร้อมเริ่ม' : 'รายการคีย์ / ไอดีที่พร้อมขาย' %> (<%= isRandomBox ? visibleStockItems.length : availableStockItems.length %>)</h3>
+      <span class="flex flex-wrap justify-end gap-x-3 text-xs text-[var(--text-4)]"><% if (reservedStockCount) { %><span>จองรางวัลกล่องสุ่ม: <b class="text-amber-500"><%= reservedStockCount %></b></span><% } %><span>ขายแล้วซ่อนจากรายการ: <b class="text-rose-400"><%= soldStockCount %></b></span></span>
     </div>
 
     <div class="overflow-x-auto">
@@ -96,7 +96,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-[var(--border)]">
-          <% availableStockItems.forEach((s, index) => { %>
+          <% visibleStockItems.forEach((s, index) => { %>
             <tr class="hover:bg-[var(--input)]/40 transition duration-150">
               <td class="py-3 px-4 font-mono text-xs text-[var(--text-4)]"><%= index + 1 %></td>
               <td class="py-3 px-4 font-mono text-xs">
@@ -109,6 +109,10 @@
                 <% if (s.status === 'available') { %>
                   <span class="inline-flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> พร้อมขาย
+                  </span>
+                <% } else if (s.status === 'reserved') { %>
+                  <span class="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-600 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> อยู่ในรอบปัจจุบัน
                   </span>
                 <% } else { %>
                   <span class="inline-flex items-center gap-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
@@ -128,7 +132,7 @@
             </tr>
           <% }) %>
 
-          <% if (!availableStockItems.length) { %>
+          <% if (!visibleStockItems.length) { %>
             <tr>
               <td class="py-12 text-center text-[var(--text-4)] text-xs" colspan="5">
                 <div class="text-2xl mb-1">📦</div>
@@ -154,8 +158,8 @@
     <form action="/admin/products/<%= product.id %>/stock/add" method="post" class="space-y-3.5">
       <% if (isRandomBox) { %>
         <div class="rounded-xl bg-[var(--input)] px-3.5 py-3">
-          <p class="text-xs font-bold text-[var(--text-2)]">สต็อก (1 บรรทัดนับเป็น 1 ชิ้น)</p>
-          <p class="mt-1 text-[11px] text-[var(--text-4)]">ส่งคีย์/ไอดีจากสต็อกให้อัตโนมัติเมื่อได้รับรางวัล</p>
+          <p class="text-xs font-bold text-[var(--text-2)]">เพิ่มสต็อกรางวัล</p>
+          <p class="mt-1 text-[11px] text-[var(--text-4)]">วางคีย์/ไอดี 1 รายการต่อบรรทัด ไม่ต้องใส่มูลค่า</p>
         </div>
         <label class="block"><span class="mb-1 block text-xs font-semibold text-[var(--text-3)]">ข้อมูลคีย์ / ไอดี *</span><textarea name="bulk" rows="8" placeholder="คีย์หรือไอดีชิ้นที่ 1&#10;คีย์หรือไอดีชิ้นที่ 2&#10;คีย์หรือไอดีชิ้นที่ 3" required data-random-box-stock-input class="w-full bg-[var(--input)] border border-[var(--border-light)] rounded-xl px-3.5 py-2 text-xs font-mono outline-none focus:border-[var(--gold)] transition"></textarea><small class="mt-1 block text-[11px] text-[var(--text-4)]">นับได้ <strong data-random-box-stock-lines>0</strong> ชิ้น · วาง 1 รายการต่อบรรทัด</small></label>
         <script>

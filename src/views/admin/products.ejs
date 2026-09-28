@@ -184,7 +184,7 @@
                   <div class="font-bold text-sm text-[var(--text)] hover:text-[var(--gold-text)] transition truncate">
                     <a href="/admin/products/<%= p.id %>/edit"><%= p.title %></a>
                   </div>
-                  <% if (isRandomBox) { %><div class="mt-1 inline-flex rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--gold-text)]">กล่องสุ่ม · ฿1/ครั้ง · <%= p.randomBoxAvailablePrizeCount %> คีย์/ไอดีพร้อมส่ง</div><% } %>
+                  <% if (isRandomBox) { %><div class="mt-1 inline-flex rounded-full border border-[var(--gold)]/35 bg-[var(--gold)]/10 px-2 py-0.5 text-[10px] font-bold text-[var(--gold-text)]">กล่องสุ่ม · ฿<%= p.price.toLocaleString('th-TH') %>/ครั้ง · <%= p.randomBoxAvailablePrizeCount %> คีย์/ไอดีพร้อมส่ง</div><% } %>
                   <div class="text-[11px] text-[var(--text-4)] font-mono truncate">slug: <%= p.slug %></div>
                   <% if (p.internalNote) { %>
                     <div class="text-[11px] text-[var(--text-3)] truncate" title="หมายเหตุภายใน (แอดมินเห็นเท่านั้น)">📝 <%= p.internalNote %></div>
@@ -205,7 +205,7 @@
 
             <!-- Price -->
             <td class="py-3 px-4 whitespace-nowrap">
-              <% if (isRandomBox) { %><span class="font-bold text-sm text-[var(--gold-text)]">฿1 /ครั้ง</span><% } else { %><button type="button" data-price-edit data-product-id="<%= p.id %>" data-product-title="<%= p.title %>" data-price="<%= p.price %>" data-available-stock="<%= p.stockCount %>" class="font-bold text-sm text-[var(--gold-text)] hover:underline decoration-dashed underline-offset-4" title="กดเพื่อแก้ราคา">฿<%= p.price.toLocaleString() %></button><% } %>
+              <% if (isRandomBox) { %><span class="font-bold text-sm text-[var(--gold-text)]">฿<%= p.price.toLocaleString('th-TH') %> /ครั้ง</span><% } else { %><button type="button" data-price-edit data-product-id="<%= p.id %>" data-product-title="<%= p.title %>" data-price="<%= p.price %>" data-available-stock="<%= p.stockCount %>" class="font-bold text-sm text-[var(--gold-text)] hover:underline decoration-dashed underline-offset-4" title="กดเพื่อแก้ราคา">฿<%= p.price.toLocaleString() %></button><% } %>
               <% if (p.originalPrice > p.price) { %>
                 <div class="text-[11px] text-[var(--coral)] line-through">฿<%= p.originalPrice.toLocaleString() %></div>
               <% } %>

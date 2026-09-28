@@ -30,16 +30,18 @@ router.post('/:productId/draw', requireLogin, async (req, res) => {
     })));
     const summary = result.result || {};
     const drawCount = Number(summary.drawCount) || 1;
-    const total = Number(summary.total) || drawCount * randomBox.RANDOM_BOX_PRICE;
+    const total = Number(summary.total) || drawCount * randomBox.configuredPrice(product);
     const winCount = Number(summary.winCount) || (summary.isWin ? 1 : 0);
     const prizeCount = Number(summary.prizeCount) || winCount;
     const missCount = Number(summary.missCount) || Math.max(0, drawCount - winCount);
     const missMessage = String(summary.missMessage || randomBox.DEFAULT_MISS_MESSAGE).trim();
     const stockNote = summary.stockExhausted ? ' · สต็อกรางวัลหมด จึงหยุดสุ่มเท่านี้' : '';
+    const balanceNote = summary.balanceLimited ? ' · หยุดตามยอดเงินที่มี' : '';
+    const priceNote = summary.priceChanged ? ' · ราคากล่องเปลี่ยนแล้ว ระบบหยุดก่อนเริ่มสต็อกรอบใหม่' : '';
     const resultCopy = winCount
       ? `ถูกรางวัล ${winCount} ครั้ง ได้รับสินค้า ${prizeCount} ชิ้น${missCount ? ` · ไม่ได้รับรางวัล ${missCount} ครั้ง · ${missMessage}` : ''}`
       : `ไม่ได้รับรางวัล · ${missMessage}`;
-    req.flash('success', `${resultCopy} · สุ่ม ${drawCount} ครั้ง ใช้เงิน ฿${total.toLocaleString('th-TH')}${stockNote}`);
+    req.flash('success', `${resultCopy} · สุ่ม ${drawCount} ครั้ง ใช้เงิน ฿${total.toLocaleString('th-TH')}${stockNote}${balanceNote}${priceNote}`);
     return res.redirect(`/account/orders/${encodeURIComponent(result.orderId)}`);
   } catch (error) {
     const safeCodes = new Set(['PRODUCT_UNAVAILABLE', 'NOT_RANDOM_BOX', 'NO_PRIZES', 'USER_UNAVAILABLE', 'INSUFFICIENT_BALANCE', 'INVALID_DRAW_COUNT']);

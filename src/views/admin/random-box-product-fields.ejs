@@ -3,20 +3,20 @@
   <% const isBoxProduct = Boolean(product && product.specialType === 'random-box'); %>
   <section class="random-box-product-kind" aria-labelledby="product-kind-title">
     <h2 id="product-kind-title">ประเภทสินค้า</h2>
-    <p>เลือกสินค้าปกติ หรือกล่องสุ่มที่คิดเงิน 1 บาทต่อครั้ง</p>
+    <p>เลือกสินค้าปกติ หรือกล่องสุ่มที่กำหนดราคาต่อครั้งและเรทได้</p>
     <div class="random-box-kind-options">
       <label><input type="radio" name="productKind" value="standard" <%= isBoxProduct ? '' : 'checked' %> /><span><strong>สินค้าปกติ</strong><small>ขายตามราคาและสต็อกสินค้าเดิม</small></span></label>
-      <label><input type="radio" name="productKind" value="random-box" <%= isBoxProduct ? 'checked' : '' %> /><span><strong>กล่องสุ่ม · ฿1/ครั้ง</strong><small>สะสมยอดรวมทุกคนตามเรท แล้วสุ่มออก 1 รางวัล</small></span></label>
+      <label><input type="radio" name="productKind" value="random-box" <%= isBoxProduct ? 'checked' : '' %> /><span><strong>กล่องสุ่ม</strong><small>สุ่มรางวัลจากคีย์/ไอดีในสต็อก ระบบคละจำนวนรางวัลต่อรอบให้</small></span></label>
     </div>
   </section>
 
   <section class="random-box-config" data-random-box-panel <%= isBoxProduct ? '' : 'hidden' %> aria-labelledby="random-box-rate-heading">
     <div class="random-box-config-head">
-      <div><h3 id="random-box-rate-heading">ตั้งค่าเรทกล่องสุ่ม</h3><p>ใส่คีย์/ไอดีในหน้าสต็อกโดยตรง · สินค้า 1 บรรทัดนับเป็น 1 ชิ้น</p></div>
-      <span class="random-box-price-pill">฿1 / ครั้ง</span>
+      <div><h3 id="random-box-rate-heading">ตั้งค่ากล่องสุ่ม</h3><p>ราคาและเรทจะถูกบันทึกไว้กับสต็อกรางวัลชุดที่เริ่มสุ่ม</p></div>
+      <span class="random-box-price-pill">฿<%= Number(product?.price) || 1 %> / ครั้ง</span>
     </div>
-    <label class="random-box-rate-field"><span>เรทออกรางวัล</span><input name="randomBoxRate" type="number" min="0.01" max="100" step="0.01" value="<%= Number(product?.randomBox?.rate) || 1 %>" placeholder="เช่น 1 หรือ 2" data-random-box-required /><small>เปลี่ยนเรทแล้วเริ่มรอบรวมใหม่ · นับยอดเปิดรวมลูกค้าทุกคน</small></label>
-    <div class="random-box-rule" role="note"><strong>รางวัลมาจากสต็อก</strong><span>เพิ่มคีย์หรือไอดีในหน้าสต็อกอย่างละ 1 บรรทัด ระบบสุ่มตัดและส่ง 1 ชิ้นเมื่อรอบครบโดยอัตโนมัติ</span></div>
+    <label class="random-box-rate-field"><span>เรทออกรางวัล</span><input name="randomBoxRate" type="number" min="1" max="10" step="1" value="<%= Number(product?.randomBox?.rate) || 1 %>" placeholder="1–10" data-random-box-required /><small>เปลี่ยนเรทหรือราคาแล้วจะมีผลกับสต็อกรางวัลชุดใหม่ · ผู้ซื้อทุกคนใช้รอบสะสมร่วมกัน</small></label>
+    <div class="random-box-rule" role="note"><strong>รางวัลใช้สต็อกกล่องสุ่มเท่านั้น</strong><span>เพิ่มคีย์/ไอดีในหน้าสต็อก · 1 บรรทัดเท่ากับ 1 รางวัล · ระบบทยอยสุ่มออกครั้งละ 1–5 รางวัล</span></div>
     <% if (isBoxProduct) { %><a class="random-box-prize-add inline-flex items-center" href="/admin/products/<%= product.id %>/stock#add-stock">ไปเพิ่มคีย์/ไอดีในสต็อก →</a><% } %>
   </section>
   <script>
@@ -32,21 +32,22 @@
       if (!panel || !typeRadios.length) return;
       const isBox = () => form.querySelector('input[name="productKind"]:checked')?.value === 'random-box';
       let normalPrice = priceInput ? priceInput.value : '';
+      let wasBox = isBox();
       const update = () => {
         const active = isBox();
         panel.hidden = !active;
         if (priceInput) {
-          if (!active && priceInput.readOnly) priceInput.value = normalPrice;
-          if (active && !priceInput.readOnly) normalPrice = priceInput.value;
-          priceInput.readOnly = active;
+          if (active && !wasBox) normalPrice = priceInput.value;
+          if (!active && wasBox) priceInput.value = normalPrice;
           priceInput.min = active ? '1' : '0';
-          priceInput.max = active ? '1' : '';
-          priceInput.value = active ? '1' : priceInput.value;
-          if (priceLabel) priceLabel.classList.toggle('random-box-fixed-price', active);
-          if (priceCaption) priceCaption.textContent = active ? 'ราคาต่อครั้ง · กำหนดไว้ 1 บาท' : normalPriceCaption;
+          priceInput.step = '1';
+          if (active && !priceInput.value) priceInput.value = '1';
+          if (priceLabel) priceLabel.classList.toggle('random-box-fixed-price', false);
+          if (priceCaption) priceCaption.textContent = active ? 'ราคาต่อครั้ง (บาท)' : normalPriceCaption;
         }
         form.querySelectorAll('[data-random-box-hide]').forEach(element => { element.hidden = active; });
         panel.querySelectorAll('[data-random-box-required]').forEach(input => { input.required = active; });
+        wasBox = active;
       };
       typeRadios.forEach(radio => radio.addEventListener('change', update));
       update();
