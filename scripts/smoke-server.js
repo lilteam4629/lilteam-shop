@@ -282,7 +282,9 @@ async function checkRandomBoxWorkflow(adminCookie) {
     || /<img data-random-box-product-image[^>]*\b(?:width|height)=/.test(customerOrderPage.body)
     || !customerOrderPage.body.includes('data-random-box-product')
     || !customerOrderPage.body.includes('data-random-box-purchase-list')
-    || !customerOrderPage.body.includes('ชื่อรายการ') || !customerOrderPage.body.includes('ของรางวัล')
+    || !customerOrderPage.body.includes('aria-label="รายการผลการสุ่ม"')
+    || !/<li[^>]*data-random-box-draw-row="1"/.test(customerOrderPage.body)
+    || !customerOrderPage.body.includes('ครั้งที่ 1')
     || (customerOrderPage.body.match(/data-random-box-product-image/g) || []).length !== 1
     || (customerOrderPage.body.match(/data-random-box-draw-row=/g) || []).length !== 1
     || /รอบรวม\s*\d+\s*\/\s*\d+/.test(customerOrderPage.body)
@@ -329,7 +331,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (!batchOrderPage.body.includes('สุ่ม 3 ครั้ง') || !batchOrderPage.body.includes('ครั้งที่ 3')
     || !batchOrderPage.body.includes(revisedMissMessage)
     || (batchOrderPage.body.match(/data-random-box-product-image/g) || []).length !== 1
-    || (batchOrderPage.body.match(/data-random-box-draw-row=/g) || []).length !== 3) {
+    || (batchOrderPage.body.match(/<li[^>]*data-random-box-draw-row=/g) || []).length !== 3) {
     throw new Error('the batch order page does not summarize and list all selected draws');
   }
   const batchReplay = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
@@ -379,7 +381,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
     || winningOrder.items[0].randomBoxDraw.prizeName !== expectedPrizeLabel
     || !deliveredPage.body.includes('data-random-box-result-status="win"')
     || (deliveredPage.body.match(/data-random-box-product-image/g) || []).length !== 1
-    || (deliveredPage.body.match(/data-random-box-draw-row=/g) || []).length !== 1
+    || (deliveredPage.body.match(/<li[^>]*data-random-box-draw-row=/g) || []).length !== 1
     || !deliveredPage.body.includes('ได้รับรางวัล')
     || !deliveredPage.body.includes(expectedPrizeLabel)
     || deliveredStock?.status !== 'sold' || deliveredStock.soldOrderId !== winningOrderId
