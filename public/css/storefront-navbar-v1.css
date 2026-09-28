@@ -247,3 +247,6 @@ html:not(.light) .store-nav__account-name,html:not(.light) .store-nav__chevron{c
 @media(min-width:1101px){
   .store-nav__inner > .store-nav__round.store-nav__mobile-toggle{display:none!important}
 }
+
+/* Keep the desktop wallet balance and top-up action together on one row across storefront themes. */
+.store-nav__wallet-group{display:flex;align-items:center;gap:8px;flex:0 0 auto;min-width:0}
