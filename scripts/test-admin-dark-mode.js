@@ -53,5 +53,11 @@ assert.match(adminLayout, /admin-dark-mode-v1\.css/);
 assert.match(legacyLayout, /admin-dark-mode-v1\.css/);
 assert.match(dashboard, /lowStockProducts\.slice\(0,\s*24\)/, 'the dashboard should initially render a bounded stock list');
 assert.match(dashboard, /<template id="experiment-stock-alert-more">/, 'remaining stock items should be deferred');
+assert.match(css, /color:\s*var\(--admin-brand-contrast-dark/, 'dark accent buttons must use the selected accent’s readable ink');
+assert.match(css, /border-color:\s*#3b362f\s*!important/, 'ordinary dark-page borders should stay subdued');
+assert.match(css, /\.effects-stage \*/, 'the live storefront preview must keep its chosen visual colors');
+assert.match(css, /@layer admin-main-neutral-borders[\s\S]*?focus-visible[\s\S]*?outline:\s*2px solid var\(--admin-brand-readable/, 'dark mode must keep keyboard focus visible after neutral border rules');
+assert.match(css, /effects-preview::before[\s\S]*?display:\s*none\s*!important/, 'dark effects settings should not retain decorative paper tape');
+assert.match(dashboard, /experiment-chart-empty/, 'a zero-sales chart should have a helpful, compact empty state');
 
 console.log('Admin dark theme checks passed: pure-black surfaces, readable controls, selected accent, no late DOM repaint, and bounded dashboard rendering.');

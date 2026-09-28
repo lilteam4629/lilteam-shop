@@ -2,8 +2,8 @@
   color-scheme: dark;
   --ex-bg: #000000;
   --ex-surface: #000000;
-  --ex-ink: #ffffff;
-  --ex-muted: #b8c1ba;
+  --ex-ink: #f2eee8;
+  --ex-muted: #aaa39a;
   --ex-line: #777777;
   --ex-sidebar: #000000;
   --ex-shadow: 0 12px 30px rgba(0, 0, 0, .18);
@@ -15,8 +15,8 @@
   --admin-dark-raised: #000000;
   --admin-dark-input: #000000;
   --admin-dark-line: #777777;
-  --admin-dark-text: #ffffff;
-  --admin-dark-muted: #b8b8b8;
+  --admin-dark-text: #f2eee8;
+  --admin-dark-muted: #aaa39a;
   --card-hover: var(--admin-dark-raised) !important;
   --bg: var(--admin-dark-canvas) !important;
   --card: var(--admin-dark-surface) !important;
@@ -58,7 +58,7 @@ html[data-admin-theme="dark"].admin-unified-site {
   --admin-brand-readable: var(--admin-brand-readable-dark, var(--admin-brand-readable));
   --admin-brand-contrast: var(--admin-brand-contrast-dark, var(--admin-brand-contrast));
   --admin-brand-soft: var(--admin-brand-soft-dark, #000000);
-  --admin-brand-border: var(--admin-brand-border-dark, #777777);
+  --admin-brand-border: var(--admin-brand-border-dark, #3a3024);
   --ex-green: var(--admin-brand-fill);
   --ex-green-dark: var(--admin-brand-readable);
   --ex-green-soft: var(--admin-brand-soft);
@@ -119,7 +119,7 @@ html[data-admin-theme="dark"] body.admin-site :is(
   .experiment-roadmap-dialog-head, [class*="-card"], [class*="-panel"],
   [class*="-surface"], [class*="-box"], [class*="-dialog"], [class*="-sheet"],
   fieldset, .bg-white, .bg-gray-50, .bg-slate-50
-):not([class*="status"]):not([class*="badge"]):not([class*="alert"]):not([class*="toast"]):not([class*="success"]):not([class*="error"]):not([class*="danger"]):not([class*="warning"]):not([class*="empty"]) {
+):not(:where([class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="success"], [class*="error"], [class*="danger"], [class*="warning"], [class*="empty"])) {
   color: var(--admin-dark-text);
   background: var(--admin-dark-surface) !important;
   border-color: var(--admin-dark-line) !important;
@@ -134,7 +134,7 @@ html[data-admin-theme="dark"] body.admin-site :is(small, [class*="muted"], [clas
 }
 html[data-admin-theme="dark"] body.admin-site a:not(.experiment-nav-item) { color: var(--admin-brand-readable, #e2c09d); }
 
-html[data-admin-theme="dark"] body.admin-site :is(input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]), select, textarea, [contenteditable="true"]) {
+html[data-admin-theme="dark"] body.admin-site :is(input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])), select, textarea, [contenteditable="true"]) {
   color: var(--admin-dark-text) !important;
   background-color: var(--admin-dark-input) !important;
   border-color: var(--admin-dark-line) !important;
@@ -145,7 +145,7 @@ html[data-admin-theme="dark"] body.admin-site :is(input:not([type="checkbox"]):n
 html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder { color: #aaa69a; opacity: 1; }
 html[data-admin-theme="dark"] body.admin-site :is(input[type="checkbox"], input[type="radio"]) { accent-color: var(--admin-brand-fill, #966746); }
 
-html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(.primary):not([class*="primary"]):not([class*="danger"]):not([class*="success"]):not([class*="warning"]):not([class*="status"]):not([class*="badge"]) {
+html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"])) {
   color: var(--admin-dark-text);
   background-color: var(--admin-dark-raised);
   border-color: var(--admin-dark-line);
@@ -315,7 +315,7 @@ html[data-admin-theme="dark"] body.admin-site {
   --ex-green-dark: var(--admin-brand-readable);
   --ex-green-soft: var(--admin-brand-soft);
   --admin-brand-soft: var(--admin-brand-soft-dark, #000000);
-  --admin-brand-border: var(--admin-brand-border-dark, #777777);
+  --admin-brand-border: var(--admin-brand-border-dark, #3a3024);
 }
 html[data-admin-theme="dark"] body.admin-site :is(
   .experiment-topbar, .experiment-sidebar, .experiment-mobile-nav,
@@ -339,7 +339,7 @@ html[data-admin-theme="dark"] body.admin-site :is(
   [class*="-surface"], [class*="-box"], [class*="-dialog"], [class*="-sheet"],
   [class~="bg-white"], [class~="bg-gray-50"], [class~="bg-slate-50"],
   [class~="bg-stone-50"], fieldset
-):not([class*="status"]):not([class*="badge"]):not([class*="alert"]):not([class*="toast"]):not([class*="success"]):not([class*="error"]):not([class*="danger"]):not([class*="warning"]):not([class*="empty"]) {
+):not(:where([class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="success"], [class*="error"], [class*="danger"], [class*="warning"], [class*="empty"])) {
   color: var(--admin-dark-text);
   background: #000000 !important;
   background-image: none !important;
@@ -347,7 +347,7 @@ html[data-admin-theme="dark"] body.admin-site :is(
   box-shadow: none;
 }
 html[data-admin-theme="dark"] body.admin-site :is(
-  input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"]),
+  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
   select, textarea, [contenteditable="true"]
 ) {
   color: var(--admin-dark-text) !important;
@@ -359,7 +359,7 @@ html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contentedita
   color: var(--admin-dark-muted);
   opacity: 1;
 }
-html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(.primary):not([class*="primary"]):not([class*="danger"]):not([class*="success"]):not([class*="warning"]):not([class*="status"]):not([class*="badge"]) {
+html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"])) {
   color: var(--admin-dark-text);
   background-color: var(--admin-dark-raised);
   border-color: var(--admin-dark-line);
@@ -456,8 +456,8 @@ html[data-admin-theme="dark"].admin-unified-site body.admin-site {
   --admin-dark-raised: #000000;
   --admin-dark-input: #000000;
   --admin-dark-line: #777777;
-  --admin-dark-text: #ffffff;
-  --admin-dark-muted: #b8b8b8;
+  --admin-dark-text: #f2eee8;
+  --admin-dark-muted: #aaa39a;
   background: #000000 !important;
   color: #ffffff !important;
 }
@@ -505,12 +505,12 @@ html[data-admin-theme="dark"] body.admin-site :is(
   .experiment-card, .experiment-panel, .experiment-product, [class*="-card"],
   [class*="-panel"], [class*="-surface"], [class*="-box"],
   [class*="-dialog"], [class*="-sheet"], .as-card, .announcement-panel
-):not([class*="status"]):not([class*="badge"]):not([class*="alert"]):not([class*="toast"]):not([class*="success"]):not([class*="error"]):not([class*="danger"]):not([class*="warning"]):not(.admin-theme-swatch):not(.admin-theme-store):not([data-admin-dark-preserve]) {
+):not(:where([class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="success"], [class*="error"], [class*="danger"], [class*="warning"], .admin-theme-swatch, .admin-theme-store, [data-admin-dark-preserve])) {
   border-color: var(--admin-dark-line) !important;
 }
 
 html[data-admin-theme="dark"] body.admin-site .admin-theme-switch,
-html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(.primary):not([class*="primary"]):not([class*="danger"]):not([class*="success"]):not([class*="warning"]):not([class*="status"]):not([class*="badge"]) {
+html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"])) {
   color: #ffffff;
   background: #000000;
   border-color: var(--admin-dark-line);
@@ -545,7 +545,7 @@ html[data-admin-theme="dark"] body.admin-site :is(
   [class*="-cost"], [class*="-live"], [class*="-chip"], [class*="-sample"],
   [class*="-product"], [class*="-badge"],
   [class*="-rule"], [class*="-label"], [class*="disabled"], [role="tablist"], [role="tab"]
-):not(.admin-theme-store *):not(.admin-theme-swatch):not(.admin-theme-swatch *):not(.admin-theme-mono-color):not([data-admin-dark-preserve]):not([data-admin-dark-preserve] *):not(.admin-dark-mode-preserve):not(.admin-dark-mode-preserve *):not(.experiment-chart-bar):not([class*="chart-bar"]):not([class*="chart-line"]):not([class*="chart-area"]):not([class*="chart-fill"]):not(.model-preview-window):not(.model-preview-window *):not(.admin-theme-effect-sample):not(.admin-theme-effect-sample *):not(.effects-stage):not(.effects-stage *) {
+):not(:where(.admin-theme-store *, .admin-theme-swatch, .admin-theme-swatch *, .admin-theme-mono-color, [data-admin-dark-preserve], [data-admin-dark-preserve] *, .admin-dark-mode-preserve, .admin-dark-mode-preserve *, .experiment-chart-bar, [class*="chart-bar"], [class*="chart-line"], [class*="chart-area"], [class*="chart-fill"], .model-preview-window, .model-preview-window *, .admin-theme-effect-sample, .admin-theme-effect-sample *, .effects-stage, .effects-stage *)) {
   background-color: #000000 !important;
   background-image: none !important;
 }
@@ -566,8 +566,8 @@ html[data-admin-theme="dark"] body.admin-site :is(
 /* Normalize the ink across legacy cards, badges, custom controls, and links.
    Accents and semantic feedback are restored below so the interface remains
    easy to scan without bringing back pale text on black. */
-html[data-admin-theme="dark"] body.admin-site *:not(.admin-theme-store *):not(.admin-theme-swatch *):not([data-admin-dark-preserve] *):not(.admin-dark-mode-preserve *) {
-  color: #ffffff !important;
+html[data-admin-theme="dark"] body.admin-site *:not(:where(.admin-theme-store *, .admin-theme-swatch *, [data-admin-dark-preserve] *, .admin-dark-mode-preserve *)) {
+  color: var(--admin-dark-text) !important;
 }
 
 html[data-admin-theme="dark"] body.admin-site :is(
@@ -586,21 +586,21 @@ html[data-admin-theme="dark"] body.admin-site :is(
 }
 html[data-admin-theme="dark"] body.admin-site :is(
   button, .btn, [role="button"], input[type="button"], input[type="submit"],
-  select, textarea, input:not([type="checkbox"]):not([type="radio"]):not([type="color"]):not([type="range"])
-):not(.admin-theme-store *) {
-  background-color: #000000 !important;
-  border-color: #777777 !important;
+  select, textarea, input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"]))
+):not(:where(.admin-theme-store *)) {
+  background-color: var(--admin-dark-input) !important;
+  border-color: var(--admin-dark-line) !important;
 }
 html[data-admin-theme="dark"] body.admin-site :is(
   button, .btn, [role="button"], input[type="button"], input[type="submit"]
-):not(.primary):not([class*="primary"]):not([class*="success"]):not([class*="danger"]):not([class*="warning"]):not([class*="status"]):not([class*="badge"]):not(.admin-theme-store *) {
+):not(:where(.primary, [class*="primary"], [class*="success"], [class*="danger"], [class*="warning"], [class*="status"], [class*="badge"], .admin-theme-store *)) {
   border-style: solid;
   border-width: 1px;
 }
 html[data-admin-theme="dark"] body.admin-site :is(
   .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
   button[class*="submit"], input[type="submit"], [class*="button-primary"]
-):not(.admin-theme-store *) {
+):not(:where(.admin-theme-store *)) {
   color: var(--admin-brand-contrast, #fffaf3) !important;
   background-color: var(--admin-brand-fill, #70533c) !important;
   background-image: none !important;
@@ -744,4 +744,337 @@ html[data-admin-theme="dark"] body.admin-site .effects-effect-art {
   color: #f2daa2 !important;
   background-color: #000000 !important;
   border: 1px solid #777777;
+}
+
+/* A single low-key edge color replaces the bright white borders left by
+   page-specific light styles. Store previews and uploaded artwork keep theirs. */
+html[data-admin-theme="dark"] body.admin-site *:not(:where(
+  .admin-theme-store *, .admin-theme-swatch, .admin-theme-swatch *,
+  .admin-theme-effect-sample, .admin-theme-effect-sample *, .effects-stage, .effects-stage *,
+  .model-preview-window, .model-preview-window *, [data-admin-dark-preserve],
+  [data-admin-dark-preserve] *, .admin-dark-mode-preserve, .admin-dark-mode-preserve *
+)),
+html[data-admin-theme="dark"] body.admin-site *::before:not(:where(.admin-theme-store *, .effects-stage *)),
+html[data-admin-theme="dark"] body.admin-site *::after:not(:where(.admin-theme-store *, .effects-stage *)) {
+  border-color: #3b362f !important;
+}
+html[data-admin-theme="dark"].admin-main-site .experiment-effects-page .experiment-page-head::after {
+  display: none !important;
+}
+
+/* Refined dark surfaces: the page itself remains true black while useful
+   controls and content get quiet separation, warmer ink, and clearer actions. */
+html[data-admin-theme="dark"].admin-unified-site,
+html[data-admin-theme="dark"].admin-unified-site body.admin-site {
+  --admin-dark-canvas: #000000;
+  --admin-dark-surface: #000000;
+  --admin-dark-raised: #000000;
+  --admin-dark-input: #000000;
+  --admin-dark-line: #777777;
+  --admin-dark-text: #f2eee8;
+  --admin-dark-muted: #aaa39a;
+  --ex-bg: #000000;
+  --ex-surface: #000000;
+  --ex-ink: #f2eee8;
+  --ex-muted: #aaa39a;
+  --ex-line: #777777;
+  --bg: #000000 !important;
+  --card: #000000 !important;
+  --input: #000000 !important;
+  --border: #777777 !important;
+  --border-light: #777777 !important;
+  --theme-page-surface: #000000 !important;
+  --theme-card-surface: #000000 !important;
+  --theme-control-surface: #000000 !important;
+  background-color: #000000 !important;
+  color: #f2eee8 !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-card, .experiment-panel, .experiment-product, .experiment-build-roadmap,
+  .experiment-build-column, .experiment-roadmap-mock-row, .experiment-placeholder-card,
+  .experiment-menu-dialog-head, .experiment-confirm-head, .experiment-roadmap-dialog-head,
+  .announcement-panel, .as-card, [class*="-card"], [class*="-panel"],
+  [class*="-surface"], [class*="-box"], [class*="-dialog"], [class*="-sheet"]
+):not(:where([class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="success"], [class*="error"], [class*="danger"], [class*="warning"], .admin-theme-swatch, .admin-theme-store, [data-admin-dark-preserve], [data-admin-dark-preserve] *, .admin-dark-mode-preserve, .admin-dark-mode-preserve *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: #000000 !important;
+  background-image: none !important;
+  border-color: #393530 !important;
+  box-shadow: none !important;
+}
+
+/* The product form is a continuous workspace, not a stack of bordered boxes. */
+html[data-admin-theme="dark"] body.admin-site .experiment-form-panel {
+  background-color: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-form-panel + .experiment-form-panel {
+  border-top: 1px solid var(--admin-dark-line) !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
+  select, textarea, [contenteditable="true"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: #000000 !important;
+  border: 1px solid #5c5852 !important;
+  border-radius: 10px;
+  box-shadow: none;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
+  select, textarea, [contenteditable="true"]
+):focus {
+  border-color: var(--admin-brand-readable, #c49a70) !important;
+  outline: 2px solid color-mix(in srgb, var(--admin-brand-fill, #8d6848) 30%, transparent) !important;
+  outline-offset: 1px;
+}
+html[data-admin-theme="dark"].admin-unified-site body.admin-site main :is(
+  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
+  select, textarea, [contenteditable="true"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: #000000 !important;
+  border-color: #5c5852 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder {
+  color: #99938a !important;
+  opacity: 1;
+}
+html[data-admin-theme="dark"] body.admin-site input[type="checkbox"],
+html[data-admin-theme="dark"] body.admin-site input[type="radio"] {
+  accent-color: var(--admin-brand-fill, #a47a52);
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"], input[type="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"], .admin-theme-store *)) {
+  min-height: 38px;
+  color: var(--admin-dark-text) !important;
+  background-color: #000000 !important;
+  border: 1px solid #48443f !important;
+  border-radius: 10px;
+  box-shadow: none;
+  transition: border-color .16s ease, background-color .16s ease, transform .16s ease !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"], .admin-theme-store *)):hover {
+  background-color: #000000 !important;
+  border-color: var(--admin-brand-readable, #b99a72) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
+  button[class*="submit"], input[type="submit"], [class*="button-primary"]
+):not(:where(.admin-theme-store *)) {
+  min-height: 42px;
+  color: var(--admin-brand-contrast, #fffaf3) !important;
+  background: var(--admin-brand-fill, #815b3d) !important;
+  border: 1px solid var(--admin-brand-fill, #815b3d) !important;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--admin-brand-fill, #815b3d) 22%, transparent);
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
+  button[class*="submit"], input[type="submit"], [class*="button-primary"]
+):not(:where(.admin-theme-store *)) * {
+  color: var(--admin-brand-contrast-dark, var(--admin-brand-contrast, #fffaf3)) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
+  button[class*="submit"], input[type="submit"], [class*="button-primary"]
+):not(:where(.admin-theme-store *)):hover {
+  background: var(--admin-brand-hover, #9b714e) !important;
+  border-color: var(--admin-brand-hover, #9b714e) !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  h1, h2, h3, h4, h5, h6, p, li, label, legend, dt, dd, th, td,
+  [class*="title"], [class*="heading"]
+):not(:where(.admin-theme-store *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  small, [class*="muted"], [class*="description"], [class*="subtitle"],
+  [class*="helper"], [class*="hint"], [class*="footnote"], [class*="caption"]
+):not(:where(.admin-theme-store *, [data-admin-dark-preserve] *)) {
+  color: #aaa39a !important;
+}
+html[data-admin-theme="dark"] body.admin-site a:not(:where(.experiment-nav-item, [role="button"], .admin-theme-store *)) {
+  color: var(--admin-brand-readable, #d0aa83) !important;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 3px;
+}
+html[data-admin-theme="dark"] body.admin-site :focus-visible {
+  outline: 2px solid var(--admin-brand-readable, #c49a70) !important;
+  outline-offset: 2px;
+}
+
+/* Keep status meaning at a glance while avoiding bright gray outlines. */
+html[data-admin-theme="dark"] body.admin-site :is([class*="success"], [class*="ready"], [class*="complete"], [class*="available"]):not(:where(.admin-theme-store *)) {
+  color: #a9dfbc !important;
+  background-color: #000000 !important;
+  border-color: #1d5031 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is([class*="error"], [class*="danger"], [class*="failed"], [class*="negative"]):not(:where(.admin-theme-store *)) {
+  color: #f3aeb5 !important;
+  background-color: #000000 !important;
+  border-color: #5c262d !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is([class*="warning"], [class*="pending"], [class*="status"], [class*="badge"], [class*="notice"], [class*="toast"]):not(:where(.admin-theme-store *)) {
+  color: #e8c78e !important;
+  background-color: #000000 !important;
+  border-color: #554321 !important;
+}
+
+/* Simplify the shortcut block and remove the decorative tape in dark mode. */
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu {
+  position: relative;
+  margin-top: 12px;
+  padding: 20px;
+  border-color: #393530 !important;
+  background: #000000 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu::after,
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-ribbons { display: none !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu-head { padding-top: 0; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu-head h2 { color: #f2eee8 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-eyebrow,
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-code { color: #b99a72 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-mark {
+  width: 38px;
+  height: 38px;
+  border-color: #3a3024 !important;
+  border-radius: 11px;
+  transform: none;
+  box-shadow: none;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card,
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card.pending {
+  min-height: 132px;
+  padding: 14px;
+  border-color: #36312b !important;
+  border-radius: 13px;
+  background: #000000 !important;
+  box-shadow: none !important;
+  transform: none;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card:hover {
+  border-color: var(--admin-brand-border, #65503a) !important;
+  background: #000000 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card-icon {
+  width: 36px;
+  height: 36px;
+  margin-bottom: 9px;
+  color: var(--admin-brand-readable, #d0aa83) !important;
+  border-color: #383127 !important;
+  border-radius: 10px;
+  background: #000000 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card strong { color: #f2eee8 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card small { color: #aaa39a !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card :is(.experiment-luxury-code, strong, small, .experiment-luxury-arrow) { text-shadow: none; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card strong { color: #f2eee8 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card small { color: #aaa39a !important; }
+
+html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty {
+  display: grid;
+  min-height: 224px;
+  place-content: center;
+  justify-items: center;
+  gap: 8px;
+  border-top: 1px solid #302b25;
+  color: #f2eee8;
+  text-align: center;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > span {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  margin-bottom: 3px;
+  border: 1px solid #393127;
+  border-radius: 12px;
+  color: var(--admin-brand-readable, #d0aa83) !important;
+  background: #000000 !important;
+  font-size: 19px;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > strong { font-size: 13px; }
+html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > p { margin: 0; color: #aaa39a !important; font-size: 11px; }
+
+/* Keep compact sticky actions readable and within the mobile safe area. */
+@media (max-width: 700px) {
+  html[data-admin-theme="dark"] body.admin-site .experiment-form-actions {
+    margin-inline: -15px;
+    padding: 10px 15px calc(10px + env(safe-area-inset-bottom));
+    background: rgb(0 0 0 / .96) !important;
+    border-top: 1px solid #393530 !important;
+    box-shadow: 0 -8px 22px rgb(0 0 0 / .35);
+    backdrop-filter: blur(12px);
+  }
+  html[data-admin-theme="dark"] body.admin-site .experiment-form-actions .experiment-button { min-height: 46px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-admin-theme="dark"] body.admin-site *,
+  html[data-admin-theme="dark"] body.admin-site *::before,
+  html[data-admin-theme="dark"] body.admin-site *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
+
+/* The main-site neutral-border layer is intentionally important. Re-introduce
+   only quiet structural edges and a strong keyboard ring inside that layer. */
+@layer admin-main-neutral-borders {
+  html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
+    .experiment-card, .experiment-panel, .experiment-product, .experiment-button,
+    .experiment-page-head, .experiment-form-panel, .hsx-hero, .hsx-stat, .hsx-board,
+    .hsx-toolbar, .hsx-card, .hsx-edit-panel, .hsx-create-dialog, .hsx-search,
+    .effects-preview, .effects-panel, .effects-stat-row > div, .effects-roadmap,
+    .effects-roadmap-grid > div, .effects-rain-form, .announcement-panel, .as-card,
+    [class*="-card"], [class*="-panel"], [class*="-dialog"]
+  ):not(:where(.admin-theme-store *, .admin-theme-swatch *, .effects-stage *, .model-preview-window *, [data-admin-dark-preserve] *, .admin-dark-mode-preserve *)) {
+    border-color: #39342d !important;
+  }
+
+  html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
+    .experiment-form-panel
+  ) {
+    border-color: transparent !important;
+    box-shadow: none !important;
+  }
+
+  html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
+    button, .btn, [role="button"], input, select, textarea, [tabindex]
+  ):focus-visible:not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+    outline: 2px solid var(--admin-brand-readable, #c49a70) !important;
+    outline-offset: 2px !important;
+    border-color: var(--admin-brand-readable, #c49a70) !important;
+    box-shadow: none !important;
+  }
+
+  html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
+    [aria-selected="true"], [aria-pressed="true"], [aria-current="page"],
+    [data-state="active"], .is-active, .is-selected, .is-editing, .selected, .active
+  ):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+    border-color: var(--admin-brand-fill, #8d6848) !important;
+  }
+
+  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page .experiment-page-head::after,
+  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page .effects-preview::before,
+  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page .effects-panel::before {
+    display: none !important;
+  }
+
+  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page :where(
+    .experiment-page-head, .effects-preview, .effects-panel, .effects-stat-row > div,
+    .effects-roadmap, .effects-roadmap-grid > div, .effects-toggle, .effects-effect-row,
+    .effects-rain-form
+  ) {
+    background: #000000 !important;
+    box-shadow: none !important;
+  }
 }

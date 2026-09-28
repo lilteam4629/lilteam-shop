@@ -299,6 +299,14 @@ async function auditPage(requestPath, viewport) {
     return { title: document.title, viewportWidth: innerWidth, status: body.innerText.trim().slice(0, 55), dark: root.dataset.adminTheme, rootInlineBackground: root.style.backgroundColor, rootInlineTheme: root.dataset.adminTheme, toggle: !!document.querySelector('[data-admin-theme-toggle]'), bodyVisible: getComputedStyle(body).visibility !== 'hidden', booting: root.classList.contains('admin-theme-booting'), bootTrace: window.__adminDarkBootTrace || null, bodyClass: body.className, bodyBackground: getComputedStyle(body).backgroundColor, canvasBackground: getComputedStyle(root).backgroundColor, dynamicProbe, dynamicSrgbProbe, selectorDiagnostics, auditScript: auditScript && { src: auditScript.src, loaded: auditScript.readyState || 'present' }, scriptTransferSize: scriptTiming && scriptTiming.transferSize, markedBackgrounds: body.querySelectorAll('[data-admin-dark-bg]').length, fontFamilies: { body: getComputedStyle(body).fontFamily, heading: body.querySelector('h1,h2,h3') ? getComputedStyle(body.querySelector('h1,h2,h3')).fontFamily : null, button: body.querySelector('button') ? getComputedStyle(body.querySelector('button')).fontFamily : null }, wrongFontCount: wrongFonts.length, wrongFontSamples: wrongFonts.slice(0, 5).map(el => ({ tag: el.tagName, className: String(el.className || '').slice(0, 75), family: getComputedStyle(el).fontFamily })), buttonIssues: buttonIssues.slice(0, 6), buttonIssueCount: buttonIssues.length, lightSurfaces: offenders.slice(0, 8), offBlackNeutrals: offBlackNeutrals.slice(0, 8), lowContrast: lowContrast.slice(0, 8), lightSurfaceCount: offenders.length, offBlackNeutralCount: offBlackNeutrals.length, lowContrastCount: lowContrast.length };
   })()`);
   if (requestPath === '/admin') await cdp.command('Runtime.evaluate', { expression: `document.querySelector('#admin-dark-audit-probe')?.remove(); document.querySelector('.experiment-menu-dialog')?.close()` });
+  const screenshotRoutes = String(process.env.ADMIN_DARK_AUDIT_SCREENSHOT_ROUTES || '').split(',').map(route => route.trim()).filter(Boolean);
+  if (screenshotRoutes.includes(requestPath) && process.env.ADMIN_DARK_AUDIT_SCREENSHOT_DIR) {
+    fs.mkdirSync(process.env.ADMIN_DARK_AUDIT_SCREENSHOT_DIR, { recursive: true });
+    const fileName = `${requestPath.replace(/[^a-z0-9]+/gi, '-')}-${viewport.name}.png`;
+    const screenshotPath = path.join(process.env.ADMIN_DARK_AUDIT_SCREENSHOT_DIR, fileName);
+    await browserPage.screenshot({ path: screenshotPath, fullPage: true, animations: 'disabled' });
+    console.log(`SCREENSHOT ${screenshotPath}`);
+  }
   result.surfaceScanComplete = surfaceScanComplete;
   return result;
 }
