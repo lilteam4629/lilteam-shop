@@ -288,6 +288,7 @@ function createPool(data, product, now, randomInt, genId) {
     totalAwards: 0,
     totalPrizeItems: 0,
     entryPrizeCount: 0,
+    cancelledPrizeCount: 0,
     createdAt: new Date(now).toISOString(),
   };
   items.forEach(stock => {
@@ -360,12 +361,108 @@ function recordPoolHistory(data, pool, finishedAt) {
     totalAwards: pool.totalAwards,
     totalPrizeItems: pool.totalPrizeItems,
     entryPrizeCount: pool.entryPrizeCount,
+    cancelledPrizeCount: Number(pool.cancelledPrizeCount) || 0,
     createdAt: pool.createdAt,
     finishedAt,
   });
   if (data.randomBoxPoolHistory.length > POOL_HISTORY_LIMIT) {
     data.randomBoxPoolHistory.splice(0, data.randomBoxPoolHistory.length - POOL_HISTORY_LIMIT);
   }
+}
+
+function replanRecoveryAfterPrizeRemoval(data, pool, removedCount, randomInt) {
+  if (!pool || pool.phase !== 'recovery' || removedCount < 1) return;
+  const remainingCount = poolRemainingStock(data, pool).length;
+  const progress = Math.max(0, Number(pool.recoveryProgressDraws) || 0);
+  const previousTarget = Math.max(progress, Number(pool.recoveryTargetDraws) || 0);
+  const { minTarget, maxTarget } = getRateConfig(pool.rate);
+  const targetReduction = randomIntInclusive(randomInt, removedCount * minTarget, removedCount * maxTarget);
+  const nextTarget = Math.max(progress, previousTarget - targetReduction);
+  pool.recoveryTargetDraws = nextTarget;
+
+  if (!remainingCount) {
+    pool.recoveryMilestones = [];
+    pool.recoveryMilestoneIndex = 0;
+    return;
+  }
+
+  const awardCounts = buildRecoveryAwardCounts(remainingCount, randomInt);
+  const minimumTarget = progress + awardCounts.length;
+  pool.recoveryTargetDraws = Math.max(nextTarget, minimumTarget);
+  pool.recoveryMilestones = buildRecoveryMilestones(
+    pool.recoveryTargetDraws - progress,
+    awardCounts,
+    randomInt,
+  ).map(milestone => ({ ...milestone, atDraws: milestone.atDraws + progress }));
+  pool.recoveryMilestoneIndex = 0;
+}
+
+function deletePrizeStock(data, product, {
+  stockIds = null,
+  now = Date.now(),
+  randomInt = crypto.randomInt,
+} = {}) {
+  if (!data || !product || product.specialType !== RANDOM_BOX_KIND) {
+    return { deletedCount: 0, removedReservedCount: 0, resetPool: false, stockEmpty: false };
+  }
+
+  data.stockItems ||= [];
+  const productId = String(product.id);
+  const pools = poolMap(data);
+  const pool = getActivePool(data, productId);
+  const activePoolIds = new Set((pool?.remainingStockIds || []).map(String));
+  const requestedIds = stockIds == null ? null : new Set(stockIds.map(String));
+  const isActiveReservedPrize = stock => Boolean(pool
+    && stock.status === 'reserved'
+    && activePoolIds.has(String(stock.id))
+    && String(stock.randomBoxPoolId) === String(pool.id));
+  const isLegacyReservedPrize = stock => stock.status === 'reserved'
+    && String(stock.randomBoxReservedFor) === productId
+    && !isActiveReservedPrize(stock);
+
+  const targets = data.stockItems.filter(stock => String(stock.productId) === productId
+    && (!requestedIds || requestedIds.has(String(stock.id)))
+    && (stock.status === 'available' || isActiveReservedPrize(stock) || isLegacyReservedPrize(stock)));
+  if (!targets.length) return { deletedCount: 0, removedReservedCount: 0, resetPool: false, stockEmpty: availablePrizeStockCount(data, product) < 1 };
+
+  const removedIds = new Set(targets.map(stock => String(stock.id)));
+  const removedPoolIds = new Set(targets.filter(isActiveReservedPrize).map(stock => String(stock.id)));
+  const removedReservedCount = removedPoolIds.size;
+  const removedLegacyCount = targets.filter(isLegacyReservedPrize).length;
+
+  if (removedLegacyCount) cleanupLegacyRound(data, productId);
+  data.stockItems = data.stockItems.filter(stock => !removedIds.has(String(stock.id)));
+
+  let resetPool = false;
+  if (pool && removedReservedCount) {
+    pool.initialStockIds = (pool.initialStockIds || []).filter(id => !removedPoolIds.has(String(id)));
+    pool.remainingStockIds = (pool.remainingStockIds || []).filter(id => !removedPoolIds.has(String(id)));
+    const remainingCount = poolRemainingStock(data, pool).length;
+    pool.initialCount = Math.max(
+      (Number(pool.totalPrizeItems) || 0) + remainingCount,
+      (Number(pool.initialCount) || 0) - removedReservedCount,
+    );
+    pool.cancelledPrizeCount = (Number(pool.cancelledPrizeCount) || 0) + removedReservedCount;
+    replanRecoveryAfterPrizeRemoval(data, pool, removedReservedCount, randomInt);
+    if (!remainingCount) {
+      recordPoolHistory(data, pool, new Date(now).toISOString());
+      delete pools[productId];
+      resetPool = true;
+    }
+  }
+
+  const stockEmpty = availablePrizeStockCount(data, product) < 1;
+  if (stockEmpty) {
+    const remainingPool = getActivePool(data, productId);
+    if (remainingPool && !poolRemainingStock(data, remainingPool).length) {
+      recordPoolHistory(data, remainingPool, new Date(now).toISOString());
+      delete pools[productId];
+      resetPool = true;
+    }
+    if (data.randomBoxRounds) delete data.randomBoxRounds[productId];
+  }
+
+  return { deletedCount: targets.length, removedReservedCount, resetPool, stockEmpty };
 }
 
 function isPublished(product, now) {
@@ -589,6 +686,7 @@ module.exports = {
   getPoolSummary,
   availablePrizeStockCount,
   hasAvailablePrizeBundle,
+  deletePrizeStock,
   releaseRoundPrizeReservation,
   buildRecoveryAwardCounts,
   buildRecoveryMilestones,

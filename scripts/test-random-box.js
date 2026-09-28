@@ -153,6 +153,78 @@ assert.strictEqual(completedExample.recoveryProgressDraws, 1500);
 assert.strictEqual(completedExample.totalCollected, 1600, 'the first ฿100 and the separate recovery total are both counted');
 assert.strictEqual(targetExample.data.stockItems.filter(stock => stock.status === 'sold').length, 15);
 
+// Deleting a reserved prize deducts it from the active batch and, during
+// recovery, lowers the remaining hidden collection target by exactly one
+// prize's configured rate interval.
+const removalExample = makeScenario({ count: 8, rate: 2, price: 2, seed: 203 });
+const removalRandom = (min, maxExclusive) => {
+  if (min === 45 && maxExclusive === 61) return 45;
+  if (min === 1 && maxExclusive === 101) return 1;
+  if (min === 0) return 0;
+  return min + Math.floor((maxExclusive - min - 1) / 2);
+};
+performDraw(removalExample.data, removalExample.product, removalRandom, removalExample.genId, 45, 1);
+const removalPool = randomBox.getActivePool(removalExample.data, removalExample.product.id);
+assert.strictEqual(removalPool.phase, 'recovery');
+const removedPrizeId = removalPool.remainingStockIds[0];
+const previousRecoveryTarget = removalPool.recoveryTargetDraws;
+const removedPrize = randomBox.deletePrizeStock(removalExample.data, removalExample.product, {
+  stockIds: [removedPrizeId], randomInt: removalRandom, now: 1_800_000_000_050,
+});
+assert.strictEqual(removedPrize.deletedCount, 1);
+assert.strictEqual(removedPrize.removedReservedCount, 1);
+assert.strictEqual(removedPrize.stockEmpty, false);
+assert.strictEqual(removalPool.initialCount, 7);
+assert.strictEqual(removalPool.cancelledPrizeCount, 1);
+assert.strictEqual(removalPool.remainingStockIds.length, 6);
+assert.ok(previousRecoveryTarget - removalPool.recoveryTargetDraws >= 45
+  && previousRecoveryTarget - removalPool.recoveryTargetDraws <= 60,
+  'removing a prize reduces the recovery target by the configured rate interval');
+assert.strictEqual(removalPool.recoveryMilestones.reduce((sum, milestone) => sum + milestone.count, 0), 6);
+assert.strictEqual(removalPool.recoveryMilestones.at(-1).atDraws, removalPool.recoveryTargetDraws);
+const deliveredRemovalExample = removalExample.data.stockItems.find(stock => stock.status === 'sold');
+const protectedSoldPrize = randomBox.deletePrizeStock(removalExample.data, removalExample.product, {
+  stockIds: [deliveredRemovalExample.id], randomInt: removalRandom,
+});
+assert.strictEqual(protectedSoldPrize.deletedCount, 0, 'delete-all selection never removes already delivered prizes');
+assert.ok(removalExample.data.stockItems.some(stock => stock.id === deliveredRemovalExample.id));
+
+// Delete-all removes current and pending unsold prizes, records the canceled
+// batch, and the next added item starts a clean pool with a fresh stock count.
+const deleteAllExample = makeScenario({ count: 4, rate: 1, price: 1, seed: 207 });
+const delayPayoutRandom = (min, maxExclusive) => {
+  if (min === 85 && maxExclusive === 111) return 110;
+  return min;
+};
+performDraw(deleteAllExample.data, deleteAllExample.product, delayPayoutRandom, deleteAllExample.genId, 1, 1);
+deleteAllExample.data.stockItems.push({
+  id: 'pending-prize', productId: deleteAllExample.product.id, username: 'Pending prize',
+  status: 'available', fulfillmentMode: 'automatic',
+});
+const deleteOneReserved = randomBox.deletePrizeStock(deleteAllExample.data, deleteAllExample.product, {
+  stockIds: [randomBox.getActivePool(deleteAllExample.data, deleteAllExample.product.id).remainingStockIds[0]],
+  randomInt: delayPayoutRandom,
+});
+assert.strictEqual(deleteOneReserved.deletedCount, 1);
+assert.strictEqual(randomBox.getActivePool(deleteAllExample.data, deleteAllExample.product.id).initialCount, 3);
+const deleteEveryUnsoldPrize = randomBox.deletePrizeStock(deleteAllExample.data, deleteAllExample.product, {
+  randomInt: delayPayoutRandom,
+});
+assert.strictEqual(deleteEveryUnsoldPrize.deletedCount, 4);
+assert.strictEqual(deleteEveryUnsoldPrize.removedReservedCount, 3);
+assert.strictEqual(deleteEveryUnsoldPrize.resetPool, true);
+assert.strictEqual(deleteEveryUnsoldPrize.stockEmpty, true);
+assert.strictEqual(randomBox.getActivePool(deleteAllExample.data, deleteAllExample.product.id), null);
+assert.strictEqual(randomBox.availablePrizeStockCount(deleteAllExample.data, deleteAllExample.product), 0);
+assert.strictEqual(deleteAllExample.data.randomBoxPoolHistory.at(-1).cancelledPrizeCount, 4);
+deleteAllExample.data.stockItems.push({
+  id: 'fresh-prize', productId: deleteAllExample.product.id, username: 'Fresh prize',
+  status: 'available', fulfillmentMode: 'automatic',
+});
+performDraw(deleteAllExample.data, deleteAllExample.product, delayPayoutRandom, deleteAllExample.genId, 1, 2);
+assert.strictEqual(randomBox.getActivePool(deleteAllExample.data, deleteAllExample.product.id).initialCount, 1,
+  'new stock after an empty reset creates a new batch from its own item count');
+
 // Rate and price cases: recovery budget follows the initial count × the saved
 // rate interval × saved per-draw price, and every key is paid exactly once.
 const matrix = [

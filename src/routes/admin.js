@@ -1724,6 +1724,24 @@ router.post('/products/:id/stock/add', async (req, res) => {
   res.redirect(`/admin/products/${product.id}/stock`);
 });
 
+router.post('/products/:id/stock/delete-all', async (req, res) => {
+  const product = store.data.products.find(p => p.id === req.params.id);
+  if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  if (product.specialType !== randomBox.RANDOM_BOX_KIND || !randomBox.supportsRandomBox(req)) return res.sendStatus(404);
+
+  const result = randomBox.deletePrizeStock(store.data, product);
+  if (!result.deletedCount) {
+    req.flash('error', 'ไม่มีรางวัลที่ยังไม่ได้จ่ายให้ลบ');
+    return res.redirect(`/admin/products/${product.id}/stock`);
+  }
+  await store.save();
+  const resetMessage = result.stockEmpty
+    ? ' · สต็อกว่างแล้ว ระบบรีเซ็ตรอบสะสมเรียบร้อย'
+    : result.resetPool ? ' · รีเซ็ตรอบปัจจุบันแล้ว' : ' · ปรับจำนวนรางวัลและยอดสะสมของรอบแล้ว';
+  req.flash('success', `ลบรางวัลที่ยังไม่ถูกจ่ายแล้ว ${result.deletedCount} ชิ้น${resetMessage} (ประวัติรางวัลที่จ่ายแล้วเก็บไว้)`);
+  res.redirect(`/admin/products/${product.id}/stock`);
+});
+
 router.post('/products/:id/stock/:stockId/delete', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (product?.specialType === randomBox.RANDOM_BOX_KIND && !randomBox.supportsRandomBox(req)) return res.sendStatus(404);
@@ -1732,17 +1750,26 @@ router.post('/products/:id/stock/:stockId/delete', async (req, res) => {
     req.flash('error', 'ไม่พบไอดีในสต๊อกของสินค้านี้');
     return res.redirect(`/admin/products/${req.params.id}/stock`);
   }
-  if (stock.status === 'reserved' && stock.randomBoxReservedFor) {
-    req.flash('error', 'สินค้านี้ถูกสำรองไว้เป็นรางวัลของกล่องสุ่มที่กำลังดำเนินรอบ ลบตอนนี้ไม่ได้');
-    return res.redirect(`/admin/products/${product.id}/stock`);
-  }
   const randomBoxPrizeOrder = stock.soldOrderId && store.data.orders.some(order => order.id === stock.soldOrderId && order.randomBoxOrder);
   if (randomBoxPrizeOrder) {
     req.flash('error', 'ลบสต็อกที่จ่ายเป็นรางวัลกล่องสุ่มแล้วไม่ได้ เพื่อเก็บประวัติการรับสินค้า');
     return res.redirect(`/admin/products/${product.id}/stock`);
   }
-  if (product.specialType === randomBox.RANDOM_BOX_KIND && stock.status !== 'available') {
-    req.flash('error', 'ลบรายการที่ส่งให้ผู้ซื้อแล้วไม่ได้ เพื่อเก็บประวัติการสั่งซื้อ');
+  if (product.specialType === randomBox.RANDOM_BOX_KIND) {
+    const result = randomBox.deletePrizeStock(store.data, product, { stockIds: [stock.id] });
+    if (!result.deletedCount) {
+      req.flash('error', 'ลบได้เฉพาะรางวัลที่ยังไม่ได้จ่ายและอยู่ในสต็อกของกล่องสุ่มนี้');
+      return res.redirect(`/admin/products/${product.id}/stock`);
+    }
+    await store.save();
+    const resetMessage = result.stockEmpty
+      ? ' สต็อกว่างแล้ว ระบบรีเซ็ตรอบสะสมเรียบร้อย'
+      : result.resetPool ? ' รอบปัจจุบันถูกรีเซ็ตแล้ว' : ' จำนวนรางวัลและยอดสะสมถูกปรับแล้ว';
+    req.flash('success', `ลบรางวัลออกจากสต็อกแล้ว${resetMessage}`);
+    return res.redirect(`/admin/products/${product.id}/stock`);
+  }
+  if (stock.status === 'reserved' && stock.randomBoxReservedFor) {
+    req.flash('error', 'สินค้านี้ถูกสำรองไว้เป็นรางวัลของกล่องสุ่มที่กำลังดำเนินรอบ ลบตอนนี้ไม่ได้');
     return res.redirect(`/admin/products/${product.id}/stock`);
   }
   store.data.stockItems = store.data.stockItems.filter(s => s.id !== stock.id);

@@ -79,9 +79,19 @@
 
   <!-- Left Column: Existing Stock Items Table -->
   <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
-    <div class="p-4 border-b border-[var(--border)] flex items-center justify-between">
-      <h3 class="font-bold text-sm text-[var(--text)]"><%= isRandomBox ? 'รายการรางวัลในรอบและที่พร้อมเริ่ม' : 'รายการคีย์ / ไอดีที่พร้อมขาย' %> (<%= isRandomBox ? visibleStockItems.length : availableStockItems.length %>)</h3>
-      <span class="flex flex-wrap justify-end gap-x-3 text-xs text-[var(--text-4)]"><% if (reservedStockCount) { %><span>จองรางวัลกล่องสุ่ม: <b class="text-amber-500"><%= reservedStockCount %></b></span><% } %><span>ขายแล้วซ่อนจากรายการ: <b class="text-rose-400"><%= soldStockCount %></b></span></span>
+    <div class="p-4 border-b border-[var(--border)] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div class="min-w-0">
+        <h3 class="font-bold text-sm text-[var(--text)]"><%= isRandomBox ? 'รายการรางวัลในรอบและที่พร้อมเริ่ม' : 'รายการคีย์ / ไอดีที่พร้อมขาย' %> (<%= isRandomBox ? visibleStockItems.length : availableStockItems.length %>)</h3>
+        <span class="mt-1 flex flex-wrap gap-x-3 text-xs text-[var(--text-4)]"><% if (reservedStockCount) { %><span>จองรางวัลกล่องสุ่ม: <b class="text-amber-500"><%= reservedStockCount %></b></span><% } %><span>ขายแล้วซ่อนจากรายการ: <b class="text-rose-400"><%= soldStockCount %></b></span></span>
+      </div>
+      <% if (isRandomBox && visibleStockItems.length) { %>
+        <form action="/admin/products/<%= product.id %>/stock/delete-all" method="post" class="shrink-0" data-confirm="ลบรางวัลที่ยังไม่ได้จ่ายทั้งหมด <%= visibleStockItems.length %> ชิ้นออกจากสต็อกใช่ไหม? ระบบจะหักจำนวนและปรับรอบสะสมให้ รางวัลที่จ่ายให้ลูกค้าแล้วจะยังอยู่ในประวัติ">
+          <button type="submit" class="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-rose-500/30 px-3 py-2 text-xs font-bold text-rose-500 transition hover:bg-rose-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">
+            <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+            ลบทั้งหมด
+          </button>
+        </form>
+      <% } %>
     </div>
 
     <div class="overflow-x-auto">
@@ -121,8 +131,8 @@
                 <% } %>
               </td>
               <td class="py-3 px-4 text-right whitespace-nowrap">
-                <% if (s.status === 'available') { %>
-                  <form action="/admin/products/<%= product.id %>/stock/<%= s.id %>/delete" method="post" class="inline" data-confirm="ต้องการลบไอดี/คีย์รายการนี้ออกจากสต็อกใช่ไหม?">
+                <% if (s.status === 'available' || (isRandomBox && s.status === 'reserved')) { %>
+                  <form action="/admin/products/<%= product.id %>/stock/<%= s.id %>/delete" method="post" class="inline" data-confirm="<%= s.status === 'reserved' ? 'ลบรางวัลนี้ออกจากรอบปัจจุบันใช่ไหม? ระบบจะหักจำนวนและปรับยอดสะสมของรอบให้' : 'ต้องการลบรางวัลนี้ออกจากสต็อกใช่ไหม?' %>">
                     <button type="submit" class="p-1.5 rounded-lg text-rose-400 hover:bg-rose-500/10 transition" title="ลบรายการนี้">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>

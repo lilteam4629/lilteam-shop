@@ -249,12 +249,12 @@ async function checkRandomBoxWorkflow(adminCookie) {
 
   const addStock = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/add', {
     method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ bulk: 'George Best:private-prize-secret-1\nCarlos Puyol:private-prize-secret-2\nREMOVE ITEM:private-prize-secret-removed' }).toString(),
+    body: new URLSearchParams({ bulk: 'George Best:private-prize-secret-1\nCarlos Puyol:private-prize-secret-2\nREMOVE ITEM:private-prize-secret-removed\nDELETE RESERVED:private-prize-secret-reserved' }).toString(),
   });
   if (addStock.statusCode !== 302) throw new Error('direct unpriced prize keys could not be added');
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   const removable = data.stockItems.find(item => item.productId === productId && item.username === 'REMOVE ITEM');
-  if (!removable || data.stockItems.filter(item => item.productId === productId && item.status === 'available').length !== 3
+  if (!removable || data.stockItems.filter(item => item.productId === productId && item.status === 'available').length !== 4
     || data.stockItems.some(item => item.productId === productId && Object.prototype.hasOwnProperty.call(item, 'prizeValue'))) {
     throw new Error('each direct stock line was not saved as one prize without a value');
   }
@@ -269,10 +269,22 @@ async function checkRandomBoxWorkflow(adminCookie) {
   if (appended.statusCode !== 302) throw new Error('new prize could not be appended');
 
   const adminStock = await fetchOk('/admin/products/' + encodeURIComponent(productId) + '/stock', 'text/html', { cookie: adminCookie });
-  if (!adminStock.body.includes('รายการรางวัลในรอบและที่พร้อมเริ่ม (3)')
+  if (!adminStock.body.includes('รายการรางวัลในรอบและที่พร้อมเริ่ม (4)')
+    || !adminStock.body.includes('/stock/delete-all') || !adminStock.body.includes('ลบทั้งหมด')
     || adminStock.body.includes('randomBoxPrizeValue') || adminStock.body.includes('มูลค่ารางวัลต่อชิ้น')) {
-    throw new Error('admin stock view still asks for or displays per-key price values');
+    throw new Error('admin stock view is missing delete actions or still displays per-key price values');
   }
+  const deleteAllAvailable = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/delete-all', {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: '',
+  });
+  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  if (deleteAllAvailable.statusCode !== 302 || data.stockItems.some(item => item.productId === productId)
+    || data.randomBoxPools?.[productId]) throw new Error('delete-all did not empty unsold random-box stock and reset its pool');
+  const restock = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/add', {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ bulk: 'George Best:private-prize-secret-1\nCarlos Puyol:private-prize-secret-2\nDELETE RESERVED:private-prize-secret-reserved\nSergio Aguero:private-prize-secret-3' }).toString(),
+  });
+  if (restock.statusCode !== 302) throw new Error('random-box stock could not be restored after delete-all reset');
   const published = await request('/admin/scheduled-products', {
     method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ productId, publishAt: '2020-01-01T00:00' }).toString(),
@@ -310,6 +322,20 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const missPage = await fetchOk(firstDraw.headers.location, 'text/html', { cookie: customerCookie });
   if (!missPage.body.includes('ไม่ได้รับรางวัล') || !missPage.body.includes('object-contain object-center')) {
     throw new Error('loss result or full product image is missing');
+  }
+  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  const reservedToDelete = data.stockItems.find(item => item.productId === productId
+    && item.username === 'DELETE RESERVED' && item.status === 'reserved');
+  const deleteReserved = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/'
+    + encodeURIComponent(reservedToDelete?.id || 'missing') + '/delete', {
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+  });
+  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  const reservedPool = data.randomBoxPools?.[productId];
+  if (deleteReserved.statusCode !== 302 || data.stockItems.some(item => item.id === reservedToDelete?.id)
+    || reservedPool?.initialCount !== 3 || reservedPool.remainingStockIds.length !== 3
+    || reservedPool.cancelledPrizeCount !== 1) {
+    throw new Error('deleting a reserved random-box prize did not deduct it from the active pool');
   }
 
   const batchId = crypto.randomUUID();
