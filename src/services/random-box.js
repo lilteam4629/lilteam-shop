@@ -7,6 +7,7 @@ const RANDOM_BOX_MAX_RATE = 10;
 const MAX_RANDOM_BOX_DRAWS = 500;
 const MAX_RANDOM_BOX_PRICE = 100000000;
 const MAX_RANDOM_BOX_STOCK = 50000;
+const RANDOM_BOX_PAYOUT_SCHEDULE_VERSION = 2;
 const DEFAULT_RANDOM_BOX_RATE = 1;
 const RANDOM_BOX_MIN_TARGET = 85;
 const RANDOM_BOX_MAX_TARGET = 110;
@@ -198,56 +199,48 @@ function randomAwardCount(remainingCount, randomInt) {
   const maximum = Math.min(MAX_RANDOM_BOX_PRIZE_ITEMS, remainingCount);
   if (maximum <= 1) return maximum;
   const roll = randomInt(1, 101);
-  const weighted = roll <= 20 ? 1 : roll <= 45 ? 2 : roll <= 70 ? 3 : roll <= 90 ? 4 : 5;
+  const weighted = roll <= 60 ? 1 : roll <= 80 ? 2 : roll <= 92 ? 3 : roll <= 98 ? 4 : 5;
   return Math.min(maximum, weighted);
 }
 
-function buildRecoveryAwardCounts(remainingCount, randomInt) {
-  const minGroups = Math.ceil(remainingCount / MAX_RANDOM_BOX_PRIZE_ITEMS);
-  const maxGroups = Math.min(remainingCount, Math.max(minGroups, Math.ceil(remainingCount / 2)));
-  const groupCount = randomIntInclusive(randomInt, minGroups, maxGroups);
-  const counts = [];
-  let left = remainingCount;
-  for (let index = 0; index < groupCount; index += 1) {
-    const slotsAfter = groupCount - index - 1;
-    const minSize = Math.max(1, left - (slotsAfter * MAX_RANDOM_BOX_PRIZE_ITEMS));
-    const maxSize = Math.min(MAX_RANDOM_BOX_PRIZE_ITEMS, left - slotsAfter);
-    const size = randomIntInclusive(randomInt, minSize, maxSize);
-    counts.push(size);
-    left -= size;
+function scheduleNextRecoveryAward(pool, remainingCount, randomInt) {
+  const remaining = Math.max(0, Math.floor(Number(remainingCount) || 0));
+  if (!remaining) {
+    pool.recoveryMilestones = [];
+    pool.recoveryMilestoneIndex = 0;
+    pool.payoutScheduleVersion = RANDOM_BOX_PAYOUT_SCHEDULE_VERSION;
+    return;
   }
-  if (left !== 0 || counts.some(count => count < 1 || count > MAX_RANDOM_BOX_PRIZE_ITEMS)) {
-    fail('POOL_PLAN_INVALID', 'จัดรอบสุ่มไม่สำเร็จ กรุณาลองใหม่');
-  }
-  return counts;
+
+  const { minTarget, maxTarget } = getRateConfig(pool.rate);
+  const progress = Math.max(0, Math.floor(Number(pool.recoveryProgressDraws) || 0));
+  const interval = randomIntInclusive(randomInt, minTarget, maxTarget);
+  const atDraws = progress + interval;
+  pool.recoveryTargetDraws = atDraws;
+  pool.recoveryMilestones = [{ atDraws, count: randomAwardCount(remaining, randomInt) }];
+  pool.recoveryMilestoneIndex = 0;
+  pool.payoutScheduleVersion = RANDOM_BOX_PAYOUT_SCHEDULE_VERSION;
 }
 
-function buildRecoveryMilestones(totalDraws, awardCounts, randomInt) {
-  if (!awardCounts.length || totalDraws < awardCounts.length) {
-    fail('POOL_PLAN_INVALID', 'จำนวนรอบสุ่มไม่เพียงพอสำหรับสต็อกรางวัล');
+function ensureCurrentRecoverySchedule(data, pool, randomInt) {
+  if (pool?.phase !== 'recovery'
+    || pool.payoutScheduleVersion === RANDOM_BOX_PAYOUT_SCHEDULE_VERSION) return;
+  const remainingCount = poolRemainingStock(data, pool).length;
+  if (!remainingCount) {
+    scheduleNextRecoveryAward(pool, 0, randomInt);
+    return;
   }
-  const milestones = [];
-  let drawsLeft = totalDraws;
-  let cumulativeDraws = 0;
-  awardCounts.forEach((count, index) => {
-    const slotsLeft = awardCounts.length - index;
-    let segment;
-    if (slotsLeft === 1) segment = drawsLeft;
-    else {
-      const ideal = Math.floor(drawsLeft / slotsLeft);
-      const spread = Math.max(1, Math.floor(ideal * 0.6));
-      const minSegment = Math.max(1, ideal - spread);
-      const maxSegment = Math.min(drawsLeft - (slotsLeft - 1), ideal + spread);
-      segment = randomIntInclusive(randomInt, minSegment, maxSegment);
-    }
-    cumulativeDraws += segment;
-    drawsLeft -= segment;
-    milestones.push({ atDraws: cumulativeDraws, count });
-  });
-  if (drawsLeft !== 0 || milestones[milestones.length - 1].atDraws !== totalDraws) {
-    fail('POOL_PLAN_INVALID', 'กำหนดรอบสะสมไม่สำเร็จ กรุณาลองใหม่');
-  }
-  return milestones;
+
+  const { minTarget, maxTarget } = getRateConfig(pool.rate);
+  const progress = Math.max(0, Math.floor(Number(pool.recoveryProgressDraws) || 0));
+  const firstPossibleTarget = Math.max(minTarget, progress + 1);
+  const target = firstPossibleTarget <= maxTarget
+    ? randomIntInclusive(randomInt, firstPossibleTarget, maxTarget)
+    : progress + 1;
+  pool.recoveryTargetDraws = target;
+  pool.recoveryMilestones = [{ atDraws: target, count: randomAwardCount(remainingCount, randomInt) }];
+  pool.recoveryMilestoneIndex = 0;
+  pool.payoutScheduleVersion = RANDOM_BOX_PAYOUT_SCHEDULE_VERSION;
 }
 
 function cleanupLegacyRound(data, productId) {
@@ -283,6 +276,7 @@ function createPool(data, product, now, randomInt, genId) {
     recoveryProgressDraws: 0,
     recoveryMilestones: [],
     recoveryMilestoneIndex: 0,
+    payoutScheduleVersion: RANDOM_BOX_PAYOUT_SCHEDULE_VERSION,
     totalDraws: 0,
     totalCollected: 0,
     totalAwards: 0,
@@ -301,20 +295,9 @@ function createPool(data, product, now, randomInt, genId) {
 }
 
 function beginRecovery(pool, remainingCount, randomInt) {
-  const { minTarget, maxTarget } = getRateConfig(pool.rate);
-  // This deliberately uses the original stock batch size, as specified:
-  // 15 initial items means an additional 15 × 85–110 base draw budget at rate 1.
-  const minDraws = pool.initialCount * minTarget;
-  const maxDraws = pool.initialCount * maxTarget;
-  pool.recoveryTargetDraws = randomIntInclusive(randomInt, minDraws, maxDraws);
   pool.recoveryProgressDraws = 0;
-  pool.recoveryMilestones = buildRecoveryMilestones(
-    pool.recoveryTargetDraws,
-    buildRecoveryAwardCounts(remainingCount, randomInt),
-    randomInt,
-  );
-  pool.recoveryMilestoneIndex = 0;
   pool.phase = 'recovery';
+  scheduleNextRecoveryAward(pool, remainingCount, randomInt);
 }
 
 function stockPrize(stock, product, orderId) {
@@ -375,26 +358,23 @@ function replanRecoveryAfterPrizeRemoval(data, pool, removedCount, randomInt) {
   if (!pool || pool.phase !== 'recovery' || removedCount < 1) return;
   const remainingCount = poolRemainingStock(data, pool).length;
   const progress = Math.max(0, Number(pool.recoveryProgressDraws) || 0);
-  const previousTarget = Math.max(progress, Number(pool.recoveryTargetDraws) || 0);
-  const { minTarget, maxTarget } = getRateConfig(pool.rate);
-  const targetReduction = randomIntInclusive(randomInt, removedCount * minTarget, removedCount * maxTarget);
-  const nextTarget = Math.max(progress, previousTarget - targetReduction);
-  pool.recoveryTargetDraws = nextTarget;
-
   if (!remainingCount) {
     pool.recoveryMilestones = [];
     pool.recoveryMilestoneIndex = 0;
     return;
   }
 
-  const awardCounts = buildRecoveryAwardCounts(remainingCount, randomInt);
-  const minimumTarget = progress + awardCounts.length;
-  pool.recoveryTargetDraws = Math.max(nextTarget, minimumTarget);
-  pool.recoveryMilestones = buildRecoveryMilestones(
-    pool.recoveryTargetDraws - progress,
-    awardCounts,
-    randomInt,
-  ).map(milestone => ({ ...milestone, atDraws: milestone.atDraws + progress }));
+  if (pool.payoutScheduleVersion !== RANDOM_BOX_PAYOUT_SCHEDULE_VERSION) {
+    ensureCurrentRecoverySchedule(data, pool, randomInt);
+    return;
+  }
+
+  const currentMilestone = pool.recoveryMilestones?.[pool.recoveryMilestoneIndex]
+    || pool.recoveryMilestones?.[0];
+  const target = Math.max(progress + 1, Math.floor(Number(currentMilestone?.atDraws) || progress + 1));
+  const count = Math.min(remainingCount, Math.max(1, Math.floor(Number(currentMilestone?.count) || 1)));
+  pool.recoveryTargetDraws = target;
+  pool.recoveryMilestones = [{ atDraws: target, count }];
   pool.recoveryMilestoneIndex = 0;
 }
 
@@ -536,6 +516,7 @@ function drawRandomBox(data, {
       pool = createPool(data, product, now, randomInt, genId);
     }
     if (!pool) break;
+    ensureCurrentRecoverySchedule(data, pool, randomInt);
     const price = pool.price;
 
     balance = Math.round((balance - price) * 100) / 100;
@@ -549,12 +530,13 @@ function drawRandomBox(data, {
       pool.entryProgressDraws += 1;
       if (pool.entryProgressDraws >= pool.entryTargetDraws) {
         const available = poolRemainingStock(data, pool).length;
-        const awardCount = available <= 1 ? available : randomAwardCount(Math.min(available - 1, MAX_RANDOM_BOX_PRIZE_ITEMS), randomInt);
+        const awardCount = randomAwardCount(available, randomInt);
         prizeItems = takePrizeItems(data, pool, awardCount, product, orderId);
         pool.entryPrizeCount = prizeItems.length;
         pool.totalAwards += 1;
         pool.totalPrizeItems += prizeItems.length;
-        if (poolRemainingStock(data, pool).length) beginRecovery(pool, poolRemainingStock(data, pool).length, randomInt);
+        const remainingCount = poolRemainingStock(data, pool).length;
+        if (remainingCount) beginRecovery(pool, remainingCount, randomInt);
       }
     } else {
       pool.recoveryProgressDraws += 1;
@@ -564,6 +546,8 @@ function drawRandomBox(data, {
         pool.recoveryMilestoneIndex += 1;
         pool.totalAwards += 1;
         pool.totalPrizeItems += prizeItems.length;
+        const remainingCount = poolRemainingStock(data, pool).length;
+        scheduleNextRecoveryAward(pool, remainingCount, randomInt);
       }
     }
 
@@ -669,6 +653,7 @@ module.exports = {
   MAX_MISS_MESSAGE_LENGTH,
   supportsRandomBox,
   randomTarget,
+  randomAwardCount,
   normalizeRate,
   getRateConfig,
   parseRate,
@@ -689,8 +674,6 @@ module.exports = {
   hasAvailablePrizeBundle,
   deletePrizeStock,
   releaseRoundPrizeReservation,
-  buildRecoveryAwardCounts,
-  buildRecoveryMilestones,
   isPublished,
   drawRandomBox,
 };

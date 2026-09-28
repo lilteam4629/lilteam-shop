@@ -34,6 +34,13 @@ assert.ok(randomBox.validatePrice('0'));
 assert.strictEqual(randomBox.parseDrawCount('101'), 101);
 assert.throws(() => randomBox.parseDrawCount('501'), error => error.code === 'INVALID_DRAW_COUNT');
 assert.strictEqual(randomBox.normalizeMissMessage('  เกลือ  '), 'เกลือ');
+const awardWeightRolls = [1, 60, 61, 80, 81, 92, 93, 98, 99, 100];
+assert.deepStrictEqual(awardWeightRolls.map(roll => randomBox.randomAwardCount(10, (min, maxExclusive) => {
+  assert.strictEqual(min, 1);
+  assert.strictEqual(maxExclusive, 101);
+  return roll;
+})), [1, 1, 2, 2, 3, 3, 4, 4, 5, 5],
+'random prize bundles include 1–5 items, with one item common and larger bundles less common');
 
 function seededRandom(seed) {
   let state = seed >>> 0;
@@ -111,6 +118,22 @@ function completeAllPrizes(scenario, { firstDraw = 500 } = {}) {
   return orders;
 }
 
+function payoutEvents(data) {
+  const events = [];
+  let drawNumber = 0;
+  let previousWin = 0;
+  for (const order of data.orders) {
+    for (const item of order.items) {
+      drawNumber += 1;
+      const draw = item.randomBoxDraw;
+      if (!draw?.isWin) continue;
+      events.push({ interval: drawNumber - previousWin, count: draw.prizeCount });
+      previousWin = drawNumber;
+    }
+  }
+  return events;
+}
+
 // Stock is displayed oldest-first in admin, placing the newest prize at the
 // bottom. Payouts must consume that bottom row first, even if storage order
 // differs from display order.
@@ -128,15 +151,59 @@ const payoutOrder = bottomToTopScenario.data.orders.flatMap(order => order.items
 assert.deepStrictEqual(payoutOrder, [...adminRowOrder].reverse(),
   'prizes are delivered from the bottom admin row to the top row');
 
+// Every rate-1 payout event stays within 85–110 draws. The draw count is
+// independent of the random 1–5 item bundle size, so large batches do not
+// stretch into one long recovery period.
+const controlledBatch = makeScenario({ count: 13, rate: 1, price: 1, seed: 702 });
+completeAllPrizes(controlledBatch);
+const controlledEvents = payoutEvents(controlledBatch.data);
+assert.ok(controlledEvents.length >= 3, '13 prizes are split into multiple payout events');
+assert.ok(controlledEvents.every(event => event.interval >= 85 && event.interval <= 110),
+  'every prize event is within the configured 85–110 draw interval');
+assert.ok(controlledEvents.every(event => event.count >= 1 && event.count <= 5),
+  'each payout contains 1–5 prizes');
+assert.ok(controlledEvents.some(event => event.count < 5), 'payouts are not always five prizes');
+assert.strictEqual(controlledEvents.reduce((sum, event) => sum + event.count, 0), 13,
+  'all 13 prizes are eventually delivered');
+
+// Active pools created by the previous schedule used a stock-sized recovery
+// target. The first draw after upgrade migrates them to one bounded interval.
+const legacySchedule = makeScenario({ count: 8, rate: 1, price: 1, seed: 703 });
+const migrationRandom = (min, maxExclusive) => {
+  if (min === 85 && maxExclusive === 111) return 96;
+  if (min === 1 && maxExclusive === 101) return 1;
+  return min;
+};
+performDraw(legacySchedule.data, legacySchedule.product, migrationRandom, legacySchedule.genId, 1, 1);
+const legacyPool = randomBox.getActivePool(legacySchedule.data, legacySchedule.product.id);
+legacyPool.phase = 'recovery';
+legacyPool.recoveryProgressDraws = 400;
+legacyPool.recoveryTargetDraws = 1200;
+legacyPool.recoveryMilestones = [{ atDraws: 800, count: 2 }, { atDraws: 1200, count: 5 }];
+legacyPool.recoveryMilestoneIndex = 0;
+delete legacyPool.payoutScheduleVersion;
+const migratedLegacyPayout = performDraw(legacySchedule.data, legacySchedule.product, migrationRandom,
+  legacySchedule.genId, 1, 2);
+assert.strictEqual(migratedLegacyPayout.result.winCount, 1,
+  'a pool already past the 110-draw limit pays out on the next draw after migration');
+assert.strictEqual(legacyPool.recoveryMilestones.length, 1, 'only the next prize event is scheduled');
+assert.strictEqual(legacyPool.recoveryMilestones[0].count, 1, 'the next bundle size is randomized from 1–5');
+const migratedTarget = legacyPool.recoveryTargetDraws;
+assert.strictEqual(migratedTarget - legacyPool.recoveryProgressDraws, 96,
+  'the next migrated prize is scheduled within one 85–110 interval');
+const migratedPayout = performDraw(legacySchedule.data, legacySchedule.product, migrationRandom,
+  legacySchedule.genId, migratedTarget - legacyPool.recoveryProgressDraws, 3);
+assert.strictEqual(migratedPayout.result.winCount, 1);
+assert.strictEqual(legacyPool.recoveryTargetDraws - migratedTarget, 96,
+  'subsequent payouts also stay within a single bounded interval');
+
 // User's worked example: 15 prizes, rate 1, ฿1 per draw. The first event
-// collects ฿100 and awards five; the remaining ten receive a separate,
-// hidden recovery target based on the original 15-prize stock batch.
+// collects ฿100 and awards five; later events award five each after another
+// bounded 85–110 draws, instead of waiting for one batch-sized recovery target.
 const targetExample = makeScenario({ count: 15, rate: 1, price: 1, seed: 7 });
 const fixedExampleRandom = (min, maxExclusive) => {
   if (min === 85 && maxExclusive === 111) return 100;
-  if (min === 1275 && maxExclusive === 1651) return 1500;
   if (min === 1 && maxExclusive === 101) return 100;
-  if (min === 2 && maxExclusive === 6) return 3;
   return min + Math.floor((maxExclusive - min - 1) / 2);
 };
 const firstExampleOrder = performDraw(targetExample.data, targetExample.product, fixedExampleRandom, targetExample.genId, 100, 1);
@@ -147,9 +214,9 @@ const activeExamplePool = randomBox.getActivePool(targetExample.data, targetExam
 assert.strictEqual(activeExamplePool.initialCount, 15);
 assert.strictEqual(activeExamplePool.remainingStockIds.length, 10);
 assert.strictEqual(activeExamplePool.entryProgressDraws, 100);
-assert.strictEqual(activeExamplePool.recoveryTargetDraws, 1500);
-assert.strictEqual(activeExamplePool.recoveryMilestones.reduce((sum, milestone) => sum + milestone.count, 0), 10);
-assert.strictEqual(activeExamplePool.recoveryMilestones.at(-1).atDraws, 1500);
+assert.strictEqual(activeExamplePool.recoveryTargetDraws, 100);
+assert.strictEqual(activeExamplePool.recoveryMilestones[0].count, 5);
+assert.strictEqual(activeExamplePool.recoveryMilestones[0].atDraws, 100);
 assert.ok(!('recoveryTargetDraws' in firstExampleOrder.result));
 assert.ok(!JSON.stringify(firstExampleOrder.result).includes('1500'));
 assert.ok(targetExample.data.orders[0].items.some(item => item.randomBoxDraw.prizeItems.some(prize => prize.productTitle.startsWith('Prize '))));
@@ -165,14 +232,14 @@ const completedExample = targetExample.data.randomBoxPoolHistory.at(-1);
 assert.strictEqual(completedExample.initialCount, 15);
 assert.strictEqual(completedExample.totalPrizeItems, 15);
 assert.strictEqual(completedExample.entryProgressDraws, 100);
-assert.strictEqual(completedExample.recoveryTargetDraws, 1500);
-assert.strictEqual(completedExample.recoveryProgressDraws, 1500);
-assert.strictEqual(completedExample.totalCollected, 1600, 'the first ฿100 and the separate recovery total are both counted');
+assert.strictEqual(completedExample.recoveryTargetDraws, 200);
+assert.strictEqual(completedExample.recoveryProgressDraws, 200);
+assert.strictEqual(completedExample.totalCollected, 300,
+  'the first and two later prize events each use a bounded 100-draw target');
 assert.strictEqual(targetExample.data.stockItems.filter(stock => stock.status === 'sold').length, 15);
 
-// Deleting a reserved prize deducts it from the active batch and, during
-// recovery, lowers the remaining hidden collection target by exactly one
-// prize's configured rate interval.
+// Deleting a reserved prize deducts it from the active batch without adding
+// another long wait or invalidating the currently scheduled bundle.
 const removalExample = makeScenario({ count: 8, rate: 2, price: 2, seed: 203 });
 const removalRandom = (min, maxExclusive) => {
   if (min === 45 && maxExclusive === 61) return 45;
@@ -194,11 +261,10 @@ assert.strictEqual(removedPrize.stockEmpty, false);
 assert.strictEqual(removalPool.initialCount, 7);
 assert.strictEqual(removalPool.cancelledPrizeCount, 1);
 assert.strictEqual(removalPool.remainingStockIds.length, 6);
-assert.ok(previousRecoveryTarget - removalPool.recoveryTargetDraws >= 45
-  && previousRecoveryTarget - removalPool.recoveryTargetDraws <= 60,
-  'removing a prize reduces the recovery target by the configured rate interval');
-assert.strictEqual(removalPool.recoveryMilestones.reduce((sum, milestone) => sum + milestone.count, 0), 6);
-assert.strictEqual(removalPool.recoveryMilestones.at(-1).atDraws, removalPool.recoveryTargetDraws);
+assert.strictEqual(removalPool.recoveryTargetDraws, previousRecoveryTarget,
+  'removing a prize does not extend or unexpectedly shorten the next payout interval');
+assert.strictEqual(removalPool.recoveryMilestones.length, 1);
+assert.ok(removalPool.recoveryMilestones[0].count <= removalPool.remainingStockIds.length);
 const deliveredRemovalExample = removalExample.data.stockItems.find(stock => stock.status === 'sold');
 const protectedSoldPrize = randomBox.deletePrizeStock(removalExample.data, removalExample.product, {
   stockIds: [deliveredRemovalExample.id], randomInt: removalRandom,
@@ -263,26 +329,22 @@ for (const [index, scenarioConfig] of matrix.entries()) {
   const scenario = makeScenario({ ...scenarioConfig, seed: 100 + index });
   const orders = completeAllPrizes(scenario);
   const history = scenario.data.randomBoxPoolHistory.at(-1);
-  observedAwardSizes.add(history.entryPrizeCount);
+  const events = payoutEvents(scenario.data);
+  events.forEach(event => observedAwardSizes.add(event.count));
   const { minTarget, maxTarget } = randomBox.getRateConfig(scenarioConfig.rate);
   assert.strictEqual(history.initialCount, scenarioConfig.count);
   assert.strictEqual(history.rate, scenarioConfig.rate);
   assert.strictEqual(history.price, scenarioConfig.price);
-  assert.ok(history.entryProgressDraws >= minTarget && history.entryProgressDraws <= maxTarget,
-    `entry payout interval: ${JSON.stringify(scenarioConfig)}`);
-  if (scenarioConfig.count > 1) {
-    assert.ok(history.recoveryTargetDraws >= scenarioConfig.count * minTarget);
-    assert.ok(history.recoveryTargetDraws <= scenarioConfig.count * maxTarget);
-    assert.strictEqual(history.recoveryProgressDraws, history.recoveryTargetDraws);
-    assert.strictEqual(history.totalPrizeItems, scenarioConfig.count);
-    const recoveryPrizeCount = history.recoveryMilestones.reduce((sum, milestone) => sum + milestone.count, 0);
-    assert.strictEqual(recoveryPrizeCount, scenarioConfig.count - history.entryPrizeCount);
-    assert.ok(history.entryPrizeCount >= 1 && history.entryPrizeCount <= 5,
-      'the initial award also contains between one and five items');
-  } else {
-    assert.strictEqual(history.recoveryTargetDraws, 0);
-    assert.strictEqual(history.totalPrizeItems, 1);
-  }
+  assert.ok(events.length >= 1);
+  assert.ok(events.every(event => event.interval >= minTarget && event.interval <= maxTarget),
+    `each payout interval stays inside the configured rate: ${JSON.stringify(scenarioConfig)}`);
+  assert.ok(events.every(event => event.count >= 1 && event.count <= randomBox.MAX_RANDOM_BOX_PRIZE_ITEMS),
+    'each payout bundle contains between one and five prizes');
+  assert.strictEqual(events.reduce((sum, event) => sum + event.count, 0), scenarioConfig.count);
+  assert.strictEqual(history.totalPrizeItems, scenarioConfig.count);
+  assert.strictEqual(history.entryPrizeCount, events[0].count);
+  assert.strictEqual(history.recoveryTargetDraws, events.slice(1).reduce((sum, event) => sum + event.interval, 0));
+  assert.strictEqual(history.recoveryProgressDraws, history.recoveryTargetDraws);
   const draws = orders.reduce((sum, opened) => sum + opened.result.drawCount, 0);
   const collected = orders.reduce((sum, opened) => sum + opened.result.total, 0);
   assert.strictEqual(draws, history.totalDraws);
@@ -307,7 +369,8 @@ for (const [index, scenarioConfig] of matrix.entries()) {
     }
   }
 }
-assert.ok(observedAwardSizes.size >= 2, 'the initial award size varies between stocked batches');
+assert.ok(observedAwardSizes.has(1) && [...observedAwardSizes].some(size => size > 1),
+  'simulation regularly delivers single prizes and sometimes multiple prizes');
 
 // Price snapshots survive an admin changing configuration mid-batch. The new
 // rate/price only applies after the captured stock batch finishes.
@@ -359,7 +422,7 @@ const buyerTwoContribution = randomBox.drawRandomBox(sharedPool.data, {
   drawCount: 50, randomInt: sharedRandom, genId: sharedPool.genId,
 });
 assert.strictEqual(buyerTwoContribution.result.winCount, 1);
-assert.strictEqual(buyerTwoContribution.result.prizeCount, 4);
+assert.strictEqual(buyerTwoContribution.result.prizeCount, 5);
 assert.strictEqual(sharedPool.data.users[0].walletBalance, 5_000_000 - 50);
 assert.strictEqual(sharedPool.data.users[1].walletBalance, 50);
 
