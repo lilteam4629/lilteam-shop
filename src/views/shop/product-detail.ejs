@@ -213,7 +213,9 @@
                   const form = document.currentScript && document.currentScript.closest('[data-random-box-form]');
                   const input = form?.querySelector('[data-random-box-count]');
                   const submit = form?.querySelector('[data-random-box-submit]');
+                  const requestId = form?.querySelector('input[name="drawRequestId"]');
                   if (!form || !input || !submit) return;
+                  let submitting = false;
                   const totalLabels = form.querySelectorAll('[data-random-box-total], [data-random-box-button-total]');
                   const countLabels = form.querySelectorAll('[data-random-box-count-label]');
                   const warning = form.querySelector('[data-random-box-balance-warning]');
@@ -236,6 +238,19 @@
                     input.value = String((Number.parseInt(input.value, 10) || 1) + Number(button.dataset.randomBoxStep || 0));
                     update();
                   }));
+                  form.addEventListener('submit', event => {
+                    if (submitting) { event.preventDefault(); return; }
+                    submitting = true;
+                    if (requestId) {
+                      const freshId = window.crypto?.randomUUID?.();
+                      requestId.value = freshId ? freshId.replace(/-/g, '')
+                        : `${Date.now().toString(36)}${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+                    }
+                    submit.disabled = true;
+                  });
+                  window.addEventListener('pageshow', event => {
+                    if (event.persisted) window.location.reload();
+                  });
                   update();
                 })();
               </script>

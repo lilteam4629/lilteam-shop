@@ -20,9 +20,12 @@ assert.strictEqual(randomBox.getRateConfig(100).minTarget, 1, 'a 100% rate award
 assert.notStrictEqual(randomBox.validateRate('1.001'), null);
 assert.strictEqual(randomBox.normalizeMissMessage('  เสียใจด้วยครับ\r\nลองใหม่อีกครั้ง  '), 'เสียใจด้วยครับ\nลองใหม่อีกครั้ง');
 assert.strictEqual(randomBox.normalizeMissMessage('x'.repeat(400)).length, randomBox.MAX_MISS_MESSAGE_LENGTH, 'miss copy is bounded');
+assert.strictEqual(randomBox.MAX_RANDOM_BOX_DRAWS, 500, 'the customer may select more than 100 draws at once');
 assert.strictEqual(randomBox.parseDrawCount(undefined), 1, 'a missing count keeps the single-draw default');
 assert.strictEqual(randomBox.parseDrawCount('7'), 7, 'buyers can request multiple draws');
-for (const invalidCount of ['', '0', '-1', '1.5', '101', '2e2']) {
+assert.strictEqual(randomBox.parseDrawCount('101'), 101, 'a batch may exceed the previous 100-draw limit');
+assert.strictEqual(randomBox.parseDrawCount('500'), 500, 'the maximum batch size is accepted');
+for (const invalidCount of ['', '0', '-1', '1.5', '501', '2e2']) {
   assert.throws(() => randomBox.parseDrawCount(invalidCount), error => error.code === 'INVALID_DRAW_COUNT', `invalid draw count ${invalidCount} is rejected`);
 }
 
@@ -220,7 +223,42 @@ const orderedDraw = randomBox.drawRandomBox(orderedDrawData, {
 assert.deepStrictEqual(orderedDrawData.orders[0].items.map(item => item.stockItemId),
   ['newest-row', 'middle-row', 'oldest-row'], 'consecutive wins deliver bottom-to-top through row one');
 assert.strictEqual(orderedDraw.result.winCount, 3, 'the ordered stock fixture wins each draw at a 100% test rate');
+const largeBatchData = {
+  users: [{ id: 'large-buyer', status: 'active', walletBalance: 101 }],
+  products: [{ id: 'large-box', title: 'large box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 0.01 } }],
+  stockItems: [{ id: 'large-prize', productId: 'large-box', username: 'large-key', status: 'available' }],
+  walletTransactions: [], orders: [], randomBoxRounds: {},
+};
+const largeBatch = randomBox.drawRandomBox(largeBatchData, {
+  productId: 'large-box', userId: 'large-buyer', idempotencyKey: 'large-batch-request-0101', drawCount: 101,
+  now: 1_800_000_250_000, randomInt: deterministicRandom, genId,
+});
+assert.strictEqual(largeBatch.result.drawCount, 101, 'a request can complete more than 100 draws');
+assert.strictEqual(largeBatchData.orders[0].items.length, 101, 'every draw in a large batch remains separately recorded');
+assert.strictEqual(largeBatchData.orders[0].total, 101, 'a large batch charges exactly one baht per completed draw');
+assert.strictEqual(largeBatchData.users[0].walletBalance, 0, 'large batches debit only the selected total');
+assert.strictEqual(largeBatchData.randomBoxRounds['large-box'].progress, 101, 'all large-batch draws advance the shared round');
 
+const freshIntentData = {
+  users: [{ id: 'repeat-buyer', status: 'active', walletBalance: 2 }],
+  products: [{ id: 'repeat-box', title: 'repeat box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } }],
+  stockItems: [
+    { id: 'repeat-prize-a', productId: 'repeat-box', username: 'first-key', status: 'available' },
+    { id: 'repeat-prize-b', productId: 'repeat-box', username: 'second-key', status: 'available' },
+  ],
+  walletTransactions: [], orders: [], randomBoxRounds: {},
+};
+const firstIntent = randomBox.drawRandomBox(freshIntentData, {
+  productId: 'repeat-box', userId: 'repeat-buyer', idempotencyKey: 'intent-request-first-0001',
+  now: 1_800_000_260_000, randomInt: deterministicRandom, genId,
+});
+const secondIntent = randomBox.drawRandomBox(freshIntentData, {
+  productId: 'repeat-box', userId: 'repeat-buyer', idempotencyKey: 'intent-request-second-0002',
+  now: 1_800_000_260_001, randomInt: deterministicRandom, genId,
+});
+assert.notStrictEqual(secondIntent.orderId, firstIntent.orderId, 'a fresh submission key creates a new draw instead of replaying the old order');
+assert.strictEqual(freshIntentData.orders.length, 2, 'separate intentional draws create separate orders');
+assert.strictEqual(freshIntentData.users[0].walletBalance, 0, 'each fresh draw is charged exactly once');
 const exhaustedBatchData = {
   users: [{ id: 'last-buyer', status: 'active', walletBalance: 10 }],
   products: [{ id: 'last-box', title: 'last box', status: 'active', specialType: randomBox.RANDOM_BOX_KIND, randomBox: { rate: 100 } }],
