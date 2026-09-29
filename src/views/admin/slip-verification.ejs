@@ -1,7 +1,7 @@
 <!-- Slip Verification API Provider Hub Header -->
 <% const activeProvider = effectiveProvider || payment.slipProvider || 'auto'; %>
-<div class="slip-owner-page" data-slip-owner-page>
-<link rel="stylesheet" href="<%= asset('css/admin-slip-verification-owner-v1.css') %>&amp;rev=1" />
+<% if (isMainSite) { %><div class="slip-owner-page" data-slip-owner-page><% } %>
+<% if (isMainSite) { %><style>@import url("<%= asset('css/admin-slip-verification-owner-v1.css') %>");</style><% } %>
 <p data-slip-owner-intro class="mb-4 rounded-xl border p-4"><%= isMainSite ? 'เว็บหลักใช้ API ของคุณเอง' : ((payment.slipApiMode || 'shared') === 'shared' ? 'ร้านนี้ใช้ระบบตรวจสลิปกลางของเว็บ รวมพูล SlipCheck ทุกคีย์ให้อัตโนมัติและไม่ต้องกรอกคีย์ในร้านเช่า' : 'ร้านนี้ใช้ API และโควตาของตัวเอง') %></p>
 <div data-slip-owner-header class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
   <div>
@@ -78,7 +78,6 @@
 <!-- Provider connection and quota status -->
 <% if (!usesSharedProvider) { %>
 <% const providerStatuses = [
-  { id: 'slipcheck', name: 'SlipCheck', info: slipcheckInfo, used: slipcheckPoolInfo?.totalUsed ?? slipcheckInfo?.quota?.used, max: slipcheckPoolInfo?.totalMax ?? slipcheckInfo?.quota?.max, remaining: slipcheckPoolInfo ? slipcheckPoolInfo.totalRemaining : (slipcheckInfo?.quota?.max == null ? null : Math.max(0, Number(slipcheckInfo.quota.max) - Number(slipcheckInfo.quota.used || 0))), note: slipcheckPoolInfo ? `${slipcheckPoolInfo.keyCount} คีย์ • ${payment.slipcheckIndependentQuota ? 'รวมโควตาแยกแต่ละบัญชี' : 'โควตารวมบัญชีเดียว'}` : (slipcheckInfo?.message || 'ยังไม่ได้กรอก API Key') },
   { id: 'rdcw', name: 'SlipRDCW', info: rdcwInfo, used: null, max: null, remaining: null, note: rdcwInfo?.ok ? 'เชื่อมข้อมูลแล้ว • ค่ายนี้ไม่มี API สำหรับอ่านโควตา' : (rdcwInfo?.message || 'ยังไม่ได้กรอก Client ID / Secret') },
   { id: 'slip2go', name: 'Slip2Go', info: slip2goInfo, used: slip2goInfo?.used, max: slip2goInfo?.quota, remaining: slip2goInfo?.quota == null ? null : Math.max(0, Number(slip2goInfo.quota) - Number(slip2goInfo.used || 0)), note: slip2goInfo?.message || 'ยังไม่ได้กรอก API Key' },
   { id: 'xepht', name: 'ระบบตรวจสอบอัตโนมัติ', info: xephtInfo, used: null, max: null, remaining: null, note: xephtInfo?.message || 'พร้อมใช้งาน' },
@@ -100,7 +99,7 @@
     </div>
   <% }) %>
 </div>
-<% if (slipcheckPoolInfo && slipcheckPoolInfo.accounts && slipcheckPoolInfo.accounts.length) { %>
+<% if (false && slipcheckPoolInfo && slipcheckPoolInfo.accounts && slipcheckPoolInfo.accounts.length) { %>
 <div data-slip-owner-pool class="mb-6 rounded-2xl border border-[var(--gold)]/30 bg-[var(--card)] p-5 shadow-sm">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
     <div><h3 class="font-bold">SlipCheck • โควตาราย API Key</h3><p class="text-xs text-[var(--text-4)] mt-1">ระบบใช้คีย์ตามลำดับทีละคีย์จนหมดโควตา แล้วจึงสลับไปคีย์ถัดไปอัตโนมัติ</p></div>
@@ -204,10 +203,9 @@
       <input type="hidden" name="slipApiMode" value="own">
     <% } %>
 
-    <% const selectableProviders = ['slipcheck', 'rdcw', 'slip2go', 'xepht']; const selectedOwnProvider = selectableProviders.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck'; %>
+<% const selectableProviders = ['rdcw', 'slip2go', 'xepht']; const selectedOwnProvider = selectableProviders.includes(payment.slipProvider) ? payment.slipProvider : 'rdcw'; %>
     <div id="own-provider-choice" data-slip-owner-provider-choice class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
       <% const ownProviders = [
-        ['slipcheck', '✅', 'SlipCheck', 'ฟรี 500 ครั้ง/เดือน'],
         ['rdcw', '🛡️', 'SlipRDCW', 'Client ID + Secret'],
         ['slip2go', '🔎', 'Slip2Go', 'API Key'],
         ['xepht', '🌐', 'ระบบตรวจสอบอัตโนมัติ', 'ไม่ต้องกรอกคีย์ในโหมดสาธารณะ']
@@ -226,7 +224,7 @@
   </div>
 
   <div data-slip-owner-settings-grid class="grid lg:grid-cols-2 gap-4">
-    <div id="provider-settings-slipcheck" data-provider-settings="slipcheck" class="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-5 space-y-3">
+    <div id="provider-settings-slipcheck" data-provider-settings="slipcheck" class="hidden">
       <div class="flex items-center justify-between"><h3 class="font-bold">✅ SlipCheck</h3><a href="https://mxrslip.lovable.app/auth" target="_blank" rel="noopener" class="text-xs text-[var(--gold-text)]">สมัครฟรี ↗</a></div>
       <label class="block text-xs text-[var(--text-3)]">API Key <% if (payment.slipcheckApiKey) { %><span class="text-emerald-500">✓ บันทึกแล้ว</span><% } %>
         <input id="own-slipcheck-key" type="password" name="slipcheckApiKey" value="<%= payment.slipcheckApiKey || '' %>" autocomplete="new-password" class="mt-1 w-full bg-[var(--input)] border border-[var(--border)] rounded-xl px-3 py-2.5 font-mono text-xs" />
@@ -333,4 +331,4 @@ async function testOwnProvider(provider) {
   }
 }
 </script>
-</div>
+<% if (isMainSite) { %></div><% } %>
