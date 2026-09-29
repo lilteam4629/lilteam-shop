@@ -167,4 +167,6 @@ assert.match(mainLayout, /storefront-monochrome/);
 assert.match(mainLayout, /product-detail-page \.product-detail-main/);
 assert.match(mainLayout, /--coral:var\(--text-2\)/);
 assert.match(productDetailSource, /system-lab-product-detail-theme/);
+assert.doesNotMatch(productDetailSource, /style="background:#(?:111827|172033)!important/,
+  'product actions must follow the storefront theme instead of hardcoded navy fills');
 console.log('Legacy tenant themes normalize to the storefront black/white contract');
