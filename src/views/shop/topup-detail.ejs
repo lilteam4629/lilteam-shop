@@ -48,6 +48,30 @@
   @media(max-width:540px){.topup-detail-page{width:calc(100% - 24px);padding-top:20px}.topup-detail-head{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"back back" "title title" "amount amount";gap:4px}.topup-detail-head h1{font-size:24px;overflow-wrap:anywhere}.topup-detail-amount{min-width:0;width:max-content;max-width:100%;margin-top:10px;padding:9px 13px;text-align:left}.topup-detail-amount strong{font-size:22px}.topup-detail-summary,.topup-detail-upload{padding:16px!important}.topup-detail-summary .text-sm.space-y-1>div{gap:10px}.topup-detail-awaiting{align-items:flex-start}}
   @media(prefers-reduced-motion:reduce){.topup-detail-page *{scroll-behavior:auto!important;transition:none!important}}
   <% } %>
+  html.slip-verification-active,body.slip-verification-active{overflow:hidden!important;overscroll-behavior:none!important}
+  body.slip-verification-active{position:fixed!important;inset-inline:0!important;width:100%!important;touch-action:none!important}
+  #slipUploadOverlay{position:fixed!important;inset:0!important;z-index:2147483000!important;display:grid;place-items:center;overflow:hidden;overscroll-behavior:contain;touch-action:none;background:color-mix(in srgb,var(--bg) 94%,#050505 6%);color:var(--text);padding:24px}
+  #slipUploadOverlay.hidden{display:none!important}
+  .slip-check-card{position:relative;width:min(100%,430px);overflow:hidden;padding:30px 26px 24px;border:1px solid color-mix(in srgb,var(--gold) 34%,var(--border));border-radius:26px;background:color-mix(in srgb,var(--card) 96%,var(--gold) 4%);box-shadow:0 28px 90px color-mix(in srgb,#000 42%,transparent),0 0 0 1px color-mix(in srgb,var(--gold) 9%,transparent) inset;text-align:center}
+  .slip-check-card:before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,transparent 20%,color-mix(in srgb,var(--gold) 12%,transparent) 48%,transparent 70%);transform:translateX(-120%);animation:slip-check-sweep 2.8s ease-in-out infinite;pointer-events:none}
+  .slip-check-mark{position:relative;display:grid;place-items:center;width:76px;height:76px;margin:0 auto 19px;border:1px solid color-mix(in srgb,var(--gold) 46%,transparent);border-radius:24px;background:color-mix(in srgb,var(--gold) 12%,var(--card));color:var(--gold-text);box-shadow:0 0 34px color-mix(in srgb,var(--gold) 20%,transparent)}
+  .slip-check-mark:before,.slip-check-mark:after{content:"";position:absolute;border-radius:50%;border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);animation:slip-check-pulse 2s ease-out infinite}
+  .slip-check-mark:before{inset:-10px}.slip-check-mark:after{inset:-19px;animation-delay:.45s;opacity:.55}
+  .slip-check-mark svg{position:relative;z-index:1;width:34px;height:34px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .slip-check-spinner{width:18px;height:18px;margin:0 auto 14px;border:2px solid color-mix(in srgb,var(--gold) 22%,transparent);border-top-color:var(--gold);border-radius:50%;animation:slip-check-spin .85s linear infinite}
+  .slip-check-title{position:relative;margin:0;font-size:clamp(20px,5vw,25px);font-weight:800;letter-spacing:-.02em;line-height:1.25}
+  .slip-check-message{position:relative;margin:9px auto 0;max-width:32ch;color:var(--text-3);font-size:13px;line-height:1.7}
+  .slip-check-dots{display:inline-flex;gap:4px;margin-left:4px;vertical-align:middle}
+  .slip-check-dots i{width:4px;height:4px;border-radius:50%;background:var(--gold);animation:slip-check-dot 1.2s ease-in-out infinite}
+  .slip-check-dots i:nth-child(2){animation-delay:.15s}.slip-check-dots i:nth-child(3){animation-delay:.3s}
+  #slipStatusReturn{position:relative;margin-top:18px;min-height:44px;align-items:center;justify-content:center;padding:0 18px;border:1px solid var(--border-light);border-radius:999px;background:var(--input);color:var(--text);text-decoration:none}
+  #slipStatusReturn:not(.hidden){display:inline-flex}
+  @keyframes slip-check-spin{to{transform:rotate(360deg)}}
+  @keyframes slip-check-pulse{0%{transform:scale(.78);opacity:.7}70%,100%{transform:scale(1.16);opacity:0}}
+  @keyframes slip-check-sweep{0%,25%{transform:translateX(-120%)}75%,100%{transform:translateX(120%)}}
+  @keyframes slip-check-dot{0%,60%,100%{transform:translateY(0);opacity:.35}30%{transform:translateY(-4px);opacity:1}}
+  @media(prefers-reduced-motion:reduce){.slip-check-card:before,.slip-check-mark:before,.slip-check-mark:after,.slip-check-spinner,.slip-check-dots i{animation:none!important}}
+
 </style>
 <section class="topup-detail-page max-w-lg mx-auto px-4 py-10">
   <header class="topup-detail-head">
@@ -81,6 +105,13 @@
       <div class="text-3xl mb-2">✕</div>
       <div class="text-[var(--coral)] font-semibold mb-1">คำขอนี้ถูกปฏิเสธ</div>
       <% if (request.reviewNote) { %><p class="text-sm text-[var(--text-3)]"><%= request.reviewNote %></p><% } %>
+    </div>
+  <% } else if (request.slipPath && request.slipCheck && request.slipCheck.checked && !request.slipCheck.verified) { %>
+    <div class="topup-detail-status bg-[var(--coral)]/10 border border-[var(--coral)]/40 rounded-2xl p-5 text-center mb-6">
+      <div class="text-2xl mb-2">✕</div>
+      <div class="text-[var(--coral)] font-semibold mb-1">ตรวจสอบสลิปไม่สำเร็จ</div>
+      <p class="text-sm text-[var(--text-3)]"><%= publicSlipMessage(request.slipCheck.message) || 'ระบบตรวจสอบไม่สามารถยืนยันรายการนี้ได้' %></p>
+      <p class="text-xs text-[var(--gold-light)] mt-2">รายการยังไม่ถูกปฏิเสธถาวร คุณสามารถแนบสลิปใหม่หรือติดต่อแอดมินได้</p>
     </div>
   <% } else if (request.status === 'verifying' && request.slipPath && automaticSlipCheck) { %>
     <div class="topup-detail-status bg-sky-500/10 border border-sky-500/30 rounded-2xl p-4 mb-6 flex items-center gap-3 text-sm">
@@ -176,15 +207,15 @@
   </div>
 </section>
 
-<div id="slipUploadOverlay" class="hidden fixed inset-x-4 bottom-5 z-50 mx-auto max-w-md rounded-2xl border border-sky-500/30 bg-[var(--card)]/95 p-4 shadow-2xl backdrop-blur-md">
-  <div class="flex items-center gap-3">
-    <div class="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sky-500/10">
-      <div class="h-6 w-6 rounded-full border-[3px] border-sky-500/20 border-t-sky-500 animate-spin"></div>
+<div id="slipUploadOverlay" class="hidden" role="dialog" aria-modal="true" aria-labelledby="slipStatusTitle" aria-describedby="slipStatusMessage">
+  <div class="slip-check-card">
+    <div class="slip-check-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.4 2.7 8.4 7 10 4.3-1.6 7-5.6 7-10V6l-7-3Z"/><path d="m8.8 12 2.1 2.1 4.5-4.5"/></svg>
     </div>
-    <div class="min-w-0 text-left">
-      <div id="slipStatusTitle" class="text-sm font-bold text-[var(--text)]"><%= automaticSlipCheck ? 'กำลังตรวจสอบสลิป' : 'กำลังบันทึกสลิป' %></div>
-      <p id="slipStatusMessage" class="mt-0.5 text-xs leading-relaxed text-[var(--text-3)]"><%= automaticSlipCheck ? 'กำลังตรวจสอบกับ SlipCheck ปกติใช้เวลาไม่เกิน 15 วินาที' : 'บันทึกเสร็จแล้วจะแสดงสถานะให้ทันที' %></p>
-    </div>
+    <div class="slip-check-spinner" aria-hidden="true"></div>
+    <h2 id="slipStatusTitle" class="slip-check-title"><%= automaticSlipCheck ? 'กำลังตรวจสอบสลิป' : 'กำลังบันทึกสลิป' %><span class="slip-check-dots" aria-hidden="true"><i></i><i></i><i></i></span></h2>
+    <p id="slipStatusMessage" class="slip-check-message" aria-live="polite"><%= automaticSlipCheck ? 'ระบบกำลังตรวจสอบรายการให้คุณ กรุณาอย่าปิดหรือย้อนกลับหน้านี้' : 'กำลังบันทึกสลิปของคุณ กรุณารอสักครู่' %></p>
+    <a id="slipStatusReturn" data-slip-verification-allow href="/account/topup" class="hidden">กลับหน้ารายการเติมเงิน</a>
   </div>
 </div>
 <script>
@@ -221,63 +252,190 @@
     }
   })();
   (function () {
+    var root = document.documentElement;
+    var body = document.body;
     var form = document.getElementById('slipUploadForm');
     var overlay = document.getElementById('slipUploadOverlay');
-    if (!form || !overlay) return;
-    form.addEventListener('submit', function () {
+    var title = document.getElementById('slipStatusTitle');
+    var message = document.getElementById('slipStatusMessage');
+    var returnLink = document.getElementById('slipStatusReturn');
+    var locked = false;
+    var allowUnloadOnce = false;
+    var lockedScrollY = 0;
+    var previousBodyStyles = null;
+    var historyPushed = false;
+    if (!overlay) return;
+
+    function setCopy(nextTitle, nextMessage, showReturn) {
+      if (title && nextTitle) title.textContent = nextTitle;
+      if (message && nextMessage) message.textContent = nextMessage;
+      if (returnLink) returnLink.classList.toggle('hidden', !showReturn);
+      var spinner = overlay.querySelector('.slip-check-spinner');
+      if (spinner) spinner.classList.toggle('hidden', Boolean(showReturn));
+    }
+
+    function unlockPage() {
+      if (!locked) return;
+      locked = false;
+      delete root.dataset.slipVerificationLocked;
+      root.classList.remove('slip-verification-active');
+      body.classList.remove('slip-verification-active');
+      if (previousBodyStyles) {
+        body.style.position = previousBodyStyles.position;
+        body.style.top = previousBodyStyles.top;
+        body.style.left = previousBodyStyles.left;
+        body.style.right = previousBodyStyles.right;
+        body.style.width = previousBodyStyles.width;
+        body.style.touchAction = previousBodyStyles.touchAction;
+      }
+      window.scrollTo(0, lockedScrollY);
+      if (overlay) overlay.classList.add('hidden');
+      window.__lilteamSlipVerificationUnlock = null;
+    }
+
+    function lockPage(allowUnload) {
+      if (locked) return;
+      locked = true;
+      allowUnloadOnce = Boolean(allowUnload);
+      lockedScrollY = window.scrollY || window.pageYOffset || 0;
+      previousBodyStyles = {
+        position: body.style.position,
+        top: body.style.top,
+        left: body.style.left,
+        right: body.style.right,
+        width: body.style.width,
+        touchAction: body.style.touchAction,
+      };
+      root.dataset.slipVerificationLocked = 'true';
+      root.classList.add('slip-verification-active');
+      body.classList.add('slip-verification-active');
+      body.style.position = 'fixed';
+      body.style.top = '-' + lockedScrollY + 'px';
+      body.style.left = '0';
+      body.style.right = '0';
+      body.style.width = '100%';
+      body.style.touchAction = 'none';
+      if (!historyPushed) {
+        historyPushed = true;
+        history.pushState(Object.assign({}, history.state || {}, {
+          lilteamNavigation: true,
+          slipVerificationLock: true,
+          scrollX: window.scrollX,
+          scrollY: lockedScrollY,
+        }), '', window.location.href);
+      }
       overlay.classList.remove('hidden');
+      window.__lilteamSlipVerificationUnlock = unlockPage;
+    }
+
+    function guardPointer(event) {
+      if (!locked) return;
+      var allowed = event.target && event.target.closest ? event.target.closest('#slipStatusReturn') : null;
+      if (allowed) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        unlockPage();
+        allowUnloadOnce = true;
+        window.location.assign(allowed.href);
+        return;
+      }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+    function guardScroll(event) {
+      if (!locked) return;
+      event.preventDefault();
+      window.scrollTo(0, lockedScrollY);
+    }
+    function guardKeys(event) {
+      if (!locked) return;
+      var keys = [' ', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+      if (keys.indexOf(event.key) !== -1) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    }
+    document.addEventListener('click', guardPointer, true);
+    document.addEventListener('wheel', guardScroll, { capture: true, passive: false });
+    document.addEventListener('touchmove', guardScroll, { capture: true, passive: false });
+    document.addEventListener('keydown', guardKeys, true);
+    window.addEventListener('beforeunload', function (event) {
+      if (!locked || allowUnloadOnce) return;
+      event.preventDefault();
+      event.returnValue = '';
     });
-  })();
-  <% if (automaticSlipCheck && request.status === 'verifying' && request.slipPath) { %>
-  (function () {
-    var overlay = document.getElementById('slipUploadOverlay');
+
+    if (form) {
+      form.setAttribute('data-slip-verification-allow', '');
+      form.addEventListener('submit', function (event) {
+        if (locked) {
+          event.preventDefault();
+          return;
+        }
+        lockPage(true);
+        setCopy(<%- JSON.stringify(automaticSlipCheck ? 'กำลังตรวจสอบสลิป' : 'กำลังบันทึกสลิป') %>, <%- JSON.stringify(automaticSlipCheck ? 'ระบบกำลังตรวจสอบรายการให้คุณ กรุณาอย่าปิดหรือย้อนกลับหน้านี้' : 'กำลังบันทึกสลิปของคุณ กรุณารอสักครู่') %>, false);
+      });
+    }
+
+    <% if (automaticSlipCheck && request.status === 'verifying' && request.slipPath) { %>
+    lockPage(false);
+    setCopy('กำลังตรวจสอบสลิป', 'ระบบกำลังเลือกคีย์ที่พร้อมใช้งาน แล้วจะแสดงผลทันทีเมื่อการตรวจเสร็จ', false);
     var statusUrl = '/account/topup/<%= request.id %>/status';
     var detailUrl = '/account/topup/<%= request.id %>';
     var attempts = 0;
-    var verificationDeadline = Date.now() + 125000;
+    var pollingStartedAt = Date.now();
+    var pollDeadlineMs = 90000;
     var pageActive = true;
+    var stopped = false;
     document.addEventListener('lilteam:page-unloading', function () { pageActive = false; }, { once: true });
 
-    if (overlay) {
-      overlay.classList.remove('hidden');
-      var title = document.getElementById('slipStatusTitle');
-      var message = document.getElementById('slipStatusMessage');
-      if (title) title.textContent = 'กำลังตรวจสอบสลิป';
-      if (message) message.textContent = 'ระบบกำลังเลือกคีย์ที่พร้อมใช้งาน แล้วจะเติมเงินให้ทันทีเมื่อตรวจผ่าน';
+    function stopPolling(stopTitle, stopMessage) {
+      stopped = true;
+      setCopy(stopTitle, stopMessage, true);
     }
 
     function checkStatus() {
-      if (!pageActive) return;
-      if (Date.now() >= verificationDeadline) {
-        window.location.replace(detailUrl);
+      if (!pageActive || stopped) return;
+      if (Date.now() - pollingStartedAt >= pollDeadlineMs) {
+        stopPolling('การตรวจใช้เวลานานกว่าปกติ', 'บันทึกสลิปแล้ว ระบบยังตรวจต่ออยู่ คุณกลับมาตรวจสถานะได้จากรายการเติมเงิน');
         return;
       }
       var controller = typeof AbortController === 'function' ? new AbortController() : null;
-      var requestTimeout = setTimeout(function () { if (controller) controller.abort(); }, 8000);
+      var requestTimeout = controller ? window.setTimeout(function () { controller.abort(); }, 8000) : null;
       fetch(statusUrl, { headers: { Accept: 'application/json' }, cache: 'no-store', signal: controller ? controller.signal : undefined })
         .then(function (response) {
+          if (requestTimeout) window.clearTimeout(requestTimeout);
           if (!response.ok) throw new Error('status request failed');
           return response.json();
         })
         .then(function (result) {
           if (!pageActive) return;
-          if (result.finished) {
+          if (result.finished === true || (result.status && result.status !== 'verifying')) {
+            allowUnloadOnce = true;
+            unlockPage();
             window.location.replace(detailUrl);
             return;
           }
           attempts += 1;
+          if (attempts >= 50) {
+            stopPolling('การตรวจใช้เวลานานกว่าปกติ', 'บันทึกสลิปแล้ว ระบบยังตรวจต่ออยู่ คุณกลับมาตรวจสถานะได้จากรายการเติมเงิน');
+            return;
+          }
           setTimeout(checkStatus, attempts < 10 ? 1200 : 2000);
         })
         .catch(function () {
+          if (requestTimeout) window.clearTimeout(requestTimeout);
           if (!pageActive) return;
           attempts += 1;
-          if (Date.now() >= verificationDeadline) window.location.replace(detailUrl);
-          else setTimeout(checkStatus, attempts < 10 ? 1500 : 3000);
-        })
-        .finally(function () { clearTimeout(requestTimeout); });
+          if (attempts >= 50 || Date.now() - pollingStartedAt >= pollDeadlineMs) {
+            stopPolling('ระบบตรวจสอบยังไม่ตอบสนอง', 'สลิปถูกบันทึกแล้ว กรุณากลับมาตรวจสถานะอีกครั้งในรายการเติมเงิน');
+            return;
+          }
+          setTimeout(checkStatus, attempts < 10 ? 1500 : 3000);
+        });
     }
 
     checkStatus();
+    <% } %>
   })();
-  <% } %>
 </script>
