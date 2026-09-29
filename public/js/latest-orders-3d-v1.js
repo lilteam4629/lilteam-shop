@@ -7,7 +7,7 @@
     if (teardown) teardown();
     teardown = null;
 
-    var section = document.querySelector('[data-latest-orders]');
+    var section = document.querySelector('[data-latest-orders], .latest-orders-section');
     if (!section) return;
 
     var shell = section.querySelector('.latest-orders-shell');

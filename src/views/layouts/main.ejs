@@ -1328,6 +1328,6 @@
 </script>
   <script src="<%= asset('js/scroll-motion-v1.js') %>" defer></script>
   <script src="<%= asset('js/interaction-performance-v1.js') %>" defer></script>
-  <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %><script src="<%= asset('js/latest-orders-3d-v1.js') %>" defer></script><% } %>
+  <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %><script src="<%= asset('js/latest-orders-3d-v1.js') %>" defer></script><% } %>
 </body>
 </html>
