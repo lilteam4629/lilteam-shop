@@ -186,7 +186,7 @@ assert.match(productCard, /if \(isMainStorefrontCard\) \{[\s\S]*?main-store-prod
   'main-store classic and natural cards must show live stock beside the product name');
 assert.match(productCard, /owner-home-v21-media[\s\S]*?width="960" height="540"/,
   'the new card must reserve image space and preserve the full product image');
-assert.match(listing, /isMainStorefrontListing[\s\S]*?main-store-product-title-row[\s\S]*?main-store-product-stock/,
+assert.match(productCard, /owner-home-v21-title-row[\s\S]*?owner-home-v21-stock-badge/,
   'the shared catalog page must place each product stock badge beside its title');
 assert.doesNotMatch(home, /owner-home-v17-hero-shell|owner-home-v17-visual|owner-home-v17-banner-frame/,
   'the former split-text and framed-screen hero must be removed from the active homepage template');
@@ -392,7 +392,7 @@ let productCardRuleCount = 0;
 productCardStylesheet.walkRules(rule => {
   productCardRuleCount += 1;
   for (const selector of rule.selectors) {
-    assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7') && selector.includes('.owner-home-v20-shell'),
+    assert.ok(selector.includes('#site-page-shell.storefront-owner-home-v7') && (selector.includes('.owner-home-v20-shell') || selector.includes('.owner-home-catalog-grid')),
       `product-card style could affect a tenant or non-home page: ${selector}`);
   }
 });
@@ -516,6 +516,16 @@ assert.match(listingHtml, /if \(isMainStorefrontListing\)[\s\S]*?storefront-cata
   'the redesigned catalogue stylesheet must load for all refreshed shops');
 assert.match(listingHtml, /main-storefront-catalog-page/,
   'the storefront listing must expose its catalog styling scope');
+assert.match(listingHtml, /owner-home-catalog-grid/,
+  'the all-products listing must use the homepage grid scope');
+assert.match(listingHtml, /include\('\.\.\/partials\/product-card', \{ p, ownerHomeProductCard: true, catalogFilterCard: true \}\)/,
+  'the all-products listing must reuse the shared homepage product-card partial');
+assert.match(listingHtml, /catalog-filter-card/,
+  'the shared catalog card must remain addressable by search and stock filters');
+assert.match(route, /router\.get\('\/products'[\s\S]*?storefrontOwnerHomeV7:\s*true/,
+  'the all-products route must enable the shared storefront card treatment');
+assert.match(productCard, /data-search=/,
+  'shared catalog cards must retain a normalized search field');
 const sharedCatalogStylesheet = postcss.parse(sharedCatalogCss, { from: 'storefront-catalog-shared-v1.css' });
 let sharedCatalogRuleCount = 0;
 sharedCatalogStylesheet.walkRules(rule => {

@@ -8,11 +8,12 @@
   const isFan = typeof compact !== 'undefined' && compact;
   const isMainStorefrontCard = typeof isMainSite !== 'undefined' && isMainSite;
   const useOwnerHomeShowcase = typeof ownerHomeProductCard !== 'undefined' && ownerHomeProductCard && !isFan;
+  const useCatalogFilterCard = typeof catalogFilterCard !== 'undefined' && catalogFilterCard;
   const useClassic = isFan || !(typeof settings !== 'undefined' && settings.productCardStyle === 'natural');
 %>
 <% if (useOwnerHomeShowcase) { %>
-<a href="/game/<%= p.slug %>" data-product-id="<%= p.id %>" data-stock="<%= soldOut ? 'sold' : 'available' %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"
-  class="owner-home-v21-product-card main-store-product-card filterable-card group" aria-label="<%= p.title %> <%= isRandomBox ? `กล่องสุ่ม ${p.price.toLocaleString()} บาทต่อครั้ง` : `ราคา ${p.price.toLocaleString()} บาท` %>, <%= soldOut ? (isRandomBox ? 'รางวัลหมดชั่วคราว' : 'สินค้าหมด') : (isRandomBox ? 'พร้อมสุ่ม' : `คงเหลือ ${p.stockCount.toLocaleString()} ชิ้น`) %>">
+<a href="/game/<%= p.slug %>" data-product-id="<%= p.id %>" data-stock="<%= soldOut ? 'sold' : 'available' %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-search="<%= [p.title, p.slug, ...(p.genres || [])].filter(Boolean).join(' ').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"<%= useCatalogFilterCard ? ' data-catalog-filter-card="true"' : '' %>
+  class="owner-home-v21-product-card main-store-product-card filterable-card group<%= useCatalogFilterCard ? ' catalog-filter-card' : '' %>" aria-label="<%= p.title %> <%= isRandomBox ? `กล่องสุ่ม ${p.price.toLocaleString()} บาทต่อครั้ง` : `ราคา ${p.price.toLocaleString()} บาท` %>, <%= soldOut ? (isRandomBox ? 'รางวัลหมดชั่วคราว' : 'สินค้าหมด') : (isRandomBox ? 'พร้อมสุ่ม' : `คงเหลือ ${p.stockCount.toLocaleString()} ชิ้น`) %>">
   <div class="owner-home-v21-media">
     <% if (p.images && p.images[0]) { %>
       <img src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low" />

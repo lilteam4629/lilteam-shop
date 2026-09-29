@@ -313,6 +313,7 @@ router.get('/products', (req, res) => {
     catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
     catalogApiLogo: store.platformData.settings.branding?.logoImage || null,
     catalogApiShopUrl: mainSiteUrlFor(req),
+    storefrontOwnerHomeV7: true,
   });
 });
 
@@ -336,6 +337,7 @@ router.get('/search', (req, res) => {
     catalogApiShopName: store.platformData.settings.shopName || 'ร้านหลัก',
     catalogApiLogo: store.platformData.settings.branding?.logoImage || null,
     catalogApiShopUrl: mainSiteUrlFor(req),
+    storefrontOwnerHomeV7: true,
   });
 });
 
