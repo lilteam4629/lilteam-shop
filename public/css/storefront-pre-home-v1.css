@@ -4743,9 +4743,10 @@ body.storefront-unified #site-page-shell.storefront-owner-home-v7 .owner-home-v2
 #site-page-shell .latest-orders-section .latest-orders-shell:is(:active, .is-user-paused) .latest-orders-track {
   animation-play-state: paused !important;
 }
+/* Reduced-motion preferences still keep the requested order ticker running.
+   The rail is intentionally slow and linear; card tilt is disabled below. */
 #site-page-shell .latest-orders-section .latest-orders-shell.is-motion-reduced .latest-orders-track {
-  animation: none !important;
-  will-change: auto !important;
+  will-change: translate !important;
 }
 #site-page-shell .latest-orders-section .latest-orders-group { display: flex; gap: 14px !important; }
 
@@ -4918,10 +4919,24 @@ body.storefront-unified #site-page-shell.storefront-owner-home-v7 .owner-home-v2
 
 @media (prefers-reduced-motion: reduce) {
   #site-page-shell .latest-orders-section .latest-orders-shell { overflow-x: auto !important; scrollbar-width: thin; }
-  #site-page-shell .latest-orders-section .latest-orders-track { animation: none !important; will-change: auto !important; }
+  #site-page-shell .latest-orders-section .latest-orders-track {
+  will-change: translate !important;
+}
+  #site-page-shell .latest-orders-section .latest-orders-track {
+    animation-duration: var(--latest-orders-duration, 32s) !important;
+    animation-timing-function: linear !important;
+    animation-iteration-count: infinite !important;
+  }
   #site-page-shell .latest-orders-section .latest-order-card,
   #site-page-shell .latest-orders-section .latest-order-card:hover,
   #site-page-shell .latest-orders-section .latest-order-card:focus-visible { transform: perspective(750px) rotateX(4deg) translateY(0) !important; transition: none; }
+}
+
+/* Keep the owner ticker moving when the broad page reduced-motion guard is active. */
+#site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .latest-orders-section .latest-orders-track {
+  animation-duration: var(--latest-orders-duration, 32s) !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
 }
 
 /* Source: storefront-announcement-width-v1.css */
