@@ -19,10 +19,19 @@ function oneEditApart(left, right) {
 }
 
 function textValues(...values) {
-  return values.flat(Infinity).map(value => {
-    if (value && typeof value === 'object') return value.th || value.en || value.full || value.display || '';
-    return value;
-  }).filter(value => typeof value === 'string' || typeof value === 'number');
+  const output = [];
+  function visit(value) {
+    if (Array.isArray(value)) return value.forEach(visit);
+    if (value && typeof value === 'object') {
+      const candidate = value.th || value.en || value.full || value.display || value.value
+        || value.account || value.number || value.accountNumber || value.bankNumber;
+      if (candidate !== undefined) return visit(candidate);
+      return;
+    }
+    if (typeof value === 'string' || typeof value === 'number') output.push(value);
+  }
+  values.forEach(visit);
+  return output;
 }
 
 function receiverMatches({ actualNames = [], actualNumbers = [], expectedNames = [], expectedNumbers = [], allowMaskedNumber = false } = {}) {

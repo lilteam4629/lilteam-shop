@@ -1,6 +1,6 @@
 const assert = require('node:assert/strict');
 const axios = require('axios');
-const { extractReceiverEvidence, receiverMatches } = require('../src/services/receiver-match');
+const { extractReceiverEvidence, receiverMatches, textValues } = require('../src/services/receiver-match');
 const receiverProfiles = require('../src/services/receiver-profiles');
 
 const standardPayload = {
@@ -29,6 +29,13 @@ assert.equal(receiverMatches({
   expectedNames: ['สมชาย ใจดี', 'SOMCHAI JAIDEE'],
   expectedNumbers: ['0812345678'],
 }).matched, true, 'English receiver aliases must be usable when the provider returns English');
+assert.equal(receiverMatches({
+  actualNames: textValues({ value: 'นาย อุรพงค์ สงทิม' }),
+  actualNumbers: textValues({ account: { value: 'XXX-X-XX804-4' } }),
+  expectedNames: ['อุรพงค์ สงทิม'],
+  expectedNumbers: ['147-3-36804-4'],
+  allowMaskedNumber: true,
+}).matched, true, 'wrapped provider receiver fields must remain verifiable');
 
 // Regression guard: the account shown on the storefront must remain a
 // verification candidate when a provider-specific receiver snapshot exists.
