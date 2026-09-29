@@ -55,7 +55,7 @@ function toMonochromeStorefrontTheme(input = {}) {
     : {};
   return {
     ...saved,
-    accent: '#000000',
+    accent: /^#[0-9a-fA-F]{6}$/.test(saved.accent || '') ? saved.accent : '#000000',
     bgPreset: MAIN_BG_PRESET_KEY,
     bgColor: null,
     style: 'normal',

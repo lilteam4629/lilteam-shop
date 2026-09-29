@@ -151,7 +151,7 @@ const legacyTenantTheme = {
   mainMonoSurfaces: { dark: 'white', light: 'black' },
 };
 const normalizedTenantTheme = theme.toMonochromeStorefrontTheme(legacyTenantTheme);
-assert.equal(normalizedTenantTheme.accent, '#000000');
+assert.equal(normalizedTenantTheme.accent, '#d6547a');
 assert.equal(normalizedTenantTheme.bgPreset, theme.MAIN_BG_PRESET_KEY);
 assert.equal(normalizedTenantTheme.bgColor, null);
 assert.equal(normalizedTenantTheme.style, 'normal');

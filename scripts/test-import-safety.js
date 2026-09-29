@@ -463,11 +463,11 @@ async function main() {
   check('Both main and tenant theme saves persist the monochrome storefront contract', () => {
     assert.equal(mainThemePostFixture.settings.theme.bgPreset, 'monochrome');
     assert.equal(mainThemePostFixture.settings.theme.bgColor, null);
-    assert.equal(mainThemePostFixture.settings.theme.accent, '#000000');
+    assert.equal(mainThemePostFixture.settings.theme.accent, '#c8a63f');
     assert.equal(mainThemePostFixture.settings.theme.style, 'normal');
     assert.equal(tenantThemePostFixture.settings.theme.bgPreset, 'monochrome');
     assert.equal(tenantThemePostFixture.settings.theme.bgColor, null);
-    assert.equal(tenantThemePostFixture.settings.theme.accent, '#000000');
+    assert.equal(tenantThemePostFixture.settings.theme.accent, '#c8a63f');
     assert.equal(tenantThemePostFixture.settings.theme.style, 'normal');
   });
   const welcomePopupHandler = admin.stack.find(layer => layer.route?.path === '/welcome-popup' && layer.route.methods.get).route.stack.at(-1).handle;

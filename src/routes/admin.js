@@ -1518,12 +1518,12 @@ router.get('/theme', (req, res) => {
     currentTheme: monochromeTheme,
     // Keep the editor honest: every storefront, including rentals, exposes
     // only the supported black/white surface choices.
-    accentPresets: [{ key: 'black', label: 'ดำ / ขาว', color: '#000000' }],
+    accentPresets: theme.getAccentPresets(),
     bgPresets: theme.getBgPresets({ mainShopOnly: true }),
     bgPreviewPresets: theme.getBgPresets({ mainShopOnly: true }),
     mainAdminUi,
     monochromeOnly: true,
-    styles: [{ key: 'normal', label: 'ปกติ' }],
+    styles: theme.getStyles(),
   });
 });
 
@@ -1532,9 +1532,10 @@ router.post('/theme', async (req, res) => {
   const current = theme.toMonochromeStorefrontTheme(store.data.settings.theme);
   // Persist the same contract used by the storefront renderer. This prevents
   // a legacy tenant form or an old browser from reintroducing colour later.
+  const accent = /^#[0-9a-fA-F]{6}$/.test(req.body.accent || '') ? req.body.accent : current.accent;
   store.data.settings.theme = {
     ...current,
-    accent: '#000000',
+    accent,
     bgPreset: theme.MAIN_BG_PRESET_KEY,
     bgColor: null,
     style: 'normal',

@@ -1,7 +1,7 @@
 <%
   const themeSeed = currentTheme || {};
   const monochromeThemePage = typeof monochromeOnly !== 'undefined' && monochromeOnly === true;
-  const safeAccent = monochromeThemePage ? '#000000' : (/^#[0-9a-fA-F]{6}$/.test(themeSeed.accent || '') ? themeSeed.accent : '#c8a63f');
+  const safeAccent = /^#[0-9a-fA-F]{6}$/.test(themeSeed.accent || '') ? themeSeed.accent : '#c8a63f';
   const safeBgColor = monochromeThemePage ? '' : (/^#[0-9a-fA-F]{6}$/.test(themeSeed.bgColor || '') ? themeSeed.bgColor : '');
   const safeBgPreset = monochromeThemePage ? 'monochrome' : (bgPresets.some(preset => preset.key === themeSeed.bgPreset)
     ? themeSeed.bgPreset
@@ -93,7 +93,7 @@
             <% }) %>
           </fieldset>
 
-          <div class="admin-theme-custom-row"<%= monochromeThemePage ? ' hidden' : '' %>>
+          <div class="admin-theme-custom-row">
             <label class="admin-theme-custom-radio">
               <input type="radio" name="accent" value="<%= safeAccent %>" data-theme-accent-custom <%= accentIsPreset ? '' : 'checked' %> />
               <span>ใช้สีที่เลือกเอง</span>
