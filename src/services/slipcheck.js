@@ -146,6 +146,10 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
     });
     const body = response.data || {};
     const data = body.data || {};
+    // Some SlipCheck deployments wrap the parsed slip one level deeper.
+    // Flatten that envelope while retaining the outer fields for backwards
+    // compatibility with the documented response shape.
+    const parsedPayload = data && typeof data.data === 'object' ? { ...data, ...data.data } : data;
     if (!body.success) {
       const quotaExhausted = isQuotaExhausted(body);
       const keyUnavailable = isKeyUnavailable(body);
@@ -158,9 +162,9 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
         raw: body,
       };
     }
-    const normalizedRaw = { ...data, transRef: data.ref_no || data.transRef || data.trans_ref || data.reference, date: data.transferred_at || data.date || data.transDateTime, providerResponse: body };
-    if (body.duplicate || data.duplicate || data.isDuplicate || data.is_duplicate) return { checked: true, verified: false, message: 'สลิปนี้เคยถูกใช้แล้ว (สลิปซ้ำ)', raw: normalizedRaw };
-    const amount = numberValue(data.amount ?? data.transferAmount ?? data.transAmount);
+    const normalizedRaw = { ...parsedPayload, transRef: parsedPayload.ref_no || parsedPayload.transRef || parsedPayload.trans_ref || parsedPayload.reference, date: parsedPayload.transferred_at || parsedPayload.date || parsedPayload.transDateTime, providerResponse: body };
+    if (body.duplicate || parsedPayload.duplicate || parsedPayload.isDuplicate || parsedPayload.is_duplicate) return { checked: true, verified: false, message: 'สลิปนี้เคยถูกใช้แล้ว (สลิปซ้ำ)', raw: normalizedRaw };
+    const amount = numberValue(parsedPayload.amount ?? parsedPayload.transferAmount ?? parsedPayload.transAmount);
     if (!Number.isFinite(amount) || Math.abs(amount - Number(expectedAmount)) > 0.009) {
       return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: normalizedRaw };
     }
@@ -168,14 +172,14 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
     // deployments put receiver fields on the success envelope itself. Read
     // both levels so a valid destination is not discarded as "wrong receiver".
     const envelope = body && typeof body === 'object' ? body : {};
-    const receiver = data.receiver || data.receiving || data.payee
+    const receiver = parsedPayload.receiver || parsedPayload.receiving || parsedPayload.payee
       || envelope.receiver || envelope.receiving || envelope.payee || {};
-    const receiverAccount = receiver.account || data.receiver_account || data.receiverAccount
+    const receiverAccount = receiver.account || parsedPayload.receiver_account || parsedPayload.receiverAccount
       || envelope.receiver_account || envelope.receiverAccount || {};
-    const discovered = extractReceiverEvidence({ ...envelope, ...data });
+    const discovered = extractReceiverEvidence({ ...envelope, ...data, ...parsedPayload });
     const receiverCheck = receiverMatches({
-      actualNames: textValues(data.receiver_name, data.receiverName, envelope.receiver_name, envelope.receiverName, receiver.name, receiver.displayName, receiverAccount.name, receiverAccount.displayName, discovered.names),
-      actualNumbers: textValues(data.receiver_account_number, data.receiverAccountNumber, envelope.receiver_account_number, envelope.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, discovered.numbers),
+      actualNames: textValues(parsedPayload.receiver_name, parsedPayload.receiverName, envelope.receiver_name, envelope.receiverName, receiver.name, receiver.displayName, receiverAccount.name, receiverAccount.displayName, discovered.names),
+      actualNumbers: textValues(parsedPayload.receiver_account_number, parsedPayload.receiverAccountNumber, envelope.receiver_account_number, envelope.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, discovered.numbers),
       expectedNames: credentials.expectedReceiverNames,
       expectedNumbers: credentials.expectedReceiverNumbers,
       allowMaskedNumber: true,
