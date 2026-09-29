@@ -31,7 +31,11 @@
       var step = groupWidth + gap;
       // One or two recent orders still fill a wide screen without exposing a
       // blank area at the instant the seamless loop returns to its start.
-      while (track.scrollWidth - step < shell.clientWidth + 24 && track.children.length < 16) {
+      // The owner rail is intentionally a short, touch-scrollable list. A
+      // previous fill loop cloned the complete ten-card group up to 16 times
+      // when the measured group width was temporarily small, creating 160
+      // cards and a large layout/paint cost on mobile WebViews.
+      while (track.scrollWidth - step < shell.clientWidth + 24 && track.children.length < 2) {
         var copy = original.cloneNode(true);
         copy.setAttribute('aria-hidden', 'true');
         copy.setAttribute('inert', '');

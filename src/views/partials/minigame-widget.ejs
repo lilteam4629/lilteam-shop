@@ -32,7 +32,7 @@
       <% } else { %>
         <div class="mg-card-icon mg-card-icon-el">🎉</div>
       <% } %>
-      <img class="mg-card-image mg-card-image-el hidden" alt="" />
+      <img class="mg-card-image mg-card-image-el hidden" alt="" width="96" height="96" loading="lazy" decoding="async" />
       <div class="mg-card-name mg-card-name-el"></div>
     </div>
     <div class="mg-confetti mg-confetti-el"></div>
@@ -55,7 +55,7 @@
         <div class="mg-preview-prize-list">
           <% mgPreviewPrizes.slice(0, 8).forEach(prize => { %>
             <article class="mg-preview-prize">
-              <% if (prize.resolvedImage || prize.image) { %><img src="<%= prize.resolvedImage || prize.image %>" alt="" loading="lazy" /><% } else { %><span class="mg-preview-prize-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 8 9-5 9 5v9l-9 5-9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v9"/></svg></span><% } %>
+              <% if (prize.resolvedImage || prize.image) { %><img src="<%= prize.resolvedImage || prize.image %>" alt="" width="72" height="88" loading="lazy" decoding="async" /><% } else { %><span class="mg-preview-prize-placeholder" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 8 9-5 9 5v9l-9 5-9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v9"/></svg></span><% } %>
               <span class="mg-preview-prize-copy"><strong><%= prize.name %></strong><small><%= Number(prize.percent || 0).toLocaleString('th-TH') %>% · <%= prize.isPrize ? 'มีรางวัล' : 'ไม่มีรางวัล' %></small></span>
             </article>
           <% }) %>

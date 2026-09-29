@@ -24,7 +24,7 @@
   <div class="store-nav__inner">
     <button type="button" class="store-nav__round store-nav__mobile-toggle" aria-label="เปิดเมนู" aria-expanded="false" aria-controls="storeMobileMenu"><span></span><span></span><span></span></button>
     <a href="/" class="store-nav__brand<%= settings.branding && settings.branding.logoImage ? ' store-nav__brand--image' : '' %>" aria-label="หน้าแรก <%= settings.shopName %>">
-      <% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" /><% } else { %><span class="store-nav__logo-fallback" data-storefront-preview-initial>L</span><% } %>
+      <% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="โลโก้ <%= settings.shopName %>" width="120" height="44" decoding="async" /><% } else { %><span class="store-nav__logo-fallback" data-storefront-preview-initial>L</span><% } %>
       <strong data-storefront-preview-setting="shopName"><%= settings.shopName %></strong>
     </a>
     <nav class="store-nav__links" aria-label="เมนูหลัก">
@@ -39,7 +39,7 @@
           <a href="/products" class="store-nav__category-all"><svg><use href="#ui-box"/></svg><span><b>สินค้าทั้งหมด</b><small>ดูสินค้าทุกประเภท</small></span></a>
           <% (cozyStorefrontNav ? categoryMenuTags : categoryMenuTags.slice(0, 10)).forEach(tag => { %>
             <a href="/products?tags=<%= encodeURIComponent(tag.id) %>" class="store-nav__category-item">
-              <% if (tag.image) { %><img src="<%= tag.image %>" alt="" loading="lazy" /><% } else { %><i><svg><use href="#ui-tag"/></svg></i><% } %>
+              <% if (tag.image) { %><img src="<%= tag.image %>" alt="" width="40" height="40" loading="lazy" decoding="async" /><% } else { %><i><svg><use href="#ui-tag"/></svg></i><% } %>
               <span><b><%= tag.name %></b></span>
             </a>
           <% }) %>
@@ -121,7 +121,7 @@
     </div>
   </div>
   <aside class="store-nav__mobile-row" id="storeMobileMenu" <%= cozyStorefrontNav ? 'role="dialog" aria-modal="true" aria-labelledby="storeMobileMenuTitle"' : '' %> aria-label="เมนูมือถือ">
-    <header><a href="/" class="store-nav__drawer-brand"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="" /><% } else { %><span data-storefront-preview-initial>L</span><% } %><strong id="storeMobileMenuTitle" data-storefront-preview-setting="shopName"><%= settings.shopName %></strong></a><button type="button" class="store-nav__mobile-close" aria-label="ปิดเมนู"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></header>
+    <header><a href="/" class="store-nav__drawer-brand"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="" width="120" height="44" loading="lazy" decoding="async" /><% } else { %><span data-storefront-preview-initial>L</span><% } %><strong id="storeMobileMenuTitle" data-storefront-preview-setting="shopName"><%= settings.shopName %></strong></a><button type="button" class="store-nav__mobile-close" aria-label="ปิดเมนู"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg></button></header>
     <form action="/search" method="get" role="search"><input type="search" name="q" placeholder="ค้นหาสินค้า..." aria-label="ค้นหาสินค้า" /><button type="submit" aria-label="ค้นหา"><svg><use href="#ui-search"/></svg></button></form>
     <nav><a href="/"><svg><use href="#ui-home"/></svg><span>หน้าหลัก</span></a><a href="/products"><svg><use href="#ui-grid"/></svg><span>หมวดหมู่สินค้า</span></a><a href="/products"><svg><use href="#ui-box"/></svg><span>สินค้าทั้งหมด</span></a><a href="/help"><svg><use href="#ui-book"/></svg><span>คู่มือการใช้งาน</span></a><% if (currentUser) { %><a href="/account/topup"><svg><use href="#ui-wallet"/></svg><span>เติมเงิน</span></a><a href="/cart"><svg><use href="#ui-cart"/></svg><span>ตะกร้า</span></a><% } %><a href="/contact"><svg><use href="#ui-phone"/></svg><span>ติดต่อเรา</span></a></nav>
     <% if (currentUser) { %><div class="store-nav__drawer-section"><b>ระบบสมาชิก</b></div><nav><a href="/account"><svg><use href="#ui-user"/></svg><span>จัดการโปรไฟล์</span></a><a href="/account/orders"><svg><use href="#ui-box"/></svg><span>สถานะคำสั่งซื้อ</span></a><% if (currentUser.role === 'admin') { %><a href="/admin"><svg><use href="#ui-shield"/></svg><span>จัดการหลังบ้าน <small><%= mainSiteNav ? 'ร้านค้าหลัก' : 'ร้านค้า' %></small></span></a><% } %><a href="/logout" class="store-nav__drawer-logout"><svg><use href="#ui-logout"/></svg><span>ออกจากระบบ</span></a></nav><% } else { %><div class="store-nav__drawer-auth"><a href="/login">เข้าสู่ระบบ</a><a href="/register">สมัครสมาชิก</a></div><% } %>

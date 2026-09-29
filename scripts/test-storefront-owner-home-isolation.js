@@ -128,7 +128,7 @@ assert.match(ownerHeroLayoutCss, /\.owner-home-v20-artwork img\s*\{[^}]*filter:\
   'the main banner image must not create a filtered GPU layer');
 assert.match(home, /ownerHomeV20\) \{ %>[\s\S]*?ownerHomeBanner = settings\.hero && settings\.hero\.mode === 'banner' \? settings\.hero\.bannerImage : null/,
   'the new banner-first hero must use the configured real shop banner');
-assert.match(home, /class="owner-home-v20-artwork"[\s\S]*?<a href="<%= settings\.hero\.bannerLink %>" aria-label=[\s\S]*?<img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high"/,
+assert.match(home, /class="owner-home-v20-artwork"[\s\S]*?<a href="<%= settings\.hero\.bannerLink %>" aria-label=[\s\S]*?<img src="<%= ownerHomeBanner %>" alt=""[^>]*fetchpriority="high"/,
   'the uploaded banner must remain visible and load with high priority');
 assert.match(home, /owner-home-v20-hero--banner-only[\s\S]*?if \(!ownerHomeBanner\) \{ %>[\s\S]*?owner-home-v20-hero-content/,
   'a configured banner must replace the homepage text and action block');

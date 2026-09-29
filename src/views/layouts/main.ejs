@@ -264,7 +264,7 @@
   <div id="page-loading-overlay" aria-hidden="true">
     <div class="loading-ring">
       <% if (settings.branding && settings.branding.logoImage) { %>
-        <img src="<%= settings.branding.logoImage %>" alt="" class="loading-logo" />
+        <img src="<%= settings.branding.logoImage %>" alt="" width="72" height="72" class="loading-logo" />
       <% } else { %>
         <span class="loading-logo-fallback">L</span>
       <% } %>
@@ -691,7 +691,7 @@
   <div id="music-widget" class="fixed bottom-4 right-4 z-50 select-none" data-video-id="<%= musicVideoId %>" data-default-volume="<%= settings.music.defaultVolume %>" data-start-seconds="<%= settings.music.startSeconds || 0 %>" data-end-seconds="<%= settings.music.endSeconds || 0 %>">
     <button id="music-toggle-btn" type="button" aria-label="เล่นเพลง" title="เล่นเพลง / หยุดเพลง" class="music-widget__toggle relative flex items-center text-left">
       <span class="music-widget__artwork" aria-hidden="true">
-        <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="" />
+        <img id="music-thumb" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="" width="48" height="48" loading="lazy" decoding="async" />
         <span id="music-icon"><svg viewBox="0 0 24 24" focusable="false"><path d="M9 18V5l12-2v13M9 18c0 1.66-1.57 3-3.5 3S2 19.66 2 18s1.57-3 3.5-3S9 16.34 9 18Zm12-2c0 1.66-1.57 3-3.5 3S14 17.66 14 16s1.57-3 3.5-3S21 14.34 21 16Z" /></svg></span>
       </span>
       <span class="music-widget__copy" aria-hidden="true">
@@ -704,7 +704,7 @@
 
     <div id="music-panel" class="music-panel hidden absolute bottom-16 right-0 w-64 bg-[var(--card)] border border-[var(--border)] rounded-2xl shadow-2xl overflow-hidden text-[var(--text)]">
       <div class="music-panel__media relative aspect-video bg-[#0c0a06]">
-        <img class="music-panel__artwork w-full h-full object-cover" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="ภาพเพลงหน้าเว็บ" />
+        <img class="music-panel__artwork w-full h-full object-cover" src="https://img.youtube.com/vi/<%= musicVideoId %>/mqdefault.jpg" alt="ภาพเพลงหน้าเว็บ" width="320" height="180" loading="lazy" decoding="async" />
         <button id="music-collapse-btn" type="button" aria-label="ปิดแผงควบคุมเพลง" title="ปิดแผงควบคุมเพลง" class="music-panel__close absolute top-2 right-2 w-7 h-7 rounded-full flex items-center justify-center">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18" /></svg>
         </button>

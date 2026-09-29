@@ -88,16 +88,16 @@
     <% if (ownerHomeBanner) { %>
       <div class="owner-home-v20-artwork">
         <% if (settings.hero.bannerLink) { %>
-          <a href="<%= settings.hero.bannerLink %>" aria-label="เปิดแบนเนอร์ร้าน <%= settings.shopName %>"><img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high" decoding="async" /></a>
+          <a href="<%= settings.hero.bannerLink %>" aria-label="เปิดแบนเนอร์ร้าน <%= settings.shopName %>"><img src="<%= ownerHomeBanner %>" alt="" width="1200" height="400" fetchpriority="high" decoding="async" /></a>
         <% } else { %>
-          <img src="<%= ownerHomeBanner %>" alt="" fetchpriority="high" decoding="async" />
+          <img src="<%= ownerHomeBanner %>" alt="" width="1200" height="400" fetchpriority="high" decoding="async" />
         <% } %>
       </div>
     <% } else if (ownerHomeHeroProduct) { %>
       <a class="owner-home-v20-artwork owner-home-v23-spotlight owner-home-cozy-spotlight" href="<%= ownerHomeHeroProduct.slug ? '/game/' + ownerHomeHeroProduct.slug : '#home-catalog' %>" aria-label="ดูสินค้า <%= ownerHomeHeroProduct.title %>">
         <span class="owner-home-v23-spotlight-head"><span><%= ownerHomeFeatured ? 'สินค้าเข้าใหม่' : 'สินค้าในร้าน' %></span><span class="owner-home-v23-stock" data-stock-state="<%= Number(ownerHomeHeroProduct.stockCount || 0) > 0 ? 'available' : 'sold' %>"><i aria-hidden="true"></i><%= Number(ownerHomeHeroProduct.stockCount || 0) > 0 ? `พร้อมส่ง ${Number(ownerHomeHeroProduct.stockCount).toLocaleString()}` : 'สินค้าหมด' %></span></span>
         <span class="owner-home-v23-spotlight-image">
-          <% if (ownerHomeHeroProduct.images && ownerHomeHeroProduct.images[0]) { %><img src="<%= ownerHomeHeroProduct.images[0] %>" alt="" fetchpriority="high" decoding="async" /><% } else { %><span class="owner-home-v23-spotlight-fallback" aria-hidden="true">L</span><% } %>
+          <% if (ownerHomeHeroProduct.images && ownerHomeHeroProduct.images[0]) { %><img src="<%= ownerHomeHeroProduct.images[0] %>" alt="" width="960" height="540" fetchpriority="high" decoding="async" /><% } else { %><span class="owner-home-v23-spotlight-fallback" aria-hidden="true">L</span><% } %>
         </span>
         <span class="owner-home-v23-spotlight-details"><span><small><%= ownerHomeFeatured ? 'รายการล่าสุด' : 'เลือกดูสินค้า' %></small><strong><%= ownerHomeHeroProduct.title %></strong></span><span class="owner-home-v23-spotlight-price"><small>ราคา</small><strong>฿<%= Number(ownerHomeHeroProduct.price || 0).toLocaleString() %></strong></span></span>
       </a>
@@ -108,10 +108,10 @@
     <div class="banner-hero-shell w-full max-w-[1800px] px-0 sm:px-4 lg:w-[85%] lg:px-0 mx-auto py-0 sm:py-6">
       <% if (settings.hero.bannerLink) { %>
         <a href="<%= settings.hero.bannerLink %>" class="banner-sparkle group block overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)] transition-all duration-300 hover:border-[var(--gold)]/60 hover:shadow-[0_0_50px_-10px_color-mix(in_srgb,var(--gold)_50%,transparent)]">
-          <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" fetchpriority="high" decoding="async" class="w-full object-cover transition duration-500 group-hover:scale-[1.02] group-hover:brightness-105" />
+          <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" width="1200" height="400" fetchpriority="high" decoding="async" class="w-full object-cover transition duration-500 group-hover:scale-[1.02] group-hover:brightness-105" />
         </a>
       <% } else { %>
-        <div class="banner-sparkle overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]"><img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" fetchpriority="high" decoding="async" class="w-full object-cover" /></div>
+        <div class="banner-sparkle overflow-hidden rounded-none sm:rounded-2xl border-0 sm:border border-[var(--border)] shadow-none sm:shadow-[0_0_40px_-14px_color-mix(in_srgb,var(--gold)_35%,transparent)]"><img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" width="1200" height="400" fetchpriority="high" decoding="async" class="w-full object-cover" /></div>
       <% } %>
     </div>
   </section>
@@ -263,7 +263,7 @@
 
 <% if (catalogApiFeaturedProducts && catalogApiFeaturedProducts.length) { %>
 <section class="api-product-shelf" aria-label="สินค้า API จากร้านหลัก">
-  <div class="api-product-shelf-head"><div class="api-product-shelf-brand"><% if (catalogApiLogo) { %><img src="<%= catalogApiLogo %>" alt="<%= catalogApiShopName %>" /><% } else { %><span class="api-product-shelf-logo-fallback">L</span><% } %><div><span>MAIN SHOP API</span><h2>สินค้า Partner <%= catalogApiShopName %></h2><p>รายการนี้แยกจากสินค้าร้านเช่า · ต้องเติมเงินสินค้า API ก่อนซื้อเท่านั้น</p></div></div><div class="api-product-shelf-actions"><a href="/products#catalog-api">ดูสินค้า API ทั้งหมด</a><a href="/account/topup/catalog-api">เติมเงิน API →</a><a href="/contact?api=1">ติดต่อร้านหลัก</a></div></div>
+  <div class="api-product-shelf-head"><div class="api-product-shelf-brand"><% if (catalogApiLogo) { %><img src="<%= catalogApiLogo %>" alt="<%= catalogApiShopName %>" width="40" height="40" loading="lazy" decoding="async" /><% } else { %><span class="api-product-shelf-logo-fallback">L</span><% } %><div><span>MAIN SHOP API</span><h2>สินค้า Partner <%= catalogApiShopName %></h2><p>รายการนี้แยกจากสินค้าร้านเช่า · ต้องเติมเงินสินค้า API ก่อนซื้อเท่านั้น</p></div></div><div class="api-product-shelf-actions"><a href="/products#catalog-api">ดูสินค้า API ทั้งหมด</a><a href="/account/topup/catalog-api">เติมเงิน API →</a><a href="/contact?api=1">ติดต่อร้านหลัก</a></div></div>
   <div class="api-product-shelf-grid product-grid grid items-start grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-1 sm:gap-4">
     <% catalogApiFeaturedProducts.forEach(p => { %><%- include('../partials/product-card', { p }) %><% }) %>
   </div>
@@ -288,7 +288,7 @@
   <div class="home-category-grid">
     <% recommendedCategories.forEach(category => { if (ownerHomeV20 && !category.imageUrl) return; %>
       <a class="home-category-card <%= fullRecommendedCategoryImages ? 'full-category-artwork' : '' %>" href="/products?recommended=<%= encodeURIComponent(category.id) %>">
-        <span class="home-category-image"><% if (category.imageUrl) { %><img src="<%= category.imageUrl %>" alt="<%= category.title %>" loading="lazy" decoding="async" /><% } else { %><span>600 × 200</span><% } %></span>
+        <span class="home-category-image"><% if (category.imageUrl) { %><img src="<%= category.imageUrl %>" alt="<%= category.title %>" width="600" height="200" loading="lazy" decoding="async" /><% } else { %><span>600 × 200</span><% } %></span>
         <span class="home-category-copy"><b><%= category.title %></b><small>สินค้าในหมวด <%= category.count %> รายการ</small></span>
         <% if (!ownerHomeV20) { %><span class="home-category-arrow">↗</span><% } %>
       </a>
@@ -461,7 +461,7 @@
     <% if (welcomePopupImages.length) { %>
       <div class="welcome-popup-slider relative w-full aspect-square bg-[var(--input)] overflow-hidden">
         <% welcomePopupImages.forEach((image, index) => { %>
-          <img src="<%= image %>" alt="" class="welcome-popup-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" data-index="<%= index %>" />
+          <img src="<%= image %>" alt="" width="1200" height="800" class="welcome-popup-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" data-index="<%= index %>" />
         <% }) %>
         <% if (welcomePopupImages.length > 1) { %>
           <div class="absolute bottom-2.5 left-0 right-0 flex items-center justify-center gap-1.5 z-10">
@@ -480,7 +480,7 @@
     <% } %>
     <% if (welcomePopupTitle || welcomePopupContent) { %>
       <div class="p-5 text-center border-t border-[var(--border)] welcome-popup-copy<%= welcomePopupImages.length ? '' : ' welcome-popup-no-image' %>">
-        <% if (showWelcomePopupRedesign) { %><div class="welcome-popup-brand" aria-hidden="true"><span class="welcome-popup-brand-mark<%= settings.branding && settings.branding.logoImage ? ' has-logo' : '' %>"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="" /><% } else { %>L<% } %></span><span><%= settings.shopName || 'LilTeam Shop' %></span></div><% } %>
+        <% if (showWelcomePopupRedesign) { %><div class="welcome-popup-brand" aria-hidden="true"><span class="welcome-popup-brand-mark<%= settings.branding && settings.branding.logoImage ? ' has-logo' : '' %>"><% if (settings.branding && settings.branding.logoImage) { %><img src="<%= settings.branding.logoImage %>" alt="" width="64" height="64" loading="lazy" decoding="async" /><% } else { %>L<% } %></span><span><%= settings.shopName || 'LilTeam Shop' %></span></div><% } %>
         <% if (welcomePopupTitle) { %><h3 id="welcome-popup-title" class="font-bold text-base text-[var(--text)] mb-1"><%= welcomePopupTitle %></h3><% } %>
         <% if (welcomePopupContent) { %><p id="welcome-popup-description" class="text-sm text-[var(--text-3)] leading-relaxed"><%= welcomePopupContent %></p><% } %>
       </div>

@@ -88,9 +88,13 @@ assert.match(homeView, /const showWelcomePopupRedesign = Boolean\(welcomePopupRe
 assert.match(welcomePopupCss, /welcome-popup-slider img\{object-fit: contain;object-position: center\}/, 'announcement images must remain fully visible without cropping');
 const homeSvgTags = [...homeView.matchAll(/<svg\b[^>]*>/g)];
 assert.ok(homeSvgTags.length > 0 && homeSvgTags.every(match => /\bwidth="\d+"/.test(match[0]) && /\bheight="\d+"/.test(match[0])), 'homepage SVGs must have intrinsic dimensions to prevent unstyled oversized icons');
+const criticalHomeImageTags = [...homeView.matchAll(/<img\b[^\n]*?\/>/g)].filter(match => !/src=""/.test(match[0]));
+assert.ok(criticalHomeImageTags.every(match => /\bwidth="\d+"/.test(match[0]) && /\bheight="\d+"/.test(match[0])), 'homepage images must reserve layout space before decoding');
 const latestOrderSvgTags = [...latestOrdersRail.matchAll(/<svg\b[^>]*>/g)];
 assert.ok(latestOrderSvgTags.length > 0 && latestOrderSvgTags.every(match => /\bwidth="\d+"/.test(match[0]) && /\bheight="\d+"/.test(match[0])), 'recent order icons and chevrons must have intrinsic dimensions');
 assert.match(latestOrdersRail, /width="54" height="60" class="latest-order-image"/, 'recent order thumbnails must have stable dimensions before image decoding');
+const latestOrdersMotion = read('public/js/latest-orders-3d-v1.js');
+assert.match(latestOrdersMotion, /track\.children\.length < 2/, 'latest-order rail may add at most one clone group');
 assert.match(homeView, /loading="lazy" decoding="async" fetchpriority="low" class="mg-prize-image"/, 'offscreen minigame images must not delay the initial homepage render');
 assert.match(shopRoutes, /req\.query\.recommended/, 'recommended category links must be handled by the products route');
 assert.match(shopRoutes, /recommendedCategory\.productIds/, 'recommended category listings must filter by assigned product ids');
