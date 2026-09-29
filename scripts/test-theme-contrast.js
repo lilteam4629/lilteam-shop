@@ -164,5 +164,7 @@ const authSource = fs.readFileSync(path.join(__dirname, '../src/middleware/auth.
 const productDetailSource = fs.readFileSync(path.join(__dirname, '../src/views/shop/product-detail.ejs'), 'utf8');
 assert.match(authSource, /toMonochromeStorefrontTheme/);
 assert.match(mainLayout, /storefront-monochrome/);
+assert.match(mainLayout, /product-detail-page \.product-detail-main/);
+assert.match(mainLayout, /--coral:var\(--text-2\)/);
 assert.match(productDetailSource, /system-lab-product-detail-theme/);
 console.log('Legacy tenant themes normalize to the storefront black/white contract');

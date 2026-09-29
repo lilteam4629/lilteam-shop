@@ -353,6 +353,7 @@
     body.storefront-monochrome {
       --rm-navy:#000000; --rm-blue:#000000; --rm-lime:#ffffff;
       --rm-ink:#ffffff; --rm-paper:#ffffff; --rm-line:#d9d9d9;
+      --coral:var(--text-2); --success:var(--text-2); --danger:var(--text-2); --warning:var(--text-2);
       background-color:var(--bg) !important; color:var(--text) !important;
     }
     body.storefront-monochrome #site-page-shell { background-color:transparent !important; }
@@ -421,6 +422,65 @@
     body.storefront-monochrome .system-lab-product-detail>a:first-child { background:#ffffff !important; color:#000000 !important; border-color:#c9c9c9 !important; }
     body.storefront-monochrome .system-lab-product-detail .product-contact-action { background:#ffffff !important; color:#000000 !important; }
     body.storefront-monochrome .system-lab-product-detail .tab-btn { color:#000000 !important; border-color:#000000 !important; }
+
+    /* The cozy detail bundle predates the monochrome contract and contains
+       literal cream/brown values. Reconnect every customer-facing surface to
+       the normalized theme variables so dark mode stays black and light mode
+       stays white while controls keep a clear contrast in both. */
+    body.storefront-monochrome .product-detail-page,
+    body.storefront-monochrome .product-detail-page * { color-scheme: inherit; }
+    body.storefront-monochrome .product-detail-page { color:var(--text) !important; }
+    body.storefront-monochrome .product-detail-page .product-detail-main,
+    body.storefront-monochrome .product-detail-page .product-detail-gallery,
+    body.storefront-monochrome .product-detail-page .product-detail-copy,
+    body.storefront-monochrome .product-detail-page .product-detail-filters,
+    body.storefront-monochrome .product-detail-page .product-buy-form-confirm,
+    body.storefront-monochrome .product-detail-page .product-buy-form-federated,
+    body.storefront-monochrome .product-detail-page .product-how-to,
+    body.storefront-monochrome .product-detail-page .product-detail-extra { background:var(--card) !important; background-image:none !important; color:var(--text) !important; border-color:var(--border) !important; box-shadow:none !important; }
+    body.storefront-monochrome .product-detail-page .product-detail-gallery { background:var(--input) !important; }
+    body.storefront-monochrome .product-detail-page .product-detail-media,
+    body.storefront-monochrome .product-detail-page .product-detail-thumb,
+    body.storefront-monochrome .product-detail-page #tab-gallery > div > div { background:var(--input) !important; border-color:var(--border-light) !important; }
+    body.storefront-monochrome .product-detail-page .product-detail-back,
+    body.storefront-monochrome .product-detail-page .product-detail-copy,
+    body.storefront-monochrome .product-detail-page .product-detail-kind,
+    body.storefront-monochrome .product-detail-page .product-detail-stock,
+    body.storefront-monochrome .product-detail-page .product-detail-genre,
+    body.storefront-monochrome .product-detail-page .product-detail-filter-item > span,
+    body.storefront-monochrome .product-detail-page .qty-tier-btn,
+    body.storefront-monochrome .product-detail-page .product-contact-action { background:var(--input) !important; color:var(--text-2) !important; border-color:var(--border-light) !important; }
+    body.storefront-monochrome .product-detail-page .product-detail-back:hover { color:var(--gold-text) !important; border-color:var(--gold) !important; }
+    body.storefront-monochrome .product-detail-page .product-detail-title,
+    body.storefront-monochrome .product-detail-page .product-detail-filter-head h2,
+    body.storefront-monochrome .product-detail-page .product-detail-filter-item b,
+    body.storefront-monochrome .product-detail-page .product-price-label,
+    body.storefront-monochrome .product-detail-page .product-detail-filter-head strong,
+    body.storefront-monochrome .product-detail-page .product-detail-tab-panel,
+    body.storefront-monochrome .product-detail-page .tab-panel { color:var(--text) !important; }
+    body.storefront-monochrome .product-detail-page .product-detail-filter-head span,
+    body.storefront-monochrome .product-detail-page .product-detail-price > span:first-child,
+    body.storefront-monochrome .product-detail-page [data-unit-price],
+    body.storefront-monochrome .product-detail-page [data-subtotal],
+    body.storefront-monochrome .product-detail-page .receive-highlight-title,
+    body.storefront-monochrome .product-detail-page .product-how-to .receive-highlight-title,
+    body.storefront-monochrome .product-detail-page .qty-tier-btn-price,
+    body.storefront-monochrome .product-detail-page .qty-tier-btn.is-active .qty-tier-btn-qty,
+    body.storefront-monochrome .product-detail-page .product-detail-kind,
+    body.storefront-monochrome .product-detail-page .product-detail-stock { color:var(--gold-text) !important; }
+    body.storefront-monochrome .product-detail-page .product-detail-price { border-color:var(--border) !important; }
+    body.storefront-monochrome .product-detail-page .product-action-primary,
+    body.storefront-monochrome .product-detail-page .product-buy-form > button,
+    body.storefront-monochrome .product-detail-page .product-topup-action,
+    body.storefront-monochrome .product-detail-page .qty-tier-btn.is-active,
+    body.storefront-monochrome .product-detail-page .receive-highlight p > span { background:var(--gold) !important; color:var(--gold-contrast) !important; border-color:var(--gold) !important; box-shadow:none !important; }
+    body.storefront-monochrome .product-detail-page .product-contact-action { color:var(--text-2) !important; }
+    body.storefront-monochrome .product-detail-page .product-buy-form button[type="submit"]:disabled { background:var(--border-light) !important; color:var(--text-3) !important; }
+    body.storefront-monochrome .product-detail-page .product-how-to p,
+    body.storefront-monochrome .product-detail-page .product-how-to p > span { color:var(--text-2) !important; }
+    body.storefront-monochrome .product-detail-page .product-detail-tabs { border-color:var(--border) !important; }
+    body.storefront-monochrome .product-detail-page .tab-btn { color:var(--gold-text) !important; border-color:var(--gold) !important; }
+    body.storefront-monochrome .product-detail-page :where(button, a, input):focus-visible { outline-color:var(--gold) !important; }
   </style>
   <% } %>
 
