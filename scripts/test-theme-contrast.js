@@ -166,6 +166,8 @@ assert.match(authSource, /toMonochromeStorefrontTheme/);
 assert.match(mainLayout, /storefront-monochrome/);
 assert.match(mainLayout, /product-detail-page \.product-detail-main/);
 assert.match(mainLayout, /--coral:var\(--text-2\)/);
+assert.doesNotMatch(mainLayout, /body\.storefront-monochrome \.system-lab-product-detail \{ color:#000000 !important; \}/,
+  'generic product details must not inherit the Rangers-only black text override in dark mode');
 assert.match(productDetailSource, /system-lab-product-detail-theme/);
 assert.doesNotMatch(productDetailSource, /style="background:#(?:111827|172033)!important/,
   'product actions must follow the storefront theme instead of hardcoded navy fills');
