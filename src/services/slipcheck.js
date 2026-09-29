@@ -164,12 +164,18 @@ async function verifySlipWithKey(fileBuffer, expectedAmount, fileOptions, creden
     if (!Number.isFinite(amount) || Math.abs(amount - Number(expectedAmount)) > 0.009) {
       return { checked: true, verified: false, message: 'ยอดเงินในสลิปไม่ตรงกับยอดที่แจ้งไว้', raw: normalizedRaw };
     }
-    const receiver = data.receiver || data.receiving || data.payee || {};
-    const receiverAccount = receiver.account || data.receiver_account || {};
-    const discovered = extractReceiverEvidence(data);
+    // SlipCheck has returned the parsed slip inside `data`, while some
+    // deployments put receiver fields on the success envelope itself. Read
+    // both levels so a valid destination is not discarded as "wrong receiver".
+    const envelope = body && typeof body === 'object' ? body : {};
+    const receiver = data.receiver || data.receiving || data.payee
+      || envelope.receiver || envelope.receiving || envelope.payee || {};
+    const receiverAccount = receiver.account || data.receiver_account || data.receiverAccount
+      || envelope.receiver_account || envelope.receiverAccount || {};
+    const discovered = extractReceiverEvidence({ ...envelope, ...data });
     const receiverCheck = receiverMatches({
-      actualNames: textValues(data.receiver_name, data.receiverName, receiver.name, receiver.displayName, receiverAccount.name, receiverAccount.displayName, discovered.names),
-      actualNumbers: textValues(data.receiver_account_number, data.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, discovered.numbers),
+      actualNames: textValues(data.receiver_name, data.receiverName, envelope.receiver_name, envelope.receiverName, receiver.name, receiver.displayName, receiverAccount.name, receiverAccount.displayName, discovered.names),
+      actualNumbers: textValues(data.receiver_account_number, data.receiverAccountNumber, envelope.receiver_account_number, envelope.receiverAccountNumber, receiver.number, receiver.accountNumber, receiverAccount.number, receiverAccount.account, receiverAccount.bankNumber, discovered.numbers),
       expectedNames: credentials.expectedReceiverNames,
       expectedNumbers: credentials.expectedReceiverNumbers,
       allowMaskedNumber: true,

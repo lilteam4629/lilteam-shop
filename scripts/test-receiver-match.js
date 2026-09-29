@@ -85,6 +85,26 @@ async function verifyProviderIntegration() {
   }
 }
 
+async function verifySlipCheckEnvelopeReceiver() {
+  const originalPost = axios.post;
+  axios.post = async () => ({ data: {
+    success: true,
+    receiver: { account: { value: 'XXX-X-XX804-4', name: 'นาย อุรพงค์ สงทิม' } },
+    data: { amount: 100, ref_no: 'envelope-receiver', transferred_at: new Date().toISOString() },
+  } });
+  try {
+    delete require.cache[require.resolve('../src/services/slipcheck')];
+    const slipcheck = require('../src/services/slipcheck');
+    const result = await slipcheck.verifySlip(Buffer.from('fixture'), 100, {}, {
+      apiKey: 'fixture-key', expectedReceiverNames: ['อุรพงค์ สงทิม'], expectedReceiverNumbers: ['147-3-36804-4'],
+    });
+    assert.equal(result.verified, true, 'SlipCheck envelope-level receiver fields must verify');
+  } finally {
+    axios.post = originalPost;
+    delete require.cache[require.resolve('../src/services/slipcheck')];
+  }
+}
+
 async function verifySlipCheckKeyOrder() {
   const originalPost = axios.post;
   const originalGet = axios.get;
@@ -198,6 +218,7 @@ function verifyTenantSharedSlipCheckPool() {
 }
 
 verifyProviderIntegration()
+  .then(verifySlipCheckEnvelopeReceiver)
   .then(verifySlipCheckKeyOrder)
   .then(verifySlipCheckAdvancesOnQuotaResponse)
   .then(verifySlipCheckSwitchesOnProcessingFailure)
