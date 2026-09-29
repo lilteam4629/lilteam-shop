@@ -2151,7 +2151,7 @@ async function renderTopupsPage(req, res) {
   const receiverProvider = availableReceiverProviders.includes(requestedReceiverProvider) ? requestedReceiverProvider : null;
   const receiverPayment = receiverProfiles.view(payment, receiverProvider
     || availableReceiverProviders[0]
-    || (receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck'));
+    || (receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipok'));
   if (req.path !== '/topups/settings') {
     return res.render('admin/topups-experiment', {
       title: 'เติมเงินและตรวจสอบ', active: 'topups', requests, pendingCount, requestStats, payment, receiverPayment,
@@ -2270,12 +2270,12 @@ router.post('/slip-verification/billing', async (req, res) => {
 
 router.post('/slip-verification', async (req, res) => {
   const payment = store.data.settings.payment;
-  const previousReceiverProvider = receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck';
+  const previousReceiverProvider = receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipok';
   receiverProfiles.save(payment, previousReceiverProvider, receiverProfiles.snapshot(payment));
   const slipApiMode = req.tenantShop && req.body.slipApiMode === 'own' ? 'own' : (req.tenantShop ? 'shared' : 'own');
-  const allowedProviders = ['none', 'slipok', 'slipcheck', 'rdcw', 'slip2go', 'xepht'];
+  const allowedProviders = ['none', 'slipok', 'rdcw', 'slip2go', 'xepht'];
   const submittedProvider = Array.isArray(req.body.slipProvider) ? req.body.slipProvider.at(-1) : req.body.slipProvider;
-  const previousProvider = allowedProviders.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck';
+  const previousProvider = allowedProviders.includes(payment.slipProvider) ? payment.slipProvider : 'slipok';
   const slipProvider = submittedProvider || previousProvider;
   if (!allowedProviders.includes(slipProvider)) {
     req.flash('error', 'กรุณาเลือกผู้ให้บริการตรวจสลิปที่รองรับ');
@@ -2416,7 +2416,7 @@ router.post('/topups/payment-settings', (req, res) => {
     const truemoneyPhone = (req.body.truemoneyPhone || '').trim().replace(/[^0-9]/g, '');
     const truemoneyEnabled = req.body.truemoneyEnabled === 'on';
     const effectiveBeforeSave = effectiveSlipConfig(payment, store.platformData.settings.payment, Boolean(req.tenantShop));
-    const currentlySelectedProvider = receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipcheck';
+    const currentlySelectedProvider = receiverProfiles.PROVIDERS.includes(payment.slipProvider) ? payment.slipProvider : 'slipok';
     const submittedReceiverProvider = String(req.body.receiverProvider || '').toLowerCase();
     const sharedTenant = Boolean(req.tenantShop && (payment.slipApiMode || 'shared') === 'shared');
     if (sharedTenant && submittedReceiverProvider && submittedReceiverProvider !== effectiveBeforeSave.slipProvider) {
@@ -2433,7 +2433,7 @@ router.post('/topups/payment-settings', (req, res) => {
     receiverProfiles.save(payment, currentlySelectedProvider, receiverProfiles.snapshot(payment));
     const selectedProfile = receiverProfiles.view(payment, slipProvider);
     payment.bankQrImage = selectedProfile.bankQrImage;
-    if (!['none', 'slipok', 'slipcheck', 'rdcw', 'slip2go', 'xepht'].includes(slipProvider)) {
+    if (!['none', 'slipok', 'rdcw', 'slip2go', 'xepht'].includes(slipProvider)) {
       req.flash('error', 'ผู้ให้บริการตรวจสลิปนี้ยังไม่พร้อมใช้งาน');
       return res.redirect('/admin/topups/settings#bank');
     }
@@ -3048,3 +3048,4 @@ router.get('/api-providers', (req, res) => res.redirect('/admin/slip-verificatio
 router.post('/api-providers/custom', (req, res) => res.redirect('/admin/slip-verification'));
 
 module.exports = router;
+
