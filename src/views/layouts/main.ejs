@@ -260,7 +260,7 @@
   <% } %>
   <%- routeStylesheetMarkup %>
 </head>
-<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront ? ' storefront-unified' : '' %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh ? ' storefront-customer-refresh' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %>">
+<body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront ? ' storefront-unified' : '' %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh ? ' storefront-customer-refresh' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %><%= typeof storefrontMonochrome !== 'undefined' && storefrontMonochrome ? ' storefront-monochrome' : '' %>">
   <div id="page-loading-overlay" aria-hidden="true">
     <div class="loading-ring">
       <% if (settings.branding && settings.branding.logoImage) { %>
@@ -342,6 +342,85 @@
         background-image: none !important;
       }
     }
+  </style>
+  <% } %>
+
+  <% if (typeof storefrontMonochrome !== 'undefined' && storefrontMonochrome) { %>
+  <!-- Legacy model styles may contain literal brand colours. This final
+       storefront layer keeps the customer UI black/white after page content,
+       route stylesheets, and model-specific inline styles have been emitted. -->
+  <style id="storefront-monochrome-override">
+    body.storefront-monochrome {
+      --rm-navy:#000000; --rm-blue:#000000; --rm-lime:#ffffff;
+      --rm-ink:#ffffff; --rm-paper:#ffffff; --rm-line:#d9d9d9;
+      background-color:var(--bg) !important; color:var(--text) !important;
+    }
+    body.storefront-monochrome #site-page-shell { background-color:transparent !important; }
+    body.storefront-monochrome .storefront-model-rangers-market,
+    body.storefront-monochrome.storefront-model-rangers-market { background:#000000 !important; color:#ffffff !important; }
+    body.storefront-monochrome .storefront-model-rangers-market #site-page-shell,
+    body.storefront-monochrome.storefront-model-rangers-market #site-page-shell { background:#000000 !important; }
+    body.storefront-monochrome .rm-match,
+    body.storefront-monochrome .rm-hero,
+    body.storefront-monochrome .rm-finder,
+    body.storefront-monochrome .rm-results,
+    body.storefront-monochrome .rm-ranger-vault { background:#000000 !important; color:#ffffff !important; border-color:#3a3a3a !important; box-shadow:none !important; }
+    body.storefront-monochrome .rm-match,
+    body.storefront-monochrome .rm-hero { background:#000000 !important; }
+    body.storefront-monochrome .rm-lineup article,
+    body.storefront-monochrome .rm-vault-grid article { background:#ffffff !important; color:#000000 !important; box-shadow:none !important; }
+    body.storefront-monochrome .rm-controls input,
+    body.storefront-monochrome .rm-controls select,
+    body.storefront-monochrome .rm-controls button,
+    body.storefront-monochrome .rm-vault-search input { background:#000000 !important; color:#ffffff !important; border-color:#505050 !important; }
+    body.storefront-monochrome .rm-match>a,
+    body.storefront-monochrome .rm-card-foot>a,
+    body.storefront-monochrome .rm-vault-tabs .is-active,
+    body.storefront-monochrome .rm-vault-more { background:#ffffff !important; color:#000000 !important; border-color:#ffffff !important; }
+    body.storefront-monochrome .rm-card,
+    body.storefront-monochrome .rm-catalog-off { background:#000000 !important; color:#ffffff !important; border-color:#3a3a3a !important; }
+    body.storefront-monochrome .rm-card-foot b,
+    body.storefront-monochrome .rm-hero h1 em,
+    body.storefront-monochrome .rm-stats b,
+    body.storefront-monochrome .rm-product-rangers b,
+    body.storefront-monochrome .rm-catalog-off b { color:#ffffff !important; }
+    body.storefront-monochrome .rm-match small,
+    body.storefront-monochrome .rm-hero small,
+    body.storefront-monochrome .rm-stats,
+    body.storefront-monochrome .rm-match p,
+    body.storefront-monochrome .rm-finder header p,
+    body.storefront-monochrome .rm-results header p,
+    body.storefront-monochrome .rm-card-body>p,
+    body.storefront-monochrome .rm-card-foot small,
+    body.storefront-monochrome .rm-empty,
+    body.storefront-monochrome .rm-credit,
+    body.storefront-monochrome .rm-ranger-vault p,
+    body.storefront-monochrome .rm-ranger-vault small { color:#c2c2c2 !important; }
+    body.storefront-monochrome .system-lab-product-detail,
+    body.storefront-monochrome .system-lab-product-detail * { --teal:#000000; --coral:#000000; --cream:#ffffff; --paper:#ffffff; }
+    body.storefront-monochrome .system-lab-product-detail { color:#000000 !important; }
+    body.storefront-monochrome .system-lab-product-detail>div.grid,
+    body.storefront-monochrome .system-lab-product-detail>div.grid>div:first-child,
+    body.storefront-monochrome .system-lab-product-detail .product-detail-filters,
+    body.storefront-monochrome .system-lab-product-detail .receive-highlight,
+    body.storefront-monochrome .system-lab-product-detail .product-contact-action,
+    body.storefront-monochrome .system-lab-product-detail .product-detail-filter-item>span { background:#ffffff !important; color:#000000 !important; border-color:#c9c9c9 !important; box-shadow:none !important; }
+    body.storefront-monochrome .system-lab-product-detail>div.grid>div:first-child>div:first-child { background:#000000 !important; }
+    body.storefront-monochrome .system-lab-product-detail h1,
+    body.storefront-monochrome .system-lab-product-detail [data-unit-price],
+    body.storefront-monochrome .system-lab-product-detail [data-subtotal],
+    body.storefront-monochrome .system-lab-product-detail .product-detail-filter-head span,
+    body.storefront-monochrome .system-lab-product-detail .receive-highlight-title { color:#000000 !important; }
+    body.storefront-monochrome .system-lab-product-detail .product-action-primary,
+    body.storefront-monochrome .system-lab-product-detail form>button,
+    body.storefront-monochrome .system-lab-product-detail .product-topup-action { background:#000000 !important; color:#ffffff !important; border-color:#000000 !important; }
+    body.storefront-monochrome .system-lab-product-detail .qty-tier-btn,
+    body.storefront-monochrome .system-lab-product-detail .qty-tier-btn.is-active { background:#ffffff !important; color:#000000 !important; border-color:#000000 !important; box-shadow:0 0 0 1px #000000 !important; }
+    body.storefront-monochrome .system-lab-product-detail .qty-tier-btn-price,
+    body.storefront-monochrome .system-lab-product-detail .qty-tier-btn.is-active .qty-tier-btn-qty { color:#000000 !important; }
+    body.storefront-monochrome .system-lab-product-detail>a:first-child { background:#ffffff !important; color:#000000 !important; border-color:#c9c9c9 !important; }
+    body.storefront-monochrome .system-lab-product-detail .product-contact-action { background:#ffffff !important; color:#000000 !important; }
+    body.storefront-monochrome .system-lab-product-detail .tab-btn { color:#000000 !important; border-color:#000000 !important; }
   </style>
   <% } %>
 

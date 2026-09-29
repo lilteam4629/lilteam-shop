@@ -43,6 +43,29 @@ const BG_PRESETS = {
 
 const MAIN_BG_PRESET_KEY = 'monochrome';
 
+// Storefronts share one deliberate visual rule: the customer-facing surface is
+// monochrome (black/white) for every shop, including rented stores. Older
+// tenant records may still contain an accent, coloured preset, custom colour,
+// or an effect from the legacy theme editor. Normalize those records at the
+// rendering boundary so stale settings cannot leak back into a storefront.
+function toMonochromeStorefrontTheme(input = {}) {
+  const saved = input && typeof input === 'object' ? input : {};
+  const surfaces = saved.mainMonoSurfaces && typeof saved.mainMonoSurfaces === 'object'
+    ? saved.mainMonoSurfaces
+    : {};
+  return {
+    ...saved,
+    accent: '#000000',
+    bgPreset: MAIN_BG_PRESET_KEY,
+    bgColor: null,
+    style: 'normal',
+    mainMonoSurfaces: {
+      dark: surfaces.dark === 'white' ? 'white' : 'black',
+      light: surfaces.light === 'black' ? 'black' : 'white',
+    },
+  };
+}
+
 const ACCENT_PRESETS = [
   { key: 'gold', label: 'ทอง (ค่าเริ่มต้น)', color: '#c8a63f' },
   { key: 'champagne', label: 'แชมเปญ', color: '#e8c873' },
@@ -420,6 +443,7 @@ function renderAdminAccentCss(theme) {
 module.exports = {
   getBgPresets,
   MAIN_BG_PRESET_KEY,
+  toMonochromeStorefrontTheme,
   getAccentPresets,
   getStyles,
   renderCss,

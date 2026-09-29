@@ -145,3 +145,24 @@ assert(storefrontBundles['storefront-pre-unified-v1.css'].includes('storefront-t
 assert(mainLayout.includes("asset('css/storefront-pre-unified-v1.css')"), 'shared storefront styles must use the cache-busted bundle asset');
 assert(fs.existsSync(path.join(__dirname, '../public/css/storefront-theme-cohesion-v1.css')), 'shared storefront theme layer must exist');
 console.log('Shared storefront theme layer is connected to the public layout');
+
+const legacyTenantTheme = {
+  accent: '#d6547a', bgPreset: 'roseDark', bgColor: '#e3a0b8', style: 'gradient',
+  mainMonoSurfaces: { dark: 'white', light: 'black' },
+};
+const normalizedTenantTheme = theme.toMonochromeStorefrontTheme(legacyTenantTheme);
+assert.equal(normalizedTenantTheme.accent, '#000000');
+assert.equal(normalizedTenantTheme.bgPreset, theme.MAIN_BG_PRESET_KEY);
+assert.equal(normalizedTenantTheme.bgColor, null);
+assert.equal(normalizedTenantTheme.style, 'normal');
+assert.deepEqual(normalizedTenantTheme.mainMonoSurfaces, { dark: 'white', light: 'black' });
+const normalizedCss = theme.renderCss(normalizedTenantTheme);
+const [normalizedDark, normalizedLight] = modeVariables(normalizedCss);
+assert.equal(normalizedDark.bg, '#ffffff');
+assert.equal(normalizedLight.bg, '#000000');
+const authSource = fs.readFileSync(path.join(__dirname, '../src/middleware/auth.js'), 'utf8');
+const productDetailSource = fs.readFileSync(path.join(__dirname, '../src/views/shop/product-detail.ejs'), 'utf8');
+assert.match(authSource, /toMonochromeStorefrontTheme/);
+assert.match(mainLayout, /storefront-monochrome/);
+assert.match(productDetailSource, /system-lab-product-detail-theme/);
+console.log('Legacy tenant themes normalize to the storefront black/white contract');

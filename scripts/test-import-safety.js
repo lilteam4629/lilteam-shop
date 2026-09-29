@@ -431,7 +431,7 @@ async function main() {
   }, { filename: themeTemplatePath });
   const mainThemeHtml = renderTheme(mainThemeRender, mainThemeFixture.settings);
   const tenantThemeHtml = renderTheme(tenantThemeRender, tenantThemeFixture.settings);
-  check('Main theme offers only an automatic pure black/white background while tenants retain all legacy options', () => {
+  check('Every storefront theme editor offers only the supported pure black/white palette', () => {
     assert.equal(mainThemeRender.view, 'admin/theme');
     assert.equal(mainThemeRender.values.mainAdminUi, true);
     assert.deepEqual(mainThemeRender.values.bgPresets.map(preset => preset.key), ['monochrome']);
@@ -442,9 +442,10 @@ async function main() {
     assert.doesNotMatch(mainThemeHtml, /data-theme-bg-choice="custom"/);
     assert.match(mainThemeHtml, /<strong>Main Theme Preview<\/strong>/);
     assert.equal(tenantThemeRender.values.mainAdminUi, false);
-    assert.equal(tenantThemeRender.values.bgPresets.length, 6);
-    assert.match(tenantThemeHtml, /data-theme-bg-choice="custom"/);
-    assert.match(tenantThemeHtml, /สร้างชุดสีจากสีที่เลือก/);
+    assert.deepEqual(tenantThemeRender.values.bgPresets.map(preset => preset.key), ['monochrome']);
+    assert.doesNotMatch(tenantThemeHtml, /data-theme-bg-choice="custom"/);
+    assert.doesNotMatch(tenantThemeHtml, /สร้างชุดสีจากสีที่เลือก/);
+    assert.match(tenantThemeHtml, /data-main-mono="true"/);
     assert.match(tenantThemeHtml, /<strong>Tenant Theme Preview<\/strong>/);
     assert.doesNotMatch(tenantThemeHtml, /<strong>Main Theme Preview<\/strong>/);
   });
@@ -459,10 +460,15 @@ async function main() {
     { body: { accent: '#c8a63f', bgMode: 'preset', bgPreset: 'roseDark', style: 'normal' }, tenantShop: { id: 'theme-tenant-fixture' }, flash() {} },
     { redirect() {} },
   ));
-  check('Main theme save enforces monochrome but tenant theme save keeps its chosen legacy palette', () => {
+  check('Both main and tenant theme saves persist the monochrome storefront contract', () => {
     assert.equal(mainThemePostFixture.settings.theme.bgPreset, 'monochrome');
     assert.equal(mainThemePostFixture.settings.theme.bgColor, null);
-    assert.equal(tenantThemePostFixture.settings.theme.bgPreset, 'roseDark');
+    assert.equal(mainThemePostFixture.settings.theme.accent, '#000000');
+    assert.equal(mainThemePostFixture.settings.theme.style, 'normal');
+    assert.equal(tenantThemePostFixture.settings.theme.bgPreset, 'monochrome');
+    assert.equal(tenantThemePostFixture.settings.theme.bgColor, null);
+    assert.equal(tenantThemePostFixture.settings.theme.accent, '#000000');
+    assert.equal(tenantThemePostFixture.settings.theme.style, 'normal');
   });
   const welcomePopupHandler = admin.stack.find(layer => layer.route?.path === '/welcome-popup' && layer.route.methods.get).route.stack.at(-1).handle;
   let tenantWelcomePopupView = '';

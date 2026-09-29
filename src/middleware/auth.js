@@ -39,7 +39,12 @@ function attachUser(req, res, next) {
   };
   // Keep the mini-game category configured in storage; omit it only from public storefront navigation.
   res.locals.navFilterTags = visibleStorefrontCategories(store.data.filterTags);
-  res.locals.themeCss = theme.renderCss(store.data.settings.theme);
+  // Customer-facing storefronts are intentionally limited to black/white.
+  // Normalize legacy tenant theme records before rendering so saved accent,
+  // coloured background, and effect settings cannot bleed into any rental
+  // shop or product route.
+  res.locals.storefrontMonochrome = true;
+  res.locals.themeCss = theme.renderCss(theme.toMonochromeStorefrontTheme(store.data.settings.theme));
   res.locals.adminBrandCss = theme.renderAdminAccentCss(store.data.settings.theme);
   next();
 }

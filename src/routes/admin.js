@@ -1512,42 +1512,36 @@ router.post('/rangers-catalog/items/:id/delete', requireSystemLab, async (req, r
 // ---------- Storefront color theme ----------
 router.get('/theme', (req, res) => {
   const mainAdminUi = usesMainAdminUi(req);
+  const monochromeTheme = theme.toMonochromeStorefrontTheme(store.data.settings.theme);
   res.render('admin/theme', {
     title: 'ธีมสี', active: 'theme',
-    currentTheme: store.data.settings.theme,
-    accentPresets: theme.getAccentPresets(),
-    bgPresets: theme.getBgPresets({ mainShopOnly: mainAdminUi }),
-    bgPreviewPresets: mainAdminUi ? theme.getBgPresets({ includeMain: true }) : undefined,
+    currentTheme: monochromeTheme,
+    // Keep the editor honest: every storefront, including rentals, exposes
+    // only the supported black/white surface choices.
+    accentPresets: [{ key: 'black', label: 'ดำ / ขาว', color: '#000000' }],
+    bgPresets: theme.getBgPresets({ mainShopOnly: true }),
+    bgPreviewPresets: theme.getBgPresets({ mainShopOnly: true }),
     mainAdminUi,
-    styles: theme.getStyles(),
+    monochromeOnly: true,
+    styles: [{ key: 'normal', label: 'ปกติ' }],
   });
 });
 
 router.post('/theme', async (req, res) => {
-  const accent = /^#[0-9a-fA-F]{6}$/.test(req.body.accent || '') ? req.body.accent : store.data.settings.theme.accent;
   const mainAdminUi = usesMainAdminUi(req);
-  const bgMode = mainAdminUi ? 'preset' : (req.body.bgMode === 'custom' ? 'custom' : 'preset');
-  let bgPreset = store.data.settings.theme.bgPreset;
-  let bgColor = null;
-  let mainMonoSurfaces = null;
-  if (mainAdminUi) {
-    bgPreset = theme.MAIN_BG_PRESET_KEY;
-    mainMonoSurfaces = {
-      dark: req.body.mainDarkSurface === 'white' ? 'white' : 'black',
-      light: req.body.mainLightSurface === 'black' ? 'black' : 'white',
-    };
-  } else if (bgMode === 'custom' && /^#[0-9a-fA-F]{6}$/.test(req.body.bgColor || '')) {
-    bgColor = req.body.bgColor;
-  } else {
-    bgPreset = theme.getBgPresets().some(p => p.key === req.body.bgPreset) ? req.body.bgPreset : store.data.settings.theme.bgPreset;
-  }
-  const style = theme.getStyles().some(s => s.key === req.body.style) ? req.body.style : 'normal';
+  const current = theme.toMonochromeStorefrontTheme(store.data.settings.theme);
+  // Persist the same contract used by the storefront renderer. This prevents
+  // a legacy tenant form or an old browser from reintroducing colour later.
   store.data.settings.theme = {
-    accent,
-    bgPreset,
-    bgColor,
-    style,
-    ...(mainAdminUi ? { mainMonoSurfaces } : {}),
+    ...current,
+    accent: '#000000',
+    bgPreset: theme.MAIN_BG_PRESET_KEY,
+    bgColor: null,
+    style: 'normal',
+    mainMonoSurfaces: {
+      dark: req.body.mainDarkSurface === 'white' ? 'white' : current.mainMonoSurfaces.dark,
+      light: req.body.mainLightSurface === 'black' ? 'black' : current.mainMonoSurfaces.light,
+    },
   };
   await store.save();
   req.flash('success', 'บันทึกธีมสีแล้ว');
@@ -2628,7 +2622,7 @@ router.get('/minigame', (req, res) => {
   res.render(isMainAdmin ? 'admin/minigame-experiment' : 'admin/minigame', {
     title: 'มินิเกม', active: 'minigame',
     minigamePreviewThemeCss: isMainAdmin
-      ? theme.renderCss(store.data.settings.theme, { scopeSelector: '.mgx-storefront-preview' })
+      ? theme.renderCss(theme.toMonochromeStorefrontTheme(store.data.settings.theme), { scopeSelector: '.mgx-storefront-preview' })
       : '',
     game: store.data.settings.miniGame,
     prizes: store.data.miniGamePrizes.map(prize => ({
