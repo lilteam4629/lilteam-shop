@@ -1633,7 +1633,7 @@ html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-h
 
 /* Admin controls and model-picker panels must pair dark fills with readable text. */
 html[data-admin-theme="dark"] body.admin-site :is(
-  .orders-detail-link, .orders-avatar, .theme-effect-demo,
+  .orders-detail-link, .orders-avatar, .theme-effect-demo, .admin-theme-effect-sample,
   .theme-color-picker-label input, .model-studio-page-head,
   .model-studio-safety
 ) {
