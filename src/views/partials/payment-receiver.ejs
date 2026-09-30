@@ -1,0 +1,6 @@
+<dl class="payment-receiver">
+  <div><dt>ธนาคาร / ช่องทางรับเงิน</dt><dd><%= payment.bankName || '-' %></dd></div>
+  <div class="payment-receiver__number"><dt>เลขบัญชี / พร้อมเพย์</dt><dd><span data-receiver-number><%= payment.bankAccountNumber || '-' %></span></dd><% if (payment.bankAccountNumber) { %><button type="button" data-copy-receiver class="payment-receiver__copy">คัดลอกเลขบัญชี</button><% } %></div>
+  <div><dt>ชื่อบัญชี</dt><dd><%= payment.bankAccountName || '-' %></dd></div>
+</dl>
+<p class="payment-receiver__feedback" data-receiver-feedback role="status" aria-live="polite"></p>

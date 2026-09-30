@@ -85,11 +85,7 @@
         <p>ยอดนี้แยกจากเงินเติมของร้านเช่า ใช้ซื้อสินค้าที่ส่งมาจากร้านหลักเท่านั้น โอนเข้าบัญชีด้านล่างแล้วแนบสลิปเพื่อให้ร้านตรวจสอบ</p>
         <p class="topup-page__api-warning">ห้ามเติมเงินร้านเช่าแล้วนำมากดซื้อสินค้า API เพราะระบบใช้คนละกระเป๋า</p>
         <% if (payment.bankName || payment.bankAccountNumber || payment.bankAccountName) { %>
-          <div class="topup-page__account">
-            <div><small>ช่องทางรับเงิน</small><b><%= payment.bankName || '-' %></b></div>
-            <div><small>เลขบัญชี / พร้อมเพย์</small><b class="topup-account-number"><%= payment.bankAccountNumber || '-' %></b></div>
-            <div><small>ชื่อบัญชี</small><b><%= payment.bankAccountName || '-' %></b></div>
-          </div>
+          <%- include('../partials/payment-receiver', { payment }) %>
         <% } %>
         <% if (payment.bankQrImage) { %><div class="topup-page__qr"><img src="<%= payment.bankQrImage %>" alt="QR บัญชีร้านหลัก" /></div><% } %>
       </aside>
@@ -250,11 +246,7 @@
       <p class="mt-1 text-sm leading-relaxed text-[var(--text-2)]">ยอดหน้านี้แยกจากเงินเติมของร้านเช่า ใช้ซื้อสินค้าที่ส่งมาจากร้านหลักเท่านั้น กรุณาโอนเข้าบัญชีด้านล่างแล้วแนบสลิป ระบบจะตรวจสอบให้</p>
       <p class="mt-2 text-xs font-bold text-[var(--coral)]">ห้ามเติมเงินร้านเช่าแล้วนำมากดซื้อสินค้า API เพราะระบบจะไม่หักเงินจากกระเป๋าร้านเช่า</p>
       <% if (payment.bankName || payment.bankAccountNumber || payment.bankAccountName) { %>
-        <div class="mt-3 grid gap-2 rounded-xl border border-[var(--gold)]/35 bg-[var(--card)] p-3 text-sm sm:grid-cols-3">
-          <div><small class="block text-[10px] text-[var(--text-4)]">ช่องทางรับเงิน</small><b><%= payment.bankName || '-' %></b></div>
-          <div><small class="block text-[10px] text-[var(--text-4)]">เลขบัญชี / พร้อมเพย์</small><b class="font-mono"><%= payment.bankAccountNumber || '-' %></b></div>
-          <div><small class="block text-[10px] text-[var(--text-4)]">ชื่อบัญชี</small><b><%= payment.bankAccountName || '-' %></b></div>
-        </div>
+        <%- include('../partials/payment-receiver', { payment }) %>
       <% } %>
       <% if (payment.bankQrImage) { %><div class="mt-3 flex justify-center rounded-xl bg-white p-3"><img src="<%= payment.bankQrImage %>" alt="QR บัญชีร้านหลัก" class="h-44 w-44 object-contain" /></div><% } %>
     </div>
@@ -446,3 +438,7 @@
 
 <link rel="stylesheet" href="<%= asset('css/truemoney-status-v1.css') %>" />
 <script src="<%= asset('js/truemoney-status-v1.js') %>" defer></script>
+
+<link rel="stylesheet" href="<%= asset('css/payment-receiver-v1.css') %>" />
+<script src="<%= asset('js/payment-receiver-v1.js') %>" defer></script>
+
