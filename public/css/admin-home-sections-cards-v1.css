@@ -181,3 +181,21 @@
   .hsx-edit-form>.hsx-form-actions{padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
 }
 @media(prefers-reduced-motion:reduce){.hsx-card:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){.hsx-card:hover{transform:none}}
+/* Compact collection cards: keep management information and actions together. */
+.hsx-content .hsx-list{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));align-items:start;gap:12px}
+.hsx-content .hsx-list .hsx-card{min-height:0;gap:0;padding:0;border-radius:12px}
+.hsx-content .hsx-card .hsx-card-art{display:none}
+.hsx-content .hsx-card .hsx-card-main{gap:6px;padding:14px;text-align:left;align-content:start}
+.hsx-content .hsx-card .hsx-card-title-row{justify-content:flex-start;gap:8px}
+.hsx-content .hsx-card .hsx-card-title-row h3{font-size:15px;line-height:1.4}
+.hsx-content .hsx-card .hsx-card-meta{justify-content:flex-start;gap:7px;font-size:11px}
+.hsx-content .hsx-card .hsx-card-actions{gap:6px;margin-top:0;padding:8px 10px;justify-content:flex-start;flex-wrap:wrap}
+.hsx-content .hsx-card .hsx-card-actions .experiment-button{min-height:36px;padding-inline:9px;font-size:11px}
+.hsx-content .hsx-card .hsx-icon-button{width:36px;height:36px}
+.hsx-content .hsx-card .hsx-card-actions>form:last-child{margin-left:auto}
+@media(max-width:760px){
+  .hsx-content .hsx-list{grid-template-columns:minmax(0,1fr)}
+  .hsx-content .hsx-card .hsx-icon-button{width:44px;height:44px}
+  .hsx-content .hsx-card .hsx-card-actions .experiment-button{min-height:44px}
+}
