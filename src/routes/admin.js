@@ -463,6 +463,24 @@ router.get('/catalog-api/payouts/:id/slip', async (req, res) => {
   media.stream.pipe(res);
 });
 
+// Top-up slips are private evidence. Serve them from the current shop's
+// dataset so an administrator can review customer uploads in every tenant.
+router.get('/topups/:id/slip', async (req, res, next) => {
+  try {
+    const request = (store.data.topupRequests || []).find(item => String(item.id) === String(req.params.id));
+    if (!request?.slipStorageId) return res.sendStatus(404);
+    const media = await store.getPrivateMedia(request.slipStorageId);
+    if (!media) return res.sendStatus(404);
+    res.set('Content-Type', media.file?.metadata?.contentType || media.file?.contentType || 'image/jpeg');
+    res.set('Content-Length', media.file.length);
+    res.set('Cache-Control', 'private, no-store');
+    res.set('Content-Disposition', 'inline');
+    media.stream.on('error', next).pipe(res);
+  } catch (error) {
+    next(error);
+  }
+});
+
 router.post('/catalog-api/settings', async (req, res) => {
   if (!req.tenantShop) {
     const mainConfig = catalogSyndication.normalizeConfig(store.platformData.settings || {});
