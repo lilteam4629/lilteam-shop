@@ -1738,3 +1738,10 @@ html[data-admin-theme="dark"] body.admin-site .effects-toggle input[type="checkb
 html[data-admin-theme="dark"] body.admin-site .order-item-meta code {
   color: var(--admin-dark-muted) !important;
 }
+
+/* Match the storefront header theme control: compact square icon button. */
+body.admin-site .admin-theme-switch{width:42px;height:42px;min-height:42px;padding:0;border-radius:11px;font-size:0;gap:0;box-shadow:none}
+body.admin-site .admin-theme-switch svg{width:20px;height:20px;flex:none}
+body.admin-site .admin-theme-switch:hover{transform:translateY(-1px);box-shadow:none}
+html[data-admin-theme="dark"] body.admin-site .admin-theme-switch{color:var(--admin-dark-text);background:var(--admin-dark-input);border-color:var(--admin-dark-line)}
+@media(max-width:760px){body.admin-site .experiment-topbar .admin-theme-switch{width:42px;height:42px;min-height:42px;padding:0}}
