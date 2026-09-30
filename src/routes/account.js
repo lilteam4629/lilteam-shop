@@ -142,6 +142,7 @@ async function reserveTrueMoneyClaim(voucherCode, userId) {
     data.walletTransactions ||= [];
     if (data.walletTransactions.some(t => t.voucherCode === voucherCode)) return { alreadyCredited: true };
     const existing = data.truemoneyRedemptions.find(item => item.voucherCode === voucherCode);
+    if (existing && !existing.id) existing.id = store.genId(16);
     // A voucher claim is permanently owned by the user who first submitted
     // it. Even a failed/network-error claim must never be re-assigned to a
     // different account, otherwise a later retry could credit the wrong user
@@ -153,10 +154,11 @@ async function reserveTrueMoneyClaim(voucherCode, userId) {
       existing.status = 'processing';
       existing.message = '';
       existing.updatedAt = new Date().toISOString();
-      return { retryExisting: true, amount: Number(existing.amount) || 0, senderName: existing.senderName || '', providerBase: existing.providerBase || '', receiverPhone: existing.receiverPhone || '' };
+      return { claimId: existing.id, retryExisting: true, amount: Number(existing.amount) || 0, senderName: existing.senderName || '', providerBase: existing.providerBase || '', receiverPhone: existing.receiverPhone || '' };
     }
-    data.truemoneyRedemptions.push({ voucherCode, userId, status: 'processing', createdAt: new Date().toISOString() });
-    return { retryExisting: false, amount: 0, senderName: '', providerBase: '' };
+    const claimId = store.genId(16);
+    data.truemoneyRedemptions.push({ id: claimId, voucherCode, userId, status: 'processing', createdAt: new Date().toISOString() });
+    return { claimId, retryExisting: false, amount: 0, senderName: '', providerBase: '' };
   });
 }
 
@@ -297,6 +299,7 @@ router.post('/topup/truemoney', async (req, res) => {
   const user = currentUser(req);
   let voucherCode = '';
   let providerAccepted = false;
+  let claimId = null;
   let ownsRedemptionLock = false;
   try {
     const voucherInput = String(req.body.voucherLink || req.body.voucherCode || '').trim();
@@ -333,6 +336,7 @@ router.post('/topup/truemoney', async (req, res) => {
       return res.redirect('/account/topup');
     }
 
+    claimId = reservation.claimId || null;
     if (reservation.alreadyCredited) {
       req.flash('success', 'ซองของขวัญนี้เติมเงินเข้าเว็บแล้ว');
       return res.redirect('/account');
@@ -359,6 +363,7 @@ router.post('/topup/truemoney', async (req, res) => {
           console.error('[TrueMoney claim status]', error.message);
         });
       }
+      if (claimId) return res.redirect('/account/topup/truemoney/status/' + encodeURIComponent(claimId));
       req.flash(result.recoverable ? 'success' : 'error', result.recoverable ? 'ระบบกำลังติดตามผลซองและบันทึกยอดให้อัตโนมัติ ไม่ต้องวางลิงก์ซ้ำ กรุณารอสักครู่แล้วตรวจยอดในหน้าบัญชี' : (result.message || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้'));
       return res.redirect('/account/topup');
     }
@@ -396,6 +401,7 @@ router.post('/topup/truemoney', async (req, res) => {
     })).catch(error => console.error('[TrueMoney Discord notify]', error.message));
 
     req.flash('success', `🧧 เติมเงินสำเร็จ! ได้รับ ฿${amount.toLocaleString()} เข้ากระเป๋าเรียบร้อยแล้ว`);
+    if (claimId) return res.redirect('/account/topup/truemoney/status/' + encodeURIComponent(claimId));
     res.redirect(topupRequestId ? `/account/topup/${topupRequestId}` : '/account');
   } catch (err) {
     console.error('[TrueMoney Redeem Error]', err);
@@ -423,7 +429,7 @@ router.post('/topup/truemoney', async (req, res) => {
     } else {
       req.flash('error', 'เกิดข้อผิดพลาดในการตรวจสอบซองของขวัญ กรุณาลองใหม่อีกครั้ง');
     }
-    res.redirect('/account/topup');
+    res.redirect(claimId ? '/account/topup/truemoney/status/' + encodeURIComponent(claimId) : '/account/topup');
   } finally {
     if (ownsRedemptionLock) truemoneyRedemptionLocks.delete(voucherCode);
   }
@@ -454,6 +460,16 @@ router.post('/topup/catalog-api', async (req, res) => {
     return res.redirect('/account/topup/catalog-api');
   }
   res.redirect(`/account/topup/${created.request.id}`);
+});
+
+router.get('/topup/truemoney/status/:claimId', (req, res) => {
+  const user = currentUser(req);
+  const claim = (store.data.truemoneyRedemptions || []).find(item => item.id === req.params.claimId && item.userId === user.id);
+  res.set('Cache-Control', 'no-store');
+  if (!claim) return res.status(404).send('ไม่พบรายการเติมเงิน');
+  const status = claim.status === 'approved' ? 'approved' : claim.status === 'failed' ? 'failed' : 'processing';
+  if (req.query.format === 'json') return res.json({ status, amount: Number(claim.amount) || 0, message: status === 'failed' ? claim.message || 'ไม่สามารถรับเงินจากซองนี้ได้' : '' });
+  res.render('shop/truemoney-status', { title: 'ผลการเติมเงิน TrueMoney', claim: { id: claim.id, status, amount: Number(claim.amount) || 0, message: status === 'failed' ? claim.message || 'ไม่สามารถรับเงินจากซองนี้ได้' : '' } });
 });
 
 router.get('/topup/:id', async (req, res) => {

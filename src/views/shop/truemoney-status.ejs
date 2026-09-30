@@ -1,0 +1,12 @@
+<link rel="stylesheet" href="<%= asset('css/truemoney-status-v1.css') %>" />
+<section class="wallet-wait" id="walletWait" data-status="<%= claim.status %>" data-claim-id="<%= claim.id %>" role="status" aria-live="polite" aria-busy="<%= claim.status === 'processing' %>">
+  <div class="wallet-wait-card">
+    <div class="wallet-wait-icon" aria-hidden="true">◷</div>
+    <h1>กำลังเติมเงินให้คุณ</h1>
+    <p class="wallet-wait-message">ระบบกำลังรับซองและบันทึกยอดเงิน กรุณารอสักครู่ ไม่ต้องส่งลิงก์ซ้ำ</p>
+    <div class="wallet-wait-amount" hidden></div>
+    <div class="wallet-wait-actions" hidden><a href="/account">กลับหน้าบัญชี</a><a href="/account/topup">เติมเงินอีกครั้ง</a></div>
+  </div>
+</section>
+<script type="application/json" id="walletInitialStatus"><%- JSON.stringify(claim).replace(/</g, '\\u003c') %></script>
+<script src="<%= asset('js/truemoney-status-v1.js') %>" defer></script>
