@@ -1,0 +1,40 @@
+/* Keep nested grids and scrollable data inside the admin workspace. */
+body.admin-site .promo-page.promo-admin {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+}
+body.admin-site .promo-admin > *,
+body.admin-site .promo-admin .promo-grid > *,
+body.admin-site .promo-admin .promo-history > div { min-width: 0; max-width: 100%; }
+body.admin-site .promo-admin .promo-history > div,
+body.admin-site .coupons-table-wrap { position: relative; overflow-x: auto; }
+body.admin-site .effects-toggle,
+body.admin-site .effects-switch { position: relative; }
+body.admin-site .effects-toggle input[type="checkbox"],
+body.admin-site .effects-switch input[type="checkbox"] {
+  position: absolute;
+  width: 1px !important;
+  height: 1px !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 0 !important;
+}
+@media (max-width: 760px) {
+  html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-content .hsx-list .hsx-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-card .hsx-card-main,
+  html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-card .hsx-card-actions {
+    grid-column: 1 / -1;
+    min-width: 0;
+  }
+  body.admin-site .hsx-card-title-row,
+  body.admin-site .hsx-card-meta { flex-wrap: wrap; }
+  body.admin-site .hsx-state,
+  body.admin-site .hsx-mode { flex-shrink: 0; }
+  body.admin-site .promo-admin .promo-hero { align-items: stretch; }
+  body.admin-site .promo-admin .promo-hero > div { width: 100%; min-width: 0; }
+  body.admin-site .promo-admin .promo-hero p { overflow-wrap: anywhere; }
+  body.admin-site .promo-admin-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  body.admin-site .promo-admin-stats article { padding: 10px; }
+}
