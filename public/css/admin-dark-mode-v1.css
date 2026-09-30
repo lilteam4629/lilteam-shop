@@ -1735,3 +1735,6 @@ html[data-admin-theme="dark"] body.admin-site .effects-toggle input[type="checkb
   background-color: var(--admin-dark-input) !important;
   border-color: var(--admin-dark-line) !important;
 }
+html[data-admin-theme="dark"] body.admin-site .order-item-meta code {
+  color: var(--admin-dark-muted) !important;
+}
