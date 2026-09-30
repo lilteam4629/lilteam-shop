@@ -14,7 +14,7 @@ function inWindow(item, now = Date.now()) {
     && (!item.endsAt || now < Date.parse(item.endsAt));
 }
 function customer(data, userId) {
-  const user = data.users.find(u => u.id === userId && u.status !== 'banned');
+  const user = data.users.find(u => u.id === userId && u.role !== 'admin' && u.status !== 'banned');
   if (!user) throw new Error('กรุณาเข้าสู่ระบบด้วยบัญชีสมาชิกที่ใช้งานได้');
   return user;
 }

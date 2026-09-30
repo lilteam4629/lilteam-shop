@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
 const service = require('../src/services/promotions');
 const now = Date.parse('2026-10-01T05:00:00Z');
-const fixture = () => ({settings:{promotions:{campaigns:[{id:'campaign',title:'Welcome',enabled:true,amount:10.25,startsAt:'2026-10-01T00:00:00Z',endsAt:'2026-10-02T00:00:00Z',maxClaims:1}],referral:{enabled:true,referrerAmount:5,friendAmount:2,startsAt:'2026-10-01T00:00:00Z',endsAt:'2026-10-02T00:00:00Z'}}},users:[{id:'a',username:'Alice',email:'alice@example.test',role:'customer',status:'active',walletBalance:0,createdAt:'2026-10-01T01:00:00Z'},{id:'b',username:'Bob',email:'bob@example.test',role:'customer',status:'active',walletBalance:20,createdAt:'2026-10-01T02:00:00Z',referredBy:'a'},{id:'admin',username:'owner',role:'admin',walletBalance:0}],orders:[],walletTransactions:[]});
+const fixture = () => ({settings:{promotions:{campaigns:[{id:'campaign',title:'Welcome',enabled:true,amount:10.25,startsAt:'2026-10-01T00:00:00Z',endsAt:'2026-10-02T00:00:00Z',maxClaims:1}],referral:{enabled:true,referrerAmount:5,friendAmount:2,startsAt:'2026-10-01T00:00:00Z',endsAt:'2026-10-02T00:00:00Z'}}},users:[{id:'a',username:'Alice',email:'alice@example.test',role:'customer',status:'active',walletBalance:0,createdAt:'2026-10-01T01:00:00Z'},{id:'b',username:'Bob',email:'bob@example.test',role:'customer',status:'active',walletBalance:20,createdAt:'2026-10-01T02:00:00Z',referredBy:'a'},{id:'admin',username:'owner',role:'admin',walletBalance:0}],orders:[],walletTransactions:[{userId:'a',type:'topup',amount:10},{userId:'b',type:'topup',amount:10}]});
 const data=fixture();
 assert.equal(service.claim(data,'a','campaign','  ALICE ',now),10.25);
 assert.equal(data.users[0].walletBalance,10.25);
