@@ -41,7 +41,17 @@
                 <% }) %>
               </div>
             <% } else { %><p class="experiment-inline-empty">ยังไม่มีรูปสินค้า เพิ่มรูปจากเครื่องหรือใส่ URL ด้านล่างได้</p><% } %>
-            <label class="experiment-field"><span>เพิ่มรูปจากเครื่องหรือโทรศัพท์</span><input type="file" name="productImages" accept="image/png,image/jpeg,image/webp,image/gif" multiple /><small>เลือกได้สูงสุด 10 รูป รูปแรกจะเป็นภาพปก เว้นแต่เลือกให้ใช้รูปใหม่เป็นภาพปก</small></label>
+            <div class="experiment-image-upload">
+              <span class="experiment-upload-label">เพิ่มรูปจากเครื่องหรือโทรศัพท์</span>
+              <label id="productImagesDropzone" class="experiment-image-dropzone" for="productImagesInput">
+                <input id="productImagesInput" class="experiment-image-dropzone-input" type="file" name="productImages" accept="image/png,image/jpeg,image/webp,image/gif" multiple aria-describedby="productImagesHelp productImagesStatus" />
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M4 15.5v3A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5v-3" /></svg>
+                <strong>ลากหลายรูปมาวางที่นี่ หรือคลิกเพื่อเลือก</strong>
+                <small id="productImagesHelp">JPG, PNG, WEBP หรือ GIF · ไม่เกิน 10 รูป · รูปละไม่เกิน 8 MB</small>
+              </label>
+              <p id="productImagesStatus" class="experiment-upload-status" role="status" aria-live="polite">ยังไม่ได้เลือกรูปใหม่</p>
+              <div id="newImagePreview" class="experiment-image-grid experiment-new-image-grid" hidden></div>
+            </div>
             <label class="experiment-check-row"><input type="checkbox" name="newImagesFirst" /> ใช้รูปที่อัปโหลดใหม่เป็นภาพปก</label>
             <label class="experiment-field"><span>เพิ่มรูปด้วย URL (ใส่ได้หลายบรรทัด)</span><textarea name="images" rows="2" placeholder="https://.../image-1.jpg&#10;https://.../image-2.jpg"></textarea></label>
           </div>
@@ -93,3 +103,130 @@
   </div>
   <nav class="experiment-mobile-nav" aria-label="เมนูมือถือ"><a href="/admin">⌂<span>ภาพรวม</span></a><a class="active" href="/admin/products">▦<span>สินค้า</span></a><a href="/admin/scheduled-products">◷<span>ตั้งเวลา</span></a><a href="/admin/orders">▤<span>คำสั่งซื้อ</span></a><a href="/admin/settings">⚙<span>ตั้งค่า</span></a></nav>
 </div>
+
+<script>
+  (function () {
+    const input = document.getElementById('productImagesInput');
+    const dropzone = document.getElementById('productImagesDropzone');
+    const preview = document.getElementById('newImagePreview');
+    const status = document.getElementById('productImagesStatus');
+    if (!input || !dropzone || !preview || !status) return;
+
+    const maxFiles = 10;
+    const maxBytes = 8 * 1024 * 1024;
+    let selectedFiles = [];
+    let dragDepth = 0;
+
+    function fileKey(file) {
+      return [file.name, file.size, file.lastModified].join(':');
+    }
+
+    function syncInput() {
+      const transfer = new DataTransfer();
+      selectedFiles.forEach(function (file) { transfer.items.add(file); });
+      input.files = transfer.files;
+    }
+
+    function renderPreview() {
+      preview.replaceChildren();
+      preview.hidden = selectedFiles.length === 0;
+      selectedFiles.forEach(function (file, index) {
+        const card = document.createElement('div');
+        card.className = 'experiment-image-choice experiment-new-image-choice';
+        const imageFrame = document.createElement('div');
+        imageFrame.className = 'experiment-image-preview';
+        const image = document.createElement('img');
+        const objectUrl = URL.createObjectURL(file);
+        image.src = objectUrl;
+        image.alt = 'รูปใหม่ ' + (index + 1) + ' ' + file.name;
+        image.onload = image.onerror = function () { URL.revokeObjectURL(objectUrl); };
+        imageFrame.appendChild(image);
+
+        const meta = document.createElement('div');
+        meta.className = 'experiment-image-choice-meta';
+        const name = document.createElement('span');
+        name.className = 'experiment-new-image-name';
+        name.textContent = (index === 0 ? 'รูปแรก · ' : 'รูปที่ ' + (index + 1) + ' · ') + file.name;
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'experiment-new-image-remove';
+        remove.setAttribute('aria-label', 'นำรูป ' + file.name + ' ออก');
+        remove.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path stroke-linecap="round" d="M5 7h14M10 11v6m4-6v6M6.5 7l.8 13h9.4l.8-13M9 7V4h6v3"/></svg>';
+        remove.addEventListener('click', function () {
+          selectedFiles.splice(index, 1);
+          syncInput();
+          renderPreview();
+        });
+        meta.append(name, remove);
+        card.append(imageFrame, meta);
+        preview.appendChild(card);
+      });
+      status.textContent = selectedFiles.length
+        ? 'เลือกรูปใหม่ ' + selectedFiles.length + ' / ' + maxFiles + ' รูป · รูปแรกจะเป็นภาพปก เว้นแต่เลือกใช้รูปใหม่เป็นภาพปก'
+        : 'ยังไม่ได้เลือกรูปใหม่';
+    }
+
+    function addFiles(fileList) {
+      const incoming = Array.from(fileList || []);
+      const existingKeys = new Set(selectedFiles.map(fileKey));
+      let added = 0;
+      let rejectedType = 0;
+      let rejectedSize = 0;
+      let rejectedLimit = 0;
+      incoming.forEach(function (file) {
+        const validMime = /^image\/(png|jpeg|webp|gif)$/i.test(file.type);
+        const validExtension = /\.(png|jpe?g|webp|gif)$/i.test(file.name);
+        if (!validMime && !validExtension) { rejectedType += 1; return; }
+        if (file.size > maxBytes) { rejectedSize += 1; return; }
+        const key = fileKey(file);
+        if (existingKeys.has(key)) return;
+        if (selectedFiles.length >= maxFiles) { rejectedLimit += 1; return; }
+        selectedFiles.push(file);
+        existingKeys.add(key);
+        added += 1;
+      });
+
+      syncInput();
+      renderPreview();
+      const messages = [];
+      if (added) messages.push('เพิ่ม ' + added + ' รูป');
+      if (rejectedType) messages.push('ข้าม ' + rejectedType + ' ไฟล์ที่ไม่ใช่รูปแบบที่รองรับ');
+      if (rejectedSize) messages.push('ข้าม ' + rejectedSize + ' รูปที่เกิน 8 MB');
+      if (rejectedLimit) messages.push('เพิ่มได้สูงสุด ' + maxFiles + ' รูปต่อครั้ง');
+      if (!messages.length && incoming.length) messages.push('รูปเหล่านี้อยู่ในรายการแล้ว');
+      if (messages.length) status.textContent = messages.join(' · ') + (selectedFiles.length ? ' — รวม ' + selectedFiles.length + ' / ' + maxFiles + ' รูป' : '');
+    }
+
+    input.addEventListener('change', function () { addFiles(input.files); });
+    ['dragenter', 'dragover'].forEach(function (type) {
+      dropzone.addEventListener(type, function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        dragDepth += 1;
+        dropzone.classList.add('is-dragging');
+        dropzone.style.borderColor = '#8c5e12';
+        dropzone.style.backgroundColor = '#f4ead5';
+      });
+    });
+    ['dragleave', 'dragend'].forEach(function (type) {
+      dropzone.addEventListener(type, function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        dragDepth = Math.max(0, dragDepth - 1);
+        if (!dragDepth) clearDragState();
+      });
+    });
+    function clearDragState() {
+      dropzone.classList.remove('is-dragging');
+      dropzone.style.removeProperty('border-color');
+      dropzone.style.removeProperty('background-color');
+    }
+    dropzone.addEventListener('drop', function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+      dragDepth = 0;
+      clearDragState();
+      addFiles(event.dataTransfer && event.dataTransfer.files);
+    });
+  })();
+</script>
