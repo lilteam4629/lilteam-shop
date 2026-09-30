@@ -215,7 +215,7 @@ async function auditPage(requestPath, viewport) {
       return style.display !== 'none' && style.visibility !== 'hidden' && +style.opacity !== 0;
     };
     for (const el of elements) {
-      if (/^(IMG|VIDEO|CANVAS|PICTURE|IFRAME|OBJECT|EMBED|SVG|PATH|CIRCLE|RECT|LINE|POLYGON|POLYLINE)$/.test(el.tagName) || el.matches('input[type="color"], input[type="range"], .experiment-chart-bar, .admin-theme-swatch, .admin-theme-store, .welcome-live-save-indicator') || el.closest('.admin-theme-store, .model-preview-window, .admin-theme-effect-sample, .admin-theme-mono-color.is-white, .effects-stage, .admin-theme-swatch, [data-admin-dark-preserve], .admin-dark-mode-preserve') || !visible(el)) continue;
+      if (/^(IMG|VIDEO|CANVAS|PICTURE|IFRAME|OBJECT|EMBED|SVG|PATH|CIRCLE|RECT|LINE|POLYGON|POLYLINE)$/.test(el.tagName) || el.matches('input[type="color"], input[type="range"], .experiment-chart-bar, .admin-theme-swatch, .admin-theme-store, .welcome-live-save-indicator') || el.closest('.admin-theme-store, .model-preview-window, .admin-theme-effect-sample, .admin-theme-mono-color.is-white, .admin-theme-mono-options, .settings-storefront-stage, .mg-preview-prizes, .mg-preview-prize, .effects-stage, .admin-theme-swatch, [data-admin-dark-preserve], .admin-dark-mode-preserve') || !visible(el)) continue;
       const style = getComputedStyle(el);
       const bg = color(style.backgroundColor);
       const rect = el.getBoundingClientRect();

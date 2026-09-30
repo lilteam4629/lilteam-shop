@@ -1336,3 +1336,297 @@ html[data-admin-theme="dark"] body.admin-site .mgx-preview-panel .mg-box-bow {
   background-color: #f0cf8c !important;
   box-shadow: -10px 0 0 -1px #d4ad51, 10px 0 0 -1px #d4ad51 !important;
 }
+
+
+/* Dark-mode completion pass: remaining page-local paper surfaces and brand accents. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-product-row, .experiment-product-row:hover, .experiment-product-table-head,
+  .experiment-list-head, .experiment-empty, .experiment-product-thumb,
+  .experiment-product-tags span, .experiment-row-actions .experiment-icon-action,
+  .hsx-hero, .hsx-card-rank, .hsx-product-thumb, .hsx-product-more,
+  .orders-workspace-head, .orders-toolbar, .orders-filter-bar, .orders-search,
+  .tp-service-link, .tp-request-card, .tp-request-card.is-reviewable,
+  .tp-channel-row, .tp-review-guide, .tp-slip-empty, .tp-method, .tp-partner,
+  .tp-slip-result, .tp-review-note, .tp-empty,
+  .theme-intro-card, .theme-step, .theme-page-state, .theme-local-badge,
+  .theme-background-option, .theme-effect-option, .theme-mode-switch,
+  .welcome-live-hero, .welcome-live-stats article,
+  .as-hero, .as-notice, .as-banner-mode-control,
+  .experiment-confirm-dialog, .experiment-confirm-head, .experiment-confirm-body,
+  .experiment-confirm-actions, .users-wallet-dialog, .users-invite-dialog,
+  .users-wallet-preview, .users-wallet-preview > div
+):not(:where(
+  .admin-theme-store *, .effects-stage *, .model-preview-window *,
+  .settings-storefront-stage *, .welcome-live-preview-stage *,
+  .welcome-popup-preview-modal *, [data-admin-dark-preserve] *
+)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-product-thumb, .hsx-product-thumb, .hsx-product-more,
+  .experiment-product-tags span, .experiment-row-actions .experiment-icon-action,
+  .orders-search, .theme-intro-icon, .theme-step-number,
+  .welcome-live-stat-icon, .welcome-live-upload-icon,
+  .as-summary-icon, .as-card-icon, .as-empty-art
+):not(:where(.admin-theme-store *, .effects-stage *, .settings-storefront-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-brand-readable-dark, var(--gold-text)) !important;
+  background-color: var(--admin-brand-soft-dark, #252018) !important;
+  border-color: var(--admin-brand-border-dark, var(--admin-dark-line)) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-product-copy small, .experiment-product-price del,
+  .orders-workspace-head p, .orders-kpi-foot, .tp-section-kicker,
+  .tp-request-card small, .tp-channel-row small, .theme-intro-copy p,
+  .welcome-live-stats small, .as-hero p, .as-hero-meta
+):not(:where(.admin-theme-store *, .effects-stage *, .settings-storefront-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-muted) !important;
+}
+
+/* Brand-colored dashboard accents and selected states follow each shop's saved palette. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .orders-kpi:first-child, .tp-service-link.is-active,
+  .theme-mode-switch button.is-active,
+  .theme-background-option:has(input:checked),
+  .theme-effect-option:has(input:checked),
+  .hsx-card-rank strong, .hsx-filters button.is-active,
+  .welcome-live-stat-icon, .as-summary-icon, .as-card-icon,
+  .experiment-kpi-icon:not(.success):not(.danger):not(.warning),
+  .experiment-filter-stat-icon:not(.success):not(.danger):not(.warning),
+  .settings-panel-icon:not(.success):not(.danger):not(.warning),
+  .effects-stat-icon:not(.success):not(.danger):not(.warning),
+  .tp-service-icon, .tp-service-icon.is-blue, .tp-service-icon.is-orange,
+  .tp-service-icon.is-purple, .as-summary-icon.is-gold, .as-summary-icon.is-blue,
+  .as-summary-icon.is-violet, .as-card-icon.is-gold, .as-card-icon.is-blue,
+  .as-card-icon.is-violet
+):not(:where(.admin-theme-store *, .effects-stage *, .model-preview-window *, .settings-storefront-stage *, .welcome-live-preview-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--gold-contrast) !important;
+  background-color: var(--gold) !important;
+  border-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-button.primary, .experiment-button[class*="primary"],
+  .btn-primary, button.primary, [role="button"].primary,
+  .tp-approve-action, .users-search-button
+):not(:where(.admin-theme-store *, .effects-stage *, .model-preview-window *, .settings-storefront-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--gold-contrast) !important;
+  background-color: var(--gold) !important;
+  background-image: none !important;
+  border-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-button.primary, .experiment-button[class*="primary"],
+  .btn-primary, button.primary, [role="button"].primary,
+  .tp-approve-action, .users-search-button
+):hover:not(:where(.admin-theme-store *, .effects-stage *, .model-preview-window *, .settings-storefront-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--gold-contrast) !important;
+  background-color: var(--gold-hover) !important;
+  border-color: var(--gold-hover) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .orders-kpi:first-child :is(small, strong, em, span, i) {
+  color: var(--gold-contrast) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .orders-kpi:first-child::after {
+  border-color: color-mix(in srgb, var(--gold-contrast) 25%, transparent) !important;
+  box-shadow: 0 0 0 12px color-mix(in srgb, var(--gold-contrast) 8%, transparent),
+    0 0 0 24px color-mix(in srgb, var(--gold-contrast) 5%, transparent) !important;
+}
+
+/* Keep review outcomes semantic while giving the queue itself a dark work surface. */
+html[data-admin-theme="dark"] body.admin-site .tp-status.is-pending,
+html[data-admin-theme="dark"] body.admin-site .tp-request-card.is-reviewable .tp-request-ref .tp-ref-icon,
+html[data-admin-theme="dark"] body.admin-site .tp-review-guide {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site .tp-status.is-verifying {
+  color: #b7dcf8 !important;
+  background-color: #162535 !important;
+  border-color: #385b79 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .tp-status.is-approved,
+html[data-admin-theme="dark"] body.admin-site .tp-slip-result:not(.is-warning) {
+  color: #b6e8c7 !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .tp-status.is-rejected,
+html[data-admin-theme="dark"] body.admin-site .tp-delete-action {
+  color: #f3aeb5 !important;
+  background-color: #2b171d !important;
+  border-color: #8f4653 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-confirm-dialog.danger .experiment-confirm-actions .experiment-button.primary {
+  color: #fff !important;
+  background-color: #a9334b !important;
+  border-color: #a9334b !important;
+}
+
+/* Product and home-section hover states must not flash white between pages. */
+html[data-admin-theme="dark"] body.admin-site .experiment-product-row:hover,
+html[data-admin-theme="dark"] body.admin-site .hsx-card:hover,
+html[data-admin-theme="dark"] body.admin-site .tp-service-link:hover {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none !important;
+  border-color: var(--admin-brand-border-dark, var(--admin-dark-line)) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .hsx-icon-button:not(.is-danger),
+html[data-admin-theme="dark"] body.admin-site .hsx-edit-details > summary,
+html[data-admin-theme="dark"] body.admin-site .hs-picker-tools button,
+html[data-admin-theme="dark"] body.admin-site .hs-picker-grid > label {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .hsx-icon-button:not(.is-danger):hover,
+html[data-admin-theme="dark"] body.admin-site .hsx-edit-details[open] > summary,
+html[data-admin-theme="dark"] body.admin-site .hs-picker-grid > label:has(input:checked) {
+  color: var(--gold-contrast) !important;
+  background-color: var(--gold) !important;
+  border-color: var(--gold) !important;
+}
+
+
+
+/* Keep nested labels legible when a selected control is filled with the shop accent. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .tp-service-link.is-active, .hsx-filters button.is-active,
+  .theme-mode-switch button.is-active, .experiment-filter.active,
+  .catalog-selector-filters button.active, .announcement-filters button.is-active,
+  .users-audience-tabs .active
+) :is(b, strong, small, span, i, em) {
+  color: var(--gold-contrast) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .theme-background-option:has(input:checked),
+  .theme-effect-option:has(input:checked)
+) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-brand-soft-dark, #252018) !important;
+  border-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .theme-background-option:has(input:checked),
+  .theme-effect-option:has(input:checked)
+) :is(b, strong, small, span, i, em) {
+  color: var(--admin-dark-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .hsx-card-rank strong {
+  color: var(--gold-text) !important;
+  background: transparent !important;
+}
+
+
+html[data-admin-theme="dark"] body.admin-site .catalog-selector-filters button.active b {
+  color: var(--gold-contrast) !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+
+/* Top-up queue KPI tiles are admin data surfaces, including the pending tile. */
+html[data-admin-theme="dark"] body.admin-site :is(.tp-stat, .tp-stat-queue, .tp-stat-approved) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+  box-shadow: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site .tp-stat :is(span, small, strong, em, .tp-stat-foot, .tp-stat-foot b) {
+  color: var(--admin-dark-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .tp-stat :is(small, em, .tp-stat-foot) {
+  color: var(--admin-dark-muted) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .tp-stat-queue > strong {
+  color: var(--admin-dark-warning) !important;
+}
+
+/* Welcome summary icons are admin indicators; use the tenant accent instead of baked-in SVG colors. */
+html[data-admin-theme="dark"] body.admin-site .welcome-live-stat-icon {
+  color: var(--gold-text) !important;
+  background-color: var(--admin-brand-soft-dark, #252018) !important;
+  border-color: var(--admin-brand-border-dark, var(--admin-dark-line)) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-stat-icon svg * {
+  fill: none !important;
+  stroke: var(--gold-text) !important;
+}
+
+
+
+/* Non-status Welcome editor icons and its admin-only illustration use one tenant accent. */
+html[data-admin-theme="dark"] body.admin-site :is(.welcome-live-card-icon, .welcome-live-stat-icon) {
+  color: var(--gold-text) !important;
+  background-color: var(--admin-brand-soft-dark, #252018) !important;
+  background-image: none !important;
+  border-color: var(--admin-brand-border-dark, var(--admin-dark-line)) !important;
+  box-shadow: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.welcome-live-card-icon, .welcome-live-stat-icon) svg * {
+  fill: none !important;
+  stroke: var(--gold-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-art-tile {
+  background-color: var(--admin-brand-soft-dark, #252018) !important;
+  background-image: none !important;
+  border-color: var(--admin-brand-border-dark, var(--admin-dark-line)) !important;
+  box-shadow: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-art-main {
+  background-color: var(--gold) !important;
+  border-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-art-tile svg * {
+  fill: none !important;
+  stroke: var(--gold-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-art-spark,
+html[data-admin-theme="dark"] body.admin-site .welcome-live-art-spark-two {
+  background-color: var(--gold) !important;
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--gold) 16%, transparent) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.tp-channel-icon.wallet, .tp-channel-icon.verify) {
+  color: var(--gold-text) !important;
+  background-color: var(--admin-brand-soft-dark, #252018) !important;
+  border-color: var(--admin-brand-border-dark, var(--admin-dark-line)) !important;
+}
+
+
+
+html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-stats .welcome-live-stat-icon {
+  color: var(--gold-text) !important;
+  background: var(--admin-brand-soft-dark, #252018) !important;
+  border-color: var(--admin-brand-border-dark, var(--admin-dark-line)) !important;
+  box-shadow: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-stats .welcome-live-stat-icon svg * {
+  fill: none !important;
+  stroke: var(--gold-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-card-head .welcome-live-card-icon {
+  color: var(--gold-text) !important;
+  background: var(--admin-brand-soft-dark, #252018) !important;
+  border-color: var(--admin-brand-border-dark, var(--admin-dark-line)) !important;
+  box-shadow: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-hero-art .welcome-live-art-tile {
+  background: var(--admin-brand-soft-dark, #252018) !important;
+  border-color: var(--admin-brand-border-dark, var(--admin-dark-line)) !important;
+  box-shadow: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-hero-art .welcome-live-art-main {
+  background: var(--gold) !important;
+  border-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-hero-art .welcome-live-art-tile svg * {
+  fill: none !important;
+  stroke: var(--gold-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-hero-art .welcome-live-art-main svg * {
+  stroke: var(--gold-contrast) !important;
+}
