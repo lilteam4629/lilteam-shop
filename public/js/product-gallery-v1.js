@@ -14,21 +14,15 @@
     var next = new Image();
     next.onload = function () {
       if (!image.isConnected || image.__galleryTicket !== ticket) return;
-      if (slide && !reduced.matches && image.animate) {
-        var previous = image.cloneNode();
-        previous.removeAttribute('data-product-images');
-        previous.removeAttribute('id');
-        previous.alt = '';
-        previous.setAttribute('aria-hidden', 'true');
-        previous.classList.add('product-gallery-outgoing');
-        var parent = image.parentElement;
-        parent.classList.add('product-gallery-frame');
-        parent.appendChild(previous);
-        var leave = previous.animate([{ transform: 'translateX(0)' }, { transform: 'translateX(-100%)' }], { duration: 450, easing: 'ease-out' });
-        leave.onfinish = leave.oncancel = function () { previous.remove(); };
-        image.animate([{ transform: 'translateX(100%)' }, { transform: 'translateX(0)' }], { duration: 450, easing: 'ease-out' });
-      }
+      // Animate only the existing image: extra image children can alter theme grid sizing.
+      if (image.__galleryAnimation) image.__galleryAnimation.cancel();
       image.src = urls[index];
+      if (!reduced.matches && image.animate) {
+        image.__galleryAnimation = image.animate([
+          { opacity: 0.25, transform: 'scale(0.985)' },
+          { opacity: 1, transform: 'scale(1)' }
+        ], { duration: 520, easing: 'cubic-bezier(.22,1,.36,1)' });
+      }
       if (done) done(index);
     };
     next.onerror = function () { if (done && image.__galleryTicket === ticket) done(null); };
@@ -61,6 +55,10 @@
     timer = null;
     if (observer) observer.disconnect();
     observer = null;
+    cards.forEach(function (entry) {
+      entry.image.__galleryTicket = (entry.image.__galleryTicket || 0) + 1;
+      if (entry.image.__galleryAnimation) entry.image.__galleryAnimation.cancel();
+    });
     cards = [];
   }
   function start() {
@@ -70,9 +68,14 @@
       if (urls.length < 2) return;
       var entry = { image: image, urls: urls, index: Math.max(0, urls.indexOf(image.getAttribute('src'))), visible: false, busy: false };
       function reserveSpace() {
-        if (image.naturalWidth && getComputedStyle(image).position !== 'absolute') {
-          image.style.aspectRatio = image.naturalWidth + ' / ' + image.naturalHeight;
-          image.style.objectFit = 'contain';
+        var parentStyle = getComputedStyle(image.parentElement);
+        var imageStyle = getComputedStyle(image);
+        var box = image.getBoundingClientRect();
+        // Preserve the theme's fixed media frame. Only pin intrinsically sized images.
+        if (box.width && box.height && imageStyle.position !== 'absolute' && parentStyle.aspectRatio === 'auto') {
+          image.style.setProperty('aspect-ratio', box.width + ' / ' + box.height, 'important');
+          image.style.setProperty('height', 'auto', 'important');
+          image.style.setProperty('object-fit', 'contain', 'important');
         }
       }
       if (image.complete) reserveSpace();
