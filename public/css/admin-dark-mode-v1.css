@@ -1635,7 +1635,7 @@ html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-h
 html[data-admin-theme="dark"] body.admin-site :is(
   .orders-detail-link, .orders-avatar, .theme-effect-demo,
   .theme-color-picker-label input, .model-studio-page-head,
-  .model-studio-safety-note
+  .model-studio-safety
 ) {
   color: var(--admin-dark-text) !important;
   background: var(--admin-dark-surface-raised, #1e2832) !important;
@@ -1658,6 +1658,6 @@ html[data-admin-theme="dark"] body.admin-site .orders-status.cancelled {
   color: #ffb5c0 !important;
   background: #3b202a !important;
 }
-html[data-admin-theme="dark"] body.admin-site :is(.model-studio-page-head, .model-studio-safety-note) :is(h1, h2, p, span, strong, small, a) {
+html[data-admin-theme="dark"] body.admin-site :is(.model-studio-page-head, .model-studio-safety) :is(h1, h2, p, span, strong, small, a) {
   color: var(--admin-dark-text) !important;
 }
