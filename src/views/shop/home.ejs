@@ -441,7 +441,7 @@
 @media(prefers-reduced-motion:reduce){.hud-bar-glow,.hud-bar-scan:before{animation:none!important}}
 </style>
 
-<%- include('../partials/promotions-home') %>
+<% if (isMainSite || settings.promotions?.storefrontEnabled === true) { %><%- include('../partials/promotions-home') %><% } %>
 <%
   const welcomePopup = settings.welcomePopup || {};
   const welcomePopupImages = Array.isArray(welcomePopup.images) ? welcomePopup.images : [];

@@ -10,7 +10,12 @@ function csrf(req, res, next) {
   if (a.length !== b.length || !crypto.timingSafeEqual(a,b)) return res.status(403).send('กรุณารีเฟรชหน้าแล้วลองใหม่');
   next();
 }
+function requireStorefrontPromotions(req, res, next) {
+  if (!req.tenantShop || store.data.settings.promotions?.storefrontEnabled === true) return next();
+  return res.redirect('/');
+}
 const publicView = (req, res) => {
+  if (req.tenantShop && store.data.settings.promotions?.storefrontEnabled !== true) return res.redirect('/');
   const user = currentUser(req), cfg = rewards.config(store.data);
   res.render('shop/promotions', { title: 'โปรโมชั่นและชวนเพื่อน', campaigns: cfg.campaigns || [], referral: cfg.referral,
     claims: (store.data.promotionClaims || []).filter(c => c.userId === user?.id),
@@ -20,14 +25,14 @@ const publicView = (req, res) => {
     coupon: req.session.coupon || null, csrf: token(req), inWindow: rewards.inWindow });
 };
 router.get('/promotions', publicView);
-router.post('/promotions/claim', requireLogin, csrf, async (req,res) => {
+router.post('/promotions/claim', requireStorefrontPromotions, requireLogin, csrf, async (req,res) => {
   try {
     const amount = await store.transact(data => rewards.claim(data, req.session.userId, String(req.body.campaignId), req.body.username));
     req.flash('success', `ได้รับ ${amount.toLocaleString()} พ้อยเข้ากระเป๋าแล้ว`);
   } catch(e) { req.flash('error', e.message); }
   res.redirect('/promotions');
 });
-router.post('/promotions/coupon', requireLogin, csrf, (req,res) => {
+router.post('/promotions/coupon', requireStorefrontPromotions, requireLogin, csrf, (req,res) => {
   const code = String(req.body.code || '').trim().toUpperCase();
   const coupon = (store.data.coupons || []).find(c => c.code === code && c.active
     && (!c.expiresAt || Date.parse(c.expiresAt) > Date.now())
@@ -39,7 +44,7 @@ router.post('/promotions/coupon', requireLogin, csrf, (req,res) => {
   }
   res.redirect('/promotions');
 });
-router.post('/promotions/referral-check', requireLogin, csrf, async (req,res) => {
+router.post('/promotions/referral-check', requireStorefrontPromotions, requireLogin, csrf, async (req,res) => {
   try {
     const settled = await store.transact(data => {
       let count = 0;
@@ -54,10 +59,23 @@ router.post('/promotions/referral-check', requireLogin, csrf, async (req,res) =>
 });
 router.get('/admin/promotions', requireAdmin, (req,res) => res.render('admin/promotions', {
   layout: 'layouts/admin-experiment', title: 'โปรโมชั่นและแนะนำเพื่อน', active: 'promotions', config: rewards.config(store.data),
+  isMainSite: !req.tenantShop, storefrontEnabled: !req.tenantShop || store.data.settings.promotions?.storefrontEnabled === true,
   claims: store.data.promotionClaims || [], csrf: token(req),
   pendingTopupCount: (store.data.topupRequests || []).filter(t => ['pending','verifying'].includes(t.status)).length,
   persistentStorageEnabled: store.isPersistent(),
 }));
+router.post('/admin/promotions/storefront', requireAdmin, csrf, async (req,res) => {
+  if (!req.tenantShop) {
+    req.flash('success', 'โปรโมชั่นเปิดใช้งานสำหรับเว็บหลักอยู่แล้ว');
+    return res.redirect('/admin/promotions');
+  }
+  await store.transact(data => {
+    const cfg = data.settings.promotions ||= { campaigns: [], referral: { enabled: false, referrerAmount: 0, friendAmount: 0 } };
+    cfg.storefrontEnabled = req.body.enabled === 'on';
+  });
+  req.flash('success', req.body.enabled === 'on' ? 'เปิดโปรโมชั่นบนหน้าเว็บร้านแล้ว' : 'ซ่อนโปรโมชั่นจากหน้าเว็บร้านแล้ว');
+  res.redirect('/admin/promotions');
+});
 router.post('/admin/promotions/campaign', requireAdmin, csrf, async (req,res) => {
   try {
     const title = String(req.body.title || '').trim().slice(0,120);
