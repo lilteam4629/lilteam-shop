@@ -57,6 +57,7 @@ function credit(data, user, amount, rewardKey, note, now) {
 }
 function claim(data, userId, campaignId, username, now = Date.now()) {
   const user = customer(data, userId);
+  requireTopup(data, userId);
   if (normalized(username) !== normalized(user.username)) throw new Error('กรอกชื่อผู้ใช้ของบัญชีที่เข้าสู่ระบบอยู่เท่านั้น');
   const campaign = (config(data).campaigns || []).find(c => c.id === campaignId);
   if (!inWindow(campaign, now)) throw new Error('โปรโมชั่นยังไม่เริ่ม หมดเวลา หรือปิดใช้งานแล้ว');
