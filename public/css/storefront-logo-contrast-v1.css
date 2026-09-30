@@ -1,0 +1,9 @@
+/* Give transparent dark wordmarks a light surface without changing their colors. */
+html:not(.light) .store-nav .store-nav__brand.store-nav__brand--image img {
+  background: #fff !important;
+  border-radius: 7px !important;
+  padding: 4px 6px !important;
+  box-sizing: border-box !important;
+  object-fit: contain !important;
+  filter: none !important;
+}
