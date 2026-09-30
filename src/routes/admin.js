@@ -1846,12 +1846,17 @@ router.post('/orders/:id/status', async (req, res) => {
   if (order && nextStatus) {
     order.status = nextStatus;
     await store.save();
+    try { await store.transact(data => require('../services/promotions').settleReferral(data, data.orders.find(o => o.id === order.id))); }
+    catch (error) { console.error('[referral] Reward pending:', error.message); }
     if (order.salesChannel === 'catalog-api-fulfillment' && order.tenantShopId) {
       const tenantDb = await store.loadTenantDb(order.tenantShopId);
       if (tenantDb) {
         await store.runInTenant(order.tenantShopId, tenantDb, () => store.transact(data => {
           const tenantOrder = data.orders.find(candidate => candidate.id === order.id && candidate.salesChannel === 'catalog-api');
-          if (tenantOrder) tenantOrder.status = nextStatus;
+          if (tenantOrder) {
+            tenantOrder.status = nextStatus;
+            require('../services/promotions').settleReferral(data, tenantOrder);
+          }
         }));
       }
     }

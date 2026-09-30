@@ -28,6 +28,8 @@ router.post('/:productId/draw', requireLogin, async (req, res) => {
       randomInt: crypto.randomInt,
       genId: store.genId,
     })));
+    try { await store.transact(data => require('../services/promotions').settleReferral(data, data.orders.find(o => o.id === result.orderId))); }
+    catch (error) { console.error('[referral] Reward pending:', error.message); }
     const summary = result.result || {};
     const drawCount = Number(summary.drawCount) || 1;
     const total = Number(summary.total) || drawCount * randomBox.configuredPrice(product);

@@ -104,7 +104,9 @@ router.post('/login', async (req, res) => {
 });
 
 router.get('/register', (req, res) => {
-  res.render('shop/register', { title: 'สมัครสมาชิก', recaptchaSiteKey: recaptcha.siteKey() });
+  if (req.query.ref) req.session.referralCode = String(req.query.ref).slice(0,100);
+  const referralId = require('../services/promotions').referralAtSignup(store.data, req.session.referralCode, '');
+  res.render('shop/register', { title: 'สมัครสมาชิก', recaptchaSiteKey: recaptcha.siteKey(), referralName: store.data.users.find(u => u.id === referralId)?.username || '' });
 });
 
 router.post('/register', async (req, res) => {
@@ -141,6 +143,7 @@ router.post('/register', async (req, res) => {
     walletBalance: 0,
     status: 'active',
     createdAt: new Date().toISOString(),
+    referredBy: require('../services/promotions').referralAtSignup(store.data, req.session.referralCode, email),
   };
   store.data.users.push(user);
   await store.save();

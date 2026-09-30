@@ -145,7 +145,7 @@ router.get('/', (req, res) => {
 
 router.post('/coupon', (req, res) => {
   const code = (req.body.code || '').trim().toUpperCase();
-  const coupon = store.data.coupons.find(c => c.code === code && c.active);
+  const coupon = store.data.coupons.find(c => c.code === code && c.active && (!c.expiresAt || Date.parse(c.expiresAt) > Date.now()));
   if (!coupon) {
     req.flash('error', 'โค้ดส่วนลดไม่ถูกต้องหรือหมดอายุ');
     return res.redirect('/cart');
@@ -319,7 +319,7 @@ router.post('/checkout', requireLogin, (req, res) => {
       const sessionCoupon = req.session.coupon;
       if (sessionCoupon) {
         const couponRecord = store.data.coupons.find(c => c.code === sessionCoupon.code && c.active);
-        if (couponRecord && (!couponRecord.usageLimit || couponRecord.usedCount < couponRecord.usageLimit)) {
+        if (couponRecord && (!couponRecord.expiresAt || Date.parse(couponRecord.expiresAt) > Date.now()) && (!couponRecord.usageLimit || couponRecord.usedCount < couponRecord.usageLimit)) {
           validCoupon = couponRecord;
           discount = couponRecord.type === 'percent' ? Math.round(total * (couponRecord.value / 100)) : couponRecord.value;
           discount = Math.min(discount, total);
@@ -419,7 +419,7 @@ router.post('/checkout', requireLogin, (req, res) => {
 
       user.walletBalance = Math.round((user.walletBalance - finalTotal) * 100) / 100;
       store.data.walletTransactions.push({
-        id: store.genId(10), userId: user.id, type: 'purchase', amount: -finalTotal,
+        id: store.genId(10), userId: user.id, type: 'purchase', amount: -finalTotal, orderId: order.id,
         note: `สั่งซื้อ #${order.id}`, createdAt: new Date().toISOString(),
       });
 
@@ -470,6 +470,9 @@ router.post('/checkout', requireLogin, (req, res) => {
 
       store.data.orders.push(order);
       await store.save();
+      // Purchase persistence succeeds first; reward failures never undo a paid order.
+      try { await store.transact(data => require('../services/promotions').settleReferral(data, data.orders.find(o => o.id === order.id))); }
+      catch (error) { console.error('[referral] Reward pending:', error.message); }
 
       req.session.cart = [];
       req.session.coupon = null;

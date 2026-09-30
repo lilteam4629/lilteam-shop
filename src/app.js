@@ -157,7 +157,14 @@ class LocalFileSessionStore extends session.Store {
   }
   set(sid, sess, cb) {
     const file = path.join(SESSION_DIR, `${sid}.json`);
-    fs.writeFile(file, JSON.stringify(sess), 'utf8', cb || (() => {}));
+    const temporary = `${file}.${require('crypto').randomBytes(12).toString('hex')}.tmp`;
+    fs.writeFile(temporary, JSON.stringify(sess), 'utf8', err => {
+      if (err) return (cb || (() => {}))(err);
+      fs.rename(temporary, file, renameError => {
+        if (renameError) fs.unlink(temporary, () => {});
+        (cb || (() => {}))(renameError);
+      });
+    });
   }
   destroy(sid, cb) {
     const file = path.join(SESSION_DIR, `${sid}.json`);
@@ -255,6 +262,7 @@ app.use((req, res, next) => {
   res.redirect('/license');
 });
 
+app.use('/', require('./routes/promotions'));
 app.use('/', shopRoutes);
 app.use('/', authRoutes);
 app.use('/cart', cartRoutes);

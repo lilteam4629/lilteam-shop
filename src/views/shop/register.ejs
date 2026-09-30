@@ -5,6 +5,7 @@
     <div class="auth-card__mark">SIGN UP</div>
     <header><span>NEW MEMBER</span><h1>สมัครสมาชิก</h1><p>สร้างบัญชีใหม่เพื่อเริ่มต้นใช้งาน</p></header>
     <form action="/register" method="post" class="auth-form">
+      <% if (typeof referralName !== 'undefined' && referralName) { %><p>คุณได้รับคำแนะนำจาก <strong><%= referralName %></strong> ซื้อสำเร็จครั้งแรกเพื่อรับรางวัลตามโปรโมชั่นของร้าน</p><% } %>
       <label><span>ชื่อผู้ใช้</span><input name="username" required autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="username" autocomplete="username" /></label>
       <label><span>อีเมล</span><input type="email" name="email" required placeholder="user@email.com" autocomplete="email" /></label>
       <div class="auth-form__pair">
