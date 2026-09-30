@@ -1,0 +1,40 @@
+/* Member benefits use the storefront's own colors in both themes. */
+.promo-member-page{width:min(1180px,calc(100% - 40px));gap:24px;margin:32px auto 56px}
+.member-benefits-hero{display:grid;grid-template-columns:1.3fr 1fr;gap:40px;align-items:center;padding:44px;border:1px solid var(--border);border-radius:26px;background:linear-gradient(125deg,var(--card),color-mix(in srgb,var(--gold) 9%,var(--card)));overflow:hidden}
+.member-benefits-eyebrow{display:block;color:var(--gold-text);font-size:11px;font-weight:800;letter-spacing:.15em;margin-bottom:12px}
+.member-benefits-intro h1{margin:0;font-size:clamp(32px,4vw,50px);font-weight:800;line-height:1.25;letter-spacing:-.025em}
+.member-benefits-intro h1 span{color:var(--gold-text)}
+.promo-member-page .member-benefits-intro p{margin:18px 0;color:var(--text-3);font-size:14px}
+.member-benefits-nav{display:flex;flex-wrap:wrap;gap:10px;margin:24px 0 18px}
+.member-benefits-nav a{display:inline-flex;align-items:center;justify-content:space-between;gap:20px;padding:12px 16px;border:1px solid var(--border);border-radius:12px;background:var(--card);color:var(--text);font-size:13px;font-weight:700;text-decoration:none;min-height:44px;transition:transform .18s ease,border-color .18s ease}
+.member-benefits-nav a:first-child{background:var(--gold);color:var(--gold-contrast);border-color:var(--gold)}
+.member-benefits-nav a:hover{transform:translateY(-2px);border-color:var(--gold)}
+.member-store-back{display:inline-flex;padding:6px 0;color:var(--text-3);font-size:12px;text-decoration:none}
+.member-benefits-pass{position:relative;isolation:isolate;padding:26px;border:1px solid color-mix(in srgb,var(--gold) 35%,var(--border));border-radius:22px;background:var(--gold);color:var(--gold-contrast);box-shadow:0 18px 38px color-mix(in srgb,var(--gold) 18%,transparent);transform:rotate(-3deg)}
+.member-benefits-pass:after{content:'';position:absolute;z-index:-1;inset:10px;border:1px solid currentColor;border-radius:15px;opacity:.18;pointer-events:none}
+.member-pass-top,.member-pass-bottom{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:11px;font-weight:700;letter-spacing:.1em}
+.member-pass-top>span:last-child{font-size:30px}
+.promo-member-page .member-benefits-pass p{margin:16px 0;color:inherit;font-size:23px;font-weight:700;line-height:1.4}
+.member-pass-value{display:flex;align-items:center;gap:18px;margin-bottom:24px}
+.member-pass-value strong{font-size:42px;line-height:1.2;font-weight:800;white-space:nowrap}
+.member-pass-value small{font-size:16px;color:inherit}
+.member-pass-bottom{padding-top:14px;border-top:1px solid color-mix(in srgb,currentColor 30%,transparent);letter-spacing:0}
+.promo-member-page .promo-heading{padding-top:10px;scroll-margin-top:100px}
+.promo-member-page .promo-heading h2{font-size:24px;margin:0}
+.promo-member-page .promo-heading p{margin-bottom:0;font-size:13px}
+.promo-member-page .promo-grid{gap:20px;align-items:stretch}
+.promo-member-page .promo-card{position:relative;padding:26px;border-radius:20px;gap:10px;background:var(--card);box-shadow:0 8px 24px color-mix(in srgb,var(--text) 5%,transparent)}
+.promo-member-page .promo-card h3{margin:4px 0;font-size:21px}
+.promo-member-page .promo-amount{font-size:44px}
+.promo-member-page .promo-tag{border-radius:999px;padding:6px 12px;font-size:11px}
+.promo-member-page .promo-period{gap:7px;padding:14px 0;font-size:12px}
+.promo-member-page .promo-button{min-height:46px;border-radius:12px}
+.promo-member-page .promo-form{margin-top:auto;padding-top:10px}
+.promo-member-page .promo-tools{scroll-margin-top:100px;margin-top:8px}
+.member-tool-icon{display:grid;place-items:center;width:48px;height:48px;margin-bottom:6px;border:1px solid var(--border);border-radius:14px;background:color-mix(in srgb,var(--gold) 10%,var(--card));color:var(--gold-text);font-size:29px;font-weight:700}
+.promo-member-page .promo-card h2{font-size:22px;margin:2px 0}
+.promo-member-page .promo-steps{display:grid;gap:12px;margin:6px 0;padding-left:24px}
+.promo-member-page .promo-notice,.promo-member-page .promo-balance{border-radius:16px}
+.member-benefits-nav a:focus-visible,.member-store-back:focus-visible{outline:3px solid var(--gold-text);outline-offset:4px}
+@media(max-width:760px){.promo-member-page{width:calc(100% - 28px);margin-top:20px;gap:20px}.member-benefits-hero{grid-template-columns:1fr;gap:28px;padding:24px;border-radius:20px}.member-benefits-intro h1{font-size:36px}.member-benefits-pass{transform:none;max-width:440px;width:100%;justify-self:center;padding:23px}.member-benefits-pass p{font-size:21px}.member-pass-value strong{font-size:36px}.promo-member-page .promo-grid{grid-template-columns:1fr}.promo-member-page .promo-card{padding:22px}.member-benefits-nav a{gap:12px;padding:12px}.promo-member-page .promo-heading h2{font-size:22px}}
+@media(prefers-reduced-motion:reduce){.member-benefits-nav a{transition:none}.member-benefits-nav a:hover{transform:none}}
