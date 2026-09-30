@@ -192,7 +192,7 @@ async function auditPage(requestPath, viewport) {
       if (!c || c.a < 0.12) return false;
       const visible = composite(c, { r: 0, g: 0, b: 0 });
       const spread = Math.max(visible.r, visible.g, visible.b) - Math.min(visible.r, visible.g, visible.b);
-      return spread <= 12 && lum(visible) > 0.001;
+      return spread <= 12 && lum(visible) < 0.002;
     };
     const isOffBlackNeutralGradient = value => {
       if (!value || value === 'none' || /url\\s*\\(/i.test(value)) return false;
@@ -202,7 +202,7 @@ async function auditPage(requestPath, viewport) {
         const channels = [candidate.r, candidate.g, candidate.b];
         return Math.max(...channels) - Math.min(...channels) > 48;
       })) return false;
-      return colors.some(candidate => lum(composite(candidate, { r: 0, g: 0, b: 0 })) > 0.001);
+      return colors.some(candidate => { const value = lum(composite(candidate, { r: 0, g: 0, b: 0 })); return value > 0 && value < 0.002; });
     };
     const contrast = (a, b) => (Math.max(lum(a), lum(b)) + .05) / (Math.min(lum(a), lum(b)) + .05);
     const offenders = [];
@@ -368,22 +368,22 @@ async function cleanup() {
       const testedRoute = `${viewport.name}:${route}`;
       if (result.dark !== 'dark' || !result.toggle) failures.push({ route: testedRoute, problem: 'theme did not initialize or toggle missing', result });
       if (!result.bodyVisible || result.booting || result.bootTrace?.hiddenVisibilitySeen) failures.push({ route: testedRoute, problem: 'admin content was hidden while the dark theme initialized', result: { bootTrace: result.bootTrace } });
-      if (result.rootInlineTheme !== 'dark' || result.rootInlineBackground !== 'rgb(0, 0, 0)') failures.push({ route: testedRoute, problem: 'dark mode was not applied synchronously before the page styles', result: { rootInlineTheme: result.rootInlineTheme, rootInlineBackground: result.rootInlineBackground, bootTrace: result.bootTrace } });
+      if (result.rootInlineTheme !== 'dark' || result.rootInlineBackground !== 'rgb(11, 15, 20)') failures.push({ route: testedRoute, problem: 'dark mode was not applied synchronously before the page styles', result: { rootInlineTheme: result.rootInlineTheme, rootInlineBackground: result.rootInlineBackground, bootTrace: result.bootTrace } });
       if (!result.surfaceScanComplete) failures.push({ route: testedRoute, problem: 'dark surface audit did not finish within 20 seconds', result: { title: result.title, bodyClass: result.bodyClass } });
       if (result.lightSurfaceCount || result.lowContrastCount) failures.push({ route: testedRoute, problem: 'computed colors remain too light / low contrast', result: { title: result.title, viewportWidth: result.viewportWidth, bodyClass: result.bodyClass, bodyBackground: result.bodyBackground, auditScript: result.auditScript, scriptTransferSize: result.scriptTransferSize, markedBackgrounds: result.markedBackgrounds, lightSurfaceCount: result.lightSurfaceCount, lowContrastCount: result.lowContrastCount, lightSurfaces: result.lightSurfaces, lowContrast: result.lowContrast } });
-      if (result.offBlackNeutralCount) failures.push({ route: testedRoute, problem: 'neutral UI surfaces are not pure black', result: { offBlackNeutralCount: result.offBlackNeutralCount, offBlackNeutrals: result.offBlackNeutrals } });
+      if (result.offBlackNeutralCount) failures.push({ route: testedRoute, problem: 'neutral UI surfaces still collapse to barely visible black', result: { offBlackNeutralCount: result.offBlackNeutralCount, offBlackNeutrals: result.offBlackNeutrals } });
       if (result.wrongFontCount) failures.push({ route: testedRoute, problem: 'admin text and controls do not consistently use Kanit', result: { fontFamilies: result.fontFamilies, wrongFontCount: result.wrongFontCount, wrongFontSamples: result.wrongFontSamples } });
       if (result.buttonIssueCount) failures.push({ route: testedRoute, problem: 'button labels are not readable against their surfaces', result: { buttonIssueCount: result.buttonIssueCount, buttonIssues: result.buttonIssues } });
-    if (route === '/admin' && (!result.dynamicProbe || result.dynamicProbe.textContrast < 4.5 || result.dynamicProbe.background !== 'rgb(0, 0, 0)')) {
+    if (route === '/admin' && (!result.dynamicProbe || result.dynamicProbe.textContrast < 4.5 || result.dynamicProbe.background !== 'rgb(21, 27, 34)')) {
       failures.push({ route: testedRoute, problem: 'new dynamic content did not inherit a dark surface and readable ink', result: { dynamicProbe: result.dynamicProbe } });
     }
-      if (route === '/admin' && (!result.dynamicSrgbProbe || result.dynamicSrgbProbe.textContrast < 4.5 || result.dynamicSrgbProbe.background !== 'rgb(0, 0, 0)' || result.dynamicSrgbProbe.image !== 'none')) {
-        failures.push({ route: testedRoute, problem: 'modern sRGB colors did not get converted to black surfaces', result: { dynamicSrgbProbe: result.dynamicSrgbProbe } });
+      if (route === '/admin' && (!result.dynamicSrgbProbe || result.dynamicSrgbProbe.textContrast < 4.5 || result.dynamicSrgbProbe.background !== 'rgb(21, 27, 34)' || result.dynamicSrgbProbe.image !== 'none')) {
+        failures.push({ route: testedRoute, problem: 'modern sRGB colors did not get converted to the layered dark surface', result: { dynamicSrgbProbe: result.dynamicSrgbProbe } });
       }
       const bodyColor = result.bodyBackground.match(/([\d.]+)/g)?.slice(0, 3).map(Number) || [];
-      if (bodyColor.length === 3 && bodyColor.some(channel => channel !== 0)) failures.push({ route: testedRoute, problem: 'admin canvas is not pure black', result });
+      if (bodyColor.length === 3 && bodyColor.some((channel, index) => channel !== [11, 15, 20][index])) failures.push({ route: testedRoute, problem: 'admin canvas does not use the layered dark canvas', result });
       const rootColor = result.canvasBackground.match(/([\d.]+)/g)?.slice(0, 3).map(Number) || [];
-      if (rootColor.length === 3 && rootColor.some(channel => channel !== 0)) failures.push({ route: testedRoute, problem: 'document canvas is not pure black', result: { canvasBackground: result.canvasBackground, rootClass: result.rootClass, dark: result.dark } });
+      if (rootColor.length === 3 && rootColor.some((channel, index) => channel !== [11, 15, 20][index])) failures.push({ route: testedRoute, problem: 'document canvas does not use the layered dark canvas', result: { canvasBackground: result.canvasBackground, rootClass: result.rootClass, dark: result.dark } });
     }
   }
 

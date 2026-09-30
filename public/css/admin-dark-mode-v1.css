@@ -237,8 +237,9 @@ html[data-admin-theme="dark"] body.admin-site .experiment-avatar {
   border: 1px solid var(--admin-dark-line);
 }
 html[data-admin-theme="dark"] body.admin-site .experiment-stock-alert .experiment-stock-chip em {
-  color: #ffc4cc !important;
-  background: #000000 !important;
+  color: #f3aeb5 !important;
+  background: #2b171d !important;
+  border-color: #8f4653 !important;
 }
 html[data-admin-theme="dark"] body.admin-site .experiment-stock-alert .experiment-stock-chip-name { color: #ffffff !important; }
 html[data-admin-theme="dark"] body.admin-site .recommended-template .template-icon {
@@ -443,8 +444,7 @@ html[data-admin-theme="dark"] .admin-theme-switch {
   .admin-reference-ui .admin-theme-switch span { display: none; }
 }
 
-/* Pure-black mode keeps the canvas and every neutral control on one true-black
-   surface; visible borders, labels, and focus rings carry the hierarchy. */
+/* Legacy dark palette defaults are replaced by the layered surfaces below. */
 html[data-admin-theme="dark"].admin-unified-site,
 html[data-admin-theme="dark"].admin-unified-site body.admin-site {
   --ex-bg: #000000;
@@ -476,7 +476,7 @@ html[data-admin-theme="dark"] body.admin-site :is(
   .announcement-list-panel
 ):not(.admin-theme-swatch):not(.admin-theme-store):not([data-admin-dark-preserve]) {
   color: var(--admin-dark-text) !important;
-  background: #000000 !important;
+  background: #1d2630 !important;
   background-image: none !important;
   border-color: var(--admin-dark-line) !important;
 }
@@ -526,13 +526,12 @@ html[data-admin-theme="dark"] body.admin-site :is(
 }
 
 html[data-admin-theme="dark"] body.admin-site .experiment-nav-item.active {
-  background-color: #000000 !important;
+  background-color: #1d2630 !important;
   box-shadow: inset 3px 0 var(--admin-brand-fill);
 }
 
-/* Finish the dark palette across older admin widgets as well as the newer
-   shared components. Keep product art, charts, and explicit live previews
-   intact; every ordinary structural surface stays true black. */
+/* Cover older admin widgets as well as shared components while preserving
+   product art, charts, and the storefront previews. */
 html[data-admin-theme="dark"] body.admin-site :is(
   div, section, article, aside, nav, header, footer, main, form, fieldset,
   table, thead, tbody, tfoot, tr, th, td, dialog, details, summary, output, label,
@@ -563,9 +562,9 @@ html[data-admin-theme="dark"] body.admin-site :is(
   background-image: none !important;
 }
 
-/* Normalize the ink across legacy cards, badges, custom controls, and links.
-   Accents and semantic feedback are restored below so the interface remains
-   easy to scan without bringing back pale text on black. */
+/* Normalize ink across legacy cards, badges, custom controls, and links.
+   Accents and semantic feedback are restored below to keep the interface easy
+   to scan. */
 html[data-admin-theme="dark"] body.admin-site *:not(:where(.admin-theme-store *, .admin-theme-swatch *, [data-admin-dark-preserve] *, .admin-dark-mode-preserve *)) {
   color: var(--admin-dark-text) !important;
 }
@@ -635,18 +634,18 @@ html[data-admin-theme="dark"] body.admin-site .experiment-filter.active b {
 }
 html[data-admin-theme="dark"] body.admin-site .mgx-add-head > span {
   color: #f2daa2 !important;
-  background-color: #000000 !important;
-  border: 1px solid #777777;
+  background-color: #202b36 !important;
+  border: 1px solid #526576;
 }
 html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] > [data-slip-owner-intro] {
-  color: #ffffff !important;
-  background-color: #000000 !important;
+  color: #f4f7fa !important;
+  background-color: #1d2630 !important;
   background-image: none !important;
-  border-color: #777777 !important;
+  border-color: #526576 !important;
 }
 html[data-admin-theme="dark"] body.admin-site .catalog-selection-progress i {
-  background-color: #000000 !important;
-  border: 1px solid #777777;
+  background-color: #1d2630 !important;
+  border: 1px solid #526576;
 }
 html[data-admin-theme="dark"] body.admin-site .catalog-selection-progress i.filled {
   background-color: var(--admin-brand-fill, #70533c) !important;
@@ -661,39 +660,39 @@ html[data-admin-theme="dark"] body.admin-site .users-audience-tabs .active b,
 html[data-admin-theme="dark"] body.admin-site .experiment-filter.active b,
 html[data-admin-theme="dark"] body.admin-site .coupons-create-note > span {
   color: #ffffff !important;
-  background-color: #000000 !important;
-  border: 1px solid #777777 !important;
+  background-color: #1d2630 !important;
+  border: 1px solid #526576 !important;
 }
 html[data-admin-theme="dark"] body.admin-site .catalog-selector-filters button.active b {
   color: var(--admin-brand-readable, #e7c29e) !important;
 }
 html[data-admin-theme="dark"] body.admin-site .effects-preview-foot > span {
-  color: #ffffff !important;
-  background-color: #000000 !important;
-  border: 1px solid #777777;
+  color: #d5dee7 !important;
+  background-color: #202b36 !important;
+  border: 1px solid #526576;
 }
 html[data-admin-theme="dark"] body.admin-site .effects-store-logo {
   color: #000000 !important;
 }
 html[data-admin-theme="dark"] body.admin-site .settings-preview-head > i {
-  color: #f2daa2 !important;
-  background-color: #000000 !important;
-  border: 1px solid #777777;
+  color: #d5dee7 !important;
+  background-color: #1d2630 !important;
+  border: 1px solid #526576;
 }
 html[data-admin-theme="dark"] body.admin-site :focus-visible {
   outline: 3px solid var(--admin-brand-readable, #e7c29e) !important;
   outline-offset: 2px;
 }
 
-/* Keep compact badges and decorative markers legible on the true-black canvas. */
+/* Keep compact badges and decorative markers legible on the dark canvas. */
 html[data-admin-theme="dark"] body.admin-site .mgx-preview-footnote > span,
 html[data-admin-theme="dark"] body.admin-site .catalog-empty > span,
 html[data-admin-theme="dark"] body.admin-site .catalog-settlement-summary i,
 html[data-admin-theme="dark"] body.admin-site [data-slip-owner-active] span[class*="bg-[var(--gold)]"],
 html[data-admin-theme="dark"] body.admin-site [data-provider-check] {
   color: #f2daa2 !important;
-  background-color: #000000 !important;
-  border: 1px solid #777777 !important;
+  background-color: #1d2630 !important;
+  border: 1px solid #526576 !important;
 }
 html[data-admin-theme="dark"] body.admin-site .hsx-board-mark {
   background-color: var(--admin-brand-fill, #70533c) !important;
@@ -706,19 +705,19 @@ html[data-admin-theme="dark"] body.admin-site .hsx-state.is-off i {
 }
 html[data-admin-theme="dark"] body.admin-site .hsx-footnote > span {
   color: #f2daa2 !important;
-  background-color: #000000 !important;
-  border: 1px solid #777777;
+  background-color: #1d2630 !important;
+  border: 1px solid #526576;
 }
 html[data-admin-theme="dark"] body.admin-site .catalog-selection-thumb > span {
-  color: #ffffff !important;
-  background-color: #000000 !important;
-  border-top: 1px solid #777777;
+  color: #f4f7fa !important;
+  background-color: #1d2630 !important;
+  border-top: 1px solid #526576;
 }
 html[data-admin-theme="dark"] body.admin-site .admin-theme-preview-caption > span,
 html[data-admin-theme="dark"] body.admin-site .announcement-tip > span {
   color: #f2daa2 !important;
-  background-color: #000000 !important;
-  border: 1px solid #777777 !important;
+  background-color: #1d2630 !important;
+  border: 1px solid #526576 !important;
 }
 html[data-admin-theme="dark"] body.admin-site .experiment-ready-chip i {
   background-color: #20c997 !important;
@@ -726,8 +725,8 @@ html[data-admin-theme="dark"] body.admin-site .experiment-ready-chip i {
 html[data-admin-theme="dark"] body.admin-site .welcome-live-switch-row > i,
 html[data-admin-theme="dark"] body.admin-site .effects-toggle i,
 html[data-admin-theme="dark"] body.admin-site .effects-switch i {
-  background-color: #000000 !important;
-  border: 1px solid #777777 !important;
+  background-color: #344250 !important;
+  border: 1px solid #526576 !important;
 }
 html[data-admin-theme="dark"] body.admin-site .welcome-live-switch-row:has(input:checked) > i,
 html[data-admin-theme="dark"] body.admin-site .effects-toggle input:checked + i,
@@ -742,8 +741,8 @@ html[data-admin-theme="dark"] body.admin-site .effects-switch i::after {
 }
 html[data-admin-theme="dark"] body.admin-site .effects-effect-art {
   color: #f2daa2 !important;
-  background-color: #000000 !important;
-  border: 1px solid #777777;
+  background-color: #1d2630 !important;
+  border: 1px solid #526576;
 }
 
 /* A single low-key edge color replaces the bright white borders left by
@@ -762,8 +761,7 @@ html[data-admin-theme="dark"].admin-main-site .experiment-effects-page .experime
   display: none !important;
 }
 
-/* Refined dark surfaces: the page itself remains true black while useful
-   controls and content get quiet separation, warmer ink, and clearer actions. */
+/* Shared dark theme tokens for the canvas, cards, controls, and accents. */
 html[data-admin-theme="dark"].admin-unified-site,
 html[data-admin-theme="dark"].admin-unified-site body.admin-site {
   --admin-dark-canvas: #000000;
@@ -819,8 +817,8 @@ html[data-admin-theme="dark"] body.admin-site :is(
   select, textarea, [contenteditable="true"]
 ):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
   color: var(--admin-dark-text) !important;
-  background-color: #000000 !important;
-  border: 1px solid #5c5852 !important;
+  background-color: #202b36 !important;
+  border: 1px solid #526576 !important;
   border-radius: 10px;
   box-shadow: none;
 }
@@ -837,8 +835,8 @@ html[data-admin-theme="dark"].admin-unified-site body.admin-site main :is(
   select, textarea, [contenteditable="true"]
 ):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
   color: var(--admin-dark-text) !important;
-  background-color: #000000 !important;
-  border-color: #5c5852 !important;
+  background-color: #202b36 !important;
+  border-color: #526576 !important;
 }
 html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder {
   color: #99938a !important;
@@ -993,10 +991,10 @@ html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > span {
   height: 38px;
   place-items: center;
   margin-bottom: 3px;
-  border: 1px solid #393127;
+  border: 1px solid #526576;
   border-radius: 12px;
   color: var(--admin-brand-readable, #d0aa83) !important;
-  background: #000000 !important;
+  background: #1d2630 !important;
   font-size: 19px;
 }
 html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > strong { font-size: 13px; }
@@ -1026,8 +1024,7 @@ html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > p { marg
   }
 }
 
-/* The main-site neutral-border layer is intentionally important. Re-introduce
-   only quiet structural edges and a strong keyboard ring inside that layer. */
+/* Keep the shared main-site controls and structural edges legible in dark mode. */
 @layer admin-main-neutral-borders {
   html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
     .experiment-card, .experiment-panel, .experiment-product, .experiment-button,
@@ -1037,7 +1034,7 @@ html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > p { marg
     .effects-roadmap-grid > div, .effects-rain-form, .announcement-panel, .as-card,
     [class*="-card"], [class*="-panel"], [class*="-dialog"]
   ):not(:where(.admin-theme-store *, .admin-theme-swatch *, .effects-stage *, .model-preview-window *, [data-admin-dark-preserve] *, .admin-dark-mode-preserve *)) {
-    border-color: #39342d !important;
+    border-color: #526576 !important;
   }
 
   html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
@@ -1071,10 +1068,485 @@ html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > p { marg
 
   html[data-admin-theme="dark"].admin-main-site .experiment-effects-page :where(
     .experiment-page-head, .effects-preview, .effects-panel, .effects-stat-row > div,
-    .effects-roadmap, .effects-roadmap-grid > div, .effects-toggle, .effects-effect-row,
-    .effects-rain-form
+    .effects-roadmap, .effects-roadmap-grid > div
   ) {
-    background: #000000 !important;
+    background: #151b22 !important;
+    box-shadow: 0 12px 28px rgb(0 0 0 / .18) !important;
+  }
+
+  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page :where(
+    .effects-toggle, .effects-effect-row, .effects-rain-form
+  ) {
+    background: #1d2630 !important;
     box-shadow: none !important;
   }
+}
+
+/* Layered dark surfaces for every admin screen.
+   Keep the dashboard dark while giving the canvas, panels, controls, and
+   status messages enough separation to scan quickly. The storefront previews
+   and uploaded artwork are intentionally excluded from these rules. */
+html[data-admin-theme="dark"].admin-unified-site,
+html[data-admin-theme="dark"].admin-unified-site body.admin-site {
+  --admin-dark-canvas: #0b0f14;
+  --admin-dark-surface: #151b22;
+  --admin-dark-raised: #1d2630;
+  --admin-dark-input: #202b36;
+  --admin-dark-line: #526576;
+  --admin-dark-line-strong: #526576;
+  --admin-dark-text: #f4f7fa;
+  --admin-dark-muted: #aab6c2;
+  --admin-dark-subtle: #82909e;
+  --ex-bg: #0b0f14;
+  --ex-surface: #151b22;
+  --ex-ink: #f4f7fa;
+  --ex-muted: #aab6c2;
+  --ex-line: #526576;
+  --ex-sidebar: #11171e;
+  --ex-green-soft: color-mix(in srgb, var(--admin-brand-fill) 14%, #151b22);
+  --ex-orange-soft: #2a2111;
+  --ex-red-soft: #2b171d;
+  --card-hover: #25313d !important;
+  --bg: #0b0f14 !important;
+  --card: #151b22 !important;
+  --theme-page-surface: #0b0f14 !important;
+  --theme-card-surface: #151b22 !important;
+  --theme-control-surface: #202b36 !important;
+  --border: #526576 !important;
+  --border-light: #526576 !important;
+  --input: #202b36 !important;
+  --text: #f4f7fa !important;
+  --text-2: #d7e0e8 !important;
+  --text-3: #aab6c2 !important;
+  --text-4: #82909e !important;
+  --theme-ink: #f4f7fa !important;
+  --theme-muted-ink: #aab6c2 !important;
+  --theme-line: #526576 !important;
+  --admin-brand-soft: color-mix(in srgb, var(--admin-brand-fill) 17%, #151b22) !important;
+  --admin-brand-border: color-mix(in srgb, var(--admin-brand-fill) 48%, #151b22) !important;
+  background-color: #0b0f14 !important;
+  color: #f4f7fa !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site,
+html[data-admin-theme="dark"] body.admin-site main,
+html[data-admin-theme="dark"] body.admin-site .experiment-main,
+html[data-admin-theme="dark"] body.admin-site .experiment-content {
+  background-color: #0b0f14 !important;
+  color: #f4f7fa !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  #admin-sidebar, .experiment-sidebar, .experiment-topbar,
+  .experiment-mobile-nav, .admin-mobile-header, body > header,
+  .experiment-menu-dialog-content, .experiment-confirm-dialog,
+  .experiment-roadmap-dialog, .experiment-dialog, .experiment-dialog-content
+) {
+  color: #f4f7fa !important;
+  background-color: #11171e !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-topbar { background-color: #151b22 !important; }
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-card, .experiment-panel, .experiment-build-roadmap,
+  .experiment-build-column, .experiment-roadmap-mock-row, .experiment-product,
+  .experiment-luxury-card, .experiment-placeholder-card, .experiment-menu-dialog-head,
+  .experiment-confirm-head, .experiment-roadmap-dialog-head, .experiment-kpi,
+  .experiment-stat, .experiment-summary, .announcement-panel, .as-card,
+  [class*="-card"], [class*="-panel"], [class*="-surface"], [class*="-box"],
+  [class*="-dialog"], [class*="-sheet"], fieldset,
+  [class~="bg-white"], [class~="bg-gray-50"], [class~="bg-slate-50"],
+  [class~="bg-stone-50"]
+):not(:where(
+  .admin-theme-store *, .admin-theme-swatch *, .effects-stage *,
+  .model-preview-window *, [data-admin-dark-preserve] *,
+  .admin-dark-mode-preserve *, [class*="status"], [class*="badge"],
+  [class*="alert"], [class*="toast"], [class*="success"], [class*="error"],
+  [class*="danger"], [class*="warning"], [class*="empty"]
+)) {
+  color: #f4f7fa !important;
+  background-color: #151b22 !important;
+  background-image: none !important;
+  border-color: #526576 !important;
+  box-shadow: 0 12px 28px rgb(0 0 0 / .18) !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
+  select, textarea, [contenteditable="true"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #f4f7fa !important;
+  background-color: #202b36 !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder {
+  color: #82909e !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  button, .btn, [role="button"], input[type="button"]
+):not(:where(
+  .primary, [class*="primary"], [class*="danger"], [class*="success"],
+  [class*="warning"], [class*="status"], [class*="badge"],
+  .admin-theme-store *, .effects-stage *
+)) {
+  color: #f4f7fa !important;
+  background-color: #1d2630 !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  button, .btn, [role="button"], input[type="button"]
+):not(:where(.admin-theme-store *, .effects-stage *)):hover {
+  background-color: #25313d !important;
+  border-color: var(--admin-brand-readable, #f2c98e) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-nav-item {
+  color: #c7d1da !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-nav-item:hover,
+html[data-admin-theme="dark"] body.admin-site .experiment-nav-item.active {
+  color: #f4f7fa !important;
+  background-color: #1d2630 !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-nav-item.active {
+  box-shadow: inset 3px 0 var(--admin-brand-fill), 0 8px 20px rgb(0 0 0 / .14) !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class*="success"], [class*="ready"], [class*="complete"], [class*="available"]
+):not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: #a9dfbc !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class*="error"], [class*="danger"], [class*="failed"], [class*="negative"]
+):not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: #f3aeb5 !important;
+  background-color: #2b171d !important;
+  border-color: #8f4653 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"],
+  [class*="notice"], [class*="toast"]
+):not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site :is(
+  h1, h2, h3, h4, h5, h6, p, li, label, legend, dt, dd, th, td,
+  [class*="title"], [class*="heading"]
+):not(:where(.admin-theme-store *, [data-admin-dark-preserve] *)) {
+  color: #f4f7fa !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  small, [class*="muted"], [class*="description"], [class*="subtitle"],
+  [class*="helper"], [class*="hint"], [class*="footnote"], [class*="caption"]
+):not(:where(.admin-theme-store *, [data-admin-dark-preserve] *)) {
+  color: #aab6c2 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :focus-visible {
+  outline: 2px solid var(--admin-brand-readable, #f2c98e) !important;
+  outline-offset: 2px !important;
+}
+html[data-admin-theme="dark"] body.admin-site ::-webkit-scrollbar-track { background: #0b0f14 !important; }
+html[data-admin-theme="dark"] body.admin-site ::-webkit-scrollbar-thumb { background-color: #526576 !important; }
+
+@media (max-width: 700px) {
+  html[data-admin-theme="dark"] body.admin-site .experiment-form-actions {
+    background: rgb(17 23 30 / .96) !important;
+    border-top-color: #526576 !important;
+  }
+}
+
+/* Resolve legacy widgets that previously painted every structural element
+   pure black. Let the page canvas show through, then restore token-based
+   surfaces and brand fills explicitly. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  div, section, article, aside, nav, header, footer, main, form, fieldset,
+  table, thead, tbody, tfoot, tr, th, td, dialog, details, summary, output,
+  label, a, li
+):not(:where(
+  .admin-theme-store *, .admin-theme-swatch *, .effects-stage *,
+  .model-preview-window *, [data-admin-dark-preserve] *,
+  .admin-dark-mode-preserve *, [class*="-card"], [class*="-panel"],
+  [class*="-surface"], [class*="-box"], [class*="-dialog"],
+  [class*="-sheet"], [class*="bg-[var(--card)]"],
+  [class*="bg-[var(--input)]"], [class*="bg-[var(--bg)]"],
+  [class~="bg-white"], [class~="bg-gray-50"], [class~="bg-slate-50"],
+  [class~="bg-stone-50"], [class*="success"], [class*="ready"],
+  [class*="complete"], [class*="available"], [class*="error"],
+  [class*="danger"], [class*="failed"], [class*="negative"],
+  [class*="warning"], [class*="pending"], [class*="status"],
+  [class*="badge"], [class*="alert"], [class*="notice"], [class*="toast"]
+)) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class*="bg-[var(--card)]"], [class~="bg-white"],
+  [class~="bg-gray-50"], [class~="bg-slate-50"], [class~="bg-stone-50"]
+):not(:where(.admin-theme-store *, .admin-theme-swatch *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  background-color: #151b22 !important;
+  background-image: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site [class*="bg-[var(--input)]"]:not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  background-color: #202b36 !important;
+  background-image: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site [class*="bg-[var(--bg)]"]:not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  background-color: #0b0f14 !important;
+  background-image: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  button, a, [role="button"]
+)[class*="bg-[var(--gold)]"]:not(:where(.admin-theme-store *, .effects-stage *)),
+html[data-admin-theme="dark"] body.admin-site [data-theme-fill="accent"]:not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: var(--gold-contrast, #0b0f14) !important;
+  background-color: var(--gold) !important;
+  border-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [style*="background: rgb(255" i], [style*="background:rgba(255" i],
+  [style*="background: rgba(255" i], [style*="background-color: rgb(255" i],
+  [style*="background-color:rgba(255" i], [style*="background-color: rgba(255" i],
+  [style*="background-color: color(srgb" i], [style*="background: color(srgb" i]
+):not(:where(.admin-theme-store *, .admin-theme-swatch *, [data-admin-dark-preserve] *)) {
+  background-color: #151b22 !important;
+  background-image: none !important;
+}
+
+/* Final paint pass: older admin styles include a broad important black fill
+   on every element. Clear that fill first, then paint the intentional layers
+   back in a predictable order. */
+html[data-admin-theme="dark"] body.admin-site.admin-site *:not(:where(
+  .admin-theme-store *, .effects-stage *, .model-preview-window *,
+  [data-admin-dark-preserve] *, .admin-dark-mode-preserve *,
+  img, svg, video, canvas
+)) {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  #admin-sidebar, .experiment-sidebar, .experiment-topbar,
+  .experiment-mobile-nav, .admin-mobile-header,
+  .experiment-menu-dialog-content, .experiment-confirm-dialog,
+  .experiment-roadmap-dialog, .experiment-dialog, .experiment-dialog-content
+) {
+  background-color: #11171e !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-topbar { background-color: #151b22 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-card, .experiment-panel, .experiment-build-roadmap,
+  .experiment-build-column, .experiment-roadmap-mock-row, .experiment-product,
+  .experiment-luxury-card, .experiment-placeholder-card, .experiment-kpi,
+  .experiment-stat, .experiment-summary, .experiment-stock-alert,
+  .announcement-panel, .as-card, [class*="-card"], [class*="-panel"],
+  [class*="-surface"], [class*="-box"], [class*="-dialog"], [class*="-sheet"],
+  [class*="var(--card)"], [class~="bg-white"], [class~="bg-gray-50"],
+  [class~="bg-slate-50"], [class~="bg-stone-50"]
+):not(:where(
+  .admin-theme-store *, .admin-theme-swatch *, .effects-stage *,
+  .model-preview-window *, [data-admin-dark-preserve] *,
+  .admin-dark-mode-preserve *, [class*="status"], [class*="badge"],
+  [class*="alert"], [class*="toast"], [class*="success"], [class*="error"],
+  [class*="danger"], [class*="warning"], [class*="empty"]
+)) {
+  background-color: #151b22 !important;
+  border-color: #526576 !important;
+  box-shadow: 0 12px 28px rgb(0 0 0 / .18) !important;
+}
+html[data-admin-theme="dark"] body.admin-site [class*="var(--input)"] {
+  background-color: #202b36 !important;
+}
+html[data-admin-theme="dark"] body.admin-site [class*="var(--bg)"] {
+  background-color: #0b0f14 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
+  select, textarea, [contenteditable="true"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #f4f7fa !important;
+  background-color: #202b36 !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  button, a, [role="button"]
+)[class*="var(--gold)"],
+html[data-admin-theme="dark"] body.admin-site [data-theme-fill="accent"] {
+  color: var(--gold-contrast, #0b0f14) !important;
+  background-color: var(--gold) !important;
+  border-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  button, .btn, [role="button"], input[type="button"]
+):not(:where(
+  .primary, [class*="primary"], [class*="danger"], [class*="success"],
+  [class*="warning"], [class*="status"], [class*="badge"],
+  [class*="var(--gold)"], .admin-theme-store *, .effects-stage *
+)) {
+  color: #f4f7fa !important;
+  background-color: #1d2630 !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
+  button[class*="submit"], input[type="submit"], [class*="button-primary"]
+):not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: var(--admin-brand-contrast, #fffaf3) !important;
+  background-color: var(--admin-brand-fill) !important;
+  border-color: var(--admin-brand-fill) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class*="success"], [class*="ready"], [class*="complete"], [class*="available"]
+):not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: #a9dfbc !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class*="error"], [class*="danger"], [class*="failed"], [class*="negative"]
+):not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: #f3aeb5 !important;
+  background-color: #2b171d !important;
+  border-color: #8f4653 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"],
+  [class*="notice"], [class*="toast"]
+):not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+
+/* Component-specific hard-coded fills from the experimental dashboard need
+   one last, higher-specificity handoff into the same surface system. */
+html[data-admin-theme="dark"] body.admin-site.admin-site :is(
+  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
+  select, textarea, [contenteditable="true"]
+) {
+  color: #f4f7fa !important;
+  background: #202b36 !important;
+  background-color: #202b36 !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"] body.admin-site.admin-site .experiment-luxury-card.ready {
+  color: #f4f7fa !important;
+  background: #10261c !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+html[data-admin-theme="dark"] body.admin-site.admin-site :is(
+  .experiment-stock-alert, .experiment-alert-head
+) {
+  color: #f0cf8c !important;
+  background: #2a2111 !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site.admin-site .experiment-stock-chip {
+  color: #f4f7fa !important;
+  background-color: #1d2630 !important;
+  border-color: #526576 !important;
+}
+
+/* Outrank the legacy alert and main-content input selectors that carry
+   several negative attribute checks in their specificity. */
+html[data-admin-theme="dark"].admin-unified-site body.admin-site.admin-site main :is(
+  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
+  select, textarea, [contenteditable="true"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #f4f7fa !important;
+  background: #202b36 !important;
+  background-color: #202b36 !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"] body.admin-site.admin-site .experiment-stock-alert.experiment-stock-alert.experiment-stock-alert.experiment-stock-alert.experiment-stock-alert {
+  color: #f0cf8c !important;
+  background: #2a2111 !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+
+/* Recess the alert internals into the alert surface even against the older
+   warning selector, which marks matching containers important. */
+html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site .experiment-stock-alert .experiment-alert-head,
+html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site .experiment-stock-alert .experiment-alert-list {
+  background: #2a2111 !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+
+/* Final harmonization pass for older admin pages whose component styles
+   still ship opaque black fills or light-theme status colors. */
+html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
+  .experiment-page-head, .experiment-card, .announcement-card,
+  .effects-preview, .effects-panel, .as-preview, .as-empty-preview
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #f4f7fa !important;
+  background: #151b22 !important;
+  background-color: #151b22 !important;
+  border-color: #3c4a57 !important;
+}
+html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
+  .experiment-page-status-note, .pending-page-status, .catalog-due-badge,
+  .admin-finance-pending:not(.is-clear), [class*="warning"], [class*="pending"],
+  [class*="status-note"], [class*="notice"], [class*="toast"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #f0cf8c !important;
+  background: #2a2111 !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
+  .experiment-button.danger, .experiment-button.is-danger,
+  .announcement-row-button.is-danger, .hsx-icon-button.is-danger,
+  button.danger, .btn-danger, [class*="is-danger"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #ffc0ca !important;
+  background: #3b2028 !important;
+  background-color: #3b2028 !important;
+  border-color: #81404b !important;
+}
+html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
+  .orders-live-badge, .tp-channel-ready, .coupons-status.active,
+  .as-live-pill, .settings-ready-badge, .welcome-live-status.is-live,
+  .admin-finance-pending.is-clear, .experiment-status,
+  .experiment-filter-image-badge.active, .users-status.active,
+  [class*="success"], [class*="ready"],
+  [class*="complete"], [class*="available"], [class*="is-live"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #b6e8c7 !important;
+  background: #10261c !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
+  .announcement-search, .tp-status-filter, .as-search, .as-status,
+  .users-page-status, .users-live-badge, .coupons-data-badge,
+  .coupons-live-badge, .as-preview-chip, .catalog-total-badge,
+  .experiment-ready-chip, .welcome-live-status,
+  .effects-toggle, .experiment-field.status-field, p.rounded-xl.border.p-4
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #d5dee7 !important;
+  background: #1d2630 !important;
+  background-color: #1d2630 !important;
+  border-color: #526576 !important;
+}
+html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
+  .announcement-search input, .as-search input, .tp-status-filter select,
+  .experiment-field.status-field select
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #f4f7fa !important;
+  background: #202b36 !important;
+  background-color: #202b36 !important;
+  border-color: #526576 !important;
 }

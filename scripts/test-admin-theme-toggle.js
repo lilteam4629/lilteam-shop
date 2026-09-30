@@ -45,7 +45,7 @@ for (const savedTheme of ['dark', 'light', null, 'invalid']) {
   assert.equal(root.style.colorScheme, expected, 'native controls should use the saved color scheme');
   assert.equal(root.classList.contains('dark'), expected === 'dark');
   assert.equal(root.classList.contains('light'), expected === 'light');
-  assert.equal(root.style.backgroundColor, expected === 'dark' ? '#000000' : '#f6f8f8');
+  assert.equal(root.style.backgroundColor, expected === 'dark' ? '#0b0f14' : '#f6f8f8');
 }
 
 const root = makeRoot();
@@ -75,7 +75,7 @@ assert.equal(label.textContent, 'โหมดมืด');
 listeners.click({ target: { closest(selector) { return selector === '[data-admin-theme-toggle]' ? button : null; } } });
 assert.equal(root.dataset.adminTheme, 'dark', 'activating the switch should apply dark mode without reloading');
 assert.equal(root.style.colorScheme, 'dark');
-assert.equal(root.style.backgroundColor, '#000000', 'dark mode must paint the canvas pure black immediately');
+assert.equal(root.style.backgroundColor, '#0b0f14', 'dark mode must paint the layered canvas immediately');
 assert.equal(storageValues.lilteam_admin_theme, 'dark', 'the selected mode must survive navigation');
 assert.equal(attributes['aria-pressed'], 'true');
 assert.equal(attributes['aria-label'], 'เปลี่ยนเป็นโหมดสว่าง');
