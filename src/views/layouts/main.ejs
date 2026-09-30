@@ -58,9 +58,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %>
     <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
-      <link rel="stylesheet" href="<%= asset('css/storefront-pre-home-v1.css') %>" />
+      <link rel="stylesheet" data-route-stylesheet data-storefront-style-slot="pre" href="<%= asset('css/storefront-pre-home-v1.css') %>" />
     <% } else { %>
-      <link rel="stylesheet" href="<%= asset('css/storefront-pre-unified-v1.css') %>" />
+      <link rel="stylesheet" data-route-stylesheet data-storefront-style-slot="pre" href="<%= asset('css/storefront-pre-unified-v1.css') %>" />
     <% } %>
   <% } else { %>
     <link rel="stylesheet" href="<%= asset('css/storefront-navbar-v1.css') %>" />
@@ -242,9 +242,9 @@
   </style>
   <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %>
     <% if (typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7) { %>
-      <link rel="stylesheet" href="<%= asset('css/storefront-post-home-v1.css') %>" />
+      <link rel="stylesheet" data-route-stylesheet data-storefront-style-slot="post" href="<%= asset('css/storefront-post-home-v1.css') %>" />
     <% } else { %>
-      <link rel="stylesheet" href="<%= asset('css/storefront-post-unified-v1.css') %>" />
+      <link rel="stylesheet" data-route-stylesheet data-storefront-style-slot="post" href="<%= asset('css/storefront-post-unified-v1.css') %>" />
     <% } %>
   <% } else { %>
     <link rel="stylesheet" href="<%= asset('css/storefront-navbar-cozy-v1.css') %>" />
@@ -259,6 +259,7 @@
     <link rel="stylesheet" href="<%= asset('css/storefront-home-section-spacing-v1.css') %>" />
   <% } %>
   <%- routeStylesheetMarkup %>
+  <link rel="stylesheet" href="<%= asset('css/product-gallery-v1.css') %>" />
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront ? ' storefront-unified' : '' %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh ? ' storefront-customer-refresh' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %><%= typeof storefrontMonochrome !== 'undefined' && storefrontMonochrome ? ' storefront-monochrome' : '' %>">
   <div id="page-loading-overlay" aria-hidden="true">
@@ -566,7 +567,12 @@
               link.dataset.routeStylesheet = 'true';
               created.push(link);
               pending.push(waitForStylesheet(link, signal));
-              document.head.appendChild(link);
+              // Homepage and general-page bundles occupy different places in
+              // the theme cascade. Replace each bundle beside its old slot,
+              // rather than appending it after the final theme overrides.
+              const slot = source.getAttribute('data-storefront-style-slot');
+              const anchor = slot && document.head.querySelector('link[data-storefront-style-slot="' + slot + '"]');
+              document.head.insertBefore(link, anchor || null);
               existing.set(key, link);
             }
             keep.push(link);
@@ -695,6 +701,9 @@
           const swapPage = function () {
             currentShell.replaceWith(nextShell);
             commitRouteStyles(routeStyles);
+            ['storefront-owner-home-page', 'storefront-customer-refresh'].forEach(function (className) {
+              document.body.classList.toggle(className, nextDocument.body.classList.contains(className));
+            });
             document.title = nextDocument.title;
             runPageScripts(nextShell);
           };
@@ -1329,7 +1338,6 @@
   <script src="<%= asset('js/scroll-motion-v1.js') %>" defer></script>
   <script src="<%= asset('js/interaction-performance-v1.js') %>" defer></script>
   <% if (typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront) { %><script src="<%= asset('js/latest-orders-3d-v1.js') %>" defer></script><% } %>
-  <link rel="stylesheet" href="<%= asset('css/product-gallery-v1.css') %>" />
   <script src="<%= asset('js/product-gallery-v1.js') %>" defer></script>
 </body>
 </html>

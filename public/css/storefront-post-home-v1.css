@@ -2442,6 +2442,17 @@
     aspect-ratio: auto !important;
   }
 }
+/* Stack the text and product spotlight for shops without a banner on mobile. */
+@media (max-width: 900px) {
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--banner) > .owner-home-v20-hero-content {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+  }
+  #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .owner-home-v20-main > .owner-home-v23-hero:not(.owner-home-v20-hero--banner) > .owner-home-v20-artwork {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+  }
+}
 
 /* Source: storefront-product-artwork-full-v1.css */
 /* Storefront product artwork should remain fully visible across every shop
