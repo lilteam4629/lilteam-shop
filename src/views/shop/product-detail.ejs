@@ -8,12 +8,13 @@
       </div>
       <% if (product.images.length > 1) { %>
         <div class="grid grid-cols-4 gap-2 product-detail-thumbnails">
-          <% product.images.slice(1).forEach(img => { %>
-            <div class="aspect-video rounded-lg overflow-hidden border border-[var(--border)] product-detail-thumb">
-              <img src="<%= img %>" class="w-full h-full object-contain bg-black" />
-            </div>
+          <% product.images.forEach((img, index) => { %>
+            <button type="button" class="aspect-video rounded-lg overflow-hidden border border-[var(--border)] product-detail-thumb product-detail-thumbnail" data-product-thumbnail="<%= index %>" data-product-image="<%= img %>" aria-pressed="<%= index === 0 %>" aria-label="ดูรูปสินค้า <%= index + 1 %>">
+              <img src="<%= img %>" class="w-full h-full object-contain" alt="<%= product.title %> รูปที่ <%= index + 1 %>" loading="lazy" />
+            </button>
           <% }) %>
         </div>
+        <div class="product-gallery-controls"><button type="button" data-product-image-step="-1" aria-label="รูปก่อนหน้า">‹</button><span data-product-image-count aria-live="polite">1 / <%= product.images.length %></span><button type="button" data-product-image-step="1" aria-label="รูปถัดไป">›</button></div>
       <% } %>
     </div>
 

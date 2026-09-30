@@ -1,0 +1,8 @@
+.product-detail-thumbnails button{cursor:pointer;padding:0;background:var(--card);color:var(--text);min-height:44px}
+.product-detail-thumbnails button[aria-pressed="true"]{outline:2px solid var(--gold);outline-offset:2px}
+.product-detail-thumbnails button:focus-visible,.product-gallery-controls button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.product-gallery-controls{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:14px}
+.product-gallery-controls button{width:44px;height:44px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);cursor:pointer;font:inherit;font-size:20px}
+.product-gallery-controls span{min-width:60px;text-align:center;font-variant-numeric:tabular-nums;color:var(--text-3)}
+.product-gallery-frame{position:relative;overflow:hidden}
+.product-gallery-outgoing{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;pointer-events:none!important;z-index:1}

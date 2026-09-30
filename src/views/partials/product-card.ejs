@@ -16,7 +16,7 @@
   class="owner-home-v21-product-card main-store-product-card filterable-card group<%= useCatalogFilterCard ? ' catalog-filter-card' : '' %>" aria-label="<%= p.title %> <%= isRandomBox ? `กล่องสุ่ม ${p.price.toLocaleString()} บาทต่อครั้ง` : `ราคา ${p.price.toLocaleString()} บาท` %>, <%= soldOut ? (isRandomBox ? 'รางวัลหมดชั่วคราว' : 'สินค้าหมด') : (isRandomBox ? 'พร้อมสุ่ม' : `คงเหลือ ${p.stockCount.toLocaleString()} ชิ้น`) %>">
   <div class="owner-home-v21-media">
     <% if (p.images && p.images[0]) { %>
-      <img src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low" />
+      <img data-product-images="<%= JSON.stringify(p.images || []) %>" src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low" />
     <% } else { %>
       <span class="owner-home-v21-image-fallback" aria-hidden="true"><%= String(p.title || 'L').trim().charAt(0).toUpperCase() %></span>
     <% } %>
@@ -61,7 +61,7 @@
          transition duration-300 hover:border-[var(--gold)]">
 
   <div class="relative w-full <%= isFan ? 'h-full' : '' %> overflow-hidden">
-    <img src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="<%= isFan ? 'eager' : 'lazy' %>" decoding="async" fetchpriority="<%= isFan ? 'high' : 'low' %>"
+    <img data-product-images="<%= JSON.stringify(p.images || []) %>" src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="<%= isFan ? 'eager' : 'lazy' %>" decoding="async" fetchpriority="<%= isFan ? 'high' : 'low' %>"
       class="<%= isFan ? 'absolute inset-0 w-full h-full object-cover' : 'block w-full h-auto' %> transition duration-500
              <%= soldOut
                ? 'grayscale-[45%] brightness-[0.7] contrast-[1.05] group-hover:brightness-[0.8]'
@@ -130,7 +130,7 @@
 
   <div class="relative w-full p-2 pb-0">
     <div class="relative w-full overflow-hidden rounded-xl border-2 border-[var(--gold)]/50 group-hover:border-[var(--gold)] transition-colors duration-300">
-      <img src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low"
+      <img data-product-images="<%= JSON.stringify(p.images || []) %>" src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low"
         class="block w-full h-auto transition duration-500
                <%= soldOut
                  ? 'grayscale-[45%] brightness-[0.7] contrast-[1.05] group-hover:brightness-[0.8]'

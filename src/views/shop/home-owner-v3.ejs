@@ -34,7 +34,7 @@
       <div class="owner-v3-deck__rail" role="listbox" aria-label="รายการสินค้าแนะนำ">
         <% v3Products.forEach((p, index) => { const sold = Number(p.stockCount || 0) < 1; %>
           <button type="button" class="owner-v3-rail-card <%= index === 0 ? 'is-active' : '' %> <%= sold ? 'is-sold' : '' %>" data-v3-item data-stock="<%= sold ? 'sold' : 'available' %>" data-title="<%= p.title %>" data-price="฿<%= Number(p.price || 0).toLocaleString() %>" data-stock-label="<%= sold ? 'รอสินค้าเข้าใหม่' : `เหลือ ${Number(p.stockCount || 0).toLocaleString()} ชิ้น` %>" data-image="<%= p.images && p.images[0] ? p.images[0] : '' %>" data-href="/game/<%= p.slug %>">
-            <span><%= String(index + 1).padStart(2, '0') %></span><img src="<%= p.images && p.images[0] ? p.images[0] : '' %>" alt="" loading="lazy" decoding="async" /><b><%= p.title %></b><small><%= sold ? 'SOLD OUT' : 'READY' %></small>
+            <span><%= String(index + 1).padStart(2, '0') %></span><img data-product-images="<%= JSON.stringify(p.images || []) %>" src="<%= p.images && p.images[0] ? p.images[0] : '' %>" alt="" loading="lazy" decoding="async" /><b><%= p.title %></b><small><%= sold ? 'SOLD OUT' : 'READY' %></small>
           </button>
         <% }) %>
       </div>

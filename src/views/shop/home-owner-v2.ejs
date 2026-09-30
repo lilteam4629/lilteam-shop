@@ -20,7 +20,7 @@
       <% if (settings.hero && settings.hero.bannerImage) { %>
         <img src="<%= settings.hero.bannerImage %>" alt="<%= settings.shopName %>" fetchpriority="high" decoding="async" />
       <% } else if (ownerNewest.length && ownerNewest[0].images && ownerNewest[0].images[0]) { %>
-        <img src="<%= ownerNewest[0].images[0] %>" alt="<%= ownerNewest[0].title %>" fetchpriority="high" decoding="async" />
+        <img data-product-images="<%= JSON.stringify(ownerNewest[0].images || []) %>" src="<%= ownerNewest[0].images[0] %>" alt="<%= ownerNewest[0].title %>" fetchpriority="high" decoding="async" />
       <% } else { %>
         <div class="owner-v2-hero__placeholder"><span>L</span></div>
       <% } %>
@@ -56,7 +56,7 @@
     <div class="owner-v2-products">
       <% ownerNewest.forEach((p) => { const soldOut = Number(p.stockCount || 0) < 1; %>
         <a href="/game/<%= p.slug %>" class="owner-v2-product <%= soldOut ? 'is-sold' : '' %>">
-          <div class="owner-v2-product__image"><img src="<%= p.images && p.images[0] ? p.images[0] : '' %>" alt="<%= p.title %>" loading="lazy" decoding="async" /><span><%= soldOut ? 'หมดแล้ว' : 'พร้อมส่ง' %></span></div>
+          <div class="owner-v2-product__image"><img data-product-images="<%= JSON.stringify(p.images || []) %>" src="<%= p.images && p.images[0] ? p.images[0] : '' %>" alt="<%= p.title %>" loading="lazy" decoding="async" /><span><%= soldOut ? 'หมดแล้ว' : 'พร้อมส่ง' %></span></div>
           <div class="owner-v2-product__body"><h3><%= p.title %></h3><div><strong>฿<%= Number(p.price || 0).toLocaleString() %></strong><small><%= soldOut ? 'รอสินค้าเข้าใหม่' : `เหลือ ${Number(p.stockCount || 0).toLocaleString()} ชิ้น` %></small></div></div>
         </a>
       <% }) %>
