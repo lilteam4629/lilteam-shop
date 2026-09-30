@@ -40,6 +40,7 @@
   <%- routeStylesheetMarkup %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-main-neutral-borders-v1.css') %>" /><% } %>
   <link rel="stylesheet" href="<%= asset('css/admin-dark-mode-v1.css') %>" />
+  <link rel="stylesheet" href="<%= asset('css/admin-theme-consistency-v1.css') %>" />
 </head>
 <body class="experiment-admin admin-site <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite && active === 'welcome-popup' ? 'admin-main-site' : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite && active === 'announcements' ? 'main-admin-announcements' : '' %>">
   <div id="experiment-canonical-sidebar-template" hidden><%- include('../partials/admin-experiment-sidebar-effects') %></div>

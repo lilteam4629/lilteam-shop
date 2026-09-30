@@ -157,6 +157,7 @@
   <%- routeStylesheetMarkup %>
   <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><link rel="stylesheet" href="<%= asset('css/admin-main-neutral-borders-v1.css') %>" /><% } %>
   <link rel="stylesheet" href="<%= asset('css/admin-dark-mode-v1.css') %>" />
+  <link rel="stylesheet" href="<%= asset('css/admin-theme-consistency-v1.css') %>" />
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col lg:flex-row antialiased selection:bg-[var(--gold)] selection:text-[var(--gold-contrast)] admin-site <%= referenceEnabled ? `admin-reference-ui admin-page-${active || 'page'}` : '' %> <%= typeof isMainSite !== 'undefined' && isMainSite ? 'admin-main-site' : '' %>">
 

@@ -1,7 +1,6 @@
 .mgx-app{min-width:0;background:var(--ex-bg,#f2f6f4)}
 .mgx-app .experiment-main{min-width:0;flex:1}
 .mgx-app .experiment-mobile-nav svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-.mgx-app .experiment-topbar{justify-content:flex-start}
 .mgx-topbar-context{display:flex;align-items:center;gap:8px;margin-right:auto;color:var(--ex-muted);font-size:11px;font-weight:700}
 .mgx-live-dot,.mgx-claim-state i,.mgx-state-pill i{width:7px;height:7px;flex:0 0 7px;border-radius:50%;background:#1da77c}
 .mgx-content{max-width:1480px}

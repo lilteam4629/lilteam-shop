@@ -1,0 +1,136 @@
+/* The saved shop accent and the admin light/dark surfaces are the only visual
+   sources for page chrome. Keep semantic success, warning and error states. */
+html.admin-unified-site body.admin-site {
+  --admin-ui-accent: var(--admin-brand-fill, var(--ex-green, #187b60));
+  --admin-ui-accent-ink: var(--admin-brand-readable, var(--ex-green-dark, #12664f));
+  --admin-ui-accent-contrast: var(--admin-brand-contrast, #fff);
+  --admin-ui-soft: var(--admin-brand-soft, var(--ex-green-soft, #edf6f1));
+  --admin-ui-border: var(--ex-line, #dfe7e3);
+  --admin-ui-surface: var(--ex-surface, var(--card, #fff));
+  --admin-ui-input: var(--input, var(--admin-ui-surface));
+  --admin-ui-text: var(--ex-ink, var(--text, #14201d));
+  --admin-ui-muted: var(--ex-muted, var(--text-2, #687771));
+}
+
+/* Every screen shares the same topbar, including the arcade. */
+html.admin-unified-site body.admin-site .experiment-topbar {
+  justify-content: flex-end;
+}
+html.admin-unified-site body.admin-site .experiment-topbar-spacer {
+  flex: 1 1 auto;
+}
+html.admin-unified-site body.admin-site :where(.experiment-button.primary, .announcement-button-primary, .welcome-live-save, .hsx-toggle-button.is-active) {
+  border-color: var(--admin-ui-accent);
+  color: var(--admin-ui-accent-contrast);
+  background: var(--admin-ui-accent);
+}
+html.admin-unified-site body.admin-site :where(.experiment-button.primary, .announcement-button-primary, .welcome-live-save):hover {
+  border-color: var(--admin-brand-hover, var(--admin-ui-accent));
+  background: var(--admin-brand-hover, var(--admin-ui-accent));
+}
+html.admin-unified-site body.admin-site :where(input[type="checkbox"], input[type="radio"], input[type="range"]) {
+  accent-color: var(--admin-ui-accent);
+}
+
+/* One panel, heading and form treatment across the custom admin studios. */
+html.admin-unified-site body.admin-site :where(.experiment-page-head, .mgx-page-head, .hsx-hero, .welcome-live-hero, .announcement-hero) {
+  border-color: var(--admin-ui-border);
+  border-radius: 18px;
+  color: var(--admin-ui-text);
+  background: var(--admin-ui-surface);
+  box-shadow: var(--ex-shadow, 0 8px 24px rgb(0 0 0 / .05));
+}
+html.admin-unified-site body.admin-site :where(.experiment-page-head, .mgx-page-head, .hsx-hero, .welcome-live-hero, .announcement-hero) h1 {
+  color: var(--admin-ui-text);
+  font-family: 'Kanit', sans-serif;
+  letter-spacing: -.045em;
+}
+html.admin-unified-site body.admin-site :where(.experiment-page-head, .mgx-page-head, .hsx-hero, .welcome-live-hero, .announcement-hero) p {
+  color: var(--admin-ui-muted);
+}
+html.admin-unified-site body.admin-site :where(.recommended-stat, .recommended-card, .recommended-toolbar, .mgx-stat, .mgx-game-switch, .mgx-game-tab, .welcome-live-stats article, .welcome-live-card, .hsx-card, .announcement-metric) {
+  border-color: var(--admin-ui-border);
+  border-radius: 16px;
+  color: var(--admin-ui-text);
+  background: var(--admin-ui-surface);
+}
+html.admin-unified-site body.admin-site :where(.recommended-search, .recommended-select, .welcome-live-field input, .welcome-live-field textarea, .mgx-field input, .mgx-field select, .mgx-field textarea, .announcement-field input, .announcement-field textarea) {
+  border-color: var(--admin-ui-border);
+  color: var(--admin-ui-text);
+  background: var(--admin-ui-input);
+}
+html.admin-unified-site body.admin-site :where(.recommended-search, .recommended-select, .welcome-live-field input, .welcome-live-field textarea, .mgx-field input, .mgx-field select, .mgx-field textarea, .announcement-field input, .announcement-field textarea):focus-visible {
+  border-color: var(--admin-ui-accent);
+  outline-color: var(--admin-ui-accent);
+}
+
+/* Custom page accents follow the chosen shop colour, not a preset palette. */
+html.admin-unified-site body.admin-site .mgx-app {
+  --mgx-accent: var(--admin-ui-accent);
+  --mgx-accent-ink: var(--admin-ui-accent-ink);
+  --mgx-accent-contrast: var(--admin-ui-accent-contrast);
+  --mgx-accent-soft: var(--admin-ui-soft);
+  --mgx-neutral-line: var(--admin-ui-border);
+}
+html.admin-unified-site body.admin-site .mgx-app :focus-visible {
+  outline-color: var(--admin-ui-accent) !important;
+}
+html.admin-unified-site body.admin-site .mgx-app :where(.mgx-page-head, .mgx-game-switch, .mgx-game-tab) {
+  background: var(--admin-ui-surface);
+}
+html.admin-unified-site body.admin-site .mgx-app .mgx-game-tab.is-active {
+  background: var(--admin-ui-soft);
+}
+html.admin-unified-site body.admin-site .mgx-app .mgx-game-tab.is-active,
+html.admin-unified-site body.admin-site .mgx-app .mgx-game-switch.is-on {
+  border-color: var(--admin-ui-accent) !important;
+}
+html.admin-unified-site body.admin-site .mgx-app :where(.mgx-page-kicker, .mgx-eyebrow, .mgx-text-link, .mgx-stat-icon, .mgx-settings-icon, .mgx-arcade-label) {
+  color: var(--admin-ui-accent-ink);
+}
+html.admin-unified-site body.admin-site .welcome-live-page {
+  --wl-accent: var(--admin-ui-accent);
+  --wl-accent-ink: var(--admin-ui-accent-ink);
+  --wl-accent-contrast: var(--admin-ui-accent-contrast);
+  --wl-accent-soft: var(--admin-ui-soft);
+  --wl-accent-border: var(--admin-brand-border, var(--admin-ui-border));
+  --wl-card: var(--admin-ui-surface);
+  --wl-input: var(--admin-ui-input);
+  --wl-border: var(--admin-ui-border);
+  --wl-ink: var(--admin-ui-text);
+  --wl-muted: var(--admin-ui-muted);
+}
+html.admin-unified-site body.admin-site .welcome-live-page :where(.welcome-live-stat-icon.is-violet, .welcome-live-stat-icon.is-amber, .welcome-live-card-icon.is-violet) {
+  border-color: var(--admin-brand-border, var(--admin-ui-border));
+  color: var(--admin-ui-accent-ink);
+  background: var(--admin-ui-soft);
+}
+html.admin-unified-site body.admin-site .recommended-page :where(.recommended-card-index, .recommended-card-status, .recommended-list-total, .recommended-product-more) {
+  color: var(--admin-ui-accent-ink);
+  background: var(--admin-ui-soft);
+}
+html.admin-unified-site body.admin-site .recommended-page .recommended-stat.accent {
+  border-color: var(--admin-ui-accent);
+  color: var(--admin-ui-accent-contrast);
+  background: var(--admin-ui-accent);
+}
+html.admin-unified-site body.admin-site .recommended-page .recommended-stat.accent :where(small, em) {
+  color: var(--admin-ui-accent-contrast);
+}
+html.admin-unified-site body.admin-site .announcement-admin-page {
+  --announcement-ink: var(--admin-ui-text);
+  --announcement-muted: var(--admin-ui-muted);
+  --announcement-line: var(--admin-ui-border);
+  --announcement-green: var(--admin-ui-accent);
+  --announcement-green-soft: var(--admin-ui-soft);
+}
+html.admin-unified-site body.admin-site .announcement-admin-page :where(.announcement-hero, .announcement-metric, .announcement-panel) {
+  border-color: var(--admin-ui-border);
+  background: var(--admin-ui-surface);
+}
+
+@media (max-width: 640px) {
+  html.admin-unified-site body.admin-site :where(.experiment-page-head, .mgx-page-head, .hsx-hero, .welcome-live-hero, .announcement-hero) {
+    padding: 18px 16px;
+  }
+}
