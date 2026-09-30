@@ -31,3 +31,17 @@ html[data-admin-theme=dark] .promo-admin input[type=datetime-local]{color-scheme
 .promo-admin .promo-history th,.promo-admin .promo-history td{padding:12px 10px;border-bottom:1px solid var(--ex-line);vertical-align:top;overflow-wrap:anywhere;min-width:100px}
 .promo-admin .promo-history th{color:var(--ex-muted);font-weight:700}
 .promo-admin .promo-history td{color:var(--ex-ink)}
+
+/* Admin promotion controls use the same saved brand palette as every studio. */
+html.admin-unified-site body.admin-site .promo-admin {
+  --gold: var(--admin-brand-fill, var(--ex-green));
+  --gold-text: var(--admin-brand-readable, var(--ex-green-dark));
+  --gold-contrast: var(--admin-brand-contrast, #fff);
+  --gold-hover: var(--admin-brand-hover, var(--admin-brand-fill));
+  --text: var(--ex-ink);
+  --text-2: var(--ex-ink);
+  --text-3: var(--ex-muted);
+  --card: var(--ex-surface);
+  --input: var(--ex-surface);
+  --border: var(--ex-line);
+}

@@ -24,7 +24,7 @@ assert.doesNotMatch(arcade, /\.mgx-app\s+\.experiment-topbar\s*\{\s*justify-cont
 assert.doesNotMatch(welcome, /(?<!html\.admin-unified-site )body\.admin-unified-site/);
 assert.match(welcome, /html\.admin-unified-site body\.admin-site \.welcome-live-page/);
 
-for (const page of ['.mgx-app', '.welcome-live-page', '.recommended-page', '.announcement-admin-page']) {
+for (const page of ['.mgx-app', '.welcome-live-page', '.recommended-page', '.announcement-admin-page', '.promo-admin']) {
   assert(consistency.includes(page), `${page} must inherit the shop theme`);
 }
 

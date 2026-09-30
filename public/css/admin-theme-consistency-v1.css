@@ -111,11 +111,87 @@ html.admin-unified-site body.admin-site .recommended-page :where(.recommended-ca
 }
 html.admin-unified-site body.admin-site .recommended-page .recommended-stat.accent {
   border-color: var(--admin-ui-accent);
+  color: var(--admin-ui-text);
+  background: var(--admin-ui-soft);
+}
+html.admin-unified-site body.admin-site .recommended-page .recommended-stat.accent :where(small, em) {
+  color: var(--admin-ui-muted);
+}
+html.admin-unified-site body.admin-site .recommended-page .recommended-stat.accent strong {
+  color: var(--admin-ui-accent-ink);
+}
+html[data-admin-theme="dark"].admin-unified-site body.admin-site .recommended-page .recommended-stat.accent {
+  border-color: var(--admin-ui-accent) !important;
+  color: var(--admin-ui-text) !important;
+  background: var(--admin-ui-soft) !important;
+}
+html[data-admin-theme="dark"].admin-unified-site body.admin-site .recommended-page .recommended-stat.accent :where(small, em) {
+  color: var(--admin-ui-muted) !important;
+}
+html[data-admin-theme="dark"].admin-unified-site body.admin-site .recommended-page .recommended-stat.accent strong {
+  color: var(--admin-ui-accent-ink) !important;
+}
+html.admin-unified-site body.admin-site .recommended-page .experiment-page-head {
+  padding: 25px 28px;
+  background: linear-gradient(110deg, var(--admin-ui-surface) 70%, var(--admin-ui-soft));
+}
+html.admin-unified-site body.admin-site .recommended-page .recommended-stat {
+  min-height: 112px;
+  padding: 18px 20px;
+  box-shadow: var(--ex-shadow);
+}
+html.admin-unified-site body.admin-site .recommended-page .recommended-list-heading h2 {
+  font-family: 'Kanit', sans-serif;
+}
+html.admin-unified-site body.admin-site .recommended-page .recommended-list-total,
+html.admin-unified-site body.admin-site .recommended-page .recommended-card-index {
+  border-color: var(--admin-ui-border);
+}
+html.admin-unified-site body.admin-site .recommended-page .recommended-card::before {
+  border-color: var(--admin-ui-accent);
+  background: var(--admin-ui-accent);
+}
+html.admin-unified-site body.admin-site .recommended-page .experiment-button.primary {
+  border-color: var(--admin-ui-accent);
   color: var(--admin-ui-accent-contrast);
   background: var(--admin-ui-accent);
 }
-html.admin-unified-site body.admin-site .recommended-page .recommended-stat.accent :where(small, em) {
+html.admin-unified-site body.admin-site .promo-admin .promo-hero {
+  align-items: center;
+  padding: 25px 28px;
+  border: 1px solid var(--admin-ui-border);
+  border-radius: 18px;
+  background: linear-gradient(110deg, var(--admin-ui-surface) 70%, var(--admin-ui-soft));
+  box-shadow: var(--ex-shadow);
+}
+html.admin-unified-site body.admin-site .promo-admin .promo-hero h1,
+html.admin-unified-site body.admin-site .promo-admin .promo-card h2,
+html.admin-unified-site body.admin-site .promo-admin .promo-heading h2 {
+  color: var(--admin-ui-text);
+  font-family: 'Kanit', sans-serif;
+}
+html.admin-unified-site body.admin-site .promo-admin :where(.promo-admin-stats article, .promo-card, .promo-notice, .promo-history) {
+  border-color: var(--admin-ui-border);
+  border-radius: 16px;
+  color: var(--admin-ui-text);
+  background: var(--admin-ui-surface);
+}
+html.admin-unified-site body.admin-site .promo-admin .promo-button:not(.secondary) {
+  border-color: var(--admin-ui-accent);
   color: var(--admin-ui-accent-contrast);
+  background: var(--admin-ui-accent);
+}
+html.admin-unified-site body.admin-site .promo-admin .promo-button:not(.secondary):hover {
+  border-color: var(--admin-brand-hover, var(--admin-ui-accent));
+  background: var(--admin-brand-hover, var(--admin-ui-accent));
+}
+html.admin-unified-site body.admin-site .promo-admin :where(.promo-tag, .promo-amount, .promo-link) {
+  color: var(--admin-ui-accent-ink);
+}
+html.admin-unified-site body.admin-site .promo-admin .promo-form :where(input:not([type="checkbox"]), textarea) {
+  border-color: var(--admin-ui-border);
+  color: var(--admin-ui-text);
+  background: var(--admin-ui-input);
 }
 html.admin-unified-site body.admin-site .announcement-admin-page {
   --announcement-ink: var(--admin-ui-text);
@@ -131,6 +207,9 @@ html.admin-unified-site body.admin-site .announcement-admin-page :where(.announc
 
 @media (max-width: 640px) {
   html.admin-unified-site body.admin-site :where(.experiment-page-head, .mgx-page-head, .hsx-hero, .welcome-live-hero, .announcement-hero) {
+    padding: 18px 16px;
+  }
+  html.admin-unified-site body.admin-site :where(.recommended-page .experiment-page-head, .promo-admin .promo-hero) {
     padding: 18px 16px;
   }
 }
