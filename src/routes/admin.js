@@ -1362,6 +1362,16 @@ router.post('/recommended-categories', (req, res) => bannerUpload.single('image'
   store.data.recommendedCategories.push({ id: store.genId(8), title, imageUrl, productIds: [], count: 0, enabled: true });
   await store.save(); req.flash('success', 'เพิ่มหมวดหมู่แนะนำแล้ว'); res.redirect(recommendedCategoriesRedirect(req));
 })));
+router.post('/recommended-categories/:id/edit', (req, res) => bannerUpload.single('image')(req, res, store.bindTenantContext(async err => {
+  const category = (store.data.recommendedCategories || []).find(item => item.id === req.params.id);
+  if (!category) { req.flash('error', 'ไม่พบหมวดหมู่'); return res.redirect(recommendedCategoriesRedirect(req)); }
+  const title = String(req.body.title || '').trim().slice(0,60);
+  if (err || !title) { req.flash('error', err ? 'อัปโหลดรูปไม่สำเร็จ' : 'กรุณากรอกชื่อหมวดหมู่'); return res.redirect(recommendedCategoriesRedirect(req)); }
+  category.title = title;
+  if (req.file) category.imageUrl = await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+  else if (String(req.body.imageUrl || '').trim()) category.imageUrl = String(req.body.imageUrl).trim().slice(0,2000);
+  await store.save(); req.flash('success', 'บันทึกชื่อและรูปหมวดหมู่แล้ว'); res.redirect(recommendedCategoriesRedirect(req));
+})));
 router.post('/recommended-categories/:id/products', async (req, res) => {
   const category = (store.data.recommendedCategories || []).find(item => item.id === req.params.id);
   if (!category) return res.status(404).send('ไม่พบหมวดหมู่');
