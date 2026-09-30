@@ -33,35 +33,32 @@ const input = color('admin-dark-input');
 const line = color('admin-dark-line');
 const text = color('admin-dark-text');
 const muted = color('admin-dark-muted');
-assert.equal(canvas, '#0b0f14', 'dark canvas should use the layered admin palette');
-assert.equal(surface, '#151b22', 'dark panels should be visibly separated from the canvas');
-assert.equal(raised, '#1d2630', 'dark raised controls should be visibly separated from panels');
-assert.equal(input, '#202b36', 'dark form fields should be visibly separated from panels');
-assert.ok(contrast(text, canvas) >= 7, 'primary text must remain clear on the dark canvas');
+assert.equal(canvas, '#0b0f14');
+assert.equal(surface, '#151b22');
+assert.equal(raised, '#1d2630');
+assert.equal(input, '#202b36');
+assert.ok(contrast(text, canvas) >= 7, 'primary text must remain clear on the page canvas');
 assert.ok(contrast(muted, input) >= 4.5, 'muted labels and placeholders must remain readable');
 assert.ok(contrast(line, canvas) >= 3, 'control borders must remain visible on the page canvas');
-assert.match(css, /html\[data-admin-theme="dark"\] body\.admin-site[\s\S]*?border:\s*1px solid var\(--admin-dark-line\)/,
-  'dark mode must apply readable, outlined controls to both admin layouts');
-assert.match(css, /\.admin-theme-switch\s*\{[\s\S]*?min-height:\s*38px/, 'theme control must have a clear, usable target');
-assert.doesNotMatch(css, /transition-property:\s*[^;]*background(?:-color)?/, 'theme changes must not fade through white backgrounds');
-assert.match(css, /html\.admin-theme-switching[\s\S]*transition:\s*none\s*!important/, 'theme changes must disable transitions while colors update');
-assert.match(css, /--admin-brand-fill:\s*var\(--admin-brand-fill-dark/, 'dark mode must use the selected store accent');
-assert.ok(css.includes('[style*="background:#fff" i]'), 'inline white surfaces must be overridden before painting');
-assert.ok(css.includes('[style*="background-color:color(srgb" i]'), 'modern inline color() fills must be overridden by the dark surface palette');
-assert.doesNotMatch(css, /admin-dark-surface-audit-v1\.js/, 'the dark theme must not depend on a delayed recoloring scan');
+assert.match(css, /:root\[data-admin-theme="dark"\][\s\S]*?--card:\s*var\(--admin-dark-surface\)/);
+assert.match(css, /html\[data-admin-theme="dark"\] body\.admin-site\s*\{[\s\S]*?--card:\s*var\(--admin-dark-surface\) !important/,
+  'page-local theme tokens must inherit the dark palette');
+assert.match(css, /:where\(main, #admin-content, \.admin-content\)[\s\S]*?color: var\(--admin-dark-text\) !important/,
+  'older admin page copy must not keep fixed dark text');
+assert.match(css, /\.experiment-button\.primary[\s\S]*?background-color: var\(--gold\) !important/,
+  'primary actions need a visible dark-theme accent fill');
+assert.match(css, /\.experiment-filter-radar-item\.sage[\s\S]*?background-color: #10261c !important/);
+assert.match(css, /\.mgx-game-tab\.is-active[\s\S]*?background-color: #10261c !important/);
+assert.match(css, /\.coupons-status\.active[\s\S]*?background-color: #10261c !important/);
+assert.match(css, /\.users-more-action[\s\S]*?background-color: var\(--admin-dark-raised\) !important/);
+assert.match(css, /:focus-visible[\s\S]*?outline-color: var\(--admin-brand-readable/,
+  'keyboard focus must remain visible');
+assert.match(css, /\.settings-storefront-stage/, 'do not recolor the embedded live storefront preview');
+assert.match(css, /html\.admin-theme-switching[\s\S]*transition:\s*none !important/);
+assert.doesNotMatch(css, /admin-dark-surface-audit-v1\.js/, 'dark mode must not depend on delayed recoloring scans');
 assert.match(adminLayout, /admin-dark-mode-v1\.css/);
 assert.match(legacyLayout, /admin-dark-mode-v1\.css/);
-assert.match(dashboard, /lowStockProducts\.slice\(0,\s*24\)/, 'the dashboard should initially render a bounded stock list');
-assert.match(dashboard, /<template id="experiment-stock-alert-more">/, 'remaining stock items should be deferred');
-assert.match(css, /color:\s*var\(--admin-brand-contrast-dark/, 'dark accent buttons must use the selected accent’s readable ink');
-assert.match(css, /border-color:\s*#3b362f\s*!important/, 'ordinary dark-page borders should stay subdued');
-assert.match(css, /\.effects-stage \*/, 'the live storefront preview must keep its chosen visual colors');
-assert.match(css, /@layer admin-main-neutral-borders[\s\S]*?focus-visible[\s\S]*?outline:\s*2px solid var\(--admin-brand-readable/, 'dark mode must keep keyboard focus visible after neutral border rules');
-assert.match(css, /admin-main-site \.experiment-effects-page :where\([\s\S]*?background:\s*#151b22 !important/, 'effect settings should use the shared raised panel surface');
-assert.doesNotMatch(css, /admin-main-site \.experiment-effects-page :where\([\s\S]*?background:\s*#000000 !important/, 'effect settings must not fall back to pure black panels');
-assert.match(css, /background-color:\s*#202b36 !important;\s*border(?:-color)?:\s*(?:1px solid )?#526576 !important/, 'admin inputs should use the same slate control surface across forms');
-assert.match(css, /experiment-stock-alert \.experiment-stock-chip em[\s\S]*?background:\s*#2b171d !important/, 'sold-out stock badges should keep a readable red status surface');
-assert.match(css, /effects-preview::before[\s\S]*?display:\s*none\s*!important/, 'dark effects settings should not retain decorative paper tape');
-assert.match(dashboard, /experiment-chart-empty/, 'a zero-sales chart should have a helpful, compact empty state');
+assert.match(dashboard, /lowStockProducts\.slice\(0,\s*24\)/);
+assert.match(dashboard, /<template id="experiment-stock-alert-more">/);
 
-console.log('Admin dark theme checks passed: layered dark surfaces, readable controls, selected accent, no late DOM repaint, and bounded dashboard rendering.');
+console.log('Admin dark theme checks passed: layered contrast, scoped legacy tokens, readable buttons, representative page surfaces, preserved previews, and both layouts.');

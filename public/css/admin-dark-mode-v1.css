@@ -1,22 +1,30 @@
 :root[data-admin-theme="dark"] {
   color-scheme: dark;
-  --ex-bg: #000000;
-  --ex-surface: #000000;
-  --ex-ink: #f2eee8;
-  --ex-muted: #aaa39a;
-  --ex-line: #777777;
-  --ex-sidebar: #000000;
-  --ex-shadow: 0 12px 30px rgba(0, 0, 0, .18);
-  --ex-green-soft: #000000;
-  --ex-orange-soft: #000000;
-  --ex-red-soft: #000000;
-  --admin-dark-canvas: #000000;
-  --admin-dark-surface: #000000;
-  --admin-dark-raised: #000000;
-  --admin-dark-input: #000000;
-  --admin-dark-line: #777777;
-  --admin-dark-text: #f2eee8;
-  --admin-dark-muted: #aaa39a;
+  --admin-dark-canvas: #0b0f14;
+  --admin-dark-surface: #151b22;
+  --admin-dark-raised: #1d2630;
+  --admin-dark-input: #202b36;
+  --admin-dark-sidebar: #11171e;
+  --admin-dark-line: #526576;
+  --admin-dark-text: #f4f7fa;
+  --admin-dark-muted: #aab6c2;
+  --admin-dark-success: #a9dfbc;
+  --admin-dark-danger: #f3aeb5;
+  --admin-dark-warning: #f0cf8c;
+
+  --ex-bg: var(--admin-dark-canvas);
+  --ex-surface: var(--admin-dark-surface);
+  --ex-ink: var(--admin-dark-text);
+  --ex-muted: var(--admin-dark-muted);
+  --ex-line: var(--admin-dark-line);
+  --ex-sidebar: var(--admin-dark-sidebar);
+  --ex-shadow: 0 12px 30px rgb(0 0 0 / .18);
+  --ex-green: var(--admin-brand-fill-dark, var(--admin-brand-fill, #c8a63f));
+  --ex-green-dark: var(--admin-brand-readable-dark, var(--admin-brand-readable, #e7c29e));
+  --ex-green-soft: var(--admin-brand-soft-dark, #25221b);
+  --ex-orange-soft: #2a2111;
+  --ex-red-soft: #2b171d;
+
   --card-hover: var(--admin-dark-raised) !important;
   --bg: var(--admin-dark-canvas) !important;
   --card: var(--admin-dark-surface) !important;
@@ -26,26 +34,29 @@
   --border: var(--admin-dark-line) !important;
   --border-light: var(--admin-dark-line) !important;
   --input: var(--admin-dark-input) !important;
+
   --brand: var(--admin-brand-accent, #936344) !important;
-  --gold: var(--admin-brand-fill, #8d6848) !important;
-  --gold-hover: var(--admin-brand-hover, #a27d5e) !important;
-  --gold-light: #b59779 !important;
-  --gold-dark: var(--admin-brand-strong, #684a32) !important;
-  --gold-contrast: var(--admin-brand-contrast, #fffaf3) !important;
-  --gold-text: var(--admin-brand-readable, #e7c29e) !important;
-  --gold-hover-text: #fffaf3 !important;
+  --gold: var(--admin-brand-fill-dark, var(--admin-brand-fill, #8d6848)) !important;
+  --gold-hover: var(--admin-brand-hover-dark, var(--admin-brand-hover, #a27d5e)) !important;
+  --gold-light: var(--admin-brand-fill-dark, #b59779) !important;
+  --gold-dark: var(--admin-brand-strong-dark, var(--admin-brand-strong, #684a32)) !important;
+  --gold-contrast: var(--admin-brand-contrast-dark, var(--admin-brand-contrast, #0b0f14)) !important;
+  --gold-text: var(--admin-brand-readable-dark, var(--admin-brand-readable, #e7c29e)) !important;
+  --gold-hover-text: var(--admin-brand-contrast-dark, #0b0f14) !important;
+
   --text: var(--admin-dark-text) !important;
   --text-2: #e0e5e1 !important;
   --text-3: var(--admin-dark-muted) !important;
-  --text-4: #b8b8b8 !important;
+  --text-4: var(--admin-dark-muted) !important;
   --theme-ink: var(--admin-dark-text) !important;
   --theme-muted-ink: var(--admin-dark-muted) !important;
   --theme-line: var(--admin-dark-line) !important;
-  --theme-accent: var(--admin-brand-fill, #70533c) !important;
-  --theme-accent-ink: var(--admin-brand-contrast, #fffaf3) !important;
-  --success: #a8deb9 !important;
-  --danger: #ffc4cc !important;
-  --warning: #f2daa2 !important;
+  --theme-accent: var(--admin-brand-fill-dark, var(--admin-brand-fill, #70533c)) !important;
+  --theme-accent-ink: var(--admin-brand-contrast-dark, #0b0f14) !important;
+
+  --success: var(--admin-dark-success) !important;
+  --danger: var(--admin-dark-danger) !important;
+  --warning: var(--admin-dark-warning) !important;
   --coral: #f0aa99 !important;
 }
 
@@ -57,8 +68,8 @@ html[data-admin-theme="dark"].admin-unified-site {
   --admin-brand-strong: var(--admin-brand-strong-dark, var(--admin-brand-strong));
   --admin-brand-readable: var(--admin-brand-readable-dark, var(--admin-brand-readable));
   --admin-brand-contrast: var(--admin-brand-contrast-dark, var(--admin-brand-contrast));
-  --admin-brand-soft: var(--admin-brand-soft-dark, #000000);
-  --admin-brand-border: var(--admin-brand-border-dark, #3a3024);
+  --admin-brand-soft: var(--admin-brand-soft-dark, #25221b);
+  --admin-brand-border: var(--admin-brand-border-dark, #554637);
   --ex-green: var(--admin-brand-fill);
   --ex-green-dark: var(--admin-brand-readable);
   --ex-green-soft: var(--admin-brand-soft);
@@ -67,209 +78,10 @@ html[data-admin-theme="dark"].admin-unified-site {
 html[data-admin-theme="dark"] body.admin-site {
   color-scheme: dark;
   color: var(--admin-dark-text) !important;
-  background: var(--admin-dark-canvas) !important;
+  background-color: var(--admin-dark-canvas) !important;
 }
 
-/* Keep background/text changes immediate so theme flips and late annotations
-   never fade through a white frame. Preserve motion that does not repaint
-   surfaces or text. */
-html[data-admin-theme="dark"] body.admin-site *,
-html[data-admin-theme="dark"] body.admin-site *::before,
-html[data-admin-theme="dark"] body.admin-site *::after {
-  transition-property: border-color, outline-color, box-shadow, opacity, transform, width, height, max-height !important;
-}
-
-html[data-admin-theme="dark"] .experiment-sidebar,
-html[data-admin-theme="dark"] .experiment-topbar,
-html[data-admin-theme="dark"] .experiment-menu-dialog-content,
-html[data-admin-theme="dark"] .experiment-mobile-nav,
-html[data-admin-theme="dark"] .experiment-confirm-dialog,
-html[data-admin-theme="dark"] .experiment-roadmap-dialog,
-html[data-admin-theme="dark"] .experiment-icon-button {
-  color: var(--admin-dark-text);
-  background-color: var(--admin-dark-surface);
-  border-color: var(--admin-dark-line);
-}
-
-html[data-admin-theme="dark"] .experiment-topbar { background-color: #000000; }
-html[data-admin-theme="dark"] .experiment-dialog,
-html[data-admin-theme="dark"] .experiment-dialog-content { background-color: var(--admin-dark-surface); }
-html[data-admin-theme="dark"] .experiment-nav-label,
-html[data-admin-theme="dark"] .experiment-profile small,
-html[data-admin-theme="dark"] .experiment-brand-sub,
-html[data-admin-theme="dark"] .experiment-page-head p,
-html[data-admin-theme="dark"] .experiment-panel-head p,
-html[data-admin-theme="dark"] .experiment-kpi-label,
-html[data-admin-theme="dark"] .experiment-summary-item,
-html[data-admin-theme="dark"] .experiment-summary-item small,
-html[data-admin-theme="dark"] .experiment-confirm-note { color: var(--admin-dark-muted); }
-html[data-admin-theme="dark"] .experiment-nav-item { color: #d1cec4; }
-html[data-admin-theme="dark"] .experiment-nav-item:hover,
-html[data-admin-theme="dark"] .experiment-icon-button:hover { color: var(--admin-dark-text); background: var(--admin-dark-raised); }
-html[data-admin-theme="dark"] .experiment-nav-item.active { color: var(--admin-dark-text); background: #000000; box-shadow: inset 3px 0 var(--admin-brand-fill); }
-html[data-admin-theme="dark"] .experiment-nav-item svg { color: #aaa79e; }
-html[data-admin-theme] .experiment-theme-icon-sun { display: none; }
-html[data-admin-theme="dark"] .experiment-theme-toggle[aria-pressed="true"] .experiment-theme-icon-sun { display: block; }
-html[data-admin-theme="dark"] .experiment-theme-toggle[aria-pressed="true"] .experiment-theme-icon-moon { display: none; }
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-card, .experiment-panel, .experiment-build-roadmap, .experiment-build-column,
-  .experiment-roadmap-mock-row, .experiment-product, .experiment-luxury-card,
-  .experiment-placeholder-card, .experiment-menu-dialog-head, .experiment-confirm-head,
-  .experiment-roadmap-dialog-head, [class*="-card"], [class*="-panel"],
-  [class*="-surface"], [class*="-box"], [class*="-dialog"], [class*="-sheet"],
-  fieldset, .bg-white, .bg-gray-50, .bg-slate-50
-):not(:where([class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="success"], [class*="error"], [class*="danger"], [class*="warning"], [class*="empty"])) {
-  color: var(--admin-dark-text);
-  background: var(--admin-dark-surface) !important;
-  border-color: var(--admin-dark-line) !important;
-  box-shadow: 0 10px 24px rgb(0 0 0 / .12);
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(h1, h2, h3, h4, h5, h6, p, li, label, legend, dt, dd, th, td) {
-  color: var(--admin-dark-text) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(small, [class*="muted"], [class*="description"], [class*="subtitle"], [class*="helper"], [class*="text-gray"], [class*="text-slate"], [class*="text-zinc"]) {
-  color: var(--admin-dark-muted) !important;
-}
-html[data-admin-theme="dark"] body.admin-site a:not(.experiment-nav-item) { color: var(--admin-brand-readable, #e2c09d); }
-
-html[data-admin-theme="dark"] body.admin-site :is(input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])), select, textarea, [contenteditable="true"]) {
-  color: var(--admin-dark-text) !important;
-  background-color: var(--admin-dark-input) !important;
-  border-color: var(--admin-dark-line) !important;
-  border-style: solid;
-  border-width: 1px;
-  accent-color: var(--admin-brand-fill, #966746);
-}
-html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder { color: #aaa69a; opacity: 1; }
-html[data-admin-theme="dark"] body.admin-site :is(input[type="checkbox"], input[type="radio"]) { accent-color: var(--admin-brand-fill, #966746); }
-
-html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"])) {
-  color: var(--admin-dark-text);
-  background-color: var(--admin-dark-raised);
-  border-color: var(--admin-dark-line);
-  border-style: solid;
-  border-width: 1px;
-}
-html[data-admin-theme="dark"] body.admin-site :is(.experiment-button.primary, button.primary, .btn-primary, button[class*="submit"], input[type="submit"]) {
-  color: var(--admin-brand-contrast, #fffaf3);
-  background-color: var(--admin-brand-fill, #70533c);
-  border-color: var(--admin-brand-fill, #70533c);
-}
-html[data-admin-theme="dark"] body.admin-site :is(.experiment-button.primary, button.primary, .btn-primary, button[class*="submit"], input[type="submit"]):hover {
-  background-color: var(--admin-brand-hover, #89674d);
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(table, .experiment-table) { color: var(--admin-dark-text); }
-html[data-admin-theme="dark"] body.admin-site :is(th, .experiment-table th) { color: #ffffff !important; background: var(--admin-dark-raised) !important; }
-html[data-admin-theme="dark"] body.admin-site :is(td, .experiment-table td) { color: #e2e2e2 !important; border-color: var(--admin-dark-line) !important; }
-html[data-admin-theme="dark"] body.admin-site :is(tr:nth-child(even), .experiment-table tr:nth-child(even)) { background-color: var(--admin-dark-canvas); }
-html[data-admin-theme="dark"] body.admin-site :is(tr:hover, .experiment-table tr:hover) { background-color: var(--admin-dark-raised); }
-
-html[data-admin-theme="dark"] body.admin-site :is([class*="alert"], [class*="notice"]):not([class*="success"]):not([class*="error"]):not([class*="danger"]) {
-  color: #f2daa2;
-  background-color: #000000 !important;
-  border-color: #8f7540 !important;
-}
-html[data-admin-theme="dark"] .experiment-stock-alert { color: #ffc4cc; background: #000000 !important; border-color: #9a5963 !important; }
-html[data-admin-theme="dark"] .experiment-stock-alert .experiment-alert-head p { color: #e2aab2; }
-html[data-admin-theme="dark"] .experiment-stock-alert .experiment-alert-head > div:first-child { color: #ffc4cc !important; background: #000000; }
-html[data-admin-theme="dark"] .experiment-page-status-note { color: #f2daa2; background: #000000 !important; border-color: #8f7540 !important; }
-html[data-admin-theme="dark"] .experiment-page-status-note strong { color: #fff0c2; }
-
-html[data-admin-theme="dark"] body.admin-site :is([class*="success"], [class*="ready"], [class*="complete"], [class*="available"]) {
-  color: #b8e2c4 !important;
-  background-color: #000000 !important;
-  border-color: #55936a !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is([class*="error"], [class*="danger"], [class*="failed"], [class*="negative"]) {
-  color: #ffc4ca !important;
-  background-color: #000000 !important;
-  border-color: #a65c67 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is([class*="warning"], [class*="pending"], [class*="status"], [class*="badge"]) {
-  color: #f2daa2 !important;
-  background-color: #000000 !important;
-  border-color: #8f7540 !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site ::selection { color: #fffaf3; background: #77533b; }
-html[data-admin-theme="dark"] body.admin-site :focus-visible { outline-color: #d9b794; }
-html[data-admin-theme="dark"] body.admin-site ::-webkit-scrollbar-track { background: var(--admin-dark-canvas); }
-html[data-admin-theme="dark"] body.admin-site ::-webkit-scrollbar-thumb { background-color: #5a665e; }
-
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-bg="surface"] {
-  color: var(--admin-dark-text) !important;
-  background-color: var(--admin-dark-surface) !important;
-  background-image: none !important;
-  border-color: var(--admin-dark-line) !important;
-}
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-bg="raised"] {
-  color: var(--admin-dark-text) !important;
-  background-color: var(--admin-dark-raised) !important;
-  background-image: none !important;
-  border-color: var(--admin-dark-line) !important;
-}
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-bg="input"] {
-  color: var(--admin-dark-text) !important;
-  background-color: var(--admin-dark-input) !important;
-  background-image: none !important;
-  border-color: var(--admin-dark-line) !important;
-}
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-ink="primary"] { color: var(--admin-dark-text) !important; }
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-ink="muted"] { color: var(--admin-dark-muted) !important; }
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-ink="accent"] { color: var(--admin-brand-readable, #e7c29e) !important; }
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-ink="dark"] { color: var(--admin-dark-canvas) !important; }
-html[data-admin-theme="dark"] body.admin-site .experiment-status-note-icon {
-  color: #f2daa2 !important;
-  background: #000000 !important;
-  border-color: #8f7540 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-brand-mark {
-  color: #ffffff !important;
-  background: var(--admin-dark-raised) !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card.ready strong { color: #b8e2c4 !important; }
-html[data-admin-theme="dark"] body.admin-site .experiment-avatar {
-  color: #ffffff !important;
-  background: var(--admin-dark-raised) !important;
-  border: 1px solid var(--admin-dark-line);
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-stock-alert .experiment-stock-chip em {
-  color: #f3aeb5 !important;
-  background: #2b171d !important;
-  border-color: #8f4653 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-stock-alert .experiment-stock-chip-name { color: #ffffff !important; }
-html[data-admin-theme="dark"] body.admin-site .recommended-template .template-icon {
-  color: var(--admin-brand-readable, #e7c29e) !important;
-  background: var(--admin-dark-raised) !important;
-  border: 1px solid var(--admin-dark-line);
-}
-html[data-admin-theme="dark"] body.admin-site :is(.as-live-pill, .announcement-status.is-live) {
-  color: #b8e2c4 !important;
-  background: #000000 !important;
-  border-color: #55936a !important;
-}
-html[data-admin-theme="dark"] body.admin-site .announcement-status.is-live * { color: #b8e2c4 !important; }
-html[data-admin-theme="dark"] body.admin-site .announcement-status.is-live i { background: #087a5b !important; }
-html[data-admin-theme="dark"] body.admin-site .experiment-page-status-note strong { color: #fff0c2 !important; }
-html[data-admin-theme="dark"] body.admin-site .coupons-create-note > span { color: #f2daa2 !important; }
-html[data-admin-theme="dark"] body.admin-site .welcome-live-save-indicator { background: #000000 !important; border: 1px solid #55936a; }
-html[data-admin-theme="dark"] body.admin-site .admin-theme-swatch-option:has(input:checked) .admin-theme-swatch span { color: #000000 !important; }
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-before-bg="surface"]::before,
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-after-bg="surface"]::after {
-  background-color: var(--admin-dark-surface) !important;
-  background-image: none !important;
-  border-color: var(--admin-dark-line) !important;
-  box-shadow: none !important;
-}
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-before-ink="primary"]::before,
-html[data-admin-theme="dark"] body.admin-site [data-admin-dark-after-ink="primary"]::after { color: var(--admin-dark-text) !important; }
-
-/* Shared admin behavior: use the storefront typeface and keep the active
-   appearance in the cascade before any page-specific surface styles paint. */
+/* Keep the shared admin type system and layout rules identical in both modes. */
 html.admin-unified-site,
 html.admin-unified-site body.admin-site {
   font-family: 'Kanit', system-ui, sans-serif !important;
@@ -280,19 +92,11 @@ html.admin-unified-site body.admin-site :not(code):not(kbd):not(samp):not(pre):n
 html.admin-unified-site body.admin-site :is(code, kbd, samp, pre, .font-mono, [class*="mono"]) {
   font-family: 'JetBrains Mono', monospace !important;
 }
-html.admin-unified-site {
-  min-height: 100%;
-  background-color: #f6f8f8;
-}
-html[data-admin-theme="dark"].admin-unified-site {
-  background-color: var(--admin-dark-canvas);
-}
-html.admin-unified-site body.admin-site {
-  min-height: 100vh;
-}
+html.admin-unified-site { min-height: 100%; background-color: #f6f8f8; }
+html[data-admin-theme="dark"].admin-unified-site { background-color: var(--admin-dark-canvas); }
+html.admin-unified-site body.admin-site { min-height: 100vh; }
 
-/* Do not animate surface or text colors during a theme change. The script
-   removes this guard after two frames so normal component motion can resume. */
+/* Prevent a light frame while the saved preference is being applied. */
 html.admin-theme-switching,
 html.admin-theme-switching *:not(.rail-track):not(.mg-box):not(.mg-card):not(.rail-center):not(.rail-pointer):not(.mg-confetti-piece),
 html.admin-theme-switching *::before,
@@ -301,110 +105,294 @@ html.admin-theme-switching *::after {
   animation: none !important;
 }
 
-/* A warm charcoal palette keeps cards, fields, borders, and text distinct. */
-html[data-admin-theme="dark"] body.admin-site {
-  color-scheme: dark;
-  color: var(--admin-dark-text) !important;
-  background-color: var(--admin-dark-canvas) !important;
-  --ex-bg: var(--admin-dark-canvas);
-  --ex-surface: var(--admin-dark-surface);
-  --ex-ink: var(--admin-dark-text);
-  --ex-muted: var(--admin-dark-muted);
-  --ex-line: #777777;
-  --ex-sidebar: #000000;
-  --ex-green: var(--admin-brand-fill);
-  --ex-green-dark: var(--admin-brand-readable);
-  --ex-green-soft: var(--admin-brand-soft);
-  --admin-brand-soft: var(--admin-brand-soft-dark, #000000);
-  --admin-brand-border: var(--admin-brand-border-dark, #3a3024);
-}
+/* Shared surfaces: only paint colors; existing dimensions and spacing stay intact. */
 html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-topbar, .experiment-sidebar, .experiment-mobile-nav,
-  .experiment-menu-dialog-content, .experiment-confirm-dialog,
+  #admin-sidebar, .experiment-sidebar, .experiment-topbar, .experiment-mobile-nav,
+  .admin-mobile-header, .experiment-menu-dialog-content, .experiment-confirm-dialog,
   .experiment-roadmap-dialog, .experiment-dialog, .experiment-dialog-content,
-  .experiment-icon-button
+  .experiment-form-actions
 ) {
   color: var(--admin-dark-text);
   background-color: var(--admin-dark-surface);
   border-color: var(--admin-dark-line);
 }
-html[data-admin-theme="dark"] body.admin-site .experiment-topbar {
-  background-color: #000000;
+html[data-admin-theme="dark"] body.admin-site .experiment-sidebar { background-color: var(--admin-dark-sidebar); }
+html[data-admin-theme="dark"] body.admin-site .experiment-menu-dialog-head {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-surface);
+  background-image: none;
+  border-color: var(--admin-dark-line);
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-page-head p,
+html[data-admin-theme="dark"] body.admin-site .experiment-panel-head p,
+html[data-admin-theme="dark"] body.admin-site .experiment-nav-label,
+html[data-admin-theme="dark"] body.admin-site .experiment-profile small,
+html[data-admin-theme="dark"] body.admin-site .experiment-brand-sub,
+html[data-admin-theme="dark"] body.admin-site .experiment-summary-item,
+html[data-admin-theme="dark"] body.admin-site .experiment-summary-item small,
+html[data-admin-theme="dark"] body.admin-site .experiment-confirm-note {
+  color: var(--admin-dark-muted);
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-nav-item { color: #d1d9df; }
+html[data-admin-theme="dark"] body.admin-site .experiment-nav-item:hover,
+html[data-admin-theme="dark"] body.admin-site .experiment-icon-button:hover {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-raised);
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-nav-item.active {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-raised);
+  box-shadow: inset 3px 0 var(--admin-brand-fill);
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-nav-item svg { color: #aab6c2; }
+html[data-admin-theme="dark"] body.admin-site .experiment-brand-mark,
+html[data-admin-theme="dark"] body.admin-site .experiment-avatar {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-raised);
+  border-color: var(--admin-dark-line);
+}
+
+/* The experimental layout's hover styles were authored for white paper. */
+html[data-admin-theme="dark"] body.admin-site .experiment-button:hover {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-raised);
+  border-color: var(--admin-dark-line);
 }
 html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-card, .experiment-panel, .experiment-build-roadmap,
-  .experiment-build-column, .experiment-roadmap-mock-row,
-  .experiment-product, .experiment-luxury-card, .experiment-placeholder-card,
-  .experiment-menu-dialog-head, .experiment-confirm-head,
-  .experiment-roadmap-dialog-head, [class*="-card"], [class*="-panel"],
-  [class*="-surface"], [class*="-box"], [class*="-dialog"], [class*="-sheet"],
-  [class~="bg-white"], [class~="bg-gray-50"], [class~="bg-slate-50"],
-  [class~="bg-stone-50"], fieldset
-):not(:where([class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="success"], [class*="error"], [class*="danger"], [class*="warning"], [class*="empty"])) {
-  color: var(--admin-dark-text);
-  background: #000000 !important;
-  background-image: none !important;
-  border-color: var(--admin-dark-line) !important;
-  box-shadow: none;
+  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
+  button[class*="submit"], input[type="submit"], [class*="button-primary"]
+):not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: var(--gold-contrast) !important;
+  background-color: var(--gold) !important;
+  border-color: var(--gold) !important;
 }
+html[data-admin-theme="dark"] body.admin-site :is(
+  button, a, input[type="button"], input[type="submit"], [role="button"]
+):is([class*="bg-[var(--gold)]"], [class*="from-[var(--gold)]"]):not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: var(--gold-contrast) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  button, a, input[type="button"], input[type="submit"], [role="button"]
+):is([class*="hover:bg-[var(--gold)]"], [class*="hover:bg-[var(--gold-hover)]"]):hover:not(:where(.admin-theme-store *, .effects-stage *)) {
+  color: var(--gold-contrast) !important;
+  border-color: var(--gold-hover) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-button.ghost, .experiment-nav-status, .experiment-inline-status,
+  .experiment-menu-status, .experiment-sidebar-count, .experiment-page-status-note
+) {
+  color: var(--admin-brand-readable) !important;
+  background-color: var(--admin-brand-soft) !important;
+  border-color: var(--admin-brand-border) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-page-status-note { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card.ready { background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-stock-alert,
+html[data-admin-theme="dark"] body.admin-site .experiment-alert-head,
+html[data-admin-theme="dark"] body.admin-site .experiment-alert-list {
+  color: #f0cf8c;
+  background-color: #2a2111;
+  border-color: #8d6b2e;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-stock-chip {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-raised);
+  border-color: var(--admin-dark-line);
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-stock-chip em {
+  color: #f3aeb5;
+  background-color: #2b171d;
+  border-color: #8f4653;
+}
+
+/* Convert neutral light utility surfaces without recoloring intentional previews. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="bg-white"], [class~="bg-gray-50"], [class~="bg-gray-100"],
+  [class~="bg-slate-50"], [class~="bg-slate-100"], [class~="bg-stone-50"],
+  [class~="bg-stone-100"], [class~="bg-neutral-50"], [class~="bg-neutral-100"],
+  [class~="bg-zinc-50"], [class~="bg-zinc-100"], .as-preview, .as-empty-preview,
+  .as-search, .as-no-results, .announcement-list-item, .announcement-search,
+  .announcement-list-filters, .announcement-stat-art, .announcement-list-icon,
+  .announcement-stat-card, .announcement-summary-note, .announcement-panel,
+  .announcement-list-panel
+):not(:where(
+  .admin-theme-store *, .effects-stage *, .model-preview-window *,
+  [data-admin-dark-preserve], [data-admin-dark-preserve] *,
+  img, svg, video, canvas
+)) {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none;
+  border-color: var(--admin-dark-line);
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="bg-gray-100"], [class~="bg-slate-100"], [class~="bg-stone-100"],
+  [class~="bg-neutral-100"], [class~="bg-zinc-100"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  background-color: var(--admin-dark-raised) !important;
+}
+
+/* Inputs keep their original size, but use the same readable control surface. */
 html[data-admin-theme="dark"] body.admin-site :is(
   input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
   select, textarea, [contenteditable="true"]
-) {
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
   color: var(--admin-dark-text) !important;
   background-color: var(--admin-dark-input) !important;
-  border: 1px solid var(--admin-dark-line) !important;
+  border-color: var(--admin-dark-line) !important;
   accent-color: var(--admin-brand-fill);
 }
 html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder {
   color: var(--admin-dark-muted);
   opacity: 1;
 }
-html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"])) {
+html[data-admin-theme="dark"] body.admin-site option {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-surface);
+}
+html[data-admin-theme="dark"] body.admin-site input[type="checkbox"],
+html[data-admin-theme="dark"] body.admin-site input[type="radio"] { accent-color: var(--admin-brand-fill); }
+
+/* Match utility text colors to the dark surfaces; status colors stay semantic. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="text-black"], [class~="text-gray-900"], [class~="text-gray-800"],
+  [class~="text-slate-900"], [class~="text-slate-800"], [class~="text-zinc-900"],
+  [class~="text-zinc-800"], [class~="text-neutral-900"], [class~="text-stone-900"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="text-gray-600"], [class~="text-gray-700"], [class~="text-slate-600"],
+  [class~="text-slate-700"], [class~="text-zinc-600"], [class~="text-zinc-700"],
+  [class~="text-neutral-600"], [class~="text-neutral-700"], [class~="text-stone-600"],
+  [class~="text-stone-700"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #d0d8df !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="text-gray-400"], [class~="text-gray-500"], [class~="text-slate-400"],
+  [class~="text-slate-500"], [class~="text-zinc-400"], [class~="text-zinc-500"],
+  [class~="text-neutral-400"], [class~="text-neutral-500"], [class~="text-stone-400"],
+  [class~="text-stone-500"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-muted) !important;
+}
+
+/* Tailwind's pale state fills become dark, tinted versions with the same meaning. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="bg-emerald-50"], [class~="bg-emerald-100"],
+  [class~="bg-green-50"], [class~="bg-green-100"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #b6e8c7 !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="bg-rose-50"], [class~="bg-rose-100"], [class~="bg-red-50"],
+  [class~="bg-red-100"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #f3aeb5 !important;
+  background-color: #2b171d !important;
+  border-color: #8f4653 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="bg-amber-50"], [class~="bg-amber-100"], [class~="bg-yellow-50"],
+  [class~="bg-yellow-100"], [class~="bg-orange-50"], [class~="bg-orange-100"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="bg-sky-50"], [class~="bg-sky-100"], [class~="bg-blue-50"],
+  [class~="bg-blue-100"], [class~="bg-indigo-50"], [class~="bg-indigo-100"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #b7dcf8 !important;
+  background-color: #162535 !important;
+  border-color: #385b79 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="text-emerald-700"], [class~="text-emerald-800"], [class~="text-green-700"],
+  [class~="text-green-800"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) { color: #9eddb4 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="text-rose-700"], [class~="text-rose-800"], [class~="text-red-700"],
+  [class~="text-red-800"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) { color: #f3aeb5 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="text-amber-700"], [class~="text-amber-800"], [class~="text-yellow-700"],
+  [class~="text-yellow-800"], [class~="text-orange-700"], [class~="text-orange-800"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) { color: #f0cf8c !important; }
+html[data-admin-theme="dark"] body.admin-site :is(
+  [class~="text-sky-700"], [class~="text-sky-800"], [class~="text-blue-700"],
+  [class~="text-blue-800"], [class~="text-indigo-700"], [class~="text-indigo-800"]
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) { color: #b7dcf8 !important; }
+
+/* Convert hard-coded white neutral surfaces used by older admin pages. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  [style*="background:#fff" i], [style*="background: #fff" i],
+  [style*="background-color:#fff" i], [style*="background-color: #fff" i],
+  [style*="background:white" i], [style*="background: white" i],
+  [style*="background-color:white" i], [style*="background-color: white" i],
+  [style*="background: rgb(255" i], [style*="background:rgba(255" i],
+  [style*="background: rgba(255" i], [style*="background-color: rgb(255" i],
+  [style*="background-color:rgba(255" i], [style*="background-color: rgba(255" i],
+  [style*="background-color:color(srgb" i], [style*="background-color: color(srgb" i],
+  [style*="background:color(srgb" i], [style*="background: color(srgb" i]
+):not(:where(
+  .admin-theme-store *, .effects-stage *, .model-preview-window *,
+  [data-admin-dark-preserve], [data-admin-dark-preserve] *,
+  img, svg, video, canvas
+)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+
+/* Keep alerts and live states distinct without flattening their component shape. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .as-live-pill, .announcement-status.is-live, .orders-live-badge, .tp-channel-ready,
+  .settings-ready-badge, .welcome-live-status.is-live, .admin-finance-pending.is-clear,
+  .users-status.active, .experiment-luxury-card.ready
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #b6e8c7 !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-page-status-note, .pending-page-status, .catalog-due-badge,
+  .admin-finance-pending:not(.is-clear), .coupons-create-note
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-save-indicator {
+  color: #b6e8c7 !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-stock-chip-name { color: var(--admin-dark-text) !important; }
+
+/* Browser controls follow the same palette and retain visible keyboard focus. */
+html[data-admin-theme="dark"] body.admin-site ::selection {
+  color: var(--gold-contrast);
+  background-color: var(--gold);
+}
+html[data-admin-theme="dark"] body.admin-site :focus-visible {
+  outline-color: var(--admin-brand-readable, #f2c98e);
+}
+html[data-admin-theme="dark"] body.admin-site ::-webkit-scrollbar-track { background-color: var(--admin-dark-canvas); }
+html[data-admin-theme="dark"] body.admin-site ::-webkit-scrollbar-thumb { background-color: var(--admin-dark-line); }
+html[data-admin-theme="dark"] body.admin-site .admin-theme-switch {
   color: var(--admin-dark-text);
   background-color: var(--admin-dark-raised);
   border-color: var(--admin-dark-line);
-  border-style: solid;
-  border-width: 1px;
 }
-html[data-admin-theme="dark"] body.admin-site :is(.experiment-button.primary, button.primary, .btn-primary, button[class*="submit"], input[type="submit"]) {
-  color: var(--admin-brand-contrast);
-  background-color: var(--admin-brand-fill);
-  border-color: var(--admin-brand-fill);
-}
-html[data-admin-theme="dark"] body.admin-site :is(.experiment-button.primary, button.primary, .btn-primary, button[class*="submit"], input[type="submit"]):hover {
-  background-color: var(--admin-brand-hover);
-}
-html[data-admin-theme="dark"] body.admin-site :is(h1, h2, h3, h4, h5, h6, p, li, label, legend, dt, dd, th, td) {
-  color: var(--admin-dark-text) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(small, [class*="muted"], [class*="description"], [class*="subtitle"], [class*="helper"], [class*="text-gray"], [class*="text-slate"], [class*="text-zinc"]) {
-  color: var(--admin-dark-muted) !important;
-}
-html[data-admin-theme="dark"] body.admin-site a:not(.experiment-nav-item) {
-  color: var(--admin-brand-readable);
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu {
-  color: var(--admin-dark-text);
-  background: #000000;
-  border-color: var(--admin-brand-border);
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu :is(h2, strong) {
-  color: var(--admin-dark-text);
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu :is(p, small) {
-  color: var(--admin-dark-muted);
-}
-html[data-admin-theme="dark"] body.admin-site :focus-visible {
-  outline: 3px solid var(--admin-brand-readable);
-  outline-offset: 2px;
-}
-html[data-admin-theme="dark"] body.admin-site ::selection {
-  color: var(--admin-brand-contrast);
-  background: var(--admin-brand-fill);
-}
+html[data-admin-theme="dark"] .admin-theme-switch-sun { display: block; }
+html[data-admin-theme="dark"] .admin-theme-switch-moon { display: none; }
 
-/* A labeled switch is clear on desktop and remains thumb-friendly on mobile. */
 .admin-theme-switch {
   display: inline-flex;
   align-items: center;
@@ -430,13 +418,6 @@ html[data-admin-theme="dark"] body.admin-site ::selection {
   outline-offset: 2px;
 }
 .admin-theme-switch-sun { display: none; }
-html[data-admin-theme="dark"] .admin-theme-switch-sun { display: block; }
-html[data-admin-theme="dark"] .admin-theme-switch-moon { display: none; }
-html[data-admin-theme="dark"] .admin-theme-switch {
-  color: var(--admin-dark-text);
-  background: #000000;
-  border-color: var(--admin-dark-line);
-}
 .experiment-theme-toggle { flex: 0 0 auto; }
 @media (max-width: 760px) {
   .experiment-topbar .admin-theme-switch { min-height: 42px; padding-inline: 9px; }
@@ -444,1109 +425,914 @@ html[data-admin-theme="dark"] .admin-theme-switch {
   .admin-reference-ui .admin-theme-switch span { display: none; }
 }
 
-/* Legacy dark palette defaults are replaced by the layered surfaces below. */
-html[data-admin-theme="dark"].admin-unified-site,
-html[data-admin-theme="dark"].admin-unified-site body.admin-site {
-  --ex-bg: #000000;
-  --ex-surface: #000000;
-  --ex-line: #777777;
-  --ex-sidebar: #000000;
-  --admin-dark-canvas: #000000;
-  --admin-dark-surface: #000000;
-  --admin-dark-raised: #000000;
-  --admin-dark-input: #000000;
-  --admin-dark-line: #777777;
-  --admin-dark-text: #f2eee8;
-  --admin-dark-muted: #aaa39a;
-  background: #000000 !important;
-  color: #ffffff !important;
+
+/* Main legacy forms scope their own light tokens; rebind that scope as well. */
+html[data-admin-theme="dark"] body.admin-site .experiment-legacy-content {
+  --bg: var(--admin-dark-canvas) !important;
+  --card: var(--admin-dark-surface) !important;
+  --border: var(--admin-dark-line) !important;
+  --border-light: var(--admin-dark-line) !important;
+  --input: var(--admin-dark-input) !important;
+  --brand: var(--admin-brand-accent, #936344) !important;
+  --gold: var(--admin-brand-fill-dark, var(--admin-brand-fill, #c8a63f)) !important;
+  --gold-hover: var(--admin-brand-hover-dark, var(--admin-brand-hover, #d0b25a)) !important;
+  --gold-light: var(--admin-brand-fill-dark, #b59779) !important;
+  --gold-dark: var(--admin-brand-strong-dark, #684a32) !important;
+  --gold-contrast: var(--admin-brand-contrast-dark, #0b0f14) !important;
+  --gold-text: var(--admin-brand-readable-dark, #e7c29e) !important;
+  --gold-hover-text: var(--admin-brand-contrast-dark, #0b0f14) !important;
+  --success: var(--admin-dark-success) !important;
+  --danger: var(--admin-dark-danger) !important;
+  --warning: var(--admin-dark-warning) !important;
+  --text: var(--admin-dark-text) !important;
+  --text-2: #e0e5e1 !important;
+  --text-3: var(--admin-dark-muted) !important;
+  --text-4: var(--admin-dark-muted) !important;
+  --theme-ink: var(--admin-dark-text) !important;
+  --theme-muted-ink: var(--admin-dark-muted) !important;
+  --theme-line: var(--admin-dark-line) !important;
+  --theme-accent: var(--gold) !important;
+  --theme-accent-ink: var(--gold-contrast) !important;
+  --ex-bg: var(--admin-dark-canvas) !important;
+  --ex-surface: var(--admin-dark-surface) !important;
+  --ex-ink: var(--admin-dark-text) !important;
+  --ex-muted: var(--admin-dark-muted) !important;
+  --ex-line: var(--admin-dark-line) !important;
 }
 
+/* Page-specific panels that still use a fixed paper fill. */
 html[data-admin-theme="dark"] body.admin-site :is(
-  [class~="bg-white"], [class~="bg-gray-50"], [class~="bg-gray-100"],
-  [class~="bg-slate-50"], [class~="bg-slate-100"], [class~="bg-stone-50"],
-  [class~="bg-stone-100"], [class~="bg-neutral-50"], [class~="bg-neutral-100"],
-  [class~="bg-zinc-50"], [class~="bg-zinc-100"],
-  .as-preview, .as-search, .as-empty-preview, .as-preview-chip,
-  .as-upload-form input[type="file"], .as-field input,
-  .as-banner-settings fieldset label, .as-no-results,
-  .announcement-list-item, .announcement-search, .announcement-list-filters,
-  .announcement-stat-art, .announcement-list-icon,
-  .announcement-stat-card, .announcement-summary-note, .announcement-panel,
-  .announcement-list-panel
-):not(.admin-theme-swatch):not(.admin-theme-store):not([data-admin-dark-preserve]) {
-  color: var(--admin-dark-text) !important;
-  background: #1d2630 !important;
-  background-image: none !important;
-  border-color: var(--admin-dark-line) !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site [style*="background:#fff" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background: #fff" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background-color:#fff" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background-color: #fff" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background:white" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background: white" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background-color:white" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background-color: white" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background:rgba(255" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background: rgba(255" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background-color:rgba(255" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background-color: rgba(255" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background-color:rgb(255" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background-color: rgb(255" i],
-html[data-admin-theme="dark"] body.admin-site [style*="background-color:color(srgb" i] {
-  background-color: #000000 !important;
-  background-image: none !important;
-  color: var(--admin-dark-text) !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-card, .experiment-panel, .experiment-product, [class*="-card"],
-  [class*="-panel"], [class*="-surface"], [class*="-box"],
-  [class*="-dialog"], [class*="-sheet"], .as-card, .announcement-panel
-):not(:where([class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="success"], [class*="error"], [class*="danger"], [class*="warning"], .admin-theme-swatch, .admin-theme-store, [data-admin-dark-preserve])) {
-  border-color: var(--admin-dark-line) !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site .admin-theme-switch,
-html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"])) {
-  color: #ffffff;
-  background: #000000;
+  .experiment-schedule-create, .experiment-filter-toolbar, .experiment-filter-tabs,
+  .experiment-filter-card, .recommended-empty-shelf, .orders-empty-steps,
+  .tp-toolbar, .tp-empty, .tp-channel-row, .coupons-kpi, .coupons-toolbar,
+  .users-kpi, .users-audience-tabs, .users-workspace, .mgx-game-switches,
+  .model-studio-page, .model-studio-current, .model-studio-option,
+  .model-preview-caption, .as-summary-card, .as-card, .admin-theme-card,
+  .admin-theme-custom-row, .admin-theme-mono-group, .welcome-live-card,
+  .effects-toggle, .effects-effect-row, .settings-hero, .settings-toggle-row,
+  .experiment-filter-option, .experiment-image-choice, .experiment-image-preview,
+  .experiment-message-locked, .efhub-player-card, .efhub-player-art,
+  .hsx-stat, .hsx-board, .hsx-board-head, .catalog-stat, .catalog-stat.attention,
+  .announcement-metric, .announcement-overview-note
+):not(:where(
+  .admin-theme-store *, .effects-stage *, .model-preview-window *,
+  [data-admin-dark-preserve], [data-admin-dark-preserve] *
+)) {
+  color: var(--admin-dark-text);
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none;
   border-color: var(--admin-dark-line);
 }
 
+/* Small fields, tabs, and selector rows sit one level above their panels. */
 html[data-admin-theme="dark"] body.admin-site :is(
-  [class*="success"], [class*="ready"], [class*="complete"], [class*="available"],
-  [class*="error"], [class*="danger"], [class*="failed"], [class*="negative"],
-  [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"],
-  [class*="alert"], [class*="notice"], [class*="toast"]
-):not(.admin-theme-swatch):not([data-admin-dark-preserve]) {
-  background-color: #000000 !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site .experiment-nav-item.active {
-  background-color: #1d2630 !important;
-  box-shadow: inset 3px 0 var(--admin-brand-fill);
-}
-
-/* Cover older admin widgets as well as shared components while preserving
-   product art, charts, and the storefront previews. */
-html[data-admin-theme="dark"] body.admin-site :is(
-  div, section, article, aside, nav, header, footer, main, form, fieldset,
-  table, thead, tbody, tfoot, tr, th, td, dialog, details, summary, output, label,
-  a, [class*="-icon"], [class*="-mark"], [class*="-pill"], [class*="-role"],
-  [class*="-avatar"], [class*="-image"], [class*="-picture"], [role="alert"], [role="status"],
-  li, kbd, [class*="-count"], [class*="-total"], [class*="-position"],
-  [class*="-state"], [class*="-mode"], [class*="-caption"], [class*="-symbol"],
-  [class*="-step"], [class*="-index"], [class*="-tag"], [class*="-selected"],
-  [class*="-current"], [class*="-empty"], [class*="-footnote"], [class*="-safe"],
-  [class*="-cost"], [class*="-live"], [class*="-chip"], [class*="-sample"],
-  [class*="-product"], [class*="-badge"],
-  [class*="-rule"], [class*="-label"], [class*="disabled"], [role="tablist"], [role="tab"]
-):not(:where(.admin-theme-store *, .admin-theme-swatch, .admin-theme-swatch *, .admin-theme-mono-color, [data-admin-dark-preserve], [data-admin-dark-preserve] *, .admin-dark-mode-preserve, .admin-dark-mode-preserve *, .experiment-chart-bar, [class*="chart-bar"], [class*="chart-line"], [class*="chart-area"], [class*="chart-fill"], .model-preview-window, .model-preview-window *, .admin-theme-effect-sample, .admin-theme-effect-sample *, .effects-stage, .effects-stage *)) {
-  background-color: #000000 !important;
-  background-image: none !important;
-}
-
-/* Inline styles from older scripts can bypass component-specific selectors.
-   CSSOM normalizes those declarations with spaces, so cover both common
-   serializations before the browser paints them. */
-html[data-admin-theme="dark"] body.admin-site :is(
-  [style*="background: rgb(255" i], [style*="background:rgba(255" i],
-  [style*="background: rgba(255" i], [style*="background-color: rgb(255" i],
-  [style*="background-color:rgba(255" i], [style*="background-color: rgba(255" i],
-  [style*="background-color: color(srgb" i], [style*="background: color(srgb" i]
-):not(.admin-theme-store *):not(.admin-theme-swatch *):not([data-admin-dark-preserve] *):not([data-admin-dark-preserve]) {
-  background-color: #000000 !important;
-  background-image: none !important;
-}
-
-/* Normalize ink across legacy cards, badges, custom controls, and links.
-   Accents and semantic feedback are restored below to keep the interface easy
-   to scan. */
-html[data-admin-theme="dark"] body.admin-site *:not(:where(.admin-theme-store *, .admin-theme-swatch *, [data-admin-dark-preserve] *, .admin-dark-mode-preserve *)) {
-  color: var(--admin-dark-text) !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  [class*="success"], [class*="ready"], [class*="complete"], [class*="available"],
-  [class*="error"], [class*="danger"], [class*="failed"], [class*="negative"],
-  [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"],
-  [class*="alert"], [class*="notice"], [class*="toast"]
-):not(.admin-theme-store *):not([data-admin-dark-preserve] *) {
-  color: #f2daa2 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-button.primary, button.primary, .btn-primary, button[class*="submit"],
-  input[type="submit"], [class*="button-primary"]
-):not(.admin-theme-store *) {
-  color: var(--admin-brand-contrast, #fffaf3) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  button, .btn, [role="button"], input[type="button"], input[type="submit"],
-  select, textarea, input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"]))
-):not(:where(.admin-theme-store *)) {
-  background-color: var(--admin-dark-input) !important;
-  border-color: var(--admin-dark-line) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  button, .btn, [role="button"], input[type="button"], input[type="submit"]
-):not(:where(.primary, [class*="primary"], [class*="success"], [class*="danger"], [class*="warning"], [class*="status"], [class*="badge"], .admin-theme-store *)) {
-  border-style: solid;
-  border-width: 1px;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
-  button[class*="submit"], input[type="submit"], [class*="button-primary"]
-):not(:where(.admin-theme-store *)) {
-  color: var(--admin-brand-contrast, #fffaf3) !important;
-  background-color: var(--admin-brand-fill, #70533c) !important;
-  background-image: none !important;
-  border-color: var(--admin-brand-fill, #70533c) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder {
-  color: #b8b8b8 !important;
-  opacity: 1;
-}
-html[data-admin-theme="dark"] body.admin-site :is(.experiment-nav-item, a:not([role="button"])):not(.admin-theme-store *) {
-  color: #ffffff !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-kicker, .experiment-nav-label, .experiment-profile small,
-  .experiment-brand-sub, .experiment-page-head p, .experiment-panel-head p,
-  .experiment-summary-item small, .experiment-confirm-note, [class*="-foot"],
-  [class*="-subtitle"], [class*="-description"], [class*="-helper"]
-):not(.admin-theme-store *):not([data-admin-dark-preserve] *) {
-  color: #b8b8b8 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-kpi-icon, [class*="-icon"], [class*="-mark"]
-):not(.admin-theme-store *):not([class*="art"]):not([class*="avatar"]):not([class*="logo"]) {
-  color: #f2daa2 !important;
-  border-color: #777777 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is([class*="success"], [class*="ready"], [class*="complete"], [class*="available"], [class*="error"], [class*="danger"], [class*="failed"], [class*="negative"], [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"], [class*="alert"], [class*="notice"], [class*="toast"]) *:not(.admin-theme-store *):not([data-admin-dark-preserve] *) {
-  color: #f2daa2 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-filter.active b {
-  color: #000000 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .mgx-add-head > span {
-  color: #f2daa2 !important;
-  background-color: #202b36 !important;
-  border: 1px solid #526576;
-}
-html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] > [data-slip-owner-intro] {
-  color: #f4f7fa !important;
-  background-color: #1d2630 !important;
-  background-image: none !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .catalog-selection-progress i {
-  background-color: #1d2630 !important;
-  border: 1px solid #526576;
-}
-html[data-admin-theme="dark"] body.admin-site .catalog-selection-progress i.filled {
-  background-color: var(--admin-brand-fill, #70533c) !important;
-  border-color: var(--admin-brand-fill, #70533c);
-}
-html[data-admin-theme="dark"] body.admin-site .catalog-flow-steps i,
-html[data-admin-theme="dark"] body.admin-site .catalog-selection-rule b,
-html[data-admin-theme="dark"] body.admin-site .catalog-selector-filters b,
-html[data-admin-theme="dark"] body.admin-site .catalog-image-open > span,
-html[data-admin-theme="dark"] body.admin-site .announcement-filters button > span,
-html[data-admin-theme="dark"] body.admin-site .users-audience-tabs .active b,
-html[data-admin-theme="dark"] body.admin-site .experiment-filter.active b,
-html[data-admin-theme="dark"] body.admin-site .coupons-create-note > span {
-  color: #ffffff !important;
-  background-color: #1d2630 !important;
-  border: 1px solid #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .catalog-selector-filters button.active b {
-  color: var(--admin-brand-readable, #e7c29e) !important;
-}
-html[data-admin-theme="dark"] body.admin-site .effects-preview-foot > span {
-  color: #d5dee7 !important;
-  background-color: #202b36 !important;
-  border: 1px solid #526576;
-}
-html[data-admin-theme="dark"] body.admin-site .effects-store-logo {
-  color: #000000 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .settings-preview-head > i {
-  color: #d5dee7 !important;
-  background-color: #1d2630 !important;
-  border: 1px solid #526576;
-}
-html[data-admin-theme="dark"] body.admin-site :focus-visible {
-  outline: 3px solid var(--admin-brand-readable, #e7c29e) !important;
-  outline-offset: 2px;
-}
-
-/* Keep compact badges and decorative markers legible on the dark canvas. */
-html[data-admin-theme="dark"] body.admin-site .mgx-preview-footnote > span,
-html[data-admin-theme="dark"] body.admin-site .catalog-empty > span,
-html[data-admin-theme="dark"] body.admin-site .catalog-settlement-summary i,
-html[data-admin-theme="dark"] body.admin-site [data-slip-owner-active] span[class*="bg-[var(--gold)]"],
-html[data-admin-theme="dark"] body.admin-site [data-provider-check] {
-  color: #f2daa2 !important;
-  background-color: #1d2630 !important;
-  border: 1px solid #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .hsx-board-mark {
-  background-color: var(--admin-brand-fill, #70533c) !important;
-}
-html[data-admin-theme="dark"] body.admin-site .hsx-state i {
-  background-color: #20c997 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .hsx-state.is-off i {
-  background-color: #e7c29e !important;
-}
-html[data-admin-theme="dark"] body.admin-site .hsx-footnote > span {
-  color: #f2daa2 !important;
-  background-color: #1d2630 !important;
-  border: 1px solid #526576;
-}
-html[data-admin-theme="dark"] body.admin-site .catalog-selection-thumb > span {
-  color: #f4f7fa !important;
-  background-color: #1d2630 !important;
-  border-top: 1px solid #526576;
-}
-html[data-admin-theme="dark"] body.admin-site .admin-theme-preview-caption > span,
-html[data-admin-theme="dark"] body.admin-site .announcement-tip > span {
-  color: #f2daa2 !important;
-  background-color: #1d2630 !important;
-  border: 1px solid #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-ready-chip i {
-  background-color: #20c997 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .welcome-live-switch-row > i,
-html[data-admin-theme="dark"] body.admin-site .effects-toggle i,
-html[data-admin-theme="dark"] body.admin-site .effects-switch i {
-  background-color: #344250 !important;
-  border: 1px solid #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .welcome-live-switch-row:has(input:checked) > i,
-html[data-admin-theme="dark"] body.admin-site .effects-toggle input:checked + i,
-html[data-admin-theme="dark"] body.admin-site .effects-switch input:checked + i {
-  background-color: var(--admin-brand-fill, #70533c) !important;
-}
-html[data-admin-theme="dark"] body.admin-site .welcome-live-switch-row > i::after,
-html[data-admin-theme="dark"] body.admin-site .effects-toggle i::after,
-html[data-admin-theme="dark"] body.admin-site .effects-switch i::after {
-  background-color: #e7c29e !important;
-  border: 1px solid #000000;
-}
-html[data-admin-theme="dark"] body.admin-site .effects-effect-art {
-  color: #f2daa2 !important;
-  background-color: #1d2630 !important;
-  border: 1px solid #526576;
-}
-
-/* A single low-key edge color replaces the bright white borders left by
-   page-specific light styles. Store previews and uploaded artwork keep theirs. */
-html[data-admin-theme="dark"] body.admin-site *:not(:where(
-  .admin-theme-store *, .admin-theme-swatch, .admin-theme-swatch *,
-  .admin-theme-effect-sample, .admin-theme-effect-sample *, .effects-stage, .effects-stage *,
-  .model-preview-window, .model-preview-window *, [data-admin-dark-preserve],
-  [data-admin-dark-preserve] *, .admin-dark-mode-preserve, .admin-dark-mode-preserve *
-)),
-html[data-admin-theme="dark"] body.admin-site *::before:not(:where(.admin-theme-store *, .effects-stage *)),
-html[data-admin-theme="dark"] body.admin-site *::after:not(:where(.admin-theme-store *, .effects-stage *)) {
-  border-color: #3b362f !important;
-}
-html[data-admin-theme="dark"].admin-main-site .experiment-effects-page .experiment-page-head::after {
-  display: none !important;
-}
-
-/* Shared dark theme tokens for the canvas, cards, controls, and accents. */
-html[data-admin-theme="dark"].admin-unified-site,
-html[data-admin-theme="dark"].admin-unified-site body.admin-site {
-  --admin-dark-canvas: #000000;
-  --admin-dark-surface: #000000;
-  --admin-dark-raised: #000000;
-  --admin-dark-input: #000000;
-  --admin-dark-line: #777777;
-  --admin-dark-text: #f2eee8;
-  --admin-dark-muted: #aaa39a;
-  --ex-bg: #000000;
-  --ex-surface: #000000;
-  --ex-ink: #f2eee8;
-  --ex-muted: #aaa39a;
-  --ex-line: #777777;
-  --bg: #000000 !important;
-  --card: #000000 !important;
-  --input: #000000 !important;
-  --border: #777777 !important;
-  --border-light: #777777 !important;
-  --theme-page-surface: #000000 !important;
-  --theme-card-surface: #000000 !important;
-  --theme-control-surface: #000000 !important;
-  background-color: #000000 !important;
-  color: #f2eee8 !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-card, .experiment-panel, .experiment-product, .experiment-build-roadmap,
-  .experiment-build-column, .experiment-roadmap-mock-row, .experiment-placeholder-card,
-  .experiment-menu-dialog-head, .experiment-confirm-head, .experiment-roadmap-dialog-head,
-  .announcement-panel, .as-card, [class*="-card"], [class*="-panel"],
-  [class*="-surface"], [class*="-box"], [class*="-dialog"], [class*="-sheet"]
-):not(:where([class*="status"], [class*="badge"], [class*="alert"], [class*="toast"], [class*="success"], [class*="error"], [class*="danger"], [class*="warning"], .admin-theme-swatch, .admin-theme-store, [data-admin-dark-preserve], [data-admin-dark-preserve] *, .admin-dark-mode-preserve, .admin-dark-mode-preserve *)) {
-  color: var(--admin-dark-text) !important;
-  background-color: #000000 !important;
-  background-image: none !important;
-  border-color: #393530 !important;
-  box-shadow: none !important;
-}
-
-/* The product form is a continuous workspace, not a stack of bordered boxes. */
-html[data-admin-theme="dark"] body.admin-site .experiment-form-panel {
-  background-color: transparent !important;
-  border-color: transparent !important;
-  box-shadow: none !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-form-panel + .experiment-form-panel {
-  border-top: 1px solid var(--admin-dark-line) !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
-  select, textarea, [contenteditable="true"]
-):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: var(--admin-dark-text) !important;
-  background-color: #202b36 !important;
-  border: 1px solid #526576 !important;
-  border-radius: 10px;
-  box-shadow: none;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
-  select, textarea, [contenteditable="true"]
-):focus {
-  border-color: var(--admin-brand-readable, #c49a70) !important;
-  outline: 2px solid color-mix(in srgb, var(--admin-brand-fill, #8d6848) 30%, transparent) !important;
-  outline-offset: 1px;
-}
-html[data-admin-theme="dark"].admin-unified-site body.admin-site main :is(
-  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
-  select, textarea, [contenteditable="true"]
-):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: var(--admin-dark-text) !important;
-  background-color: #202b36 !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder {
-  color: #99938a !important;
-  opacity: 1;
-}
-html[data-admin-theme="dark"] body.admin-site input[type="checkbox"],
-html[data-admin-theme="dark"] body.admin-site input[type="radio"] {
-  accent-color: var(--admin-brand-fill, #a47a52);
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"], input[type="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"], .admin-theme-store *)) {
-  min-height: 38px;
-  color: var(--admin-dark-text) !important;
-  background-color: #000000 !important;
-  border: 1px solid #48443f !important;
-  border-radius: 10px;
-  box-shadow: none;
-  transition: border-color .16s ease, background-color .16s ease, transform .16s ease !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(button, .btn, [role="button"]):not(:where(.primary, [class*="primary"], [class*="danger"], [class*="success"], [class*="warning"], [class*="status"], [class*="badge"], .admin-theme-store *)):hover {
-  background-color: #000000 !important;
-  border-color: var(--admin-brand-readable, #b99a72) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
-  button[class*="submit"], input[type="submit"], [class*="button-primary"]
-):not(:where(.admin-theme-store *)) {
-  min-height: 42px;
-  color: var(--admin-brand-contrast, #fffaf3) !important;
-  background: var(--admin-brand-fill, #815b3d) !important;
-  border: 1px solid var(--admin-brand-fill, #815b3d) !important;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--admin-brand-fill, #815b3d) 22%, transparent);
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
-  button[class*="submit"], input[type="submit"], [class*="button-primary"]
-):not(:where(.admin-theme-store *)) * {
-  color: var(--admin-brand-contrast-dark, var(--admin-brand-contrast, #fffaf3)) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
-  button[class*="submit"], input[type="submit"], [class*="button-primary"]
-):not(:where(.admin-theme-store *)):hover {
-  background: var(--admin-brand-hover, #9b714e) !important;
-  border-color: var(--admin-brand-hover, #9b714e) !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  h1, h2, h3, h4, h5, h6, p, li, label, legend, dt, dd, th, td,
-  [class*="title"], [class*="heading"]
-):not(:where(.admin-theme-store *, [data-admin-dark-preserve] *)) {
-  color: var(--admin-dark-text) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  small, [class*="muted"], [class*="description"], [class*="subtitle"],
-  [class*="helper"], [class*="hint"], [class*="footnote"], [class*="caption"]
-):not(:where(.admin-theme-store *, [data-admin-dark-preserve] *)) {
-  color: #aaa39a !important;
-}
-html[data-admin-theme="dark"] body.admin-site a:not(:where(.experiment-nav-item, [role="button"], .admin-theme-store *)) {
-  color: var(--admin-brand-readable, #d0aa83) !important;
-  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
-  text-underline-offset: 3px;
-}
-html[data-admin-theme="dark"] body.admin-site :focus-visible {
-  outline: 2px solid var(--admin-brand-readable, #c49a70) !important;
-  outline-offset: 2px;
-}
-
-/* Keep status meaning at a glance while avoiding bright gray outlines. */
-html[data-admin-theme="dark"] body.admin-site :is([class*="success"], [class*="ready"], [class*="complete"], [class*="available"]):not(:where(.admin-theme-store *)) {
-  color: #a9dfbc !important;
-  background-color: #000000 !important;
-  border-color: #1d5031 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is([class*="error"], [class*="danger"], [class*="failed"], [class*="negative"]):not(:where(.admin-theme-store *)) {
-  color: #f3aeb5 !important;
-  background-color: #000000 !important;
-  border-color: #5c262d !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is([class*="warning"], [class*="pending"], [class*="status"], [class*="badge"], [class*="notice"], [class*="toast"]):not(:where(.admin-theme-store *)) {
-  color: #e8c78e !important;
-  background-color: #000000 !important;
-  border-color: #554321 !important;
-}
-
-/* Simplify the shortcut block and remove the decorative tape in dark mode. */
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu {
-  position: relative;
-  margin-top: 12px;
-  padding: 20px;
-  border-color: #393530 !important;
-  background: #000000 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu::after,
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-ribbons { display: none !important; }
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu-head { padding-top: 0; }
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu-head h2 { color: #f2eee8 !important; }
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-eyebrow,
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-code { color: #b99a72 !important; }
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-mark {
-  width: 38px;
-  height: 38px;
-  border-color: #3a3024 !important;
-  border-radius: 11px;
-  transform: none;
-  box-shadow: none;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card,
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card.pending {
-  min-height: 132px;
-  padding: 14px;
-  border-color: #36312b !important;
-  border-radius: 13px;
-  background: #000000 !important;
-  box-shadow: none !important;
-  transform: none;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card:hover {
-  border-color: var(--admin-brand-border, #65503a) !important;
-  background: #000000 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card-icon {
-  width: 36px;
-  height: 36px;
-  margin-bottom: 9px;
-  color: var(--admin-brand-readable, #d0aa83) !important;
-  border-color: #383127 !important;
-  border-radius: 10px;
-  background: #000000 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card strong { color: #f2eee8 !important; }
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card small { color: #aaa39a !important; }
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card :is(.experiment-luxury-code, strong, small, .experiment-luxury-arrow) { text-shadow: none; }
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card strong { color: #f2eee8 !important; }
-html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card small { color: #aaa39a !important; }
-
-html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty {
-  display: grid;
-  min-height: 224px;
-  place-content: center;
-  justify-items: center;
-  gap: 8px;
-  border-top: 1px solid #302b25;
-  color: #f2eee8;
-  text-align: center;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > span {
-  display: grid;
-  width: 38px;
-  height: 38px;
-  place-items: center;
-  margin-bottom: 3px;
-  border: 1px solid #526576;
-  border-radius: 12px;
-  color: var(--admin-brand-readable, #d0aa83) !important;
-  background: #1d2630 !important;
-  font-size: 19px;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > strong { font-size: 13px; }
-html[data-admin-theme="dark"] body.admin-site .experiment-chart-empty > p { margin: 0; color: #aaa39a !important; font-size: 11px; }
-
-/* Keep compact sticky actions readable and within the mobile safe area. */
-@media (max-width: 700px) {
-  html[data-admin-theme="dark"] body.admin-site .experiment-form-actions {
-    margin-inline: -15px;
-    padding: 10px 15px calc(10px + env(safe-area-inset-bottom));
-    background: rgb(0 0 0 / .96) !important;
-    border-top: 1px solid #393530 !important;
-    box-shadow: 0 -8px 22px rgb(0 0 0 / .35);
-    backdrop-filter: blur(12px);
-  }
-  html[data-admin-theme="dark"] body.admin-site .experiment-form-actions .experiment-button { min-height: 46px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html[data-admin-theme="dark"] body.admin-site *,
-  html[data-admin-theme="dark"] body.admin-site *::before,
-  html[data-admin-theme="dark"] body.admin-site *::after {
-    scroll-behavior: auto !important;
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .01ms !important;
-  }
-}
-
-/* Keep the shared main-site controls and structural edges legible in dark mode. */
-@layer admin-main-neutral-borders {
-  html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
-    .experiment-card, .experiment-panel, .experiment-product, .experiment-button,
-    .experiment-page-head, .experiment-form-panel, .hsx-hero, .hsx-stat, .hsx-board,
-    .hsx-toolbar, .hsx-card, .hsx-edit-panel, .hsx-create-dialog, .hsx-search,
-    .effects-preview, .effects-panel, .effects-stat-row > div, .effects-roadmap,
-    .effects-roadmap-grid > div, .effects-rain-form, .announcement-panel, .as-card,
-    [class*="-card"], [class*="-panel"], [class*="-dialog"]
-  ):not(:where(.admin-theme-store *, .admin-theme-swatch *, .effects-stage *, .model-preview-window *, [data-admin-dark-preserve] *, .admin-dark-mode-preserve *)) {
-    border-color: #526576 !important;
-  }
-
-  html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
-    .experiment-form-panel
-  ) {
-    border-color: transparent !important;
-    box-shadow: none !important;
-  }
-
-  html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
-    button, .btn, [role="button"], input, select, textarea, [tabindex]
-  ):focus-visible:not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-    outline: 2px solid var(--admin-brand-readable, #c49a70) !important;
-    outline-offset: 2px !important;
-    border-color: var(--admin-brand-readable, #c49a70) !important;
-    box-shadow: none !important;
-  }
-
-  html[data-admin-theme="dark"] body.admin-site.admin-unified-site :where(
-    [aria-selected="true"], [aria-pressed="true"], [aria-current="page"],
-    [data-state="active"], .is-active, .is-selected, .is-editing, .selected, .active
-  ):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-    border-color: var(--admin-brand-fill, #8d6848) !important;
-  }
-
-  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page .experiment-page-head::after,
-  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page .effects-preview::before,
-  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page .effects-panel::before {
-    display: none !important;
-  }
-
-  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page :where(
-    .experiment-page-head, .effects-preview, .effects-panel, .effects-stat-row > div,
-    .effects-roadmap, .effects-roadmap-grid > div
-  ) {
-    background: #151b22 !important;
-    box-shadow: 0 12px 28px rgb(0 0 0 / .18) !important;
-  }
-
-  html[data-admin-theme="dark"].admin-main-site .experiment-effects-page :where(
-    .effects-toggle, .effects-effect-row, .effects-rain-form
-  ) {
-    background: #1d2630 !important;
-    box-shadow: none !important;
-  }
-}
-
-/* Layered dark surfaces for every admin screen.
-   Keep the dashboard dark while giving the canvas, panels, controls, and
-   status messages enough separation to scan quickly. The storefront previews
-   and uploaded artwork are intentionally excluded from these rules. */
-html[data-admin-theme="dark"].admin-unified-site,
-html[data-admin-theme="dark"].admin-unified-site body.admin-site {
-  --admin-dark-canvas: #0b0f14;
-  --admin-dark-surface: #151b22;
-  --admin-dark-raised: #1d2630;
-  --admin-dark-input: #202b36;
-  --admin-dark-line: #526576;
-  --admin-dark-line-strong: #526576;
-  --admin-dark-text: #f4f7fa;
-  --admin-dark-muted: #aab6c2;
-  --admin-dark-subtle: #82909e;
-  --ex-bg: #0b0f14;
-  --ex-surface: #151b22;
-  --ex-ink: #f4f7fa;
-  --ex-muted: #aab6c2;
-  --ex-line: #526576;
-  --ex-sidebar: #11171e;
-  --ex-green-soft: color-mix(in srgb, var(--admin-brand-fill) 14%, #151b22);
-  --ex-orange-soft: #2a2111;
-  --ex-red-soft: #2b171d;
-  --card-hover: #25313d !important;
-  --bg: #0b0f14 !important;
-  --card: #151b22 !important;
-  --theme-page-surface: #0b0f14 !important;
-  --theme-card-surface: #151b22 !important;
-  --theme-control-surface: #202b36 !important;
-  --border: #526576 !important;
-  --border-light: #526576 !important;
-  --input: #202b36 !important;
-  --text: #f4f7fa !important;
-  --text-2: #d7e0e8 !important;
-  --text-3: #aab6c2 !important;
-  --text-4: #82909e !important;
-  --theme-ink: #f4f7fa !important;
-  --theme-muted-ink: #aab6c2 !important;
-  --theme-line: #526576 !important;
-  --admin-brand-soft: color-mix(in srgb, var(--admin-brand-fill) 17%, #151b22) !important;
-  --admin-brand-border: color-mix(in srgb, var(--admin-brand-fill) 48%, #151b22) !important;
-  background-color: #0b0f14 !important;
-  color: #f4f7fa !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site,
-html[data-admin-theme="dark"] body.admin-site main,
-html[data-admin-theme="dark"] body.admin-site .experiment-main,
-html[data-admin-theme="dark"] body.admin-site .experiment-content {
-  background-color: #0b0f14 !important;
-  color: #f4f7fa !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  #admin-sidebar, .experiment-sidebar, .experiment-topbar,
-  .experiment-mobile-nav, .admin-mobile-header, body > header,
-  .experiment-menu-dialog-content, .experiment-confirm-dialog,
-  .experiment-roadmap-dialog, .experiment-dialog, .experiment-dialog-content
-) {
-  color: #f4f7fa !important;
-  background-color: #11171e !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-topbar { background-color: #151b22 !important; }
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-card, .experiment-panel, .experiment-build-roadmap,
-  .experiment-build-column, .experiment-roadmap-mock-row, .experiment-product,
-  .experiment-luxury-card, .experiment-placeholder-card, .experiment-menu-dialog-head,
-  .experiment-confirm-head, .experiment-roadmap-dialog-head, .experiment-kpi,
-  .experiment-stat, .experiment-summary, .announcement-panel, .as-card,
-  [class*="-card"], [class*="-panel"], [class*="-surface"], [class*="-box"],
-  [class*="-dialog"], [class*="-sheet"], fieldset,
-  [class~="bg-white"], [class~="bg-gray-50"], [class~="bg-slate-50"],
-  [class~="bg-stone-50"]
+  .experiment-schedule-search, .experiment-filter-search, .tp-service-nav,
+  .tp-requests .tp-queue, .coupons-data-badge, .coupons-live-badge,
+  .users-live-badge, .users-page-status, .experiment-muted-chip,
+  .experiment-filter-tabs .experiment-filter, .admin-theme-current-chip,
+  .admin-theme-mono-choice, .welcome-live-count, .effects-effect-row,
+  .settings-toggle-row, .settings-preview-head,
+  .efhub-position, .efhub-total, .efhub-summary-note, .efhub-import-state,
+  .hsx-board-count, .model-studio-safety-note, .model-studio-current,
+  .as-search, .as-preview, .as-empty-preview, .announcement-button-secondary,
+  .announcement-overview-note
 ):not(:where(
-  .admin-theme-store *, .admin-theme-swatch *, .effects-stage *,
-  .model-preview-window *, [data-admin-dark-preserve] *,
-  .admin-dark-mode-preserve *, [class*="status"], [class*="badge"],
-  [class*="alert"], [class*="toast"], [class*="success"], [class*="error"],
-  [class*="danger"], [class*="warning"], [class*="empty"]
-)) {
-  color: #f4f7fa !important;
-  background-color: #151b22 !important;
-  background-image: none !important;
-  border-color: #526576 !important;
-  box-shadow: 0 12px 28px rgb(0 0 0 / .18) !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
-  select, textarea, [contenteditable="true"]
-):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: #f4f7fa !important;
-  background-color: #202b36 !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(input, textarea, [contenteditable="true"])::placeholder {
-  color: #82909e !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  button, .btn, [role="button"], input[type="button"]
-):not(:where(
-  .primary, [class*="primary"], [class*="danger"], [class*="success"],
-  [class*="warning"], [class*="status"], [class*="badge"],
-  .admin-theme-store *, .effects-stage *
-)) {
-  color: #f4f7fa !important;
-  background-color: #1d2630 !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  button, .btn, [role="button"], input[type="button"]
-):not(:where(.admin-theme-store *, .effects-stage *)):hover {
-  background-color: #25313d !important;
-  border-color: var(--admin-brand-readable, #f2c98e) !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-nav-item {
-  color: #c7d1da !important;
-  background-color: transparent !important;
-  border-color: transparent !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-nav-item:hover,
-html[data-admin-theme="dark"] body.admin-site .experiment-nav-item.active {
-  color: #f4f7fa !important;
-  background-color: #1d2630 !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-nav-item.active {
-  box-shadow: inset 3px 0 var(--admin-brand-fill), 0 8px 20px rgb(0 0 0 / .14) !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  [class*="success"], [class*="ready"], [class*="complete"], [class*="available"]
-):not(:where(.admin-theme-store *, .effects-stage *)) {
-  color: #a9dfbc !important;
-  background-color: #10261c !important;
-  border-color: #2b7650 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  [class*="error"], [class*="danger"], [class*="failed"], [class*="negative"]
-):not(:where(.admin-theme-store *, .effects-stage *)) {
-  color: #f3aeb5 !important;
-  background-color: #2b171d !important;
-  border-color: #8f4653 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"],
-  [class*="notice"], [class*="toast"]
-):not(:where(.admin-theme-store *, .effects-stage *)) {
-  color: #f0cf8c !important;
-  background-color: #2a2111 !important;
-  border-color: #8d6b2e !important;
-}
-
-html[data-admin-theme="dark"] body.admin-site :is(
-  h1, h2, h3, h4, h5, h6, p, li, label, legend, dt, dd, th, td,
-  [class*="title"], [class*="heading"]
-):not(:where(.admin-theme-store *, [data-admin-dark-preserve] *)) {
-  color: #f4f7fa !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  small, [class*="muted"], [class*="description"], [class*="subtitle"],
-  [class*="helper"], [class*="hint"], [class*="footnote"], [class*="caption"]
-):not(:where(.admin-theme-store *, [data-admin-dark-preserve] *)) {
-  color: #aab6c2 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :focus-visible {
-  outline: 2px solid var(--admin-brand-readable, #f2c98e) !important;
-  outline-offset: 2px !important;
-}
-html[data-admin-theme="dark"] body.admin-site ::-webkit-scrollbar-track { background: #0b0f14 !important; }
-html[data-admin-theme="dark"] body.admin-site ::-webkit-scrollbar-thumb { background-color: #526576 !important; }
-
-@media (max-width: 700px) {
-  html[data-admin-theme="dark"] body.admin-site .experiment-form-actions {
-    background: rgb(17 23 30 / .96) !important;
-    border-top-color: #526576 !important;
-  }
-}
-
-/* Resolve legacy widgets that previously painted every structural element
-   pure black. Let the page canvas show through, then restore token-based
-   surfaces and brand fills explicitly. */
-html[data-admin-theme="dark"] body.admin-site :is(
-  div, section, article, aside, nav, header, footer, main, form, fieldset,
-  table, thead, tbody, tfoot, tr, th, td, dialog, details, summary, output,
-  label, a, li
-):not(:where(
-  .admin-theme-store *, .admin-theme-swatch *, .effects-stage *,
-  .model-preview-window *, [data-admin-dark-preserve] *,
-  .admin-dark-mode-preserve *, [class*="-card"], [class*="-panel"],
-  [class*="-surface"], [class*="-box"], [class*="-dialog"],
-  [class*="-sheet"], [class*="bg-[var(--card)]"],
-  [class*="bg-[var(--input)]"], [class*="bg-[var(--bg)]"],
-  [class~="bg-white"], [class~="bg-gray-50"], [class~="bg-slate-50"],
-  [class~="bg-stone-50"], [class*="success"], [class*="ready"],
-  [class*="complete"], [class*="available"], [class*="error"],
-  [class*="danger"], [class*="failed"], [class*="negative"],
-  [class*="warning"], [class*="pending"], [class*="status"],
-  [class*="badge"], [class*="alert"], [class*="notice"], [class*="toast"]
-)) {
-  background-color: transparent !important;
-  background-image: none !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  [class*="bg-[var(--card)]"], [class~="bg-white"],
-  [class~="bg-gray-50"], [class~="bg-slate-50"], [class~="bg-stone-50"]
-):not(:where(.admin-theme-store *, .admin-theme-swatch *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  background-color: #151b22 !important;
-  background-image: none !important;
-}
-html[data-admin-theme="dark"] body.admin-site [class*="bg-[var(--input)]"]:not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  background-color: #202b36 !important;
-  background-image: none !important;
-}
-html[data-admin-theme="dark"] body.admin-site [class*="bg-[var(--bg)]"]:not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  background-color: #0b0f14 !important;
-  background-image: none !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  button, a, [role="button"]
-)[class*="bg-[var(--gold)]"]:not(:where(.admin-theme-store *, .effects-stage *)),
-html[data-admin-theme="dark"] body.admin-site [data-theme-fill="accent"]:not(:where(.admin-theme-store *, .effects-stage *)) {
-  color: var(--gold-contrast, #0b0f14) !important;
-  background-color: var(--gold) !important;
-  border-color: var(--gold) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  [style*="background: rgb(255" i], [style*="background:rgba(255" i],
-  [style*="background: rgba(255" i], [style*="background-color: rgb(255" i],
-  [style*="background-color:rgba(255" i], [style*="background-color: rgba(255" i],
-  [style*="background-color: color(srgb" i], [style*="background: color(srgb" i]
-):not(:where(.admin-theme-store *, .admin-theme-swatch *, [data-admin-dark-preserve] *)) {
-  background-color: #151b22 !important;
-  background-image: none !important;
-}
-
-/* Final paint pass: older admin styles include a broad important black fill
-   on every element. Clear that fill first, then paint the intentional layers
-   back in a predictable order. */
-html[data-admin-theme="dark"] body.admin-site.admin-site *:not(:where(
   .admin-theme-store *, .effects-stage *, .model-preview-window *,
-  [data-admin-dark-preserve] *, .admin-dark-mode-preserve *,
-  img, svg, video, canvas
+  [data-admin-dark-preserve], [data-admin-dark-preserve] *
 )) {
-  background-color: transparent !important;
-  background-image: none !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none;
+  border-color: var(--admin-dark-line);
 }
+
+
+/* Keep colored icon blocks and status chips legible with deep tinted fills. */
 html[data-admin-theme="dark"] body.admin-site :is(
-  #admin-sidebar, .experiment-sidebar, .experiment-topbar,
-  .experiment-mobile-nav, .admin-mobile-header,
-  .experiment-menu-dialog-content, .experiment-confirm-dialog,
-  .experiment-roadmap-dialog, .experiment-dialog, .experiment-dialog-content
-) {
-  background-color: #11171e !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site .experiment-topbar { background-color: #151b22 !important; }
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-card, .experiment-panel, .experiment-build-roadmap,
-  .experiment-build-column, .experiment-roadmap-mock-row, .experiment-product,
-  .experiment-luxury-card, .experiment-placeholder-card, .experiment-kpi,
-  .experiment-stat, .experiment-summary, .experiment-stock-alert,
-  .announcement-panel, .as-card, [class*="-card"], [class*="-panel"],
-  [class*="-surface"], [class*="-box"], [class*="-dialog"], [class*="-sheet"],
-  [class*="var(--card)"], [class~="bg-white"], [class~="bg-gray-50"],
-  [class~="bg-slate-50"], [class~="bg-stone-50"]
-):not(:where(
-  .admin-theme-store *, .admin-theme-swatch *, .effects-stage *,
-  .model-preview-window *, [data-admin-dark-preserve] *,
-  .admin-dark-mode-preserve *, [class*="status"], [class*="badge"],
-  [class*="alert"], [class*="toast"], [class*="success"], [class*="error"],
-  [class*="danger"], [class*="warning"], [class*="empty"]
-)) {
-  background-color: #151b22 !important;
-  border-color: #526576 !important;
-  box-shadow: 0 12px 28px rgb(0 0 0 / .18) !important;
-}
-html[data-admin-theme="dark"] body.admin-site [class*="var(--input)"] {
-  background-color: #202b36 !important;
-}
-html[data-admin-theme="dark"] body.admin-site [class*="var(--bg)"] {
-  background-color: #0b0f14 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
-  select, textarea, [contenteditable="true"]
+  .experiment-kpi-icon.blue, .experiment-filter-stat-icon.blue,
+  .coupons-kpi-icon.blue, .users-kpi-icon.blue, .tp-service-icon.is-blue,
+  .mgx-stat-icon.blue, .settings-panel-icon.blue, .effects-stat-icon.blue,
+  .effects-panel-icon.blue, .experiment-filter-radar-item.blue,
+  .experiment-filter-option.blue, .template-icon.blue
 ):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: #f4f7fa !important;
-  background-color: #202b36 !important;
-  border-color: #526576 !important;
+  color: #b7dcf8 !important;
+  background-color: #162535 !important;
+  border-color: #385b79 !important;
 }
 html[data-admin-theme="dark"] body.admin-site :is(
-  button, a, [role="button"]
-)[class*="var(--gold)"],
-html[data-admin-theme="dark"] body.admin-site [data-theme-fill="accent"] {
-  color: var(--gold-contrast, #0b0f14) !important;
-  background-color: var(--gold) !important;
-  border-color: var(--gold) !important;
+  .experiment-kpi-icon.purple, .experiment-filter-stat-icon.violet,
+  .experiment-filter-radar-item.plum, .coupons-kpi-icon.violet,
+  .tp-service-icon.is-purple, .template-icon.violet, .effects-panel-icon.violet
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: #d6c1ff !important;
+  background-color: #292438 !important;
+  border-color: #59486b !important;
 }
 html[data-admin-theme="dark"] body.admin-site :is(
-  button, .btn, [role="button"], input[type="button"]
-):not(:where(
-  .primary, [class*="primary"], [class*="danger"], [class*="success"],
-  [class*="warning"], [class*="status"], [class*="badge"],
-  [class*="var(--gold)"], .admin-theme-store *, .effects-stage *
-)) {
-  color: #f4f7fa !important;
-  background-color: #1d2630 !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  .experiment-button.primary, button.primary, .btn-primary, a.btn-primary,
-  button[class*="submit"], input[type="submit"], [class*="button-primary"]
-):not(:where(.admin-theme-store *, .effects-stage *)) {
-  color: var(--admin-brand-contrast, #fffaf3) !important;
-  background-color: var(--admin-brand-fill) !important;
-  border-color: var(--admin-brand-fill) !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  [class*="success"], [class*="ready"], [class*="complete"], [class*="available"]
-):not(:where(.admin-theme-store *, .effects-stage *)) {
-  color: #a9dfbc !important;
-  background-color: #10261c !important;
-  border-color: #2b7650 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  [class*="error"], [class*="danger"], [class*="failed"], [class*="negative"]
-):not(:where(.admin-theme-store *, .effects-stage *)) {
-  color: #f3aeb5 !important;
-  background-color: #2b171d !important;
-  border-color: #8f4653 !important;
-}
-html[data-admin-theme="dark"] body.admin-site :is(
-  [class*="warning"], [class*="pending"], [class*="status"], [class*="badge"],
-  [class*="notice"], [class*="toast"]
-):not(:where(.admin-theme-store *, .effects-stage *)) {
+  .experiment-kpi-icon.gold, .experiment-filter-stat-icon.gold,
+  .experiment-filter-radar-item.gold, .experiment-schedule-stat-icon.waiting,
+  .coupons-kpi-icon.gold, .users-kpi-icon.gold, .tp-service-icon.is-orange,
+  .experiment-nav-status, .experiment-inline-status, .experiment-menu-status,
+  .experiment-sidebar-count, .experiment-status, .experiment-ready-chip,
+  .experiment-page-status-note, .tp-queue-pill, .users-page-status,
+  .users-role.admin, .catalog-due-badge, .experiment-kpi-icon.orange,
+  .experiment-filter-option.gold, .settings-panel-icon.green,
+  .settings-panel-icon.amber, .effects-stat-icon.gold, .model-studio-safety-icon,
+  .model-studio-current-icon, .model-studio-option-icon, .admin-theme-step.is-amber,
+  .admin-theme-current-chip
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
   color: #f0cf8c !important;
   background-color: #2a2111 !important;
   border-color: #8d6b2e !important;
 }
-
-/* Component-specific hard-coded fills from the experimental dashboard need
-   one last, higher-specificity handoff into the same surface system. */
-html[data-admin-theme="dark"] body.admin-site.admin-site :is(
-  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
-  select, textarea, [contenteditable="true"]
-) {
-  color: #f4f7fa !important;
-  background: #202b36 !important;
-  background-color: #202b36 !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site.admin-site .experiment-luxury-card.ready {
-  color: #f4f7fa !important;
-  background: #10261c !important;
-  background-color: #10261c !important;
-  border-color: #2b7650 !important;
-}
-html[data-admin-theme="dark"] body.admin-site.admin-site :is(
-  .experiment-stock-alert, .experiment-alert-head
-) {
-  color: #f0cf8c !important;
-  background: #2a2111 !important;
-  background-color: #2a2111 !important;
-  border-color: #8d6b2e !important;
-}
-html[data-admin-theme="dark"] body.admin-site.admin-site .experiment-stock-chip {
-  color: #f4f7fa !important;
-  background-color: #1d2630 !important;
-  border-color: #526576 !important;
-}
-
-/* Outrank the legacy alert and main-content input selectors that carry
-   several negative attribute checks in their specificity. */
-html[data-admin-theme="dark"].admin-unified-site body.admin-site.admin-site main :is(
-  input:not(:where([type="checkbox"], [type="radio"], [type="color"], [type="range"])),
-  select, textarea, [contenteditable="true"]
-):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: #f4f7fa !important;
-  background: #202b36 !important;
-  background-color: #202b36 !important;
-  border-color: #526576 !important;
-}
-html[data-admin-theme="dark"] body.admin-site.admin-site .experiment-stock-alert.experiment-stock-alert.experiment-stock-alert.experiment-stock-alert.experiment-stock-alert {
-  color: #f0cf8c !important;
-  background: #2a2111 !important;
-  background-color: #2a2111 !important;
-  border-color: #8d6b2e !important;
-}
-
-/* Recess the alert internals into the alert surface even against the older
-   warning selector, which marks matching containers important. */
-html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site .experiment-stock-alert .experiment-alert-head,
-html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site .experiment-stock-alert .experiment-alert-list {
-  background: #2a2111 !important;
-  background-color: #2a2111 !important;
-  border-color: #8d6b2e !important;
-}
-
-/* Final harmonization pass for older admin pages whose component styles
-   still ship opaque black fills or light-theme status colors. */
-html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
-  .experiment-page-head, .experiment-card, .announcement-card,
-  .effects-preview, .effects-panel, .as-preview, .as-empty-preview
-):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: #f4f7fa !important;
-  background: #151b22 !important;
-  background-color: #151b22 !important;
-  border-color: #3c4a57 !important;
-}
-html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
-  .experiment-page-status-note, .pending-page-status, .catalog-due-badge,
-  .admin-finance-pending:not(.is-clear), [class*="warning"], [class*="pending"],
-  [class*="status-note"], [class*="notice"], [class*="toast"]
-):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: #f0cf8c !important;
-  background: #2a2111 !important;
-  background-color: #2a2111 !important;
-  border-color: #8d6b2e !important;
-}
-html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
-  .experiment-button.danger, .experiment-button.is-danger,
-  .announcement-row-button.is-danger, .hsx-icon-button.is-danger,
-  button.danger, .btn-danger, [class*="is-danger"]
-):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: #ffc0ca !important;
-  background: #3b2028 !important;
-  background-color: #3b2028 !important;
-  border-color: #81404b !important;
-}
-html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
-  .orders-live-badge, .tp-channel-ready, .coupons-status.active,
-  .as-live-pill, .settings-ready-badge, .welcome-live-status.is-live,
-  .admin-finance-pending.is-clear, .experiment-status,
-  .experiment-filter-image-badge.active, .users-status.active,
-  [class*="success"], [class*="ready"],
-  [class*="complete"], [class*="available"], [class*="is-live"]
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-kpi-icon.green, .experiment-schedule-stat-icon.ready,
+  .experiment-luxury-status.ready, .recommended-empty-mini.mini-green,
+  .tp-service-icon, .coupons-data-badge, .coupons-live-badge,
+  .users-live-badge, .users-role, .as-live-pill, .announcement-status.is-live,
+  .efhub-hero-mark, .efhub-note-icon, .efhub-import-state.is-new,
+  .welcome-live-status.is-live, .welcome-live-count, .welcome-live-card-icon,
+  .settings-panel-icon.green, .catalog-stat-icon
 ):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
   color: #b6e8c7 !important;
-  background: #10261c !important;
   background-color: #10261c !important;
   border-color: #2b7650 !important;
 }
-html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
-  .announcement-search, .tp-status-filter, .as-search, .as-status,
-  .users-page-status, .users-live-badge, .coupons-data-badge,
-  .coupons-live-badge, .as-preview-chip, .catalog-total-badge,
-  .experiment-ready-chip, .welcome-live-status,
-  .effects-toggle, .experiment-field.status-field, p.rounded-xl.border.p-4
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-luxury-card-icon, .recommended-empty-mini.mini-gold,
+  .coupons-kpi-icon.gold, .users-avatar.admin, .model-studio-safety-icon,
+  .model-studio-current-icon, .model-studio-option-icon,
+  .announcement-metric-icon, .experiment-filter-radar-item.gold
 ):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: #d5dee7 !important;
-  background: #1d2630 !important;
-  background-color: #1d2630 !important;
-  border-color: #526576 !important;
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
 }
-html[data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"][data-admin-theme="dark"] body.admin-site.admin-site.admin-site.admin-site main :is(
-  .announcement-search input, .as-search input, .tp-status-filter select,
-  .experiment-field.status-field select
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-stock-link.empty, .experiment-icon-action.danger,
+  .experiment-button.danger, .experiment-button.is-danger,
+  .experiment-stock-chip em, .experiment-alert-head > div:first-child,
+  .recommended-empty-mini.mini-rose, .template-icon.rose, .users-status.banned
 ):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
-  color: #f4f7fa !important;
-  background: #202b36 !important;
-  background-color: #202b36 !important;
-  border-color: #526576 !important;
+  color: #f3aeb5 !important;
+  background-color: #2b171d !important;
+  border-color: #8f4653 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-stock-link:not(.empty), .experiment-luxury-card.ready .experiment-luxury-card-icon,
+  .experiment-luxury-status.ready, .experiment-schedule-stat-icon.ready,
+  .experiment-filter.active, .experiment-product-table-head,
+  .experiment-filter-toolbar, .experiment-filter-search,
+  .experiment-schedule-search, .experiment-muted-chip, .experiment-ready-chip,
+  .experiment-stock-link.empty, .experiment-filter-option,
+  .admin-theme-mono-choice
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line);
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-status.ready,
+html[data-admin-theme="dark"] body.admin-site .experiment-stock-link:not(.empty),
+html[data-admin-theme="dark"] body.admin-site .experiment-schedule-stat-icon.ready {
+  color: #b6e8c7 !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-stock-link.empty, .experiment-icon-action.danger,
+  .experiment-button.danger, .experiment-button.is-danger
+) {
+  color: #f3aeb5 !important;
+  background-color: #2b171d !important;
+  border-color: #8f4653 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-filter.active {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+
+/* Dense admin tables keep their familiar geometry, with a clear dark header. */
+html[data-admin-theme="dark"] body.admin-site table thead,
+html[data-admin-theme="dark"] body.admin-site table th {
+  color: var(--admin-dark-muted) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site table td {
+  color: var(--admin-dark-text);
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site table tbody tr:nth-child(even) { background-color: color-mix(in srgb, var(--admin-dark-raised) 55%, var(--admin-dark-surface)); }
+html[data-admin-theme="dark"] body.admin-site table tbody tr:hover { background-color: var(--admin-dark-raised); }
+
+
+
+/* Carry the dark palette into page-local legacy token scopes. */
+html[data-admin-theme="dark"] body.admin-site {
+  --bg: var(--admin-dark-canvas) !important;
+  --card: var(--admin-dark-surface) !important;
+  --border: var(--admin-dark-line) !important;
+  --border-light: var(--admin-dark-line) !important;
+  --input: var(--admin-dark-input) !important;
+  --brand: var(--admin-brand-accent, #936344) !important;
+  --gold: var(--admin-brand-fill-dark, var(--admin-brand-fill, #c8a63f)) !important;
+  --gold-hover: var(--admin-brand-hover-dark, var(--admin-brand-hover, #d0b25a)) !important;
+  --gold-light: var(--admin-brand-fill-dark, #b59779) !important;
+  --gold-dark: var(--admin-brand-strong-dark, #684a32) !important;
+  --gold-contrast: var(--admin-brand-contrast-dark, #0b0f14) !important;
+  --gold-text: var(--admin-brand-readable-dark, #e7c29e) !important;
+  --gold-hover-text: var(--admin-brand-contrast-dark, #0b0f14) !important;
+  --success: var(--admin-dark-success) !important;
+  --danger: var(--admin-dark-danger) !important;
+  --warning: var(--admin-dark-warning) !important;
+  --text: var(--admin-dark-text) !important;
+  --text-2: #e0e5e1 !important;
+  --text-3: var(--admin-dark-muted) !important;
+  --text-4: var(--admin-dark-muted) !important;
+  --on-image: #f4f7fa !important;
+  --theme-ink: var(--admin-dark-text) !important;
+  --theme-muted-ink: var(--admin-dark-muted) !important;
+  --theme-line: var(--admin-dark-line) !important;
+  --theme-accent: var(--gold) !important;
+  --theme-accent-ink: var(--gold-contrast) !important;
+  --ex-bg: var(--admin-dark-canvas) !important;
+  --ex-surface: var(--admin-dark-surface) !important;
+  --ex-ink: var(--admin-dark-text) !important;
+  --ex-muted: var(--admin-dark-muted) !important;
+  --ex-line: var(--admin-dark-line) !important;
+}
+
+/* Fixed paper-color labels on older pages need the same legible text scale. */
+html[data-admin-theme="dark"] body.admin-site :where(main, #admin-content, .admin-content) :is(
+  h1, h2, h3, h4, h5, h6, strong, b, th, td, legend, summary
+):not(:where(
+  .admin-theme-store *, .effects-stage *, .model-preview-window *, .settings-storefront-stage *,
+  [data-admin-dark-preserve], [data-admin-dark-preserve] *,
+  button *, [role="button"] *, .experiment-button *, a[class*="button"] *, a.btn *
+)) {
+  color: var(--admin-dark-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :where(main, #admin-content, .admin-content) :is(
+  p, label, small, span, em, li, dt, dd, kbd, .text-xs, .text-sm
+):not(:where(
+  .admin-theme-store *, .effects-stage *, .model-preview-window *, .settings-storefront-stage *,
+  [data-admin-dark-preserve], [data-admin-dark-preserve] *,
+  button *, [role="button"] *, .experiment-button *, a[class*="button"] *, a.btn *
+)) {
+  color: #d5dde4 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :where(main, #admin-content, .admin-content) :is(a, button, [role="button"]):not(:where(
+  .admin-theme-store *, .effects-stage *, .model-preview-window *, .settings-storefront-stage *,
+  [data-admin-dark-preserve], [data-admin-dark-preserve] *
+)) {
+  color: var(--admin-dark-text) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+
+/* Neutral controls remain visible and operable across both admin layouts. */
+html[data-admin-theme="dark"] body.admin-site :where(main, #admin-content, .admin-content) button:not(:is(
+  .primary, .is-active, .is-selected, .danger, .is-danger, .mg-play-btn,
+  .experiment-button.primary, .experiment-button.ghost, .users-search-button,
+  [class*="bg-[var(--gold)]"], [class*="from-[var(--gold)]"]
+)):not(:where(.admin-theme-store *, .effects-stage *, .model-preview-window *, .settings-storefront-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-button, .users-search-button, .users-dialog-close, .users-more-action, .users-pagination a, .users-pagination .disabled) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-button.primary, .experiment-button[class*="primary"], .experiment-filter-manage, .experiment-filter-radar-reset, .coupons-copy) {
+  color: var(--gold-contrast) !important;
+  background-color: var(--gold) !important;
+  border-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-button.primary, .experiment-button[class*="primary"], .experiment-filter-manage, .experiment-filter-radar-reset, .coupons-copy):hover {
+  color: var(--gold-contrast) !important;
+  background-color: var(--gold-hover) !important;
+  border-color: var(--gold-hover) !important;
+}
+
+/* Filter-tag organizer, picker controls, and status tiles. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .experiment-filter-radar, .experiment-filter-heading, .experiment-filter-library,
+  .experiment-filter-toolbar, .experiment-filter-drawer aside,
+  .experiment-filter-drawer-head, .experiment-filter-product-row,
+  .experiment-filter-drop-zone, .experiment-filter-upload-preview div,
+  .experiment-filter-empty, .experiment-filter-manage, .experiment-filter-search,
+  .experiment-filter-select, .experiment-filter-usage, .experiment-filter-inline-edit input
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-filter-select, .experiment-filter-search, .experiment-filter-inline-edit input, .experiment-filter-product-row) {
+  background-color: var(--admin-dark-input) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-usage { background-color: #34414d !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-radar-head h2,
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-radar-copy strong { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-filter-radar-kicker, .experiment-filter-radar-head p, .experiment-filter-radar-copy small, .experiment-filter-radar-arrow, .experiment-filter-card-title span, .experiment-filter-card-meta small, .experiment-filter-card-actions button, .experiment-filter-upload-hint, .experiment-filter-product-tools > span) { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-radar-item.sage { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-radar-item.gold { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-radar-item.plum { color: #d6c1ff !important; background-color: #292438 !important; border-color: #59486b !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-radar-item.dark { color: #f4f7fa !important; background-color: #16232c !important; border-color: #526576 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-radar-icon,
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-radar-image { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-image { background: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-manage,
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-select.is-selected,
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-card.is-selected .experiment-filter-select { color: var(--gold-contrast) !important; background-color: var(--gold) !important; border-color: var(--gold) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-option.green,
+html[data-admin-theme="dark"] body.admin-site .experiment-filter-stat.note { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+
+/* Summary cards keep their accent meanings while all card copy stays readable. */
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-kpi.primary, .recommended-stat.accent) {
+  color: #f0cf8c !important;
+  background: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-kpi.primary, .recommended-stat.accent) :is(.experiment-kpi-label, .experiment-kpi-note, .experiment-kpi-icon, .experiment-kpi-value, small, em, strong) {
+  color: #f0cf8c !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-alert-head p { color: #d5dde4 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu { background: var(--admin-dark-surface) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu-head h2,
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card strong { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-menu-head p,
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card small { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card { background: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-card.ready { background: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-code,
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-arrow { color: #f0cf8c !important; }
+
+/* Orders, top-ups, coupons, members, and their empty or compact states. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .orders-empty-steps > a, .orders-empty-steps > div, .tp-review-guide,
+  .tp-channel-icon.wallet, .tp-channel-icon.verify,
+  .coupons-search, .coupons-progress, .coupons-action, .coupons-delete,
+  .coupons-status, .coupons-created, .users-toolbar, .users-search-wrap,
+  .users-more-action, .users-audience-tabs a, .users-pagination .disabled
+):not(:where(.admin-theme-store *, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.orders-empty-steps span, .orders-kpi-foot, .coupons-created) { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .tp-channel-icon.wallet { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .tp-channel-icon.verify { color: #b7dcf8 !important; background-color: #162535 !important; border-color: #385b79 !important; }
+html[data-admin-theme="dark"] body.admin-site .coupons-progress { background: #34414d !important; }
+html[data-admin-theme="dark"] body.admin-site .coupons-status.active { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site .users-more-action,
+html[data-admin-theme="dark"] body.admin-site .users-pagination .disabled { color: var(--admin-dark-muted) !important; background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site .users-audience-tabs a { background-color: var(--admin-dark-surface) !important; }
+
+/* Minigame admin controls use dark surfaces; the rendered game artwork stays intact. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .mgx-page-head, .mgx-game-switch, .mgx-game-tab, .mgx-game-cost,
+  .mgx-state-pill, .mgx-arcade-label, .mgx-filter-group button,
+  .mgx-history-filters button, .mgx-game-switches
+):not(:where(.admin-theme-store *, .effects-stage *, .mgx-preview-panel .mg-box-el, .mg-preview-prize, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.mgx-game-tab:hover, .mgx-game-switch:hover) { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site .mgx-game-tab.is-active,
+html[data-admin-theme="dark"] body.admin-site .mgx-game-switch.is-on { background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.mgx-arcade-label, .mgx-game-cost) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .mgx-state-pill.on { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.mgx-stat-icon.mint, .mgx-stat-icon.amber) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+
+/* Store settings pages retain their admin shell palette, with clean state colors. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .hsx-toolbar, .hsx-search, .hsx-list, .hsx-card, .hsx-art-index, .hsx-mode,
+  .admin-theme-effect-option, .admin-theme-mode-switch, .admin-theme-preview-caption,
+  .admin-theme-summary, .admin-theme-live, .admin-theme-step,
+  .as-summary-icon, .as-status, .as-preview-chip, .as-card-icon,
+  .announcement-card, .announcement-row, .announcement-heading-icon,
+  .announcement-total-pill, .announcement-kbd, .welcome-live-gallery-empty,
+  .welcome-live-savebar, .effects-effect-art, .effects-toggle, .effects-effect-row,
+  .catalog-selection-rule, .catalog-selection-count,
+  .model-studio-store-link, .model-studio-option-state, .model-studio-submit-row
+):not(:where(.admin-theme-store *, .effects-stage *, .model-preview-window *, .settings-storefront-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.hsx-search, .hsx-list, .hsx-card, .admin-theme-effect-option, .admin-theme-mode-switch, .admin-theme-preview-caption, .announcement-row, .welcome-live-gallery-empty) { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.hsx-state.is-on, .admin-theme-live, .welcome-live-status.is-live) { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.announcement-heading-icon, .announcement-total-pill, .announcement-kbd) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.as-summary-icon.is-gold, .as-card-icon.is-gold, .admin-theme-step.is-amber, .admin-theme-step.is-violet) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.as-summary-icon.is-blue, .as-summary-icon.is-violet) { color: #b7dcf8 !important; background-color: #162535 !important; border-color: #385b79 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.as-status, .as-preview-chip, .model-studio-option-state, .model-studio-store-link) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.catalog-selection-rule, .catalog-selection-count) { color: var(--admin-dark-muted) !important; background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-confirm-kicker, .experiment-page-kicker, .experiment-kicker) { color: #f0cf8c !important; }
+
+
+
+/* Pickers, filter tabs, recommended shortcuts, and product action menus. */
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-action-menu-panel, .experiment-menu-item) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-action-menu-panel { background-color: var(--admin-dark-surface) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-menu-item :is(strong, small) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-menu-item small { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-menu-chevron { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-filter.active, .experiment-filter) b { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-filter.active b { color: var(--gold-contrast) !important; background-color: var(--gold) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-eyebrow { color: #f0cf8c !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-luxury-mark { background: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-template, .recommended-dialog, .recommended-dialog-head, .recommended-picker-controls, .recommended-product-row, .recommended-create-preview, .recommended-upload-zone, .recommended-search, .recommended-toolbar) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .recommended-template { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-template :is(b, strong) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-template small { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-template i,
+html[data-admin-theme="dark"] body.admin-site .orders-empty-steps i { color: #f0cf8c !important; }
+html[data-admin-theme="dark"] body.admin-site .template-icon.gold { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .template-icon.green { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site .template-icon.rose { color: #f3aeb5 !important; background-color: #2b171d !important; border-color: #8f4653 !important; }
+
+/* Finance and membership dialogs are page content, including opened dialogs. */
+html[data-admin-theme="dark"] body.admin-site :is(.tp-channel-row > a, .tp-review-guide, .users-invite-dialog, .users-credit-dialog, .users-dialog, .users-build-status, .users-build-head, .users-build-column, .users-table-foot, .coupons-dialog, .coupons-create-note) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.tp-channel-row > a, .users-more-action, .users-row-actions button, .users-pagination a, .users-pagination .disabled) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.users-build-column.pending, .coupons-create-note) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.users-build-kicker, .users-build-foot, .users-kpi-foot, .users-time, .users-person small, .users-table-foot) { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .coupons-created { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .coupons-action.danger,
+html[data-admin-theme="dark"] body.admin-site .coupons-delete,
+html[data-admin-theme="dark"] body.admin-site .users-status.banned { color: #f3aeb5 !important; background-color: #2b171d !important; border-color: #8f4653 !important; }
+html[data-admin-theme="dark"] body.admin-site .coupons-action:not(.danger) { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+
+/* Home-section editor and catalog partner screens. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .hsx-content, .hsx-hero, .hsx-card, .hsx-toolbar, .hsx-search, .hsx-list,
+  .hsx-card-actions, .hsx-art-product, .catalog-api-page, .catalog-flow-card,
+  .catalog-selection-item, .catalog-selection-rule, .catalog-selection-count,
+  .catalog-selection-toolbar, .catalog-selector-filters, .catalog-image-open,
+  .catalog-step, .catalog-flow-steps, .catalog-notice, .catalog-table-wrap,
+  .as-banner-details, .as-banner-details-panel, .as-banner-mode-control
+):not(:where(.settings-storefront-stage *, .admin-theme-store *, .effects-stage *, .model-preview-window *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.hsx-card, .hsx-toolbar, .hsx-search, .hsx-list, .catalog-selection-item, .catalog-flow-steps, .catalog-table-wrap, .as-banner-details, .as-banner-details-panel, .as-banner-mode-control) { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.hsx-art-index, .catalog-flow-steps i, .catalog-selection-rule, .catalog-selection-count, .catalog-selector-filters b) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .hsx-state.is-on { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site .hsx-icon-button.is-danger { color: #f3aeb5 !important; background-color: #2b171d !important; border-color: #8f4653 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.catalog-flow-steps span, .catalog-selection-item small, .catalog-page-head p) { color: #d5dde4 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.catalog-flow-steps b, .catalog-flow-icon, .catalog-image-open > span) { color: #f0cf8c !important; }
+
+/* Minigame settings and data cards. Game art remains part of the preview. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .mgx-distribution-item, .mgx-progress, .mgx-preview-safe, .mgx-mode-tag,
+  .mgx-history-total, .mgx-history-empty, .mgx-prize-empty,
+  .mgx-prize-summary, .mgx-prize-check, .mgx-settings-form fieldset,
+  .mgx-settings-toggle, .mgx-field input, .mgx-field select, .mgx-field textarea,
+  .mgx-game-tab-icon.box, .mgx-game-tab-icon.rail
+):not(:where(.mgx-preview-panel .mg-box-el, .mg-preview-prize, .effects-stage *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .mgx-progress { background-color: #34414d !important; }
+html[data-admin-theme="dark"] body.admin-site .mgx-preview-safe { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .mgx-mode-tag { color: #b7dcf8 !important; background-color: #162535 !important; border-color: #385b79 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.mgx-game-tab-icon.box, .mgx-game-tab-icon.rail) { color: #b7dcf8 !important; background-color: #162535 !important; border-color: #385b79 !important; }
+
+/* Slip provider hub had a separate white-only palette and !important fills. */
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] {
+  --slip-owner-ink: var(--admin-dark-text) !important;
+  --slip-owner-muted: var(--admin-dark-muted) !important;
+  --slip-owner-line: var(--admin-dark-line) !important;
+  --slip-owner-green: var(--admin-brand-fill) !important;
+  --slip-owner-green-dark: #f0cf8c !important;
+  --slip-owner-green-soft: #10261c !important;
+  color: var(--admin-dark-text) !important;
+}
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] :is(
+  [data-slip-owner-intro], [data-slip-owner-active], [data-slip-owner-quotas],
+  [data-slip-owner-provider], [data-slip-owner-pool], [data-slip-owner-costs],
+  [data-slip-owner-selection], [data-slip-owner-provider-choice] > label,
+  [data-slip-owner-settings-grid] > [data-provider-settings], [data-slip-owner-guides],
+  [data-slip-owner-guides] a, [data-slip-owner-costs] details
+) {
+  color: var(--admin-dark-text) !important;
+  background: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] :is(
+  [data-slip-owner-header] a, [data-slip-owner-provider-choice] > label,
+  [data-slip-owner-settings-grid] input, [data-slip-owner-settings-grid] textarea,
+  [data-slip-owner-costs] input
+) { background-color: var(--admin-dark-input) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] :is(
+  [data-slip-owner-intro], [data-slip-owner-active] [class*="text-xs"],
+  [data-slip-owner-active] [class*="text-sm"], [data-slip-owner-provider] > div:nth-child(2),
+  [data-slip-owner-provider] > div:last-child, [data-slip-owner-pool] *,
+  [data-slip-owner-selection] label, [data-slip-owner-settings-grid] label,
+  [data-slip-owner-guides] a, [data-slip-owner-costs] details
+) { color: #d5dde4 !important; }
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] :is(
+  [data-slip-owner-header] h1, [data-slip-owner-header] p,
+  [data-slip-owner-costs] h2, [data-slip-owner-selection] h2,
+  [data-slip-owner-guides] h3, [data-slip-owner-settings-grid] h3,
+  [data-slip-owner-provider] > div:nth-child(3)
+) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] :is(
+  [data-slip-owner-selection] button[type="submit"], [data-slip-owner-settings-grid] button,
+  [data-slip-owner-save]
+) { color: var(--gold-contrast) !important; background: var(--gold) !important; border-color: var(--gold) !important; }
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] [data-slip-owner-provider][data-selected="true"],
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] [data-slip-owner-provider-choice] > label:has(input:checked) {
+  background: #10261c !important;
+  border-color: #2b7650 !important;
+}
+
+/* Smaller editor details and semantic statuses. */
+html[data-admin-theme="dark"] body.admin-site :is(.as-banner-details, .as-banner-mode-control, .admin-theme-actions, .admin-theme-mode-switch, .admin-theme-effect-option, .admin-theme-preview-caption) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .admin-theme-actions code { color: var(--admin-dark-muted) !important; background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.announcement-row-symbol.is-live, .welcome-live-status.is-live, .effects-effect-art.snow-art) { color: #b7dcf8 !important; background-color: #162535 !important; border-color: #385b79 !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-row-button.is-danger { color: #f3aeb5 !important; background-color: #2b171d !important; border-color: #8f4653 !important; }
+html[data-admin-theme="dark"] body.admin-site .welcome-live-status:not(.is-live) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+
+/* Product price reductions and dialogs opened from the admin action menus. */
+html[data-admin-theme="dark"] body.admin-site .experiment-product-price del { color: #f3aeb5 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-create-note i,
+html[data-admin-theme="dark"] body.admin-site .coupons-create-note i { color: var(--gold-contrast) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-field, .recommended-field label, .recommended-dialog-close, .recommended-upload-zone, .recommended-create-preview) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .recommended-field :is(label, span, small) { color: #d5dde4 !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-field b { color: #f3aeb5 !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-dialog-close { background-color: var(--admin-dark-input) !important; }
+
+html[data-admin-theme="dark"] body.admin-site :is(.users-wallet-dialog, .users-wallet-form, .users-wallet-member, .users-wallet-preview, .users-wallet-preview > div, .users-wallet-field, .users-invite-dialog, .users-invite-form, .users-dialog-head) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.users-wallet-member, .users-wallet-preview, .users-wallet-preview > div, .users-wallet-field input, .users-wallet-field select, .users-wallet-field textarea) { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site .users-wallet-field :is(small, span) { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .users-wallet-arrow { color: #f0cf8c !important; }
+
+/* Home section editor dialogs and their input panels. */
+html[data-admin-theme="dark"] body.admin-site :is(.hsx-edit-dialog, .hsx-create-dialog, .hsx-dialog-head, .hsx-dialog-body, .hsx-field, .hsx-field input, .hsx-field select, .hsx-field textarea, .hsx-product-picker, .hsx-product-picker-toolbar, .hsx-product-option) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.hsx-field input, .hsx-field select, .hsx-field textarea, .hsx-product-picker-toolbar, .hsx-product-option) { background-color: var(--admin-dark-input) !important; }
+html[data-admin-theme="dark"] body.admin-site .hsx-icon-button { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+
+/* Catalog selector is a workspace panel, not a white storefront card. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .catalog-flow-card, .catalog-panel, .catalog-panel-head, .catalog-selector-layout,
+  .catalog-selector-main, .catalog-selection-panel, .catalog-selection-list,
+  .catalog-selected-row, .catalog-search, .catalog-selector-toolbar,
+  .catalog-product-card, .catalog-product-copy, .catalog-selection-empty,
+  .catalog-pagination, .catalog-form-foot, .catalog-history, .catalog-history-head,
+  .catalog-search kbd, .catalog-product-image, .catalog-image-open,
+  .catalog-status-tabs button, .catalog-sort-row, .catalog-active-tags
+):not(:where(.admin-theme-store *, .effects-stage *, .model-preview-window *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.catalog-selection-panel, .catalog-selection-list, .catalog-selector-main, .catalog-selected-row, .catalog-product-card, .catalog-pagination, .catalog-form-foot, .catalog-history) { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.catalog-search, .catalog-selector-toolbar, .catalog-search kbd, .catalog-product-image) { background-color: var(--admin-dark-input) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.catalog-selection-count, .catalog-flow-steps i, .catalog-selector-filters button.active, .catalog-due-badge) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .catalog-selection-panel :is(i, small) { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .catalog-selector-filters button { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .catalog-selector-filters button.active { color: var(--gold-contrast) !important; background-color: var(--gold) !important; border-color: var(--gold) !important; }
+
+/* Announcement filters and information notes use dark semantic fills. */
+html[data-admin-theme="dark"] body.admin-site :is(.announcement-list-card, .announcement-form-card, .announcement-tip, .announcement-filters, .announcement-filters button, .announcement-filters button span, .announcement-list-icon, .announcement-stat-art, .announcement-preview-top) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .announcement-filters button { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-filters button.is-active { color: var(--gold-contrast) !important; background-color: var(--gold) !important; border-color: var(--gold) !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-filters button span { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-input) !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-filters button.is-active span { color: var(--gold-contrast) !important; background-color: var(--gold-hover) !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-tip > span { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-kbd,
+html[data-admin-theme="dark"] body.admin-site kbd { color: var(--admin-dark-muted) !important; background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-preview-top { color: var(--admin-dark-muted) !important; background-color: var(--admin-dark-raised) !important; }
+
+/* Welcome popup content editor fields, switches, and disabled/empty states. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .welcome-live-fieldset, .welcome-live-visibility label, .welcome-live-switch-row,
+  .welcome-live-field, .welcome-live-upload, .welcome-live-file-summary,
+  .welcome-live-gallery-head, .welcome-live-image-card, .welcome-live-remove-bar,
+  .welcome-live-savebar, .welcome-live-panel
+):not(:where(.admin-theme-store *, .model-preview-window *, [data-admin-dark-preserve] *)) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .welcome-live-field :is(span, small),
+html[data-admin-theme="dark"] body.admin-site .welcome-live-visibility small { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .welcome-live-fieldset legend { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .welcome-live-upload-icon { color: #f0cf8c !important; background-color: #2a2111 !important; }
+
+/* More compact minigame admin controls; game canvases keep their original art. */
+html[data-admin-theme="dark"] body.admin-site :is(.mgx-preview-footnote, .mgx-settings-icon, .mgx-search, .mgx-prize-thumb, .mgx-type-pill, .mgx-prize-summary, .mgx-history-total, .mgx-live-catalog-status) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .mgx-preview-footnote { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.mgx-settings-icon, .mgx-type-pill.box, .mgx-prize-summary) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .mgx-search { background-color: var(--admin-dark-input) !important; }
+
+/* Make the remaining high-contrast owner controls readable in dark mode. */
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] :is(button, a, [class*="bg-[var(--gold)]"]) {
+  color: var(--admin-dark-text) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] button:not([data-slip-owner-save]) { background: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] [class*="bg-[var(--gold)]"] { color: var(--gold-contrast) !important; }
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] [data-slip-owner-save] { color: var(--gold-contrast) !important; background: var(--gold) !important; border-color: var(--gold) !important; }
+
+/* Final dialog surfaces and icon counters found through the rendered page audit. */
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-modal, .experiment-modal-head, .experiment-modal-body, .experiment-modal-close) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-modal-close { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.hs-picker-dialog, .hs-picker-title, .hs-picker-search, .hs-picker-products, .hs-picker-product, .hs-picker-footer, [class*="hs-picker-"]) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.hs-picker-search, .hs-picker-product) { background-color: var(--admin-dark-raised) !important; }
+
+html[data-admin-theme="dark"] body.admin-site :is(.catalog-panel-head b, .catalog-selection-panel i, .catalog-image-open > span) {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site .catalog-product-state { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site .catalog-panel-head { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .catalog-image-open { background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .coupons-create-note > span { color: var(--gold-contrast) !important; }
+html[data-admin-theme="dark"] body.admin-site .users-audience-tabs .active b { color: var(--gold-contrast) !important; background-color: var(--gold) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-preview-label, .recommended-preview-copy) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-preview-label :is(span, i) { color: #f0cf8c !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-preview-copy strong { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-preview-copy small { color: var(--admin-dark-muted) !important; }
+
+html[data-admin-theme="dark"] body.admin-site .mgx-add-card { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .mgx-preview-footnote > span { color: var(--gold-contrast) !important; background-color: var(--gold) !important; }
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] button[class*="bg-[var(--gold)]"],
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-page] a[class*="bg-[var(--gold)]"] { color: var(--gold-contrast) !important; background: var(--gold) !important; border-color: var(--gold) !important; }
+
+html[data-admin-theme="dark"] body.admin-site :is(.announcement-empty, .announcement-empty-state) { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-surface) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-note-mark { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.settings-preview-head, .settings-preview-mode) { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .settings-preview-head > i { color: #f0cf8c !important; background-color: #2a2111 !important; }
+html[data-admin-theme="dark"] body.admin-site .settings-preview-mode .is-active { color: var(--gold-contrast) !important; background-color: var(--gold) !important; border-color: var(--gold) !important; }
+html[data-admin-theme="dark"] body.admin-site .effects-preview { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-surface) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .effects-preview b { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .effects-form > :is(i, span) { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .admin-theme-mono-choice-copy code { color: var(--admin-dark-muted) !important; }
+
+/* Keep the last page-specific surfaces aligned with the shared admin shell. */
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-page-head {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-page-head :is(h1, p) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-total-badge {
+  color: var(--admin-dark-muted) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-total-badge b { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-settlement-summary {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-settlement-summary > span { border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-settlement-summary > span:nth-child(odd) i {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-settlement-summary > span:nth-child(even) i {
+  color: #b6e8c7 !important;
+  background-color: #10261c !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-settlement-summary :is(b, small) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-settlement-summary small { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-catalog-api-page .catalog-empty > span {
+  color: #b6e8c7 !important;
+  background-color: #10261c !important;
+  border-color: #2b7650 !important;
+}
+
+html[data-admin-theme="dark"] body.admin-site .announcement-admin-page .announcement-hero {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .announcement-admin-page .announcement-hero :is(h1, p) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-admin-page .announcement-kicker { color: #f0cf8c !important; }
+/* This card previews the storefront, so retain its light preview surface and use storefront ink. */
+html[data-admin-theme="dark"] body.admin-site .announcement-admin-page .announcement-preview-content :is(strong, p) { color: #29281f !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-admin-page .announcement-preview-top { color: #625d53 !important; border-color: #eee8dc !important; }
+
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page :is(.experiment-page-head, .effects-preview, .effects-stat-row > div, .effects-panel, .effects-roadmap, .effects-roadmap-grid > div, .effects-rain-form) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page .experiment-page-head::after,
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page .effects-panel::before { display: none !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page :is(.experiment-page-head h1, .experiment-page-head p, .effects-preview-top h2, .effects-preview-top p, .effects-panel-head h2, .effects-panel-head p, .effects-form label, .effects-rain-form label, .effects-stat-row strong) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page :is(.effects-eyebrow, .effects-form label > small, .effects-toggle small, .effects-effect-row small, .effects-roadmap ul) { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page .experiment-page-status-note {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  background-image: none !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page .effects-stat-icon.blue,
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page .effects-panel-icon.blue { color: #b7dcf8 !important; background-color: #162535 !important; border-color: #385b79 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page .effects-stat-icon.gold { color: #f0cf8c !important; background-color: #2a2111 !important; border-color: #8d6b2e !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page .effects-ready { color: #b6e8c7 !important; background-color: #10261c !important; border-color: #2b7650 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page .effects-preview-foot > span:first-child {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page .effects-preview-foot > span:first-child :is(b, small) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page :is(.effects-toggle i, .effects-switch i) { background-color: #3a4651 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-effects-page :is(.effects-toggle input:checked + i, .effects-switch input:checked + i) { background-color: #2d8a60 !important; }
+
+/* Contrast fixes for dialogs and editor previews that are revealed on interaction. */
+html[data-admin-theme="dark"] body.admin-site :is(.experiment-modal-body label, .experiment-modal-body label > span) { color: #d5dde4 !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-dialog, .recommended-dialog-head, .recommended-dialog-body, .recommended-product-row) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-dialog-head, .recommended-product-row) { background-color: var(--admin-dark-raised) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-dialog-head h2, .recommended-dialog-head p, .recommended-dialog-close, .recommended-product-row strong) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-dialog-head p, .recommended-product-row small) { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-create-preview, .recommended-preview-card, .recommended-preview-cover) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-preview-label, .recommended-preview-label span, .recommended-preview-copy span, .recommended-empty-kicker) { color: #f0cf8c !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-preview-copy strong, .recommended-empty-copy h2) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.recommended-preview-copy small, .recommended-empty-copy p) { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-create-preview > p { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-empty-studio {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+  box-shadow: 0 14px 30px rgb(0 0 0 / .2) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .recommended-empty-shelf { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-empty-mini { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-input) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-empty-mini.mini-gold { background-color: #2a2111 !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-empty-mini.mini-rose { background-color: #2b171d !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-empty-mini :is(b, small) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-template {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .recommended-template small { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-template i { color: #f0cf8c !important; }
+html[data-admin-theme="dark"] body.admin-site .recommended-upload-zone {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .recommended-upload-icon { color: #f0cf8c !important; background-color: #2a2111 !important; }
+
+html[data-admin-theme="dark"] body.admin-site :is(.hs-picker-grid > label, .hsx-edit-panel .hs-picker-grid > label) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.hs-picker-grid > label > b, .hsx-edit-panel .hs-picker-grid > label > b) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.hs-picker-grid > label > span, .hsx-edit-panel .hs-picker-grid > label > span) { color: var(--admin-dark-muted) !important; background-color: var(--admin-dark-input) !important; }
+html[data-admin-theme="dark"] body.admin-site :is(.hs-picker-grid > label > span img, .hsx-edit-panel .hs-picker-grid > label > span img) { background-color: var(--admin-dark-input) !important; }
+
+html[data-admin-theme="dark"] body.admin-site .experiment-legacy-content label { color: #d5dde4 !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-legacy-content :is(button, a)[class*="bg-gradient-to-r"][class*="from-[var(--gold)]"][class*="to-[var(--gold-hover)]"] {
+  color: var(--gold-contrast) !important;
+  background-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-legacy-content [data-slip-owner-active] :is([class*="bg-[var(--gold)]"], button:hover) { color: var(--gold-contrast) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-legacy-content [data-slip-owner-active] {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  background-image: none !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-legacy-content [data-slip-owner-active] :is(span, div) { color: #f0cf8c !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-legacy-content [data-slip-owner-active] button:hover { color: var(--gold-contrast) !important; }
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-active] {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  background-image: none !important;
+  border-color: #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-active] :is(span, div) { color: #f0cf8c !important; }
+html[data-admin-theme="dark"] body.admin-site [data-slip-owner-active] button:hover { color: var(--gold-contrast) !important; }
+
+html[data-admin-theme="dark"] body.admin-site .experiment-home-sections-page :is(.hsx-art-product, .hsx-product-thumb, .hsx-product-more) {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .experiment-home-sections-page :is(.hsx-product-thumb-name, .hsx-product-thumb > span:not(.hsx-product-thumb-name)) { color: var(--admin-dark-muted) !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-home-sections-page :is(.hsx-product-thumb img, .hsx-art-product img) { background-color: var(--admin-dark-raised) !important; }
+
+html[data-admin-theme="dark"] body.admin-site .catalog-dialog {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-surface) !important;
+  background-image: none !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .catalog-dialog-head { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-surface) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .catalog-dialog-head button { color: var(--admin-dark-text) !important; background-color: var(--admin-dark-raised) !important; border-color: var(--admin-dark-line) !important; }
+
+html[data-admin-theme="dark"] body.admin-site .admin-theme-selected { color: var(--gold-contrast) !important; }
+html[data-admin-theme="dark"] body.admin-site .admin-theme-preview-caption > span { color: var(--gold-contrast) !important; background-color: var(--gold) !important; }
+html[data-admin-theme="dark"] body.admin-site .admin-theme-mono-choice.is-black .admin-theme-mono-choice-check { color: #fff !important; }
+html[data-admin-theme="dark"] body.admin-site .admin-theme-mono-choice:has(.admin-theme-mono-color.is-black) .admin-theme-mono-choice-check { color: #fff !important; }
+
+/* The notice preview is an admin panel in dark mode; keep the same contents and layout. */
+html[data-admin-theme="dark"] body.admin-site .announcement-admin-page .announcement-preview {
+  color: var(--admin-dark-text) !important;
+  background-color: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .announcement-admin-page .announcement-preview-top { color: var(--admin-dark-muted) !important; background-color: var(--admin-dark-surface) !important; border-color: var(--admin-dark-line) !important; }
+html[data-admin-theme="dark"] body.admin-site .announcement-admin-page .announcement-preview-content :is(strong, p) { color: var(--admin-dark-text) !important; }
+html[data-admin-theme="dark"] body.admin-site .mgx-app .mgx-add-head > span {
+  color: #f0cf8c !important;
+  background-color: #2a2111 !important;
+  border: 1px solid #8d6b2e !important;
+}
+html[data-admin-theme="dark"] body.admin-site .mgx-preview-panel .mg-box-bow {
+  background-color: #f0cf8c !important;
+  box-shadow: -10px 0 0 -1px #d4ad51, 10px 0 0 -1px #d4ad51 !important;
 }
