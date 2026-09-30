@@ -1661,3 +1661,71 @@ html[data-admin-theme="dark"] body.admin-site .orders-status.cancelled {
 html[data-admin-theme="dark"] body.admin-site :is(.model-studio-page-head, .model-studio-safety) :is(h1, h2, p, span, strong, small, a) {
   color: var(--admin-dark-text) !important;
 }
+
+/* Complete dark coverage for detail screens, nested cards and status indicators. */
+html[data-admin-theme="dark"] body.admin-site .order-detail-page {
+  --order-ink: var(--admin-dark-text);
+  --order-muted: var(--admin-dark-muted);
+  --order-line: var(--admin-dark-line);
+  --order-green: var(--admin-dark-success);
+  --order-green-soft: #15382a;
+  --order-amber: var(--admin-dark-warning);
+  --order-amber-soft: #352a13;
+  --order-red: var(--admin-dark-danger);
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .order-panel, .order-item-card, .order-empty-items,
+  .catalog-shop-card, .catalog-payout-card, .catalog-payout-amount,
+  .mg-preview-prize
+) {
+  color: var(--admin-dark-text) !important;
+  background: var(--admin-dark-surface) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .order-count-pill, .order-item-image, .order-partner-icon,
+  .order-fulfillment-icon, .order-section-icon,
+  .experiment-rank, .tp-slip-thumb, .recommended-card-count,
+  .catalog-shop-mark, .catalog-status.off,
+  .settings-storefront-stage, input[type="color"]
+) {
+  color: var(--admin-dark-text) !important;
+  background: var(--admin-dark-raised) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .order-fulfillment-note, .order-partner-note, .order-current-status,
+  .order-status-badge, .experiment-filter-image-badge.empty,
+  .catalog-payout-message.warning
+) {
+  color: var(--admin-dark-warning) !important;
+  background: #352a13 !important;
+  border-color: #7b6538 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .order-status-badge.is-complete, .order-current-status.is-complete,
+  .order-fulfillment-note.is-ready, .catalog-status.on
+) {
+  color: var(--admin-dark-success) !important;
+  background: #15382a !important;
+  border-color: #357858 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .order-status-badge.is-cancelled, .order-current-status.is-cancelled,
+  .catalog-account-status.missing
+) {
+  color: var(--admin-dark-danger) !important;
+  background: #3b202a !important;
+  border-color: #8f4653 !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(
+  .order-partner-note, .order-fulfillment-note, .order-current-status,
+  .order-status-badge, .catalog-payout-message, .catalog-account-status,
+  .catalog-status
+) :is(span, small, strong, b) { color: inherit !important; }
+html[data-admin-theme="dark"] body.admin-site .experiment-chart-bar {
+  background: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .mg-preview-prize img {
+  background-color: var(--admin-dark-raised) !important;
+}
