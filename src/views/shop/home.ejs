@@ -444,7 +444,7 @@
 <%
   const welcomePopup = settings.welcomePopup || {};
   const welcomePopupImages = Array.isArray(welcomePopup.images) ? welcomePopup.images : [];
-  const showWelcomePopupRedesign = Boolean(welcomePopupRedesign || welcomePopupExperiment);
+  const showWelcomePopupRedesign = true;
   const welcomePopupTitle = welcomePopup.showTitle !== false
     ? (welcomePopup.title || (welcomePopupExperiment ? 'ยินดีต้อนรับ!' : ''))
     : '';
@@ -464,6 +464,8 @@
           <img src="<%= image %>" alt="" width="1200" height="800" class="welcome-popup-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" data-index="<%= index %>" />
         <% }) %>
         <% if (welcomePopupImages.length > 1) { %>
+          <button type="button" class="welcome-popup-arrow welcome-popup-prev" data-popup-prev aria-label="รูปประกาศก่อนหน้า"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+          <button type="button" class="welcome-popup-arrow welcome-popup-next" data-popup-next aria-label="รูปประกาศถัดไป"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
           <div class="absolute bottom-2.5 left-0 right-0 flex items-center justify-center gap-1.5 z-10">
             <% welcomePopupImages.forEach((image, index) => { %>
               <span class="welcome-popup-dot w-1.5 h-1.5 rounded-full <%= index === 0 ? 'bg-white' : 'bg-white/40' %> transition" data-index="<%= index %>"></span>
@@ -489,6 +491,7 @@
       <button type="button" id="welcome-popup-close" class="flex-1 py-3 text-sm font-medium text-[var(--text-2)] hover:bg-[var(--input)]"><% if (showWelcomePopupRedesign) { %><svg width="24" height="24" class="welcome-popup-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><% } else { %>✕ <% } %>เข้าสู่เว็บไซต์</button>
       <button type="button" id="welcome-popup-mute" class="flex-1 py-3 text-sm font-medium text-[var(--coral)] hover:bg-[var(--input)]"><% if (showWelcomePopupRedesign) { %><svg width="24" height="24" class="welcome-popup-action-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><% } else { %>🕐 <% } %>ไม่แสดงผลอีกครั้งใน 1 วัน</button>
     </div>
+    <label class="welcome-popup-today"><input type="checkbox" id="welcome-popup-hide-today" /> <span>ไม่แสดงแจ้งเตือนอีกภายในวันนี้</span></label>
   </div>
 </div>
 <script>
@@ -682,6 +685,12 @@
     const previousFocus = document.activeElement;
     if (isRedesign) document.body.style.overflow = 'hidden';
     const dismiss = function () {
+      if (modal.querySelector('#welcome-popup-hide-today')?.checked) {
+        const midnight = new Date();
+        midnight.setHours(24, 0, 0, 0);
+        try { localStorage.setItem(storageKey, String(midnight.getTime())); } catch (_) {}
+      }
+      modal.dispatchEvent(new Event('welcome-popup:dismiss'));
       modal.remove();
       document.removeEventListener('keydown', handlePopupKeydown);
       if (isRedesign) {
@@ -738,15 +747,21 @@
       let pointerInside = false;
       let focusInside = isRedesign && modal.contains(document.activeElement);
       let popupTimer = null;
-      const showNextSlide = function () {
+      const showSlide = function (offset) {
         if (!modal.isConnected) { clearInterval(popupTimer); return; }
-        if (!isPlaying || pointerInside || focusInside) return;
         slides[current].classList.replace('opacity-100', 'opacity-0');
         if (dots[current]) dots[current].classList.replace('bg-white', 'bg-white/40');
-        current = (current + 1) % slides.length;
+        current = (current + offset + slides.length) % slides.length;
         slides[current].classList.replace('opacity-0', 'opacity-100');
         if (dots[current]) dots[current].classList.replace('bg-white/40', 'bg-white');
       };
+      const showNextSlide = function () {
+        if (!isPlaying || pointerInside || focusInside) return;
+        showSlide(1);
+      };
+      modal.querySelector('[data-popup-prev]')?.addEventListener('click', () => showSlide(-1));
+      modal.querySelector('[data-popup-next]')?.addEventListener('click', () => showSlide(1));
+      modal.addEventListener('welcome-popup:dismiss', () => clearInterval(popupTimer), { once: true });
       const syncCarouselToggle = function () {
         if (!carouselToggle) return;
         carouselToggle.setAttribute('aria-label', isPlaying ? 'หยุดสลับรูปภาพ' : 'เล่นสลับรูปภาพ');

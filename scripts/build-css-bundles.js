@@ -74,7 +74,6 @@ const BUNDLES = Object.freeze({
     'storefront-home-section-spacing-v1.css',
   ],
   'storefront-home-popup-v1.css': [
-    'storefront-welcome-popup-experiment-v1.css',
     'storefront-welcome-popup-main-v2.css',
   ],
 });
