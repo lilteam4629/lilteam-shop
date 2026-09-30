@@ -153,7 +153,7 @@ async function reserveTrueMoneyClaim(voucherCode, userId) {
       existing.status = 'processing';
       existing.message = '';
       existing.updatedAt = new Date().toISOString();
-      return { retryExisting: true, amount: Number(existing.amount) || 0, senderName: existing.senderName || '', providerBase: existing.providerBase || '' };
+      return { retryExisting: true, amount: Number(existing.amount) || 0, senderName: existing.senderName || '', providerBase: existing.providerBase || '', receiverPhone: existing.receiverPhone || '' };
     }
     data.truemoneyRedemptions.push({ voucherCode, userId, status: 'processing', createdAt: new Date().toISOString() });
     return { retryExisting: false, amount: 0, senderName: '', providerBase: '' };
@@ -173,12 +173,13 @@ async function rememberTrueMoneyResult(voucherCode, userId, result) {
   });
 }
 
-async function rememberTrueMoneyProvider(voucherCode, userId, providerBase) {
+async function rememberTrueMoneyProvider(voucherCode, userId, providerBase, receiverPhone) {
   if (!providerBase) return;
   await transactWithRetry(data => {
     const claim = (data.truemoneyRedemptions || []).find(item => item.voucherCode === voucherCode && item.userId === userId);
-    if (claim && !claim.providerBase) {
-      claim.providerBase = providerBase;
+    if (claim && claim.status !== 'approved') {
+      claim.providerBase ||= providerBase;
+      if (receiverPhone) claim.receiverPhone ||= truemoney.normalizePhone(receiverPhone);
       claim.updatedAt = new Date().toISOString();
     }
   });
@@ -296,6 +297,7 @@ router.post('/topup/truemoney', async (req, res) => {
   const user = currentUser(req);
   let voucherCode = '';
   let providerAccepted = false;
+  let ownsRedemptionLock = false;
   try {
     const voucherInput = String(req.body.voucherLink || req.body.voucherCode || '').trim();
     const payment = settlementPayment() || {};
@@ -323,6 +325,7 @@ router.post('/topup/truemoney', async (req, res) => {
   }
 
   truemoneyRedemptionLocks.add(voucherCode);
+  ownsRedemptionLock = true;
 
     const reservation = await reserveTrueMoneyClaim(voucherCode, user.id);
     if (!reservation) {
@@ -335,9 +338,13 @@ router.post('/topup/truemoney', async (req, res) => {
       return res.redirect('/account');
     }
 
+    const claimProvider = reservation.providerBase || truemoney.providerBases()[0];
+    const claimPhone = reservation.receiverPhone || receiverPhone;
+    // Persist receiver and provider before the irreversible call.
+    await rememberTrueMoneyProvider(voucherCode, user.id, claimProvider, claimPhone);
     const result = reservation.retryExisting && reservation.amount > 0
       ? { success: true, recovered: true, amount: reservation.amount, senderName: reservation.senderName || '', message: 'กู้คืนรายการรับเงินสำเร็จ' }
-      : await truemoney.redeemAngpao(voucherInput, receiverPhone, { providerBase: reservation.providerBase });
+      : await truemoney.redeemAngpao(voucherInput, claimPhone, { providerBase: claimProvider });
 
     if (!result.success || !Number.isFinite(result.amount) || result.amount <= 0) {
       if (result.recoverable && result.providerBase) {
@@ -352,7 +359,7 @@ router.post('/topup/truemoney', async (req, res) => {
           console.error('[TrueMoney claim status]', error.message);
         });
       }
-      req.flash('error', result.message || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้');
+      req.flash(result.recoverable ? 'success' : 'error', result.recoverable ? 'ระบบกำลังติดตามผลซองและบันทึกยอดให้อัตโนมัติ ไม่ต้องวางลิงก์ซ้ำ กรุณารอสักครู่แล้วตรวจยอดในหน้าบัญชี' : (result.message || 'ไม่สามารถรับเงินจากซองของขวัญนี้ได้'));
       return res.redirect('/account/topup');
     }
 
@@ -412,13 +419,13 @@ router.post('/topup/truemoney', async (req, res) => {
       } catch (recoveryError) {
         console.error('[TrueMoney recovery after error]', recoveryError);
       }
-      req.flash('error', 'รับซองสำเร็จแล้ว แต่ระบบกำลังบันทึกยอดอยู่ กรุณาส่งลิงก์ซองเดิมอีกครั้ง ระบบจะกู้คืนยอดให้โดยไม่หักซ้ำ');
+      req.flash('error', 'รับซองสำเร็จแล้ว ระบบจะกู้คืนและบันทึกยอดให้อัตโนมัติ ไม่ต้องวางลิงก์ซ้ำ');
     } else {
       req.flash('error', 'เกิดข้อผิดพลาดในการตรวจสอบซองของขวัญ กรุณาลองใหม่อีกครั้ง');
     }
     res.redirect('/account/topup');
   } finally {
-    truemoneyRedemptionLocks.delete(voucherCode);
+    if (ownsRedemptionLock) truemoneyRedemptionLocks.delete(voucherCode);
   }
 });
 
@@ -961,3 +968,62 @@ router.markTrueMoneyClaimFailed = markTrueMoneyClaimFailed;
 router.creditTrueMoneyClaim = creditTrueMoneyClaim;
 router.finalizeTrueMoneyClaim = finalizeTrueMoneyClaim;
 router.rememberTrueMoneyProvider = rememberTrueMoneyProvider;
+
+
+// Durable reconciliation also resumes pending claims after a server restart.
+let trueMoneySweepRunning = false;
+let trueMoneyRecoveryTimer = null;
+async function reconcileTrueMoneyClaims() {
+  const pending = (store.data.truemoneyRedemptions || []).filter(claim =>
+    claim.status === 'processing' && (Number(claim.amount) > 0 || claim.providerBase)
+    && (!claim.nextRecoveryAt || Date.parse(claim.nextRecoveryAt) <= Date.now()));
+  for (const snapshot of pending.slice(0, 10)) {
+    const { voucherCode, userId } = snapshot;
+    if (truemoneyRedemptionLocks.has(voucherCode)) continue;
+    truemoneyRedemptionLocks.add(voucherCode);
+    try {
+      const phone = snapshot.receiverPhone || settlementPayment()?.truemoneyPhone;
+      const result = Number(snapshot.amount) > 0
+        ? { success: true, amount: Number(snapshot.amount), senderName: snapshot.senderName, recovered: true }
+        : await truemoney.redeemAngpao(voucherCode, phone, { providerBase: snapshot.providerBase, attempts: 1 });
+      if (result.success && Number(result.amount) > 0) {
+        await finalizeTrueMoneyClaim({ voucherCode, userId, result });
+      } else if (!result.recoverable) {
+        await markTrueMoneyClaimFailed(voucherCode, userId, result.message);
+      } else {
+        await transactWithRetry(data => {
+          const claim = (data.truemoneyRedemptions || []).find(c => c.voucherCode === voucherCode && c.userId === userId);
+          if (!claim || claim.status !== 'processing') return;
+          claim.recoveryAttempts = (Number(claim.recoveryAttempts) || 0) + 1;
+          claim.nextRecoveryAt = new Date(Date.now() + Math.min(300000, 30000 * claim.recoveryAttempts)).toISOString();
+          claim.message = result.message;
+        });
+      }
+    } catch (error) { console.error('[TrueMoney automatic recovery]', error.message); }
+    finally { truemoneyRedemptionLocks.delete(voucherCode); }
+  }
+}
+function startTrueMoneyRecovery() {
+  if (trueMoneyRecoveryTimer) return trueMoneyRecoveryTimer;
+  const sweep = async () => {
+    if (trueMoneySweepRunning) return;
+    trueMoneySweepRunning = true;
+    try {
+      await store.runOnPlatform(reconcileTrueMoneyClaims);
+      const shops = store.platformData.shops || [];
+      for (const shop of shops) {
+        if (!shop.id) continue;
+        try {
+          const db = await store.loadTenantDb(shop.id);
+          if (db) await store.runInTenant(shop.id, db, reconcileTrueMoneyClaims);
+        } catch (error) { console.error('[TrueMoney tenant recovery]', error.message); }
+      }
+    } catch (error) { console.error('[TrueMoney recovery sweep]', error.message); }
+    finally { trueMoneySweepRunning = false; }
+  };
+  trueMoneyRecoveryTimer = setInterval(sweep, 30000);
+  trueMoneyRecoveryTimer.unref();
+  return trueMoneyRecoveryTimer;
+}
+router.startTrueMoneyRecovery = startTrueMoneyRecovery;
+router.reconcileTrueMoneyClaims = reconcileTrueMoneyClaims;

@@ -309,6 +309,7 @@ async function initializeStore() {
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       await store.init();
+      accountRoutes.startTrueMoneyRecovery();
       // This rollout writes tenant records, so local/test startup requires an
       // explicit opt-in even when a shared database is configured.
       if (shouldRunStartupTenantRollouts(process.env)) {
