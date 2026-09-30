@@ -29,13 +29,12 @@
       if (!groupWidth) return;
 
       var step = groupWidth + gap;
-      // One or two recent orders still fill a wide screen without exposing a
-      // blank area at the instant the seamless loop returns to its start.
-      // The owner rail is intentionally a short, touch-scrollable list. A
-      // previous fill loop cloned the complete ten-card group up to 16 times
-      // when the measured group width was temporarily small, creating 160
-      // cards and a large layout/paint cost on mobile WebViews.
-      while (track.scrollWidth - step < shell.clientWidth + 24 && track.children.length < 2) {
+      // Keep enough identical groups in the track to cover the viewport after
+      // the animation has moved by one group. Cap the count to bound layout
+      // work when a mobile WebView briefly reports a very small measurement.
+      var requiredWidth = shell.clientWidth + step + 24;
+      var maxGroups = Math.max(track.children.length, Math.min(12, Math.ceil(requiredWidth / step) + 1));
+      while (track.scrollWidth < requiredWidth && track.children.length < maxGroups) {
         var copy = original.cloneNode(true);
         copy.setAttribute('aria-hidden', 'true');
         copy.setAttribute('inert', '');

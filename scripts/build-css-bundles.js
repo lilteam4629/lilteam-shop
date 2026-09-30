@@ -22,6 +22,7 @@ const BUNDLES = Object.freeze({
     'storefront-theme-cohesion-v1.css',
     'storefront-music-unified-v1.css',
     'storefront-navbar-shared-v1.css',
+    'latest-orders-loop-v1.css',
   ],
   'storefront-pre-home-v1.css': [
     'storefront-navbar-v1.css',
@@ -41,6 +42,7 @@ const BUNDLES = Object.freeze({
     'storefront-category-gallery-cozy-v2.css',
     'storefront-section-chrome-v1.css',
     'storefront-navbar-main-v3.css',
+    'latest-orders-loop-v1.css',
     'latest-orders-3d-v1.css',
     'storefront-announcement-width-v1.css',
     'storefront-home-compact-v1.css',

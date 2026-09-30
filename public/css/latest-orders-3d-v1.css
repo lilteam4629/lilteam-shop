@@ -98,7 +98,7 @@
   translate: 0 0;
   will-change: auto;
 }
-#site-page-shell .latest-orders-section .latest-orders-shell.is-visible:not(:hover):not(:focus-within) .latest-orders-track {
+#site-page-shell .latest-orders-section .latest-orders-shell.is-visible:not(:focus-within) .latest-orders-track {
   animation-play-state: running !important;
   will-change: translate;
 }

@@ -4635,6 +4635,30 @@ body.storefront-unified #site-page-shell.storefront-owner-home-v7 .owner-home-v2
   }
 }
 
+/* Source: latest-orders-loop-v1.css */
+/* Shared seamless loop mechanics for owner and tenant latest-order rails. */
+#site-page-shell .latest-orders-section .latest-orders-track {
+  animation-name: latest-orders-loop-run !important;
+  animation-duration: var(--latest-orders-duration, 32s) !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  animation-play-state: paused !important;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+#site-page-shell .latest-orders-section .latest-orders-shell.is-visible:not(:focus-within):not(.is-user-paused):not(:active) .latest-orders-track {
+  animation-play-state: running !important;
+}
+
+#site-page-shell .latest-orders-section .latest-orders-group[aria-hidden="true"] {
+  display: flex !important;
+}
+
+@keyframes latest-orders-loop-run {
+  to { transform: translate3d(var(--latest-orders-offset, -50%), 0, 0); }
+}
+
 /* Source: latest-orders-3d-v1.css */
 /* Recent orders: a shallow display shelf with raised, readable product tickets. */
 #site-page-shell .latest-orders-section {
@@ -4736,7 +4760,7 @@ body.storefront-unified #site-page-shell.storefront-owner-home-v7 .owner-home-v2
   translate: 0 0;
   will-change: auto;
 }
-#site-page-shell .latest-orders-section .latest-orders-shell.is-visible:not(:hover):not(:focus-within) .latest-orders-track {
+#site-page-shell .latest-orders-section .latest-orders-shell.is-visible:not(:focus-within) .latest-orders-track {
   animation-play-state: running !important;
   will-change: translate;
 }
