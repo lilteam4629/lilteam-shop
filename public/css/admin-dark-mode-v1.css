@@ -1630,3 +1630,34 @@ html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-h
 html[data-admin-theme="dark"] body.admin-site .welcome-live-page .welcome-live-hero-art .welcome-live-art-main svg * {
   stroke: var(--gold-contrast) !important;
 }
+
+/* Admin controls and model-picker panels must pair dark fills with readable text. */
+html[data-admin-theme="dark"] body.admin-site :is(
+  .orders-detail-link, .orders-avatar, .theme-effect-demo,
+  .theme-color-picker-label input, .model-studio-page-head,
+  .model-studio-safety-note
+) {
+  color: var(--admin-dark-text) !important;
+  background: var(--admin-dark-surface-raised, #1e2832) !important;
+  border-color: var(--admin-dark-line) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .orders-detail-link:hover {
+  background: var(--admin-dark-input, #2b3540) !important;
+  border-color: var(--gold) !important;
+}
+html[data-admin-theme="dark"] body.admin-site .orders-status {
+  color: #a7efce !important;
+  background: #15382a !important;
+  border-color: #357858 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .orders-status.pending {
+  color: #f0cf8c !important;
+  background: #352a13 !important;
+}
+html[data-admin-theme="dark"] body.admin-site .orders-status.cancelled {
+  color: #ffb5c0 !important;
+  background: #3b202a !important;
+}
+html[data-admin-theme="dark"] body.admin-site :is(.model-studio-page-head, .model-studio-safety-note) :is(h1, h2, p, span, strong, small, a) {
+  color: var(--admin-dark-text) !important;
+}
