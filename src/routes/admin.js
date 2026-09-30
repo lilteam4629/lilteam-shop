@@ -1824,7 +1824,6 @@ router.get('/orders/:id', (req, res) => {
   const itemsWithCreds = order.items.map(oi => {
     const product = store.data.products.find(p => p.id === oi.productId);
     const stock = store.data.stockItems.find(s => String(s.id) === String(oi.stockItemId));
-    const stock = store.data.stockItems.find(s => String(s.id) === String(oi.stockItemId));
     const prizeItems = (oi.randomBoxDraw?.prizeItems || []).map(prize => ({
       ...prize,
       credentials: store.data.stockItems.find(stock => String(stock.id) === String(prize.stockItemId)),
