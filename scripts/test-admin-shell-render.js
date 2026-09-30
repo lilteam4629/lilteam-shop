@@ -30,9 +30,18 @@ const shared = {
     products: [],
     csrf: 'test-token',
   });
+  const homeSectionsBody = await ejs.renderFile(path.join(__dirname, '../src/views/admin/home-sections-experiment.ejs'), {
+    ...shared,
+    currentUser: { username: 'admin' },
+    homeSections: [{ id: 'section-1', title: 'ขายดี', mode: 'manual', enabled: true, productIds: [] }],
+    products: [],
+    successMessages: [],
+    errorMessages: [],
+  });
   for (const [label, body] of [
     ['promotions page', promotionBody],
     ['recommended categories page', categoriesBody],
+    ['homepage categories page', homeSectionsBody],
     ['missing topbar', '<div class="experiment-app"><div class="experiment-main"><main class="experiment-content">โปรโมชั่น</main></div></div>'],
     ['existing topbar', '<div class="experiment-app"><div class="experiment-main"><header class="experiment-topbar"><span>old</span></header><main class="experiment-content">หมวดหมู่</main></div></div>'],
   ]) {

@@ -193,6 +193,126 @@ html.admin-unified-site body.admin-site .promo-admin .promo-form :where(input:no
   color: var(--admin-ui-text);
   background: var(--admin-ui-input);
 }
+
+/* Homepage collections have a separate card stylesheet that used to force
+   black and white over the saved shop theme. Scope its replacement here. */
+html.admin-unified-site body.admin-site .experiment-home-sections-page .experiment-content.hsx-content {
+  max-width: 1520px;
+  background: var(--ex-bg);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-content :focus-visible {
+  outline-color: var(--admin-ui-accent) !important;
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-hero {
+  border-color: var(--admin-ui-border);
+  background: linear-gradient(110deg, var(--admin-ui-surface) 70%, var(--admin-ui-soft));
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page :where(.hsx-hero h1, .hsx-board-head h2, .hsx-card-title-row h3) {
+  color: var(--admin-ui-text);
+  font-family: 'Kanit', sans-serif;
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page :where(.hsx-hero-actions, .hsx-empty, .hsx-form-actions) .experiment-button.primary {
+  border-color: var(--admin-ui-accent) !important;
+  color: var(--admin-ui-accent-contrast) !important;
+  background: var(--admin-ui-accent) !important;
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-stat {
+  border-color: var(--admin-ui-border);
+  background: var(--admin-ui-surface);
+  box-shadow: var(--ex-shadow);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-stat::before {
+  background: var(--admin-ui-accent);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-stat>strong {
+  color: var(--admin-ui-text);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-stat-total {
+  background: var(--admin-ui-soft);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-stat-total>strong {
+  color: var(--admin-ui-accent-ink);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page :where(.hsx-board, .hsx-board-head, .hsx-toolbar, .hsx-list, .hsx-card, .hsx-card-actions) {
+  border-color: var(--admin-ui-border);
+  background: var(--admin-ui-surface);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-board-mark {
+  background: var(--admin-ui-accent);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page :where(.hsx-board-count, .hsx-card-rank, .hsx-state.is-on, .hsx-mode) {
+  border-color: var(--admin-ui-border);
+  color: var(--admin-ui-accent-ink);
+  background: var(--admin-ui-soft);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page :where(.hsx-board-count b, .hsx-card-rank strong) {
+  color: var(--admin-ui-accent-ink);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-state.is-on {
+  border-color: var(--admin-ui-border) !important;
+  color: var(--admin-ui-accent-ink) !important;
+  background: var(--admin-ui-soft) !important;
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-state.is-on i {
+  background: var(--admin-ui-accent);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-search {
+  border-color: var(--admin-ui-border);
+  background: var(--admin-ui-input);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-search:focus-within {
+  border-color: var(--admin-ui-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--admin-ui-accent) 16%, transparent);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-filters button.is-active {
+  border-color: var(--admin-ui-accent);
+  color: var(--admin-ui-accent-contrast);
+  background: var(--admin-ui-accent);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-filters button.is-active span {
+  color: var(--admin-ui-accent-contrast);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-content .hsx-list {
+  grid-template-columns: minmax(0, 1fr);
+  background: var(--admin-ui-surface);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-content .hsx-list .hsx-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  min-height: 116px;
+  border-color: var(--admin-ui-border);
+  border-radius: 16px;
+  background: var(--admin-ui-surface);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-content .hsx-card .hsx-card-main {
+  padding: 18px 20px;
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-content .hsx-card .hsx-card-actions {
+  justify-content: flex-end;
+  margin: 0;
+  padding: 12px 18px;
+  border-top: 0;
+  background: transparent !important;
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-card-actions :where(.experiment-button, .hsx-icon-button) {
+  border-color: var(--admin-ui-border);
+  color: var(--admin-ui-text);
+  background: var(--admin-ui-surface);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-card-actions :where(.experiment-button, .hsx-icon-button):hover:not(:disabled):not(.is-danger) {
+  border-color: var(--admin-ui-accent);
+  color: var(--admin-ui-accent-ink);
+  background: var(--admin-ui-soft);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-card-actions .is-danger {
+  color: var(--ex-red);
+}
+html.admin-unified-site body.admin-site .experiment-home-sections-page :where(.hsx-edit-dialog, .hsx-create-dialog, .hsx-dialog-head, .hsx-field input, .hsx-field select) {
+  border-color: var(--admin-ui-border);
+  color: var(--admin-ui-text);
+  background: var(--admin-ui-surface);
+}
 html.admin-unified-site body.admin-site .announcement-admin-page {
   --announcement-ink: var(--admin-ui-text);
   --announcement-muted: var(--admin-ui-muted);
@@ -211,5 +331,12 @@ html.admin-unified-site body.admin-site .announcement-admin-page :where(.announc
   }
   html.admin-unified-site body.admin-site :where(.recommended-page .experiment-page-head, .promo-admin .promo-hero) {
     padding: 18px 16px;
+  }
+  html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-content .hsx-list .hsx-card {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html.admin-unified-site body.admin-site .experiment-home-sections-page .hsx-content .hsx-card .hsx-card-actions {
+    justify-content: flex-start;
+    padding: 0 14px 14px;
   }
 }
