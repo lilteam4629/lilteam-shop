@@ -120,6 +120,11 @@ async function exerciseTenantRandomBox() {
   const adminCookie = await login('boxadmin', 'boxadmin-password');
   const form = await request('/admin/products/new', { headers: { cookie: adminCookie } });
   assert.equal(form.statusCode, 200, 'rental admin can open the product form');
+  assert.ok(form.body.includes('รอทำระบบเพิ่ม'));
+  assert.ok(form.body.includes('disabled>เรท 2'));
+  const invalid = await request('/admin/products/new', { method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ title: 'invalid-box', productKind: 'random-box', randomBoxRate: '2', price: '2' }).toString() });
+  assert.equal(invalid.statusCode, 302);
+  assert.ok(!JSON.parse(fs.readFileSync(tenantDbPath, 'utf8')).products.some(p => p.title === 'invalid-box'));
   for (const control of ['name="productKind"', 'name="randomBoxRate"', 'random-box-product-fields-v1.css']) {
     assert.ok(form.body.includes(control), `rental product form exposes ${control}`);
   }
@@ -128,7 +133,7 @@ async function exerciseTenantRandomBox() {
   const created = await request('/admin/products/new', {
     method: 'POST',
     headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ title, productKind: 'random-box', randomBoxRate: '10', price: '2' }).toString(),
+    body: new URLSearchParams({ title, productKind: 'random-box', randomBoxRate: '1', price: '1' }).toString(),
   });
   assert.equal(created.statusCode, 302, 'rental admin can create a random-box product');
   const tenantDataPath = tenantDbPath;
@@ -137,8 +142,10 @@ async function exerciseTenantRandomBox() {
   assert.ok(product, 'created product is saved in the tenant database');
   const productId = product.id;
   assert.equal(product?.specialType, 'random-box', 'product type is saved in this tenant database');
-  assert.equal(product?.price, 2);
-  assert.equal(product?.randomBox?.rate, 10);
+  assert.equal(product?.price, 1);
+  assert.equal(product?.randomBox?.rate, 1);
+  const tamperedPrice = await request(`/admin/products/${encodeURIComponent(productId)}/price`, { method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'price=2' });
+  assert.equal(tamperedPrice.statusCode, 400);
 
   const stockResponse = await request(`/admin/products/${encodeURIComponent(productId)}/stock/add`, {
     method: 'POST',
@@ -170,7 +177,7 @@ async function exerciseTenantRandomBox() {
   const draw = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
     method: 'POST',
     headers: { cookie: buyerCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ drawRequestId: requestId, drawCount: '11' }).toString(),
+    body: new URLSearchParams({ drawRequestId: requestId, drawCount: '110' }).toString(),
   });
   assert.equal(draw.statusCode, 302, 'rental customer can draw from the box');
 

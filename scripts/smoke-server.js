@@ -238,180 +238,78 @@ async function checkScheduledProductWorkflow(cookie) {
 }
 
 async function checkRandomBoxWorkflow(adminCookie) {
+  const assert = require('node:assert/strict');
   const form = await fetchOk('/admin/products/new', 'text/html', { cookie: adminCookie });
-  if (!form.body.includes('name="productKind"') || !form.body.includes('name="randomBoxRate"')
-    || !form.body.includes('min="1"') || !form.body.includes('max="10"')
-    || !form.body.includes('admin-random-box-product-fields-v1.css')) {
-    throw new Error('random-box setup form is missing editable rate and price controls');
-  }
+  assert.ok(form.body.includes('name="randomBoxRate"'));
+  assert.ok(form.body.includes('disabled>เรท 2 · รอทำระบบเพิ่ม'));
   const title = 'random-box-smoke-' + process.pid;
-  const created = await request('/admin/products/new', {
-    method: 'POST',
+  const created = await request('/admin/products/new', { method: 'POST',
     headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ title, productKind: 'random-box', randomBoxRate: '10', price: '2' }).toString(),
-  });
+    body: new URLSearchParams({ title, productKind: 'random-box', randomBoxRate: '1', price: '1' }).toString() });
   const productId = decodeURIComponent(created.headers.location?.match(/[?&]productId=([^&#]+)/)?.[1] || '');
-  if (created.statusCode !== 302 || !productId) throw new Error('random-box product could not be created');
+  assert.equal(created.statusCode, 302); assert.ok(productId);
   let data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   let product = data.products.find(item => item.id === productId);
-  if (product?.specialType !== 'random-box' || product.price !== 2 || product.randomBox.rate !== 10
-    || Object.prototype.hasOwnProperty.call(product.randomBox, 'prizes')) {
-    throw new Error('editable random-box settings were not saved');
-  }
-
+  assert.equal(product.price, 1); assert.equal(product.randomBox.rate, 1);
   const priceChange = await request('/admin/products/' + encodeURIComponent(productId) + '/price', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'price=3',
-  });
-  if (priceChange.statusCode !== 200 || !priceChange.body.includes('"price":3')) throw new Error('random-box price could not be edited');
-  await request('/admin/products/' + encodeURIComponent(productId) + '/price', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'price=2',
-  });
-
-  const addStock = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/add', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ bulk: 'George Best:private-prize-secret-1\nCarlos Puyol:private-prize-secret-2\nREMOVE ITEM:private-prize-secret-removed\nDELETE RESERVED:private-prize-secret-reserved' }).toString(),
-  });
-  if (addStock.statusCode !== 302) throw new Error('direct unpriced prize keys could not be added');
+    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'price=3' });
+  assert.equal(priceChange.statusCode, 400);
+  const addStock = await request(`/admin/products/${productId}/stock/add`, { method: 'POST',
+    headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ bulk: 'George Best:private-prize-secret-1\nCarlos Puyol:private-prize-secret-2\nSergio Aguero:private-prize-secret-3\nREMOVE ITEM:private-prize-secret-remove' }).toString() });
+  assert.equal(addStock.statusCode, 302);
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   const removable = data.stockItems.find(item => item.productId === productId && item.username === 'REMOVE ITEM');
-  if (!removable || data.stockItems.filter(item => item.productId === productId && item.status === 'available').length !== 4
-    || data.stockItems.some(item => item.productId === productId && Object.prototype.hasOwnProperty.call(item, 'prizeValue'))) {
-    throw new Error('each direct stock line was not saved as one prize without a value');
-  }
-  const deleted = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/' + encodeURIComponent(removable.id) + '/delete', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-  });
-  if (deleted.statusCode !== 302) throw new Error('unused prize could not be removed');
-  const appended = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/add', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ bulk: 'Sergio Aguero:private-prize-secret-3' }).toString(),
-  });
-  if (appended.statusCode !== 302) throw new Error('new prize could not be appended');
-
-  const adminStock = await fetchOk('/admin/products/' + encodeURIComponent(productId) + '/stock', 'text/html', { cookie: adminCookie });
-  if (!adminStock.body.includes('รายการรางวัลในรอบและที่พร้อมเริ่ม (4)')
-    || !adminStock.body.includes('/stock/delete-all') || !adminStock.body.includes('ลบทั้งหมด')
-    || adminStock.body.includes('randomBoxPrizeValue') || adminStock.body.includes('มูลค่ารางวัลต่อชิ้น')) {
-    throw new Error('admin stock view is missing delete actions or still displays per-key price values');
-  }
-  const deleteAllAvailable = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/delete-all', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: '',
-  });
-  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
-  if (deleteAllAvailable.statusCode !== 302 || data.stockItems.some(item => item.productId === productId)
-    || data.randomBoxPools?.[productId]) throw new Error('delete-all did not empty unsold random-box stock and reset its pool');
-  const restock = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/add', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ bulk: 'George Best:private-prize-secret-1\nCarlos Puyol:private-prize-secret-2\nDELETE RESERVED:private-prize-secret-reserved\nSergio Aguero:private-prize-secret-3' }).toString(),
-  });
-  if (restock.statusCode !== 302) throw new Error('random-box stock could not be restored after delete-all reset');
-  const published = await request('/admin/scheduled-products', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ productId, publishAt: '2020-01-01T00:00' }).toString(),
-  });
-  if (published.statusCode !== 302) throw new Error('random-box product could not be published');
-
+  const deleted = await request(`/admin/products/${productId}/stock/${removable.id}/delete`, { method: 'POST',
+    headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' } });
+  assert.equal(deleted.statusCode, 302);
+  const stockPage = await fetchOk(`/admin/products/${productId}/stock`, 'text/html', { cookie: adminCookie });
+  assert.ok(stockPage.body.includes('เป้าหมายรายรับเฉลี่ย 97.50'));
+  const published = await request('/admin/scheduled-products', { method: 'POST',
+    headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ productId, publishAt: '2020-01-01T00:00' }).toString() });
+  assert.equal(published.statusCode, 302);
   product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
-  const anonymousPage = await fetchOk('/game/' + encodeURIComponent(product.slug), 'text/html');
   const customerCookie = await loginAsCustomer();
-  const productPage = await fetchOk('/game/' + encodeURIComponent(product.slug), 'text/html', { cookie: customerCookie });
-  for (const page of [anonymousPage, productPage]) {
-    if (!page.body.includes('฿2') || page.body.includes('85–110') || page.body.includes('85-110')
-      || page.body.includes('เรทออกรางวัล') || page.body.includes('recoveryTarget')
-      || page.body.includes('ความคืบหน้ารอบ')) {
-      throw new Error('customer storefront price is wrong or a private target is visible');
-    }
-  }
-  if (!productPage.body.includes('name="drawCount" type="number" min="1" max="500"')) {
-    throw new Error('customer cannot choose a draw quantity');
-  }
-
-  const buyerBefore = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).users.find(user => user.username === 'demo').walletBalance;
-  const missId = crypto.randomUUID();
-  const firstDraw = await request('/random-box/' + encodeURIComponent(productId) + '/draw', {
-    method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ drawRequestId: missId, drawCount: '1' }).toString(),
-  });
-  if (firstDraw.statusCode !== 302) throw new Error('the first draw failed');
-  const dataAfterFirst = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
-  const missOrder = dataAfterFirst.orders.find(item => item.id === firstDraw.headers.location.split('/').pop());
-  if (missOrder?.total !== 2 || missOrder.items.length !== 1 || missOrder.items[0].randomBoxDraw.isWin
-    || !missOrder.items[0].randomBoxDraw.missMessage) {
-    throw new Error('one draw did not charge the saved price and show its loss result');
-  }
-  const missPage = await fetchOk(firstDraw.headers.location, 'text/html', { cookie: customerCookie });
-  if (!missPage.body.includes('ไม่ได้รับรางวัล') || !missPage.body.includes('object-contain object-center')) {
-    throw new Error('loss result or full product image is missing');
-  }
+  const productPage = await fetchOk(`/game/${product.slug}`, 'text/html', { cookie: customerCookie });
+  assert.ok(productPage.body.includes('เรทและราคาอื่น: รอทำระบบเพิ่ม'));
+  assert.ok(productPage.body.includes('กล่องสะสมไม่มีรางวัลครบ 110 บาท'));
+  assert.ok(!productPage.body.includes('totalCollectedCents'));
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
-  const reservedToDelete = data.stockItems.find(item => item.productId === productId
-    && item.username === 'DELETE RESERVED' && item.status === 'reserved');
-  const deleteReserved = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/'
-    + encodeURIComponent(reservedToDelete?.id || 'missing') + '/delete', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-  });
-  data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
-  const reservedPool = data.randomBoxPools?.[productId];
-  if (deleteReserved.statusCode !== 302 || data.stockItems.some(item => item.id === reservedToDelete?.id)
-    || reservedPool?.initialCount !== 3 || reservedPool.remainingStockIds.length !== 3
-    || reservedPool.cancelledPrizeCount !== 1) {
-    throw new Error('deleting a reserved random-box prize did not deduct it from the active pool');
-  }
-
+  const buyerBefore = data.users.find(user => user.username === 'demo').walletBalance;
   const batchId = crypto.randomUUID();
-  const batch = await request('/random-box/' + encodeURIComponent(productId) + '/draw', {
-    method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ drawRequestId: batchId, drawCount: '500' }).toString(),
-  });
-  if (batch.statusCode !== 302) throw new Error('the large draw request failed');
+  const batch = await request(`/random-box/${productId}/draw`, { method: 'POST',
+    headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ drawRequestId: batchId, drawCount: '500' }).toString() });
+  assert.equal(batch.statusCode, 302);
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   const order = data.orders.find(item => item.id === batch.headers.location.split('/').pop());
-  const buyerAfter = data.users.find(user => user.username === 'demo');
+  assert.ok(order?.randomBoxOrder);
+  assert.ok(order.items.length <= 330, 'three prizes cannot have a global drought longer than 110');
+  assert.equal(order.total, order.items.length);
+  assert.ok(order.items.every(item => item.price === 1));
+  assert.equal(order.items.reduce((sum, item) => sum + item.randomBoxDraw.prizeCount, 0), 3);
   const boxStock = data.stockItems.filter(item => item.productId === productId);
-  if (!order?.randomBoxOrder || order.items.length >= 500 || order.total !== order.items.length * 2
-    || order.items.some(item => item.price !== 2 || !item.randomBoxDraw)
-    || !order.items.some(item => item.randomBoxDraw.isWin)
-    || order.items.reduce((sum, item) => sum + item.randomBoxDraw.prizeCount, 0) !== 3
-    || boxStock.length !== 3 || boxStock.some(item => item.status !== 'sold')
-    || buyerAfter.walletBalance !== buyerBefore - order.total - 2) {
-    throw new Error('the shared draw did not pay for and consume exactly the directly stocked rewards');
-  }
+  assert.ok(boxStock.every(item => item.status === 'sold'));
+  const buyerAfter = data.users.find(user => user.username === 'demo').walletBalance;
+  assert.equal(buyerAfter, buyerBefore - order.total);
+  assert.equal(data.randomBoxGachaStates[productId].totalPrizeItems, 3);
   const orderPage = await fetchOk(batch.headers.location, 'text/html', { cookie: customerCookie });
+  assert.ok(orderPage.body.includes('George Best') && orderPage.body.includes('Carlos Puyol') && orderPage.body.includes('Sergio Aguero'));
+  assert.ok(!orderPage.body.includes('private-prize-secret') && !orderPage.body.includes('REMOVE ITEM'));
   const rows = orderPage.body.match(/<li[^>]*data-random-box-draw-row=/g) || [];
-  const resultOrder = [...orderPage.body.matchAll(/data-random-box-result-order="(win|miss)"/g)].map(match => match[1]);
-  const firstMissIndex = resultOrder.indexOf('miss');
-  if (resultOrder.length !== order.items.length || firstMissIndex < 1
-    || resultOrder.slice(0, firstMissIndex).some(status => status !== 'win')
-    || resultOrder.slice(firstMissIndex).some(status => status !== 'miss')) {
-    throw new Error('random-box order page did not list all winning draws before all misses');
-  }
-  if (rows.length !== order.items.length || !orderPage.body.includes('ได้รับรางวัล')
-    || !orderPage.body.includes('ไม่ได้รับรางวัล') || !orderPage.body.includes('ติดต่อร้านเพื่อรับสินค้า')
-    || (orderPage.body.match(/data-random-box-product-image/g) || []).length !== 1
-    || !orderPage.body.includes('George Best') || !orderPage.body.includes('Carlos Puyol')
-    || !orderPage.body.includes('Sergio Aguero')
-    || orderPage.body.includes('private-prize-secret') || orderPage.body.includes('REMOVE ITEM')
-    || orderPage.body.includes('recoveryTargetDraws')) {
-    throw new Error('order history leaks secrets or omits outcomes and the contact action');
-  }
-
-  const replay = await request('/random-box/' + encodeURIComponent(productId) + '/draw', {
-    method: 'POST', headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ drawRequestId: batchId, drawCount: '500' }).toString(),
-  });
+  assert.equal(rows.length, order.items.length);
+  const replay = await request(`/random-box/${productId}/draw`, { method: 'POST',
+    headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ drawRequestId: batchId, drawCount: '500' }).toString() });
+  assert.equal(replay.headers.location, batch.headers.location);
   const afterReplay = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
-  if (replay.headers.location !== batch.headers.location
-    || afterReplay.users.find(user => user.username === 'demo').walletBalance !== buyerAfter.walletBalance
-    || afterReplay.orders.filter(item => item.randomBoxRequestId === batchId).length !== 1) {
-    throw new Error('replaying a random-box batch charged or consumed stock twice');
-  }
-
-  const delivered = boxStock.find(item => item.status === 'sold');
-  const deleteDelivered = await request('/admin/products/' + encodeURIComponent(productId) + '/stock/' + encodeURIComponent(delivered.id) + '/delete', {
-    method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-  });
-  const stillStored = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).stockItems.find(item => item.id === delivered.id);
-  if (deleteDelivered.statusCode !== 302 || stillStored?.status !== 'sold') throw new Error('awarded inventory was deleted from purchase history');
+  assert.equal(afterReplay.users.find(user => user.username === 'demo').walletBalance, buyerAfter);
+  assert.equal(afterReplay.orders.filter(item => item.randomBoxRequestId === batchId).length, 1);
+  const delivered = boxStock[0];
+  await request(`/admin/products/${productId}/stock/${delivered.id}/delete`, { method: 'POST',
+    headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' } });
+  assert.equal(JSON.parse(fs.readFileSync(testDbPath, 'utf8')).stockItems.find(item => item.id === delivered.id).status, 'sold');
 }
 
 async function loginAsCustomer() {
@@ -492,7 +390,9 @@ async function crawlAdmin(cookie) {
       if (!checked.has(nextPath)) queue.push(nextPath);
     }
   }
-  if (checked.size < 15) throw new Error(`admin crawl covered only ${checked.size} pages`);  await fetchOk('/js/admin-theme-bootstrap-v1.js', 'application/javascript');  return checked.size;
+  if (checked.size < 15) throw new Error(`admin crawl covered only ${checked.size} pages`);
+  await fetchOk('/js/admin-theme-bootstrap-v1.js', 'application/javascript');
+  return checked.size;
 }
 
 async function checkBulkPrice(cookie) {
@@ -679,6 +579,11 @@ async function run() {
     }
     if (!ready) throw new Error(`server did not become healthy: ${lastError && lastError.message}\n${output}`);
     await fetchOk('/health', 'application/json');
+    if (process.env.SMOKE_RANDOM_BOX_ONLY === '1') {
+      await checkRandomBoxWorkflow(await loginAsAdmin());
+      console.log('Main storefront random-box HTTP checks passed');
+      return;
+    }
     const home = await fetchOk('/', 'text/html');
     if (!home.body.includes('/css/tailwind.generated.css')) throw new Error('home is missing the precompiled Tailwind stylesheet');
     if (firstPartyStylesheetCount(home.body) > 6) throw new Error(`home loaded ${firstPartyStylesheetCount(home.body)} first-party stylesheets instead of using the compact bundle`);

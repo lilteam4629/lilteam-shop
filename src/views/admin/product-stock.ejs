@@ -22,11 +22,11 @@
 <% if (isRandomBox) { %>
   <section id="random-box-stock-info" class="mb-6 rounded-2xl border border-[var(--gold)]/30 bg-[var(--card)] p-4 sm:p-5 shadow-sm" aria-labelledby="random-box-stock-info-title">
     <div class="flex flex-wrap items-start justify-between gap-3">
-      <div><h2 id="random-box-stock-info-title" class="font-bold text-sm sm:text-base text-[var(--text)]">สต็อกรางวัลกล่องสุ่ม</h2><p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">คีย์/ไอดีที่ใส่ในหน้านี้คือรางวัลทั้งหมด · 1 บรรทัดนับเป็น 1 ชิ้น · สต็อกที่เพิ่มระหว่างรอบจะเริ่มในชุดถัดไป</p></div>
-      <span class="rounded-full bg-[var(--gold)]/10 px-3 py-1.5 text-xs font-bold text-[var(--gold-text)]">฿<%= Number(product.price || 1).toLocaleString('th-TH') %> / ครั้ง</span>
+      <div><h2 id="random-box-stock-info-title" class="font-bold text-sm sm:text-base text-[var(--text)]">สต็อกรางวัลกล่องสุ่ม</h2><p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">คีย์/ไอดีที่ใส่ในหน้านี้คือรางวัลทั้งหมด · 1 บรรทัดนับเป็น 1 ชิ้น · สต็อกที่เพิ่มพร้อมร่วมสุ่มทันที · เติมสต็อกแล้วบัญชีสะสมของกล่องยังคงอยู่</p></div>
+      <span class="rounded-full bg-[var(--gold)]/10 px-3 py-1.5 text-xs font-bold text-[var(--gold-text)]">฿1 / ครั้ง</span>
     </div>
     <div class="mt-4 grid gap-3 sm:grid-cols-2">
-      <div class="rounded-xl bg-[var(--input)] px-4 py-3"><span class="block text-[11px] text-[var(--text-4)]">จำนวนรางวัลในสต็อก</span><strong class="mt-1 block text-base font-black text-[var(--text)]"><%= randomBoxAvailablePrizeCount.toLocaleString('th-TH') %> ชิ้น</strong><span class="mt-1 block text-[11px] text-[var(--text-3)]">พร้อมเริ่มรอบใหม่ <%= availableStockItems.length.toLocaleString('th-TH') %> ชิ้น · อยู่ในรอบปัจจุบัน <%= reservedStockCount.toLocaleString('th-TH') %> ชิ้น</span><% if (randomBoxPoolSummary) { %><span class="mt-1 block text-[11px] text-[var(--text-4)]">รอบปัจจุบันเริ่มจาก <%= randomBoxPoolSummary.initialCount.toLocaleString('th-TH') %> ชิ้น · เหลือ <%= randomBoxPoolSummary.remainingCount.toLocaleString('th-TH') %> ชิ้น</span><% } %></div>
+      <div class="rounded-xl bg-[var(--input)] px-4 py-3"><span class="block text-[11px] text-[var(--text-4)]">จำนวนรางวัลในสต็อก</span><strong class="mt-1 block text-base font-black text-[var(--text)]"><%= randomBoxAvailablePrizeCount.toLocaleString('th-TH') %> ชิ้น</strong><span class="mt-1 block text-[11px] text-[var(--text-3)]">พร้อมสุ่ม <%= availableStockItems.length.toLocaleString('th-TH') %> ชิ้น · สต็อกจองเดิม <%= reservedStockCount.toLocaleString('th-TH') %> ชิ้น</span><% if (randomBoxPoolSummary) { %><span class="mt-1 block text-[11px] text-[var(--text-4)]">เรท 1 · จ่ายแล้ว <%= randomBoxPoolSummary.totalPrizeItems.toLocaleString('th-TH') %> ชิ้น · เป้าหมายรายรับเฉลี่ย 97.50 บาทต่อชิ้น · ยอดไม่ออกรางวัลของกล่อง <%= randomBoxPoolSummary.drySpend.toLocaleString('th-TH') %>/110 บาท</span><% } %></div>
       <form action="/admin/products/<%= product.id %>/stock/random-box-message" method="post" class="rounded-xl border border-[var(--border-light)] bg-[var(--card)] p-3.5">
         <label for="random-box-miss-message" class="block text-xs font-bold text-[var(--text)]">ข้อความเมื่อสุ่มไม่ได้รางวัล</label>
         <textarea id="random-box-miss-message" name="randomBoxMissMessage" rows="2" maxlength="300" placeholder="ยังไม่ได้รับรางวัลในครั้งนี้" class="mt-2 w-full resize-y rounded-lg border border-[var(--border-light)] bg-[var(--input)] px-3 py-2 text-xs leading-relaxed text-[var(--text)] outline-none transition focus:border-[var(--gold)]"><%= randomBoxMissMessage %></textarea>
@@ -81,11 +81,11 @@
   <div class="lg:col-span-2 bg-[var(--card)] border border-[var(--border)] rounded-2xl overflow-hidden shadow-sm">
     <div class="p-4 border-b border-[var(--border)] flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div class="min-w-0">
-        <h3 class="font-bold text-sm text-[var(--text)]"><%= isRandomBox ? 'รายการรางวัลในรอบและที่พร้อมเริ่ม' : 'รายการคีย์ / ไอดีที่พร้อมขาย' %> (<%= isRandomBox ? visibleStockItems.length : availableStockItems.length %>)</h3>
+        <h3 class="font-bold text-sm text-[var(--text)]"><%= isRandomBox ? 'รายการรางวัลพร้อมสุ่ม' : 'รายการคีย์ / ไอดีที่พร้อมขาย' %> (<%= isRandomBox ? visibleStockItems.length : availableStockItems.length %>)</h3>
         <span class="mt-1 flex flex-wrap gap-x-3 text-xs text-[var(--text-4)]"><% if (reservedStockCount) { %><span>จองรางวัลกล่องสุ่ม: <b class="text-amber-500"><%= reservedStockCount %></b></span><% } %><span>ขายแล้วซ่อนจากรายการ: <b class="text-rose-400"><%= soldStockCount %></b></span></span>
       </div>
       <% if (isRandomBox && visibleStockItems.length) { %>
-        <form action="/admin/products/<%= product.id %>/stock/delete-all" method="post" class="shrink-0" data-confirm="ลบรางวัลที่ยังไม่ได้จ่ายทั้งหมด <%= visibleStockItems.length %> ชิ้นออกจากสต็อกใช่ไหม? ระบบจะหักจำนวนและปรับรอบสะสมให้ รางวัลที่จ่ายให้ลูกค้าแล้วจะยังอยู่ในประวัติ">
+        <form action="/admin/products/<%= product.id %>/stock/delete-all" method="post" class="shrink-0" data-confirm="ลบรางวัลที่ยังไม่ได้จ่ายทั้งหมด <%= visibleStockItems.length %> ชิ้นออกจากสต็อกใช่ไหม? ระบบจะปรับจำนวนสต็อกและเก็บบัญชีสะสมเดิมไว้ รางวัลที่จ่ายให้ลูกค้าแล้วจะยังอยู่ในประวัติ">
           <button type="submit" class="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-rose-500/30 px-3 py-2 text-xs font-bold text-rose-500 transition hover:bg-rose-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">
             <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             ลบทั้งหมด
@@ -122,7 +122,7 @@
                   </span>
                 <% } else if (s.status === 'reserved') { %>
                   <span class="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-600 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
-                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> อยู่ในรอบปัจจุบัน
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> สต็อกจองเดิม
                   </span>
                 <% } else { %>
                   <span class="inline-flex items-center gap-1 bg-rose-500/10 border border-rose-500/30 text-rose-400 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">

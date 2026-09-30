@@ -748,6 +748,7 @@ function migrateSchema(db) {
     db.randomBoxRounds = {};
     changed = true;
   }
+  if (require('../services/random-box').migrateData(db)) changed = true;
   if (!db.licensePlans) { db.licensePlans = []; changed = true; }
   if (!db.licenseSales) { db.licenseSales = []; changed = true; }
   if (!db.shops) { db.shops = []; changed = true; }

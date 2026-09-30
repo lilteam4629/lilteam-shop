@@ -1,20 +1,34 @@
 const crypto = require('crypto');
-
+const gacha = require('./gacha');
 const RANDOM_BOX_KIND = 'random-box';
 const RANDOM_BOX_PRICE = 1;
 const RANDOM_BOX_MIN_RATE = 1;
-const RANDOM_BOX_MAX_RATE = 10;
+const RANDOM_BOX_MAX_RATE = 1;
 const MAX_RANDOM_BOX_DRAWS = 500;
-const MAX_RANDOM_BOX_PRICE = 100000000;
+const MAX_RANDOM_BOX_PRICE = 1;
 const MAX_RANDOM_BOX_STOCK = 50000;
-const RANDOM_BOX_PAYOUT_SCHEDULE_VERSION = 2;
 const DEFAULT_RANDOM_BOX_RATE = 1;
 const RANDOM_BOX_MIN_TARGET = 85;
 const RANDOM_BOX_MAX_TARGET = 110;
 const MAX_RANDOM_BOX_PRIZE_ITEMS = 5;
 const DEFAULT_MISS_MESSAGE = 'ยังไม่ได้รับรางวัลในครั้งนี้';
 const MAX_MISS_MESSAGE_LENGTH = 300;
-const POOL_HISTORY_LIMIT = 500;
+const PENDING_SYSTEM_MESSAGE = 'รอทำระบบเพิ่ม';
+
+function normalizeRate() { return 1; }
+function getRateConfig() { return { rate: 1, minTarget: 85, maxTarget: 110, targetRevenue: 97.50, pityLimit: 110 }; }
+function parseRate() { return 1; }
+function validateRate(value) { return String(value ?? '').trim() && Number(value) === 1 ? null : 'ใช้ได้เฉพาะเรท 1 · รอทำระบบเพิ่ม'; }
+function parsePrice(value) { return String(value ?? '').trim() && Number(value) === 1 ? 1 : null; }
+function validatePrice(value) { return parsePrice(value) === 1 ? null : 'ราคากล่องสุ่มต้องเป็น 1 บาทเท่านั้น · รอทำระบบเพิ่ม'; }
+function configuredPrice() { return 1; }
+function getDrawPrice() { return 1; }
+function randomTarget(rng = crypto.randomInt) { return rng(85, 111); }
+function randomAwardCount(remaining, rng = crypto.randomInt) {
+  let count = Math.min(1, Math.max(0, remaining));
+  while (count < Math.min(5, remaining) && rng(0, 5) < 2) count++;
+  return count;
+}
 
 function normalizeMissMessage(message) {
   return String(message ?? '').replace(/\r\n?/g, '\n').trim().slice(0, MAX_MISS_MESSAGE_LENGTH);
@@ -38,66 +52,6 @@ function supportsRandomBox() {
   return true;
 }
 
-function normalizeRate(rate) {
-  const value = Number(rate);
-  if (!Number.isInteger(value) || value < RANDOM_BOX_MIN_RATE || value > RANDOM_BOX_MAX_RATE) return DEFAULT_RANDOM_BOX_RATE;
-  return value;
-}
-
-function getRateConfig(rate) {
-  const normalizedRate = normalizeRate(rate);
-  // Keep the shop's established rate examples (1 => 85–110, 2 => 45–60,
-  // 3 => 30–40) and scale the remaining supported rates from the same base.
-  let minTarget;
-  let maxTarget;
-  if (normalizedRate === 1) [minTarget, maxTarget] = [85, 110];
-  else if (normalizedRate === 2) [minTarget, maxTarget] = [45, 60];
-  else if (normalizedRate === 3) [minTarget, maxTarget] = [30, 40];
-  else {
-    minTarget = Math.max(1, Math.ceil(RANDOM_BOX_MIN_TARGET / normalizedRate));
-    maxTarget = Math.max(minTarget, Math.floor(RANDOM_BOX_MAX_TARGET / normalizedRate));
-  }
-  return { rate: normalizedRate, minTarget, maxTarget };
-}
-
-function randomIntInclusive(randomInt, min, max) {
-  return randomInt(min, max + 1);
-}
-
-function randomTarget(randomInt = crypto.randomInt, rate = DEFAULT_RANDOM_BOX_RATE) {
-  const { minTarget, maxTarget } = getRateConfig(rate);
-  return randomIntInclusive(randomInt, minTarget, maxTarget);
-}
-
-function parseRate(body = {}) {
-  return normalizeRate(body.randomBoxRate);
-}
-
-function validateRate(rate) {
-  const raw = String(rate == null ? '' : rate).trim();
-  const value = Number(raw);
-  if (!raw || !Number.isInteger(value) || value < RANDOM_BOX_MIN_RATE || value > RANDOM_BOX_MAX_RATE) {
-    return `เรทกล่องสุ่มต้องเป็นจำนวนเต็ม ${RANDOM_BOX_MIN_RATE}–${RANDOM_BOX_MAX_RATE}`;
-  }
-  return null;
-}
-
-function parsePrice(value) {
-  const raw = String(value == null ? '' : value).trim();
-  const price = Number(raw);
-  if (!raw || !Number.isSafeInteger(price) || price < 1 || price > MAX_RANDOM_BOX_PRICE) return null;
-  return price;
-}
-
-function validatePrice(value) {
-  return parsePrice(value) === null
-    ? `ราคาสุ่มต้องเป็นจำนวนเต็มตั้งแต่ 1 ถึง ${MAX_RANDOM_BOX_PRICE.toLocaleString('th-TH')} บาท`
-    : null;
-}
-
-function configuredPrice(product) {
-  return parsePrice(product?.price) ?? RANDOM_BOX_PRICE;
-}
 
 function stockItemsOldestFirst(stockItems = [], productId = null) {
   if (!Array.isArray(stockItems)) return [];
@@ -139,52 +93,6 @@ function fail(code, message) {
   throw error;
 }
 
-function poolMap(data) {
-  data.randomBoxPools ||= {};
-  return data.randomBoxPools;
-}
-
-function getActivePool(data, productId) {
-  return data?.randomBoxPools?.[String(productId)] || null;
-}
-
-function getDrawPrice(data, product) {
-  return getActivePool(data, product?.id)?.price || configuredPrice(product);
-}
-
-function poolRemainingStock(data, pool) {
-  const byId = new Map((data.stockItems || []).map(stock => [String(stock.id), stock]));
-  return (pool?.remainingStockIds || [])
-    .map(id => byId.get(String(id)))
-    .filter(stock => stock && stock.status === 'reserved' && String(stock.randomBoxPoolId) === String(pool.id));
-}
-
-function availablePrizeStockCount(data, boxProduct) {
-  if (!boxProduct) return 0;
-  const active = getActivePool(data, boxProduct.id);
-  const activeCount = active ? poolRemainingStock(data, active).length : 0;
-  const pendingCount = availableStockCount(data.stockItems, boxProduct.id);
-  const legacyCount = !active && data.randomBoxRounds?.[String(boxProduct.id)]
-    ? (data.stockItems || []).filter(stock => stock.status === 'reserved'
-      && String(stock.productId) === String(boxProduct.id)
-      && String(stock.randomBoxReservedFor) === String(boxProduct.id)).length
-    : 0;
-  return activeCount + pendingCount + legacyCount;
-}
-
-function hasAvailablePrizeBundle(data, boxProduct) {
-  return availablePrizeStockCount(data, boxProduct) > 0;
-}
-
-function getPoolSummary(data, product) {
-  const pool = getActivePool(data, product?.id);
-  if (!pool) return null;
-  return {
-    initialCount: Number(pool.initialCount) || 0,
-    remainingCount: poolRemainingStock(data, pool).length,
-    phase: pool.phase === 'recovery' ? 'recovery' : 'entry',
-  };
-}
 
 function releaseRoundPrizeReservation(data, productId, round) {
   const reservedIds = new Set((round?.reservedPrizeItems || []).map(item => String(item.stockItemId || item.id || '')));
@@ -198,110 +106,6 @@ function releaseRoundPrizeReservation(data, productId, round) {
   });
 }
 
-function randomAwardCount(remainingCount, randomInt) {
-  const maximum = Math.min(MAX_RANDOM_BOX_PRIZE_ITEMS, remainingCount);
-  if (maximum <= 1) return maximum;
-  const roll = randomInt(1, 101);
-  const weighted = roll <= 60 ? 1 : roll <= 80 ? 2 : roll <= 92 ? 3 : roll <= 98 ? 4 : 5;
-  return Math.min(maximum, weighted);
-}
-
-function scheduleNextRecoveryAward(pool, remainingCount, randomInt) {
-  const remaining = Math.max(0, Math.floor(Number(remainingCount) || 0));
-  if (!remaining) {
-    pool.recoveryMilestones = [];
-    pool.recoveryMilestoneIndex = 0;
-    pool.payoutScheduleVersion = RANDOM_BOX_PAYOUT_SCHEDULE_VERSION;
-    return;
-  }
-
-  const { minTarget, maxTarget } = getRateConfig(pool.rate);
-  const progress = Math.max(0, Math.floor(Number(pool.recoveryProgressDraws) || 0));
-  const interval = randomIntInclusive(randomInt, minTarget, maxTarget);
-  const atDraws = progress + interval;
-  pool.recoveryTargetDraws = atDraws;
-  pool.recoveryMilestones = [{ atDraws, count: randomAwardCount(remaining, randomInt) }];
-  pool.recoveryMilestoneIndex = 0;
-  pool.payoutScheduleVersion = RANDOM_BOX_PAYOUT_SCHEDULE_VERSION;
-}
-
-function ensureCurrentRecoverySchedule(data, pool, randomInt) {
-  if (pool?.phase !== 'recovery'
-    || pool.payoutScheduleVersion === RANDOM_BOX_PAYOUT_SCHEDULE_VERSION) return;
-  const remainingCount = poolRemainingStock(data, pool).length;
-  if (!remainingCount) {
-    scheduleNextRecoveryAward(pool, 0, randomInt);
-    return;
-  }
-
-  const { minTarget, maxTarget } = getRateConfig(pool.rate);
-  const progress = Math.max(0, Math.floor(Number(pool.recoveryProgressDraws) || 0));
-  const firstPossibleTarget = Math.max(minTarget, progress + 1);
-  const target = firstPossibleTarget <= maxTarget
-    ? randomIntInclusive(randomInt, firstPossibleTarget, maxTarget)
-    : progress + 1;
-  pool.recoveryTargetDraws = target;
-  pool.recoveryMilestones = [{ atDraws: target, count: randomAwardCount(remainingCount, randomInt) }];
-  pool.recoveryMilestoneIndex = 0;
-  pool.payoutScheduleVersion = RANDOM_BOX_PAYOUT_SCHEDULE_VERSION;
-}
-
-function cleanupLegacyRound(data, productId) {
-  const rounds = data.randomBoxRounds;
-  const oldRound = rounds?.[String(productId)];
-  releaseRoundPrizeReservation(data, productId, oldRound || null);
-  if (rounds) delete rounds[String(productId)];
-}
-
-function createPool(data, product, now, randomInt, genId) {
-  const productId = String(product.id);
-  cleanupLegacyRound(data, productId);
-  const items = availableStockItems(data.stockItems, productId);
-  if (!items.length) return null;
-  if (items.length > MAX_RANDOM_BOX_STOCK) fail('STOCK_LIMIT', 'สต็อกรางวัลเกินจำนวนที่ระบบรองรับ');
-  const rate = normalizeRate(product.randomBox?.rate);
-  const price = configuredPrice(product);
-  const { minTarget, maxTarget } = getRateConfig(rate);
-  const id = genId(12);
-  const initialCount = items.length;
-  const pool = {
-    id,
-    productId,
-    initialCount,
-    initialStockIds: items.map(stock => String(stock.id)),
-    remainingStockIds: items.map(stock => String(stock.id)),
-    rate,
-    price,
-    phase: 'entry',
-    entryTargetDraws: randomIntInclusive(randomInt, minTarget, maxTarget),
-    entryProgressDraws: 0,
-    recoveryTargetDraws: 0,
-    recoveryProgressDraws: 0,
-    recoveryMilestones: [],
-    recoveryMilestoneIndex: 0,
-    payoutScheduleVersion: RANDOM_BOX_PAYOUT_SCHEDULE_VERSION,
-    totalDraws: 0,
-    totalCollected: 0,
-    totalAwards: 0,
-    totalPrizeItems: 0,
-    entryPrizeCount: 0,
-    cancelledPrizeCount: 0,
-    createdAt: new Date(now).toISOString(),
-  };
-  items.forEach(stock => {
-    stock.status = 'reserved';
-    stock.randomBoxReservedFor = productId;
-    stock.randomBoxPoolId = id;
-  });
-  poolMap(data)[productId] = pool;
-  return pool;
-}
-
-function beginRecovery(pool, remainingCount, randomInt) {
-  pool.recoveryProgressDraws = 0;
-  pool.phase = 'recovery';
-  scheduleNextRecoveryAward(pool, remainingCount, randomInt);
-}
 
 function stockPrize(stock, product, orderId) {
   stock.status = 'sold';
@@ -316,138 +120,6 @@ function stockPrize(stock, product, orderId) {
   };
 }
 
-function takePrizeItems(data, pool, count, product, orderId) {
-  const remaining = poolRemainingStock(data, pool);
-  const takeCount = Math.min(count, remaining.length);
-  const chosen = [];
-  for (let index = 0; index < takeCount; index += 1) {
-    // Admin stock rows are displayed oldest-first, so the newest item sits at
-    // the bottom. Consume that last item first to keep payouts bottom-to-top.
-    const stock = remaining.pop();
-    chosen.push(stockPrize(stock, product, orderId));
-    pool.remainingStockIds = pool.remainingStockIds.filter(id => String(id) !== String(stock.id));
-  }
-  return chosen;
-}
-
-function recordPoolHistory(data, pool, finishedAt) {
-  data.randomBoxPoolHistory ||= [];
-  data.randomBoxPoolHistory.push({
-    poolId: pool.id,
-    productId: pool.productId,
-    initialCount: pool.initialCount,
-    rate: pool.rate,
-    price: pool.price,
-    entryTargetDraws: pool.entryTargetDraws,
-    entryProgressDraws: pool.entryProgressDraws,
-    recoveryTargetDraws: pool.recoveryTargetDraws,
-    recoveryProgressDraws: pool.recoveryProgressDraws,
-    recoveryMilestones: pool.recoveryMilestones.map(milestone => ({ ...milestone })),
-    totalDraws: pool.totalDraws,
-    totalCollected: pool.totalCollected,
-    totalAwards: pool.totalAwards,
-    totalPrizeItems: pool.totalPrizeItems,
-    entryPrizeCount: pool.entryPrizeCount,
-    cancelledPrizeCount: Number(pool.cancelledPrizeCount) || 0,
-    createdAt: pool.createdAt,
-    finishedAt,
-  });
-  if (data.randomBoxPoolHistory.length > POOL_HISTORY_LIMIT) {
-    data.randomBoxPoolHistory.splice(0, data.randomBoxPoolHistory.length - POOL_HISTORY_LIMIT);
-  }
-}
-
-function replanRecoveryAfterPrizeRemoval(data, pool, removedCount, randomInt) {
-  if (!pool || pool.phase !== 'recovery' || removedCount < 1) return;
-  const remainingCount = poolRemainingStock(data, pool).length;
-  const progress = Math.max(0, Number(pool.recoveryProgressDraws) || 0);
-  if (!remainingCount) {
-    pool.recoveryMilestones = [];
-    pool.recoveryMilestoneIndex = 0;
-    return;
-  }
-
-  if (pool.payoutScheduleVersion !== RANDOM_BOX_PAYOUT_SCHEDULE_VERSION) {
-    ensureCurrentRecoverySchedule(data, pool, randomInt);
-    return;
-  }
-
-  const currentMilestone = pool.recoveryMilestones?.[pool.recoveryMilestoneIndex]
-    || pool.recoveryMilestones?.[0];
-  const target = Math.max(progress + 1, Math.floor(Number(currentMilestone?.atDraws) || progress + 1));
-  const count = Math.min(remainingCount, Math.max(1, Math.floor(Number(currentMilestone?.count) || 1)));
-  pool.recoveryTargetDraws = target;
-  pool.recoveryMilestones = [{ atDraws: target, count }];
-  pool.recoveryMilestoneIndex = 0;
-}
-
-function deletePrizeStock(data, product, {
-  stockIds = null,
-  now = Date.now(),
-  randomInt = crypto.randomInt,
-} = {}) {
-  if (!data || !product || product.specialType !== RANDOM_BOX_KIND) {
-    return { deletedCount: 0, removedReservedCount: 0, resetPool: false, stockEmpty: false };
-  }
-
-  data.stockItems ||= [];
-  const productId = String(product.id);
-  const pools = poolMap(data);
-  const pool = getActivePool(data, productId);
-  const activePoolIds = new Set((pool?.remainingStockIds || []).map(String));
-  const requestedIds = stockIds == null ? null : new Set(stockIds.map(String));
-  const isActiveReservedPrize = stock => Boolean(pool
-    && stock.status === 'reserved'
-    && activePoolIds.has(String(stock.id))
-    && String(stock.randomBoxPoolId) === String(pool.id));
-  const isLegacyReservedPrize = stock => stock.status === 'reserved'
-    && String(stock.randomBoxReservedFor) === productId
-    && !isActiveReservedPrize(stock);
-
-  const targets = data.stockItems.filter(stock => String(stock.productId) === productId
-    && (!requestedIds || requestedIds.has(String(stock.id)))
-    && (stock.status === 'available' || isActiveReservedPrize(stock) || isLegacyReservedPrize(stock)));
-  if (!targets.length) return { deletedCount: 0, removedReservedCount: 0, resetPool: false, stockEmpty: availablePrizeStockCount(data, product) < 1 };
-
-  const removedIds = new Set(targets.map(stock => String(stock.id)));
-  const removedPoolIds = new Set(targets.filter(isActiveReservedPrize).map(stock => String(stock.id)));
-  const removedReservedCount = removedPoolIds.size;
-  const removedLegacyCount = targets.filter(isLegacyReservedPrize).length;
-
-  if (removedLegacyCount) cleanupLegacyRound(data, productId);
-  data.stockItems = data.stockItems.filter(stock => !removedIds.has(String(stock.id)));
-
-  let resetPool = false;
-  if (pool && removedReservedCount) {
-    pool.initialStockIds = (pool.initialStockIds || []).filter(id => !removedPoolIds.has(String(id)));
-    pool.remainingStockIds = (pool.remainingStockIds || []).filter(id => !removedPoolIds.has(String(id)));
-    const remainingCount = poolRemainingStock(data, pool).length;
-    pool.initialCount = Math.max(
-      (Number(pool.totalPrizeItems) || 0) + remainingCount,
-      (Number(pool.initialCount) || 0) - removedReservedCount,
-    );
-    pool.cancelledPrizeCount = (Number(pool.cancelledPrizeCount) || 0) + removedReservedCount;
-    replanRecoveryAfterPrizeRemoval(data, pool, removedReservedCount, randomInt);
-    if (!remainingCount) {
-      recordPoolHistory(data, pool, new Date(now).toISOString());
-      delete pools[productId];
-      resetPool = true;
-    }
-  }
-
-  const stockEmpty = availablePrizeStockCount(data, product) < 1;
-  if (stockEmpty) {
-    const remainingPool = getActivePool(data, productId);
-    if (remainingPool && !poolRemainingStock(data, remainingPool).length) {
-      recordPoolHistory(data, remainingPool, new Date(now).toISOString());
-      delete pools[productId];
-      resetPool = true;
-    }
-    if (data.randomBoxRounds) delete data.randomBoxRounds[productId];
-  }
-
-  return { deletedCount: targets.length, removedReservedCount, resetPool, stockEmpty };
-}
 
 function isPublished(product, now) {
   if (!product || product.status !== 'active') return false;
@@ -457,190 +129,160 @@ function isPublished(product, now) {
   return Number.isFinite(time) && time <= now;
 }
 
-function drawRandomBox(data, {
-  productId,
-  userId,
-  idempotencyKey,
-  drawCount = 1,
-  now = Date.now(),
-  randomInt = crypto.randomInt,
-  genId = length => crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length),
-}) {
-  const requestedDrawCount = parseDrawCount(drawCount);
-  data.orders ||= [];
-  data.walletTransactions ||= [];
-  data.stockItems ||= [];
-  data.products ||= [];
-  const pools = poolMap(data);
-  const previous = data.walletTransactions.find(transaction => transaction.type === 'random_box_draw'
-    && String(transaction.userId) === String(userId)
-    && String(transaction.productId) === String(productId)
-    && transaction.idempotencyKey === idempotencyKey);
-  if (previous?.orderId) return { orderId: previous.orderId, result: previous.randomBoxResult, replay: true };
 
-  const product = data.products.find(item => String(item.id) === String(productId));
+function getActivePool(data, productId) { return data.randomBoxPools?.[String(productId)] || null; }
+function availablePrizeStockCount(data, product) {
+  if (!product) return 0;
+  const legacy = getActivePool(data, product.id);
+  return (data.stockItems || []).filter(stock => String(stock.productId) === String(product.id)
+    && (stock.status === 'available' || (stock.status === 'reserved'
+      && (String(stock.randomBoxReservedFor) === String(product.id)
+        || (legacy && String(stock.randomBoxPoolId) === String(legacy.id)))))).length;
+}
+function hasAvailablePrizeBundle(data, product) { return availablePrizeStockCount(data, product) > 0; }
+function getPoolSummary(data, product) {
+  const state = data.randomBoxGachaStates?.[String(product?.id)];
+  if (!state) return null;
+  return { phase: 'random', remainingCount: availablePrizeStockCount(data, product),
+    totalCollected: state.totalCollectedCents / 100, totalPrizeItems: state.totalPrizeItems,
+    drySpend: state.drySpendCents / 100, targetRevenue: 97.50 };
+}
+
+// Runs through the common store schema migration on main and every tenant.
+// Archive old reservations/schedules; preserve orders, sold IDs and paid totals.
+function migrateData(data, now = Date.now()) {
+  let changed = false;
+  if (!data.randomBoxGachaStates || typeof data.randomBoxGachaStates !== 'object' || Array.isArray(data.randomBoxGachaStates)) {
+    data.randomBoxGachaStates = {}; changed = true;
+  }
+  for (const product of data.products || []) {
+    if (product.specialType !== RANDOM_BOX_KIND) continue;
+    const id = String(product.id);
+    if (product.price !== 1 || product.randomBox?.rate !== 1 || Number(product.originalPrice) !== 0 || product.priceOptions?.length) {
+      product.price = 1; product.originalPrice = 0; product.priceOptions = [];
+      product.randomBox = { ...(product.randomBox || {}), rate: 1 }; changed = true;
+    }
+    if (data.randomBoxGachaStates[id]) continue;
+    const pool = data.randomBoxPools?.[id];
+    const round = data.randomBoxRounds?.[id];
+    const history = (data.randomBoxPoolHistory || []).filter(item => String(item.productId) === id);
+    const accounting = [...history, ...(pool ? [pool] : [])];
+    const legacyCollected = accounting.reduce((sum, item) => sum + Math.max(0, Number(item.totalCollected) || 0) * 100, 0);
+    const legacyPrizes = accounting.reduce((sum, item) => sum + Math.max(0, Number(item.totalPrizeItems) || 0), 0);
+    const txCollected = (data.walletTransactions || []).filter(item => item.type === 'random_box_draw' && String(item.productId) === id)
+      .reduce((sum, item) => sum + Math.max(0, -Number(item.amount) || 0) * 100, 0);
+    const orders = (data.orders || []).filter(order => order.randomBoxOrder)
+      .slice().sort((a, b) => Date.parse(a.createdAt) - Date.parse(b.createdAt));
+    let orderCollected = 0, orderPrizes = 0, dryCents = 0, hasDrawHistory = false;
+    for (const order of orders) {
+      for (const item of order.items || []) {
+        if (String(item.productId) !== id || !item.randomBoxDraw) continue;
+        const draw = item.randomBoxDraw;
+        const count = Array.isArray(draw.prizeItems) ? draw.prizeItems.length : Math.max(0, Number(draw.prizeCount) || (draw.isWin ? 1 : 0));
+        const cost = Math.round(Math.max(0, Number(item.price) || 0) * 100);
+        orderCollected += cost; orderPrizes += count;
+        dryCents = count ? 0 : dryCents + cost; hasDrawHistory = true;
+      }
+    }
+    if (!hasDrawHistory && pool) {
+      const progress = pool.phase === 'entry' ? pool.entryProgressDraws : pool.recoveryProgressDraws;
+      dryCents = Math.max(0, Number(progress) || 0) * Math.max(1, Number(pool.price) || 1) * 100;
+    }
+    if (!hasDrawHistory && !pool && round) dryCents = Math.max(0, Number(round.progressDraws || round.progress) || 0) * 100;
+    const state = gacha.createState(id);
+    state.totalCollectedCents = Math.round(Math.max(txCollected, legacyCollected, orderCollected));
+    state.totalPrizeItems = Math.round(Math.max(legacyPrizes, orderPrizes));
+    state.drySpendCents = Math.min(10900, Math.floor(Math.min(dryCents, state.totalCollectedCents) / 100) * 100);
+    data.randomBoxGachaStates[id] = state;
+    if (pool || round) {
+      data.randomBoxMigrationBackup ||= {};
+      data.randomBoxMigrationBackup[id] ||= { migratedAt: new Date(now).toISOString(),
+        pool: pool ? structuredClone(pool) : null, round: round ? structuredClone(round) : null };
+      for (const stock of data.stockItems || []) {
+        if (String(stock.productId) !== id || stock.status !== 'reserved') continue;
+        if (String(stock.randomBoxReservedFor) === id || (pool && String(stock.randomBoxPoolId) === String(pool.id))) {
+          stock.status = 'available'; delete stock.randomBoxReservedFor; delete stock.randomBoxPoolId;
+        }
+      }
+      if (data.randomBoxPools) delete data.randomBoxPools[id];
+      if (data.randomBoxRounds) delete data.randomBoxRounds[id];
+    }
+    changed = true;
+  }
+  return changed;
+}
+function deletePrizeStock(data, product, { stockIds = null, now = Date.now() } = {}) {
+  if (!data || product?.specialType !== RANDOM_BOX_KIND) {
+    return { deletedCount: 0, removedReservedCount: 0, resetPool: false, stockEmpty: false };
+  }
+  migrateData(data, now);
+  const selected = stockIds == null ? null : new Set(stockIds.map(String));
+  const removed = (data.stockItems || []).filter(item => String(item.productId) === String(product.id)
+    && item.status === 'available' && (!selected || selected.has(String(item.id))));
+  const ids = new Set(removed.map(item => String(item.id)));
+  data.stockItems = (data.stockItems || []).filter(item => !ids.has(String(item.id)));
+  // Keep the shared accounting and pity even through delete-all and refill.
+  return { deletedCount: removed.length, removedReservedCount: 0, resetPool: false,
+    stockEmpty: availablePrizeStockCount(data, product) === 0 };
+}
+function drawRandomBox(data, { productId, userId, idempotencyKey, drawCount = 1, now = Date.now(),
+  randomInt = crypto.randomInt, genId = length => crypto.randomBytes(Math.ceil(length / 2)).toString('hex').slice(0, length) }) {
+  const requestedDrawCount = parseDrawCount(drawCount);
+  data.orders ||= []; data.walletTransactions ||= []; data.stockItems ||= [];
+  const previous = data.walletTransactions.find(tx => tx.type === 'random_box_draw'
+    && String(tx.userId) === String(userId) && String(tx.productId) === String(productId) && tx.idempotencyKey === idempotencyKey);
+  if (previous?.orderId) return { orderId: previous.orderId, result: previous.randomBoxResult, replay: true };
+  const product = (data.products || []).find(item => String(item.id) === String(productId));
   if (!isPublished(product, now)) fail('PRODUCT_UNAVAILABLE', 'กล่องสุ่มนี้ยังไม่เปิดขายหรือปิดการขายแล้ว');
   if (product.specialType !== RANDOM_BOX_KIND) fail('NOT_RANDOM_BOX', 'สินค้านี้ไม่ใช่กล่องสุ่ม');
-  const user = data.users.find(item => String(item.id) === String(userId));
-  if (!user || user.status === 'disabled' || user.status === 'banned') fail('USER_UNAVAILABLE', 'ไม่พบบัญชีผู้ใช้หรือบัญชีถูกระงับ');
-
-  product.fulfillmentMode = 'automatic';
-  product.fulfillmentInstructions = '';
-  const orderId = genId(10);
-  const createdAt = new Date(now).toISOString();
-  const drawResults = [];
-  const orderItems = [];
-  let balance = Number(user.walletBalance);
-  balance = Number.isFinite(balance) ? Math.max(0, Math.round(balance * 100) / 100) : 0;
-  let total = 0;
-  let balanceLimited = false;
-  let priceChanged = false;
-  let orderPrice = null;
-
-  for (let index = 0; index < requestedDrawCount; index += 1) {
-    let pool = pools[String(product.id)];
-    if (pool && !poolRemainingStock(data, pool).length) {
-      recordPoolHistory(data, pool, new Date(now).toISOString());
-      delete pools[String(product.id)];
-      pool = null;
-    }
-    if (!pool && availablePrizeStockCount(data, product) < 1) break;
-    const nextPrice = pool?.price || configuredPrice(product);
-    if (drawResults.length && orderPrice !== null && nextPrice !== orderPrice) {
-      priceChanged = true;
-      break;
-    }
-    if (balance < nextPrice) {
-      if (!drawResults.length) fail('INSUFFICIENT_BALANCE', `ยอดเงินในกระเป๋าไม่เพียงพอ ต้องมีอย่างน้อย ฿${nextPrice.toLocaleString('th-TH')}`);
-      balanceLimited = true;
-      break;
-    }
-    if (!pool) {
-      pool = createPool(data, product, now, randomInt, genId);
-    }
-    if (!pool) break;
-    ensureCurrentRecoverySchedule(data, pool, randomInt);
-    const price = pool.price;
-
-    balance = Math.round((balance - price) * 100) / 100;
-    total = Math.round((total + price) * 100) / 100;
-    if (orderPrice === null) orderPrice = price;
-    pool.totalDraws += 1;
-    pool.totalCollected += price;
-    let prizeItems = [];
-
-    if (pool.phase === 'entry') {
-      pool.entryProgressDraws += 1;
-      if (pool.entryProgressDraws >= pool.entryTargetDraws) {
-        const available = poolRemainingStock(data, pool).length;
-        const awardCount = randomAwardCount(available, randomInt);
-        prizeItems = takePrizeItems(data, pool, awardCount, product, orderId);
-        pool.entryPrizeCount = prizeItems.length;
-        pool.totalAwards += 1;
-        pool.totalPrizeItems += prizeItems.length;
-        const remainingCount = poolRemainingStock(data, pool).length;
-        if (remainingCount) beginRecovery(pool, remainingCount, randomInt);
-      }
-    } else {
-      pool.recoveryProgressDraws += 1;
-      const milestone = pool.recoveryMilestones[pool.recoveryMilestoneIndex];
-      if (milestone && pool.recoveryProgressDraws >= milestone.atDraws) {
-        prizeItems = takePrizeItems(data, pool, milestone.count, product, orderId);
-        pool.recoveryMilestoneIndex += 1;
-        pool.totalAwards += 1;
-        pool.totalPrizeItems += prizeItems.length;
-        const remainingCount = poolRemainingStock(data, pool).length;
-        scheduleNextRecoveryAward(pool, remainingCount, randomInt);
-      }
-    }
-
-    const isWin = prizeItems.length > 0;
-    const prizeName = isWin ? (prizeItems.length === 1 ? 'รางวัลกล่องสุ่ม 1 ชิ้น' : `รางวัลกล่องสุ่ม ${prizeItems.length} ชิ้น`) : null;
-    const drawResult = {
-      isWin,
-      boxProductId: product.id,
-      boxTitle: product.title,
-      boxSlug: product.slug,
-      prizeName,
-      prizeItems,
-      prizeCount: prizeItems.length,
-      missMessage: isWin ? null : getMissMessage(product),
-    };
-    drawResults.push(drawResult);
-    orderItems.push({
-      productId: product.id,
-      title: product.title,
-      price,
-      productImage: product.images?.[0] || '',
-      stockItemId: prizeItems[0]?.stockItemId || null,
-      fulfillmentMode: 'automatic',
-      randomBoxDraw: drawResult,
-    });
-
-    if (!poolRemainingStock(data, pool).length) {
-      recordPoolHistory(data, pool, new Date(now).toISOString());
-      delete pools[String(product.id)];
-    }
-  }
-
-  if (!drawResults.length) fail('NO_PRIZES', 'สต็อกรางวัลหมดชั่วคราว กรุณาลองใหม่ภายหลัง');
-  user.walletBalance = balance;
-  drawResults.forEach(draw => { draw.walletBalance = user.walletBalance; });
-  const winResults = drawResults.filter(draw => draw.isWin);
-  const missResults = drawResults.filter(draw => !draw.isWin);
-  const prizeCount = winResults.reduce((sum, draw) => sum + draw.prizeCount, 0);
-  const stockExhausted = drawResults.length < requestedDrawCount && !hasAvailablePrizeBundle(data, product);
-  const result = {
-    ...(drawResults.length === 1 ? drawResults[0] : {}),
-    isWin: winResults.length > 0,
-    drawCount: drawResults.length,
-    requestedDrawCount,
-    winCount: winResults.length,
-    prizeCount,
-    missCount: missResults.length,
-    missMessage: missResults[0]?.missMessage || null,
-    stockExhausted,
-    balanceLimited,
-    priceChanged,
-    total,
-    prizeName: winResults[0]?.prizeName || null,
-    prizeNames: winResults.map(draw => draw.prizeName),
-    walletBalance: user.walletBalance,
-  };
-  const order = {
-    id: orderId,
-    userId: user.id,
-    items: orderItems,
-    subtotal: total,
-    discount: 0,
-    total,
-    couponCode: null,
-    status: 'completed',
-    paymentMethod: 'wallet',
-    createdAt,
-    salesChannel: 'direct',
-    federatedTenantIds: [],
-    randomBoxOrder: true,
-    randomBoxRequestedDrawCount: requestedDrawCount,
-    randomBoxRequestId: idempotencyKey,
-  };
-  data.orders.push(order);
-  data.walletTransactions.push({
-    id: genId(10),
-    userId: user.id,
-    type: 'random_box_draw',
-    amount: -total,
-    note: `เปิดกล่องสุ่ม ${product.title} ${drawResults.length} ครั้ง · คำสั่งซื้อ #${orderId}`,
-    orderId,
-    productId: product.id,
-    idempotencyKey,
-    randomBoxResult: result,
-    createdAt,
+  const user = (data.users || []).find(item => String(item.id) === String(userId));
+  if (!user || ['disabled', 'banned'].includes(user.status)) fail('USER_UNAVAILABLE', 'ไม่พบบัญชีผู้ใช้หรือบัญชีถูกระงับ');
+  const balance = Math.max(0, Math.round((Number(user.walletBalance) || 0) * 100));
+  if (balance < 100) fail('INSUFFICIENT_BALANCE', 'ยอดเงินในกระเป๋าไม่เพียงพอ ต้องมีอย่างน้อย ฿1');
+  migrateData(data, now);
+  const available = availableStockItems(data.stockItems, product.id);
+  if (!available.length) fail('NO_PRIZES', 'สต็อกรางวัลหมดชั่วคราว กรุณาลองใหม่ภายหลัง');
+  const affordableCount = Math.min(requestedDrawCount, Math.floor(balance / 100));
+  const drawn = gacha.draw({ stock: available.map(item => ({ stockId: String(item.id), rewardId: product.id,
+    title: getStockPrizeName(item, 'รางวัลกล่องสุ่ม'), status: 'available' })),
+    poolId: String(product.id), state: data.randomBoxGachaStates[String(product.id)], ticketCount: affordableCount }, { rng: randomInt });
+  const orderId = genId(10), createdAt = new Date(now).toISOString();
+  const byId = new Map(available.map(item => [String(item.id), item]));
+  const newBalance = (balance - drawn.paymentCents) / 100;
+  const orderItems = drawn.drawResults.map(event => {
+    const prizeItems = event.stockIds.map(id => stockPrize(byId.get(id), product, orderId));
+    return { productId: product.id, title: product.title, price: 1, productImage: product.images?.[0] || '',
+      stockItemId: prizeItems[0]?.stockItemId || null, fulfillmentMode: 'automatic',
+      randomBoxDraw: { isWin: prizeItems.length > 0, boxProductId: product.id, boxTitle: product.title, boxSlug: product.slug,
+        prizeName: prizeItems.length ? `รางวัลกล่องสุ่ม ${prizeItems.length} ชิ้น` : null,
+        prizeItems, prizeCount: prizeItems.length, missMessage: prizeItems.length ? null : getMissMessage(product),
+        pityApplied: event.pityApplied, walletBalance: newBalance } };
   });
+  const wins = orderItems.filter(item => item.randomBoxDraw.isWin);
+  const misses = orderItems.filter(item => !item.randomBoxDraw.isWin);
+  const total = drawn.paymentCents / 100;
+  const result = { ...(orderItems.length === 1 ? orderItems[0].randomBoxDraw : {}),
+    isWin: wins.length > 0, drawCount: drawn.ticketCount, requestedDrawCount, winCount: wins.length,
+    prizeCount: drawn.prizeCount, missCount: misses.length, missMessage: misses.length ? getMissMessage(product) : null,
+    stockExhausted: drawn.stockExhausted, balanceLimited: affordableCount < requestedDrawCount && drawn.ticketCount === affordableCount && !drawn.stockExhausted,
+    priceChanged: false, total, prizeName: wins[0]?.randomBoxDraw.prizeName || null,
+    prizeNames: wins.map(item => item.randomBoxDraw.prizeName), walletBalance: newBalance };
+  product.price = 1; product.randomBox.rate = 1; product.fulfillmentMode = 'automatic'; product.fulfillmentInstructions = '';
+  user.walletBalance = newBalance;
+  data.randomBoxGachaStates[String(product.id)] = drawn.nextState;
+  data.orders.push({ id: orderId, userId: user.id, items: orderItems, subtotal: total, discount: 0,
+    total, couponCode: null, status: 'completed', paymentMethod: 'wallet', createdAt,
+    salesChannel: 'direct', federatedTenantIds: [], randomBoxOrder: true,
+    randomBoxRequestedDrawCount: requestedDrawCount, randomBoxRequestId: idempotencyKey });
+  data.walletTransactions.push({ id: genId(10), userId: user.id, type: 'random_box_draw', amount: -total,
+    note: `เปิดกล่องสุ่ม ${product.title} ${drawn.ticketCount} ครั้ง · คำสั่งซื้อ #${orderId}`,
+    orderId, productId: product.id, idempotencyKey, randomBoxResult: result, createdAt });
   return { orderId, result, replay: false };
 }
 
 module.exports = {
+  migrateData,
+  PENDING_SYSTEM_MESSAGE,
   RANDOM_BOX_KIND,
   RANDOM_BOX_PRICE,
   RANDOM_BOX_MIN_TARGET,

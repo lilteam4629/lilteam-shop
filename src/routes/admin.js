@@ -793,6 +793,9 @@ router.post('/products/:id/price', async (req, res) => {
   if (!product) return res.status(404).json({ ok: false, message: 'ไม่พบสินค้า' });
   const rawPrice = String(req.body.price == null ? '' : req.body.price).trim();
   const price = Number(rawPrice);
+  if (product.specialType === randomBox.RANDOM_BOX_KIND && randomBox.validatePrice(rawPrice)) {
+    return res.status(400).json({ ok: false, message: randomBox.validatePrice(rawPrice) });
+  }
   const minPrice = product.specialType === randomBox.RANDOM_BOX_KIND ? 1 : 0;
   if (!rawPrice || !Number.isInteger(price) || price < minPrice || price > 100000000) {
     return res.status(400).json({ ok: false, message: `กรุณากรอกราคาเป็นจำนวนเต็มตั้งแต่ ${minPrice.toLocaleString('th-TH')} ถึง 100,000,000 บาท` });
@@ -817,9 +820,9 @@ router.post('/products/bulk-price', async (req, res) => {
     return res.redirect('/admin/products');
   }
   const targets = store.data.products.filter(product => scope === 'all' || selectedIds.has(String(product.id)));
-  const priceableTargets = targets;
+  const priceableTargets = targets.filter(product => product.specialType !== randomBox.RANDOM_BOX_KIND);
   if (!priceableTargets.length) {
-    req.flash('error', 'ไม่พบสินค้าที่ต้องการปรับราคา');
+    req.flash('error', 'กล่องสุ่มล็อกราคา 1 บาท · รอทำระบบเพิ่ม');
     return res.redirect('/admin/products');
   }
   const factor = operation === 'discount' ? 1 - (percentage / 100) : 1 + (percentage / 100);
@@ -1754,8 +1757,8 @@ router.post('/products/:id/stock/delete-all', async (req, res) => {
   }
   await store.save();
   const resetMessage = result.stockEmpty
-    ? ' · สต็อกว่างแล้ว ระบบรีเซ็ตรอบสะสมเรียบร้อย'
-    : result.resetPool ? ' · รีเซ็ตรอบปัจจุบันแล้ว' : ' · ปรับจำนวนรางวัลและยอดสะสมของรอบแล้ว';
+    ? ' · สต็อกว่างแล้ว บัญชีและยอดสะสมของกล่องยังคงอยู่'
+    : result.resetPool ? ' · รีเซ็ตรอบปัจจุบันแล้ว' : ' · ปรับจำนวนรางวัลแล้ว บัญชีสะสมยังคงอยู่';
   req.flash('success', `ลบรางวัลที่ยังไม่ถูกจ่ายแล้ว ${result.deletedCount} ชิ้น${resetMessage} (ประวัติรางวัลที่จ่ายแล้วเก็บไว้)`);
   res.redirect(`/admin/products/${product.id}/stock`);
 });
@@ -1781,8 +1784,8 @@ router.post('/products/:id/stock/:stockId/delete', async (req, res) => {
     }
     await store.save();
     const resetMessage = result.stockEmpty
-      ? ' สต็อกว่างแล้ว ระบบรีเซ็ตรอบสะสมเรียบร้อย'
-      : result.resetPool ? ' รอบปัจจุบันถูกรีเซ็ตแล้ว' : ' จำนวนรางวัลและยอดสะสมถูกปรับแล้ว';
+      ? ' สต็อกว่างแล้ว บัญชีและยอดสะสมของกล่องยังคงอยู่'
+      : result.resetPool ? ' รอบปัจจุบันถูกรีเซ็ตแล้ว' : ' ปรับจำนวนรางวัลแล้ว บัญชีสะสมยังคงอยู่';
     req.flash('success', `ลบรางวัลออกจากสต็อกแล้ว${resetMessage}`);
     return res.redirect(`/admin/products/${product.id}/stock`);
   }
