@@ -1823,13 +1823,16 @@ router.get('/orders/:id', (req, res) => {
     : undefined);
   const itemsWithCreds = order.items.map(oi => {
     const product = store.data.products.find(p => p.id === oi.productId);
+    const stock = store.data.stockItems.find(s => String(s.id) === String(oi.stockItemId));
+    const stock = store.data.stockItems.find(s => String(s.id) === String(oi.stockItemId));
     const prizeItems = (oi.randomBoxDraw?.prizeItems || []).map(prize => ({
       ...prize,
       credentials: store.data.stockItems.find(stock => String(stock.id) === String(prize.stockItemId)),
     }));
     return {
       ...oi,
-      credentials: store.data.stockItems.find(s => s.id === oi.stockItemId),
+      credentials: stock,
+      stockDisplayName: randomBox.getStockPrizeName(stock, oi.stockDisplayName || ''),
       prizeItems,
       productImage: oi.productImage || product?.images?.[0] || '',
       importedFileCode: oi.importedFileCode || product?.internalNote || '',

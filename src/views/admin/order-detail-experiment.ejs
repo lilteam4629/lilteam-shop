@@ -69,6 +69,8 @@
                       <div class="order-item-copy">
                         <h3><%= item.title || 'สินค้าไม่ระบุชื่อ' %></h3>
                         <div class="order-item-meta"><span>รหัสสินค้า</span><code><%= item.productId || '-' %></code></div>
+                        <% if (item.stockDisplayName) { %><div class="order-item-meta"><span>ชื่อในสต็อกที่ลูกค้าได้รับ</span><strong style="overflow-wrap:anywhere"><%= item.stockDisplayName %></strong></div><% } %>
+                        <% if (item.prizeItems?.length) { item.prizeItems.forEach(prize => { %><div class="order-item-meta"><span>สต็อกรางวัลที่ได้รับ</span><strong style="overflow-wrap:anywhere"><%= prize.credentials?.rewardName || prize.credentials?.displayName || prize.credentials?.name || prize.credentials?.title || prize.credentials?.username || prize.productTitle || 'ไม่พบชื่อสต็อก' %></strong></div><% }); } %>
                         <% if (item.importedFileCode) { %>
                           <div class="order-item-meta"><span>รหัสอ้างอิง</span><code><%= item.importedFileCode %></code></div>
                         <% } %>
