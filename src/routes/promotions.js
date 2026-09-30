@@ -21,7 +21,9 @@ const publicView = (req, res) => {
     claims: (store.data.promotionClaims || []).filter(c => c.userId === user?.id),
     referralCount: user ? store.data.users.filter(u => u.referredBy === user.id).length : 0,
     referralCompleted: user ? store.data.users.filter(u => u.referredBy === user.id && u.referralRewardedAt).length : 0,
-    referralPath: user?.role === 'customer' ? `/register?ref=${encodeURIComponent(user.id)}` : '',
+    topupTotal: user ? rewards.topupTotal(store.data,user.id) : 0,
+    referralJoined: Boolean(user?.referredBy),
+    referralPath: user && rewards.topupTotal(store.data,user.id) >= 10 ? `/register?ref=${encodeURIComponent(user.id)}` : '',
     coupon: req.session.coupon || null, csrf: token(req), inWindow: rewards.inWindow });
 };
 router.get('/promotions', publicView);
@@ -44,6 +46,10 @@ router.post('/promotions/coupon', requireStorefrontPromotions, requireLogin, csr
   }
   res.redirect('/promotions');
 });
+router.post('/promotions/referral-join', requireStorefrontPromotions, requireLogin, csrf, async (req,res) => {
+  try { await store.transact(data=>rewards.joinReferral(data,req.session.userId,req.body.username,req.body.referrerUsername));req.flash('success','บันทึกผู้แนะนำแล้ว ซื้อสินค้าสำเร็จครั้งแรกเพื่อรับรางวัล'); }
+  catch(e){req.flash('error',e.message);}res.redirect('/promotions');
+});
 router.post('/promotions/referral-check', requireStorefrontPromotions, requireLogin, csrf, async (req,res) => {
   try {
     const settled = await store.transact(data => {
@@ -60,7 +66,7 @@ router.post('/promotions/referral-check', requireStorefrontPromotions, requireLo
 router.get('/admin/promotions', requireAdmin, (req,res) => res.render('admin/promotions', {
   layout: 'layouts/admin-experiment', title: 'โปรโมชั่นและแนะนำเพื่อน', active: 'promotions', config: rewards.config(store.data),
   isMainSite: !req.tenantShop, storefrontEnabled: !req.tenantShop || store.data.settings.promotions?.storefrontEnabled === true,
-  claims: store.data.promotionClaims || [], csrf: token(req),
+  history: rewards.history(store.data), claims: store.data.promotionClaims || [], csrf: token(req),
   pendingTopupCount: (store.data.topupRequests || []).filter(t => ['pending','verifying'].includes(t.status)).length,
   persistentStorageEnabled: store.isPersistent(),
 }));

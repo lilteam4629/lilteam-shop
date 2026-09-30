@@ -14,9 +14,37 @@ function inWindow(item, now = Date.now()) {
     && (!item.endsAt || now < Date.parse(item.endsAt));
 }
 function customer(data, userId) {
-  const user = data.users.find(u => u.id === userId && u.role === 'customer' && u.status !== 'banned');
+  const user = data.users.find(u => u.id === userId && u.status !== 'banned');
   if (!user) throw new Error('กรุณาเข้าสู่ระบบด้วยบัญชีสมาชิกที่ใช้งานได้');
   return user;
+}
+function topupTotal(data, userId) {
+  return Math.round((data.walletTransactions || []).filter(t => t.userId === userId && t.type === 'topup' && !t.catalogApiTopup && Number(t.amount) > 0).reduce((total,t) => total + Number(t.amount),0) * 100) / 100;
+}
+function requireTopup(data, userId) {
+  if (topupTotal(data,userId) < 10) throw new Error('ต้องมีประวัติเติมเงินสำเร็จรวมอย่างน้อย 10 บาทในร้านนี้ก่อนรับสิทธิ์');
+}
+function joinReferral(data,userId,username,referrerUsername,now=Date.now()) {
+  const user=customer(data,userId); requireTopup(data,userId);
+  if (normalized(username)!==normalized(user.username)) throw new Error('กรอกชื่อบัญชีที่เข้าสู่ระบบอยู่เท่านั้น');
+  if (!inWindow(config(data).referral,now)) throw new Error('กิจกรรมแนะนำเพื่อนยังไม่เปิด');
+  if (user.referredBy || user.referralRewardedAt) throw new Error('บัญชีนี้มีผู้แนะนำแล้ว');
+  const referrer=data.users.find(u=>normalized(u.username)===normalized(referrerUsername) && u.status!=='banned');
+  if (!referrer || referrer.id===user.id || normalized(referrer.email)===normalized(user.email)) throw new Error('ชื่อผู้แนะนำไม่ถูกต้อง หรือเป็นบัญชีของคุณเอง');
+  requireTopup(data,referrer.id);
+  if ((data.orders || []).some(o=>o.userId===userId && o.status==='completed' && Number(o.total)>0)) throw new Error('ต้องระบุผู้แนะนำก่อนซื้อสินค้าสำเร็จครั้งแรก');
+  // Stop circular referral chains before linking existing accounts.
+  const seen=new Set([userId]); let next=referrer;
+  while(next){if(seen.has(next.id))throw new Error('ไม่สามารถแนะนำเพื่อนแบบวนกลับได้');seen.add(next.id);next=data.users.find(u=>u.id===next.referredBy);}
+  user.referredBy=referrer.id;user.referralJoinedAt=new Date(now).toISOString();
+}
+function history(data) {
+  const name=id=>data.users.find(u=>u.id===id)?.username || id || 'ไม่พบผู้ใช้';
+  return [
+    ...(data.promotionClaims || []).map(c=>({createdAt:c.createdAt,username:name(c.userId),action:'รับโปรโมชั่น',detail:(config(data).campaigns || []).find(x=>x.id===c.campaignId)?.title || c.campaignId,amount:c.amount})),
+    ...data.users.filter(u=>u.referredBy).map(u=>({createdAt:u.referralJoinedAt || u.createdAt,username:name(u.id),action:'ลงทะเบียนผู้แนะนำ',detail:'ผู้แนะนำ: '+name(u.referredBy),amount:0})),
+    ...(data.walletTransactions || []).filter(t=>t.type==='promotion-reward' && String(t.rewardKey || '').startsWith('referral:')).map(t=>({createdAt:t.createdAt,username:name(t.userId),action:'รับรางวัลแนะนำเพื่อน',detail:t.note,amount:t.amount}))
+  ].sort((a,b)=>Date.parse(b.createdAt)-Date.parse(a.createdAt)).slice(0,300);
 }
 function credit(data, user, amount, rewardKey, note, now) {
   data.walletTransactions ||= [];
@@ -44,7 +72,7 @@ function claim(data, userId, campaignId, username, now = Date.now()) {
 }
 function referralAtSignup(data, code, email, now = Date.now()) {
   if (!inWindow(config(data).referral, now)) return null;
-  const user = data.users.find(u => u.id === code && u.role === 'customer' && u.status !== 'banned');
+  const user = data.users.find(u => u.id === code && u.status !== 'banned' && topupTotal(data,u.id) >= 10);
   return user && normalized(user.email) !== normalized(email) ? user.id : null;
 }
 function settleReferral(data, order, now = Date.now()) {
@@ -54,11 +82,12 @@ function settleReferral(data, order, now = Date.now()) {
   if (!isPaid(order)) return false;
   const policy = config(data).referral;
   if (!inWindow(policy, now)) return false;
-  const friend = data.users.find(u => u.id === order.userId && u.role === 'customer' && u.status !== 'banned');
+  const friend = data.users.find(u => u.id === order.userId && u.status !== 'banned');
   if (!friend?.referredBy || friend.referralRewardedAt) return false;
-  const referrer = data.users.find(u => u.id === friend.referredBy && u.role === 'customer' && u.status !== 'banned');
+  const referrer = data.users.find(u => u.id === friend.referredBy && u.status !== 'banned');
   if (!referrer || referrer.id === friend.id || normalized(referrer.email) === normalized(friend.email)) return false;
-  if (!Number.isFinite(Date.parse(friend.createdAt)) || (policy.startsAt && Date.parse(friend.createdAt) < Date.parse(policy.startsAt))) return false;
+  if (topupTotal(data,friend.id) < 10 || topupTotal(data,referrer.id) < 10) return false;
+  if (!Number.isFinite(Date.parse(friend.createdAt)) || (policy.startsAt && Date.parse(friend.referralJoinedAt || friend.createdAt) < Date.parse(policy.startsAt))) return false;
   const qualifying = data.orders.filter(o => o.userId === friend.id && o.status === 'completed' && Number(o.total) > 0 && o.items?.length && isPaid(o))
     .sort((a,b) => Date.parse(a.createdAt) - Date.parse(b.createdAt) || String(a.id).localeCompare(String(b.id)))[0];
   if (qualifying?.id !== order.id) return false;
@@ -83,4 +112,4 @@ function validateWindow(body) {
   if (startsAt && endsAt && startsAt >= endsAt) throw new Error('เวลาสิ้นสุดต้องหลังเวลาเริ่ม');
   return { startsAt, endsAt };
 }
-module.exports = { config, inWindow, claim, referralAtSignup, settleReferral, money, validateWindow };
+module.exports = { topupTotal, joinReferral, history, config, inWindow, claim, referralAtSignup, settleReferral, money, validateWindow };

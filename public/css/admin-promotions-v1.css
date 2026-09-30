@@ -27,3 +27,7 @@ html[data-admin-theme=dark] .promo-admin input[type=datetime-local]{color-scheme
 @media(max-width:760px){.promo-admin .promo-hero{align-items:flex-start;flex-direction:column}.promo-admin .promo-hero h1{font-size:24px}.promo-admin .promo-grid{grid-template-columns:1fr}.promo-admin .promo-card{padding:16px}.promo-admin-stats{gap:8px}.promo-admin-stats article{padding:12px}.promo-admin .promo-form .promo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.promo-admin .promo-button{min-height:44px}}
 @media(max-width:400px){.promo-admin-stats{grid-template-columns:1fr}.promo-admin .promo-form .promo-grid{grid-template-columns:1fr}}
 
+.promo-admin .promo-history{padding:20px;border:1px solid var(--ex-line);border-radius:14px;background:var(--ex-surface)}
+.promo-admin .promo-history th,.promo-admin .promo-history td{padding:12px 10px;border-bottom:1px solid var(--ex-line);vertical-align:top;overflow-wrap:anywhere;min-width:100px}
+.promo-admin .promo-history th{color:var(--ex-muted);font-weight:700}
+.promo-admin .promo-history td{color:var(--ex-ink)}
