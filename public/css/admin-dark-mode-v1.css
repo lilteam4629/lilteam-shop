@@ -1729,3 +1729,9 @@ html[data-admin-theme="dark"] body.admin-site .experiment-chart-bar {
 html[data-admin-theme="dark"] body.admin-site .mg-preview-prize img {
   background-color: var(--admin-dark-raised) !important;
 }
+html[data-admin-theme="dark"] body.admin-site .effects-toggle input[type="checkbox"] {
+  color-scheme: dark;
+  accent-color: var(--gold);
+  background-color: var(--admin-dark-input) !important;
+  border-color: var(--admin-dark-line) !important;
+}
