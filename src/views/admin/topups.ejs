@@ -352,15 +352,16 @@
       %>
       <div class="admin-bank-transfer bg-[var(--input)]/40 border border-[var(--border-light)] rounded-2xl p-5 space-y-4">
         <h3 class="font-bold text-sm text-[var(--text)] flex items-center gap-2">
-          <% if (isMainSite) { %><svg class="admin-bank-section-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18M2 9h20"/></svg><span>ช่องทางโอนผ่านบัญชีธนาคาร</span><% } else { %><span>🏦 ช่องทาง โอนผ่านบัญชีธนาคาร</span><% } %>
+          <% if (isMainSite) { %><svg class="admin-bank-section-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-5 9 5M5 10v8m4-8v8m6-8v8m4-8v8M3 20h18M2 9h20"/></svg><span>ช่องทางรับเงิน: ธนาคาร / พร้อมเพย์</span><% } else { %><span>🏦 ช่องทางรับเงิน: ธนาคาร / พร้อมเพย์</span><% } %>
         </h3>
 
+        <p class="text-xs text-[var(--text-3)]">เลือกพร้อมเพย์เพื่อรับด้วยเบอร์มือถือ 10 หลัก หรือเลขประจำตัว/เลขผู้เสียภาษี 13 หลัก ข้อมูลผู้รับชุดนี้ใช้กับค่ายตรวจสลิปที่ร้านเลือก</p>
         <div class="admin-bank-grid grid sm:grid-cols-3 gap-4">
           <div>
-            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคาร *</label>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ธนาคาร / พร้อมเพย์ *</label>
             <% if (otherBanks.length) { %>
               <select name="bankCode" <%= receiverPayment.bankAccountNumber ? 'required' : '' %> class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition">
-                <option value="">-- เลือกธนาคาร --</option>
+                <option value="">-- เลือกธนาคารหรือพร้อมเพย์ --</option>
                 <% otherBanks.forEach(bank => { %>
                   <option value="<%= bank.code %>" <%= primaryBank && primaryBank.code === bank.code ? 'selected' : '' %>><%= bank.nameTh %></option>
                 <% }) %>
@@ -371,12 +372,12 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลขที่บัญชีธนาคาร</label>
-            <input name="bankAccountNumber" value="<%= receiverPayment.bankAccountNumber %>" placeholder="เช่น 123-4-56789-0" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">เลขบัญชี / หมายเลขพร้อมเพย์</label>
+            <input name="bankAccountNumber" value="<%= receiverPayment.bankAccountNumber %>" placeholder="เลขบัญชี, เบอร์ 10 หลัก หรือเลขประจำตัว 13 หลัก" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs font-mono outline-none focus:border-[var(--gold)] transition" />
           </div>
 
           <div>
-            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อบัญชีธนาคาร</label>
+            <label class="block text-xs font-semibold mb-1.5 text-[var(--text-3)]">ชื่อผู้รับเงิน</label>
             <input name="bankAccountName" value="<%= receiverPayment.bankAccountName %>" placeholder="เช่น นาย สมชาย ใจดี" class="w-full bg-[var(--card)] border border-[var(--border-light)] rounded-xl px-3.5 py-2.5 text-xs outline-none focus:border-[var(--gold)] transition" />
           </div>
         </div>
@@ -387,8 +388,8 @@
         </div>
 
         <div>
-          <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code บัญชีธนาคาร (ทางเลือก)</label>
-          <p class="text-[11px] text-[var(--text-4)] mb-2">ใช้แสดงเมื่อลูกค้าเลือกชำระผ่านช่องทางบัญชีธนาคาร</p>
+          <label class="block font-semibold text-xs mb-1 text-[var(--text)]">รูปภาพ QR Code ธนาคาร / พร้อมเพย์ (ทางเลือก)</label>
+          <p class="text-[11px] text-[var(--text-4)] mb-2">อัปโหลด QR จากแอปธนาคารที่ผูกกับผู้รับด้านบน ลูกค้าสแกนโอนได้จากแอปธนาคารที่รองรับพร้อมเพย์</p>
 
           <% if (receiverPayment.bankQrImage) { %>
             <div class="flex items-center gap-3 mb-3 bg-[var(--card)] p-2.5 rounded-xl border border-[var(--border)] max-w-sm">

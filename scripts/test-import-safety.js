@@ -113,11 +113,11 @@ async function main() {
     assert.equal(Object.hasOwn(payment.receiverProfiles.slipcheck, 'promptpayId'), false);
     assert.deepEqual(receiverProfiles.PROVIDERS, ['slipcheck', 'rdcw', 'slip2go', 'xepht']);
   });
-  check('PromptPay receiver fields and customer payment option are removed', () => {
+  check('PromptPay uses shared receiver fields on the customer payment form', () => {
     const adminForm = fs.readFileSync(path.join(root, 'src/views/admin/topups.ejs'), 'utf8');
     const customerForm = fs.readFileSync(path.join(root, 'src/views/shop/topup.ejs'), 'utf8');
     assert.doesNotMatch(adminForm, /name="(?:promptpayId|promptpayName|promptpayQrImage)"/);
-    assert.doesNotMatch(customerForm, /value="promptpay"|พร้อมเพย์/);
+    assert.match(customerForm, /receivingViaPromptPay/);
   });
   check('Admin inventory value counts available and reserved regular stock, but excludes random-box box-price rows', () => {
     const adminRoutes = fs.readFileSync(path.join(root, 'src/routes/admin.js'), 'utf8');
@@ -333,10 +333,19 @@ async function main() {
     bankOnly.settings.payment.slipApiMode = 'own';
     const rejectedPromptPay = await als.run(bankOnly, () => account.createTopupRequest({ user: bankOnly.users[0], amount: 10, method: 'promptpay' }));
     const acceptedBank = await als.run(bankOnly, () => account.createTopupRequest({ user: bankOnly.users[0], amount: 10, method: 'bank_transfer' }));
-    check(`${provider} accepts bank transfer but rejects PromptPay requests`, () => {
+    check(`${provider} rejects an unconfigured PromptPay destination`, () => {
       assert.equal(rejectedPromptPay.ok, false);
       assert.match(rejectedPromptPay.error, /บัญชีธนาคาร/);
       assert.equal(acceptedBank.ok, true);
+    });
+    bankOnly.settings.payment.bankName = 'พร้อมเพย์';
+    bankOnly.settings.payment.bankAccountNumber = '0812345678';
+    const acceptedPromptPay = await als.run(bankOnly, () => account.createTopupRequest({ user: bankOnly.users[0], amount: 10, method: 'bank_transfer' }));
+    check(`${provider} records a configured PromptPay payment without crediting early`, () => {
+      assert.equal(acceptedPromptPay.ok, true);
+      assert.equal(acceptedPromptPay.request.method, 'promptpay');
+      assert.equal(acceptedPromptPay.request.status, 'pending');
+      assert.equal(bankOnly.users[0].walletBalance, 100);
     });
   }
   const admin = load('src/routes/admin.js', { '../data/store': store,

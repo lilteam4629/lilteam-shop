@@ -45,6 +45,12 @@ function receiverMatches({ actualNames = [], actualNumbers = [], expectedNames =
   const wantedNumbers = allWantedNumbers.filter(value => value.length >= 6);
   const nameMatched = names.some(actual => wantedNames.some(expected => actual === expected || actual.includes(expected) || expected.includes(actual)));
   const numberMatched = numbers.some(actual => wantedNumbers.some(expected => {
+    // Providers may encode a PromptPay mobile proxy with Thailand's country code.
+    // Normalize only when the configured destination is a Thai mobile number.
+    if (/^0[689]\d{8}$/.test(expected)) {
+      if (/^66[689]\d{8}$/.test(actual)) actual = '0' + actual.slice(2);
+      else if (/^0066[689]\d{8}$/.test(actual)) actual = '0' + actual.slice(4);
+    }
     const size = Math.min(actual.length, expected.length);
     return size >= 6 && actual.slice(-size) === expected.slice(-size);
   }));

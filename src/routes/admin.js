@@ -2406,13 +2406,24 @@ router.post('/topups/payment-settings', (req, res) => {
       req.flash('error', 'อัปโหลดรูป QR ไม่สำเร็จ (รองรับไฟล์รูปภาพเท่านั้น ไม่เกิน 4MB)');
       return res.redirect('/admin/topups/settings#bank');
     }
-    const { bankAccountNumber, bankAccountName } = req.body;
+    let { bankAccountNumber, bankAccountName } = req.body;
     const bankCode = (req.body.bankCode || '').trim();
     const bankAccountNameEn = (req.body.bankAccountNameEn || '').trim();
     const bankAccountType = req.body.bankAccountType === 'JURISTIC' ? 'JURISTIC' : 'NATURAL';
 
     const payment = store.data.settings.payment;
     const primaryBank = banks.find(b => b.code === bankCode);
+    const receivingViaPromptPay = primaryBank?.code === 'PROMPTPAY' || (!bankCode && payment.bankName === 'พร้อมเพย์');
+    if (receivingViaPromptPay) {
+      const enteredId = String(bankAccountNumber || '').trim();
+      const normalizedId = enteredId.replace(/[\s-]/g, '');
+      if (!/^(0[689]\d{8}|\d{13})$/.test(normalizedId) || !String(bankAccountName || '').trim()) {
+        req.flash('error', 'พร้อมเพย์ต้องระบุเบอร์มือถือ 10 หลัก หรือเลขประจำตัว/เลขผู้เสียภาษี 13 หลัก พร้อมชื่อผู้รับ');
+        return res.redirect('/admin/topups/settings#bank');
+      }
+      bankAccountNumber = normalizedId;
+      bankAccountName = String(bankAccountName).trim();
+    }
     const truemoneyPhone = (req.body.truemoneyPhone || '').trim().replace(/[^0-9]/g, '');
     const truemoneyEnabled = req.body.truemoneyEnabled === 'on';
     const effectiveBeforeSave = effectiveSlipConfig(payment, store.platformData.settings.payment, Boolean(req.tenantShop));

@@ -1,4 +1,5 @@
 module.exports = [
+  { code: 'PROMPTPAY', shortCode: 'PROMPTPAY', nameTh: 'พร้อมเพย์', nameEn: 'PromptPay' },
   { code: '002', shortCode: 'BBL', nameTh: 'ธนาคารกรุงเทพ', nameEn: 'Bangkok Bank' },
   { code: '004', shortCode: 'KBANK', nameTh: 'ธนาคารกสิกรไทย', nameEn: 'Kasikornbank' },
   { code: '006', shortCode: 'KTB', nameTh: 'ธนาคารกรุงไทย', nameEn: 'Krungthai Bank' },

@@ -1,4 +1,4 @@
-// Regression checks for removing PromptPay as a receiver and top-up channel.
+// Receiver settings retain a single shared destination, including PromptPay.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -63,11 +63,13 @@ assert.equal(Object.hasOwn(receiverProfiles.view({ slipProvider: 'slipcheck', re
 
 const admin = fs.readFileSync(path.join(root, 'src/views/admin/topups.ejs'), 'utf8');
 const bankSettings = admin.split('id="topup-tab-content-bank"')[1].split('id="topup-tab-content-truemoney"')[0];
-assert.doesNotMatch(bankSettings, /promptpayId|promptpayName|promptpayQrImage|พร้อมเพย์/);
+assert.doesNotMatch(bankSettings, /name="promptpayId"|name="promptpayName"|name="promptpayQrImage"/);
+assert.match(bankSettings, /พร้อมเพย์/);
+assert.equal(require('../src/data/thai-banks').find(bank => bank.code === 'PROMPTPAY').nameTh, 'พร้อมเพย์');
 const customerTopup = fs.readFileSync(path.join(root, 'src/views/shop/topup.ejs'), 'utf8');
-assert.doesNotMatch(customerTopup, /value="promptpay"|พร้อมเพย์/);
+assert.match(customerTopup, /receivingViaPromptPay/);
 const accountRoute = fs.readFileSync(path.join(root, 'src/routes/account.js'), 'utf8');
-assert.match(accountRoute, /if \(mth !== 'bank_transfer'\)/);
+assert.match(accountRoute, /const mth = payment.bankName === 'พร้อมเพย์'/);
 assert.doesNotMatch(accountRoute, /services\/promptpay|generatePayload/);
 
-console.log('Bank-only top-up checks passed: provider settings, legacy-data cleanup, history retention, and server-side channel restriction');
+console.log('Shared bank/PromptPay receiver checks passed');

@@ -758,10 +758,15 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
 // one place that kicks off slip verification.
 async function createTopupRequest({ user, amount, method, catalogApiTopup = false, tenantShopId = null, tenantShopName = '' }) {
   const amt = Math.round((Number(amount) || 0) * 100) / 100;
-  const mth = String(method || 'bank_transfer');
-  if (mth !== 'bank_transfer') {
-    return { ok: false, error: 'ระบบรับชำระผ่านบัญชีธนาคารเท่านั้น' };
+  const submittedMethod = String(method || 'bank_transfer');
+  if (!['bank_transfer', 'promptpay'].includes(submittedMethod)) {
+    return { ok: false, error: 'กรุณาเลือกช่องทางธนาคารหรือพร้อมเพย์' };
   }
+  const payment = settlementPayment({ catalogApiTopup });
+  if (submittedMethod === 'promptpay' && payment.bankName !== 'พร้อมเพย์') {
+    return { ok: false, error: 'ร้านนี้รับผ่านบัญชีธนาคาร กรุณาเลือกช่องทางที่ร้านตั้งค่าไว้' };
+  }
+  const mth = payment.bankName === 'พร้อมเพย์' ? 'promptpay' : 'bank_transfer';
   if (!Number.isFinite(amt) || amt < 1) {
     return { ok: false, error: 'กรุณาระบุจำนวนเงินอย่างน้อย 1 บาท' };
   }

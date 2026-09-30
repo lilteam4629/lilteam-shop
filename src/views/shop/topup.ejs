@@ -1,3 +1,4 @@
+<% const receivingViaPromptPay = payment.bankName === 'พร้อมเพย์'; %>
 <% if (typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh) { %>
 <style>
   .topup-page{--tp-line:var(--border);--tp-line-soft:var(--border-light);--tp-surface:var(--card);--tp-input:var(--input);width:min(1080px,calc(100% - 32px));margin:0 auto;padding:38px 0 64px;color:var(--text)}
@@ -85,8 +86,8 @@
         <p class="topup-page__api-warning">ห้ามเติมเงินร้านเช่าแล้วนำมากดซื้อสินค้า API เพราะระบบใช้คนละกระเป๋า</p>
         <% if (payment.bankName || payment.bankAccountNumber || payment.bankAccountName) { %>
           <div class="topup-page__account">
-            <div><small>ธนาคาร</small><b><%= payment.bankName || '-' %></b></div>
-            <div><small>เลขบัญชี</small><b class="topup-account-number"><%= payment.bankAccountNumber || '-' %></b></div>
+            <div><small>ช่องทางรับเงิน</small><b><%= payment.bankName || '-' %></b></div>
+            <div><small>เลขบัญชี / พร้อมเพย์</small><b class="topup-account-number"><%= payment.bankAccountNumber || '-' %></b></div>
             <div><small>ชื่อบัญชี</small><b><%= payment.bankAccountName || '-' %></b></div>
           </div>
         <% } %>
@@ -126,7 +127,7 @@
           </button>
           <button type="button" id="tabBank" role="tab" aria-controls="sectionBank" aria-selected="false" onclick="switchTab('bank')" class="topup-page__channel">
             <span class="topup-page__channel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-6 9 6M5 10h14M6 10v8m4-8v8m4-8v8m4-8v8M3 21h18M4 18h16"/></svg></span>
-            <span class="topup-page__channel-label">โอนธนาคาร<small>แนบสลิปในขั้นตอนถัดไป</small></span>
+            <span class="topup-page__channel-label"><%= receivingViaPromptPay ? 'พร้อมเพย์' : 'โอนธนาคาร' %><small>แนบสลิปในขั้นตอนถัดไป</small></span>
           </button>
         </div>
         <p class="topup-page__hint">ตรวจสอบยอดและช่องทางให้ถูกต้องก่อนยืนยัน รายการโอนธนาคารจะให้แนบสลิปในหน้าถัดไป</p>
@@ -159,7 +160,7 @@
         <div id="sectionBank" role="tabpanel" aria-labelledby="tabBank" class="hidden topup-page__panel">
           <div class="topup-page__panel-head">
             <span class="topup-page__channel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-6 9 6M5 10h14M6 10v8m4-8v8m4-8v8m4-8v8M3 21h18M4 18h16"/></svg></span>
-            <div><h2>เติมเงินด้วยการโอนธนาคาร</h2><p>ระบุยอด แล้วแนบหลักฐานในหน้าถัดไป</p></div>
+            <div><h2>เติมเงินด้วย<%= receivingViaPromptPay ? 'พร้อมเพย์' : 'การโอนธนาคาร' %></h2><p>ระบุยอด แล้วแนบหลักฐานในหน้าถัดไป</p></div>
           </div>
           <form action="/account/topup" method="post" class="space-y-5">
             <div>
@@ -175,7 +176,7 @@
               <label class="method-option flex min-h-[62px] cursor-pointer items-center gap-3 rounded-xl border border-[var(--gold)] bg-[color-mix(in_srgb,var(--gold)_9%,var(--card))] px-4 py-3 transition-colors">
                 <input type="radio" name="method" value="bank_transfer" checked class="accent-[var(--gold)]" />
                 <span class="topup-page__channel-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-6 9 6M5 10h14M6 10v8m4-8v8m4-8v8m4-8v8M3 21h18M4 18h16"/></svg></span>
-                <span class="text-sm font-medium">โอนผ่านธนาคาร</span>
+                <span class="text-sm font-medium"><%= receivingViaPromptPay ? 'โอนพร้อมเพย์' : 'โอนผ่านธนาคาร' %></span>
               </label>
             </fieldset>
             <button class="topup-page__primary" type="submit">ดำเนินการต่อ <span aria-hidden="true">→</span></button>
@@ -250,8 +251,8 @@
       <p class="mt-2 text-xs font-bold text-[var(--coral)]">ห้ามเติมเงินร้านเช่าแล้วนำมากดซื้อสินค้า API เพราะระบบจะไม่หักเงินจากกระเป๋าร้านเช่า</p>
       <% if (payment.bankName || payment.bankAccountNumber || payment.bankAccountName) { %>
         <div class="mt-3 grid gap-2 rounded-xl border border-[var(--gold)]/35 bg-[var(--card)] p-3 text-sm sm:grid-cols-3">
-          <div><small class="block text-[10px] text-[var(--text-4)]">ธนาคาร</small><b><%= payment.bankName || '-' %></b></div>
-          <div><small class="block text-[10px] text-[var(--text-4)]">เลขบัญชี</small><b class="font-mono"><%= payment.bankAccountNumber || '-' %></b></div>
+          <div><small class="block text-[10px] text-[var(--text-4)]">ช่องทางรับเงิน</small><b><%= payment.bankName || '-' %></b></div>
+          <div><small class="block text-[10px] text-[var(--text-4)]">เลขบัญชี / พร้อมเพย์</small><b class="font-mono"><%= payment.bankAccountNumber || '-' %></b></div>
           <div><small class="block text-[10px] text-[var(--text-4)]">ชื่อบัญชี</small><b><%= payment.bankAccountName || '-' %></b></div>
         </div>
       <% } %>
@@ -285,7 +286,7 @@
       <img src="/images/truemoney-wallet.jpg" alt="TrueMoney Wallet" class="w-7 h-7 rounded-lg object-cover" /> <span>ซองของขวัญ TrueMoney</span>
     </button>
     <button type="button" id="tabBank" onclick="switchTab('bank')" class="flex items-center justify-center gap-2 py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all border-[var(--border-light)] bg-[var(--card)] text-[var(--text-3)] hover:border-[var(--gold)]/50">
-      <span>🏦</span> <span>โอนผ่านธนาคาร</span>
+      <span>🏦</span> <span><%= receivingViaPromptPay ? 'โอนพร้อมเพย์' : 'โอนผ่านธนาคาร' %></span>
     </button>
   </div>
 
@@ -355,7 +356,7 @@
             <input type="radio" name="method" value="bank_transfer" checked class="peer sr-only" />
             <span class="method-check hidden absolute top-2 right-2 w-4 h-4 rounded-full bg-[var(--gold)] text-[var(--gold-contrast)] text-[10px] items-center justify-center">✓</span>
             <span class="text-2xl">🏦</span>
-            <span class="text-sm font-medium leading-tight">โอนผ่าน<br />ธนาคาร</span>
+            <span class="text-sm font-medium leading-tight"><%= receivingViaPromptPay ? 'โอนพร้อมเพย์' : 'โอนธนาคาร' %></span>
           </label>
         </div>
       </div>
