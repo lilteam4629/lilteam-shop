@@ -2,7 +2,8 @@
   const prizeStockCount = Math.max(0, Math.floor(Number(p.remainingPrizeCount) || 0));
 %>
 <div class="random-box-prize-stock" data-prize-stock data-prize-remaining="<%= prizeStockCount %>" data-empty="<%= prizeStockCount === 0 %>">
-  <span class="random-box-prize-stock__icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9M8 5.2l8 4.6"/></svg></span>
+  <span class="random-box-prize-stock__icon" aria-hidden="true"><svg width="23" height="23" style="width:23px;height:23px;max-width:23px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9M8 5.2l8 4.6"/></svg></span>
   <span class="random-box-prize-stock__copy"><span data-prize-stock-label><%= prizeStockCount ? 'รางวัลคงเหลือ' : 'รางวัลหมดชั่วคราว' %></span><small>จากสต็อกกล่องนี้</small></span>
   <span class="random-box-prize-stock__quantity"><strong data-prize-stock-count><%= prizeStockCount.toLocaleString('th-TH') %></strong><small>ชิ้น</small></span>
 </div>
+
