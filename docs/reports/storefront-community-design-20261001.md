@@ -4,7 +4,7 @@ Date: 2026-10-01
 
 ## Scope and result
 
-This is a local extension of the existing storefront: service hours, shop announcements, and recent purchases. The desktop composition places an inverse service desk on the left, with editorial announcements and two recent purchase cards on the right. Mobile uses a compact service panel followed by announcements and two vertically stacked purchases. The same partial is included in both homepage variants.
+This is an extension of the main shop storefront only: service hours, shop announcements, and recent purchases. The desktop composition places an inverse service desk on the left, with editorial announcements and two recent purchase cards on the right. Mobile uses a compact service panel followed by announcements and two vertically stacked purchases. Both homepage variants select the new partial only when `isMainSite` is true. Customer rental shops retain the previous service strip, announcement markup and recent-order rail, including its previous placement. The community script loads only for the main shop.
 
 The section inherits Kanit and the live tenant theme variables, including `--text`, `--card`, and `--gold-text`. The service panel reverses the surface and text roles in light and dark themes. Store name, hours, tagline, announcements, product images, prices, timestamps, and buyer labels come from existing template data. Contact opens `/contact`; purchase cards open their product route or `/products` when a slug is absent.
 
