@@ -201,6 +201,36 @@ html:not(.light) .community-service-status { color: #9ce4ba; }
   .community-service::after, .community-service-status i, .community-clock .main-service-clock__orbit { animation: none; }
 }
 
+/* Full-width announcement ticker, scoped to the main storefront component. */
+.community-overview, .community-overview--single { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.community-service { grid-template-columns: 30px minmax(0, 1fr) 44px; padding: 5px 10px; }
+.community-service-header { justify-content: flex-start; }
+.community-service-description { font-size: 9px; }
+.community-service-hours strong { font-size: 15px; line-height: 19px; }
+.community-announcements { grid-column: 1 / -1; display: flex; gap: 0; padding: 5px; border: 1px solid #303033; border-radius: 15px; background: #19191b; color: #bdbdc3; min-height: 46px; overflow: hidden; }
+.community-announcements-header { display: flex; align-items: center; justify-content: center; gap: 7px; flex: 0 0 auto; width: auto; height: 34px; padding: 0 13px; border-radius: 10px; background: #ededee; color: #171719; }
+.community-announcements-header h2 { position: static; width: auto; height: auto; clip-path: none; overflow: visible; color: inherit; font-size: 12px; line-height: 18px; font-weight: 500; }
+.community-news-window { flex: 1; min-width: 0; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 12px, #000 calc(100% - 12px), transparent); }
+.community-news-track { display: flex; width: max-content; animation: community-news-run 35s linear infinite; }
+.community-news-group { display: flex; align-items: center; flex: 0 0 auto; min-width: max(950px, 85vw); }
+.community-news-item { display: flex; align-items: center; gap: 9px; flex: 1 0 auto; white-space: nowrap; padding: 0 24px; font-size: 12px; line-height: 34px; }
+.community-news-item svg { flex-shrink: 0; fill: none; stroke: currentColor; stroke-width: 1.5; }
+.community-news-item strong { font-weight: 500; color: #e2e2e5; }
+.community-news-separator { color: #77777f; }
+@keyframes community-news-run { to { transform: translateX(-50%); } }
+@media (max-width: 760px) {
+  .community-overview { grid-template-columns: 1fr; gap: 7px; }
+  .community-announcements { padding: 4px; min-height: 40px; border-radius: 12px; }
+  .community-announcements-header { height: 30px; padding: 0 10px; font-size: 11px; }
+  .community-news-item { font-size: 11px; line-height: 30px; padding: 0 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .community-news-track { animation: none; }
+  .community-news-window { overflow-x: auto; scrollbar-width: thin; }
+  .community-news-group { min-width: 0; }
+  .community-news-group[aria-hidden="true"] { display: none; }
+}
+
 /* The refreshed cards ride the same continuous, seamless motion as the old rail. */
 .community-order-shell { min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-behavior: smooth; overscroll-behavior-inline: contain; }
 .community-order-shell::-webkit-scrollbar { display: none; }
