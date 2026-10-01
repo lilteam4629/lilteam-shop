@@ -182,7 +182,8 @@ async function exerciseTenantRandomBox() {
   assert.equal(draw.statusCode, 302, 'rental customer can draw from the box');
 
   tenantData = JSON.parse(fs.readFileSync(tenantDataPath, 'utf8'));
-  const order = tenantData.orders.find(item => item.id === decodeURIComponent(draw.headers.location.split('/').pop()));
+  const storedOrder = tenantData.orders.find(item => item.id === decodeURIComponent(draw.headers.location.split('/').pop()));
+  const order = require('../src/services/store-order-codec').decodeStoreSnapshot({ orders: [storedOrder] }).orders[0];
   assert.ok(order?.randomBoxOrder, 'draw order is stored in this tenant database');
   assert.ok(order.items.some(item => item.randomBoxDraw), 'draw result is stored with its order');
   assert.ok(tenantData.stockItems.every(item => item.productId === productId), 'the tenant only touched its own prize stock');

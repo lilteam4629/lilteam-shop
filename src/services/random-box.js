@@ -161,7 +161,20 @@ function getDrawHealth(data, product) {
   }
 }
 
+const readinessCache = new WeakMap();
 async function getPersistedDrawHealth(store, product) {
+  const target = store.data;
+  let entries = readinessCache.get(target);
+  if (!entries) { entries = new Map(); readinessCache.set(target, entries); }
+  const key = String(product.id);
+  const cached = entries.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.result;
+  const result = inspectPersistedDrawHealth(store, product);
+  entries.set(key, { expiresAt: Date.now() + 60000, result });
+  return result;
+}
+
+async function inspectPersistedDrawHealth(store, product) {
   try {
     return await store.previewTransaction((data, metadata) => {
       const savedProduct = data.products.find(item => String(item.id) === String(product.id));

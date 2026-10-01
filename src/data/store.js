@@ -7,6 +7,7 @@ const { MongoClient, GridFSBucket, ObjectId } = require('mongodb');
 const { AsyncLocalStorage } = require('async_hooks');
 const crypto = require('crypto');
 const r2 = require('../services/r2');
+const { encodeStoreSnapshot, decodeStoreSnapshot } = require('../services/store-order-codec');
 
 // Multi-tenant support: each rented "shop" (see src/routes/tenant.js) gets
 // its OWN full copy of this exact data shape (products, orders, users,
@@ -328,19 +329,35 @@ async function transact(mutator) {
   const target = ctx ? ctx.db : db;
   return enqueueDocument(documentId, async () => {
     if (!mongoCollection) {
-      const result = await mutator(target);
-      await (ctx ? saveTenantDb(ctx.shopId, target) : save());
+      const working = structuredClone(target);
+      const result = await mutator(working);
+      const destination = ctx ? tenantDbPath(ctx.shopId) : DB_PATH;
+      const temporary = `${destination}.transaction-${nanoid(12)}.tmp`;
+      try {
+        fs.writeFileSync(temporary, JSON.stringify(encodeStoreSnapshot(working), null, 2));
+        fs.renameSync(temporary, destination);
+      } catch (error) {
+        if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
+        throw error;
+      }
+      replaceObject(target, working);
+      if (ctx) tenantDbCache.set(String(ctx.shopId), { db: target, expiresAt: Date.now() + TENANT_CACHE_TTL_MS });
       return result;
     }
     for (let attempt = 0; attempt < 3; attempt += 1) {
-      const stored = await mongoCollection.findOne({ _id: documentId });
+      const storedDocument = await mongoCollection.findOne({ _id: documentId });
+      const stored = storedDocument && decodeStoreSnapshot(storedDocument);
       if (!stored) throw new Error(`ไม่พบข้อมูลร้าน ${documentId}`);
       const { revision, filter } = require('../services/store-revision').snapshotRevision(stored, documentId);
       delete stored._id;
       delete stored._revision;
       migrateSchema(stored);
       const result = await mutator(stored);
-      const written = await mongoCollection.replaceOne(filter, { _id: documentId, _revision: revision + 1, ...stored });
+      const replacement = { _id: documentId, _revision: revision + 1, ...encodeStoreSnapshot(stored) };
+      if (require('mongodb').BSON.calculateObjectSize(replacement) >= 16 * 1024 * 1024) {
+        const error = new Error('STORE_SIZE_LIMIT'); error.code = 'STORE_SIZE_LIMIT'; throw error;
+      }
+      const written = await mongoCollection.replaceOne(filter, replacement);
       if (written.modifiedCount === 1) {
         replaceObject(target, stored);
         return result;
@@ -354,16 +371,17 @@ async function transact(mutator) {
 async function previewTransaction(mutator) {
   const ctx = tenantContext.getStore();
   const documentId = ctx ? `shop:${ctx.shopId}` : 'main';
-  const snapshot = mongoCollection
+  const document = mongoCollection
     ? await mongoCollection.findOne({ _id: documentId })
     : structuredClone(ctx ? ctx.db : db);
+  const snapshot = document && decodeStoreSnapshot(document);
   if (!snapshot) throw new Error('STORE_UNAVAILABLE');
   const { legacy } = require('../services/store-revision').snapshotRevision(snapshot, documentId);
   delete snapshot._id;
   delete snapshot._revision;
   migrateSchema(snapshot);
   const result = await mutator(snapshot, { legacyRevision: legacy });
-  if (mongoCollection && require('mongodb').BSON.calculateObjectSize(snapshot) >= 16 * 1024 * 1024 - 1024) {
+  if (mongoCollection && require('mongodb').BSON.calculateObjectSize(encodeStoreSnapshot(snapshot)) >= 16 * 1024 * 1024 - 1024) {
     throw new Error('STORE_SIZE_LIMIT');
   }
   return result;
@@ -432,7 +450,7 @@ async function init() {
     const existing = await mongoCollection.findOne({ _id: 'main' });
     if (existing) {
       delete existing._id;
-      db = existing;
+      db = decodeStoreSnapshot(existing);
     } else {
       db = defaultData();
       await mongoCollection.insertOne({ _id: 'main', ...db });
@@ -443,7 +461,7 @@ async function init() {
       db = defaultData();
       fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
     } else {
-      db = JSON.parse(fs.readFileSync(DB_PATH, 'utf-8'));
+      db = decodeStoreSnapshot(JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')));
     }
     console.log('[store] MONGODB_URI not set — using local db.json (data will reset on redeploy).');
   }
@@ -870,9 +888,9 @@ function save() {
   const ctx = tenantContext.getStore();
   if (ctx) return saveTenantDb(ctx.shopId, ctx.db);
   if (mongoCollection) {
-    return mongoCollection.replaceOne({ _id: 'main' }, { _id: 'main', ...db }, { upsert: true });
+    return mongoCollection.replaceOne({ _id: 'main' }, { _id: 'main', ...encodeStoreSnapshot(db) }, { upsert: true });
   } else {
-    fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+    fs.writeFileSync(DB_PATH, JSON.stringify(encodeStoreSnapshot(db), null, 2));
     return Promise.resolve();
   }
 }
@@ -883,9 +901,9 @@ async function saveTenantDb(shopId, tenantDb) {
     // shop created and then immediately redirected to must already be
     // readable by loadTenantDb on the very next request, or that request
     // sees no data yet and shows "ร้านนี้ยังไม่พร้อมใช้งาน".
-    await mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...tenantDb }, { upsert: true });
+    await mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...encodeStoreSnapshot(tenantDb) }, { upsert: true });
   } else {
-    fs.writeFileSync(tenantDbPath(shopId), JSON.stringify(tenantDb, null, 2));
+    fs.writeFileSync(tenantDbPath(shopId), JSON.stringify(encodeStoreSnapshot(tenantDb), null, 2));
   }
   tenantDbCache.set(String(shopId), { db: tenantDb, expiresAt: Date.now() + TENANT_CACHE_TTL_MS });
 }
@@ -931,11 +949,11 @@ async function loadTenantDbUncached(shopId, cacheKey) {
     const existing = await mongoCollection.findOne({ _id: `shop:${shopId}` });
     if (!existing) return null;
     delete existing._id;
-    tenantDb = existing;
+    tenantDb = decodeStoreSnapshot(existing);
   } else {
     const file = tenantDbPath(shopId);
     if (!fs.existsSync(file)) return null;
-    tenantDb = JSON.parse(fs.readFileSync(file, 'utf-8'));
+    tenantDb = decodeStoreSnapshot(JSON.parse(fs.readFileSync(file, 'utf-8')));
   }
   // A tenant's dataset can have been created at an arbitrarily older point
   // in this app's history — fields added since (theme, homeSections, etc.)

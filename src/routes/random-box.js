@@ -46,6 +46,11 @@ router.post('/:productId/draw', requireLogin, async (req, res) => {
     req.flash('success', `${resultCopy} · สุ่ม ${drawCount} ครั้ง ใช้เงิน ฿${total.toLocaleString('th-TH')}${stockNote}${balanceNote}${priceNote}`);
     return res.redirect(`/account/orders/${encodeURIComponent(result.orderId)}`);
   } catch (error) {
+    if (error.code === 'STORE_SIZE_LIMIT') {
+      req.flash('error', 'พื้นที่บันทึกของร้านไม่เพียงพอ ระบบยังไม่ได้หักเงิน กรุณาติดต่อร้าน');
+      console.error('[random-box] storage limit:', req.params.productId);
+      return res.redirect(returnPath);
+    }
     const safeCodes = new Set(['PRODUCT_UNAVAILABLE', 'NOT_RANDOM_BOX', 'NO_PRIZES', 'USER_UNAVAILABLE', 'INSUFFICIENT_BALANCE', 'INVALID_DRAW_COUNT']);
     const safeMessage = error.code === 'INVALID_DRAW_COUNT'
       ? `เลือกจำนวนเปิดกล่องได้ตั้งแต่ 1 ถึง ${randomBox.MAX_RANDOM_BOX_DRAWS} ครั้ง`

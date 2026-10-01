@@ -283,7 +283,8 @@ async function checkRandomBoxWorkflow(adminCookie) {
     body: new URLSearchParams({ drawRequestId: batchId, drawCount: '500' }).toString() });
   assert.equal(batch.statusCode, 302);
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
-  const order = data.orders.find(item => item.id === batch.headers.location.split('/').pop());
+  const storedOrder = data.orders.find(item => item.id === batch.headers.location.split('/').pop());
+  const order = require('../src/services/store-order-codec').decodeStoreSnapshot({ orders: [storedOrder] }).orders[0];
   assert.ok(order?.randomBoxOrder);
   assert.ok(order.items.length <= 330, 'three prizes cannot have a global drought longer than 110');
   assert.equal(order.total, order.items.length);
