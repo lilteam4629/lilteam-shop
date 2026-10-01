@@ -4485,6 +4485,46 @@ html:not(.light) .community-service-status { color: #9ce4ba; }
 }
 .community-order-grid { grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
 
+/* Main-shop signal dock: small service chip and an open announcement feed. */
+.community-overview { grid-template-columns: minmax(270px, 330px) minmax(0, 1fr); gap: 18px; border: 0; border-radius: 0; background: transparent; overflow: visible; align-items: center; }
+.community-service { grid-template-columns: 32px minmax(0, 1fr) 44px; gap: 0 9px; padding: 8px 10px; border: 1px solid color-mix(in srgb, var(--gold) 24%, var(--border)); border-radius: 12px; background: color-mix(in srgb, var(--gold) 6%, var(--card)); box-shadow: inset 3px 0 var(--gold-text); }
+.community-service-header { grid-column: 2; grid-row: 1; gap: 6px; justify-content: flex-start; }
+.community-service-header > strong { font-size: 10px; line-height: 15px; }
+.community-service-status { font-size: 0; gap: 0; }
+.community-service-status i { width: 5px; height: 5px; box-shadow: 0 0 0 3px color-mix(in srgb, #249868 12%, transparent); animation: community-signal 2.4s ease-in-out infinite; }
+.community-service-hours { display: contents; }
+.community-clock { grid-column: 1; grid-row: 1 / 4; }
+.community-clock, .community-clock svg { width: 30px; height: 30px; }
+.community-service-hours > div { grid-column: 2; grid-row: 2; }
+.community-service-hours > div > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.community-service-hours strong { font-size: 16px; line-height: 21px; letter-spacing: -.02em; }
+.community-service-description { grid-column: 2; grid-row: 3; font-size: 9px; line-height: 13px; }
+.community-service-footer { grid-column: 3; grid-row: 1 / 4; }
+.community-service-footer a { width: 44px; padding: 0; font-size: 0; border: 0; border-radius: 8px; background: color-mix(in srgb, var(--gold) 12%, transparent); }
+.community-service-footer a svg { width: 18px; height: 18px; }
+.community-service::after { animation: community-service-light 5s linear infinite; }
+.community-clock .main-service-clock__orbit { animation: main-service-orbit 3s linear infinite; }
+.community-announcements { padding: 4px 0; gap: 10px; background: transparent; border-radius: 0; }
+.community-announcements-header { width: 28px; height: 28px; border-radius: 50%; background: transparent; }
+.community-announcements-header svg { width: 17px; height: 17px; }
+.community-announcement h3 { font-size: 12px; line-height: 18px; }
+.community-announcement p { margin-top: 2px; font-size: 11px; line-height: 16px; max-width: none; }
+.community-overview--single { grid-template-columns: minmax(0, 330px); }
+.community-service-footer a:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
+@keyframes community-signal { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, #249868 5%, transparent); } }
+@media (max-width: 760px) {
+  .community-overview { grid-template-columns: 1fr; gap: 7px; }
+  .community-service { padding: 6px 9px; }
+  .community-service-hours strong { font-size: 15px; }
+  .community-announcements { padding: 3px 4px; gap: 7px; }
+  .community-announcements-header { width: 24px; height: 24px; }
+  .community-announcement h3 { font-size: 11px; line-height: 16px; }
+  .community-announcement p { font-size: 10px; line-height: 15px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .community-service::after, .community-service-status i, .community-clock .main-service-clock__orbit { animation: none; }
+}
+
 /* The refreshed cards ride the same continuous, seamless motion as the old rail. */
 .community-order-shell { min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-behavior: smooth; overscroll-behavior-inline: contain; }
 .community-order-shell::-webkit-scrollbar { display: none; }
