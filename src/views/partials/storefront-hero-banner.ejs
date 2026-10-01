@@ -1,0 +1,10 @@
+<% const sharedHero = typeof storefrontHero !== 'undefined' ? storefrontHero : { bannerImage: settings.hero?.bannerImage || '/images/storefront-default-banner.svg', bannerLink: '/products' }; %>
+<section class="owner-home-v20-hero owner-home-v23-hero owner-home-v20-hero--banner owner-home-v20-hero--banner-only" id="home-top" aria-label="แบนเนอร์ร้าน <%= settings.shopName %>">
+  <div class="owner-home-v20-artwork">
+    <% if (sharedHero.bannerLink) { %>
+      <a href="<%= sharedHero.bannerLink %>" aria-label="เปิดแบนเนอร์ร้าน <%= settings.shopName %>"><img src="<%= sharedHero.bannerImage %>" alt="แบนเนอร์ร้าน <%= settings.shopName %>" width="1200" height="400" fetchpriority="high" decoding="async" /></a>
+    <% } else { %>
+      <img src="<%= sharedHero.bannerImage %>" alt="แบนเนอร์ร้าน <%= settings.shopName %>" width="1200" height="400" fetchpriority="high" decoding="async" />
+    <% } %>
+  </div>
+</section>

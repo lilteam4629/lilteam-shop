@@ -126,12 +126,14 @@ assert.match(ownerHeroFxCss, /owner-home-v20-artwork:not\(\.owner-home-v23-spotl
   'the blurred banner underlay that can turn into a black disk must stay removed');
 assert.match(ownerHeroLayoutCss, /\.owner-home-v20-artwork img\s*\{[^}]*filter:\s*none;/,
   'the main banner image must not create a filtered GPU layer');
-assert.match(home, /ownerHomeV20\) \{ %>[\s\S]*?ownerHomeBanner = settings\.hero && settings\.hero\.mode === 'banner' \? settings\.hero\.bannerImage : null/,
-  'the new banner-first hero must use the configured real shop banner');
-assert.match(home, /class="owner-home-v20-artwork"[\s\S]*?<a href="<%= settings\.hero\.bannerLink %>" aria-label=[\s\S]*?<img src="<%= ownerHomeBanner %>" alt=""[^>]*fetchpriority="high"/,
-  'the uploaded banner must remain visible and load with high priority');
-assert.match(home, /owner-home-v20-hero--banner-only[\s\S]*?if \(!ownerHomeBanner\) \{ %>[\s\S]*?owner-home-v20-hero-content/,
-  'a configured banner must replace the homepage text and action block');
+assert.match(home, /include\('\.\.\/partials\/storefront-hero-banner'\)/,
+  'every shop uses the shared banner component');
+const sharedBanner = read('src/views/partials/storefront-hero-banner.ejs');
+assert.match(sharedBanner, /class="owner-home-v20-artwork"[\s\S]*?<img src="<%= sharedHero\.bannerImage %>"[\s\S]*?fetchpriority="high"/,
+  'the resolved shop banner remains visible and loads with high priority');
+assert.match(sharedBanner, /owner-home-v20-hero--banner-only/);
+assert.doesNotMatch(home, /ownerHomeHeroProduct|owner-home-cozy-spotlight|<h1[^>]*owner-home-v20-title/,
+  'a shop without an uploaded banner must never fall back to a product hero');
 assert.doesNotMatch(home, /owner-home-v20-hero-note/,
   'the enlarged banner must not carry a floating text badge');
 assert.match(ownerHeroFxCss, /owner-home-v20-hero--banner-only[\s\S]*?width:\s*100%[\s\S]*?owner-home-v20-artwork[\s\S]*?width:\s*100%[\s\S]*?object-fit:\s*contain/s,
@@ -542,9 +544,9 @@ assert.match(sharedCatalogCss, /@media\s*\(max-width:\s*760px\)[\s\S]*?grid-temp
   'the shared catalogue must retain a readable two-column mobile layout');
 assert.ok(sharedCatalogRuleCount > 0, 'shared catalogue styles must stay scoped to refreshed shops');
 
-assert.match(home, /settings\.shopName \|\| 'ร้านค้า'/,
+assert.match(sharedBanner, /settings\.shopName/,
   'each tenant home must use that shop\'s own name in its refreshed hero');
-assert.match(home, /settings\.hero\.bannerImage/,
+assert.match(sharedBanner, /settings\.hero\?\.bannerImage/,
   'each tenant home must read its configured banner from the active shop settings');
 assert.match(productCard, /src="<%= p\.images\[0\] %>"/,
   'refreshed product cards must read image URLs from the active shop product records');

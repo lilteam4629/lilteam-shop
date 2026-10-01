@@ -11,6 +11,7 @@ const expressLayouts = require('express-ejs-layouts');
 const store = require('./data/store');
 const { attachUser } = require('./middleware/auth');
 const { requestShopSettings } = require('./services/shop-branding');
+const { resolveStorefrontHero } = require('./services/storefront-presentation');
 const shopRoutes = require('./routes/shop');
 const authRoutes = require('./routes/auth');
 const cartRoutes = require('./routes/cart');
@@ -216,6 +217,7 @@ app.use((req, res, next) => {
   // route-level 404/500 renders that do not pass page settings explicitly.
   // store.data resolves through this request's AsyncLocalStorage tenant scope.
   res.locals.settings = requestShopSettings(store.data.settings, req.tenantShop);
+  res.locals.storefrontHero = resolveStorefrontHero(store.data.settings.hero, store.platformData.settings.hero, !req.tenantShop);
   res.locals.messages = {
     success: req.flash('success'),
     error: req.flash('error'),

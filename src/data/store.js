@@ -9,6 +9,7 @@ const crypto = require('crypto');
 const r2 = require('../services/r2');
 const { encodeStoreSnapshot, decodeStoreSnapshot } = require('../services/store-order-codec');
 const { writeJson } = require('../services/atomic-json');
+const { newShopPresentation } = require('../services/storefront-presentation');
 
 // Multi-tenant support: each rented "shop" (see src/routes/tenant.js) gets
 // its OWN full copy of this exact data shape (products, orders, users,
@@ -997,6 +998,7 @@ async function loadTenantDbUncached(shopId, cacheKey) {
  */
 async function createTenantDb(shopId, { shopName, adminUsername, adminEmail, adminPasswordHash }) {
   const tenantDb = defaultData();
+  Object.assign(tenantDb.settings, newShopPresentation(db.settings));
   tenantDb.settings.shopName = shopName;
   tenantDb.settings.payment.slipApiMode = 'shared';
   tenantDb.users = [
