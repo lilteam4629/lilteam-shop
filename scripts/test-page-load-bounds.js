@@ -1,0 +1,10 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert/strict');const handlers={},hints=[];let pending;
+const document={addEventListener:(name,fn)=>handlers[name]=fn,createElement:()=>({}),head:{appendChild:x=>hints.push(x)},documentElement:{classList:{add(){},remove(){}}}};
+const location={href:'https://shop.test/',origin:'https://shop.test'};
+const window={addEventListener(){},matchMedia:()=>({matches:false,addEventListener(){}})};
+vm.runInNewContext(fs.readFileSync('public/js/interaction-performance-v1.js','utf8'),{document,location,window,navigator:{},URL,Set,setTimeout:fn=>{pending=fn;return 1},clearTimeout:()=>{pending=null},requestAnimationFrame:fn=>fn()});
+function hover(path){handlers.pointerover({pointerType:'mouse',target:{closest:()=>({href:'https://shop.test'+path,hasAttribute:()=>false})}});if(pending){const fn=pending;pending=null;fn();}}
+handlers.pointerover({pointerType:'mouse',target:{closest:()=>({href:'https://shop.test/products',hasAttribute:()=>false})}});assert.equal(hints.length,0);handlers.pointerout();assert.equal(pending,null);
+['/admin/products/delete','/account/orders','/logout','/products?page=2'].forEach(hover);assert.equal(hints.length,0);
+['/products','/help','/contact','/game/fourth'].forEach(hover);assert.equal(hints.length,3);
+let route;const source=fs.readFileSync('src/routes/account.js','utf8');const a=source.indexOf("router.get('/orders',"),b=source.indexOf("router.get('/orders/:id'",a);const orders=Array.from({length:45},(_,i)=>({id:String(i),userId:'u',createdAt:new Date(2026,0,i+1),items:[]}));vm.runInNewContext(source.slice(a,b),{router:{get:(p,fn)=>route=fn},currentUser:()=>({id:'u'}),store:{data:{orders}},summarizeOrders:x=>x});let result;route({query:{page:2}},{render:(view,data)=>result=data});assert.equal(result.orders.length,20);assert.equal(result.page,2);assert.equal(result.totalPages,3);route({query:{page:9999}},{render:(view,data)=>result=data});assert.equal(result.orders.length,5);assert.equal(result.page,3);console.log('Bounded prefetch, protected-route exclusion and order pagination passed');

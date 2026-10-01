@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="/css/order-history-v1.css">
+<link rel="stylesheet" href="<%= asset('css/order-history-v1.css') %>">
 <section class="order-history">
   <header class="order-history-heading"><h1>คำสั่งซื้อของฉัน</h1><p>ดูสินค้าที่ซื้อและรายการที่ได้รับในแต่ละคำสั่งซื้อ</p></header>
   <% if (!orders.length) { %>
@@ -23,5 +23,12 @@
         </article>
       <% }) %>
     </div>
+  <% } %>
+<% if (typeof totalPages !== 'undefined' && totalPages > 1) { %>
+  <nav aria-label="แบ่งหน้าคำสั่งซื้อ" class="order-history-pagination">
+    <% if(page > 1) { %><a href="/account/orders?page=<%= page - 1 %>">← หน้าก่อน</a><% } %>
+    <span>หน้า <%= page %> / <%= totalPages %> · <%= totalOrders.toLocaleString('th-TH') %> คำสั่งซื้อ</span>
+    <% if(page < totalPages) { %><a href="/account/orders?page=<%= page + 1 %>">หน้าถัดไป →</a><% } %>
+  </nav>
   <% } %>
 </section>

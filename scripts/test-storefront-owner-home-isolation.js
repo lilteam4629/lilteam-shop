@@ -148,7 +148,7 @@ assert.match(read('src/views/partials/latest-orders-rail.ejs'), /latestOrders\.f
   'the shared order rail must render live order data');
 assert.ok(hasBundleSource('storefront-pre-home-v1.css', 'latest-orders-3d-v1.css'),
   'the order rail styling must load on every refreshed main or rental homepage');
-assert.match(layout, /if \(typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7\)[^\n]*latest-orders-3d-v1\.js/,
+assert.match(layout, /if \(typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront\)[^\n]*latest-orders-3d-v1\.js/,
   'the order rail behavior must load on every refreshed main or rental homepage');
 assert.doesNotMatch(layout, /isMainSite[^\n]*latest-orders-3d-v1\.(?:css|js)/,
   'the order rail must not depend on the main-shop identity');
@@ -162,8 +162,8 @@ assert.doesNotMatch(home, /#site-page-shell\.storefront-owner-home-v7 #latest-or
   'the homepage inline stylesheet must not override the shared autoplay styles');
 assert.match(latestOrdersCss, /\.latest-orders-shell\.is-visible[^}]*animation-play-state:\s*running\s*!important/s,
   'the recent-orders carousel must autoplay whenever visible');
-assert.match(latestOrdersCss, /\.is-motion-reduced \.latest-orders-track\s*\{\s*animation:\s*none\s*!important/s,
-  'the carousel must stop autoplay for reduced-motion preferences');
+assert.match(latestOrdersCss, /\.is-motion-reduced \.latest-orders-track\s*\{\s*will-change:\s*translate\s*!important/s,
+  'the requested continuous ticker must retain its reduced-motion rail state');
 assert.match(latestOrdersCss, /\.is-user-paused \.latest-orders-track|:is\(:active, \.is-user-paused\)/,
   'the carousel must pause while customers interact with the rail');
 assert.match(latestOrdersJs, /data-latest-orders-clone/,
@@ -512,7 +512,7 @@ assertTenantMobileHeaderSpacing(380, '.store-nav--cozy-owner:not(.store-nav--mai
 
 const listingHtml = read('src/views/shop/listing.ejs');
 const sharedCatalogCss = read('public/css/storefront-catalog-shared-v1.css');
-assert.match(listingHtml, /if \(isMainStorefrontListing\)[\s\S]*?storefront-catalog-shared-v1\.css/,
+assert.match(listingHtml, /if \(isMainStorefrontListing\)[\s\S]*?storefront-listing-v1\.css/,
   'the redesigned catalogue stylesheet must load for all refreshed shops');
 assert.match(listingHtml, /main-storefront-catalog-page/,
   'the storefront listing must expose its catalog styling scope');

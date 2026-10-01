@@ -473,8 +473,8 @@
           <img src="<%= image %>" alt="" width="1200" height="800" class="welcome-popup-slide absolute inset-0 w-full h-full object-cover transition-opacity duration-500 <%= index === 0 ? 'opacity-100' : 'opacity-0' %>" data-index="<%= index %>" />
         <% }) %>
         <% if (welcomePopupImages.length > 1) { %>
-          <button type="button" class="welcome-popup-arrow welcome-popup-prev" data-popup-prev aria-label="รูปประกาศก่อนหน้า"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
-          <button type="button" class="welcome-popup-arrow welcome-popup-next" data-popup-next aria-label="รูปประกาศถัดไป"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+          <button type="button" class="welcome-popup-arrow welcome-popup-prev" data-popup-prev aria-label="รูปประกาศก่อนหน้า"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg></button>
+          <button type="button" class="welcome-popup-arrow welcome-popup-next" data-popup-next aria-label="รูปประกาศถัดไป"><svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
           <div class="absolute bottom-2.5 left-0 right-0 flex items-center justify-center gap-1.5 z-10">
             <% welcomePopupImages.forEach((image, index) => { %>
               <span class="welcome-popup-dot w-1.5 h-1.5 rounded-full <%= index === 0 ? 'bg-white' : 'bg-white/40' %> transition" data-index="<%= index %>"></span>

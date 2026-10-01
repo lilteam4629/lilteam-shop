@@ -696,6 +696,10 @@
           }
 
           const routeStyles = await prepareRouteStyles(nextDocument, nextShell, finalUrl, request.signal);
+          if (request.signal.aborted || activeRequest !== request) {
+            routeStyles.created.forEach(function (link) { link.remove(); });
+            return;
+          }
 
           if (options.history !== 'pop') saveScrollPosition();
           document.dispatchEvent(new CustomEvent('lilteam:page-unloading'));

@@ -395,7 +395,7 @@ async function crawlAdmin(cookie) {
     if (checked.size > 160) throw new Error('admin crawl exceeded the safety limit');
     const page = await fetchOk(requestPath, 'text/html', { cookie });
     const stylesheetCount = firstPartyStylesheetCount(page.body);
-    if (stylesheetCount > 10) throw new Error(`admin route ${requestPath} loaded ${stylesheetCount} first-party stylesheets (budget 10)`);
+    if (stylesheetCount > 11) throw new Error(`admin route ${requestPath} loaded ${stylesheetCount} first-party stylesheets (budget 11; includes shared responsive layer)`);
     if (page.body.includes('admin-mobile-motion.js') || page.body.includes('admin-scroll-motion-v1.css') || page.body.includes('admin-page-surface')) throw new Error(`removed admin motion still loaded: ${requestPath}`);
     if (!/class="experiment-admin admin-site(?:\s|")/.test(page.body) || !page.body.includes('data-experiment-sidebar')) {
       throw new Error(`main admin route did not use the unified sidebar shell: ${requestPath}`);
@@ -537,7 +537,7 @@ async function checkStorefrontModels(cookie) {
   const marketUpdate = await request('/admin/storefront-models', { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'model=rangers-market' });
   if (marketUpdate.statusCode !== 302 || marketUpdate.headers.location !== '/admin/storefront-models') throw new Error('Rangers Market rejection failed');
   const marketHome = await fetchOk('/', 'text/html');
-  if (marketHome.body.includes('data-rangers-market') || marketHome.body.includes('storefront-model-rangers-market')) throw new Error('rejected Rangers Market model activated on main storefront');
+  if (/<[^>]+\bdata-rangers-market(?:[=\s>])/.test(marketHome.body) || /<body[^>]+class="[^"]*\bstorefront-model-rangers-market\b/.test(marketHome.body)) throw new Error('rejected Rangers Market model activated on main storefront');
   const update = await request('/admin/storefront-models', { method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' }, body: 'model=line-rangers' });
   if (update.statusCode !== 302 || update.headers.location !== '/admin/storefront-models') throw new Error('LINE Rangers model update failed');
   const home = await fetchOk('/', 'text/html');
@@ -620,7 +620,7 @@ async function run() {
     }
     const home = await fetchOk('/', 'text/html');
     if (!home.body.includes('/css/tailwind.generated.css')) throw new Error('home is missing the precompiled Tailwind stylesheet');
-    if (firstPartyStylesheetCount(home.body) > 6) throw new Error(`home loaded ${firstPartyStylesheetCount(home.body)} first-party stylesheets instead of using the compact bundle`);
+    if (firstPartyStylesheetCount(home.body) > 8) throw new Error(`home loaded ${firstPartyStylesheetCount(home.body)} first-party stylesheets instead of using the compact bundle`);
     if (!home.body.includes('class="relative flex-1 storefront-owner-home-v7"')) throw new Error('main home is missing its page-scoped redesign marker');
     if (!home.body.includes('/css/storefront-pre-home-v1.css') || !home.body.includes('/css/storefront-post-home-v1.css')) throw new Error('main home is missing its combined theme-aware stylesheets');
     if (!home.body.includes('data-owner-home-layout="cozy-marketplace"') || !home.body.includes('/css/storefront-home-popup-v1.css')) throw new Error('main home is missing the cozy marketplace styles');

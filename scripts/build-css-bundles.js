@@ -8,6 +8,7 @@ const CSS_DIR = path.join(ROOT, 'public', 'css');
 // split around the shop's inline theme variables is intentional: it preserves
 // the existing cascade while reducing render-blocking stylesheet requests.
 const BUNDLES = Object.freeze({
+  'storefront-listing-v1.css': ['storefront-catalog-shared-v1.css', 'storefront-catalog-shared-v2.css', 'storefront-owner-home-v21.css'],
   'storefront-pre-unified-v1.css': [
     'storefront-navbar-v1.css',
     'storefront-home-v1.css',
@@ -22,6 +23,7 @@ const BUNDLES = Object.freeze({
     'storefront-theme-cohesion-v1.css',
     'storefront-music-unified-v1.css',
     'storefront-navbar-shared-v1.css',
+    'main-service-strip-v1.css',
     'latest-orders-loop-v1.css',
   ],
   'storefront-pre-home-v1.css': [
@@ -50,6 +52,7 @@ const BUNDLES = Object.freeze({
     'storefront-theme-cohesion-v1.css',
     'storefront-music-unified-v1.css',
     'storefront-navbar-shared-v1.css',
+    'main-service-strip-v1.css',
   ],
   'storefront-post-unified-v1.css': [
     'storefront-navbar-cozy-v1.css',
@@ -96,7 +99,7 @@ function checkCssBundles() {
   for (const [output, sources] of Object.entries(BUNDLES)) {
     const outputPath = path.join(CSS_DIR, output);
     const expected = bundleContents(sources);
-    if (!fs.existsSync(outputPath) || fs.readFileSync(outputPath, 'utf8') !== expected) staleFiles.push(output);
+    if (!fs.existsSync(outputPath) || fs.readFileSync(outputPath, 'utf8').replace(/\r\n/g, '\n') !== expected) staleFiles.push(output);
   }
   return { ok: staleFiles.length === 0, staleFiles };
 }

@@ -1,0 +1,1493 @@
+[
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/",
+    "source": "src/routes/shop.js",
+    "line": 221
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/api/rangers-catalog",
+    "source": "src/routes/shop.js",
+    "line": 236
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/preview/rangers-market",
+    "source": "src/routes/shop.js",
+    "line": 250
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/preview/locker-home",
+    "source": "src/routes/shop.js",
+    "line": 259
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/preview/mobile-cinematic-7f4c2a",
+    "source": "src/routes/shop.js",
+    "line": 263
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/products",
+    "source": "src/routes/shop.js",
+    "line": 271
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/offline",
+    "source": "src/routes/shop.js",
+    "line": 320
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/rental",
+    "source": "src/routes/shop.js",
+    "line": 321
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/search",
+    "source": "src/routes/shop.js",
+    "line": 323
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/help",
+    "source": "src/routes/shop.js",
+    "line": 344
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/contact",
+    "source": "src/routes/shop.js",
+    "line": 348
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/cookie-policy",
+    "source": "src/routes/shop.js",
+    "line": 379
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/federated/checkout",
+    "source": "src/routes/shop.js",
+    "line": 383
+  },
+  {
+    "family": "shop",
+    "method": "GET",
+    "route": "/game/:slug",
+    "source": "src/routes/shop.js",
+    "line": 404
+  },
+  {
+    "family": "auth",
+    "method": "GET",
+    "route": "/login",
+    "source": "src/routes/auth.js",
+    "line": 59
+  },
+  {
+    "family": "auth",
+    "method": "POST",
+    "route": "/login",
+    "source": "src/routes/auth.js",
+    "line": 63
+  },
+  {
+    "family": "auth",
+    "method": "GET",
+    "route": "/register",
+    "source": "src/routes/auth.js",
+    "line": 109
+  },
+  {
+    "family": "auth",
+    "method": "POST",
+    "route": "/register",
+    "source": "src/routes/auth.js",
+    "line": 115
+  },
+  {
+    "family": "auth",
+    "method": "GET",
+    "route": "/logout",
+    "source": "src/routes/auth.js",
+    "line": 160
+  },
+  {
+    "family": "promotions",
+    "method": "GET",
+    "route": "/promotions",
+    "source": "src/routes/promotions.js",
+    "line": 29
+  },
+  {
+    "family": "promotions",
+    "method": "POST",
+    "route": "/promotions/claim",
+    "source": "src/routes/promotions.js",
+    "line": 30
+  },
+  {
+    "family": "promotions",
+    "method": "POST",
+    "route": "/promotions/coupon",
+    "source": "src/routes/promotions.js",
+    "line": 37
+  },
+  {
+    "family": "promotions",
+    "method": "POST",
+    "route": "/promotions/referral-join",
+    "source": "src/routes/promotions.js",
+    "line": 49
+  },
+  {
+    "family": "promotions",
+    "method": "POST",
+    "route": "/promotions/referral-check",
+    "source": "src/routes/promotions.js",
+    "line": 53
+  },
+  {
+    "family": "promotions",
+    "method": "GET",
+    "route": "/admin/promotions",
+    "source": "src/routes/promotions.js",
+    "line": 66
+  },
+  {
+    "family": "promotions",
+    "method": "POST",
+    "route": "/admin/promotions/storefront",
+    "source": "src/routes/promotions.js",
+    "line": 73
+  },
+  {
+    "family": "promotions",
+    "method": "POST",
+    "route": "/admin/promotions/campaign",
+    "source": "src/routes/promotions.js",
+    "line": 85
+  },
+  {
+    "family": "promotions",
+    "method": "POST",
+    "route": "/admin/promotions/campaign/:id/toggle",
+    "source": "src/routes/promotions.js",
+    "line": 102
+  },
+  {
+    "family": "promotions",
+    "method": "POST",
+    "route": "/admin/promotions/referral",
+    "source": "src/routes/promotions.js",
+    "line": 109
+  },
+  {
+    "family": "license",
+    "method": "GET",
+    "route": "/license",
+    "source": "src/routes/license.js",
+    "line": 11
+  },
+  {
+    "family": "license",
+    "method": "POST",
+    "route": "/license",
+    "source": "src/routes/license.js",
+    "line": 20
+  },
+  {
+    "family": "cart",
+    "method": "POST",
+    "route": "/cart/add/:productId",
+    "source": "src/routes/cart.js",
+    "line": 78
+  },
+  {
+    "family": "cart",
+    "method": "POST",
+    "route": "/cart/update/:productId",
+    "source": "src/routes/cart.js",
+    "line": 124
+  },
+  {
+    "family": "cart",
+    "method": "POST",
+    "route": "/cart/remove/:productId",
+    "source": "src/routes/cart.js",
+    "line": 136
+  },
+  {
+    "family": "cart",
+    "method": "GET",
+    "route": "/cart/",
+    "source": "src/routes/cart.js",
+    "line": 141
+  },
+  {
+    "family": "cart",
+    "method": "POST",
+    "route": "/cart/coupon",
+    "source": "src/routes/cart.js",
+    "line": 146
+  },
+  {
+    "family": "cart",
+    "method": "POST",
+    "route": "/cart/coupon/remove",
+    "source": "src/routes/cart.js",
+    "line": 162
+  },
+  {
+    "family": "cart",
+    "method": "POST",
+    "route": "/cart/checkout",
+    "source": "src/routes/cart.js",
+    "line": 290
+  },
+  {
+    "family": "account",
+    "method": "GET",
+    "route": "/account/",
+    "source": "src/routes/account.js",
+    "line": 256
+  },
+  {
+    "family": "account",
+    "method": "GET",
+    "route": "/account/topup",
+    "source": "src/routes/account.js",
+    "line": 282
+  },
+  {
+    "family": "account",
+    "method": "GET",
+    "route": "/account/topup/catalog-api",
+    "source": "src/routes/account.js",
+    "line": 289
+  },
+  {
+    "family": "account",
+    "method": "POST",
+    "route": "/account/topup/truemoney",
+    "source": "src/routes/account.js",
+    "line": 299
+  },
+  {
+    "family": "account",
+    "method": "POST",
+    "route": "/account/topup",
+    "source": "src/routes/account.js",
+    "line": 439
+  },
+  {
+    "family": "account",
+    "method": "POST",
+    "route": "/account/topup/catalog-api",
+    "source": "src/routes/account.js",
+    "line": 449
+  },
+  {
+    "family": "account",
+    "method": "GET",
+    "route": "/account/topup/truemoney/status/:claimId",
+    "source": "src/routes/account.js",
+    "line": 466
+  },
+  {
+    "family": "account",
+    "method": "GET",
+    "route": "/account/topup/:id",
+    "source": "src/routes/account.js",
+    "line": 476
+  },
+  {
+    "family": "account",
+    "method": "GET",
+    "route": "/account/topup/:id/status",
+    "source": "src/routes/account.js",
+    "line": 490
+  },
+  {
+    "family": "account",
+    "method": "GET",
+    "route": "/account/topup/:id/slip-file",
+    "source": "src/routes/account.js",
+    "line": 533
+  },
+  {
+    "family": "account",
+    "method": "POST",
+    "route": "/account/topup/:id/retry-slip",
+    "source": "src/routes/account.js",
+    "line": 894
+  },
+  {
+    "family": "account",
+    "method": "POST",
+    "route": "/account/topup/:id/slip",
+    "source": "src/routes/account.js",
+    "line": 903
+  },
+  {
+    "family": "account",
+    "method": "GET",
+    "route": "/account/orders",
+    "source": "src/routes/account.js",
+    "line": 939
+  },
+  {
+    "family": "account",
+    "method": "GET",
+    "route": "/account/orders/:id",
+    "source": "src/routes/account.js",
+    "line": 952
+  },
+  {
+    "family": "minigame",
+    "method": "POST",
+    "route": "/minigame/play",
+    "source": "src/routes/minigame.js",
+    "line": 16
+  },
+  {
+    "family": "random-box",
+    "method": "POST",
+    "route": "/random-box/:productId/draw",
+    "source": "src/routes/random-box.js",
+    "line": 9
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/media/direct-upload",
+    "source": "src/routes/admin.js",
+    "line": 150
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/products/bulk-import/progress/:jobId",
+    "source": "src/routes/admin.js",
+    "line": 216
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/",
+    "source": "src/routes/admin.js",
+    "line": 222
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/license-label",
+    "source": "src/routes/admin.js",
+    "line": 315
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/dashboard/revenue-today/reset",
+    "source": "src/routes/admin.js",
+    "line": 333
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/catalog-api",
+    "source": "src/routes/admin.js",
+    "line": 350
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/catalog-api/payouts",
+    "source": "src/routes/admin.js",
+    "line": 416
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/catalog-api/payouts/:id/slip",
+    "source": "src/routes/admin.js",
+    "line": 475
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/topups/:id/slip",
+    "source": "src/routes/admin.js",
+    "line": 489
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/catalog-api/settings",
+    "source": "src/routes/admin.js",
+    "line": 505
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/catalog-api/sync",
+    "source": "src/routes/admin.js",
+    "line": 525
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/products",
+    "source": "src/routes/admin.js",
+    "line": 626
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/card-style",
+    "source": "src/routes/admin.js",
+    "line": 657
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/products/new",
+    "source": "src/routes/admin.js",
+    "line": 664
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/new",
+    "source": "src/routes/admin.js",
+    "line": 668
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/products/bulk-import",
+    "source": "src/routes/admin.js",
+    "line": 700
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/bulk-import",
+    "source": "src/routes/admin.js",
+    "line": 707
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/products/:id/edit",
+    "source": "src/routes/admin.js",
+    "line": 806
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/:id/price",
+    "source": "src/routes/admin.js",
+    "line": 812
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/bulk-price",
+    "source": "src/routes/admin.js",
+    "line": 829
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/:id/edit",
+    "source": "src/routes/admin.js",
+    "line": 866
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/:id/delete",
+    "source": "src/routes/admin.js",
+    "line": 902
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/stock/add-all",
+    "source": "src/routes/admin.js",
+    "line": 925
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/set-status-all",
+    "source": "src/routes/admin.js",
+    "line": 949
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/delete-all",
+    "source": "src/routes/admin.js",
+    "line": 964
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/:id/copy",
+    "source": "src/routes/admin.js",
+    "line": 979
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/filter-tags",
+    "source": "src/routes/admin.js",
+    "line": 1008
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/filter-tags/reorder",
+    "source": "src/routes/admin.js",
+    "line": 1023
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/filter-tags/efootball/import",
+    "source": "src/routes/admin.js",
+    "line": 1057
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/filter-tags/efootball/import",
+    "source": "src/routes/admin.js",
+    "line": 1077
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/filter-tags/:id/products",
+    "source": "src/routes/admin.js",
+    "line": 1125
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/filter-tags/:tagId/products/:productId/add",
+    "source": "src/routes/admin.js",
+    "line": 1143
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/filter-tags",
+    "source": "src/routes/admin.js",
+    "line": 1158
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/filter-tags/:id/delete",
+    "source": "src/routes/admin.js",
+    "line": 1225
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/filter-tags/bulk-delete",
+    "source": "src/routes/admin.js",
+    "line": 1235
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/filter-tags/:id/edit",
+    "source": "src/routes/admin.js",
+    "line": 1263
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/home-sections",
+    "source": "src/routes/admin.js",
+    "line": 1280
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/home-sections",
+    "source": "src/routes/admin.js",
+    "line": 1289
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/home-sections/:id/edit",
+    "source": "src/routes/admin.js",
+    "line": 1313
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/home-sections/:id/delete",
+    "source": "src/routes/admin.js",
+    "line": 1348
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/home-sections/:id/move",
+    "source": "src/routes/admin.js",
+    "line": 1356
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/recommended-categories",
+    "source": "src/routes/admin.js",
+    "line": 1374
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/recommended-categories",
+    "source": "src/routes/admin.js",
+    "line": 1381
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/recommended-categories/:id/edit",
+    "source": "src/routes/admin.js",
+    "line": 1389
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/recommended-categories/:id/products",
+    "source": "src/routes/admin.js",
+    "line": 1399
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/recommended-categories/:id/delete",
+    "source": "src/routes/admin.js",
+    "line": 1407
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/recommended-categories/:id/toggle",
+    "source": "src/routes/admin.js",
+    "line": 1411
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/home-sections/:id/toggle",
+    "source": "src/routes/admin.js",
+    "line": 1417
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/storefront-models",
+    "source": "src/routes/admin.js",
+    "line": 1430
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/storefront-models",
+    "source": "src/routes/admin.js",
+    "line": 1439
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/rangers-model",
+    "source": "src/routes/admin.js",
+    "line": 1471
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/rangers-catalog",
+    "source": "src/routes/admin.js",
+    "line": 1483
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/rangers-catalog/source",
+    "source": "src/routes/admin.js",
+    "line": 1495
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/rangers-catalog/refresh",
+    "source": "src/routes/admin.js",
+    "line": 1499
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/rangers-catalog/assign",
+    "source": "src/routes/admin.js",
+    "line": 1509
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/rangers-catalog/toggle",
+    "source": "src/routes/admin.js",
+    "line": 1525
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/rangers-catalog/items",
+    "source": "src/routes/admin.js",
+    "line": 1533
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/rangers-catalog/items/:id/delete",
+    "source": "src/routes/admin.js",
+    "line": 1556
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/theme",
+    "source": "src/routes/admin.js",
+    "line": 1565
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/theme",
+    "source": "src/routes/admin.js",
+    "line": 1582
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/products/:id/stock",
+    "source": "src/routes/admin.js",
+    "line": 1605
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/scheduled-products",
+    "source": "src/routes/admin.js",
+    "line": 1624
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/scheduled-products",
+    "source": "src/routes/admin.js",
+    "line": 1637
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/scheduled-products/:id",
+    "source": "src/routes/admin.js",
+    "line": 1658
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/scheduled-products/:id/clear",
+    "source": "src/routes/admin.js",
+    "line": 1675
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/:id/stock/settings",
+    "source": "src/routes/admin.js",
+    "line": 1689
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/:id/stock/random-box-message",
+    "source": "src/routes/admin.js",
+    "line": 1710
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/:id/stock/add",
+    "source": "src/routes/admin.js",
+    "line": 1721
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/:id/stock/delete-all",
+    "source": "src/routes/admin.js",
+    "line": 1771
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/products/:id/stock/:stockId/delete",
+    "source": "src/routes/admin.js",
+    "line": 1804
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/orders",
+    "source": "src/routes/admin.js",
+    "line": 1841
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/orders/:id",
+    "source": "src/routes/admin.js",
+    "line": 1869
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/orders/:id/status",
+    "source": "src/routes/admin.js",
+    "line": 1894
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/users",
+    "source": "src/routes/admin.js",
+    "line": 1924
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/users/:id",
+    "source": "src/routes/admin.js",
+    "line": 1998
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/users/:id/wallet",
+    "source": "src/routes/admin.js",
+    "line": 2024
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/users/api/:shopId/:id/wallet",
+    "source": "src/routes/admin.js",
+    "line": 2083
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/users/:id/toggle-ban",
+    "source": "src/routes/admin.js",
+    "line": 2133
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/users/new",
+    "source": "src/routes/admin.js",
+    "line": 2143
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/topups",
+    "source": "src/routes/admin.js",
+    "line": 2244
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/topups/settings",
+    "source": "src/routes/admin.js",
+    "line": 2245
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/slip-verification",
+    "source": "src/routes/admin.js",
+    "line": 2328
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/slip-verification/billing",
+    "source": "src/routes/admin.js",
+    "line": 2330
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/slip-verification",
+    "source": "src/routes/admin.js",
+    "line": 2347
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/slip-verification/test",
+    "source": "src/routes/admin.js",
+    "line": 2431
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/topups/payment-settings",
+    "source": "src/routes/admin.js",
+    "line": 2477
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/topups/:id/approve",
+    "source": "src/routes/admin.js",
+    "line": 2587
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/topups/:id/reject",
+    "source": "src/routes/admin.js",
+    "line": 2594
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/topups/:id/retry-slip",
+    "source": "src/routes/admin.js",
+    "line": 2601
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/topups/:id/delete",
+    "source": "src/routes/admin.js",
+    "line": 2611
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/coupons",
+    "source": "src/routes/admin.js",
+    "line": 2619
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/coupons",
+    "source": "src/routes/admin.js",
+    "line": 2646
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/coupons/:id/toggle",
+    "source": "src/routes/admin.js",
+    "line": 2669
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/coupons/:id/delete",
+    "source": "src/routes/admin.js",
+    "line": 2675
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/minigame/live-catalog",
+    "source": "src/routes/admin.js",
+    "line": 2683
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/minigame",
+    "source": "src/routes/admin.js",
+    "line": 2694
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/settings",
+    "source": "src/routes/admin.js",
+    "line": 2728
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/toggle",
+    "source": "src/routes/admin.js",
+    "line": 2743
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/prizes",
+    "source": "src/routes/admin.js",
+    "line": 2753
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/prizes/:id/image",
+    "source": "src/routes/admin.js",
+    "line": 2789
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/prizes/:id/image/remove",
+    "source": "src/routes/admin.js",
+    "line": 2808
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/preview",
+    "source": "src/routes/admin.js",
+    "line": 2814
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/prizes/:id",
+    "source": "src/routes/admin.js",
+    "line": 2832
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/prizes/:id/restock",
+    "source": "src/routes/admin.js",
+    "line": 2850
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/prizes/:id/toggle",
+    "source": "src/routes/admin.js",
+    "line": 2861
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/prizes/:id/delete",
+    "source": "src/routes/admin.js",
+    "line": 2867
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/minigame/plays/:id/deliver",
+    "source": "src/routes/admin.js",
+    "line": 2874
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/announcements",
+    "source": "src/routes/admin.js",
+    "line": 2884
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/announcements",
+    "source": "src/routes/admin.js",
+    "line": 2888
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/announcements/:id/toggle",
+    "source": "src/routes/admin.js",
+    "line": 2898
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/announcements/:id/delete",
+    "source": "src/routes/admin.js",
+    "line": 2904
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/welcome-popup",
+    "source": "src/routes/admin.js",
+    "line": 2912
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/filter-tags/heading",
+    "source": "src/routes/admin.js",
+    "line": 2916
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/welcome-popup",
+    "source": "src/routes/admin.js",
+    "line": 2923
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/settings",
+    "source": "src/routes/admin.js",
+    "line": 2952
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/effects",
+    "source": "src/routes/admin.js",
+    "line": 2956
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/appearance",
+    "source": "src/routes/admin.js",
+    "line": 2960
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/settings",
+    "source": "src/routes/admin.js",
+    "line": 2977
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/music-player",
+    "source": "src/routes/admin.js",
+    "line": 2994
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/snow-toggle",
+    "source": "src/routes/admin.js",
+    "line": 3030
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/site-logo/upload",
+    "source": "src/routes/admin.js",
+    "line": 3038
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/hero-banner/upload",
+    "source": "src/routes/admin.js",
+    "line": 3056
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/auth-background/upload",
+    "source": "src/routes/admin.js",
+    "line": 3074
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/storefront-background/upload",
+    "source": "src/routes/admin.js",
+    "line": 3093
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/storefront-background/remove",
+    "source": "src/routes/admin.js",
+    "line": 3106
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/auth-background/remove",
+    "source": "src/routes/admin.js",
+    "line": 3112
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/hero-banner/mode",
+    "source": "src/routes/admin.js",
+    "line": 3120
+  },
+  {
+    "family": "admin",
+    "method": "GET",
+    "route": "/admin/api-providers",
+    "source": "src/routes/admin.js",
+    "line": 3134
+  },
+  {
+    "family": "admin",
+    "method": "POST",
+    "route": "/admin/api-providers/custom",
+    "source": "src/routes/admin.js",
+    "line": 3135
+  },
+  {
+    "family": "custom-systems-admin",
+    "method": "POST",
+    "route": "/admin/effects/rain",
+    "source": "src/routes/custom-systems-admin.js",
+    "line": 10
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/media/direct-upload",
+    "source": "src/routes/internal-api.js",
+    "line": 68
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/slips/claim",
+    "source": "src/routes/internal-api.js",
+    "line": 73
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/auth/login",
+    "source": "src/routes/internal-api.js",
+    "line": 93
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/auth/register",
+    "source": "src/routes/internal-api.js",
+    "line": 104
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/me",
+    "source": "src/routes/internal-api.js",
+    "line": 130
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/config",
+    "source": "src/routes/internal-api.js",
+    "line": 138
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/captcha/verify",
+    "source": "src/routes/internal-api.js",
+    "line": 142
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/plans",
+    "source": "src/routes/internal-api.js",
+    "line": 148
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/shops",
+    "source": "src/routes/internal-api.js",
+    "line": 154
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/shops",
+    "source": "src/routes/internal-api.js",
+    "line": 172
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/shops/:id/renew",
+    "source": "src/routes/internal-api.js",
+    "line": 182
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/catalog/products",
+    "source": "src/routes/internal-api.js",
+    "line": 195
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/catalog/shops",
+    "source": "src/routes/internal-api.js",
+    "line": 216
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/wallet/topups",
+    "source": "src/routes/internal-api.js",
+    "line": 226
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/wallet/topup",
+    "source": "src/routes/internal-api.js",
+    "line": 236
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/wallet/topups/:id",
+    "source": "src/routes/internal-api.js",
+    "line": 266
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/wallet/topups/:id/slip",
+    "source": "src/routes/internal-api.js",
+    "line": 278
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/wallet/topups/:id/slip",
+    "source": "src/routes/internal-api.js",
+    "line": 291
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/wallet/truemoney",
+    "source": "src/routes/internal-api.js",
+    "line": 304
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/admin/license-plans",
+    "source": "src/routes/internal-api.js",
+    "line": 388
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/admin/license-plans",
+    "source": "src/routes/internal-api.js",
+    "line": 393
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/admin/license-plans/:id",
+    "source": "src/routes/internal-api.js",
+    "line": 399
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/admin/license-plans/:id/toggle",
+    "source": "src/routes/internal-api.js",
+    "line": 405
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/admin/license-plans/:id/delete",
+    "source": "src/routes/internal-api.js",
+    "line": 411
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/admin/topups",
+    "source": "src/routes/internal-api.js",
+    "line": 417
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/admin/topups/:id/slip",
+    "source": "src/routes/internal-api.js",
+    "line": 443
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/admin/topups/:id/approve",
+    "source": "src/routes/internal-api.js",
+    "line": 458
+  },
+  {
+    "family": "internal-api",
+    "method": "POST",
+    "route": "/internal/api/admin/topups/:id/reject",
+    "source": "src/routes/internal-api.js",
+    "line": 464
+  },
+  {
+    "family": "internal-api",
+    "method": "GET",
+    "route": "/internal/api/admin/users",
+    "source": "src/routes/internal-api.js",
+    "line": 470
+  }
+]

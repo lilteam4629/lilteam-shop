@@ -4217,6 +4217,20 @@ body {
   }
 }
 
+/* Source: main-service-strip-v1.css */
+/* Main shop only: the tenant storefront keeps its existing service strip. */
+.main-service-strip{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:28px;padding:20px 24px;border:1px solid var(--border);border-radius:18px;background:var(--card);color:var(--text);box-shadow:0 6px 20px rgba(0,0,0,.04)}
+.main-service-hours{display:flex;align-items:center;gap:13px;padding-right:28px;border-right:1px solid var(--border)}
+.main-service-clock{display:grid;place-items:center;width:46px;height:46px;border:1px solid var(--border);border-radius:14px;background:var(--bg);color:var(--gold-text);flex-shrink:0}
+.main-service-label{display:block;color:var(--text-2);font-size:11px;font-weight:600;letter-spacing:.06em;line-height:1.6}
+.main-service-hours strong{display:block;font-size:19px;font-weight:700;line-height:1.5;font-variant-numeric:tabular-nums;white-space:nowrap}
+.main-service-message{min-width:0;font-size:14px;line-height:1.7;overflow-wrap:anywhere}
+.main-service-message .main-service-label{font-size:10px;letter-spacing:.12em;margin-bottom:2px}
+.main-service-status{display:inline-flex;align-items:center;gap:7px;border:1px solid #a7dcc5;border-radius:999px;padding:7px 12px;background:#edf9f2;color:#176442;font-size:12px;font-weight:600;white-space:nowrap}
+.main-service-status>span{width:7px;height:7px;border-radius:50%;background:#249868}
+html:not(.light) .main-service-status{background:#152c23;border-color:#315844;color:#9ce4ba}
+@media(max-width:600px){.main-service-strip{grid-template-columns:minmax(0,1fr) auto;gap:16px 10px;padding:17px;border-radius:16px}.main-service-hours{padding:0;border:0;gap:10px}.main-service-clock{width:38px;height:38px;border-radius:12px}.main-service-hours strong{font-size:16px}.main-service-status{font-size:10px;padding:6px 9px;gap:5px}.main-service-message{grid-column:1/-1;grid-row:2;border-top:1px solid var(--border);padding-top:13px;font-size:13px}.main-service-label{font-size:10px}}
+
 /* Source: latest-orders-loop-v1.css */
 /* Shared seamless loop mechanics for owner and tenant latest-order rails. */
 #site-page-shell .latest-orders-section .latest-orders-track {

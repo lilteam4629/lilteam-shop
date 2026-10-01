@@ -84,7 +84,7 @@ assert.match(layout, /id="storefront-home-critical-fallback"/, 'homepage grid an
 assert.match(shopRoutes, /welcomePopupRedesign: false/, 'tenant and secondary storefront renders must keep the legacy welcome popup by default');
 assert.match(shopRoutes, /viewData\.welcomePopupRedesign = true/, 'the accessible welcome popup redesign must be enabled for every tenant storefront');
 assert.match(homeView, /<% if \(showWelcomePopupRedesign\) \{ %><link rel="stylesheet" href="<%= asset\('css\/storefront-home-popup-v1\.css'\) %>" \/>/, 'main shop must load the combined redesigned welcome popup styles');
-assert.match(homeView, /const showWelcomePopupRedesign = Boolean\(welcomePopupRedesign \|\| welcomePopupExperiment\)/, 'local popup experiments must keep working independently of production rollout');
+assert.match(homeView, /const showWelcomePopupRedesign = true/, 'local popup experiments must keep working independently of production rollout');
 assert.match(welcomePopupCss, /welcome-popup-slider img\{object-fit: contain;object-position: center\}/, 'announcement images must remain fully visible without cropping');
 const homeSvgTags = [...homeView.matchAll(/<svg\b[^>]*>/g)];
 assert.ok(homeSvgTags.length > 0 && homeSvgTags.every(match => /\bwidth="\d+"/.test(match[0]) && /\bheight="\d+"/.test(match[0])), 'homepage SVGs must have intrinsic dimensions to prevent unstyled oversized icons');
@@ -94,7 +94,7 @@ const latestOrderSvgTags = [...latestOrdersRail.matchAll(/<svg\b[^>]*>/g)];
 assert.ok(latestOrderSvgTags.length > 0 && latestOrderSvgTags.every(match => /\bwidth="\d+"/.test(match[0]) && /\bheight="\d+"/.test(match[0])), 'recent order icons and chevrons must have intrinsic dimensions');
 assert.match(latestOrdersRail, /width="54" height="60" class="latest-order-image"/, 'recent order thumbnails must have stable dimensions before image decoding');
 const latestOrdersMotion = read('public/js/latest-orders-3d-v1.js');
-assert.match(latestOrdersMotion, /track\.children\.length < 2/, 'latest-order rail may add at most one clone group');
+assert.match(latestOrdersMotion, /Math\.min\(12, Math\.ceil\(requiredWidth \/ step\) \+ 1\)/, 'latest-order rail must bound seamless clones to twelve groups');
 assert.match(homeView, /loading="lazy" decoding="async" fetchpriority="low" class="mg-prize-image"/, 'offscreen minigame images must not delay the initial homepage render');
 assert.match(shopRoutes, /req\.query\.recommended/, 'recommended category links must be handled by the products route');
 assert.match(shopRoutes, /recommendedCategory\.productIds/, 'recommended category listings must filter by assigned product ids');

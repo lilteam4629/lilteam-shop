@@ -941,7 +941,12 @@ router.get('/orders', (req, res) => {
   const orders = store.data.orders
     .filter(o => o.userId === user.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  res.render('shop/orders', { title: 'คำสั่งซื้อของฉัน', orders: summarizeOrders(orders, store.data) });
+  const pageSize = 20;
+  const totalPages = Math.max(1, Math.ceil(orders.length / pageSize));
+  const page = Math.min(totalPages, Math.max(1, Math.floor(Number(req.query.page) || 1)));
+  res.render('shop/orders', { title: 'คำสั่งซื้อของฉัน',
+    orders: summarizeOrders(orders.slice((page - 1) * pageSize, page * pageSize), store.data),
+    page, totalPages, totalOrders: orders.length });
 });
 
 router.get('/orders/:id', (req, res) => {

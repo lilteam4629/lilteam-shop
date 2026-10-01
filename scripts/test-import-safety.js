@@ -132,7 +132,7 @@ async function main() {
   check('Admin top-up rows hide empty slip placeholders', () => {
     const topupsPage = fs.readFileSync(path.join(root, 'src/views/admin/topups.ejs'), 'utf8');
     assert.doesNotMatch(topupsPage, /ยังไม่แนบสลิป/);
-    assert.match(topupsPage, /if \(r\.slipPath\)/);
+    assert.match(topupsPage, /if \(r\.slipStorageId\)/);
   });
   let slip2goCalls = 0;
   let slip2goRequest = null;
@@ -506,7 +506,7 @@ async function main() {
   ];
   let tenantUsersView;
   await als.run(tenantUsersFixture, () => usersList(
-    { query: { status: 'banned', role: 'customer' }, tenantShop: { id: 'tenant-ui-fixture' } },
+    { session: { userId: 'test-admin' }, query: { status: 'banned', role: 'customer' }, tenantShop: { id: 'tenant-ui-fixture' } },
     { locals: {}, render(view, values) { tenantUsersView = { view, ...values }; } },
   ));
   check('The redesigned member list continues to read the current tenant and ignores platform-only filters', () => {
@@ -685,13 +685,13 @@ async function main() {
     body: { slipApiMode: 'own', slipProvider: 'slipcheck', slipcheckApiKey: 'check-saved', rdcwClientId: 'rdcw-id', rdcwClientSecret: 'rdcw-secret', slip2goApiKey: 's2g-saved' },
     tenantShop: null, flash() {},
   }, { redirect() {} }));
-  check('SlipCheck provider settings save without EasySlip credentials', () => {
+  check('Removed SlipCheck submission cannot change provider settings', () => {
     const saved = legacyProviderData.settings.payment;
-    assert.equal(saved.slipProvider, 'slipcheck');
+    assert.equal(saved.slipProvider, 'auto');
     assert.equal(Object.hasOwn(saved, 'easyslipApiKey'), false);
-    assert.equal(saved.slipcheckApiKey, 'check-saved');
-    assert.equal(saved.rdcwClientSecret, 'rdcw-secret');
-    assert.equal(saved.slip2goApiKey, 's2g-saved');
+    assert.notEqual(saved.slipcheckApiKey, 'check-saved');
+    assert.notEqual(saved.rdcwClientSecret, 'rdcw-secret');
+    assert.notEqual(saved.slip2goApiKey, 's2g-saved');
   });
   let testedProvider;
   await hubTest({ body: { provider: 'easyslip' }, tenantShop: { id: 'fixture' } }, { json(result) { testedProvider = result; } });
@@ -1017,9 +1017,9 @@ async function main() {
     const slipOkSource = fs.readFileSync(path.join(root, 'src/services/slipok.js'), 'utf8');
     assert.match(accountSource, /const STALE_VERIFICATION_MS = 120 \* 1000/);
     assert.match(accountSource, /freshStartedAt[\s\S]{0,500}freshStale[\s\S]{0,240}fresh\.status = 'pending'/);
-    assert.match(topupDetail, /verificationDeadline = Date\.now\(\) \+ 125000/);
+    assert.match(topupDetail, /pollDeadlineMs = 90000/);
     assert.match(topupDetail, /new AbortController\(\)[\s\S]{0,180}8000/);
-    assert.match(topupDetail, /Date\.now\(\) >= verificationDeadline[\s\S]{0,160}location\.replace\(detailUrl\)/);
+    assert.match(topupDetail, /Date\.now\(\) - pollingStartedAt >= pollDeadlineMs[\s\S]{0,220}stopPolling/);
     assert.match(slipOkSource, /timeout: 30000/);
   });
   check('Storefront background survives every storefront model', () => {
