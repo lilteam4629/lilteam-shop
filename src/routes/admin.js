@@ -1719,8 +1719,10 @@ router.post('/products/:id/stock/random-box-message', async (req, res) => {
 });
 
 router.post('/products/:id/stock/add', async (req, res) => {
+  const finish = destination => req.get('X-Requested-With') === 'XMLHttpRequest'
+    && req.accepts('json') ? res.json({ redirect: destination }) : res.redirect(destination);
   const product = store.data.products.find(p => p.id === req.params.id);
-  if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
+  if (!product) { req.flash('error', 'ไม่พบสินค้า'); return finish('/admin/products'); }
   if (product.specialType === randomBox.RANDOM_BOX_KIND) {
     if (!randomBox.supportsRandomBox(req)) return res.sendStatus(404);
     product.fulfillmentMode = 'automatic';
@@ -1737,7 +1739,7 @@ router.post('/products/:id/stock/add', async (req, res) => {
     req.flash(entries.length ? 'success' : 'error', entries.length
       ? `เพิ่มคีย์/ไอดีในสต็อกกล่องสุ่มแล้ว ${entries.length} ชิ้น`
       : 'กรุณาใส่ข้อมูลคีย์/ไอดีอย่างน้อย 1 บรรทัด');
-    return res.redirect(`/admin/products/${product.id}/stock#add-stock`);
+    return finish(`/admin/products/${product.id}/stock#add-stock`);
   }
   if (product.fulfillmentMode === 'contact') {
     const quantity = Math.min(1000, Math.max(0, parseInt(req.body.quantity, 10) || 0));
@@ -1749,7 +1751,7 @@ router.post('/products/:id/stock/add', async (req, res) => {
     }
     await store.save();
     req.flash(quantity ? 'success' : 'error', quantity ? `เพิ่มจำนวนพร้อมขายแล้ว ${quantity} รายการ` : 'กรุณาระบุจำนวนที่ต้องการเพิ่ม');
-    return res.redirect(`/admin/products/${product.id}/stock`);
+    return finish(`/admin/products/${product.id}/stock`);
   }
   const entries = parseBulkStockEntries(req.body.bulk);
   entries.forEach(({ username, password, extra }) => {
@@ -1763,7 +1765,7 @@ router.post('/products/:id/stock/add', async (req, res) => {
   req.flash(entries.length ? 'success' : 'error', entries.length
     ? `เพิ่มสต๊อกสินค้าแล้ว ${entries.length} รายการ`
     : 'กรุณาใส่ข้อมูลสินค้าอย่างน้อย 1 บรรทัด');
-  res.redirect(`/admin/products/${product.id}/stock`);
+  finish(`/admin/products/${product.id}/stock`);
 });
 
 router.post('/products/:id/stock/delete-all', async (req, res) => {

@@ -156,10 +156,11 @@ async function exerciseTenantRandomBox() {
 
   const stockResponse = await request(`/admin/products/${encodeURIComponent(productId)}/stock/add`, {
     method: 'POST',
-    headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
+    headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded', accept: 'application/json', 'x-requested-with': 'XMLHttpRequest' },
     body: new URLSearchParams({ bulk: 'Tenant Prize One:secret-one\nTenant Prize Two:secret-two\nTenant Prize Three:secret-three' }).toString(),
   });
-  assert.equal(stockResponse.statusCode, 302, 'rental admin can add prizes to its local stock');
+  assert.equal(stockResponse.statusCode, 200, 'rental admin can add prizes without another history entry');
+  assert.equal(JSON.parse(stockResponse.body).redirect, `/admin/products/${productId}/stock#add-stock`);
   const stockPage = await request(`/admin/products/${encodeURIComponent(productId)}/stock`, { headers: { cookie: adminCookie } });
   assert.equal(stockPage.statusCode, 200, 'rental admin can view the random-box stock manager');
   for (const removed of ['เรท 1', 'เป้าหมายรายรับ', '97.50', '/110 บาท']) assert.ok(!stockPage.body.includes(removed));

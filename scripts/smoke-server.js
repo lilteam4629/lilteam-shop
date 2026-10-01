@@ -607,6 +607,10 @@ async function run() {
     }
     if (!ready) throw new Error(`server did not become healthy: ${lastError && lastError.message}\n${output}`);
     await fetchOk('/health', 'application/json');
+    if (process.env.SMOKE_STOCK_HISTORY_ONLY === '1') {
+      await require('./check-stock-history-browser')({ baseUrl, testDbPath });
+      return;
+    }
     if (process.env.SMOKE_RANDOM_BOX_ONLY === '1') {
       const adminCookie = await loginAsAdmin();
       await checkRandomBoxWorkflow(adminCookie);

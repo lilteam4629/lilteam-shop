@@ -165,7 +165,7 @@
       <h3 class="font-bold text-sm sm:text-base text-[var(--text)]">เพิ่มจำนวนสต็อก</h3>
     </div>
 
-    <form action="/admin/products/<%= product.id %>/stock/add" method="post" class="space-y-3.5">
+    <form action="/admin/products/<%= product.id %>/stock/add" method="post" class="space-y-3.5" data-stock-add-form>
       <% if (isRandomBox) { %>
         <div class="rounded-xl bg-[var(--input)] px-3.5 py-3">
           <p class="text-xs font-bold text-[var(--text-2)]">เพิ่มสต็อกรางวัล</p>
@@ -203,7 +203,9 @@
       <button type="submit" class="w-full bg-gradient-to-r from-[var(--gold)] to-[var(--gold-hover)] text-[var(--gold-contrast)] font-bold rounded-xl py-2.5 text-xs shadow-md transition active:scale-95">
         + เพิ่มรายการเข้าสู่สต็อก
       </button>
+      <p data-stock-add-error role="alert" class="text-xs text-red-600" hidden></p>
     </form>
   </div>
 
 </div>
+<script src="<%= asset('js/admin-stock-submit-v1.js') %>" defer></script>
