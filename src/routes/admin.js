@@ -3084,6 +3084,7 @@ router.post('/hero-banner/upload', (req, res) => {
     }
     try {
       store.data.settings.hero.bannerImage = directImage || await store.saveMedia(req.file.buffer, req.file.originalname, req.file.mimetype);
+      store.data.settings.hero.mode = 'banner';
       await store.save();
       req.flash('success', 'อัปโหลดแบนเนอร์แล้ว และจะไม่หายเมื่อ Deploy');
     } catch (saveError) {
