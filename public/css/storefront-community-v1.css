@@ -1,3 +1,21 @@
+/* Main shop welcome stage replaces artwork without changing rental storefronts. */
+.main-welcome-stage { position: relative; isolation: isolate; overflow: hidden; display: grid; place-items: center; min-height: 290px; padding: 55px 24px 44px; border-radius: 18px; background: var(--card); color: var(--text); }
+.main-welcome-light { position: absolute; z-index: -1; inset: -100px 15% 35%; pointer-events: none; background: radial-gradient(ellipse at 50% 0%, color-mix(in srgb, var(--gold) 35%, transparent), transparent 65%); filter: blur(22px); animation: main-welcome-drift 9s ease-in-out infinite alternate; }
+.main-welcome-content { width: 100%; text-align: center; animation: main-welcome-arrive .7s cubic-bezier(.16,1,.3,1) both; }
+.main-welcome-content h1 { margin: 0; font-size: clamp(28px, 4vw, 52px); font-weight: 700; line-height: 1.2; letter-spacing: -.025em; text-wrap: balance; }
+.main-welcome-content h1 span { color: var(--gold-text); }
+.main-welcome-content p { max-width: 640px; margin: 14px auto 0; font-size: 14px; line-height: 1.7; color: var(--text-2); text-wrap: balance; }
+.main-welcome-actions { display: flex; justify-content: center; gap: 9px; margin-top: 24px; }
+.main-welcome-actions a { display: inline-flex; justify-content: center; align-items: center; gap: 10px; min-height: 44px; border-radius: 24px; text-decoration: none; transition: transform .2s ease, background .2s ease; }
+.main-welcome-primary { padding: 0 22px; background: var(--text); color: var(--card); font-size: 13px; font-weight: 500; }
+.main-welcome-contact { width: 44px; border: 1px solid var(--border); color: var(--gold-text); background: color-mix(in srgb, var(--gold) 8%, var(--card)); }
+.main-welcome-contact svg { fill: none; stroke: currentColor; stroke-width: 1.7; }
+.main-welcome-actions a:hover { transform: translateY(-2px); }
+.main-welcome-actions a:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 3px; }
+@keyframes main-welcome-drift { to { transform: translate3d(12%, 16px, 0) scale(1.18); } }
+@keyframes main-welcome-arrive { from { opacity: .5; transform: translateY(10px); } }
+@media (max-width: 640px) { .main-welcome-stage { min-height: 240px; padding: 38px 16px 32px; border-radius: 14px; } .main-welcome-content p { font-size: 12px; } .main-welcome-actions { margin-top: 20px; } }
+@media (prefers-reduced-motion: reduce) { .main-welcome-light, .main-welcome-content { animation: none; } .main-welcome-actions a { transition: none; } }
 /* A compact service desk beside shop news and paged recent purchases. */
 .storefront-community { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 1.8fr); gap: 22px 28px; margin-block: 24px 36px; color: var(--text); }
 .community-overview { display: contents; }

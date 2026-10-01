@@ -1,5 +1,17 @@
 <% const sharedHero = typeof storefrontHero !== 'undefined' ? storefrontHero : { bannerImage: settings.hero?.mode === 'none' ? null : settings.hero?.bannerImage, bannerLink: settings.hero?.bannerLink || '' }; %>
-<% if (sharedHero.bannerImage) { %>
+<% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+<section class="main-welcome-stage" id="home-top" aria-label="ยินดีต้อนรับสู่ร้าน">
+  <div class="main-welcome-light" aria-hidden="true"></div>
+  <div class="main-welcome-content">
+    <h1>ยินดีต้อนรับสู่ <span><%= settings.shopName %></span></h1>
+    <% if (settings.tagline) { %><p><%= settings.tagline %></p><% } %>
+    <div class="main-welcome-actions">
+      <a class="main-welcome-primary" href="/products">เลือกดูสินค้า<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+      <a class="main-welcome-contact" href="/contact" aria-label="ติดต่อร้าน"><svg width="19" height="19" aria-hidden="true"><use href="#ui-megaphone"/></svg></a>
+    </div>
+  </div>
+</section>
+<% } else if (sharedHero.bannerImage) { %>
 <section class="owner-home-v20-hero owner-home-v23-hero owner-home-v20-hero--banner owner-home-v20-hero--banner-only" id="home-top" aria-label="แบนเนอร์ร้าน <%= settings.shopName %>">
   <div class="owner-home-v20-artwork">
     <% if (sharedHero.bannerLink) { %>
