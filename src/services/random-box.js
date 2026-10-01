@@ -170,9 +170,9 @@ async function getPersistedDrawHealth(store, product) {
       if (readiness !== 'READY') return readiness;
       // Synthetic buyer and deterministic rolls operate only on the discarded snapshot.
       const buyerId = 'random-box-readiness-preview';
-      data.users.push({ id: buyerId, status: 'active', walletBalance: 1 });
+      data.users.push({ id: buyerId, status: 'active', walletBalance: MAX_RANDOM_BOX_DRAWS });
       drawRandomBox(data, { productId: savedProduct.id, userId: buyerId,
-        idempotencyKey: 'random-box-readiness-preview', drawCount: 1,
+        idempotencyKey: 'random-box-readiness-preview', drawCount: MAX_RANDOM_BOX_DRAWS,
         randomInt: (min, max) => max - 1, genId: () => buyerId });
       return 'READY';
     });
