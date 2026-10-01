@@ -133,7 +133,7 @@ async function exerciseTenantRandomBox() {
   const created = await request('/admin/products/new', {
     method: 'POST',
     headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ title, productKind: 'random-box', randomBoxRate: '1', price: '1' }).toString(),
+    body: new URLSearchParams({ title, description: 'รายละเอียดกล่องของร้านเช่า', productKind: 'random-box', randomBoxRate: '1', price: '1' }).toString(),
   });
   assert.equal(created.statusCode, 302, 'rental admin can create a random-box product');
   const tenantDataPath = tenantDbPath;
@@ -168,6 +168,9 @@ async function exerciseTenantRandomBox() {
   const buyerCookie = await login('boxbuyer', 'boxbuyer-password');
   const page = await request(`/game/${encodeURIComponent(product.slug)}`, { headers: { cookie: buyerCookie } });
   assert.equal(page.statusCode, 200, 'rental storefront displays its own random-box product');
+  assert.ok(page.body.includes('รายละเอียดกล่องของร้านเช่า'));
+  assert.ok(!page.body.includes('กล่องสะสมไม่มีรางวัลครบ 110 บาท'));
+  assert.ok(!page.body.includes('เรทและราคาอื่น: รอทำระบบเพิ่ม'));
   assert.ok(page.body.includes('id="random-box-draw-count"'), 'rental customer can choose how many draws to buy');
   const home = await request('/');
   assert.equal(home.statusCode, 200, 'rental storefront home loads');

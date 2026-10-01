@@ -245,7 +245,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const title = 'random-box-smoke-' + process.pid;
   const created = await request('/admin/products/new', { method: 'POST',
     headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ title, productKind: 'random-box', randomBoxRate: '1', price: '1' }).toString() });
+    body: new URLSearchParams({ title, description: 'รายละเอียดรางวัลของกล่องทดสอบ', productKind: 'random-box', randomBoxRate: '1', price: '1' }).toString() });
   const productId = decodeURIComponent(created.headers.location?.match(/[?&]productId=([^&#]+)/)?.[1] || '');
   assert.equal(created.statusCode, 302); assert.ok(productId);
   let data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
@@ -272,8 +272,10 @@ async function checkRandomBoxWorkflow(adminCookie) {
   product = JSON.parse(fs.readFileSync(testDbPath, 'utf8')).products.find(item => item.id === productId);
   const customerCookie = await loginAsCustomer();
   const productPage = await fetchOk(`/game/${product.slug}`, 'text/html', { cookie: customerCookie });
-  assert.ok(productPage.body.includes('เรทและราคาอื่น: รอทำระบบเพิ่ม'));
-  assert.ok(productPage.body.includes('กล่องสะสมไม่มีรางวัลครบ 110 บาท'));
+  assert.ok(productPage.body.includes('รายละเอียดกล่อง'));
+  assert.ok(productPage.body.includes('รายละเอียดรางวัลของกล่องทดสอบ'));
+  assert.ok(!productPage.body.includes('เรทและราคาอื่น: รอทำระบบเพิ่ม'));
+  assert.ok(!productPage.body.includes('กล่องสะสมไม่มีรางวัลครบ 110 บาท'));
   assert.ok(!productPage.body.includes('totalCollectedCents'));
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   const buyerBefore = data.users.find(user => user.username === 'demo').walletBalance;
