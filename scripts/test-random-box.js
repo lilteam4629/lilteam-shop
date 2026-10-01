@@ -21,6 +21,16 @@ for (const value of ['', 0, 2, 10, 1.5, NaN]) {
 }
 assert.equal(box.validateRate('1'), null); assert.equal(box.validatePrice('1'), null);
 const shared = make();
+assert.equal(box.getDrawHealth(shared, shared.products[0]), 'READY');
+const invalidReadiness = make();
+box.migrateData(invalidReadiness);
+invalidReadiness.randomBoxGachaStates.box.drySpendCents = 11000;
+const beforeReadiness = JSON.stringify(invalidReadiness);
+assert.equal(box.getDrawHealth(invalidReadiness, invalidReadiness.products[0]), 'INVALID_POOL_STATE');
+assert.equal(JSON.stringify(invalidReadiness), beforeReadiness, 'readiness checks must not mutate wallets or stock');
+const duplicateReadiness = make();
+duplicateReadiness.stockItems[1].id = duplicateReadiness.stockItems[0].id;
+assert.equal(box.getDrawHealth(duplicateReadiness, duplicateReadiness.products[0]), 'INVALID_STOCK');
 draw(shared, 109, 'first');
 assert.equal(shared.randomBoxGachaStates.box.drySpendCents, 10900);
 shared.users.push({ id: 'other', status: 'active', walletBalance: 100 });

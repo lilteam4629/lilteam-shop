@@ -401,7 +401,7 @@ router.get('/federated/checkout', async (req, res) => {
   res.redirect(`/game/${encodeURIComponent(source.sourceSlug)}?federated=1`);
 });
 
-router.get('/game/:slug', (req, res) => {
+router.get('/game/:slug', async (req, res) => {
   const remoteProduct = catalogSyndication.findTenantProduct(store.platformData, store.data, req.params.slug, mainSiteUrlFor(req), req.tenantShop);
   const product = remoteProduct || store.data.products.find(p => p.slug === req.params.slug);
   if (!product || !isProductVisible(product)) return res.status(404).render('shop/404', { title: 'ไม่พบสินค้า' });
@@ -423,7 +423,7 @@ router.get('/game/:slug', (req, res) => {
     remoteProduct ? [] : store.data.settings.rangersCatalog?.productAssignments?.[product.id] || [],
   );
   const randomBoxDetails = product.specialType === randomBox.RANDOM_BOX_KIND ? {
-    healthCode: randomBox.getDrawHealth(store.data, product),
+    healthCode: await randomBox.getPersistedDrawHealth(store, product),
     maxDrawCount: randomBox.MAX_RANDOM_BOX_DRAWS,
     pricePerDraw: randomBox.getDrawPrice(store.data, product),
     availableStockCount: randomBox.availablePrizeStockCount(store.data, product),

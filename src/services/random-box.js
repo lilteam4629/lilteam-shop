@@ -161,6 +161,30 @@ function getDrawHealth(data, product) {
   }
 }
 
+async function getPersistedDrawHealth(store, product) {
+  try {
+    return await store.previewTransaction(data => {
+      const savedProduct = data.products.find(item => String(item.id) === String(product.id));
+      if (!savedProduct) return 'PRODUCT_UNAVAILABLE';
+      const readiness = getDrawHealth(data, savedProduct);
+      if (readiness !== 'READY') return readiness;
+      // Synthetic buyer and deterministic rolls operate only on the discarded snapshot.
+      const buyerId = 'random-box-readiness-preview';
+      data.users.push({ id: buyerId, status: 'active', walletBalance: 1 });
+      drawRandomBox(data, { productId: savedProduct.id, userId: buyerId,
+        idempotencyKey: 'random-box-readiness-preview', drawCount: 1,
+        randomInt: (min, max) => max - 1, genId: () => buyerId });
+      return 'READY';
+    });
+  } catch (error) {
+    const codes = ['STORE_UNAVAILABLE', 'INVALID_STORE_REVISION', 'STORE_SIZE_LIMIT', 'INVALID_POOL_STATE', 'ACCOUNTING_LIMIT'];
+    if (codes.includes(error.message)) return error.message;
+    if (error.code && ['PRODUCT_UNAVAILABLE', 'NO_PRIZES'].includes(error.code)) return error.code;
+    console.error('[random-box] readiness failed:', error.name, error.message);
+    return 'DRAW_EXECUTION_ERROR';
+  }
+}
+
 // Runs through the common store schema migration on main and every tenant.
 // Archive old reservations/schedules; preserve orders, sold IDs and paid totals.
 function migrateData(data, now = Date.now()) {
@@ -295,6 +319,7 @@ function drawRandomBox(data, { productId, userId, idempotencyKey, drawCount = 1,
 
 module.exports = {
   getDrawHealth,
+  getPersistedDrawHealth,
   migrateData,
   PENDING_SYSTEM_MESSAGE,
   RANDOM_BOX_KIND,

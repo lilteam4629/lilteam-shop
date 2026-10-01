@@ -353,6 +353,27 @@ async function transact(mutator) {
   });
 }
 
+// Read the same snapshot as checkout, but never persist a preview mutation.
+async function previewTransaction(mutator) {
+  const ctx = tenantContext.getStore();
+  const documentId = ctx ? `shop:${ctx.shopId}` : 'main';
+  const snapshot = mongoCollection
+    ? await mongoCollection.findOne({ _id: documentId })
+    : structuredClone(ctx ? ctx.db : db);
+  if (!snapshot) throw new Error('STORE_UNAVAILABLE');
+  if (snapshot._revision != null && (!Number.isSafeInteger(snapshot._revision) || snapshot._revision < 0)) {
+    throw new Error('INVALID_STORE_REVISION');
+  }
+  delete snapshot._id;
+  delete snapshot._revision;
+  migrateSchema(snapshot);
+  const result = await mutator(snapshot);
+  if (mongoCollection && require('mongodb').BSON.calculateObjectSize(snapshot) >= 16 * 1024 * 1024 - 1024) {
+    throw new Error('STORE_SIZE_LIMIT');
+  }
+  return result;
+}
+
 // One transaction reference may credit only one wallet across the main site
 // and Shop Cloud. MongoDB's unique _id makes simultaneous claims atomic.
 async function claimGlobalSlipRef(transRef, details = {}) {
@@ -1153,6 +1174,7 @@ module.exports = {
   runInTenant,
   runOnPlatform,
   transact,
+  previewTransaction,
   claimGlobalSlipRef,
   // Wrap a callback with the CURRENT tenant context so it still resolves
   // the right shop's data even if invoked later through a non-Express
