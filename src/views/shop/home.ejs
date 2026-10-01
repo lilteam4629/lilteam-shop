@@ -175,6 +175,9 @@
 
 <% if (ownerHomeV20) { %>
 <section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
+  <% if (isMainSite) { %>
+    <%- include('../partials/main-service-strip') %>
+  <% } else { %>
   <div class="hud-bar relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
     <div class="hud-bar-glow"></div>
     <div class="hud-bar-scan"></div>
@@ -190,6 +193,7 @@
       เปิดให้บริการ
     </span>
   </div>
+  <% } %>
 </section>
 
 <% if (announcements.length) { %>
@@ -393,6 +397,9 @@
 
 <% if (!ownerHomeV20) { %>
 <section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
+  <% if (isMainSite) { %>
+    <%- include('../partials/main-service-strip') %>
+  <% } else { %>
   <div class="hud-bar relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
     <div class="hud-bar-glow"></div>
     <div class="hud-bar-scan"></div>
@@ -408,6 +415,7 @@
       เปิดให้บริการ
     </span>
   </div>
+  <% } %>
 </section>
 
 <% if (announcements.length) { %>
