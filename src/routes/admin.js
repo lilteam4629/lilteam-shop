@@ -1942,7 +1942,7 @@ router.get('/users', async (req, res) => {
     && user.createdAt && bangkokDay(new Date(user.createdAt)) === todayKey).length;
   return res.render('admin/users-experiment', {
       title: source === 'api' ? 'ลูกค้า API' : 'จัดการสมาชิก', active: 'users', users, q, registered, status, role,
-      source, apiShops, shopFilter,
+      source, apiShops, shopFilter, currentAdminId: req.session.userId,
       totalUsers: allUsers.length, totalWalletBalance, matchedCount: matched.length,
       page, totalPages, pageSize, pageSizeOptions,
       memberCounts: {

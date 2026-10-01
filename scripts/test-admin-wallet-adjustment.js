@@ -63,9 +63,19 @@ const rejectWithoutMutation = (params, expectedMessage) => {
 
 rejectWithoutMutation({ operation: 'subtract', amount: '6.00' }, 'เครดิตไม่พอ');
 rejectWithoutMutation({ expectedBalance: '4.00' }, 'เปลี่ยนไประหว่าง');
-rejectWithoutMutation({ userId: 'admin-1' }, 'เฉพาะบัญชีสมาชิก');
+rejectWithoutMutation({ userId: 'admin-1', adminUserId: 'another-admin' }, 'เฉพาะบัญชีสมาชิก');
 rejectWithoutMutation({ userId: 'missing' }, 'ไม่พบสมาชิก');
 rejectWithoutMutation({ note: 'x' }, 'เหตุผล');
+
+const ownAdminWallet = fixture(25);
+ownAdminWallet.users[0].walletBalance = 20391;
+const adminCredit = adjustCustomerWallet(ownAdminWallet, {
+  ...fixed, userId: 'admin-1', amount: '100', expectedBalance: '20391.00', transactionId: 'admin-self-credit',
+});
+assert.equal(adminCredit.balanceAfter, 20491);
+assert.equal(ownAdminWallet.walletTransactions[0].userId, 'admin-1');
+assert.equal(ownAdminWallet.walletTransactions[0].adminUserId, 'admin-1');
+assert.match(ownAdminWallet.walletTransactions[0].note, /บัญชีผู้ดูแลของตนเอง/);
 
 const apiWalletData = {
   users: [
@@ -92,6 +102,10 @@ assert.throws(() => adjustCustomerWallet(apiWalletData, {
   ...fixed, userId: 'api-customer', walletType: 'catalog', operation: 'subtract', amount: '16',
   expectedBalance: '15.00', transactionId: 'catalog-wallet-test-invalid',
 }), error => error instanceof WalletAdjustmentError && error.message.includes('เครดิตไม่พอ'));
+assert.throws(() => adjustCustomerWallet(apiWalletData, {
+  ...fixed, userId: 'tenant-admin', walletType: 'catalog', operation: 'add', amount: '1',
+  expectedBalance: '500', transactionId: 'admin-self-api-invalid',
+}), error => error instanceof WalletAdjustmentError && error.message.includes('เฉพาะบัญชีสมาชิก'));
 
 (async () => {
 const apiMembers = await collectCatalogApiMembers({
@@ -131,14 +145,18 @@ assert.ok(!apiMembers.some(member => member.id === 'main-regular' || member.id =
 const usersView = ejs.render(fs.readFileSync(require.resolve('../src/views/admin/users-experiment.ejs'), 'utf8'), {
   asset: path => `/${path}`,
   q: '', status: '', role: '', registered: '', pageSize: 10, source: 'store', shopFilter: '', apiShops: [], platformMemberCount: 2,
+  currentAdminId: 'admin-1',
   users: [
     { id: 'user-1', username: 'member', email: 'member@example.com', role: 'customer', status: 'active', walletBalance: 25, createdAt: '2026-09-01T00:00:00.000Z' },
     { id: 'admin-1', username: 'owner', email: 'owner@example.com', role: 'admin', status: 'active', walletBalance: 0, createdAt: '2026-09-01T00:00:00.000Z' },
+    { id: 'admin-2', username: 'other-admin', email: 'other-admin@example.com', role: 'admin', status: 'active', walletBalance: 0, createdAt: '2026-09-01T00:00:00.000Z' },
   ],
   matchedCount: 2, totalWalletBalance: 25, page: 1, totalPages: 1, pageSizeOptions: [10, 25, 50, 100],
   memberCounts: { all: 2, active: 2, banned: 0, admins: 1, today: 0 },
 });
-assert.equal((usersView.match(/<button\b[^>]*\bdata-users-adjust\b/g) || []).length, 1, 'only customer rows show a wallet adjustment action');
+assert.equal((usersView.match(/<button\b[^>]*\bdata-users-adjust\b/g) || []).length, 2, 'customer rows and the signed-in admin row show a wallet adjustment action');
+assert.match(usersView, /data-user-id="admin-1"[^>]*>ปรับเครดิตบัญชีผู้ดูแลของฉัน/);
+assert.doesNotMatch(usersView, /data-user-id="admin-2"[^>]*>ปรับเครดิตบัญชีผู้ดูแลของฉัน/);
 assert.match(usersView, /name="expectedBalance"/);
 assert.match(usersView, /name="operation"/);
 assert.match(usersView, /name="note"/);

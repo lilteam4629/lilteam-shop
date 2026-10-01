@@ -54,7 +54,10 @@ function adjustCustomerWallet(data, {
 
   const user = (data.users || []).find(item => String(item.id) === String(userId));
   if (!user) throw new WalletAdjustmentError('ไม่พบสมาชิก กรุณารีเฟรชหน้าแล้วลองอีกครั้ง');
-  if ((user.role || 'customer') !== 'customer') {
+  const isOwnAdminStoreWallet = !isCatalogWallet
+    && (user.role || 'customer') === 'admin'
+    && String(user.id) === String(adminUserId);
+  if ((user.role || 'customer') !== 'customer' && !isOwnAdminStoreWallet) {
     throw new WalletAdjustmentError('ปรับเครดิตได้เฉพาะบัญชีสมาชิก ไม่สามารถปรับบัญชีผู้ดูแลได้');
   }
 
@@ -89,7 +92,9 @@ function adjustCustomerWallet(data, {
     previousBalance,
     balanceAfter,
     adminUserId: String(adminUserId || ''),
-    note: `ผู้ดูแล ${actor} ${operation === 'add' ? 'เพิ่ม' : 'หัก'}${isCatalogWallet ? 'เครดิต API' : 'เครดิต'}: ${reason}`,
+    note: isOwnAdminStoreWallet
+      ? `ผู้ดูแล ${actor} ปรับเครดิตบัญชีผู้ดูแลของตนเอง (${operation === 'add' ? 'เพิ่ม' : 'หัก'}เครดิต): ${reason}`
+      : `ผู้ดูแล ${actor} ${operation === 'add' ? 'เพิ่ม' : 'หัก'}${isCatalogWallet ? 'เครดิต API' : 'เครดิต'}: ${reason}`,
     createdAt: now,
   });
 
