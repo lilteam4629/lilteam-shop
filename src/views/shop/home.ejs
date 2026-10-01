@@ -174,7 +174,7 @@
 <% } %>
 
 <% if (ownerHomeV20) { %>
-<section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
+<section class="store-status-section<%= isMainSite ? ' main-service-section' : '' %> w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
   <% if (isMainSite) { %>
     <%- include('../partials/main-service-strip') %>
   <% } else { %>
@@ -396,7 +396,7 @@
 
 
 <% if (!ownerHomeV20) { %>
-<section class="store-status-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
+<section class="store-status-section<%= isMainSite ? ' main-service-section' : '' %> w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
   <% if (isMainSite) { %>
     <%- include('../partials/main-service-strip') %>
   <% } else { %>
