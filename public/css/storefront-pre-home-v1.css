@@ -7049,3 +7049,19 @@ html:not(.light) .community-service-status { color: #9ce4ba; }
   .community-service-hours strong { font-size: 19px; }
 }
 .community-order-grid { grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
+
+/* The refreshed cards ride the same continuous, seamless motion as the old rail. */
+.community-order-shell { min-width: 0; overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-behavior: smooth; overscroll-behavior-inline: contain; }
+.community-order-shell::-webkit-scrollbar { display: none; }
+.community-order-track { display: flex; width: max-content; gap: 10px; animation: community-order-run var(--community-order-duration, 40s) linear infinite paused; will-change: transform; }
+.community-orders.is-scrolling .community-order-track { animation-play-state: running; }
+.community-order-group { display: flex; flex: 0 0 auto; gap: 10px; }
+.community-order-group .community-order-card { flex: 0 0 clamp(250px, 26vw, 340px); width: clamp(250px, 26vw, 340px); }
+.community-order-shell:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
+@keyframes community-order-run { to { transform: translate3d(calc(-1 * var(--community-order-step, 0px)), 0, 0); } }
+@media (max-width: 760px) {
+  .community-order-group .community-order-card { flex-basis: min(76vw, 300px); width: min(76vw, 300px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .community-order-track { animation: none; will-change: auto; }
+}

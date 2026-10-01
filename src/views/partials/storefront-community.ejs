@@ -26,21 +26,24 @@
   <section class="community-orders" id="latest-orders" data-community-orders>
     <header class="community-orders-header">
       <div><h2>รายการสั่งซื้อล่าสุด<span class="community-live-dot" aria-hidden="true"></span></h2><p>เลือกสินค้าเพื่อดูรายละเอียด</p></div>
-      <div class="community-order-controls" aria-label="เปลี่ยนรายการสั่งซื้อ">
-        <span data-community-page aria-live="off">1</span>
-        <button type="button" data-community-toggle aria-label="หยุดการสลับอัตโนมัติ" title="หยุดการสลับอัตโนมัติ" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
-        <button type="button" data-community-prev aria-label="รายการก่อนหน้า"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg></button>
-        <button type="button" data-community-next aria-label="รายการถัดไป"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m10 6 6 6-6 6"/></svg></button>
+      <div class="community-order-controls" aria-label="ควบคุมการเลื่อนรายการสั่งซื้อ">
+        <button type="button" data-community-toggle aria-label="หยุดการเลื่อนอัตโนมัติ" title="หยุดการเลื่อนอัตโนมัติ" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
       </div>
     </header>
-    <div class="community-order-grid">
-      <% latestOrders.forEach((order, index) => { %>
-      <a class="community-order-card" href="<%= order.slug ? '/game/' + order.slug : '/products' %>" data-community-order <%= index >= 2 ? 'hidden' : '' %>>
+    <div class="community-order-shell" tabindex="0" aria-label="รายการสั่งซื้อล่าสุด เลื่อนดูได้" data-community-shell>
+      <div class="community-order-track" data-community-track>
+        <% for (let duplicate = 0; duplicate < 2; duplicate++) { %>
+        <div class="community-order-group" <%- duplicate ? 'aria-hidden="true"' : 'data-community-original' %>>
+        <% latestOrders.forEach((order) => { %>
+      <a class="community-order-card" href="<%= order.slug ? '/game/' + order.slug : '/products' %>" <%- duplicate ? 'tabindex="-1"' : 'data-community-order' %>>
         <span class="community-order-image"><% if (order.image) { %><img src="<%= order.image %>" alt="" width="60" height="70" loading="lazy" decoding="async"/><% } else { %><svg width="24" height="24"><use href="#ui-box"/></svg><% } %></span>
         <span class="community-order-copy"><span class="community-order-title"><%= order.title %><%= order.extraItems ? ' +' + order.extraItems + ' รายการ' : '' %></span><strong>฿<%= Number(order.amount).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong><span class="community-order-meta"><time><%= new Date(order.createdAt).toLocaleString('th-TH', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %></time><span>· <%= order.buyer %></span></span></span>
         <svg class="community-order-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
       </a>
-      <% }) %>
+        <% }) %>
+        </div>
+        <% } %>
+      </div>
     </div>
   </section>
   <% } %>

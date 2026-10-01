@@ -2,75 +2,118 @@
   'use strict';
   if (window.storefrontCommunityLoaded) return;
   window.storefrontCommunityLoaded = true;
+
   let dispose = null;
   function mount() {
     if (dispose) dispose();
     const section = document.querySelector('[data-community-orders]');
     if (!section) { dispose = null; return; }
-    const cards = Array.from(section.querySelectorAll('[data-community-order]'));
-    const prev = section.querySelector('[data-community-prev]');
-    const next = section.querySelector('[data-community-next]');
-    const label = section.querySelector('[data-community-page]');
+
+    const shell = section.querySelector('[data-community-shell]');
+    const track = section.querySelector('[data-community-track]');
+    const original = section.querySelector('[data-community-original]');
     const toggle = section.querySelector('[data-community-toggle]');
+    if (!shell || !track || !original || !toggle) return;
     const controller = new AbortController();
     const signal = controller.signal;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let page = 0, visible = false, hovered = window.matchMedia('(hover: hover)').matches && section.matches(':hover'), focused = section.contains(document.activeElement), paused = toggle.getAttribute('aria-pressed') === 'true', timer = null;
-    const wide = window.matchMedia('(min-width: 1100px)');
-    const mobile = window.matchMedia('(max-width: 639px)');
-    const size = () => mobile.matches ? 1 : wide.matches ? 3 : 2;
-    let lastSize = size();
-    const pages = () => Math.ceil(cards.length / size());
-    function syncTimer() {
-      clearInterval(timer); timer = null;
-      if (visible && !document.hidden && !hovered && !focused && !paused && !motion.matches && pages() > 1) timer = setInterval(() => show(page + 1, true), 7000);
+    let visible = false;
+    let hovered = window.matchMedia('(hover: hover)').matches && section.matches(':hover');
+    let focused = section.contains(document.activeElement);
+    let paused = toggle.getAttribute('aria-pressed') === 'true';
+    let interacting = false;
+    let resumeTimer = 0;
+    let frame = 0;
+    let step = 0;
+
+    function sync() {
+      toggle.disabled = motion.matches || !original.querySelector('[data-community-order]');
+      section.classList.toggle('is-scrolling', visible && !document.hidden && !hovered && !focused && !paused && !interacting && !motion.matches && step > 0);
     }
-    function show(index, animate) {
-      page = (index + pages()) % pages();
-      const start = page * size();
-      cards.forEach((card, i) => {
-        card.getAnimations().forEach(animation => animation.cancel());
-        const position = (i - start + cards.length) % cards.length;
-        card.hidden = position >= size();
-        card.style.order = position;
-        if (!card.hidden && animate && !motion.matches && card.animate) card.animate([{ opacity: 0, transform: 'translateY(5px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, easing: 'cubic-bezier(.16,1,.3,1)' });
-      });
-      label.textContent = (page + 1) + ' / ' + pages();
-      prev.disabled = next.disabled = pages() < 2;
-      toggle.disabled = pages() < 2 || motion.matches;
+
+    function measure() {
+      frame = 0;
+      track.querySelectorAll('[data-community-clone]').forEach(node => node.remove());
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      const groupWidth = original.getBoundingClientRect().width;
+      if (!groupWidth) { step = 0; sync(); return; }
+      step = groupWidth + gap;
+      const requiredWidth = shell.clientWidth + step + 24;
+      while (track.scrollWidth < requiredWidth && track.children.length < 12) {
+        const clone = original.cloneNode(true);
+        clone.removeAttribute('data-community-original');
+        clone.setAttribute('data-community-clone', '');
+        clone.setAttribute('aria-hidden', 'true');
+        clone.querySelectorAll('a, button').forEach(element => element.setAttribute('tabindex', '-1'));
+        track.appendChild(clone);
+      }
+      track.style.setProperty('--community-order-step', step + 'px');
+      track.style.setProperty('--community-order-duration', Math.max(12, step / 55).toFixed(2) + 's');
+      sync();
     }
-    function manual(delta) { show(page + delta, true); syncTimer(); }
-    prev.addEventListener('click', () => manual(-1), { signal });
-    next.addEventListener('click', () => manual(1), { signal });
+    function scheduleMeasure() {
+      if (frame) cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(measure);
+    }
+    function resumeSoon() {
+      window.clearTimeout(resumeTimer);
+      resumeTimer = window.setTimeout(() => { interacting = false; sync(); }, 1400);
+    }
+    function pauseForInteraction() {
+      window.clearTimeout(resumeTimer);
+      interacting = true;
+      sync();
+    }
+
     toggle.addEventListener('click', () => {
       paused = !paused;
-      toggle.setAttribute('aria-label', paused ? 'เล่นการสลับอัตโนมัติ' : 'หยุดการสลับอัตโนมัติ');
-      toggle.title = toggle.getAttribute('aria-label');
+      const label = paused ? 'เล่นการเลื่อนอัตโนมัติ' : 'หยุดการเลื่อนอัตโนมัติ';
+      toggle.setAttribute('aria-label', label);
+      toggle.title = label;
       toggle.setAttribute('aria-pressed', String(paused));
       toggle.querySelector('path').setAttribute('d', paused ? 'm9 5 10 7-10 7Z' : 'M8 5v14M16 5v14');
-      syncTimer();
+      sync();
     }, { signal });
-    section.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') hovered = true; syncTimer(); }, { signal });
-    section.addEventListener('pointerleave', () => { hovered = false; syncTimer(); }, { signal });
-    section.addEventListener('focusin', () => { focused = true; syncTimer(); }, { signal });
-    section.addEventListener('focusout', event => { focused = section.contains(event.relatedTarget); syncTimer(); }, { signal });
-    document.addEventListener('visibilitychange', syncTimer, { signal });
-    const motionChange = () => { show(page, false); syncTimer(); };
-    motion.addEventListener('change', motionChange);
-    const resize = () => {
-      const focusedIndex = cards.indexOf(document.activeElement);
-      const first = focusedIndex >= 0 ? focusedIndex : page * lastSize;
-      lastSize = size();
-      show(Math.floor(first / lastSize), false);
-      syncTimer();
-    };
-    wide.addEventListener('change', resize);
-    mobile.addEventListener('change', resize);
+    section.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') hovered = true; sync(); }, { signal });
+    section.addEventListener('pointerleave', () => { hovered = false; resumeSoon(); sync(); }, { signal });
+    section.addEventListener('focusin', () => { focused = true; sync(); }, { signal });
+    section.addEventListener('focusout', event => { focused = section.contains(event.relatedTarget); sync(); }, { signal });
+    shell.addEventListener('pointerdown', pauseForInteraction, { signal });
+    shell.addEventListener('pointerup', resumeSoon, { signal });
+    shell.addEventListener('pointercancel', resumeSoon, { signal });
+    shell.addEventListener('scroll', () => {
+      if (step && shell.scrollLeft >= step) shell.scrollLeft -= step;
+      pauseForInteraction();
+      resumeSoon();
+    }, { passive: true, signal });
+    shell.addEventListener('keydown', event => {
+      if (event.target !== shell || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+      event.preventDefault();
+      pauseForInteraction();
+      shell.scrollBy({ left: event.key === 'ArrowRight' ? 240 : -240, behavior: 'smooth' });
+      resumeSoon();
+    }, { signal });
+    document.addEventListener('visibilitychange', sync, { signal });
+    motion.addEventListener('change', sync);
     let observer = null;
-    if ('IntersectionObserver' in window) { observer = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; syncTimer(); }); observer.observe(section); }
-    else { visible = true; }
-    show(0, false); syncTimer();
-    dispose = () => { clearInterval(timer); controller.abort(); if (observer) observer.disconnect(); motion.removeEventListener('change', motionChange); wide.removeEventListener('change', resize); mobile.removeEventListener('change', resize); cards.forEach(card => card.getAnimations().forEach(animation => animation.cancel())); };
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; sync(); }, { threshold: 0.05 });
+      observer.observe(shell);
+    } else { visible = true; }
+    let resizeObserver = null;
+    if ('ResizeObserver' in window) { resizeObserver = new ResizeObserver(scheduleMeasure); resizeObserver.observe(shell); }
+    else window.addEventListener('resize', scheduleMeasure, { signal });
+    measure();
+    document.fonts?.ready?.then(() => { if (!signal.aborted) scheduleMeasure(); });
+    dispose = () => {
+      controller.abort();
+      window.clearTimeout(resumeTimer);
+      if (frame) cancelAnimationFrame(frame);
+      if (observer) observer.disconnect();
+      if (resizeObserver) resizeObserver.disconnect();
+      motion.removeEventListener('change', sync);
+      section.classList.remove('is-scrolling');
+    };
   }
   document.addEventListener('lilteam:page-loaded', mount);
   window.addEventListener('pageshow', mount);
