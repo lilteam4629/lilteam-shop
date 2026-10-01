@@ -423,6 +423,7 @@ router.get('/game/:slug', (req, res) => {
     remoteProduct ? [] : store.data.settings.rangersCatalog?.productAssignments?.[product.id] || [],
   );
   const randomBoxDetails = product.specialType === randomBox.RANDOM_BOX_KIND ? {
+    healthCode: randomBox.getDrawHealth(store.data, product),
     maxDrawCount: randomBox.MAX_RANDOM_BOX_DRAWS,
     pricePerDraw: randomBox.getDrawPrice(store.data, product),
     availableStockCount: randomBox.availablePrizeStockCount(store.data, product),

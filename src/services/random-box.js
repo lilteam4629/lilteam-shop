@@ -148,6 +148,19 @@ function getPoolSummary(data, product) {
     drySpend: state.drySpendCents / 100, targetRevenue: 97.50 };
 }
 
+// Read-only readiness check: expose a bounded code, never accounting/credentials.
+function getDrawHealth(data, product) {
+  try {
+    gacha.quote({ poolId: String(product.id), state: data.randomBoxGachaStates?.[String(product.id)],
+      stock: availableStockItems(data.stockItems, product.id).map(item => ({ stockId: String(item.id), status: 'available' })) });
+    return 'READY';
+  } catch (error) {
+    if (['NO_STOCK', 'INVALID_POOL_STATE', 'ACCOUNTING_LIMIT'].includes(error.message)) return error.message;
+    if (/totalCollectedCents|totalPrizeItems|drySpendCents/.test(error.message)) return 'INVALID_POOL_STATE';
+    return 'INVALID_STOCK';
+  }
+}
+
 // Runs through the common store schema migration on main and every tenant.
 // Archive old reservations/schedules; preserve orders, sold IDs and paid totals.
 function migrateData(data, now = Date.now()) {
@@ -281,6 +294,7 @@ function drawRandomBox(data, { productId, userId, idempotencyKey, drawCount = 1,
 }
 
 module.exports = {
+  getDrawHealth,
   migrateData,
   PENDING_SYSTEM_MESSAGE,
   RANDOM_BOX_KIND,

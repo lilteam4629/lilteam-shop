@@ -125,7 +125,7 @@
             <strong class="text-3xl font-black text-[var(--gold-text)]">฿<%= Number(randomBoxDetails.pricePerDraw).toLocaleString('th-TH') %> <small class="text-sm font-semibold text-[var(--text-3)]">/ ครั้ง</small></strong>
           </div>
           <div class="mt-3 rounded-xl bg-[var(--input)] px-4 py-3">
-            <div class="text-xs font-bold text-[var(--text-2)]">กล่องสุ่ม · ฿<%= Number(randomBoxDetails.pricePerDraw).toLocaleString('th-TH') %> ต่อครั้ง</div>
+            <div data-random-box-health="<%= randomBoxDetails.healthCode %>" class="text-xs font-bold text-[var(--text-2)]">กล่องสุ่ม · ฿<%= Number(randomBoxDetails.pricePerDraw).toLocaleString('th-TH') %> ต่อครั้ง</div>
             <p class="mt-1 text-xs leading-relaxed text-[var(--text-3)]">หากได้รับรางวัล ระบบจะตัดสต็อกไว้ให้ แล้วกดติดต่อร้านเพื่อรับสินค้า</p>
             <p class="mt-2 text-xs leading-relaxed text-[var(--text-3)]">เรท 1 · ลุ้นได้ 1–5 ชิ้นต่อครั้ง · กล่องสะสมไม่มีรางวัลครบ 110 บาท จะได้ขั้นต่ำ 1 ชิ้น โดยใช้ยอดร่วมกันทุกคน</p>
             <p class="mt-1 text-xs text-[var(--text-3)]">เรทและราคาอื่น: รอทำระบบเพิ่ม</p>
