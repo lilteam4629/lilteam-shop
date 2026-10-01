@@ -1007,6 +1007,10 @@ async function loadTenantDbUncached(shopId, cacheKey) {
  */
 async function createTenantDb(shopId, { shopName, adminUsername, adminEmail, adminPasswordHash }) {
   const tenantDb = defaultData();
+  // Never carry bootstrap/sample records into a new rental, including future collections.
+  for (const [key, value] of Object.entries(tenantDb)) {
+    if (Array.isArray(value)) tenantDb[key] = [];
+  }
   Object.assign(tenantDb.settings, newShopPresentation());
   tenantDb.settings.shopName = shopName;
   tenantDb.settings.payment.slipApiMode = 'shared';
@@ -1016,17 +1020,6 @@ async function createTenantDb(shopId, { shopName, adminUsername, adminEmail, adm
       role: 'admin', walletBalance: 0, status: 'active', createdAt: new Date().toISOString(),
     },
   ];
-  // A fresh shop starts with an empty catalog — the sample products are only
-  // useful for the seller's own demo/main site.
-  tenantDb.products = [];
-  tenantDb.stockItems = [];
-  tenantDb.orders = [];
-  tenantDb.filterTags = [];
-  tenantDb.coupons = [];
-  tenantDb.announcements = [];
-  tenantDb.miniGamePrizes = [];
-  tenantDb.homeSections = [];
-  tenantDb.licensePlans = [];
   tenantDb.settings.miniGame.enabled = false;
   for (const field of ['title', 'description', 'railTitle', 'railDescription']) tenantDb.settings.miniGame[field] = '';
   tenantDb.settings.miniGame.boxEnabled = false;

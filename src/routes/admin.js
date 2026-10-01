@@ -358,7 +358,7 @@ router.get('/catalog-api', async (req, res) => {
   const availableSourceIds = new Set((mainDb.stockItems || [])
     .filter(item => item.status === 'available')
     .map(item => String(item.productId)));
-  const sourceProducts = mainDb.products.filter(product => product.status === 'active'
+  const sourceProducts = tenantMode && !config.enabled ? [] : mainDb.products.filter(product => product.status === 'active'
     && availableSourceIds.has(String(product.id)));
   if (!config.featuredProductIds.length && !config.featuredProductIdsConfigured) {
     config.featuredProductIds = sourceProducts.slice(0, 5).map(product => String(product.id));
@@ -384,7 +384,8 @@ router.get('/catalog-api', async (req, res) => {
       };
     }));
   }
-  const payoutLedger = catalogSyndication.calculatePayoutLedger(mainDb.settings || {});
+  const payoutLedger = tenantMode ? { accrued: {}, paid: {}, pending: {} }
+    : catalogSyndication.calculatePayoutLedger(mainDb.settings || {});
   const payoutByTenant = payoutLedger.pending;
   const payoutShops = !tenantMode
     ? shops.filter(shop => shop.config.enabled).map(shop => ({
@@ -408,8 +409,8 @@ router.get('/catalog-api', async (req, res) => {
     title: 'API แคตตาล็อกร้านหลัก', active: 'catalog-api', tenantMode, config,
     sourceProducts, preview, shops, payoutByTenant, payoutLedger, payoutShops,
     payoutHistory: config.payouts || [],
-    sourceShopName: mainDb.settings.shopName || 'ร้านหลัก',
-    sourceLogo: mainDb.settings.branding?.logoImage || null,
+    sourceShopName: tenantMode && !config.enabled ? 'ร้านหลัก' : mainDb.settings.shopName || 'ร้านหลัก',
+    sourceLogo: tenantMode && !config.enabled ? null : mainDb.settings.branding?.logoImage || null,
     sourceShopUrl: MAIN_SITE_URL || '/',
   });
 });
