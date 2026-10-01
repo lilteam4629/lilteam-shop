@@ -163,7 +163,7 @@ function getDrawHealth(data, product) {
 
 async function getPersistedDrawHealth(store, product) {
   try {
-    return await store.previewTransaction(data => {
+    return await store.previewTransaction((data, metadata) => {
       const savedProduct = data.products.find(item => String(item.id) === String(product.id));
       if (!savedProduct) return 'PRODUCT_UNAVAILABLE';
       const readiness = getDrawHealth(data, savedProduct);
@@ -174,7 +174,7 @@ async function getPersistedDrawHealth(store, product) {
       drawRandomBox(data, { productId: savedProduct.id, userId: buyerId,
         idempotencyKey: 'random-box-readiness-preview', drawCount: MAX_RANDOM_BOX_DRAWS,
         randomInt: (min, max) => max - 1, genId: () => buyerId });
-      return 'READY';
+      return metadata.legacyRevision ? 'READY_LEGACY_REVISION' : 'READY';
     });
   } catch (error) {
     const codes = ['STORE_UNAVAILABLE', 'INVALID_STORE_REVISION', 'STORE_SIZE_LIMIT', 'INVALID_POOL_STATE', 'ACCOUNTING_LIMIT'];

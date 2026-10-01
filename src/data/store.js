@@ -335,14 +335,11 @@ async function transact(mutator) {
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const stored = await mongoCollection.findOne({ _id: documentId });
       if (!stored) throw new Error(`ไม่พบข้อมูลร้าน ${documentId}`);
-      const revision = Number(stored._revision) || 0;
+      const { revision, filter } = require('../services/store-revision').snapshotRevision(stored, documentId);
       delete stored._id;
       delete stored._revision;
       migrateSchema(stored);
       const result = await mutator(stored);
-      const filter = revision
-        ? { _id: documentId, _revision: revision }
-        : { _id: documentId, $or: [{ _revision: { $exists: false } }, { _revision: 0 }] };
       const written = await mongoCollection.replaceOne(filter, { _id: documentId, _revision: revision + 1, ...stored });
       if (written.modifiedCount === 1) {
         replaceObject(target, stored);
@@ -361,13 +358,11 @@ async function previewTransaction(mutator) {
     ? await mongoCollection.findOne({ _id: documentId })
     : structuredClone(ctx ? ctx.db : db);
   if (!snapshot) throw new Error('STORE_UNAVAILABLE');
-  if (snapshot._revision != null && (!Number.isSafeInteger(snapshot._revision) || snapshot._revision < 0)) {
-    throw new Error('INVALID_STORE_REVISION');
-  }
+  const { legacy } = require('../services/store-revision').snapshotRevision(snapshot, documentId);
   delete snapshot._id;
   delete snapshot._revision;
   migrateSchema(snapshot);
-  const result = await mutator(snapshot);
+  const result = await mutator(snapshot, { legacyRevision: legacy });
   if (mongoCollection && require('mongodb').BSON.calculateObjectSize(snapshot) >= 16 * 1024 * 1024 - 1024) {
     throw new Error('STORE_SIZE_LIMIT');
   }
@@ -1146,6 +1141,7 @@ function getSystemStatus() {
   const managedAccount = db && db.users.find(user => (user.username || '').toLowerCase() === managedUsername);
   return {
     persistentStorage: Boolean(mongoCollection),
+    storageBackend: mongoCollection ? 'mongodb' : 'json-file',
     adminRecoveryConfigured: Boolean(process.env.ADMIN_PASSWORD),
     managedAdminReady: Boolean(managedAccount && managedAccount.role === 'admin' && managedAccount.status === 'active'),
     r2Storage: r2.isEnabled(),
