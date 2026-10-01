@@ -14,7 +14,8 @@
     "test:promotions": "node scripts/test-promotions.js && node scripts/test-member-promotions-http.js",
     "test:smoke": "node scripts/smoke-server.js",
     "audit:admin-theme": "node scripts/test-admin-theme-toggle.js && node scripts/test-admin-ui-consistency.js && node scripts/test-admin-shell-render.js",
-    "test:security": "node scripts/test-security.js && node scripts/test-store-safe-save.js"
+    "test:security": "node scripts/test-security.js && node scripts/test-store-safe-save.js",
+    "test:purchase-notifications": "node scripts/test-purchase-notifications.js"
   },
   "engines": {
     "node": ">=20.9.0"

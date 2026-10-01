@@ -1,0 +1,9 @@
+.purchase-notice{position:fixed;left:20px;bottom:24px;z-index:45;display:flex;align-items:flex-start;gap:8px;width:min(360px,calc(100vw - 40px));padding:16px;background:var(--card,#fff);color:var(--text,#17212b);border:1px solid var(--border,#dbe2e8);border-radius:12px}
+.purchase-notice[hidden]{display:none}
+.purchase-notice div{min-width:0;flex:1}
+.purchase-notice strong{display:block;font-size:14px;line-height:1.5}
+.purchase-notice p{margin:6px 0 0;font-size:13px;line-height:1.6;overflow-wrap:anywhere}
+.purchase-notice button{flex:none;width:44px;height:44px;border:0;border-radius:8px;background:transparent;color:inherit;font-size:24px;cursor:pointer}
+.purchase-notice button:hover{background:var(--input,#f1f5f9)}
+.purchase-notice button:focus-visible{outline:2px solid var(--gold,#506fa5);outline-offset:2px}
+@media(max-width:600px){.purchase-notice{left:12px;bottom:calc(88px + env(safe-area-inset-bottom));width:calc(100vw - 24px);padding:12px}}
