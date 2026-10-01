@@ -1,0 +1,13 @@
+<link rel="stylesheet" href="<%= asset('css/admin-sales-report-v1.css') %>" />
+<section class="sales-report" data-sales-report>
+  <header><div><h2>สรุปยอดขาย</h2><p>เวลาประเทศไทย · กดแท่งกราฟเพื่อดูสินค้าที่ขาย</p></div><div class="sales-report-switch" role="group" aria-label="ช่วงเวลายอดขาย"><button type="button" data-sales-period="daily" aria-pressed="true">7 วันล่าสุด</button><button type="button" data-sales-period="monthly" aria-pressed="false">รายเดือน</button></div></header>
+  <% ['daily','monthly'].forEach(period=>{ const buckets=salesReport[period], max=Math.max(1,...buckets.map(b=>b.amount)); %>
+  <div data-sales-panel="<%= period %>" <%= period==='monthly'?'hidden':'' %>>
+    <div class="sales-report-total"><span><%= period==='daily'?'รวม 7 วันตามกราฟ':'รวม 12 เดือนล่าสุด' %></span><strong>฿<%= buckets.reduce((sum,b)=>sum+b.amount,0).toLocaleString('th-TH',{maximumFractionDigits:2}) %></strong></div>
+    <div class="sales-report-scroll"><div class="sales-report-bars <%= period==='monthly'?'is-monthly':'' %>">
+      <% buckets.forEach((b,index)=>{ %><button type="button" class="sales-report-bar" data-sales-bucket="<%= period %>-<%= index %>" aria-expanded="false" aria-controls="sales-detail-<%= period %>-<%= index %>" aria-label="<%= b.label %> ยอดขาย <%= b.amount %> บาท ดูรายการสินค้า"><strong>฿<%= b.amount.toLocaleString('th-TH',{maximumFractionDigits:2}) %></strong><span class="sales-report-column"><i style="height:<%= Math.max(3,Math.round(b.amount/max*150)) %>px"></i></span><span><%= b.label %></span></button><% }) %>
+    </div></div>
+    <% buckets.forEach((b,index)=>{ %><div class="sales-report-detail" id="sales-detail-<%= period %>-<%= index %>" data-sales-detail hidden><h3><%= b.label %> · <%= b.orderCount %> คำสั่งซื้อ · ฿<%= b.amount.toLocaleString('th-TH',{maximumFractionDigits:2}) %></h3><% if(b.products.length){ %><p>ยอดสินค้าแบ่งส่วนลดตามสัดส่วนราคา รวมตรงกับยอดคำสั่งซื้อ</p><div class="sales-report-table"><table><thead><tr><th>สินค้า</th><th>จำนวนขาย</th><th>ยอดขายสุทธิ</th></tr></thead><tbody><% b.products.forEach(p=>{ %><tr><td><%= p.title %></td><td><%= p.units %></td><td>฿<%= p.amount.toLocaleString('th-TH',{maximumFractionDigits:2}) %></td></tr><% }) %></tbody></table></div><% }else{ %><p>ยังไม่มีรายการขายในช่วงนี้</p><% } %></div><% }) %>
+  </div><% }) %>
+</section>
+<script src="<%= asset('js/admin-sales-report-v1.js') %>" defer></script>

@@ -227,37 +227,7 @@
 <!-- Charts & Top Products Grid -->
 <div class="grid grid-cols-1 lg:grid-cols-[1.4fr_.6fr] gap-6 mb-8">
 
-  <!-- 7-Day Revenue Visual Chart -->
-  <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h2 class="font-bold text-sm sm:text-base text-[var(--text)]">กราฟยอดขาย 7 วันล่าสุด</h2>
-        <p class="text-xs text-[var(--text-4)] mt-0.5">สรุปยอดขายรายวันตามเวลาประเทศไทย</p>
-      </div>
-      <div class="text-right">
-        <span class="text-xs text-[var(--text-4)]">รวม 7 วัน</span>
-        <div class="text-sm font-bold text-[var(--gold-text)]">฿<%= stats.revenue7Days.toLocaleString() %></div>
-      </div>
-    </div>
-
-    <!-- Bar Chart Container -->
-    <div class="h-52 flex items-end gap-2 sm:gap-4 border-b border-[var(--border)] pt-4 px-2">
-      <% dailySales.forEach(day => {
-        const height = Math.max(day.amount ? 10 : 3, Math.round((day.amount / maxDailyRevenue) * 100));
-      %>
-        <div class="flex-1 h-full flex flex-col justify-end items-center min-w-0 group relative">
-          <!-- Hover Tooltip -->
-          <div class="absolute -top-7 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none bg-[var(--input)] border border-[var(--border-light)] text-[10px] font-bold text-[var(--gold-text)] px-2 py-0.5 rounded-md shadow-lg whitespace-nowrap z-10">
-            ฿<%= day.amount.toLocaleString() %>
-          </div>
-          <!-- Bar Column -->
-          <div class="w-full max-w-10 rounded-t-lg bg-gradient-to-t from-[var(--gold-dark)] to-[var(--gold)] shadow-[0_0_12px_color-mix(in_srgb,var(--gold)_20%,transparent)] group-hover:brightness-110 transition-all duration-200" style="height:<%= height %>%"></div>
-          <!-- Day Label -->
-          <span class="text-[10px] sm:text-xs text-[var(--text-4)] py-2.5 font-medium"><%= day.label %></span>
-        </div>
-      <% }) %>
-    </div>
-  </section>
+  <%- include('../partials/admin-sales-report', { salesReport }) %>
 
   <!-- Top Products Leaderboard -->
   <section class="bg-[var(--card)] border border-[var(--border)] rounded-2xl p-5 sm:p-6 shadow-sm">
@@ -366,3 +336,4 @@
     </table>
   </div>
 </section>
+

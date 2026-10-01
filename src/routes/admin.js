@@ -1,3 +1,4 @@
+const { buildSalesReport } = require('../services/sales-report');
 const express = require('express');
 const { randomBytes } = require('node:crypto');
 const { todayRevenue, resetTodayRevenue } = require('../services/dashboard-revenue');
@@ -251,6 +252,8 @@ router.get('/', (req, res) => {
     const amount = revenueByDay.get(key) || 0;
     return { key, label: date.toLocaleDateString('th-TH', { timeZone: 'Asia/Bangkok', weekday: 'short' }), amount };
   });
+  const salesReport = buildSalesReport(orders, now);
+  revenue7Days = salesReport.daily.reduce((sum, day) => sum + day.amount, 0);
   const maxDailyRevenue = Math.max(1, ...dailySales.map(day => day.amount));
   const productSales = new Map();
   paidOrders.forEach(order => order.items.forEach(item => {
@@ -295,6 +298,7 @@ router.get('/', (req, res) => {
     },
     lowStockProducts,
     recentOrders,
+    salesReport,
     dailySales,
     maxDailyRevenue,
     topProducts,
@@ -3135,4 +3139,5 @@ router.get('/api-providers', (req, res) => res.redirect('/admin/slip-verificatio
 router.post('/api-providers/custom', (req, res) => res.redirect('/admin/slip-verification'));
 
 module.exports = router;
+
 
