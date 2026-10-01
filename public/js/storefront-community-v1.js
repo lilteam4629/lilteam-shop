@@ -12,23 +12,19 @@
     const shell = section.querySelector('[data-community-shell]');
     const track = section.querySelector('[data-community-track]');
     const original = section.querySelector('[data-community-original]');
-    const toggle = section.querySelector('[data-community-toggle]');
-    if (!shell || !track || !original || !toggle) return;
+    if (!shell || !track || !original) return;
     const controller = new AbortController();
     const signal = controller.signal;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let visible = false;
-    let hovered = window.matchMedia('(hover: hover)').matches && section.matches(':hover');
-    let focused = section.contains(document.activeElement);
-    let paused = toggle.getAttribute('aria-pressed') === 'true';
+    let focused = !!section.querySelector(':focus-visible');
     let interacting = false;
     let resumeTimer = 0;
     let frame = 0;
     let step = 0;
 
     function sync() {
-      toggle.disabled = motion.matches || !original.querySelector('[data-community-order]');
-      section.classList.toggle('is-scrolling', visible && !document.hidden && !hovered && !focused && !paused && !interacting && !motion.matches && step > 0);
+      section.classList.toggle('is-scrolling', visible && !document.hidden && !focused && !interacting && !motion.matches && step > 0);
     }
 
     function measure() {
@@ -65,22 +61,12 @@
       sync();
     }
 
-    toggle.addEventListener('click', () => {
-      paused = !paused;
-      const label = paused ? 'เล่นการเลื่อนอัตโนมัติ' : 'หยุดการเลื่อนอัตโนมัติ';
-      toggle.setAttribute('aria-label', label);
-      toggle.title = label;
-      toggle.setAttribute('aria-pressed', String(paused));
-      toggle.querySelector('path').setAttribute('d', paused ? 'm9 5 10 7-10 7Z' : 'M8 5v14M16 5v14');
-      sync();
-    }, { signal });
-    section.addEventListener('pointerenter', event => { if (event.pointerType !== 'touch') hovered = true; sync(); }, { signal });
-    section.addEventListener('pointerleave', () => { hovered = false; resumeSoon(); sync(); }, { signal });
-    section.addEventListener('focusin', () => { focused = true; sync(); }, { signal });
-    section.addEventListener('focusout', event => { focused = section.contains(event.relatedTarget); sync(); }, { signal });
+    section.addEventListener('focusin', event => { focused = event.target.matches(':focus-visible'); sync(); }, { signal });
+    section.addEventListener('focusout', event => { focused = section.contains(event.relatedTarget) && !!event.relatedTarget?.matches(':focus-visible'); sync(); }, { signal });
     shell.addEventListener('pointerdown', pauseForInteraction, { signal });
     shell.addEventListener('pointerup', resumeSoon, { signal });
     shell.addEventListener('pointercancel', resumeSoon, { signal });
+    shell.addEventListener('pointerleave', resumeSoon, { signal });
     shell.addEventListener('scroll', () => {
       if (step && shell.scrollLeft >= step) shell.scrollLeft -= step;
       pauseForInteraction();

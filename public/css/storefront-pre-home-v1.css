@@ -6939,7 +6939,7 @@ html:not(.light) .community-service-status { color: #176442; }
 .community-order-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .community-order-card { display: flex; align-items: center; gap: 12px; min-width: 0; min-height: 102px; padding: 14px; border: 1px solid var(--border); border-radius: 14px; background: var(--card); color: var(--text); text-decoration: none; transition: border-color .2s ease, transform .2s cubic-bezier(.16, 1, .3, 1); }
 .community-order-image { display: grid; place-items: center; width: 56px; height: 68px; flex-shrink: 0; border-radius: 9px; overflow: hidden; background: var(--bg); color: var(--text-2); }
-.community-order-image img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.community-order-image img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .community-order-copy { display: flex; flex: 1; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 0; }
 .community-order-title { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 12px; font-weight: 600; line-height: 1.5; }
 .community-order-copy strong { font-size: 16px; line-height: 1.25; font-weight: 700; color: var(--gold-text); font-variant-numeric: tabular-nums; }
@@ -7055,6 +7055,7 @@ html:not(.light) .community-service-status { color: #9ce4ba; }
 .community-order-shell::-webkit-scrollbar { display: none; }
 .community-order-track { display: flex; width: max-content; gap: 10px; animation: community-order-run var(--community-order-duration, 40s) linear infinite paused; will-change: transform; }
 .community-orders.is-scrolling .community-order-track { animation-play-state: running; }
+.community-orders-header { min-height: 24px; margin-bottom: 10px; }
 .community-order-group { display: flex; flex: 0 0 auto; gap: 10px; }
 .community-order-group .community-order-card { flex: 0 0 clamp(250px, 26vw, 340px); width: clamp(250px, 26vw, 340px); }
 .community-order-shell:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
