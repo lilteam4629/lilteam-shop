@@ -1,6 +1,6 @@
 <% const purchaseConfig = typeof purchaseNotificationSettings !== 'undefined' ? purchaseNotificationSettings : { storefrontEnabled: true, webhookUrl: '' }; %>
-<details class="purchase-settings">
-  <summary>การแจ้งเตือนคนซื้อสินค้าและ Webhook</summary>
+<section class="purchase-settings" id="purchase-notification-settings" aria-labelledby="purchase-settings-heading" hidden>
+  <h2 id="purchase-settings-heading">การแจ้งเตือนคนซื้อสินค้าและ Webhook</h2>
   <form method="post" action="/admin/products/notifications">
     <label class="purchase-settings-toggle"><input type="checkbox" name="purchaseStorefrontEnabled" <%= purchaseConfig.storefrontEnabled ? 'checked' : '' %> /> แสดงแจ้งเตือนเมื่อมีคนซื้อสินค้าบนหน้าเว็บ</label>
     <p>แสดงเฉพาะคำสั่งซื้อจริงใน 10 นาทีล่าสุด โดยปิดบังชื่อผู้ซื้อ</p>
@@ -9,10 +9,14 @@
     <p>แจ้งเมื่อชำระเงินสำเร็จ ทั้งสินค้าปกติและสินค้า API แยกการตั้งค่าของแต่ละเว็บ เว้นว่างเพื่อปิด Webhook</p>
     <button type="submit">บันทึกการแจ้งเตือน</button>
   </form>
-</details>
+</section>
 <style>
   .purchase-settings{margin:16px 0 24px;padding:16px 20px;border:1px solid var(--border,#dbe2e8);border-radius:12px;background:var(--card,#fff);color:var(--text,#17212b)}
-  .purchase-settings summary{cursor:pointer;font-weight:700;min-height:44px;align-content:center}
+  .purchase-settings[hidden]{display:none}
+  .purchase-settings h2{margin:0;font-size:16px;font-weight:700;line-height:1.5}
+  .purchase-settings-trigger{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:10px 14px;border:1px solid var(--border,#dbe2e8);border-radius:10px;background:var(--card,#fff);color:var(--text,#17212b);font-size:12px;font-weight:600;cursor:pointer}
+  .purchase-settings-trigger:hover,.purchase-settings-trigger[aria-expanded=true]{background:var(--input,#f1f5f9)}
+  .purchase-settings-trigger:focus-visible{outline:2px solid var(--gold,#506fa5);outline-offset:3px}
   .purchase-settings form{display:grid;gap:12px;padding-top:12px;max-width:760px}
   .purchase-settings label{font-size:14px;font-weight:600}
   .purchase-settings-toggle{display:flex;align-items:center;gap:10px;min-height:44px}
@@ -20,6 +24,21 @@
   .purchase-settings input[type=url]{width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--border,#cbd5e1);border-radius:8px;background:var(--input,#fff);color:var(--text,#17212b)}
   .purchase-settings p{margin:0;font-size:13px;line-height:1.6;color:var(--text-2,#475569)}
   .purchase-settings button{justify-self:start;min-height:44px;padding:10px 18px;border-radius:8px;background:var(--gold,#506fa5);color:var(--gold-contrast,#fff);font-weight:700}
-  .purchase-settings :is(summary,input,button):focus-visible{outline:2px solid var(--gold,#506fa5);outline-offset:3px}
+  .purchase-settings :is(input,button):focus-visible{outline:2px solid var(--gold,#506fa5);outline-offset:3px}
   @media(max-width:600px){.purchase-settings{padding:12px}.purchase-settings button{width:100%}}
 </style>
+
+<script>
+(function () {
+  if (window.purchaseSettingsToggleBound) return;
+  window.purchaseSettingsToggleBound = true;
+  document.addEventListener('click', function (event) {
+    const trigger = event.target.closest('[data-purchase-settings-toggle]');
+    if (!trigger) return;
+    const panel = document.getElementById(trigger.getAttribute('aria-controls'));
+    if (!panel) return;
+    panel.hidden = !panel.hidden;
+    trigger.setAttribute('aria-expanded', String(!panel.hidden));
+  });
+})();
+</script>
