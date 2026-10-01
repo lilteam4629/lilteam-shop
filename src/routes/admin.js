@@ -1,4 +1,6 @@
 const express = require('express');
+const { randomBytes } = require('node:crypto');
+const { todayRevenue, resetTodayRevenue } = require('../services/dashboard-revenue');
 const router = express.Router();
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
@@ -228,7 +230,7 @@ router.get('/', (req, res) => {
   const todayKey = bangkokKey(now);
   const since7Days = now.getTime() - (7 * 86400000);
   const since30Days = now.getTime() - (30 * 86400000);
-  let revenueToday = 0;
+  const revenueToday = todayRevenue(store.data, { mainSite: !req.tenantShop, now });
   let revenue7Days = 0;
   let revenue30Days = 0;
   const revenueByDay = new Map();
@@ -238,7 +240,6 @@ router.get('/', (req, res) => {
     const amount = Number(order.total) || 0;
     const dayKey = bangkokKey(createdAt);
     revenueByDay.set(dayKey, (revenueByDay.get(dayKey) || 0) + amount);
-    if (dayKey === todayKey) revenueToday += amount;
     if (createdMs >= since7Days) revenue7Days += amount;
     if (createdMs >= since30Days) revenue30Days += amount;
   });
@@ -275,6 +276,9 @@ router.get('/', (req, res) => {
   const pendingTopups = store.data.topupRequests.filter(t => t.status === 'pending').length;
   res.render('admin/dashboard-experiment', {
     title: 'แดชบอร์ด', active: 'dashboard',
+    canResetTodayRevenue: !req.tenantShop,
+    revenueResetToken: !req.tenantShop
+      ? (req.session.revenueResetToken ||= randomBytes(32).toString('hex')) : null,
     stats: {
       revenue,
       orderCount: orders.length,
@@ -326,6 +330,23 @@ router.post('/license-label', async (req, res) => {
 
 
 // ---------- Catalog API / product syndication ----------
+router.post('/dashboard/revenue-today/reset', async (req, res) => {
+  if (req.tenantShop) return res.sendStatus(403);
+  if (!req.session.revenueResetToken || req.body.revenueResetToken !== req.session.revenueResetToken) {
+    return res.status(403).send('คำขอไม่ถูกต้อง กรุณาเปิดหน้าแดชบอร์ดแล้วลองใหม่');
+  }
+  try {
+    await store.transact(data => resetTodayRevenue(data, {
+      mainSite: true, adminUserId: req.session.userId,
+    }));
+    req.flash('success', 'รีเซ็ตรายได้วันนี้เป็น 0 แล้ว ยอดขายใหม่จะเริ่มนับต่อจากนี้');
+  } catch (error) {
+    console.error('[dashboard-revenue-reset]', error);
+    req.flash('error', 'รีเซ็ตไม่สำเร็จ กรุณาลองใหม่');
+  }
+  res.redirect('/admin');
+});
+
 router.get('/catalog-api', async (req, res) => {
   const mainDb = store.platformData;
   const tenantMode = Boolean(req.tenantShop);

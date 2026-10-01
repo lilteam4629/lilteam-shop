@@ -118,6 +118,13 @@ async function waitForServer() {
 
 async function exerciseTenantRandomBox() {
   const adminCookie = await login('boxadmin', 'boxadmin-password');
+  const dashboard = await request('/admin', { headers: { cookie: adminCookie } });
+  assert.equal(dashboard.statusCode, 200);
+  assert.ok(!dashboard.body.includes('/admin/dashboard/revenue-today/reset'));
+  const beforeResetAttempt = fs.readFileSync(tenantDbPath, 'utf8');
+  const blockedReset = await request('/admin/dashboard/revenue-today/reset', { method: 'POST', headers: { cookie: adminCookie } });
+  assert.equal(blockedReset.statusCode, 403);
+  assert.equal(fs.readFileSync(tenantDbPath, 'utf8'), beforeResetAttempt);
   const form = await request('/admin/products/new', { headers: { cookie: adminCookie } });
   assert.equal(form.statusCode, 200, 'rental admin can open the product form');
   assert.ok(form.body.includes('type="hidden" name="randomBoxRate" value="1"'));

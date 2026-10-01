@@ -361,6 +361,28 @@ async function checkCustomerOrderDetail() {
   }
 }
 
+async function checkRevenueReset(cookie) {
+  const assert = require('node:assert/strict');
+  const page = await fetchOk('/admin', 'text/html', { cookie });
+  const token = page.body.match(/name="revenueResetToken" value="([a-f0-9]+)"/)?.[1];
+  assert.ok(token, 'main dashboard has a reset button');
+  assert.equal((await request('/admin/dashboard/revenue-today/reset', { method: 'POST' })).statusCode, 302);
+  assert.equal((await request('/admin/dashboard/revenue-today/reset', { method: 'POST', headers: { cookie } })).statusCode, 403);
+  const before = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  const reset = await request('/admin/dashboard/revenue-today/reset', {
+    method: 'POST', headers: { cookie, 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ revenueResetToken: token }).toString(),
+  });
+  assert.equal(reset.statusCode, 302);
+  const after = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
+  assert.deepEqual(after.orders, before.orders);
+  assert.deepEqual(after.users, before.users);
+  assert.deepEqual(after.stockItems, before.stockItems);
+  assert.ok(after.settings.dashboardRevenueReset);
+  const updated = await fetchOk('/admin', 'text/html', { cookie });
+  assert.ok(updated.body.includes('data-revenue-today="0"'));
+}
+
 async function crawlAdmin(cookie) {
   const queue = ['/admin'];
   const checked = new Set();
@@ -584,8 +606,10 @@ async function run() {
     if (!ready) throw new Error(`server did not become healthy: ${lastError && lastError.message}\n${output}`);
     await fetchOk('/health', 'application/json');
     if (process.env.SMOKE_RANDOM_BOX_ONLY === '1') {
-      await checkRandomBoxWorkflow(await loginAsAdmin());
-      console.log('Main storefront random-box HTTP checks passed');
+      const adminCookie = await loginAsAdmin();
+      await checkRandomBoxWorkflow(adminCookie);
+      await checkRevenueReset(adminCookie);
+      console.log('Main storefront random-box and dashboard revenue-reset HTTP checks passed');
       return;
     }
     const home = await fetchOk('/', 'text/html');

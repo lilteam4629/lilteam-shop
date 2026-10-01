@@ -30,7 +30,15 @@
 
       <div class="experiment-grid experiment-kpis">
         <div class="experiment-card experiment-kpi primary"><div class="experiment-kpi-icon">↗</div><div class="experiment-kpi-label">รายได้ 7 วันล่าสุด</div><div class="experiment-kpi-value"><%= money(stats.revenue7Days) %></div><div class="experiment-kpi-note">30 วันที่ผ่านมา: <b><%= money(stats.revenue30Days) %></b></div></div>
-        <div class="experiment-card experiment-kpi"><div class="experiment-kpi-icon">฿</div><div class="experiment-kpi-label">รายได้วันนี้ (Today)</div><div class="experiment-kpi-value"><%= money(stats.revenueToday) %></div><div class="experiment-kpi-note"><span class="experiment-live-dot"></span> นับตามเวลาประเทศไทย (ICT)</div></div>
+        <div class="experiment-card experiment-kpi"><div class="experiment-kpi-icon">฿</div><div class="experiment-kpi-label">รายได้วันนี้ (Today)</div><div class="experiment-kpi-value" data-revenue-today="<%= stats.revenueToday %>"><%= money(stats.revenueToday) %></div><div class="experiment-kpi-note"><span class="experiment-live-dot"></span> นับตามเวลาประเทศไทย (ICT)</div>
+          <% if (typeof canResetTodayRevenue !== 'undefined' && canResetTodayRevenue) { %>
+            <form action="/admin/dashboard/revenue-today/reset" method="post" style="margin-top:12px">
+              <input type="hidden" name="revenueResetToken" value="<%= revenueResetToken %>" />
+              <button type="submit" class="experiment-button" aria-label="รีเซ็ตรายได้วันนี้เป็นศูนย์">รีเซ็ตเป็น 0</button>
+              <p class="experiment-kpi-note" style="margin-top:6px">เริ่มนับยอดใหม่ โดยเก็บประวัติคำสั่งซื้อไว้</p>
+            </form>
+          <% } %>
+        </div>
         <div class="experiment-card experiment-kpi"><div class="experiment-kpi-icon">#</div><div class="experiment-kpi-label">คำสั่งซื้อสะสม</div><div class="experiment-kpi-value"><%= stats.orderCount.toLocaleString('th-TH') %> <small style="font:500 12px var(--ex-font)">รายการ</small></div><div class="experiment-kpi-note">ยอดขายรวม <b><%= money(stats.revenue) %></b></div></div>
         <div class="experiment-card experiment-kpi"><div class="experiment-kpi-icon purple">+1</div><div class="experiment-kpi-label">ลูกค้าใหม่วันนี้</div><div class="experiment-kpi-value"><%= stats.newCustomersToday.toLocaleString('th-TH') %> <small style="font:500 12px var(--ex-font)">คน</small></div><div class="experiment-kpi-note">30 วันล่าสุด <b><%= stats.newCustomers30Days.toLocaleString('th-TH') %> คน</b></div></div>
       </div>
