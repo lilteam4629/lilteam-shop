@@ -8,7 +8,7 @@ process.env.NODE_ENV = 'test';
 process.env.TEST_DB_PATH = dbPath;
 process.env.MONGODB_URI = '';
 const store = require('../src/data/store');
-const originalWrite = fs.writeFileSync;
+const originalSync = fs.fsyncSync;
 (async () => {
   try {
     await store.init();
@@ -21,17 +21,14 @@ const originalWrite = fs.writeFileSync;
     }), /mutation failed/);
     assert.ok(JSON.stringify(store.data) === initial, 'failed checkout must not change the live wallet/orders');
     assert.equal(fs.readFileSync(dbPath, 'utf8'), disk);
-    fs.writeFileSync = function (filename, ...args) {
-      if (String(filename).startsWith(dbPath)) {
-        const error = new Error('simulated disk full'); error.code = 'ENOSPC'; throw error;
-      }
-      return originalWrite.call(this, filename, ...args);
+    fs.fsyncSync = function () {
+      const error = new Error('simulated disk full'); error.code = 'ENOSPC'; throw error;
     };
     await assert.rejects(store.transact(data => {
       data.users[0].walletBalance -= 7;
       data.orders.push({ id: 'unpersisted-order' });
     }), { code: 'ENOSPC' });
-    fs.writeFileSync = originalWrite;
+    fs.fsyncSync = originalSync;
     assert.ok(JSON.stringify(store.data) === initial, 'storage failure must roll back memory');
     assert.equal(fs.readFileSync(dbPath, 'utf8'), disk, 'storage failure must preserve the previous file');
     await store.transact(data => { data.users[0].walletBalance += 10; });
@@ -48,7 +45,7 @@ const originalWrite = fs.writeFileSync;
     assert.deepEqual(store.data.orders.find(order => order.id === 'packed-order').items, items, 'restart must restore every original draw');
     console.log('PASS: local JSON rollback on mutation/storage failure, atomic commit and read-only preview');
   } finally {
-    fs.writeFileSync = originalWrite;
-    if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
+    fs.fsyncSync = originalSync;
+    for (const file of [dbPath, dbPath + '.bak']) if (fs.existsSync(file)) fs.unlinkSync(file);
   }
 })().catch(error => { console.error(error.message); process.exitCode = 1; });
