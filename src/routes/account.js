@@ -16,6 +16,7 @@ const { resolveSlipProvider } = require('../services/slip-provider');
 const { publicSlipMessage } = require('../services/public-slip');
 const discordBot = require('../services/discord-bot');
 const randomBox = require('../services/random-box');
+const { summarizeOrders } = require('../services/order-history-summary');
 const { requireLogin, currentUser } = require('../middleware/auth');
 
 router.use(requireLogin);
@@ -940,7 +941,7 @@ router.get('/orders', (req, res) => {
   const orders = store.data.orders
     .filter(o => o.userId === user.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  res.render('shop/orders', { title: 'คำสั่งซื้อของฉัน', orders });
+  res.render('shop/orders', { title: 'คำสั่งซื้อของฉัน', orders: summarizeOrders(orders, store.data) });
 });
 
 router.get('/orders/:id', (req, res) => {

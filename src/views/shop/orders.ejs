@@ -1,20 +1,26 @@
-<section class="max-w-3xl mx-auto px-4 py-8">
-  <h1 class="text-2xl font-bold mb-6">คำสั่งซื้อของฉัน</h1>
+<link rel="stylesheet" href="/css/order-history-v1.css">
+<section class="order-history">
+  <header class="order-history-heading"><h1>คำสั่งซื้อของฉัน</h1><p>ดูสินค้าที่ซื้อและรายการที่ได้รับในแต่ละคำสั่งซื้อ</p></header>
   <% if (!orders.length) { %>
-    <p class="text-[var(--text-3)]">คุณยังไม่มีคำสั่งซื้อ</p>
+    <div class="order-history-empty">คุณยังไม่มีคำสั่งซื้อ</div>
   <% } else { %>
-    <div class="space-y-3">
-      <% orders.forEach(o => { %>
-        <a href="/account/orders/<%= o.id %>" class="block bg-[var(--card)] border border-[var(--border)] hover:border-[var(--gold)]/50 rounded-xl p-4">
-          <div class="flex items-center justify-between mb-1">
-            <span class="font-medium">คำสั่งซื้อ #<%= o.id %></span>
-            <span class="text-emerald-400 text-sm"><%= o.status %></span>
-          </div>
-          <div class="text-[var(--text-3)] text-sm flex items-center justify-between">
-            <span><%= new Date(o.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %> &middot; <%= o.items.length %> รายการ</span>
-            <span class="text-[var(--gold-text)] font-medium">฿<%= o.total.toLocaleString() %>.00</span>
-          </div>
-        </a>
+    <div class="order-history-list">
+      <% orders.forEach(o => { const statusLabels = { completed: 'สำเร็จ', pending: 'รอดำเนินการ', cancelled: 'ยกเลิก', canceled: 'ยกเลิก' }; %>
+        <article class="order-history-card">
+          <header class="order-history-meta"><div><a href="/account/orders/<%= encodeURIComponent(o.id) %>" class="order-history-id">คำสั่งซื้อ #<%= o.id %></a><time><%= new Date(o.createdAt).toLocaleString('th-TH', { timeZone: 'Asia/Bangkok' }) %></time></div><div class="order-history-payment"><span class="order-history-status" data-status="<%= o.status %>"><%= statusLabels[o.status] || o.status %></span><strong>฿<%= o.total.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong></div></header>
+          <section class="order-history-purchased" aria-label="สินค้าที่ซื้อ"><h2>สินค้าที่ซื้อ <span><%= o.itemCount.toLocaleString('th-TH') %> รายการ</span></h2>
+            <% o.purchased.forEach(item => { %><div class="order-history-product"><div class="order-history-image"><span aria-hidden="true">▧</span><% if(item.image) { %><img src="<%= item.image %>" alt="<%= item.title %>" loading="lazy" decoding="async" onerror="this.hidden=true"/><% } %></div><div class="order-history-product-text"><h3><%= item.title %></h3><p>จำนวน <%= item.count.toLocaleString('th-TH') %> รายการ</p></div></div><% }) %>
+          </section>
+          <section class="order-history-received" aria-label="รายการที่ได้รับ"><h2>รายการที่ได้รับ <span><%= o.receivedCount.toLocaleString('th-TH') %> ชิ้น</span></h2>
+            <% if(o.received.length) { %>
+              <ul><% o.received.slice(0,3).forEach(item => { %><li><span><%= item.title %></span><strong>×<%= item.count.toLocaleString('th-TH') %></strong></li><% }) %></ul>
+              <% if(o.received.length > 3) { %><details><summary>ดูรายการที่ได้รับทั้งหมด (<%= o.received.length %> แบบ)</summary><ul><% o.received.slice(3).forEach(item => { %><li><span><%= item.title %></span><strong>×<%= item.count.toLocaleString('th-TH') %></strong></li><% }) %></ul></details><% } %>
+            <% } else { %><p><%= o.awaiting && !['cancelled','canceled'].includes(o.status) ? 'ยังไม่มีสินค้าที่ส่งมอบ' : 'ไม่มีรายการที่ได้รับในคำสั่งซื้อนี้' %></p><% } %>
+            <% if(o.misses) { %><p class="order-history-note">ไม่มีรางวัล <%= o.misses.toLocaleString('th-TH') %> รายการ</p><% } %>
+            <% if(o.awaiting && !['cancelled','canceled'].includes(o.status)) { %><p class="order-history-note">รอดำเนินการ / ติดต่อร้านเพื่อรับสินค้า <%= o.awaiting.toLocaleString('th-TH') %> รายการ</p><% } %>
+          </section>
+          <footer><a href="/account/orders/<%= encodeURIComponent(o.id) %>" class="order-history-detail">ดูรายละเอียดและข้อมูลรับสินค้า <span aria-hidden="true">→</span></a></footer>
+        </article>
       <% }) %>
     </div>
   <% } %>
