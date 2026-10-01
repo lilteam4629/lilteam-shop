@@ -103,6 +103,7 @@ html:not(.light) .community-service-status { color: #176442; }
 
 /* Compact main-shop composition: short information row, full-width orders below. */
 .storefront-community { display: block; margin-block: 16px 24px; }
+.owner-home-v20-main > .storefront-community { width: 100%; max-width: none; padding-inline: 0; }
 .community-overview { display: grid; grid-template-columns: minmax(300px, .9fr) minmax(0, 1.4fr); gap: 0; border: 1px solid var(--border); border-radius: 14px; background: var(--card); overflow: hidden; }
 .community-overview--single, .community-overview:has(.community-service[hidden]) { grid-template-columns: 1fr; }
 .community-service { grid-column: 1; grid-row: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: center; align-items: center; gap: 4px 10px; min-width: 0; padding: 12px 16px; border: 0; border-radius: 0; background: color-mix(in srgb, var(--gold) 8%, var(--card)); color: var(--text); }
