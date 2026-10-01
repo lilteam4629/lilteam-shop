@@ -16,7 +16,10 @@
     const signal = controller.signal;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let page = 0, visible = false, hovered = window.matchMedia('(hover: hover)').matches && section.matches(':hover'), focused = section.contains(document.activeElement), paused = toggle.getAttribute('aria-pressed') === 'true', timer = null;
-    const size = () => 2;
+    const wide = window.matchMedia('(min-width: 1100px)');
+    const mobile = window.matchMedia('(max-width: 639px)');
+    const size = () => mobile.matches ? 1 : wide.matches ? 3 : 2;
+    let lastSize = size();
     const pages = () => Math.ceil(cards.length / size());
     function syncTimer() {
       clearInterval(timer); timer = null;
@@ -27,7 +30,9 @@
       const start = page * size();
       cards.forEach((card, i) => {
         card.getAnimations().forEach(animation => animation.cancel());
-        card.hidden = i < start || i >= start + size();
+        const position = (i - start + cards.length) % cards.length;
+        card.hidden = position >= size();
+        card.style.order = position;
         if (!card.hidden && animate && !motion.matches && card.animate) card.animate([{ opacity: 0, transform: 'translateY(5px)' }, { opacity: 1, transform: 'translateY(0)' }], { duration: 320, easing: 'cubic-bezier(.16,1,.3,1)' });
       });
       label.textContent = (page + 1) + ' / ' + pages();
@@ -52,11 +57,20 @@
     document.addEventListener('visibilitychange', syncTimer, { signal });
     const motionChange = () => { show(page, false); syncTimer(); };
     motion.addEventListener('change', motionChange);
+    const resize = () => {
+      const focusedIndex = cards.indexOf(document.activeElement);
+      const first = focusedIndex >= 0 ? focusedIndex : page * lastSize;
+      lastSize = size();
+      show(Math.floor(first / lastSize), false);
+      syncTimer();
+    };
+    wide.addEventListener('change', resize);
+    mobile.addEventListener('change', resize);
     let observer = null;
     if ('IntersectionObserver' in window) { observer = new IntersectionObserver(entries => { visible = entries[0].isIntersecting; syncTimer(); }); observer.observe(section); }
     else { visible = true; }
     show(0, false); syncTimer();
-    dispose = () => { clearInterval(timer); controller.abort(); if (observer) observer.disconnect(); motion.removeEventListener('change', motionChange); cards.forEach(card => card.getAnimations().forEach(animation => animation.cancel())); };
+    dispose = () => { clearInterval(timer); controller.abort(); if (observer) observer.disconnect(); motion.removeEventListener('change', motionChange); wide.removeEventListener('change', resize); mobile.removeEventListener('change', resize); cards.forEach(card => card.getAnimations().forEach(animation => animation.cancel())); };
   }
   document.addEventListener('lilteam:page-loaded', mount);
   window.addEventListener('pageshow', mount);

@@ -4425,6 +4425,66 @@ html:not(.light) .community-service-status { color: #176442; }
   .community-order-card { transition: none; transform: none; }
 }
 
+/* Compact main-shop composition: short information row, full-width orders below. */
+.storefront-community { display: block; margin-block: 16px 24px; }
+.community-overview { display: grid; grid-template-columns: minmax(300px, .9fr) minmax(0, 1.4fr); gap: 0; border: 1px solid var(--border); border-radius: 14px; background: var(--card); overflow: hidden; }
+.community-overview--single, .community-overview:has(.community-service[hidden]) { grid-template-columns: 1fr; }
+.community-service { grid-column: 1; grid-row: auto; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: center; align-items: center; gap: 4px 10px; min-width: 0; padding: 12px 16px; border: 0; border-radius: 0; background: color-mix(in srgb, var(--gold) 8%, var(--card)); color: var(--text); }
+.community-service::after { width: 45%; inset: 0 auto 0 -50%; background: linear-gradient(110deg, transparent, color-mix(in srgb, var(--gold) 12%, transparent), transparent); }
+.community-service-header { grid-column: 1 / -1; }
+.community-service-header > strong { font-size: 12px; font-weight: 600; }
+.community-service-status { color: #176442; font-size: 10px; }
+html:not(.light) .community-service-status { color: #9ce4ba; }
+.community-service-hours { grid-column: 1; gap: 10px; margin: 0; }
+.community-clock, .community-clock svg { width: 40px; height: 40px; color: var(--gold-text); }
+.community-service-hours > div > span { font-size: 10px; color: var(--text-2); }
+.community-service-hours strong { font-size: 21px; line-height: 1.25; color: var(--gold-text); }
+.community-service-description { grid-column: 1 / -1; margin: 0; color: var(--text-2); font-size: 11px; line-height: 1.5; }
+.community-service-footer { grid-column: 2; grid-row: 2; margin: 0; padding: 0; border: 0; }
+.community-service-footer > span { display: none; }
+.community-service-footer a { justify-content: center; min-height: 44px; padding: 0 10px; border: 1px solid color-mix(in srgb, var(--gold) 22%, var(--border)); border-radius: 10px; background: var(--card); color: var(--gold-text); }
+.community-announcements { grid-column: 2; grid-row: auto; display: flex; align-items: center; gap: 12px; min-width: 0; padding: 12px 18px; border: 0; }
+.community-announcements-header { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; margin: 0; border-radius: 10px; background: color-mix(in srgb, var(--gold) 8%, var(--card)); }
+.community-announcements-header h2 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.community-announcement-list { min-width: 0; }
+.community-announcement h3 { font-size: 14px; }
+.community-announcement p { font-size: 12px; line-height: 1.55; }
+.community-orders { grid-column: auto; margin-top: 10px; }
+.community-orders-header { margin-bottom: 6px; }
+.community-orders-header h2 { font-size: 16px; }
+.community-orders-header p { display: none; }
+.community-order-controls button { border: 0; border-radius: 10px; background: transparent; color: var(--text-2); }
+.community-order-controls [data-community-next] { background: color-mix(in srgb, var(--gold) 10%, var(--card)); color: var(--gold-text); }
+.community-order-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.community-order-card { min-height: 88px; padding: 10px; }
+.community-order-image { width: 50px; height: 60px; }
+.community-order-copy { gap: 3px; }
+.community-order-meta { font-size: 10px; }
+.community-order-arrow { display: none; }
+@media (max-width: 1099px) {
+  .community-overview { grid-template-columns: minmax(280px, 1fr) minmax(0, 1fr); }
+  .community-order-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 760px) {
+  .storefront-community { margin-block: 12px 20px; }
+  .community-overview { grid-template-columns: 1fr; }
+  .community-service { padding: 10px 14px; }
+  .community-announcements { grid-column: 1; padding: 11px 14px; }
+  .community-orders { margin-top: 7px; }
+}
+@media (max-width: 639px) {
+  .community-order-grid { grid-template-columns: 1fr; }
+  .community-order-card { min-height: 88px; }
+  .community-order-image { width: 50px; height: 60px; }
+}
+@media (max-width: 380px) {
+  .community-order-controls > span { display: none; }
+  .community-orders-header h2 { flex-wrap: nowrap; white-space: nowrap; gap: 4px; font-size: 14px; }
+  .community-service-hours { gap: 6px; }
+  .community-service-hours strong { font-size: 19px; }
+}
+.community-order-grid { grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr)); }
+
 /* Source: latest-orders-loop-v1.css */
 /* Shared seamless loop mechanics for owner and tenant latest-order rails. */
 #site-page-shell .latest-orders-section .latest-orders-track {
