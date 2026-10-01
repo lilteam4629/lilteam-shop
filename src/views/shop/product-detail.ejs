@@ -128,7 +128,7 @@
             <div data-random-box-health="<%= randomBoxDetails.healthCode %>" class="text-xs font-bold text-[var(--text-2)]">กล่องสุ่ม · ฿<%= Number(randomBoxDetails.pricePerDraw).toLocaleString('th-TH') %> ต่อครั้ง</div>
             <div class="mt-3 text-base font-bold text-[var(--text-2)]">รายละเอียดกล่อง</div>
             <p class="mt-2 whitespace-pre-line break-words text-base leading-7 text-[var(--text-3)]"><%= product.description || product.aboutText || 'ร้านยังไม่ได้ระบุรายละเอียดกล่องนี้' %></p>
-            <p class="mt-2 text-[11px] text-[var(--text-4)]">รางวัลพร้อมสุ่ม <strong class="text-[var(--text-2)]"><%= randomBoxDetails.availableStockCount.toLocaleString('th-TH') %> รายการ</strong></p>
+            <%- include('../partials/random-box-prize-stock', { p: { remainingPrizeCount: randomBoxDetails.availableStockCount } }) %>
           </div>
         </div>
       <% } else if (qtyTiers.length) { %>

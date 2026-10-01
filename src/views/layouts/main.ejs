@@ -260,6 +260,7 @@
   <% } %>
   <%- routeStylesheetMarkup %>
   <link rel="stylesheet" href="<%= asset('css/product-gallery-v1.css') %>" />
+  <link rel="stylesheet" href="<%= asset('css/random-box-prize-stock-v1.css') %>" />
   <link rel="stylesheet" href="<%= asset('css/storefront-logo-contrast-v1.css') %>" />
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront ? ' storefront-unified' : '' %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh ? ' storefront-customer-refresh' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %><%= typeof storefrontMonochrome !== 'undefined' && storefrontMonochrome ? ' storefront-monochrome' : '' %>">
@@ -1290,8 +1291,8 @@
     function observePerformanceTargets() {
       const mobileCoarse = window.matchMedia('(max-width: 900px) and (pointer: coarse)').matches;
       const animated = document.querySelectorAll(mobileCoarse
-        ? '.banner-sparkle,.latest-orders-shell,.hud-bar,.mg-panel'
-        : '.premium-product-card,.banner-sparkle,.latest-orders-shell,.hud-bar,.mg-panel');
+        ? '.random-box-prize-stock,.banner-sparkle,.latest-orders-shell,.hud-bar,.mg-panel'
+        : '.random-box-prize-stock,.premium-product-card,.banner-sparkle,.latest-orders-shell,.hud-bar,.mg-panel');
       if (performanceObserver) performanceObserver.disconnect();
     if ('IntersectionObserver' in window) {
       performanceObserver = new IntersectionObserver(function (entries) {

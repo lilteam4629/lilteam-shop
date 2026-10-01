@@ -13,7 +13,7 @@
 %>
 <% if (useOwnerHomeShowcase) { %>
 <a href="/game/<%= p.slug %>" data-product-id="<%= p.id %>" data-stock="<%= soldOut ? 'sold' : 'available' %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-search="<%= [p.title, p.slug, ...(p.genres || [])].filter(Boolean).join(' ').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"<%= useCatalogFilterCard ? ' data-catalog-filter-card="true"' : '' %>
-  class="owner-home-v21-product-card main-store-product-card filterable-card group<%= useCatalogFilterCard ? ' catalog-filter-card' : '' %>" aria-label="<%= p.title %> <%= isRandomBox ? `กล่องสุ่ม ${p.price.toLocaleString()} บาทต่อครั้ง` : `ราคา ${p.price.toLocaleString()} บาท` %>, <%= soldOut ? (isRandomBox ? 'รางวัลหมดชั่วคราว' : 'สินค้าหมด') : (isRandomBox ? 'พร้อมสุ่ม' : `คงเหลือ ${p.stockCount.toLocaleString()} ชิ้น`) %>">
+  class="owner-home-v21-product-card main-store-product-card filterable-card group<%= useCatalogFilterCard ? ' catalog-filter-card' : '' %>" aria-label="<%= p.title %> <%= isRandomBox ? `กล่องสุ่ม ${p.price.toLocaleString()} บาทต่อครั้ง` : `ราคา ${p.price.toLocaleString()} บาท` %>, <%= soldOut ? (isRandomBox ? 'รางวัลหมดชั่วคราว' : 'สินค้าหมด') : (isRandomBox ? `รางวัลคงเหลือ ${Number(p.remainingPrizeCount || 0).toLocaleString('th-TH')} ชิ้น` : `คงเหลือ ${p.stockCount.toLocaleString()} ชิ้น`) %>">
   <div class="owner-home-v21-media">
     <% if (p.images && p.images[0]) { %>
       <img data-product-images="<%= JSON.stringify(p.images || []) %>" src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low" />
@@ -33,11 +33,12 @@
       <span class="owner-home-v21-summary"><%= isRandomBox ? `กล่องสุ่มรางวัลจากสต็อก · ฿${p.price.toLocaleString('th-TH')}/ครั้ง` : String(p.description || 'สินค้าเกมดิจิทัล').replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim() %></span>
     <div class="main-store-product-title-row owner-home-v21-title-row">
       <h3 class="owner-home-v21-name"><%= p.title %></h3>
-      <span class="owner-home-v21-stock-badge main-store-product-stock" data-stock-state="<%= soldOut ? 'sold' : 'available' %>">
+      <% if (!isRandomBox) { %><span class="owner-home-v21-stock-badge main-store-product-stock" data-stock-state="<%= soldOut ? 'sold' : 'available' %>">
         <span class="owner-home-v21-stock-dot" aria-hidden="true"></span>
         <strong><%= soldOut ? (isRandomBox ? 'รางวัลหมด' : 'หมด') : (isRandomBox ? 'พร้อมสุ่ม' : `พร้อมส่ง ${p.stockCount.toLocaleString()}`) %></strong>
-      </span>
+      </span><% } %>
     </div>
+    <% if (isRandomBox) { %><%- include('random-box-prize-stock', { p }) %><% } %>
     <div class="owner-home-v21-purchase-row">
       <div class="owner-home-v21-price-row">
         <span class="owner-home-v21-label">ราคา</span>
@@ -115,6 +116,7 @@
           <span class="text-[#ff9d85] text-[11px] line-through whitespace-nowrap">฿<%= crossedPrice.toLocaleString() %>.00</span>
         <% } %>
       </div>
+      <% if (isRandomBox) { %><%- include('random-box-prize-stock', { p }) %><% } %>
     </div>
 
     <div class="pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -191,6 +193,7 @@
       <% if (p.isSyndicated) { %><span class="shrink-0 inline-flex items-center gap-1 rounded-full border border-[var(--gold)]/50 bg-[var(--input)] px-2 py-1 text-[9px] font-black text-[var(--gold-text)]">Partner</span><% } %>
     </div>
     <span <%= soldOut ? '' : 'data-theme-fill="accent"' %> class="mt-1 block w-full text-center rounded-lg py-1.5 text-xs font-bold transition-colors <%= soldOut ? 'theme-danger bg-[var(--input)] border' : 'bg-[var(--gold)] text-[var(--gold-contrast)] group-hover:bg-[var(--gold-hover)]' %>"><%= soldOut ? (isRandomBox ? 'รางวัลหมดชั่วคราว' : 'สินค้าหมด') : (isRandomBox ? `สุ่มสินค้า · ฿${p.price.toLocaleString('th-TH')}/ครั้ง` : 'สั่งซื้อสินค้า') %></span>
+    <% if (isRandomBox) { %><%- include('random-box-prize-stock', { p }) %><% } %>
     <span class="text-[10px] text-[var(--text-4)] text-center truncate"><%= soldOut ? (isRandomBox ? 'ปิดรับการสุ่มชั่วคราว' : 'รอสินค้าเข้าใหม่') : (isRandomBox ? 'รางวัลส่งอัตโนมัติจากสต็อก' : `สินค้าคงเหลือ ${p.stockCount.toLocaleString()} ชิ้น`) %></span>
   </div>
 </a>

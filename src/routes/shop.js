@@ -38,10 +38,11 @@ function availableStockCounts() {
 
 function withStock(product, counts, req = null) {
   if (product?.specialType === randomBox.RANDOM_BOX_KIND) {
+    const remainingPrizeCount = randomBox.availablePrizeStockCount(store.data, product);
     const active = randomBox.supportsRandomBox(req)
       && product.status === 'active'
-      && randomBox.hasAvailablePrizeBundle(store.data, product);
-    return { ...withEffectivePrice({ ...product, price: randomBox.getDrawPrice(store.data, product), originalPrice: 0, priceOptions: [] }), stockCount: active ? 1 : 0 };
+      && remainingPrizeCount > 0;
+    return { ...withEffectivePrice({ ...product, price: randomBox.getDrawPrice(store.data, product), originalPrice: 0, priceOptions: [] }), stockCount: active ? 1 : 0, remainingPrizeCount };
   }
   const stockCount = counts
     ? (counts.get(product.id) || 0)

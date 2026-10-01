@@ -184,6 +184,11 @@ async function exerciseTenantRandomBox() {
   const home = await request('/');
   assert.equal(home.statusCode, 200, 'rental storefront home loads');
   assert.ok(home.body.includes(title), 'rental storefront home lists its random-box product');
+  assert.ok(home.body.includes('data-prize-remaining="3"'), 'rental home shows all three remaining prizes, not the one available draw flag');
+  assert.ok(page.body.includes('data-prize-remaining="3"'), 'box detail shows the same real prize count');
+  const listing = await request('/products');
+  assert.equal(listing.statusCode, 200);
+  assert.ok(listing.body.includes('data-prize-remaining="3"'), 'rental product list shows its local prize count');
 
   const requestId = crypto.randomUUID();
   const expectedStockOrder = require('../src/services/random-box').availableStockItems(tenantData.stockItems, productId).map(item => item.id);
@@ -202,6 +207,9 @@ async function exerciseTenantRandomBox() {
   assert.deepEqual(deliveredIds, expectedStockOrder.slice(0, deliveredIds.length), 'rental checkout consumes top-to-bottom stock rows');
   assert.ok(order.items.some(item => item.randomBoxDraw), 'draw result is stored with its order');
   assert.ok(tenantData.stockItems.every(item => item.productId === productId), 'the tenant only touched its own prize stock');
+  const remaining = require('../src/services/random-box').availablePrizeStockCount(tenantData, product);
+  const afterDrawPage = await request(`/game/${encodeURIComponent(product.slug)}`, { headers: { cookie: buyerCookie } });
+  assert.ok(afterDrawPage.body.includes(`data-prize-remaining="${remaining}"`), 'display decreases to the persisted remaining count after a draw');
 
   const platformData = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   assert.ok(!platformData.products.some(item => item.title === title), 'rental product never appears in the platform catalog');
