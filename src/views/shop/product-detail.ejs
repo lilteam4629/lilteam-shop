@@ -304,7 +304,7 @@
       <% } else if (product.stockCount > 0) { %>
         <form action="/cart/add/<%= product.id %><%= product.federatedCheckout ? '?federated=1' : '' %>" method="post" class="product-buy-form <%= product.purchaseApprovalEnabled ? 'product-buy-form-confirm relative overflow-hidden rounded-2xl border border-[var(--gold)]/40 bg-gradient-to-br from-[var(--card)] to-[var(--input)] p-5 shadow-lg' : '' %>">
           <% if (qtyTiers.length) { %>
-            <div class="flex flex-wrap items-center gap-4 mb-4" data-qty-wrap data-base-price="<%= product.price %>" data-tiers='<%- JSON.stringify(qtyTiers) %>'>
+            <div class="flex flex-wrap items-center gap-4 mb-4" data-qty-wrap data-base-price="<%= product.price %>" data-tiers='<%- (JSON.stringify(qtyTiers)).replace(/</g, "\\u003c") %>'>
               <div>
                 <label class="block text-xs text-[var(--text-3)] mb-1" for="qty-input">จำนวน</label>
                 <div class="flex items-stretch">

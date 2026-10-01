@@ -8,6 +8,7 @@ const { AsyncLocalStorage } = require('async_hooks');
 const crypto = require('crypto');
 const r2 = require('../services/r2');
 const { encodeStoreSnapshot, decodeStoreSnapshot } = require('../services/store-order-codec');
+const { writeJson } = require('../services/atomic-json');
 
 // Multi-tenant support: each rented "shop" (see src/routes/tenant.js) gets
 // its OWN full copy of this exact data shape (products, orders, users,
@@ -332,14 +333,7 @@ async function transact(mutator) {
       const working = structuredClone(target);
       const result = await mutator(working);
       const destination = ctx ? tenantDbPath(ctx.shopId) : DB_PATH;
-      const temporary = `${destination}.transaction-${nanoid(12)}.tmp`;
-      try {
-        fs.writeFileSync(temporary, JSON.stringify(encodeStoreSnapshot(working), null, 2));
-        fs.renameSync(temporary, destination);
-      } catch (error) {
-        if (fs.existsSync(temporary)) fs.unlinkSync(temporary);
-        throw error;
-      }
+      writeJson(destination, encodeStoreSnapshot(working));
       replaceObject(target, working);
       if (ctx) tenantDbCache.set(String(ctx.shopId), { db: target, expiresAt: Date.now() + TENANT_CACHE_TTL_MS });
       return result;
@@ -359,6 +353,7 @@ async function transact(mutator) {
       }
       const written = await mongoCollection.replaceOne(filter, replacement);
       if (written.modifiedCount === 1) {
+        stored._revision = revision + 1;
         replaceObject(target, stored);
         return result;
       }
@@ -459,7 +454,7 @@ async function init() {
   } else {
     if (!fs.existsSync(DB_PATH)) {
       db = defaultData();
-      fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
+      writeJson(DB_PATH, db);
     } else {
       db = decodeStoreSnapshot(JSON.parse(fs.readFileSync(DB_PATH, 'utf-8')));
     }
@@ -884,13 +879,28 @@ function tenantDbPath(shopId) {
   return path.join(__dirname, `db.shop.${shopId}.json`);
 }
 
+function saveMongoSnapshot(documentId, target) {
+  const snapshot = encodeStoreSnapshot(structuredClone(target));
+  return enqueueDocument(documentId, async () => {
+    try {
+      target._revision = await require('../services/store-safe-save').saveSnapshot(mongoCollection, documentId, snapshot);
+    } catch (error) {
+      if (error.code === 'STORE_WRITE_CONFLICT') {
+        const latest = await mongoCollection.findOne({ _id: documentId });
+        if (latest) { delete latest._id; replaceObject(target, decodeStoreSnapshot(latest)); }
+      }
+      throw error;
+    }
+  });
+}
+
 function save() {
   const ctx = tenantContext.getStore();
   if (ctx) return saveTenantDb(ctx.shopId, ctx.db);
   if (mongoCollection) {
-    return mongoCollection.replaceOne({ _id: 'main' }, { _id: 'main', ...encodeStoreSnapshot(db) }, { upsert: true });
+    return saveMongoSnapshot('main', db);
   } else {
-    fs.writeFileSync(DB_PATH, JSON.stringify(encodeStoreSnapshot(db), null, 2));
+    writeJson(DB_PATH, encodeStoreSnapshot(db));
     return Promise.resolve();
   }
 }
@@ -901,9 +911,9 @@ async function saveTenantDb(shopId, tenantDb) {
     // shop created and then immediately redirected to must already be
     // readable by loadTenantDb on the very next request, or that request
     // sees no data yet and shows "ร้านนี้ยังไม่พร้อมใช้งาน".
-    await mongoCollection.replaceOne({ _id: `shop:${shopId}` }, { _id: `shop:${shopId}`, ...encodeStoreSnapshot(tenantDb) }, { upsert: true });
+    await saveMongoSnapshot(`shop:${shopId}`, tenantDb);
   } else {
-    fs.writeFileSync(tenantDbPath(shopId), JSON.stringify(encodeStoreSnapshot(tenantDb), null, 2));
+    writeJson(tenantDbPath(shopId), encodeStoreSnapshot(tenantDb));
   }
   tenantDbCache.set(String(shopId), { db: tenantDb, expiresAt: Date.now() + TENANT_CACHE_TTL_MS });
 }

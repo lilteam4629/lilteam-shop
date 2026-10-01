@@ -27,15 +27,21 @@ const { shouldRunStartupTenantRollouts } = require('./services/startup-policy');
 const license = require('./services/license');
 const discordBot = require('./services/discord-bot');
 const packageInfo = require('../package.json');
+const security = require('./middleware/security');
+const crypto = require('crypto');
 
 const app = express();
 
 app.disable('x-powered-by');
+app.use(security.headers);
+app.use(security.requestFirewall);
+app.use(security.traffic());
+app.use(security.sameOrigin);
 app.use(compression({ threshold: 1024 }));
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'SAMEORIGIN');
-  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('X-XSS-Protection', '0');
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   next();
 });
@@ -91,7 +97,7 @@ app.use(express.static(path.join(__dirname, '..', 'public'), {
 // Pages must always revalidate so an already-open storefront cannot keep an
 // older EJS layout after a deploy. Fingerprinted static assets remain cached.
 app.use((req, res, next) => {
-  res.setHeader('Cache-Control', 'no-cache, must-revalidate');
+  if (!String(res.getHeader('Cache-Control') || '').includes('no-store')) res.setHeader('Cache-Control', 'no-cache, must-revalidate');
   next();
 });
 
@@ -124,7 +130,7 @@ app.locals.asset = (publicPath) => {
 app.use(tenantResolver);
 
 if (process.env.NODE_ENV === 'production') {
-  app.set('trust proxy', 1);
+  app.set('trust proxy', security.trustedProxies);
 }
 
 // Persistent session store for local development (prevents getting logged out on server reload)
@@ -140,7 +146,7 @@ class LocalFileSessionStore extends session.Store {
     super();
   }
   get(sid, cb) {
-    const file = path.join(SESSION_DIR, `${sid}.json`);
+    const file = path.join(SESSION_DIR, `${crypto.createHash('sha256').update(sid).digest('hex')}.json`);
     fs.readFile(file, 'utf8', (err, data) => {
       if (err) return cb(null, null);
       try {
@@ -156,9 +162,9 @@ class LocalFileSessionStore extends session.Store {
     });
   }
   set(sid, sess, cb) {
-    const file = path.join(SESSION_DIR, `${sid}.json`);
+    const file = path.join(SESSION_DIR, `${crypto.createHash('sha256').update(sid).digest('hex')}.json`);
     const temporary = `${file}.${require('crypto').randomBytes(12).toString('hex')}.tmp`;
-    fs.writeFile(temporary, JSON.stringify(sess), 'utf8', err => {
+    fs.writeFile(temporary, JSON.stringify(sess), { mode: 0o600 }, err => {
       if (err) return (cb || (() => {}))(err);
       fs.rename(temporary, file, renameError => {
         if (renameError) fs.unlink(temporary, () => {});
@@ -167,7 +173,7 @@ class LocalFileSessionStore extends session.Store {
     });
   }
   destroy(sid, cb) {
-    const file = path.join(SESSION_DIR, `${sid}.json`);
+    const file = path.join(SESSION_DIR, `${crypto.createHash('sha256').update(sid).digest('hex')}.json`);
     fs.unlink(file, (err) => {
       if (err && err.code !== 'ENOENT') {
         if (cb) return cb(err);
@@ -202,6 +208,7 @@ app.use(session({
   },
 }));
 app.use(flash());
+app.use(security.bindSession);
 app.use(attachUser);
 
 app.use((req, res, next) => {
@@ -279,8 +286,9 @@ app.use((req, res) => {
   });
 });
 
+app.use(security.errorResponse);
 app.use((err, req, res, next) => {
-  console.error('[Unhandled Server Error]', err);
+  console.error('[Unhandled Server Error]', { name: err.name, code: err.code || 'UNEXPECTED' });
   if (res.headersSent) return next(err);
   res.status(500).render('shop/404', {
     layout: 'layouts/main', title: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', statusCode: 500,

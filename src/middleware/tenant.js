@@ -45,6 +45,7 @@ const MAIN_SITE_URL = (process.env.MAIN_SITE_URL || '').trim().replace(/\/$/, ''
 // "rent" is the dedicated landing site for the reseller/rent-a-shop funnel
 // (see app.js), so it must never be resolved as a shop slug lookup.
 const RESERVED_TENANT_SUBDOMAINS = new Set(['rent']);
+const escapeHtml = value => String(value || '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 
 async function tenantResolver(req, res, next) {
   const host = (req.hostname || '').toLowerCase();
@@ -88,8 +89,8 @@ async function tenantResolver(req, res, next) {
       `<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">` +
       `<title>ร้านหมดอายุ</title><style>body{font-family:sans-serif;background:#100e08;color:#f3ecd8;display:flex;align-items:center;` +
       `justify-content:center;min-height:100vh;margin:0;padding:16px;text-align:center}a{color:#c8a63f}</style></head><body>` +
-      `<div><h1>ร้าน "${shop.name}" หมดอายุแล้ว</h1><p>เจ้าของร้านต้องต่ออายุก่อนถึงจะใช้งานต่อได้</p>` +
-      `<p><a href="${mainUrl}/my-shops">ไปหน้าต่ออายุ →</a></p></div></body></html>`
+      `<div><h1>ร้าน "${escapeHtml(shop.name)}" หมดอายุแล้ว</h1><p>เจ้าของร้านต้องต่ออายุก่อนถึงจะใช้งานต่อได้</p>` +
+      `<p><a href="${escapeHtml(mainUrl)}/my-shops">ไปหน้าต่ออายุ →</a></p></div></body></html>`
     );
   }
 

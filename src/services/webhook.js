@@ -4,22 +4,10 @@
 // shared or mixed with any other shop. Fire-and-forget: a failed/slow
 // webhook must never affect the customer's topup flow.
 const axios = require('axios');
+const outbound = require('./outbound-security');
 
 function isSafeWebhookUrl(urlStr) {
-  try {
-    const url = new URL(urlStr);
-    if (url.protocol !== 'https:') return false;
-    const hostname = url.hostname.toLowerCase();
-    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '::1' || hostname.endsWith('.local')) {
-      return false;
-    }
-    if (/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|169\.254\.)/.test(hostname)) {
-      return false;
-    }
-    return true;
-  } catch (e) {
-    return false;
-  }
+  return outbound.safeUrl(urlStr);
 }
 
 async function notifyTopup({ webhookUrl, username, email, amount, refCode, method, slipUrl, autoApproved, adminUrl }) {
@@ -40,9 +28,9 @@ async function notifyTopup({ webhookUrl, username, email, amount, refCode, metho
     if (adminUrl) {
       embed.fields.push({ name: 'กดตรวจสอบ/อนุมัติ (ต้องล็อกอินแอดมิน)', value: adminUrl, inline: false });
     }
-    await axios.post(webhookUrl, { embeds: [embed] }, { timeout: 10000 });
+    await axios.post(webhookUrl, { embeds: [embed] }, { timeout: 10000, maxRedirects: 0, proxy: false, httpsAgent: outbound.httpsAgent });
   } catch (err) {
-    console.error('[webhook] topup notify failed:', err.message);
+    console.error('[webhook] topup notify failed:', err.code || 'REQUEST_FAILED');
   }
 }
 

@@ -1248,8 +1248,8 @@
     (function(){
       const canvas=document.getElementById('store-rain'); if(!canvas||!canvas.getContext)return;
       const ctx=canvas.getContext('2d',{alpha:true});if(!ctx){canvas.remove();return}
-      const color=<%- JSON.stringify(/^#[0-9a-fA-F]{6}$/.test(rain.color||'')?rain.color:'#78c8ff') %>;
-      const level=<%- JSON.stringify(['light','medium','heavy'].includes(rain.intensity)?rain.intensity:'medium') %>;
+      const color=<%- (JSON.stringify(/^#[0-9a-fA-F]{6}$/.test(rain.color||'')?rain.color:'#78c8ff')).replace(/</g, "\\u003c") %>;
+      const level=<%- (JSON.stringify(['light','medium','heavy'].includes(rain.intensity)?rain.intensity:'medium')).replace(/</g, "\\u003c") %>;
       const coarse=matchMedia('(max-width:900px), (pointer:coarse)').matches;
       const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
       const limits={light:coarse?14:30,medium:coarse?24:52,heavy:coarse?34:72};

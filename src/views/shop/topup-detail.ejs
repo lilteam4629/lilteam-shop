@@ -369,7 +369,7 @@
           return;
         }
         lockPage(true);
-        setCopy(<%- JSON.stringify(automaticSlipCheck ? 'กำลังตรวจสอบสลิป' : 'กำลังบันทึกสลิป') %>, <%- JSON.stringify(automaticSlipCheck ? 'ระบบกำลังตรวจสอบรายการให้คุณ กรุณาอย่าปิดหรือย้อนกลับหน้านี้' : 'กำลังบันทึกสลิปของคุณ กรุณารอสักครู่') %>, false);
+        setCopy(<%- (JSON.stringify(automaticSlipCheck ? 'กำลังตรวจสอบสลิป' : 'กำลังบันทึกสลิป')).replace(/</g, "\\u003c") %>, <%- (JSON.stringify(automaticSlipCheck ? 'ระบบกำลังตรวจสอบรายการให้คุณ กรุณาอย่าปิดหรือย้อนกลับหน้านี้' : 'กำลังบันทึกสลิปของคุณ กรุณารอสักครู่')).replace(/</g, "\\u003c") %>, false);
       });
     }
 

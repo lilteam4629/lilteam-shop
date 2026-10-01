@@ -9,11 +9,12 @@
     "build:css": "node scripts/build-css-bundles.js && tailwindcss -i ./src/styles/tailwind.css -o ./public/css/tailwind.generated.css --minify",
     "build": "npm run build:css",
     "migrate:r2": "node scripts/migrate-gridfs-to-r2.js",
-    "test": "node scripts/test-storefront-owner-home-isolation.js && node scripts/test-storefront-category-visibility.js && node scripts/test-theme-contrast.js && node scripts/test-admin-theme-toggle.js && node scripts/test-admin-ui-consistency.js && node scripts/test-admin-shell-render.js && node scripts/test-promotions.js && node scripts/test-admin-dark-mode.js && node scripts/test-shop-branding.js && node scripts/test-receiver-match.js && node scripts/test-performance-guards.js && node scripts/test-tenant-features.js && node scripts/test-rangers-catalog.js && node scripts/test-efootball-model.js && node scripts/test-bank-only-topups.js && node scripts/test-promptpay-receivers.js && node scripts/test-truemoney-recovery.js && node scripts/test-truemoney-provider-safety.js && node scripts/test-catalog-syndication.js && node scripts/test-partner-topup-routing.js && node scripts/test-admin-wallet-adjustment.js && node scripts/test-music-player-service.js && node scripts/test-music-widget.js && node scripts/test-import-safety.js && node scripts/test-recommended-category-home.js && node scripts/test-store-revision.js && node scripts/test-store-order-codec.js && node scripts/test-local-store-transactions.js && node scripts/test-gacha.js && node scripts/test-random-box.js && node scripts/test-random-box-tenant.js && node scripts/test-stock-bulk-entry.js && node scripts/smoke-server.js",
+    "test": "npm run test:security && node scripts/test-storefront-owner-home-isolation.js && node scripts/test-storefront-category-visibility.js && node scripts/test-theme-contrast.js && node scripts/test-admin-theme-toggle.js && node scripts/test-admin-ui-consistency.js && node scripts/test-admin-shell-render.js && node scripts/test-promotions.js && node scripts/test-admin-dark-mode.js && node scripts/test-shop-branding.js && node scripts/test-receiver-match.js && node scripts/test-performance-guards.js && node scripts/test-tenant-features.js && node scripts/test-rangers-catalog.js && node scripts/test-efootball-model.js && node scripts/test-bank-only-topups.js && node scripts/test-promptpay-receivers.js && node scripts/test-truemoney-recovery.js && node scripts/test-truemoney-provider-safety.js && node scripts/test-catalog-syndication.js && node scripts/test-partner-topup-routing.js && node scripts/test-admin-wallet-adjustment.js && node scripts/test-music-player-service.js && node scripts/test-music-widget.js && node scripts/test-import-safety.js && node scripts/test-recommended-category-home.js && node scripts/test-store-revision.js && node scripts/test-store-order-codec.js && node scripts/test-local-store-transactions.js && node scripts/test-gacha.js && node scripts/test-random-box.js && node scripts/test-random-box-tenant.js && node scripts/test-stock-bulk-entry.js && node scripts/smoke-server.js",
     "test:theme": "node scripts/test-theme-contrast.js",
     "test:promotions": "node scripts/test-promotions.js && node scripts/test-member-promotions-http.js",
     "test:smoke": "node scripts/smoke-server.js",
-    "audit:admin-theme": "node scripts/test-admin-theme-toggle.js && node scripts/test-admin-ui-consistency.js && node scripts/test-admin-shell-render.js"
+    "audit:admin-theme": "node scripts/test-admin-theme-toggle.js && node scripts/test-admin-ui-consistency.js && node scripts/test-admin-shell-render.js",
+    "test:security": "node scripts/test-security.js && node scripts/test-store-safe-save.js"
   },
   "engines": {
     "node": ">=20.9.0"
@@ -37,6 +38,7 @@
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.19.0",
     "form-data": "^4.0.6",
+    "ipaddr.js": "^2.5.0",
     "mongodb": "^5.9.2",
     "multer": "^2.2.0",
     "nanoid": "^3.3.18",

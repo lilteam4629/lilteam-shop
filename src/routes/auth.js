@@ -27,6 +27,7 @@ function regenerateSession(req) {
   return new Promise((resolve, reject) => {
     req.session.regenerate((err) => {
       if (err) return reject(err);
+      req.session.siteScope = String(req.tenantShop?.id || 'platform');
       resolve();
     });
   });
@@ -45,6 +46,8 @@ function isLoginAllowed(key) {
 }
 function recordFailedAttempt(key) {
   const now = Date.now();
+  for (const [id, entry] of loginAttempts) if (now > entry.resetAt) loginAttempts.delete(id);
+  if (!loginAttempts.has(key) && loginAttempts.size >= 20000) return;
   const entry = loginAttempts.get(key) || { count: 0, resetAt: now + 5 * 60 * 1000 };
   entry.count += 1;
   loginAttempts.set(key, entry);

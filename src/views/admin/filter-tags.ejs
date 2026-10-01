@@ -48,7 +48,7 @@
   <div class="filter-product-tools"><div class="filter-search-box"><span>⌕</span><input id="filter-product-search" placeholder="ค้นหาสินค้า..." /></div><div class="filter-product-summary"><b id="filter-product-count">0</b><span>รายการที่เลือก</span></div></div>
   <form id="filter-products-form" method="post" class="filter-products-form">
     <div class="filter-product-list">
-      <% products.forEach(p=>{ %><label class="filter-product-row" data-product-id="<%= p.id %>" data-product-name="<%= String(p.title || '').toLowerCase() %>" data-tags='<%- JSON.stringify(p.filterTagIds || []) %>'>
+      <% products.forEach(p=>{ %><label class="filter-product-row" data-product-id="<%= p.id %>" data-product-name="<%= String(p.title || '').toLowerCase() %>" data-tags='<%- (JSON.stringify(p.filterTagIds || [])).replace(/</g, "\\u003c") %>'>
         <input type="checkbox" name="productIds" value="<%= p.id %>" />
         <span class="filter-product-thumb"><% if(p.image){ %><img src="<%= p.image %>" alt="" loading="lazy" /><% } else { %>◇<% } %></span>
         <span class="filter-product-check">✓</span>

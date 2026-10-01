@@ -30,6 +30,7 @@ const r2 = require('../services/r2');
 const { getShopUrl, MAIN_SITE_URL } = require('../middleware/tenant');
 const { publicTopupRequest } = require('../services/public-slip');
 const catalogSyndication = require('../services/catalog-syndication');
+const { equalSecret } = require('../middleware/security');
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -47,7 +48,7 @@ router.use((req, res, next) => {
     // be reachable at all yet, not "open to anyone".
     return res.status(503).json({ error: 'internal API not configured' });
   }
-  if (req.get('X-Internal-Secret') !== secret) {
+  if (!equalSecret(req.get('X-Internal-Secret'), secret)) {
     return res.status(403).json({ error: 'forbidden' });
   }
   // Defense in depth: this router must only ever run against the MAIN
