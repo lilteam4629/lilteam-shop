@@ -60,25 +60,9 @@
 <%- include('../partials/storefront-hero-banner') %>
 
 <% if (ownerHomeV20) { %>
-<section class="store-status-section main-service-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
-  <%- include('../partials/main-service-strip') %>
-</section>
+<%- include('../partials/storefront-community', { announcements, latestOrders }) %>
 
-<% if (announcements.length) { %>
-<div class="store-announcements w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-2 space-y-2">
-  <% announcements.forEach(a => { %>
-    <div class="announce-hud relative flex items-start gap-3 rounded-xl px-4 py-3 text-[var(--text)] text-sm overflow-hidden">
-      <div class="announce-hud-glow"></div>
-      <span class="announce-hud-icon relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"><svg width="24" height="24"><use href="#ui-megaphone"/></svg></span>
-      <p class="relative z-[1] min-w-0 leading-relaxed"><b class="text-[var(--gold-text)]"><%= a.title %></b> — <%= a.body %></p>
-    </div>
-  <% }) %>
-</div>
-<% } %>
 
-<% if (latestOrders && latestOrders.length) { %>
-  <%- include('../partials/latest-orders-rail', { latestOrders, isOwnerLatestRail: true }) %>
-<% } %>
 
 <% } %>
 
@@ -264,21 +248,7 @@
 
 
 <% if (!ownerHomeV20) { %>
-<section class="store-status-section main-service-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
-  <%- include('../partials/main-service-strip') %>
-</section>
-
-<% if (announcements.length) { %>
-<div class="store-announcements w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto mt-2 space-y-2">
-  <% announcements.forEach(a => { %>
-    <div class="announce-hud relative flex items-start gap-3 rounded-xl px-4 py-3 text-[var(--text)] text-sm overflow-hidden">
-      <div class="announce-hud-glow"></div>
-      <span class="announce-hud-icon relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"><svg width="24" height="24"><use href="#ui-megaphone"/></svg></span>
-      <p class="relative z-[1] min-w-0 leading-relaxed"><b class="text-[var(--gold-text)]"><%= a.title %></b> — <%= a.body %></p>
-    </div>
-  <% }) %>
-</div>
-<% } %>
+<%- include('../partials/storefront-community', { announcements, latestOrders }) %>
 
 
 <% } %>
@@ -708,9 +678,7 @@
 </script>
 <% } %>
 
-<% if (!ownerHomeV20 && latestOrders && latestOrders.length) { %>
-  <%- include('../partials/latest-orders-rail', { latestOrders, isOwnerLatestRail: false }) %>
-<% } %><% if (filterTags && filterTags.length) { %>
+<% if (filterTags && filterTags.length) { %>
 <section class="store-filter-section w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto pt-4">
   <%- include('../partials/filter-panel', { filterTags }) %>
 </section>

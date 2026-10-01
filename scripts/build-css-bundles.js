@@ -24,6 +24,7 @@ const BUNDLES = Object.freeze({
     'storefront-music-unified-v1.css',
     'storefront-navbar-shared-v1.css',
     'main-service-strip-v1.css',
+    'storefront-community-v1.css',
     'latest-orders-loop-v1.css',
   ],
   'storefront-pre-home-v1.css': [
@@ -53,6 +54,7 @@ const BUNDLES = Object.freeze({
     'storefront-music-unified-v1.css',
     'storefront-navbar-shared-v1.css',
     'main-service-strip-v1.css',
+    'storefront-community-v1.css',
   ],
   'storefront-post-unified-v1.css': [
     'storefront-navbar-cozy-v1.css',

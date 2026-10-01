@@ -1,0 +1,45 @@
+<div class="storefront-community w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto" data-storefront-community>
+  <div class="community-overview<%= !announcements.length ? ' community-overview--single' : '' %>">
+    <section class="community-service" aria-label="เวลาบริการของร้าน" data-main-service-strip data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
+      <header class="community-service-header"><strong><%= settings.shopName %></strong><span class="community-service-status"><i aria-hidden="true"></i>เปิดให้บริการ</span></header>
+      <div class="community-service-hours">
+        <span class="community-clock" aria-hidden="true"><svg width="52" height="52" viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-linecap="round"><circle class="main-service-clock__orbit" cx="30" cy="30" r="27" stroke-width="2" stroke-dasharray="36 134"/><circle cx="30" cy="30" r="22" stroke-width="1.5" stroke-dasharray="1 10.5" opacity=".4"/><path class="main-service-clock__hand" data-service-hour d="M30 30V19" stroke-width="3"/><path class="main-service-clock__hand" data-service-minute d="M30 30V13" stroke-width="2"/><path class="main-service-clock__hand" data-service-second d="M30 34V11" stroke-width="1" opacity=".5"/><circle cx="30" cy="30" r="2" fill="currentColor" stroke="none"/></svg></span>
+        <div><span>เวลาบริการ</span><strong data-storefront-preview-setting="openHours"><%= settings.openHours %></strong></div>
+      </div>
+      <p class="community-service-description" data-storefront-preview-setting="tagline"><%= settings.tagline %></p>
+      <footer class="community-service-footer"><span>เวลาประเทศไทย <time data-main-service-time><%= new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23' }).format(new Date()) %></time></span><a href="/contact">ติดต่อร้าน<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></footer>
+    </section>
+    <% if (announcements.length) { %>
+    <section class="community-announcements" aria-label="ประกาศจากร้าน">
+      <header class="community-announcements-header"><svg width="18" height="18" aria-hidden="true"><use href="#ui-megaphone"/></svg><h2>ประกาศจากร้าน</h2></header>
+      <% announcements.forEach(a => { %>
+      <article class="community-announcement">
+        <div class="community-announcement-copy"><h3><%= a.title %></h3><p><%= a.body %></p></div>
+      </article>
+      <% }) %>
+    </section>
+    <% } %>
+  </div>
+  <% if (latestOrders && latestOrders.length) { %>
+  <section class="community-orders" id="latest-orders" data-community-orders>
+    <header class="community-orders-header">
+      <div><h2>รายการสั่งซื้อล่าสุด<span class="community-live-dot" aria-hidden="true"></span></h2><p>เลือกสินค้าเพื่อดูรายละเอียด</p></div>
+      <div class="community-order-controls" aria-label="เปลี่ยนรายการสั่งซื้อ">
+        <span data-community-page aria-live="off">1</span>
+        <button type="button" data-community-toggle aria-label="หยุดการสลับอัตโนมัติ" title="หยุดการสลับอัตโนมัติ" aria-pressed="false"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg></button>
+        <button type="button" data-community-prev aria-label="รายการก่อนหน้า"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m14 6-6 6 6 6"/></svg></button>
+        <button type="button" data-community-next aria-label="รายการถัดไป"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m10 6 6 6-6 6"/></svg></button>
+      </div>
+    </header>
+    <div class="community-order-grid">
+      <% latestOrders.forEach((order, index) => { %>
+      <a class="community-order-card" href="<%= order.slug ? '/game/' + order.slug : '/products' %>" data-community-order <%= index >= 2 ? 'hidden' : '' %>>
+        <span class="community-order-image"><% if (order.image) { %><img src="<%= order.image %>" alt="" width="60" height="70" loading="lazy" decoding="async"/><% } else { %><svg width="24" height="24"><use href="#ui-box"/></svg><% } %></span>
+        <span class="community-order-copy"><span class="community-order-title"><%= order.title %><%= order.extraItems ? ' +' + order.extraItems + ' รายการ' : '' %></span><strong>฿<%= Number(order.amount).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) %></strong><span class="community-order-meta"><time><%= new Date(order.createdAt).toLocaleString('th-TH', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Bangkok' }) %></time><span>· <%= order.buyer %></span></span></span>
+        <svg class="community-order-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m10 6 6 6-6 6"/></svg>
+      </a>
+      <% }) %>
+    </div>
+  </section>
+  <% } %>
+</div>
