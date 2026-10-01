@@ -174,26 +174,8 @@
 <% } %>
 
 <% if (ownerHomeV20) { %>
-<section class="store-status-section<%= isMainSite ? ' main-service-section' : '' %> w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
-  <% if (isMainSite) { %>
-    <%- include('../partials/main-service-strip') %>
-  <% } else { %>
-  <div class="hud-bar relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
-    <div class="hud-bar-glow"></div>
-    <div class="hud-bar-scan"></div>
-    <span class="hud-icon hidden sm:flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[13px]">🕐</span>
-    <div class="flex-1 relative h-5 overflow-hidden min-w-0 z-[1]">
-      <span class="marquee-track flex items-center gap-2 font-mono tracking-tight"><span class="sm:hidden">🕐</span> <span data-storefront-preview-setting="openHours"><%= settings.openHours %></span> &nbsp;&nbsp;<span class="text-[var(--gold-text)]">◆</span>&nbsp;&nbsp; <span data-storefront-preview-setting="tagline"><%= settings.tagline %></span></span>
-    </div>
-    <span class="hud-status inline-flex items-center gap-1.5 shrink-0 ml-2 pl-2.5 pr-3 py-1 rounded-full text-[11px] font-bold text-emerald-300 z-[1]">
-      <span class="relative flex h-2 w-2 shrink-0">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-      </span>
-      เปิดให้บริการ
-    </span>
-  </div>
-  <% } %>
+<section class="store-status-section main-service-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
+  <%- include('../partials/main-service-strip') %>
 </section>
 
 <% if (announcements.length) { %>
@@ -396,26 +378,8 @@
 
 
 <% if (!ownerHomeV20) { %>
-<section class="store-status-section<%= isMainSite ? ' main-service-section' : '' %> w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
-  <% if (isMainSite) { %>
-    <%- include('../partials/main-service-strip') %>
-  <% } else { %>
-  <div class="hud-bar relative flex items-center gap-3 rounded-xl px-4 py-2.5 text-sm text-[var(--text-2)] overflow-hidden">
-    <div class="hud-bar-glow"></div>
-    <div class="hud-bar-scan"></div>
-    <span class="hud-icon hidden sm:flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[13px]">🕐</span>
-    <div class="flex-1 relative h-5 overflow-hidden min-w-0 z-[1]">
-      <span class="marquee-track flex items-center gap-2 font-mono tracking-tight"><span class="sm:hidden">🕐</span> <span data-storefront-preview-setting="openHours"><%= settings.openHours %></span> &nbsp;&nbsp;<span class="text-[var(--gold-text)]">◆</span>&nbsp;&nbsp; <span data-storefront-preview-setting="tagline"><%= settings.tagline %></span></span>
-    </div>
-    <span class="hud-status inline-flex items-center gap-1.5 shrink-0 ml-2 pl-2.5 pr-3 py-1 rounded-full text-[11px] font-bold text-emerald-300 z-[1]">
-      <span class="relative flex h-2 w-2 shrink-0">
-        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-400"></span>
-      </span>
-      เปิดให้บริการ
-    </span>
-  </div>
-  <% } %>
+<section class="store-status-section main-service-section w-full max-w-[1800px] px-4 lg:w-[85%] lg:px-0 mx-auto py-6" data-storefront-preview-hours-bar <%= settings.showOpenHoursBar === false ? 'hidden' : '' %>>
+  <%- include('../partials/main-service-strip') %>
 </section>
 
 <% if (announcements.length) { %>

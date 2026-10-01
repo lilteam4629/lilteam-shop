@@ -1,4 +1,4 @@
-/* Main-shop-only compact service strip. */
+/* Shared compact service strip for the main shop and all rental storefronts. */
 .store-status-section.main-service-section { padding-block: 12px !important; }
 .main-service-strip {
   position: relative; isolation: isolate; display: grid;

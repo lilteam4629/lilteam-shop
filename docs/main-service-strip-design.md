@@ -14,4 +14,6 @@ The clock orbit rotates continuously in 3 seconds; the light sweep takes 4 secon
 the status ring pulses in 2 seconds. Animations pause outside the viewport or while
 the document is hidden. Reduced motion retains readable static content.
 
-Only the main shop renders this component. Rental storefronts retain their own UI.
+The main shop and all rental storefronts render this shared component. Each shop
+uses its own configured name, hours, tagline and theme. The existing setting to
+hide the service-hours bar remains available in each shop's storefront settings.
