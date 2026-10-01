@@ -17,14 +17,14 @@
     const signal = controller.signal;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let visible = false;
-    let focused = !!section.querySelector(':focus-visible');
     let interacting = false;
     let resumeTimer = 0;
     let frame = 0;
     let step = 0;
 
     function sync() {
-      section.classList.toggle('is-scrolling', visible && !document.hidden && !focused && !interacting && !motion.matches && step > 0);
+      if (step > 0) track.style.setProperty('--community-order-duration', Math.max(12, step / (motion.matches ? 16 : 55)).toFixed(2) + 's');
+      section.classList.toggle('is-scrolling', visible && !document.hidden && !interacting && step > 0);
     }
 
     function measure() {
@@ -61,8 +61,6 @@
       sync();
     }
 
-    section.addEventListener('focusin', event => { focused = event.target.matches(':focus-visible'); sync(); }, { signal });
-    section.addEventListener('focusout', event => { focused = section.contains(event.relatedTarget) && !!event.relatedTarget?.matches(':focus-visible'); sync(); }, { signal });
     shell.addEventListener('pointerdown', pauseForInteraction, { signal });
     shell.addEventListener('pointerup', resumeSoon, { signal });
     shell.addEventListener('pointercancel', resumeSoon, { signal });

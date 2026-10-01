@@ -4499,7 +4499,7 @@ html:not(.light) .community-service-status { color: #9ce4ba; }
   .community-order-group .community-order-card { flex-basis: min(76vw, 300px); width: min(76vw, 300px); }
 }
 @media (prefers-reduced-motion: reduce) {
-  .community-order-track { animation: none; will-change: auto; }
+  .community-order-track { will-change: auto; }
 }
 
 /* Source: latest-orders-loop-v1.css */
