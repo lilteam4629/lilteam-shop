@@ -84,8 +84,8 @@
         <h3 class="font-bold text-sm text-[var(--text)]"><%= isRandomBox ? 'รายการรางวัลพร้อมสุ่ม' : 'รายการคีย์ / ไอดีที่พร้อมขาย' %> (<%= isRandomBox ? visibleStockItems.length : availableStockItems.length %>)</h3>
         <span class="mt-1 flex flex-wrap gap-x-3 text-xs text-[var(--text-4)]"><% if (reservedStockCount) { %><span>จองรางวัลกล่องสุ่ม: <b class="text-amber-500"><%= reservedStockCount %></b></span><% } %><span>ขายแล้วซ่อนจากรายการ: <b class="text-rose-400"><%= soldStockCount %></b></span></span>
       </div>
-      <% if (isRandomBox && visibleStockItems.length) { %>
-        <form action="/admin/products/<%= product.id %>/stock/delete-all" method="post" class="shrink-0" data-confirm="ลบรางวัลที่ยังไม่ได้จ่ายทั้งหมด <%= visibleStockItems.length %> ชิ้นออกจากสต็อกใช่ไหม? ระบบจะปรับจำนวนสต็อกและเก็บบัญชีสะสมเดิมไว้ รางวัลที่จ่ายให้ลูกค้าแล้วจะยังอยู่ในประวัติ">
+      <% if (visibleStockItems.length) { %>
+        <form action="/admin/products/<%= product.id %>/stock/delete-all" method="post" class="shrink-0" data-confirm="<%= isRandomBox ? `ลบรางวัลที่ยังไม่ได้จ่ายทั้งหมด ${visibleStockItems.length} ชิ้นใช่ไหม? เก็บประวัติรางวัลที่จ่ายแล้วและบัญชีสะสมไว้` : `ลบสต็อกพร้อมขายทั้งหมด ${visibleStockItems.length} รายการใช่ไหม? เก็บรายการที่ขายแล้วและรายการในคำสั่งซื้อไว้ การลบนี้ย้อนกลับไม่ได้` %>">
           <button type="submit" class="inline-flex min-h-9 items-center justify-center gap-1.5 rounded-lg border border-rose-500/30 px-3 py-2 text-xs font-bold text-rose-500 transition hover:bg-rose-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500">
             <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
             ลบทั้งหมด

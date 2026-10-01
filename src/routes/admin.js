@@ -1771,7 +1771,22 @@ router.post('/products/:id/stock/add', async (req, res) => {
 router.post('/products/:id/stock/delete-all', async (req, res) => {
   const product = store.data.products.find(p => p.id === req.params.id);
   if (!product) { req.flash('error', 'ไม่พบสินค้า'); return res.redirect('/admin/products'); }
-  if (product.specialType !== randomBox.RANDOM_BOX_KIND || !randomBox.supportsRandomBox(req)) return res.sendStatus(404);
+  if (product.specialType !== randomBox.RANDOM_BOX_KIND) {
+    const linkedStockIds = new Set((store.data.orders || []).flatMap(order =>
+      (order.items || []).map(item => String(item.stockItemId || ''))));
+    const removable = stock => stock.productId === product.id && stock.status === 'available'
+      && !stock.soldOrderId && !linkedStockIds.has(String(stock.id));
+    const deletedCount = store.data.stockItems.filter(removable).length;
+    if (!deletedCount) {
+      req.flash('error', 'ไม่มีสต็อกพร้อมขายที่ลบได้');
+      return res.redirect('/admin/products/' + product.id + '/stock');
+    }
+    store.data.stockItems = store.data.stockItems.filter(stock => !removable(stock));
+    await store.save();
+    req.flash('success', 'ลบสต็อกพร้อมขายทั้งหมดแล้ว ' + deletedCount + ' รายการ (เก็บรายการที่ขายแล้วและรายการในคำสั่งซื้อไว้)');
+    return res.redirect('/admin/products/' + product.id + '/stock');
+  }
+  if (!randomBox.supportsRandomBox(req)) return res.sendStatus(404);
 
   const result = randomBox.deletePrizeStock(store.data, product);
   if (!result.deletedCount) {
