@@ -383,10 +383,15 @@ async function previewTransaction(mutator) {
 }
 
 // One transaction reference may credit only one wallet across the main site
-// and Shop Cloud. MongoDB's unique _id makes simultaneous claims atomic.
+// and Shop Cloud. Persist ownership so retries by the same request are idempotent.
 async function claimGlobalSlipRef(transRef, details = {}) {
   const normalized = String(transRef || '').trim();
   if (!normalized) return false;
+  const source = String(details.source || 'main').slice(0, 40);
+  const requestId = String(details.requestId || '').slice(0, 100);
+  if (!requestId) return false;
+  const historical = (db.topupRequests || []).find(t => t.status === 'approved' && String(t.slipCheck?.transRef || t.slipCheck?.raw?.transRef || '').trim() === normalized);
+  if (historical && (source !== 'main-site' || historical.id !== requestId)) return false;
   const key = `used-slip:${crypto.createHash('sha256').update(normalized).digest('hex')}`;
   if (mongoCollection) {
     try {
@@ -408,15 +413,16 @@ async function claimGlobalSlipRef(transRef, details = {}) {
       throw error;
     }
   }
-  let claimed = false;
-  await transact(data => {
+  return runOnPlatform(() => transact(data => {
     data.globalUsedSlipRefs ||= [];
-    if (!data.globalUsedSlipRefs.includes(normalized)) {
-      data.globalUsedSlipRefs.push(normalized);
-      claimed = true;
-    }
-  });
-  return claimed;
+    data.globalSlipClaims ||= [];
+    const existing = data.globalSlipClaims.find(entry => entry.transRef === normalized);
+    if (existing) return existing.source === source && existing.requestId === requestId;
+    if (data.globalUsedSlipRefs.includes(normalized)) return false;
+    data.globalUsedSlipRefs.push(normalized);
+    data.globalSlipClaims.push({ transRef: normalized, source, requestId, claimedAt: new Date().toISOString() });
+    return true;
+  }));
 }
 
 async function init() {

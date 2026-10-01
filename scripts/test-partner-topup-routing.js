@@ -36,6 +36,8 @@ const topups = require('../src/services/topups');
     assert.ok(store.platformData.topupRequests.some(item => item.id === created.request.id && item.tenantShopId === shopId));
     assert.ok(!tenantDb.topupRequests.some(item => item.id === created.request.id), 'Partner request must be queued on the platform');
 
+    assert.equal((await topups.approveTopup(created.request.id)).ok, false, 'A receipt without a transaction reference cannot bypass the shared duplicate ledger');
+    await store.runOnPlatform(() => store.transact(data => { data.topupRequests.find(t => t.id === created.request.id).slipCheck = { checked: true, transRef: 'partner-fixture-ref' }; }));
     const approved = await topups.approveTopup(created.request.id);
     assert.strictEqual(approved.ok, true);
     assert.strictEqual(approved.user.id, user.id);

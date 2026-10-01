@@ -64,6 +64,7 @@ router.use((req, res, next) => {
 });
 
 router.use(require('./cloud-management-api'));
+router.use(require('./shared-payments-api'));
 
 router.post('/media/direct-upload', async (req, res) => {
   try { res.json({ ok: true, ...(await r2.createDirectUpload(req.body.filename, req.body.contentType)) }); }
