@@ -166,6 +166,11 @@ html:not(.light) .community-service-status { color: #9ce4ba; }
 .community-order-shell::-webkit-scrollbar { display: none; }
 .community-order-track { display: flex; width: max-content; gap: 10px; animation: community-order-run var(--community-order-duration, 40s) linear infinite paused; will-change: transform; }
 .community-orders.is-scrolling .community-order-track { animation-play-state: running; }
+body.storefront-owner-home-page #site-page-shell .community-orders .community-order-track {
+  animation-duration: var(--community-order-duration, 40s) !important;
+  animation-iteration-count: infinite !important;
+  animation-timing-function: linear !important;
+}
 .community-orders-header { min-height: 24px; margin-bottom: 10px; }
 .community-order-group { display: flex; flex: 0 0 auto; gap: 10px; }
 .community-order-group .community-order-card { flex: 0 0 clamp(250px, 26vw, 340px); width: clamp(250px, 26vw, 340px); }
