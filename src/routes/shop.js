@@ -14,6 +14,13 @@ const {
 const { MAIN_SITE_URL } = require('../middleware/tenant');
 const { visibleStorefrontCategories } = require('../services/storefront-category-visibility');
 
+const purchaseNotifications = require('../services/purchase-notifications');
+
+router.get('/api/recent-purchases', (req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.json({ purchases: purchaseNotifications.recentPurchases(store.data) });
+});
+
 function publishTime(product) {
   if (!product.publishAt) return 0;
   const value = String(product.publishAt);

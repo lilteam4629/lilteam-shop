@@ -628,6 +628,7 @@ function randomBoxProductFormError(req, existingProduct = null) {
 }
 
 router.get('/products', (req, res) => {
+  res.locals.purchaseNotificationSettings = require('../services/purchase-notifications').config(store.data.settings);
   const filterTagById = new Map(store.data.filterTags.map(tag => [tag.id, tag]));
   const availableStockCountByProduct = new Map();
   const inventoryCountByProduct = new Map();
@@ -656,6 +657,23 @@ router.get('/products', (req, res) => {
     return sum + ((Number(product.price) || 0) * inventoryCount);
   }, 0);
   res.render('admin/products-experiment', { title: 'สินค้า', active: 'products', products, totalProductPrice, totalAvailableProductCount, productCardStyle: store.data.settings.productCardStyle || 'natural' });
+});
+
+router.post('/products/notifications', async (req, res) => {
+  const { isPurchaseWebhookUrl } = require('../services/purchase-notifications');
+  const webhookUrl = String(req.body.purchaseWebhookUrl || '').trim();
+  if (webhookUrl && !isPurchaseWebhookUrl(webhookUrl)) {
+    req.flash('error', 'กรุณาใส่ Discord Webhook URL ที่ถูกต้อง (https://discord.com/api/webhooks/...)');
+    return res.redirect('/admin/products');
+  }
+  await store.transact(data => {
+    data.settings.purchaseNotifications = {
+      storefrontEnabled: req.body.purchaseStorefrontEnabled === 'on',
+      webhookUrl,
+    };
+  });
+  req.flash('success', 'บันทึกการแจ้งเตือนการซื้อสินค้าของเว็บนี้แล้ว');
+  res.redirect('/admin/products');
 });
 
 router.post('/products/card-style', async (req, res) => {

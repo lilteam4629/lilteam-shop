@@ -8,6 +8,29 @@ const randomBox = require('../services/random-box');
 const { runWithCheckoutQueue } = require('../services/checkout-queue');
 const { MAIN_SITE_URL } = require('../middleware/tenant');
 
+const purchaseNotifications = require('../services/purchase-notifications');
+
+function notifyPaidOrder(orderId, user, includePlatform = false) {
+  const data = store.data;
+  const order = data.orders.find(candidate => candidate.id === orderId);
+  const platform = store.platformData;
+  // Capture each shop's data before starting any asynchronous work.
+  Promise.resolve().then(async () => {
+    if (!order) return;
+    await purchaseNotifications.notifyPurchase({ data, order, user });
+    if (includePlatform && platform !== data) {
+      const sourceOrder = platform.orders.find(candidate => candidate.id === orderId);
+      if (sourceOrder) await purchaseNotifications.notifyPurchase({ data: platform, order: sourceOrder, user });
+    }
+    if (platform === data) {
+      for (const tenantId of order.federatedTenantIds || []) {
+        const tenantData = await store.loadTenantDb(tenantId);
+        if (tenantData) await purchaseNotifications.notifyPurchase({ data: tenantData, order, user });
+      }
+    }
+  }).catch(() => console.error('[purchase notifications] delivery failed'));
+}
+
 function getCart(req) {
   if (!req.session.cart) req.session.cart = [];
   return req.session.cart;
@@ -343,6 +366,7 @@ router.post('/checkout', requireLogin, (req, res) => {
           return res.redirect('/cart');
         }
         const completed = await completeTenantFederatedCheckout({ req, user, items, total, discount, finalTotal, validCoupon });
+        notifyPaidOrder(completed.orderId, user, true);
         req.session.cart = [];
         req.session.coupon = null;
         req.session.federatedCatalog = null;
@@ -470,6 +494,7 @@ router.post('/checkout', requireLogin, (req, res) => {
 
       store.data.orders.push(order);
       await store.save();
+      notifyPaidOrder(order.id, user);
       // Purchase persistence succeeds first; reward failures never undo a paid order.
       try { await store.transact(data => require('../services/promotions').settleReferral(data, data.orders.find(o => o.id === order.id))); }
       catch (error) { console.error('[referral] Reward pending:', error.message); }

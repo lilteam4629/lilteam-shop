@@ -30,6 +30,12 @@ router.post('/:productId/draw', requireLogin, async (req, res) => {
     })));
     try { await store.transact(data => require('../services/promotions').settleReferral(data, data.orders.find(o => o.id === result.orderId))); }
     catch (error) { console.error('[referral] Reward pending:', error.message); }
+    if (!result.replay) {
+      const data = store.data;
+      const order = data.orders.find(candidate => candidate.id === result.orderId);
+      if (order) Promise.resolve().then(() => require('../services/purchase-notifications').notifyPurchase({ data, order, user }))
+        .catch(() => console.error('[purchase notifications] delivery failed'));
+    }
     const summary = result.result || {};
     const drawCount = Number(summary.drawCount) || 1;
     const total = Number(summary.total) || drawCount * randomBox.configuredPrice(product);
