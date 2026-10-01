@@ -3141,7 +3141,7 @@ router.post('/auth-background/remove', async (req, res) => {
 });
 
 router.post('/hero-banner/mode', async (req, res) => {
-  const mode = req.body.mode === 'banner' ? 'banner' : 'inherit';
+  const mode = req.body.mode === 'banner' ? 'banner' : 'none';
   if (mode === 'banner' && !store.data.settings.hero.bannerImage) {
     req.flash('error', 'กรุณาอัปโหลดรูปแบนเนอร์ก่อนเปิดใช้งานโหมดแบนเนอร์');
     return res.redirect('/admin/appearance');
@@ -3149,7 +3149,7 @@ router.post('/hero-banner/mode', async (req, res) => {
   store.data.settings.hero.mode = mode;
   store.data.settings.hero.bannerLink = req.body.bannerLink || '';
   await store.save();
-  req.flash('success', mode === 'banner' ? 'เปิดใช้งานแบนเนอร์ของร้านแล้ว' : 'ใช้แบนเนอร์เริ่มต้นของระบบแล้ว');
+  req.flash('success', mode === 'banner' ? 'เปิดใช้งานแบนเนอร์ของร้านแล้ว' : 'ซ่อนแบนเนอร์แล้ว');
   res.redirect('/admin/appearance');
 });
 

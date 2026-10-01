@@ -218,7 +218,7 @@ app.use((req, res, next) => {
   // route-level 404/500 renders that do not pass page settings explicitly.
   // store.data resolves through this request's AsyncLocalStorage tenant scope.
   res.locals.settings = requestShopSettings(store.data.settings, req.tenantShop);
-  res.locals.storefrontHero = resolveStorefrontHero(store.data.settings.hero, store.platformData.settings.hero, !req.tenantShop);
+  res.locals.storefrontHero = resolveStorefrontHero(store.data.settings.hero);
   res.locals.messages = {
     success: req.flash('success'),
     error: req.flash('error'),

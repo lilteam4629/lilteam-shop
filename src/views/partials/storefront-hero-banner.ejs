@@ -1,4 +1,5 @@
-<% const sharedHero = typeof storefrontHero !== 'undefined' ? storefrontHero : { bannerImage: settings.hero?.bannerImage || '/images/storefront-default-banner.svg', bannerLink: '/products' }; %>
+<% const sharedHero = typeof storefrontHero !== 'undefined' ? storefrontHero : { bannerImage: settings.hero?.mode === 'none' ? null : settings.hero?.bannerImage, bannerLink: settings.hero?.bannerLink || '' }; %>
+<% if (sharedHero.bannerImage) { %>
 <section class="owner-home-v20-hero owner-home-v23-hero owner-home-v20-hero--banner owner-home-v20-hero--banner-only" id="home-top" aria-label="แบนเนอร์ร้าน <%= settings.shopName %>">
   <div class="owner-home-v20-artwork">
     <% if (sharedHero.bannerLink) { %>
@@ -8,3 +9,5 @@
     <% } %>
   </div>
 </section>
+
+<% } %>

@@ -1,28 +1,33 @@
-const DEFAULT_BANNER = '/images/storefront-default-banner.svg';
-
-// Presentation defaults are shared; catalog, accounts and wallets stay tenant scoped.
-function resolveStorefrontHero(ownHero = {}, platformHero = {}, isMainSite = false) {
+// Share the storefront components, never another shop's content.
+function resolveStorefrontHero(ownHero = {}) {
   const own = ownHero && typeof ownHero === 'object' ? ownHero : {};
-  const platform = platformHero && typeof platformHero === 'object' ? platformHero : {};
-  const useOwn = own.mode !== 'inherit' && String(own.bannerImage || '').trim();
-  const image = useOwn || (!isMainSite && String(platform.bannerImage || '').trim()) || DEFAULT_BANNER;
-  return {
-    mode: 'banner',
-    bannerImage: image,
-    // A platform campaign link must not send a rental customer to another shop's checkout.
-    bannerLink: useOwn ? String(own.bannerLink || '') : '/products',
-    inherited: !useOwn,
-  };
+  const image = own.mode === 'none' ? '' : String(own.bannerImage || '').trim();
+  return { mode: image ? 'banner' : 'none', bannerImage: image || null,
+    bannerLink: image ? String(own.bannerLink || '') : '', inherited: false };
 }
 
-function newShopPresentation(platformSettings = {}) {
-  return {
-    hero: { mode: 'inherit', bannerImage: null, bannerLink: '' },
-    storefrontModel: 'classic',
-    theme: JSON.parse(JSON.stringify(platformSettings.theme || {
-      accent: '#000000', bgPreset: 'monochrome', bgColor: null, style: 'normal',
-    })),
-  };
+const LEGACY_TENANT_SEEDS = {
+  tagline: 'สินค้าเกมราคาดี พร้อมส่งอัตโนมัติตลอด 24 ชั่วโมง',
+  contactLine: '@lilteamshop', contactFacebook: 'https://facebook.com/lilteamshop',
+  contactMessenger: 'https://m.me/lilteamshop', contactFacebookName: 'LilTeam Shop',
+  contactResponseTime: '5–15 นาที', openHours: '17:00 - 00:00',
+};
+
+// Only remove known bootstrap text from older tenants. Keep their own content.
+function clearLegacyTenantSeeds(settings) {
+  for (const [key, value] of Object.entries(LEGACY_TENANT_SEEDS)) {
+    if (key.startsWith('contact') && key !== 'contactResponseTime' && settings[key] === value) settings[key] = '';
+    if (key === 'contactMessenger' && settings[key] === LEGACY_TENANT_SEEDS.contactFacebook) settings[key] = '';
+  }
+  return settings;
 }
 
-module.exports = { DEFAULT_BANNER, resolveStorefrontHero, newShopPresentation };
+function newShopPresentation() {
+  return {
+    ...Object.fromEntries(Object.keys(LEGACY_TENANT_SEEDS).map(key => [key, ''])),
+    hero: { mode: 'none', bannerImage: null, bannerLink: '' },
+    storefrontModel: 'classic', genres: {},
+    theme: { accent: '#000000', bgPreset: 'monochrome', bgColor: null, style: 'normal' },
+  };
+}
+module.exports = { resolveStorefrontHero, newShopPresentation, clearLegacyTenantSeeds };

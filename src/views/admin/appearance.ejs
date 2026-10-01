@@ -63,12 +63,12 @@
       </div>
       <div class="grid sm:grid-cols-2 gap-3">
         <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.hero.mode !== 'banner' ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-xl px-4 py-3 cursor-pointer text-sm">
-          <input type="radio" name="mode" value="inherit" <%= settings.hero.mode !== 'banner' ? 'checked' : '' %> class="accent-[var(--gold)]" />
-          ใช้แบนเนอร์เริ่มต้นของระบบ
+          <input type="radio" name="mode" value="none" <%= settings.hero.mode !== 'banner' ? 'checked' : '' %> class="accent-[var(--gold)]" />
+          ยังไม่แสดงแบนเนอร์
         </label>
         <label class="flex items-center gap-2 bg-[var(--input)] border-2 <%= settings.hero.mode === 'banner' ? 'border-[var(--gold)]' : 'border-[var(--border-light)]' %> rounded-xl px-4 py-3 cursor-pointer text-sm">
           <input type="radio" name="mode" value="banner" <%= settings.hero.mode === 'banner' ? 'checked' : '' %> class="accent-[var(--gold)]" />
-          ใช้ภาพแบนเนอร์
+          ใช้ภาพแบนเนอร์ของร้าน
         </label>
       </div>
       <button class="w-full bg-[var(--gold)] hover:bg-[var(--gold-hover)] text-[var(--gold-contrast)] font-medium px-6 py-2.5 rounded-lg text-sm">บันทึกรูปแบบหน้าแรก</button>

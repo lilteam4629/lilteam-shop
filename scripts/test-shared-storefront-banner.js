@@ -3,27 +3,38 @@ const fs = require('node:fs');
 const path = require('node:path');
 const os = require('node:os');
 const ejs = require('ejs');
-const { resolveStorefrontHero, newShopPresentation, DEFAULT_BANNER } = require('../src/services/storefront-presentation');
+const { resolveStorefrontHero, newShopPresentation } = require('../src/services/storefront-presentation');
 
 const platform = { mode: 'banner', bannerImage: '/media/main-banner.png', bannerLink: '/game/main-only' };
-for (const own of [{}, { mode: 'default', bannerImage: null }, { mode: 'inherit', bannerImage: '/media/previous.png' }]) {
+const template = fs.readFileSync(path.join(__dirname, '../src/views/partials/storefront-hero-banner.ejs'), 'utf8');
+for (const own of [{}, { mode: 'default', bannerImage: null }, { mode: 'inherit', bannerImage: null }, { mode: 'none', bannerImage: '/media/saved.png' }]) {
   const hero = resolveStorefrontHero(own, platform);
-  assert.equal(hero.bannerImage, platform.bannerImage);
-  assert.equal(hero.bannerLink, '/products');
-  const rendered = ejs.render(fs.readFileSync(path.join(__dirname, '../src/views/partials/storefront-hero-banner.ejs'), 'utf8'), { settings: { shopName: 'Sheep shop' }, storefrontHero: hero });
-  assert.match(rendered, /owner-home-v20-hero--banner-only/);
-  assert.doesNotMatch(rendered, /spotlight|สินค้าเข้าใหม่|<h1/);
-  assert.match(rendered, /\/media\/main-banner.png/);
+  assert.equal(hero.bannerImage, null);
+  assert.equal(hero.bannerLink, '');
+  assert.equal(hero.inherited, false);
+  assert.doesNotMatch(ejs.render(template, { settings: { shopName: 'Sheep shop' }, storefrontHero: hero }), /<img|<section|main-banner|spotlight/);
 }
-const own = { mode: 'default', bannerImage: '/media/sheep-banner.png', bannerLink: '/products?tag=sheep' };
-assert.equal(resolveStorefrontHero(own, platform).bannerImage, own.bannerImage);
-assert.equal(resolveStorefrontHero(own, platform).bannerLink, own.bannerLink);
-assert.equal(resolveStorefrontHero({}, {}).bannerImage, DEFAULT_BANNER);
-assert.equal(resolveStorefrontHero(platform, {}, true).bannerImage, platform.bannerImage);
+for (const mode of ['banner', 'default', 'inherit']) {
+  const own = { mode, bannerImage: '/media/sheep-banner.png', bannerLink: '/products?tag=sheep' };
+  assert.equal(resolveStorefrontHero(own, platform).bannerImage, own.bannerImage);
+  assert.equal(resolveStorefrontHero(own, platform).bannerLink, own.bannerLink);
+}
+assert.equal(resolveStorefrontHero(platform).bannerImage, platform.bannerImage);
 const theme = { accent: '#5073af', bgPreset: 'monochrome' };
 const defaults = newShopPresentation({ theme });
-defaults.theme.accent = '#ffffff';
-assert.equal(theme.accent, '#5073af');
+assert.equal(defaults.theme.accent, '#000000');
+const { clearLegacyTenantSeeds } = require('../src/services/storefront-presentation');
+const custom = { contactLine: '@sheep', contactFacebook: 'https://facebook.com/sheep', openHours: '17:00 - 00:00', tagline: 'Custom', hero: platform };
+assert.deepEqual(clearLegacyTenantSeeds(structuredClone(custom)), custom);
+assert.equal(clearLegacyTenantSeeds({ contactLine: '@lilteamshop' }).contactLine, '');
+
+const contactTemplate = fs.readFileSync(path.join(__dirname, '../src/views/shop/contact.ejs'), 'utf8');
+const emptyContact = ejs.render(contactTemplate, { settings: { ...defaults, shopName: 'Fresh rental' } });
+assert.doesNotMatch(emptyContact, /href=""|lilteamshop|17:00/);
+assert.match(emptyContact, /ร้านยังไม่ได้เพิ่มช่องทางติดต่อ/);
+const serviceTemplate = fs.readFileSync(path.join(__dirname, '../src/views/partials/main-service-strip.ejs'), 'utf8');
+assert.equal(ejs.render(serviceTemplate, { settings: defaults }).trim(), '');
+assert.match(ejs.render(serviceTemplate, { settings: { ...defaults, shopName: 'Own shop', openHours: '08:00-22:00' } }), /08:00-22:00/);
 
 (async () => {
   const id = `banner-check-${process.pid}`;
@@ -38,15 +49,22 @@ assert.equal(theme.accent, '#5073af');
     store.platformData.settings.hero = platform;
     store.platformData.settings.theme = theme;
     const fresh = await store.createTenantDb(id, { shopName: 'Fresh rental', adminUsername: 'fixture', adminEmail: 'fixture@example.test', adminPasswordHash: 'fixture-hash' });
-    assert.equal(fresh.settings.hero.mode, 'inherit');
-    assert.equal(fresh.settings.theme.accent, theme.accent);
-    assert.equal(resolveStorefrontHero(fresh.settings.hero, platform).bannerImage, platform.bannerImage);
+    assert.equal(fresh.settings.hero.mode, 'none');
+    assert.equal(fresh.settings.theme.accent, '#000000');
+    assert.equal(resolveStorefrontHero(fresh.settings.hero, platform).bannerImage, null);
     assert.equal(fresh.settings.shopName, 'Fresh rental');
     assert.equal(fresh.products.length, 0);
     assert.equal(fresh.orders.length, 0);
     assert.equal(fresh.users.length, 1);
     assert.equal(fresh.users[0].walletBalance, 0);
-    console.log('PASS: legacy/new rental banners, own banner override, safe links, shared rendering and real isolated tenant creation');
+    for (const field of ['tagline', 'openHours', 'contactLine', 'contactFacebook', 'contactMessenger', 'contactFacebookName', 'contactResponseTime']) assert.equal(fresh.settings[field], '');
+    for (const field of ['products', 'stockItems', 'orders', 'filterTags', 'homeSections', 'licensePlans', 'coupons', 'announcements', 'miniGamePrizes', 'reviews', 'walletTransactions', 'topupRequests']) assert.deepEqual(fresh[field], []);
+    assert.equal(fresh.settings.catalogApi.enabled, false);
+    assert.equal(fresh.settings.miniGame.enabled, false);
+    assert.equal(fresh.settings.payment.bankAccountNumber, '');
+    assert.equal(fresh.settings.branding.logoImage, null);
+    assert.deepEqual(store.platformData.settings.hero, platform);
+    console.log('PASS: empty rental content, no platform banner/theme fallback, own content preservation and real isolated tenant creation');
   } finally {
     for (const file of [dbPath, tenantPath]) if (fs.existsSync(file)) fs.unlinkSync(file);
   }

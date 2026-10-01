@@ -9,7 +9,7 @@ const crypto = require('crypto');
 const r2 = require('../services/r2');
 const { encodeStoreSnapshot, decodeStoreSnapshot } = require('../services/store-order-codec');
 const { writeJson } = require('../services/atomic-json');
-const { newShopPresentation } = require('../services/storefront-presentation');
+const { newShopPresentation, clearLegacyTenantSeeds } = require('../services/storefront-presentation');
 
 // Multi-tenant support: each rented "shop" (see src/routes/tenant.js) gets
 // its OWN full copy of this exact data shape (products, orders, users,
@@ -347,6 +347,7 @@ async function transact(mutator) {
       delete stored._id;
       delete stored._revision;
       migrateSchema(stored);
+      if (ctx) clearLegacyTenantSeeds(stored.settings);
       const result = await mutator(stored);
       const replacement = { _id: documentId, _revision: revision + 1, ...encodeStoreSnapshot(stored) };
       if (require('mongodb').BSON.calculateObjectSize(replacement) >= 16 * 1024 * 1024) {
@@ -376,6 +377,7 @@ async function previewTransaction(mutator) {
   delete snapshot._id;
   delete snapshot._revision;
   migrateSchema(snapshot);
+  if (ctx) clearLegacyTenantSeeds(snapshot.settings);
   const result = await mutator(snapshot, { legacyRevision: legacy });
   if (mongoCollection && require('mongodb').BSON.calculateObjectSize(encodeStoreSnapshot(snapshot)) >= 16 * 1024 * 1024 - 1024) {
     throw new Error('STORE_SIZE_LIMIT');
@@ -986,6 +988,7 @@ async function loadTenantDbUncached(shopId, cacheKey) {
   // change. The backfilled fields get persisted safely the normal way, the
   // next time this tenant's own request path calls store.save().
   migrateSchema(tenantDb);
+  clearLegacyTenantSeeds(tenantDb.settings);
   tenantDbCache.set(cacheKey, { db: tenantDb, expiresAt: Date.now() + TENANT_CACHE_TTL_MS });
   // Avoid an unbounded map if many expired tenant shops are visited over time.
   if (tenantDbCache.size > 200) {
@@ -1004,7 +1007,7 @@ async function loadTenantDbUncached(shopId, cacheKey) {
  */
 async function createTenantDb(shopId, { shopName, adminUsername, adminEmail, adminPasswordHash }) {
   const tenantDb = defaultData();
-  Object.assign(tenantDb.settings, newShopPresentation(db.settings));
+  Object.assign(tenantDb.settings, newShopPresentation());
   tenantDb.settings.shopName = shopName;
   tenantDb.settings.payment.slipApiMode = 'shared';
   tenantDb.users = [
@@ -1022,6 +1025,13 @@ async function createTenantDb(shopId, { shopName, adminUsername, adminEmail, adm
   tenantDb.coupons = [];
   tenantDb.announcements = [];
   tenantDb.miniGamePrizes = [];
+  tenantDb.homeSections = [];
+  tenantDb.licensePlans = [];
+  tenantDb.settings.miniGame.enabled = false;
+  for (const field of ['title', 'description', 'railTitle', 'railDescription']) tenantDb.settings.miniGame[field] = '';
+  tenantDb.settings.miniGame.boxEnabled = false;
+  tenantDb.settings.miniGame.railEnabled = false;
+  tenantDb.settings.payment.truemoneyEnabled = false;
   await saveTenantDb(shopId, tenantDb);
   return tenantDb;
 }

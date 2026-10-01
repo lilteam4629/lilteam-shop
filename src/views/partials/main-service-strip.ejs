@@ -1,3 +1,4 @@
+<% if (settings.openHours || settings.tagline) { %>
 <div class="main-service-strip" data-main-service-strip>
   <div class="main-service-hours">
     <span class="main-service-clock" aria-hidden="true"><svg viewBox="0 0 60 60" fill="none" stroke="currentColor" stroke-linecap="round"><circle class="main-service-clock__orbit" cx="30" cy="30" r="27" stroke-width="2.8" stroke-dasharray="28 142"/><circle class="main-service-clock__dial" cx="30" cy="30" r="23" stroke-width="1.5" stroke-dasharray="1 11.04" opacity=".5"/><circle cx="30" cy="30" r="18" stroke-width="1" opacity=".2"/><path class="main-service-clock__hand" data-service-hour d="M30 30V19" stroke-width="3"/><path class="main-service-clock__hand" data-service-minute d="M30 30V13" stroke-width="2"/><path class="main-service-clock__hand main-service-clock__second" data-service-second d="M30 34V11" stroke-width="1.2"/><circle cx="30" cy="30" r="2.5" fill="currentColor" stroke="none"/></svg></span>
@@ -8,3 +9,5 @@
   <div class="main-service-actions"><span class="main-service-status"><span aria-hidden="true"></span>เปิดให้บริการ</span><a class="main-service-contact" href="/contact" aria-label="ติดต่อร้าน"><span>ติดต่อร้าน</span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a></div>
   <span class="main-service-light-track" aria-hidden="true"></span>
 </div>
+
+<% } %>
