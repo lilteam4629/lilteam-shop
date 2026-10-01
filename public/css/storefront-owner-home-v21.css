@@ -67,9 +67,9 @@
 #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-image-tag { left: 10px; }
 #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-partner-tag { top: auto; right: 10px; bottom: 10px; color: #fff; }
 #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-stock-badge {
-  position: absolute;
-  top: 9px;
-  right: 9px;
+  position: static;
+  align-self: flex-start;
+  flex: 0 0 auto;
   display: inline-flex;
   min-height: 30px;
   align-items: center;
@@ -79,7 +79,7 @@
   border-radius: 999px;
   background: var(--input);
   color: var(--gold-text);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--text) 18%, transparent);
+  box-shadow: none;
   font-size: 11px;
   line-height: 1;
 }
@@ -118,6 +118,13 @@
   flex-direction: column;
   gap: 3px;
   padding: 13px 14px 14px;
+}
+#site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-title-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
+  min-width: 0;
 }
 #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-summary {
   display: -webkit-box;
@@ -247,7 +254,7 @@
   #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-purchase-row { gap: 6px; }
   #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-price-values > strong { font-size: 17px; }
   #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-buy { min-width: 68px; min-height: 34px; padding: 0 7px; }
-  #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-stock-badge { top: 7px; right: 7px; min-height: 27px; gap: 4px; padding: 4px 7px; }
+  #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-stock-badge { min-height: 27px; gap: 4px; padding: 4px 7px; }
   #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-stock-badge strong { font-size: 10px; }
   #site-page-shell.storefront-owner-home-v7 :is(.owner-home-v20-shell, .owner-home-catalog-scope) .owner-home-v21-image-tag { top: 7px; left: 7px; min-height: 23px; padding: 3px 6px; font-size: 8px; }
 }
