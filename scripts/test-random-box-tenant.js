@@ -120,8 +120,8 @@ async function exerciseTenantRandomBox() {
   const adminCookie = await login('boxadmin', 'boxadmin-password');
   const form = await request('/admin/products/new', { headers: { cookie: adminCookie } });
   assert.equal(form.statusCode, 200, 'rental admin can open the product form');
-  assert.ok(form.body.includes('รอทำระบบเพิ่ม'));
-  assert.ok(form.body.includes('disabled>เรท 2'));
+  assert.ok(form.body.includes('type="hidden" name="randomBoxRate" value="1"'));
+  for (const removed of ['เรทออกรางวัล', 'เรท 1', 'รอทำระบบเพิ่ม', '97.50', '110 บาท']) assert.ok(!form.body.includes(removed));
   const invalid = await request('/admin/products/new', { method: 'POST', headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ title: 'invalid-box', productKind: 'random-box', randomBoxRate: '2', price: '2' }).toString() });
   assert.equal(invalid.statusCode, 302);
   assert.ok(!JSON.parse(fs.readFileSync(tenantDbPath, 'utf8')).products.some(p => p.title === 'invalid-box'));
@@ -155,6 +155,7 @@ async function exerciseTenantRandomBox() {
   assert.equal(stockResponse.statusCode, 302, 'rental admin can add prizes to its local stock');
   const stockPage = await request(`/admin/products/${encodeURIComponent(productId)}/stock`, { headers: { cookie: adminCookie } });
   assert.equal(stockPage.statusCode, 200, 'rental admin can view the random-box stock manager');
+  for (const removed of ['เรท 1', 'เป้าหมายรายรับ', '97.50', '/110 บาท']) assert.ok(!stockPage.body.includes(removed));
 
   const publishResponse = await request('/admin/scheduled-products', {
     method: 'POST',

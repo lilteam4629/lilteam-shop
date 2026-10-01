@@ -822,7 +822,7 @@ router.post('/products/bulk-price', async (req, res) => {
   const targets = store.data.products.filter(product => scope === 'all' || selectedIds.has(String(product.id)));
   const priceableTargets = targets.filter(product => product.specialType !== randomBox.RANDOM_BOX_KIND);
   if (!priceableTargets.length) {
-    req.flash('error', 'กล่องสุ่มล็อกราคา 1 บาท · รอทำระบบเพิ่ม');
+    req.flash('error', 'กล่องสุ่มล็อกราคา 1 บาท');
     return res.redirect('/admin/products');
   }
   const factor = operation === 'discount' ? 1 - (percentage / 100) : 1 + (percentage / 100);

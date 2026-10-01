@@ -18,7 +18,7 @@ const PENDING_SYSTEM_MESSAGE = 'รอทำระบบเพิ่ม';
 function normalizeRate() { return 1; }
 function getRateConfig() { return { rate: 1, minTarget: 85, maxTarget: 110, targetRevenue: 97.50, pityLimit: 110 }; }
 function parseRate() { return 1; }
-function validateRate(value) { return String(value ?? '').trim() && Number(value) === 1 ? null : 'ใช้ได้เฉพาะเรท 1 · รอทำระบบเพิ่ม'; }
+function validateRate(value) { return String(value ?? '').trim() && Number(value) === 1 ? null : 'การตั้งค่ากล่องสุ่มไม่ถูกต้อง'; }
 function parsePrice(value) { return String(value ?? '').trim() && Number(value) === 1 ? 1 : null; }
 function validatePrice(value) { return parsePrice(value) === 1 ? null : 'ราคากล่องสุ่มต้องเป็น 1 บาทเท่านั้น · รอทำระบบเพิ่ม'; }
 function configuredPrice() { return 1; }

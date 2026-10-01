@@ -241,7 +241,8 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const assert = require('node:assert/strict');
   const form = await fetchOk('/admin/products/new', 'text/html', { cookie: adminCookie });
   assert.ok(form.body.includes('name="randomBoxRate"'));
-  assert.ok(form.body.includes('disabled>เรท 2 · รอทำระบบเพิ่ม'));
+  assert.ok(form.body.includes('type="hidden" name="randomBoxRate" value="1"'));
+  for (const removed of ['เรทออกรางวัล', 'เรท 1', 'รอทำระบบเพิ่ม', '97.50', '110 บาท']) assert.ok(!form.body.includes(removed));
   const title = 'random-box-smoke-' + process.pid;
   const created = await request('/admin/products/new', { method: 'POST',
     headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
@@ -264,7 +265,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
     headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' } });
   assert.equal(deleted.statusCode, 302);
   const stockPage = await fetchOk(`/admin/products/${productId}/stock`, 'text/html', { cookie: adminCookie });
-  assert.ok(stockPage.body.includes('เป้าหมายรายรับเฉลี่ย 97.50'));
+  for (const removed of ['เรท 1', 'เป้าหมายรายรับ', '97.50', '/110 บาท']) assert.ok(!stockPage.body.includes(removed));
   const published = await request('/admin/scheduled-products', { method: 'POST',
     headers: { cookie: adminCookie, 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ productId, publishAt: '2020-01-01T00:00' }).toString() });
