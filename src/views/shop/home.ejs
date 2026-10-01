@@ -60,10 +60,14 @@
 <%- include('../partials/storefront-hero-banner') %>
 
 <% if (ownerHomeV20) { %>
+<% if (isMainSite) { %>
 <%- include('../partials/storefront-community', { announcements, latestOrders }) %>
-
-
-
+<% } else { %>
+<%- include('../partials/storefront-community-legacy', { announcements }) %>
+<% if (latestOrders && latestOrders.length) { %>
+  <%- include('../partials/latest-orders-rail', { latestOrders, isOwnerLatestRail: true }) %>
+<% } %>
+<% } %>
 <% } %>
 
 <style>
@@ -248,9 +252,11 @@
 
 
 <% if (!ownerHomeV20) { %>
+<% if (isMainSite) { %>
 <%- include('../partials/storefront-community', { announcements, latestOrders }) %>
-
-
+<% } else { %>
+<%- include('../partials/storefront-community-legacy', { announcements }) %>
+<% } %>
 <% } %>
 
 <style>
@@ -678,6 +684,9 @@
 </script>
 <% } %>
 
+<% if (!isMainSite && !ownerHomeV20 && latestOrders && latestOrders.length) { %>
+  <%- include('../partials/latest-orders-rail', { latestOrders, isOwnerLatestRail: false }) %>
+<% } %>
 <% if (filterTags && filterTags.length) { %>
 <section class="store-filter-section w-full max-w-[1800px] px-1 sm:px-4 lg:w-[85%] lg:px-0 mx-auto pt-4">
   <%- include('../partials/filter-panel', { filterTags }) %>
