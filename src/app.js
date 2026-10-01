@@ -67,6 +67,7 @@ app.get('/health', async (req, res) => {
       ok: true,
       uptime: Math.floor(process.uptime()),
       version: packageInfo.version,
+      sharedPaymentGatewayVersion: 1,
       commit: (process.env.RAILWAY_GIT_COMMIT_SHA || process.env.COMMIT_SHA || '').slice(0, 12) || null,
       ...store.getSystemStatus(),
     });

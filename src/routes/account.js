@@ -137,7 +137,7 @@ async function transactWithRetry(mutator, attempts = 4) {
   throw lastError;
 }
 
-async function reserveTrueMoneyClaim(voucherCode, userId) {
+async function reserveTrueMoneyClaim(voucherCode, userId, options = {}) {
   return transactWithRetry(data => {
     data.truemoneyRedemptions ||= [];
     data.walletTransactions ||= [];
@@ -151,6 +151,7 @@ async function reserveTrueMoneyClaim(voucherCode, userId) {
     if (existing && existing.userId !== userId) return null;
     if (existing && existing.status === 'approved') return { alreadyCredited: true };
     if (existing) {
+      if (options.externalWallet) existing.externalWallet = true;
       existing.userId = userId;
       existing.status = 'processing';
       existing.message = '';
@@ -158,7 +159,7 @@ async function reserveTrueMoneyClaim(voucherCode, userId) {
       return { claimId: existing.id, retryExisting: true, amount: Number(existing.amount) || 0, senderName: existing.senderName || '', providerBase: existing.providerBase || '', receiverPhone: existing.receiverPhone || '' };
     }
     const claimId = store.genId(16);
-    data.truemoneyRedemptions.push({ id: claimId, voucherCode, userId, status: 'processing', createdAt: new Date().toISOString() });
+    data.truemoneyRedemptions.push({ id: claimId, voucherCode, userId, externalWallet: Boolean(options.externalWallet), status: 'processing', createdAt: new Date().toISOString() });
     return { claimId, retryExisting: false, amount: 0, senderName: '', providerBase: '' };
   });
 }
@@ -608,48 +609,7 @@ async function verifySlipInBackground({ requestId, userId, fileBuffer, fileOptio
     let provider = null;
     let result;
 
-    const selectedProvider = resolveSlipProvider(effective);
-    const receiverPayment = receiverProfiles.view(payment, selectedProvider);
-
-    if (selectedProvider === 'slipok') {
-      provider = 'slipok';
-      result = await slipok.verifySlip(fileBuffer, request.amount, fileOptions, {
-        branchId: effective.slipokBranchId,
-        apiKey: effective.slipokApiKey,
-      });
-    } else if (selectedProvider === 'slipcheck') {
-      provider = 'slipcheck';
-      const expectedReceiver = receiverCredentials(receiverPayment, request.method, payment);
-      result = await slipcheck.verifySlip(fileBuffer, request.amount, fileOptions, {
-        ...slipcheckCredentials(effective),
-        ...expectedReceiver,
-      });
-    } else if (selectedProvider === 'rdcw') {
-      provider = 'rdcw';
-      result = await rdcwSlip.verifySlip(fileBuffer, request.amount, fileOptions, {
-        clientId: effective.rdcwClientId,
-        clientSecret: effective.rdcwClientSecret,
-        endpoint: effective.rdcwEndpoint,
-        ...receiverCredentials(receiverPayment, request.method, payment),
-      });
-    } else if (selectedProvider === 'slip2go') {
-      provider = 'slip2go';
-      result = await slip2go.verifySlip(fileBuffer, request.amount, fileOptions, {
-        apiKey: effective.slip2goApiKey,
-        endpoint: effective.slip2goEndpoint,
-        ...receiverCredentials(receiverPayment, request.method, payment),
-      });
-    } else if (selectedProvider === 'xepht') {
-      provider = 'xepht';
-      result = await xephtSlip.verifySlip(fileBuffer, request.amount, fileOptions, {
-        apiKey: effective.xephtApiKey,
-        endpoint: effective.xephtEndpoint,
-        ...receiverCredentials(receiverPayment, request.method, payment),
-      });
-    } else {
-      provider = selectedProvider;
-      result = { checked: false, verified: false, message: 'รอแอดมินตรวจสอบสลิป', raw: null };
-    }
+    ({ provider, result } = await require('../services/shared-slip-verification').verify(fileBuffer, request.amount, fileOptions, effective, payment, request.method));
     let verified = result.checked && result.verified;
     const raw = result.raw;
     // Normalize the transaction reference + timestamp across providers —
@@ -997,7 +957,7 @@ let trueMoneySweepRunning = false;
 let trueMoneyRecoveryTimer = null;
 async function reconcileTrueMoneyClaims() {
   const pending = (store.data.truemoneyRedemptions || []).filter(claim =>
-    claim.status === 'processing' && (Number(claim.amount) > 0 || claim.providerBase)
+    !claim.externalWallet && claim.status === 'processing' && (Number(claim.amount) > 0 || claim.providerBase)
     && (!claim.nextRecoveryAt || Date.parse(claim.nextRecoveryAt) <= Date.now()));
   for (const snapshot of pending.slice(0, 10)) {
     const { voucherCode, userId } = snapshot;
