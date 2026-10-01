@@ -144,7 +144,7 @@ assert.doesNotMatch(heroCozyCss, /max-height:\s*min\(52vh,\s*460px\)/,
   'the desktop banner must not be narrowed by a viewport-height cap');
 assert.match(home, /recommendedCategories\.forEach\(category => \{[\s\S]*?class="home-category-card <%= fullRecommendedCategoryImages \? 'full-category-artwork' : '' %>" href="\/products\?recommended=<%= encodeURIComponent\(category\.id\) %>/,
   'real shop categories must remain available in the homepage category rail');
-assert.match(home, /include\('\.\.\/partials\/latest-orders-rail', \{ latestOrders, isOwnerLatestRail: true \}\)/,
+assert.match(home, /include\('\.\.\/partials\/(?:latest-orders-rail|storefront-community)', \{ (?:latestOrders, isOwnerLatestRail: true|announcements, latestOrders) \}\)/,
   'the main homepage order rail must use its shared live-data partial');
 assert.match(read('src/views/partials/latest-orders-rail.ejs'), /latestOrders\.forEach\(order => \{/,
   'the shared order rail must render live order data');
