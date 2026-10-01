@@ -185,6 +185,7 @@ async function exerciseTenantRandomBox() {
   assert.ok(home.body.includes(title), 'rental storefront home lists its random-box product');
 
   const requestId = crypto.randomUUID();
+  const expectedStockOrder = require('../src/services/random-box').availableStockItems(tenantData.stockItems, productId).map(item => item.id);
   const draw = await request(`/random-box/${encodeURIComponent(productId)}/draw`, {
     method: 'POST',
     headers: { cookie: buyerCookie, 'content-type': 'application/x-www-form-urlencoded' },
@@ -196,6 +197,8 @@ async function exerciseTenantRandomBox() {
   const storedOrder = tenantData.orders.find(item => item.id === decodeURIComponent(draw.headers.location.split('/').pop()));
   const order = require('../src/services/store-order-codec').decodeStoreSnapshot({ orders: [storedOrder] }).orders[0];
   assert.ok(order?.randomBoxOrder, 'draw order is stored in this tenant database');
+  const deliveredIds = order.items.flatMap(item => item.randomBoxDraw.prizeItems.map(prize => prize.stockItemId));
+  assert.deepEqual(deliveredIds, expectedStockOrder.slice(0, deliveredIds.length), 'rental checkout consumes top-to-bottom stock rows');
   assert.ok(order.items.some(item => item.randomBoxDraw), 'draw result is stored with its order');
   assert.ok(tenantData.stockItems.every(item => item.productId === productId), 'the tenant only touched its own prize stock');
 

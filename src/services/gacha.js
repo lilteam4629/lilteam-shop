@@ -152,10 +152,9 @@ function draw(options, { rng = randomInt } = {}) {
     if (pityApplied) count = 1;
     const ids = [];
     for (let prize = 0; prize < count; prize++) {
-      const index = roll(0, pool.length);
-      // Preserve ordering across request boundaries: batches and singles
-      // consume the same RNG stream and produce the same IDs with a given seed.
-      const [item] = pool.splice(index, 1);
+      // The caller supplies stock in the same order shown in its stock table.
+      // Randomness controls whether/how many prizes drop; delivery is FIFO.
+      const item = pool.shift();
       rewards.push({ stockId: item.stockId, rewardId: item.rewardId,
         title: item.title, estimatedValueCents: item.estimatedValueCents });
       ids.push(item.stockId);

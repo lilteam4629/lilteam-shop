@@ -47,6 +47,7 @@ for (const ticketCount of [1, 50, 100]) {
   } });
   assert.equal(result.prizeCount, 2);
   assert.equal(result.drawResults[0].prizeCount, 2);
+  assert.deepEqual(result.rewards.map(item => item.stockId), ['id-0', 'id-1'], 'multi-drop consumes the top stock rows');
   assert.equal(result.paymentCents, ticketCount * 100);
   assert.equal(new Set(result.rewards.map(item => item.stockId)).size, 2);
   assert.equal(JSON.stringify(options), original);

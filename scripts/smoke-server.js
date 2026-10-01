@@ -280,6 +280,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
   assert.ok(!productPage.body.includes('totalCollectedCents'));
   data = JSON.parse(fs.readFileSync(testDbPath, 'utf8'));
   const buyerBefore = data.users.find(user => user.username === 'demo').walletBalance;
+  const expectedStockOrder = require('../src/services/random-box').availableStockItems(data.stockItems, productId).map(item => item.id);
   const batchId = crypto.randomUUID();
   const batch = await request(`/random-box/${productId}/draw`, { method: 'POST',
     headers: { cookie: customerCookie, 'content-type': 'application/x-www-form-urlencoded' },
@@ -289,6 +290,7 @@ async function checkRandomBoxWorkflow(adminCookie) {
   const storedOrder = data.orders.find(item => item.id === batch.headers.location.split('/').pop());
   const order = require('../src/services/store-order-codec').decodeStoreSnapshot({ orders: [storedOrder] }).orders[0];
   assert.ok(order?.randomBoxOrder);
+  assert.deepEqual(order.items.flatMap(item => item.randomBoxDraw.prizeItems.map(prize => prize.stockItemId)), expectedStockOrder);
   assert.ok(order.items.length <= 330, 'three prizes cannot have a global drought longer than 110');
   assert.equal(order.total, order.items.length);
   assert.ok(order.items.every(item => item.price === 1));

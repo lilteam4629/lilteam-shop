@@ -20,6 +20,22 @@ for (const value of ['', 0, 2, 10, 1.5, NaN]) {
   assert.ok(box.validateRate(value)); assert.ok(box.validatePrice(value));
 }
 assert.equal(box.validateRate('1'), null); assert.equal(box.validatePrice('1'), null);
+// The same oldest-first ordering feeds both the stock table and fulfillment.
+const fifo = make(8);
+fifo.stockItems[0].addedAt = '2026-10-02T00:00:00Z';
+fifo.stockItems[1].addedAt = '2026-10-01T00:00:00Z';
+fifo.stockItems[2].addedAt = '2026-10-01T00:00:00Z';
+fifo.stockItems[3].status = 'sold';
+fifo.stockItems.push({ id: 'unrelated', productId: 'other-box', status: 'available' });
+const expectedFifo = box.availableStockItems(fifo.stockItems, 'box').map(item => item.id);
+draw(fifo, 1, 'fifo-first', min => min); // five prizes in a single ticket
+const restoredFifo = JSON.parse(JSON.stringify(fifo));
+restoredFifo.stockItems.push({ id: 'refill-last', productId: 'box', status: 'available', addedAt: '2026-10-03T00:00:00Z' });
+draw(restoredFifo, 1, 'fifo-next', min => min);
+const deliveredFifo = restoredFifo.orders.flatMap(order => order.items.flatMap(item => item.randomBoxDraw.prizeItems.map(prize => prize.stockItemId)));
+assert.deepEqual(deliveredFifo, [...expectedFifo, 'refill-last'], 'top-to-bottom across multi-drop, next request, reload and refill');
+assert.equal(restoredFifo.stockItems.find(item => item.id === 'unrelated').status, 'available');
+assert.equal(new Set(deliveredFifo).size, deliveredFifo.length);
 const shared = make();
 assert.equal(box.getDrawHealth(shared, shared.products[0]), 'READY');
 const invalidReadiness = make();
