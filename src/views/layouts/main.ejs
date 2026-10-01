@@ -259,9 +259,11 @@
     <link rel="stylesheet" href="<%= asset('css/storefront-home-section-spacing-v1.css') %>" />
   <% } %>
   <%- routeStylesheetMarkup %>
+  <% if (typeof isUnifiedStorefront === 'undefined' || !isUnifiedStorefront) { %>
   <link rel="stylesheet" data-route-stylesheet href="<%= asset('css/product-gallery-v1.css') %>" />
   <link rel="stylesheet" data-route-stylesheet href="<%= asset('css/random-box-prize-stock-v1.css') %>" />
   <link rel="stylesheet" data-route-stylesheet href="<%= asset('css/storefront-logo-contrast-v1.css') %>" />
+  <% } %>
 </head>
 <body class="bg-[var(--bg)] text-[var(--text)] min-h-screen flex flex-col storefront-model-<%= (typeof publicPreview !== 'undefined' && publicPreview) ? 'rangers-market' : (settings.storefrontModel || 'classic') %><%= typeof isUnifiedStorefront !== 'undefined' && isUnifiedStorefront ? ' storefront-unified' : '' %><%= (typeof isMainSite !== 'undefined' && isMainSite) ? ' storefront-owner-lilteam' : '' %><%= typeof storefrontCustomerRefresh !== 'undefined' && storefrontCustomerRefresh ? ' storefront-customer-refresh' : '' %><%= typeof storefrontOwnerHomeV7 !== 'undefined' && storefrontOwnerHomeV7 ? ' storefront-owner-home-page' : '' %><%= storefrontBackground ? ' storefront-global-background' : '' %><%= typeof storefrontMonochrome !== 'undefined' && storefrontMonochrome ? ' storefront-monochrome' : '' %>">
   <div id="page-loading-overlay" aria-hidden="true">
@@ -1348,4 +1350,5 @@
   <script src="<%= asset('js/main-service-strip-v1.js') %>" defer></script>
 </body>
 </html>
+
 

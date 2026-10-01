@@ -63,6 +63,9 @@ const BUNDLES = Object.freeze({
     'storefront-account-menu-mobile-v1.css',
     'storefront-product-artwork-full-v1.css',
     'storefront-home-section-spacing-v1.css',
+    'product-gallery-v1.css',
+    'random-box-prize-stock-v1.css',
+    'storefront-logo-contrast-v1.css',
   ],
   'storefront-post-home-v1.css': [
     'storefront-navbar-cozy-v1.css',
@@ -75,6 +78,9 @@ const BUNDLES = Object.freeze({
     'storefront-home-hero-cozy-v1.css',
     'storefront-product-artwork-full-v1.css',
     'storefront-home-section-spacing-v1.css',
+    'product-gallery-v1.css',
+    'random-box-prize-stock-v1.css',
+    'storefront-logo-contrast-v1.css',
   ],
   'storefront-home-popup-v1.css': [
     'storefront-welcome-popup-main-v2.css',
@@ -122,3 +128,4 @@ if (require.main === module) {
 }
 
 module.exports = { BUNDLES, buildCssBundles, checkCssBundles };
+
