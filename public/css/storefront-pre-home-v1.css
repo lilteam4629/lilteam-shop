@@ -6938,6 +6938,41 @@ body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welco
 @keyframes main-aurora-flow { from { transform: translate3d(-8%, -5%, 0) rotate(-25deg) scale(.9, 1); } to { transform: translate3d(18%, 15%, 0) rotate(28deg) scale(1.2, 1.3); } }
 @media (max-width: 640px) { .main-welcome-aurora i { width: 120%; filter: blur(18px); opacity: .7; } }
 @media (prefers-reduced-motion: reduce) { body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-aurora i { animation-duration: 24s !important; } }
+/* A floating product stage built from actual shop artwork. */
+.main-welcome-stage:has(.main-welcome-showcase) { min-height: 360px; padding-block: 65px; }
+.main-welcome-stage:has(.main-welcome-showcase) .main-welcome-content { width: min(100%, 690px); position: relative; z-index: 2; }
+.main-welcome-stage:has(.main-welcome-showcase) h1 { font-size: clamp(28px, 3.1vw, 46px); }
+.main-welcome-showcase { position: absolute; inset: 0; pointer-events: none; perspective: 1000px; }
+.main-welcome-tile { position: absolute; display: grid; grid-template-columns: minmax(0, 1fr) 18px; width: 142px; padding: 7px; border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border)); border-radius: 14px; background: var(--card); color: var(--text); box-shadow: 0 16px 30px color-mix(in srgb, var(--gold) 18%, transparent); text-decoration: none; pointer-events: auto; --tile-tilt: -12deg; }
+.main-welcome-tile img { grid-column: 1 / -1; width: 100%; height: 116px; object-fit: contain; border-radius: 9px; background: var(--input); }
+.main-welcome-tile span { padding: 7px 2px 1px; font-size: 10px; line-height: 15px; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
+.main-welcome-tile > svg { margin-top: 7px; color: var(--gold-text); }
+.main-welcome-tile--0 { left: 5%; top: 35px; }
+.main-welcome-tile--1 { left: 15%; bottom: 18px; --tile-tilt: 9deg; }
+.main-welcome-tile--2 { right: 5%; top: 28px; --tile-tilt: 12deg; }
+.main-welcome-tile--3 { right: 15%; bottom: 18px; --tile-tilt: -9deg; }
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile { animation: main-tile-float 4s ease-in-out infinite alternate !important; }
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile:nth-child(even) { animation-delay: -2s !important; }
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile:hover { animation-play-state: paused !important; border-color: var(--gold-text); }
+.main-welcome-tile:focus-visible { outline: 3px solid var(--gold-text); outline-offset: 4px; }
+@keyframes main-tile-float { from { transform: translateY(6px) rotate(var(--tile-tilt)) rotateY(-8deg); } to { transform: translateY(-12px) rotate(calc(var(--tile-tilt) + 4deg)) rotateY(8deg); } }
+@media (max-width: 1150px) {
+  .main-welcome-tile { width: 112px; }
+  .main-welcome-tile img { height: 90px; }
+  .main-welcome-tile--0, .main-welcome-tile--1 { left: 2%; }
+  .main-welcome-tile--2, .main-welcome-tile--3 { right: 2%; }
+  .main-welcome-stage:has(.main-welcome-showcase) .main-welcome-content { max-width: 580px; }
+}
+@media (max-width: 800px) {
+  .main-welcome-stage:has(.main-welcome-showcase) { padding: 35px 16px 20px; gap: 24px; min-height: 0; }
+  .main-welcome-showcase { position: relative; display: flex; justify-content: center; gap: 12px; width: 100%; order: 2; padding: 9px 0; }
+  .main-welcome-tile { position: relative; inset: auto; width: 102px; flex: 0 0 102px; --tile-tilt: -5deg; }
+  .main-welcome-tile:nth-child(even) { --tile-tilt: 5deg; }
+  .main-welcome-tile img { height: 82px; }
+  .main-welcome-tile:nth-child(n+3) { display: none; }
+  .main-welcome-tile span { font-size: 9px; }
+}
+@media (prefers-reduced-motion: reduce) { body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile { animation-duration: 16s !important; } }
 /* A compact service desk beside shop news and paged recent purchases. */
 .storefront-community { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 1.8fr); gap: 22px 28px; margin-block: 24px 36px; color: var(--text); }
 .community-overview { display: contents; }

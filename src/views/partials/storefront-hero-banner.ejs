@@ -2,6 +2,14 @@
 <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
 <section class="main-welcome-stage" id="home-top" aria-label="ยินดีต้อนรับสู่ร้าน">
   <div class="main-welcome-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+  <% const welcomeProducts = typeof products !== 'undefined' ? products.filter(p => p.images && p.images[0]).slice(0, 4) : []; %>
+  <% if (welcomeProducts.length) { %>
+  <div class="main-welcome-showcase" aria-label="เลือกชมสินค้าในร้าน">
+    <% welcomeProducts.forEach((p, index) => { %>
+    <a class="main-welcome-tile main-welcome-tile--<%= index %>" href="/game/<%= p.slug %>" aria-label="ดูสินค้า <%= p.title %>"><img src="<%= p.images[0] %>" alt="" width="160" height="160" decoding="async"/><span><%= p.title %></span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
+    <% }) %>
+  </div>
+  <% } %>
   <div class="main-welcome-content">
     <h1>ยินดีต้อนรับสู่ <span><%= settings.shopName %></span></h1>
     <% if (settings.tagline) { %><p><%= settings.tagline %></p><% } %>
