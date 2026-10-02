@@ -1,3 +1,4 @@
+const { memberTopupTotals } = require('./member-topup-totals');
 const API_TRANSACTION_TYPES = new Set(['catalog-topup', 'catalog-purchase', 'catalog-adjust']);
 
 function hasCatalogActivity(transaction) {
@@ -5,6 +6,7 @@ function hasCatalogActivity(transaction) {
 }
 
 function collectScopeMembers({ data, shopId, shopName, shopSlug = '', topupRequests = [] }) {
+  const totals = memberTopupTotals(data, 'catalog');
   const activityUserIds = new Set();
   const apiTransactionCounts = new Map();
 
@@ -35,6 +37,7 @@ function collectScopeMembers({ data, shopId, shopName, shopSlug = '', topupReque
       status: user.status || 'active',
       createdAt: user.createdAt || null,
       catalogWalletBalance: Number(user.catalogWalletBalance) || 0,
+      totalTopupAmount: totals.get(String(user.id)) || 0,
       apiTransactionCount: apiTransactionCounts.get(String(user.id)) || 0,
     }));
 }

@@ -21,6 +21,7 @@ const receiverProfiles = require('../services/receiver-profiles');
 const theme = require('../services/theme');
 const topupsService = require('../services/topups');
 const { adjustCustomerWallet, WalletAdjustmentError } = require('../services/admin-wallet-adjustment');
+const { memberTopupTotals } = require('../services/member-topup-totals');
 const { collectCatalogApiMembers } = require('../services/admin-catalog-wallet-members');
 const { getCloudUrl } = require('../services/cloud-url');
 const { parseBulkStockEntries } = require('../services/stock-bulk-entry');
@@ -1956,7 +1957,8 @@ router.get('/users', async (req, res) => {
     timeZone: 'Asia/Bangkok', year: 'numeric', month: '2-digit', day: '2-digit',
   }).format(date);
   const todayKey = bangkokDay(new Date());
-  let sourceUsers = [...store.data.users];
+  const topupTotals = memberTopupTotals(store.data);
+  let sourceUsers = store.data.users.map(user => ({ ...user, totalTopupAmount: topupTotals.get(String(user.id)) || 0 }));
   let apiShops = [];
   let shopFilter = '';
   if (mainAdminUi && source === 'api') {
