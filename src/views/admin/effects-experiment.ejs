@@ -29,6 +29,19 @@
       <div class="experiment-page-head"><div><div class="experiment-kicker">STOREFRONT EXPERIENCE</div><h1>ลูกเล่นหน้าเว็บ</h1><p>ตั้งค่าเพลงและเอฟเฟกต์ตกแต่งหน้าร้าน พร้อมดูผลลัพธ์จากแผงเดียว</p></div><div class="experiment-actions"><a href="/" class="experiment-button">ดูผลที่หน้าร้าน ↗</a></div></div>
       <div class="experiment-page-status-note"><strong>สถานะหน้านี้:</strong> ตั้งค่าเพลงพื้นหลัง, หิมะ และระบบฝนได้จริง · พื้นที่ตัวอย่างอัปเดตทันทีโดยไม่ต้องออกจากหน้า</div>
 
+      <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+      <section class="experiment-card" style="padding:20px;margin-bottom:20px">
+        <h2 style="font-size:18px;font-weight:600;margin-bottom:6px">รูปแบบส่วนต้อนรับหน้าแรก</h2>
+        <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">สลับระหว่างหน้าต้อนรับเคลื่อนไหวกับภาพแบนเนอร์ของร้านได้</p>
+        <form action="/admin/effects/welcome-layout" method="post">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+            <label class="experiment-button" style="cursor:pointer;gap:8px"><input type="radio" name="welcomeLayout" value="animated" <%= settings.hero?.welcomeLayout !== 'banner' ? 'checked' : '' %>>หน้าต้อนรับเคลื่อนไหว</label>
+            <label class="experiment-button" style="cursor:pointer;gap:8px"><input type="radio" name="welcomeLayout" value="banner" <%= settings.hero?.welcomeLayout === 'banner' ? 'checked' : '' %>>แบนเนอร์รูปภาพ</label>
+          </div>
+          <div class="experiment-actions"><button type="submit" class="experiment-button">บันทึกรูปแบบหน้าแรก</button><a class="experiment-button" href="/admin/appearance">เลือกรูปแบนเนอร์</a></div>
+        </form>
+      </section>
+      <% } %>
       <section class="effects-preview experiment-card" data-effects-preview>
         <div class="effects-preview-top"><div><span class="effects-eyebrow">LIVE STOREFRONT PREVIEW</span><h2>บรรยากาศหน้าร้านของคุณ</h2><p>ดูผลของเอฟเฟกต์ก่อนบันทึก การตั้งค่าจะมีผลหน้าร้านหลังบันทึก</p></div><span class="effects-preview-live"><i></i> จำลองแบบสด</span></div>
         <div class="effects-stage <%= snow.enabled ? 'snow-on' : '' %> <%= rainInstalled && rain.enabled ? 'rain-on' : '' %>" data-effects-stage style="--rain-color:<%= rain.color || '#78c8ff' %>">

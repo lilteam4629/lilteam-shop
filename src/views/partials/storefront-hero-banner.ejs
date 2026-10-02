@@ -1,5 +1,6 @@
 <% const sharedHero = typeof storefrontHero !== 'undefined' ? storefrontHero : { bannerImage: settings.hero?.mode === 'none' ? null : settings.hero?.bannerImage, bannerLink: settings.hero?.bannerLink || '' }; %>
-<% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
+<% const mainWelcomeEnabled = typeof isMainSite !== 'undefined' && isMainSite && settings.hero?.welcomeLayout !== 'banner'; %>
+<% if (mainWelcomeEnabled) { %>
 <section class="main-welcome-stage" id="home-top" aria-label="ยินดีต้อนรับสู่ร้าน">
   <div class="main-welcome-crystal-scene" aria-hidden="true">
     <svg class="main-welcome-crystal main-welcome-crystal--left" viewBox="0 0 420 360" fill="none"><g class="main-crystal-facets"><path d="m80 40 125 40 50 115-155 85-65-140Z"/><path d="m80 40 20 240 105-200-170 60 220 55-175-155Z"/><path d="m280 30 80 60-30 85-60-70Z"/><path d="m280 30 50 145 30-85-90 15Z"/></g><path class="main-crystal-energy" d="M-20 300 100 280 255 195 330 175 440 240"/><circle cx="100" cy="280" r="4"/><circle cx="255" cy="195" r="3"/></svg>
@@ -30,13 +31,14 @@
     </div>
   </div>
 </section>
-<% } else if (sharedHero.bannerImage) { %>
+<% } else if (sharedHero.bannerImage || (typeof isMainSite !== 'undefined' && isMainSite && settings.hero?.bannerImage)) { %>
+<% const selectedBannerImage = sharedHero.bannerImage || settings.hero.bannerImage; %>
 <section class="owner-home-v20-hero owner-home-v23-hero owner-home-v20-hero--banner owner-home-v20-hero--banner-only" id="home-top" aria-label="แบนเนอร์ร้าน <%= settings.shopName %>">
   <div class="owner-home-v20-artwork">
     <% if (sharedHero.bannerLink) { %>
-      <a href="<%= sharedHero.bannerLink %>" aria-label="เปิดแบนเนอร์ร้าน <%= settings.shopName %>"><img src="<%= sharedHero.bannerImage %>" alt="แบนเนอร์ร้าน <%= settings.shopName %>" width="1200" height="400" fetchpriority="high" decoding="async" /></a>
+      <a href="<%= sharedHero.bannerLink %>" aria-label="เปิดแบนเนอร์ร้าน <%= settings.shopName %>"><img src="<%= selectedBannerImage %>" alt="แบนเนอร์ร้าน <%= settings.shopName %>" width="1200" height="400" fetchpriority="high" decoding="async" /></a>
     <% } else { %>
-      <img src="<%= sharedHero.bannerImage %>" alt="แบนเนอร์ร้าน <%= settings.shopName %>" width="1200" height="400" fetchpriority="high" decoding="async" />
+      <img src="<%= selectedBannerImage %>" alt="แบนเนอร์ร้าน <%= settings.shopName %>" width="1200" height="400" fetchpriority="high" decoding="async" />
     <% } %>
   </div>
 </section>

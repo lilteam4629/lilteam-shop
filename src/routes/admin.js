@@ -2976,6 +2976,22 @@ router.get('/settings', (req, res) => {
   res.render('admin/settings-experiment', { title: 'ตั้งค่าร้าน', active: 'settings', licenseEnabled: license.isGateOn() });
 });
 
+router.post('/effects/welcome-layout', async (req, res) => {
+  if (req.tenantShop) return res.sendStatus(403);
+  const welcomeLayout = req.body.welcomeLayout;
+  if (!['animated', 'banner'].includes(welcomeLayout)) return res.sendStatus(400);
+  if (welcomeLayout === 'banner' && !store.data.settings.hero?.bannerImage) {
+    req.flash('error', 'กรุณาอัปโหลดแบนเนอร์ในหน้า รูปและแบนเนอร์ ก่อนเลือกใช้แบนเนอร์');
+    return res.redirect('/admin/effects');
+  }
+  store.data.settings.hero = store.data.settings.hero || {};
+  store.data.settings.hero.welcomeLayout = welcomeLayout;
+  if (welcomeLayout === 'banner') store.data.settings.hero.mode = 'banner';
+  await store.save();
+  req.flash('success', welcomeLayout === 'banner' ? 'เปลี่ยนเป็นแบนเนอร์แล้ว' : 'เปลี่ยนเป็นหน้าต้อนรับเคลื่อนไหวแล้ว');
+  res.redirect('/admin/effects');
+});
+
 router.get('/effects', (req, res) => {
   res.render('admin/effects-experiment', { title: 'ลูกเล่นหน้าเว็บ', active: 'effects' });
 });
