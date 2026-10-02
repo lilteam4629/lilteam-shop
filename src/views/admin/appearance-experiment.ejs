@@ -63,6 +63,7 @@
 
         <article class="as-card as-card-hero" data-as-card data-search="แบนเนอร์ banner hero หน้าแรก home">
           <header class="as-card-head"><div><span class="as-card-icon is-gold" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m5 16 4-4 3 3 3-5 4 6"/></svg></span><div><h3>แบนเนอร์หน้าหลัก</h3><p>เลือกภาพหลักเพื่อใช้แทนการ์ดเกมด้านบนของหน้าแรก</p></div></div><span class="as-status <%= heroSettings.bannerImage ? 'is-set' : '' %>"><i></i><%= heroSettings.bannerImage ? 'มีรูปแล้ว' : 'ยังไม่ตั้งค่า' %></span></header>
+          <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><p>เว็บหลัก: รูปนี้ใช้เป็นพื้นหลังส่วนต้อนรับ พร้อมชั้นบังภาพให้ข้อความอ่านชัด ปิดใช้ภาพแบนเนอร์เพื่อซ่อนภาพพื้นหลัง</p><% } %>
           <div class="as-preview as-preview-banner" data-as-preview>
             <img src="<%= heroSettings.bannerImage || '' %>" alt="ตัวอย่างแบนเนอร์หน้าหลัก" data-as-image <%= heroSettings.bannerImage ? '' : 'hidden' %>>
             <div class="as-empty-preview" data-as-empty <%= heroSettings.bannerImage ? 'hidden' : '' %>><span class="as-empty-art" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="14" rx="2"/><path d="m5 16 4-4 3 3 3-5 4 6"/></svg></span><strong>ตัวอย่างแบนเนอร์หน้าหลัก</strong><small>แนะนำภาพแนวนอน อัตราส่วน 3:1</small></div>

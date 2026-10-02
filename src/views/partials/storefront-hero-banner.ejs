@@ -1,6 +1,9 @@
 <% const sharedHero = typeof storefrontHero !== 'undefined' ? storefrontHero : { bannerImage: settings.hero?.mode === 'none' ? null : settings.hero?.bannerImage, bannerLink: settings.hero?.bannerLink || '' }; %>
 <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
 <section class="main-welcome-stage" id="home-top" aria-label="ยินดีต้อนรับสู่ร้าน">
+  <% if (sharedHero.bannerImage) { %><img class="main-welcome-background" src="<%= sharedHero.bannerImage %>" alt="" aria-hidden="true" decoding="async"/><% } %>
+  <div class="main-welcome-veil" aria-hidden="true"></div>
+  <svg class="main-welcome-ribbons" viewBox="0 0 1300 300" preserveAspectRatio="xMidYMid slice" fill="none" aria-hidden="true"><path d="M-80 270C150 280 110 25 350 65S650 330 900 195s210-170 480-80"/><path d="M-90 295C180 310 130 55 365 88S680 350 915 218s235-190 480-80"/><path d="M-100 245C120 250 95 0 335 42S630 310 885 172s195-150 475-80"/><path class="main-welcome-tracer" d="M-80 270C150 280 110 25 350 65S650 330 900 195s210-170 480-80"/></svg>
   <div class="main-welcome-light" aria-hidden="true"></div>
   <div class="main-welcome-content">
     <h1>ยินดีต้อนรับสู่ <span><%= settings.shopName %></span></h1>
