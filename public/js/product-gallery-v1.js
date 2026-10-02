@@ -6,6 +6,8 @@
   // Read every image frame before writing styles to avoid repeated forced layouts.
   function reserveSpace(image) {
     if (!image.isConnected) return;
+    // This media frame already has a CSS aspect ratio; measuring it forces no useful work.
+    if (image.parentElement && image.parentElement.classList && image.parentElement.classList.contains("owner-home-v21-media")) return;
     sizingImages.add(image);
     if (sizingFrame) return;
     sizingFrame = requestAnimationFrame(function () {

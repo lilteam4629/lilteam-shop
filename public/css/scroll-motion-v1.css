@@ -38,3 +38,7 @@ html.page-is-scrolling body #site-page-shell .main-welcome-stage .main-welcome-s
 html.page-is-scrolling body #site-page-shell .main-welcome-stage .main-welcome-showcase .main-welcome-tile::after,
 html.page-is-scrolling body #site-page-shell .main-welcome-stage .main-crystal-facets,
 html.page-is-scrolling body #site-page-shell .main-welcome-stage .main-crystal-energy { animation-play-state:paused!important; }
+
+/* Isolate card layout/paint without hiding lazy-loaded images or changing card heights. */
+#catalogGrid > .catalog-filter-card{contain:layout paint}
+.main-welcome-stage:not(.perf-visible) :is(.main-welcome-tile,.main-welcome-tile::after,.main-crystal-facets,.main-crystal-energy){animation-play-state:paused!important}

@@ -15,3 +15,12 @@
 
 ## Scope
 Shared public layout and gallery implementation; no changes to tenant data, balances, checkout, admin permissions, or rain settings.
+
+
+## Follow-up — 2026-10-03
+- Reproduced invisible desktop rain: live SVG stroke was #000000 on a black storefront. It was loaded and animating with no console error. Added separate theme-aware texture colors; black is lightened in dark mode and white darkened in light mode, without an animated CSS filter or changing stored settings.
+- Explicitly enabled rain keeps falling more slowly under reduced-motion preference instead of disappearing/static trails.
+- Avoid redundant root class mutations on every scroll frame. Skip gallery geometry reads for known fixed-ratio product media frames. Pause hero decoration only when outside the viewport (rain remains active).
+- Isolate catalog card layout/paint. An experimental content-visibility approach was rejected by an existing regression protecting native lazy-loaded images and was removed before delivery.
+- Candidate browser checks: desktop 1440px and mobile 390px; real wheel scrolling, navigation to /products, two theme colors, search matching the last product, clearing search, reduced-motion animation running, and zero page errors all passed.
+- Final comparison with CPU throttled 4x over the same scroll/navigation sequence: desktop layout 715→660ms/style 1334→1313ms; mobile layout 661→612ms/style 4611→4487ms. These are sums over the measured interval, not individual-frame or network latency guarantees. Earlier provisional numbers used a rejected experiment and are superseded.

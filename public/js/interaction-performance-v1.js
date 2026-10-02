@@ -36,7 +36,7 @@
   var scrollTimer=0,scrollFrame=0;
   window.addEventListener('scroll',function(){
     clearTimeout(scrollTimer);
-    if(!scrollFrame)scrollFrame=requestAnimationFrame(function(){
+    if(!scrollFrame&&!document.documentElement.classList.contains('page-is-scrolling'))scrollFrame=requestAnimationFrame(function(){
       scrollFrame=0;
       document.documentElement.classList.add('page-is-scrolling');
       if(mobileQuery.matches)document.documentElement.classList.add('mobile-is-scrolling');
