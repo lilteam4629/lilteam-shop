@@ -1,7 +1,7 @@
 <% const sharedHero = typeof storefrontHero !== 'undefined' ? storefrontHero : { bannerImage: settings.hero?.mode === 'none' ? null : settings.hero?.bannerImage, bannerLink: settings.hero?.bannerLink || '' }; %>
 <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
 <section class="main-welcome-stage" id="home-top" aria-label="ยินดีต้อนรับสู่ร้าน">
-  <div class="main-welcome-aurora" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="main-welcome-orbit" aria-hidden="true"><div class="main-welcome-orbit-ring"></div><div class="main-welcome-orbit-ring main-welcome-orbit-ring--inner"></div><div class="main-welcome-orbit-satellite"></div></div>
   <% const welcomeProducts = typeof products !== 'undefined' ? products.filter(p => p.images && p.images[0]).slice(0, 4) : []; %>
   <% if (welcomeProducts.length) { %>
   <div class="main-welcome-showcase" aria-label="เลือกชมสินค้าในร้าน">

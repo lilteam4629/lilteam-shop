@@ -84,6 +84,24 @@ body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welco
   .main-welcome-tile span { font-size: 9px; }
 }
 @media (prefers-reduced-motion: reduce) { body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile { animation-duration: 16s !important; } }
+/* Sculpted orbital stage, with solid card edges and directional shadows. */
+.main-welcome-orbit { position: absolute; z-index: -1; inset: 0; overflow: hidden; pointer-events: none; perspective: 900px; background: radial-gradient(ellipse at 50% 110%, color-mix(in srgb, var(--gold) 12%, var(--card)), var(--card) 70%); }
+.main-welcome-orbit-ring { position: absolute; width: 1100px; height: 700px; left: calc(50% - 550px); top: -155px; border: 1px solid color-mix(in srgb, var(--gold) 32%, transparent); border-radius: 50%; transform: rotateX(66deg) rotateZ(-14deg); box-shadow: 0 9px 0 -8px color-mix(in srgb, var(--gold) 25%, transparent), 0 28px 40px -30px var(--gold); }
+.main-welcome-orbit-ring--inner { width: 850px; height: 540px; left: calc(50% - 425px); top: -80px; border-style: dashed; opacity: .6; }
+.main-welcome-orbit-satellite { position: absolute; width: 1100px; height: 700px; left: calc(50% - 550px); top: -155px; border-radius: 50%; transform: rotateX(66deg) rotateZ(-14deg); }
+.main-welcome-orbit-satellite::before { content: ''; position: absolute; left: 49%; top: -5px; width: 10px; height: 10px; border-radius: 50%; background: var(--gold-text); box-shadow: 0 5px 12px color-mix(in srgb, var(--gold) 40%, transparent); }
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-orbit-satellite { animation: main-orbit-travel 12s linear infinite !important; }
+@keyframes main-orbit-travel { from { transform: rotateX(66deg) rotateZ(-14deg); } to { transform: rotateX(66deg) rotateZ(346deg); } }
+@media (min-width: 801px) {
+  .main-welcome-tile { transform-style: preserve-3d; border-bottom: 4px solid color-mix(in srgb, var(--gold) 35%, var(--card)); border-right: 3px solid color-mix(in srgb, var(--gold) 24%, var(--card)); box-shadow: 8px 20px 22px -12px color-mix(in srgb, var(--text) 27%, transparent), 0 35px 45px -25px color-mix(in srgb, var(--gold) 30%, transparent); }
+  .main-welcome-tile::after { content: ''; position: absolute; inset: 0; border-radius: 12px; pointer-events: none; background: linear-gradient(125deg, #ffffff50, transparent 35%, transparent 70%, #ffffff20); }
+  .main-welcome-tile--0, .main-welcome-tile--3 { --tile-depth: -18deg; }
+  .main-welcome-tile--1, .main-welcome-tile--2 { --tile-depth: 18deg; }
+  body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile { animation-name: main-tile-dimensional !important; }
+}
+@keyframes main-tile-dimensional { from { transform: translateY(7px) rotateZ(var(--tile-tilt)) rotateY(var(--tile-depth)) rotateX(5deg); } to { transform: translateY(-10px) rotateZ(calc(var(--tile-tilt) + 3deg)) rotateY(calc(var(--tile-depth) - 8deg)) rotateX(-4deg); } }
+@media (max-width: 800px) { .main-welcome-orbit { opacity: .6; } }
+@media (prefers-reduced-motion: reduce) { body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-orbit-satellite { animation-duration: 40s !important; } }
 /* A compact service desk beside shop news and paged recent purchases. */
 .storefront-community { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 1.8fr); gap: 22px 28px; margin-block: 24px 36px; color: var(--text); }
 .community-overview { display: contents; }
