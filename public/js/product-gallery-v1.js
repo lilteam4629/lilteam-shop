@@ -12,8 +12,17 @@
     var ticket = (image.__galleryTicket || 0) + 1;
     image.__galleryTicket = ticket;
     var next = new Image();
+    var settled = false;
+    var timeout = setTimeout(function () { finish(null); next.onload = next.onerror = null; next.src = ''; }, 12000);
+    function finish(result) {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      if (done) done(result);
+    }
     next.onload = function () {
-      if (!image.isConnected || image.__galleryTicket !== ticket) return;
+      if (settled) return;
+      if (!image.isConnected || image.__galleryTicket !== ticket) { finish(null); return; }
       // Animate only the existing image: extra image children can alter theme grid sizing.
       if (image.__galleryAnimation) image.__galleryAnimation.cancel();
       image.src = urls[index];
@@ -23,9 +32,9 @@
           { opacity: 1, transform: 'scale(1)' }
         ], { duration: 520, easing: 'cubic-bezier(.22,1,.36,1)' });
       }
-      if (done) done(index);
+      finish(index);
     };
-    next.onerror = function () { if (done && image.__galleryTicket === ticket) done(null); };
+    next.onerror = function () { finish(null); };
     next.src = urls[index];
   }
   function select(gallery, index) {
@@ -90,7 +99,7 @@
       cards.forEach(function (entry) { observer.observe(entry.image); });
     } else cards.forEach(function (entry) { entry.visible = true; });
     timer = setInterval(function () {
-      if (document.hidden || reduced.matches) return;
+      if (document.hidden || reduced.matches || document.documentElement.classList.contains('page-is-scrolling')) return;
       cards.forEach(function (entry) {
         var host = entry.image.closest('a, button') || entry.image.parentElement;
         if (!entry.visible || entry.busy || !entry.image.isConnected || host.matches(':hover, :focus-within')) return;

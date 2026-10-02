@@ -1,0 +1,22 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const layout = fs.readFileSync('src/views/layouts/main.ejs', 'utf8');
+const begin = layout.indexOf("      const canvas=document.getElementById('store-rain')");
+const end = layout.indexOf('    })();', begin);
+let code = layout.slice(begin, end).replace(/<%-[^\n]*%>/g, JSON.stringify('medium'));
+code = code.replace("const color=\"medium\"", "const color='#78c8ff'");
+let callback, time = 0, clears = 0;
+const listeners = {};
+const context = {setTransform(){},clearRect(){clears++;},beginPath(){},moveTo(){},lineTo(){},stroke(){}};
+const canvas = {getContext:()=>context};
+vm.runInNewContext('(function(){'+code+'})();', {document:{getElementById:()=>canvas,hidden:false,addEventListener:(name,fn)=>listeners[name]=fn},matchMedia:()=>({matches:true}),innerWidth:390,innerHeight:844,devicePixelRatio:3,performance:{now:()=>time},requestAnimationFrame:fn=>{callback=fn;return 1;},cancelAnimationFrame(){},addEventListener:(name,fn)=>listeners[name]=fn,setTimeout,clearTimeout,Math});
+for(time=0;time<=1000;time+=16.67) callback(time);
+assert.ok(clears<=25, 'mobile rain must not paint every display frame');
+const before = clears;
+listeners.scroll();
+for(let i=0;i<6;i++){time+=16.67;callback(time);}
+assert.equal(clears,before,'rain must leave rendering capacity for mobile scrolling');
+time+=200; callback(time);
+assert.ok(clears>before,'rain resumes after scrolling');
+console.log('Rain frame budget, mobile scroll yield and resume passed');

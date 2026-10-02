@@ -1317,6 +1317,10 @@ html.scroll-motion-ready body .premium-product-card.scroll-reveal-card.scroll-re
   html.mobile-is-scrolling .snowflake,html.mobile-is-scrolling .marquee-track,html.mobile-is-scrolling .product-shimmer,html.mobile-is-scrolling .ready-glow,html.mobile-is-scrolling .banner-sparkle{animation-play-state:paused!important}
   html.mobile-is-scrolling .premium-product-card,html.mobile-is-scrolling .catalog-card{box-shadow:none!important;filter:none!important}
 }
+html.page-is-scrolling body #site-page-shell .main-welcome-stage .main-welcome-showcase .main-welcome-tile,
+html.page-is-scrolling body #site-page-shell .main-welcome-stage .main-welcome-showcase .main-welcome-tile::after,
+html.page-is-scrolling body #site-page-shell .main-welcome-stage .main-crystal-facets,
+html.page-is-scrolling body #site-page-shell .main-welcome-stage .main-crystal-energy { animation-play-state:paused!important; }
 
 /* Source: storefront-navbar-main-v2.css */
 /* Main-store navigation refresh. The theme is loaded only for the main shop;

@@ -129,7 +129,7 @@ assert.match(ownerHeroLayoutCss, /\.owner-home-v20-artwork img\s*\{[^}]*filter:\
 assert.match(home, /include\('\.\.\/partials\/storefront-hero-banner'\)/,
   'every shop uses the shared banner component');
 const sharedBanner = read('src/views/partials/storefront-hero-banner.ejs');
-assert.match(sharedBanner, /class="owner-home-v20-artwork"[\s\S]*?<img src="<%= sharedHero\.bannerImage %>"[\s\S]*?fetchpriority="high"/,
+assert.match(sharedBanner, /class="owner-home-v20-artwork"[\s\S]*?<img src="<%= selectedBannerImage %>"[\s\S]*?fetchpriority="high"/,
   'the resolved shop banner remains visible and loads with high priority');
 assert.match(sharedBanner, /owner-home-v20-hero--banner-only/);
 assert.doesNotMatch(home, /ownerHomeHeroProduct|owner-home-cozy-spotlight|<h1[^>]*owner-home-v20-title/,

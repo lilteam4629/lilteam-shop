@@ -671,13 +671,19 @@
       }
       async function uploadFile(file) {
         file = await optimizeImage(file);
-        const response = await fetch('/admin/media/direct-upload', {
+        async function boundedFetch(url, options, milliseconds) {
+          const controller = new AbortController();
+          const timer = setTimeout(() => controller.abort(), milliseconds);
+          try { return await fetch(url, Object.assign({}, options, { signal: controller.signal })); }
+          finally { clearTimeout(timer); }
+        }
+        const response = await boundedFetch('/admin/media/direct-upload', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ filename: file.name, contentType: file.type }),
-        });
+        }, 15000);
         const signed = await response.json();
         if (!response.ok || !signed.ok) throw new Error(signed.error || 'สร้างลิงก์ฝากรูปไม่สำเร็จ');
-        const uploaded = await fetch(signed.uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
+        const uploaded = await boundedFetch(signed.uploadUrl, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file }, 90000);
         if (!uploaded.ok) throw new Error('ส่งรูปไป Cloudflare R2 ไม่สำเร็จ (' + uploaded.status + ')');
         return signed.publicUrl;
       }

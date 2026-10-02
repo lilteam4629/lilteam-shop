@@ -206,13 +206,12 @@
     #page-loading-overlay {
       position: fixed; inset: 0; z-index: 9999;
       display: flex; align-items: center; justify-content: center;
-      background: color-mix(in srgb, var(--bg) 75%, transparent);
-      backdrop-filter: blur(3px);
+      background: transparent;
       opacity: 0; visibility: hidden; pointer-events: none;
       transition: opacity .15s ease;
     }
     html.lilteam-navigating #page-loading-overlay {
-      opacity: 1; visibility: visible; pointer-events: auto;
+      opacity: 1; visibility: visible; pointer-events: none;
       transition: opacity .15s ease .15s;
     }
     #page-loading-overlay .loading-ring {
@@ -1260,13 +1259,15 @@
       const coarse=matchMedia('(max-width:900px), (pointer:coarse)').matches;
       const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
       const limits={light:coarse?14:30,medium:coarse?24:52,heavy:coarse?34:72};
-      let drops=[],frame=0,last=0,w=0,h=0,dpr=1,running=true;
+      let drops=[],frame=0,last=0,w=0,h=0,dpr=1,running=true,scrollUntil=0;
+      const frameInterval=1000/(coarse?24:30);
       function reset(drop,randomY){const depth=.22+Math.random()*.78;drop.bucket=Math.min(2,Math.floor(depth*3));drop.x=-20+Math.random()*(w+40);drop.y=randomY?Math.random()*h:-35-Math.random()*90;drop.len=(7+Math.random()*11)*(.72+depth*.45);drop.speed=(430+Math.random()*300)*(.72+depth*.38);drop.wind=-12+Math.random()*30;drop.slant=(drop.wind/drop.speed)*drop.len+(-.55+Math.random()*1.1);return drop}
       function resize(force){const nextW=innerWidth,nextH=innerHeight;if(!force&&coarse&&w&&Math.abs(nextW-w)<2)return;dpr=Math.min(devicePixelRatio||1,coarse?1:1.25);w=nextW;h=nextH;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const areaScale=coarse?1:Math.min(1,Math.max(.55,(w*h)/(1440*900)));const count=reduced?Math.max(7,Math.round(limits[level]*.4)):Math.max(9,Math.round(limits[level]*areaScale));drops=Array.from({length:count},()=>reset({},true))}
       function rainPath(bucket){ctx.beginPath();for(const d of drops){if(d.bucket!==bucket)continue;ctx.moveTo(d.x,d.y);ctx.lineTo(d.x+d.slant+(d.wind*.025),d.y+d.len)}}
       function draw(now){
         frame=0;
         if(document.hidden||!running)return;
+        if(now<scrollUntil||now-last<frameInterval){frame=requestAnimationFrame(draw);return}
         // Keep rainfall continuous during touch and momentum scrolling. Mobile
         // performance is controlled by the lower DPR/drop count above, rather
         // than freezing the animation whenever the page moves.
@@ -1281,6 +1282,7 @@
       function stop(){running=false;if(frame){cancelAnimationFrame(frame);frame=0}}
       let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(()=>resize(false),180)},{passive:true});
       addEventListener('orientationchange',()=>{clearTimeout(timer);timer=setTimeout(()=>resize(true),220)},{passive:true});
+      addEventListener('scroll',()=>{if(coarse)scrollUntil=performance.now()+160},{passive:true});
       document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else start()});resize(true);start();
       addEventListener('pagehide',stop);
       addEventListener('pageshow',start);

@@ -633,7 +633,7 @@ async function run() {
     const homePopupCss = await fetchOk('/css/storefront-home-popup-v1.css', 'text/css');
     if (!homePreCss.body.includes('.owner-home-v20-shell') || !homePostCss.body.includes('.owner-home-v20-hero')) throw new Error('combined homepage CSS is missing the selected storefront layers');
     if (!homePopupCss.body.includes('.welcome-popup-redesign')) throw new Error('combined welcome popup CSS is missing its redesigned layer');
-    const homeSectionOrder = ['class="owner-home-v20-hero ', 'class="store-status-section', 'class="store-announcements', 'class="store-filter-section', 'id="home-catalog"'];
+    const homeSectionOrder = ['data-storefront-community', 'class="store-filter-section', 'id="home-catalog"'];
     const sectionPositions = homeSectionOrder.map(marker => home.body.indexOf(marker));
     if (sectionPositions.some(position => position < 0) || sectionPositions.some((position, index) => index && position <= sectionPositions[index - 1])) throw new Error('main home discovery sections are out of order');
     const ownerHomeCss = await fetchOk('/css/storefront-owner-home-v7.css', 'text/css');
@@ -643,8 +643,8 @@ async function run() {
     if (!/\.owner-home-v20-artwork img\s*\{[^}]*object-fit:\s*contain/s.test(ownerHomeV20Css.body)) throw new Error('main shop banner is not shown in full');
     if (!['background: var(--bg)', 'background: var(--card)', 'color: var(--text)', 'color: var(--gold-text)'].every(token => ownerHomeV20Css.body.includes(token))) throw new Error('main shop homepage is not using the saved storefront theme tokens');
     if (/--(?:gold|bg|card|input|border|text):\s*#[0-9a-f]{3,8}/i.test(ownerHomeV20Css.body)) throw new Error('main shop homepage overrides the saved storefront theme palette');
-    if (!home.body.includes('owner-home-v23-hero')) throw new Error('main home is missing its featured hero');
-    if (!home.body.includes('owner-home-v23-spotlight') || !home.body.includes('main-store-product-stock')) throw new Error('main home is missing the real-data featured item or stock status');
+    if (home.body.includes('class="main-welcome-stage"')) throw new Error('animated welcome must be opt-in on a fresh shop');
+    if (!home.body.includes('main-store-product-card') || !home.body.includes('main-store-product-stock')) throw new Error('main home is missing real product cards or stock status');
     const ownerHomeV23Css = await fetchOk('/css/storefront-owner-home-hero-v23.css', 'text/css');
     if (!ownerHomeV23Css.body.includes('.owner-home-v23-spotlight') || !ownerHomeV23Css.body.includes('prefers-reduced-motion')) throw new Error('main hero spotlight is missing its responsive motion-safe styles');
     const ownerHomeV21Css = await fetchOk('/css/storefront-owner-home-v21.css', 'text/css');
