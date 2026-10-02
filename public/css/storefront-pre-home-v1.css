@@ -7291,9 +7291,6 @@ body.storefront-owner-home-page #site-page-shell .community-news-track {
   animation-iteration-count: infinite !important;
   animation-play-state: running !important;
 }
-body.storefront-owner-home-page #site-page-shell .community-announcements.is-news-paused .community-news-track { animation-play-state: paused !important; }
-.community-news-toggle { flex: 0 0 28px; align-self: center; height: 28px; border-radius: 8px; color: var(--gold-text); background: color-mix(in srgb, var(--gold) 12%, var(--card)); cursor: pointer; }
-.community-news-toggle:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   body.storefront-owner-home-page #site-page-shell .community-news-track { animation-duration: 70s !important; }
 }

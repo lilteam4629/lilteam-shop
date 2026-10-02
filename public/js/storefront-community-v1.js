@@ -5,16 +5,6 @@
 
   let dispose = null;
   function mount() {
-    document.querySelectorAll('[data-community-news-toggle]').forEach(button => {
-      if (button.dataset.newsMounted) return;
-      button.dataset.newsMounted = 'true';
-      button.addEventListener('click', () => {
-        const paused = button.closest('.community-announcements').classList.toggle('is-news-paused');
-        button.setAttribute('aria-pressed', String(paused));
-        button.setAttribute('aria-label', paused ? 'เล่นประกาศเลื่อน' : 'หยุดประกาศเลื่อน');
-        button.textContent = paused ? '▶' : 'Ⅱ';
-      });
-    });
     if (dispose) dispose();
     const section = document.querySelector('[data-community-orders]');
     if (!section) { dispose = null; return; }
