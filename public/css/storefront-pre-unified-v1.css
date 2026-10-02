@@ -4781,6 +4781,29 @@ body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner
   body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] [data-main-service-strip] .main-service-clock__orbit { animation-duration: 6s !important; }
 }
 
+/* Four actual welcome products on phones: a compact two-by-two showcase. */
+@media (max-width: 800px) {
+  .main-welcome-stage .main-welcome-showcase {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: min(100%, 284px);
+    gap: 16px;
+    padding: 8px 4px;
+    margin-inline: auto;
+  }
+  .main-welcome-stage .main-welcome-showcase .main-welcome-tile {
+    display: grid;
+    position: relative;
+    inset: auto;
+    width: 100%;
+    min-width: 0;
+    padding: 6px;
+    --tile-tilt: -3deg;
+  }
+  .main-welcome-stage .main-welcome-showcase .main-welcome-tile:nth-child(even) { --tile-tilt: 3deg; }
+  .main-welcome-stage .main-welcome-showcase .main-welcome-tile img { height: 98px; }
+}
+
 /* Source: latest-orders-loop-v1.css */
 /* Shared seamless loop mechanics for owner and tenant latest-order rails. */
 #site-page-shell .latest-orders-section .latest-orders-track {
