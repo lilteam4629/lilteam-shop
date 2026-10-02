@@ -6996,6 +6996,11 @@ body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welco
   .owner-home-v20-main > .main-welcome-stage { width: 100vw; max-width: none; margin-inline-start: calc(50% - 50vw); border: 0; border-radius: 0; box-shadow: none; background: var(--bg); }
   .main-welcome-orbit { background: radial-gradient(ellipse at 50% 75%, color-mix(in srgb, var(--gold) 7%, var(--bg)), var(--bg) 75%); mask-image: linear-gradient(180deg, transparent, #000 20%, #000 75%, transparent); }
 }
+/* Blend the desktop scene into the following storefront section. */
+@media (min-width: 801px) {
+  .owner-home-v20-main > .main-welcome-stage { border: 0; border-radius: 0; box-shadow: none; background: var(--bg); }
+  .main-welcome-orbit { background: radial-gradient(ellipse at 50% 75%, color-mix(in srgb, var(--gold) 9%, var(--bg)), var(--bg) 75%); mask-image: linear-gradient(180deg, transparent, #000 18%, #000 65%, transparent); }
+}
 /* A compact service desk beside shop news and paged recent purchases. */
 .storefront-community { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 1.8fr); gap: 22px 28px; margin-block: 24px 36px; color: var(--text); }
 .community-overview { display: contents; }
