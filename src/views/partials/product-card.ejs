@@ -1,6 +1,6 @@
 <%
   const isRandomBox = p.specialType === 'random-box';
-  const soldOut = p.stockCount < 1;
+  const soldOut = Number(p.stockCount || 0) < 1;
   const flashTarget = p.flashSaleActive ? p.flashSaleEndsAt : p.flashSaleStartsAt;
   const flashSeconds = Math.max(0, Math.floor((flashTarget - Date.now()) / 1000));
   const flashInitial = (Math.floor(flashSeconds / 86400) ? Math.floor(flashSeconds / 86400) + 'ว ' : '') + [Math.floor((flashSeconds % 86400) / 3600), Math.floor((flashSeconds % 3600) / 60), flashSeconds % 60].map(n => String(n).padStart(2, '0')).join(':');
@@ -14,7 +14,8 @@
 <% if (useOwnerHomeShowcase) { %>
 <a href="/game/<%= p.slug %>" data-product-id="<%= p.id %>" data-stock="<%= soldOut ? 'sold' : 'available' %>" data-title="<%= String(p.title || '').toLowerCase() %>" data-search="<%= [p.title, p.slug, ...(p.genres || [])].filter(Boolean).join(' ').toLowerCase() %>" data-genres="<%= (p.genres || []).join(',') %>" data-tags="<%= (p.filterTagIds || []).join(',') %>"<%= useCatalogFilterCard ? ' data-catalog-filter-card="true"' : '' %>
   class="owner-home-v21-product-card main-store-product-card filterable-card group<%= useCatalogFilterCard ? ' catalog-filter-card' : '' %>" aria-label="<%= p.title %> <%= isRandomBox ? `กล่องสุ่ม ${p.price.toLocaleString()} บาทต่อครั้ง` : `ราคา ${p.price.toLocaleString()} บาท` %>, <%= soldOut ? (isRandomBox ? 'รางวัลหมดชั่วคราว' : 'สินค้าหมด') : (isRandomBox ? `รางวัลคงเหลือ ${Number(p.remainingPrizeCount || 0).toLocaleString('th-TH')} ชิ้น` : `คงเหลือ ${p.stockCount.toLocaleString()} ชิ้น`) %>">
-  <div class="owner-home-v21-media">
+  <div class="owner-home-v21-media product-stock-media">
+    <%- include('product-sold-overlay', { p, soldOut }) %>
     <% if (p.images && p.images[0]) { %>
       <img data-product-images="<%= JSON.stringify(p.images || []) %>" src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low" />
     <% } else { %>
@@ -61,12 +62,13 @@
   class="premium-product-card <%= isMainStorefrontCard ? 'main-store-product-card' : '' %> spotlight-card filterable-card group relative block w-full <%= isFan ? 'h-full aspect-[3/4]' : 'self-start' %> rounded-2xl overflow-hidden border bg-[var(--card)] <%= p.flashSaleActive ? 'border-[var(--gold)]' : 'border-[var(--gold)]/40' %>
          transition duration-300 hover:border-[var(--gold)]">
 
-  <div class="relative w-full <%= isFan ? 'h-full' : '' %> overflow-hidden">
+  <div class="product-stock-media relative w-full <%= isFan ? 'h-full' : '' %> overflow-hidden">
     <img data-product-images="<%= JSON.stringify(p.images || []) %>" src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="<%= isFan ? 'eager' : 'lazy' %>" decoding="async" fetchpriority="<%= isFan ? 'high' : 'low' %>"
       class="<%= isFan ? 'absolute inset-0 w-full h-full object-cover' : 'block w-full h-auto' %> transition duration-500
              <%= soldOut
                ? 'grayscale-[45%] brightness-[0.7] contrast-[1.05] group-hover:brightness-[0.8]'
                : 'brightness-[0.98] contrast-[1.1] saturate-[1.16] group-hover:scale-[1.03] group-hover:brightness-[1.08] group-hover:saturate-[1.28]' %>" />
+    <%- include('product-sold-overlay', { p, soldOut }) %>
     <% if (soldOut) { %>
       <div class="absolute inset-0 bg-black/10"></div>
     <% } %>
@@ -131,12 +133,13 @@
          transition duration-300 hover:border-[var(--gold)]">
 
   <div class="relative w-full p-2 pb-0">
-    <div class="relative w-full overflow-hidden rounded-xl border-2 border-[var(--gold)]/50 group-hover:border-[var(--gold)] transition-colors duration-300">
+    <div class="product-stock-media relative w-full overflow-hidden rounded-xl border-2 border-[var(--gold)]/50 group-hover:border-[var(--gold)] transition-colors duration-300">
       <img data-product-images="<%= JSON.stringify(p.images || []) %>" src="<%= p.images[0] %>" alt="<%= p.title %>" width="960" height="540" loading="lazy" decoding="async" fetchpriority="low"
         class="block w-full h-auto transition duration-500
                <%= soldOut
                  ? 'grayscale-[45%] brightness-[0.7] contrast-[1.05] group-hover:brightness-[0.8]'
                  : 'group-hover:scale-[1.03]' %>" />
+      <%- include('product-sold-overlay', { p, soldOut }) %>
       <% if (soldOut) { %>
         <div class="absolute inset-0 bg-black/10"></div>
       <% } %>

@@ -1217,3 +1217,44 @@ body.storefront-customer-refresh #site-page-shell .main-storefront-catalog-page 
 @media (min-width: 1280px) {
   #site-page-shell.storefront-owner-home-v7 .owner-home-catalog-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
 }
+
+/* Source: product-sold-state-v1.css */
+/* Keep the artwork recognizable, while making unavailable stock unambiguous. */
+body.storefront-customer-refresh #site-page-shell [data-stock="sold"] .product-stock-media {
+  position: relative;
+  isolation: isolate;
+}
+body.storefront-customer-refresh #site-page-shell [data-stock="sold"] .product-stock-media > img {
+  filter: saturate(.2) brightness(.48) !important;
+}
+body.storefront-customer-refresh #site-page-shell .product-stock-media .product-sold-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(15,23,42,.06), rgba(15,23,42,.2));
+}
+.product-sold-label {
+  display: grid;
+  grid-template-columns: 18px auto;
+  align-items: center;
+  gap: 3px 7px;
+  padding: 11px 15px;
+  border: 1px solid rgba(255,255,255,.65);
+  border-radius: 12px;
+  color: #172033;
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 8px 24px rgba(0,0,0,.22);
+  font-size: clamp(12px, 1.15vw, 16px);
+  line-height: 1.35;
+  white-space: nowrap;
+}
+.product-sold-label strong { font-weight: 700; }
+.product-sold-label small { grid-column: 1 / -1; text-align: center; font-size: 9px; font-weight: 400; color: #596273; }
+body.storefront-customer-refresh #site-page-shell [data-stock="sold"] :is(.flash-corner-tag, .owner-home-v21-image-tag, .product-shimmer) { display: none !important; }
+@media (max-width: 480px) {
+  .product-sold-label { padding: 8px 10px; gap: 3px 5px; border-radius: 10px; }
+}

@@ -8,7 +8,7 @@ const CSS_DIR = path.join(ROOT, 'public', 'css');
 // split around the shop's inline theme variables is intentional: it preserves
 // the existing cascade while reducing render-blocking stylesheet requests.
 const BUNDLES = Object.freeze({
-  'storefront-listing-v1.css': ['storefront-catalog-shared-v1.css', 'storefront-catalog-shared-v2.css', 'storefront-owner-home-v21.css'],
+  'storefront-listing-v1.css': ['storefront-catalog-shared-v1.css', 'storefront-catalog-shared-v2.css', 'storefront-owner-home-v21.css', 'product-sold-state-v1.css'],
   'storefront-pre-unified-v1.css': [
     'storefront-navbar-v1.css',
     'storefront-home-v1.css',
@@ -68,6 +68,7 @@ const BUNDLES = Object.freeze({
     'product-gallery-v1.css',
     'random-box-prize-stock-v1.css',
     'storefront-logo-contrast-v1.css',
+    'product-sold-state-v1.css',
   ],
   'storefront-post-home-v1.css': [
     'storefront-navbar-cozy-v1.css',
@@ -83,6 +84,7 @@ const BUNDLES = Object.freeze({
     'product-gallery-v1.css',
     'random-box-prize-stock-v1.css',
     'storefront-logo-contrast-v1.css',
+    'product-sold-state-v1.css',
   ],
   'storefront-home-popup-v1.css': [
     'storefront-welcome-popup-main-v2.css',
