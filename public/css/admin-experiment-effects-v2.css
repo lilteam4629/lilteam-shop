@@ -503,3 +503,19 @@ html.admin-main-site .experiment-effects-page :where(a, button, input, select, l
 .welcome-picker-save { background:var(--gold)!important; color:var(--gold-contrast)!important; border-color:var(--gold)!important; }
 @media(max-width:700px) { .welcome-layout-picker { padding:16px; } .welcome-picker-heading,.welcome-picker-footer { flex-direction:column; } .welcome-picker-heading h2 { font-size:17px; } .welcome-picker-options { grid-template-columns:1fr; } .welcome-picker-footer .experiment-actions { width:100%; flex-wrap:wrap; } }
 @media(prefers-reduced-motion:reduce) { .welcome-picker-preview--animated i { animation:none; } }
+.experiment-effects-page .welcome-layout-picker { --picker-accent:var(--admin-brand-fill,#5074af); --picker-ink:var(--admin-brand-readable,#41669f); --picker-border:var(--admin-brand-border,#cfdaec); --picker-soft:var(--admin-brand-soft,#edf2fa); }
+.experiment-effects-page .welcome-picker-heading h2 { font-size:18px; }
+.experiment-effects-page .welcome-picker-current { background:var(--picker-soft); color:var(--picker-ink); border:1px solid var(--picker-border); }
+.experiment-effects-page .welcome-picker-option { border:1px solid #dce3e8!important; background:var(--card,#fff)!important; }
+.experiment-effects-page .welcome-picker-option:has(input:checked) { border:2px solid var(--picker-accent)!important; box-shadow:0 0 0 3px var(--picker-soft); }
+.experiment-effects-page .welcome-picker-option input { accent-color:var(--picker-accent); }
+.experiment-effects-page .welcome-picker-preview { background:var(--picker-soft)!important; border-bottom:1px solid var(--picker-border); height:140px; color:var(--picker-ink); }
+.experiment-effects-page .welcome-picker-preview--animated i { border:1px solid var(--picker-border)!important; background:var(--card,#fff)!important; box-shadow:0 6px 12px -5px #5074af40; }
+.experiment-effects-page .welcome-preview-search { background:var(--card,#fff); border:1px solid var(--picker-border); }
+.experiment-effects-page .welcome-preview-button { background:var(--picker-accent); color:#fff; }
+.experiment-effects-page .welcome-picker-copy { padding:16px 18px; }
+.experiment-effects-page .welcome-picker-copy h3 { color:var(--text,#172b37); }
+.experiment-effects-page .welcome-picker-copy p,.experiment-effects-page .welcome-picker-copy > span,.experiment-effects-page .welcome-picker-heading p,.experiment-effects-page .welcome-picker-footer p { color:var(--text-2,#667b8b); }
+.experiment-effects-page .welcome-picker-footer { border-top:1px solid #e0e6ea; padding-top:16px; }
+.experiment-effects-page .welcome-picker-save { background:var(--picker-accent)!important; border-color:var(--picker-accent)!important; color:#fff!important; }
+html:not(.light) .experiment-effects-page .welcome-picker-option { border-color:var(--picker-border)!important; }
