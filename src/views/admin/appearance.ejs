@@ -44,7 +44,7 @@
       </div>
     </div>
 
-    <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><p class="text-sm text-[var(--text-3)] mb-4">เว็บหลัก: รูปในช่องนี้ใช้เป็นพื้นหลังส่วนต้อนรับ พร้อมชั้นบังภาพให้ข้อความอ่านชัด เลือกไม่แสดงแบนเนอร์เพื่อซ่อนภาพพื้นหลัง</p><% } %>
+    <% if (typeof isMainSite !== 'undefined' && isMainSite) { %><p class="text-sm text-[var(--text-3)] mb-4">เว็บหลักใช้ลวดลายเคลื่อนไหวในส่วนต้อนรับ รูปแบนเนอร์จะไม่แสดงในส่วนนี้</p><% } %>
     <% if (settings.hero.bannerImage) { %>
       <img src="<%= settings.hero.bannerImage %>" class="w-full aspect-[3/1] object-cover rounded-xl border border-[var(--border)] mb-4" alt="แบนเนอร์หน้าหลัก" />
     <% } else { %>
