@@ -30,15 +30,22 @@
       <div class="experiment-page-status-note"><strong>สถานะหน้านี้:</strong> ตั้งค่าเพลงพื้นหลัง, หิมะ และระบบฝนได้จริง · พื้นที่ตัวอย่างอัปเดตทันทีโดยไม่ต้องออกจากหน้า</div>
 
       <% { %>
-      <section class="experiment-card" style="padding:20px;margin-bottom:20px">
-        <h2 style="font-size:18px;font-weight:600;margin-bottom:6px">รูปแบบส่วนต้อนรับหน้าแรก</h2>
-        <p style="font-size:13px;color:var(--text-2);margin-bottom:16px">สลับระหว่างหน้าต้อนรับเคลื่อนไหวกับภาพแบนเนอร์ของร้านได้</p>
+      <section class="experiment-card welcome-layout-picker">
+        <header class="welcome-picker-heading"><div><h2>เลือกสิ่งที่ลูกค้าเห็นเป็นอันดับแรก</h2><p>ส่วนบนสุดของหน้าแรก เลือกได้หนึ่งแบบและเปลี่ยนกลับได้ทุกเมื่อ</p></div><span class="welcome-picker-current">ใช้อยู่: <%= settings.hero?.welcomeLayoutV2 === 'animated' ? 'หน้าต้อนรับเคลื่อนไหว' : 'แบนเนอร์รูปภาพ' %></span></header>
         <form action="/admin/effects/welcome-layout" method="post">
-          <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px">
-            <label class="experiment-button" style="cursor:pointer;gap:8px"><input type="radio" name="welcomeLayout" value="animated" <%= settings.hero?.welcomeLayoutV2 === 'animated' ? 'checked' : '' %>>หน้าต้อนรับเคลื่อนไหว</label>
-            <label class="experiment-button" style="cursor:pointer;gap:8px"><input type="radio" name="welcomeLayout" value="banner" <%= settings.hero?.welcomeLayoutV2 !== 'animated' ? 'checked' : '' %>>แบนเนอร์รูปภาพ</label>
+          <div class="welcome-picker-options">
+            <label class="welcome-picker-option">
+              <input type="radio" name="welcomeLayout" value="banner" <%= settings.hero?.welcomeLayoutV2 !== 'animated' ? 'checked' : '' %>>
+              <div class="welcome-picker-preview welcome-picker-preview--banner" aria-hidden="true"><% if (settings.hero?.bannerImage) { %><img src="<%= settings.hero.bannerImage %>" alt=""><% } else { %><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8" cy="9" r="1.5"/><path d="m4 17 5-5 4 4 3-5 4 6"/></svg><span>อัปโหลดภาพแบนเนอร์ของร้าน</span><% } %></div>
+              <div class="welcome-picker-copy"><h3>แบนเนอร์รูปภาพ</h3><p>แสดงภาพที่คุณอัปโหลด เหมาะกับโปรโมชันหรือภาพแนะนำร้าน คลิกภาพไปยังลิงก์ที่ตั้งไว้ได้</p><span>ใช้รูปและลิงก์จากหน้า “รูปและแบนเนอร์”</span></div>
+            </label>
+            <label class="welcome-picker-option">
+              <input type="radio" name="welcomeLayout" value="animated" <%= settings.hero?.welcomeLayoutV2 === 'animated' ? 'checked' : '' %>>
+              <div class="welcome-picker-preview welcome-picker-preview--animated" aria-hidden="true"><i></i><strong>ยินดีต้อนรับสู่ <%= settings.shopName %></strong><span class="welcome-preview-search">ค้นหาสินค้าในร้าน…</span><span class="welcome-preview-button">เลือกดูสินค้า →</span><i></i></div>
+              <div class="welcome-picker-copy"><h3>หน้าต้อนรับเคลื่อนไหว</h3><p>แสดงชื่อร้าน ช่องค้นหา และการ์ดสินค้าลอยขยับ ลูกค้ากดค้นหาหรือเข้าสู่สินค้าได้ทันที</p><span>ใช้ชื่อร้าน สีธีม และสินค้าของร้านคุณอัตโนมัติ</span></div>
+            </label>
           </div>
-          <div class="experiment-actions"><button type="submit" class="experiment-button">บันทึกรูปแบบหน้าแรก</button><a class="experiment-button" href="/admin/appearance">เลือกรูปแบนเนอร์</a></div>
+          <footer class="welcome-picker-footer"><p>เลือกแบบที่ต้องการ แล้วกดบันทึกเพื่อเปลี่ยนหน้าร้าน</p><div class="experiment-actions"><a class="experiment-button" href="/admin/appearance">จัดการรูปแบนเนอร์</a><button type="submit" class="experiment-button welcome-picker-save">บันทึกรูปแบบหน้าแรก</button></div></footer>
         </form>
       </section>
       <% } %>
