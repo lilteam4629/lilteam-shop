@@ -335,7 +335,6 @@ router.post('/license-label', async (req, res) => {
 
 // ---------- Catalog API / product syndication ----------
 router.post('/dashboard/revenue-today/reset', async (req, res) => {
-  if (req.tenantShop) return res.sendStatus(403);
   if (!req.session.revenueResetToken || req.body.revenueResetToken !== req.session.revenueResetToken) {
     return res.status(403).send('คำขอไม่ถูกต้อง กรุณาเปิดหน้าแดชบอร์ดแล้วลองใหม่');
   }
@@ -2985,7 +2984,7 @@ router.post('/effects/welcome-layout', async (req, res) => {
     return res.redirect('/admin/effects');
   }
   store.data.settings.hero = store.data.settings.hero || {};
-  store.data.settings.hero.welcomeLayout = welcomeLayout;
+  store.data.settings.hero.welcomeLayoutV2 = welcomeLayout;
   if (welcomeLayout === 'banner') store.data.settings.hero.mode = 'banner';
   await store.save();
   req.flash('success', welcomeLayout === 'banner' ? 'เปลี่ยนเป็นแบนเนอร์แล้ว' : 'เปลี่ยนเป็นหน้าต้อนรับเคลื่อนไหวแล้ว');
