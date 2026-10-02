@@ -4465,6 +4465,22 @@ body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welco
 .main-welcome-stage .main-welcome-actions { margin-top: 16px; }
 @media (max-width: 800px) { .main-welcome-search { margin-top: 17px; } .main-welcome-stage:has(.main-welcome-showcase) { padding-block: 28px 20px; gap: 16px; } }
 .main-welcome-stage::after { content: ''; position: absolute; z-index: 1; inset: auto 0 0; height: 28px; pointer-events: none; background: linear-gradient(180deg, transparent, var(--bg)); }
+/* Paired product decks: front cards anchor the composition, rear cards add depth. */
+@media (min-width: 801px) {
+  .main-welcome-tile { width:clamp(120px,10vw,170px); padding:8px; border:1px solid var(--border); border-bottom:3px solid color-mix(in srgb,var(--gold) 25%,var(--card)); border-radius:16px; box-shadow:0 18px 28px -16px color-mix(in srgb,var(--text) 30%,transparent); }
+  .main-welcome-tile img { height:clamp(108px,9vw,146px); border-radius:10px; }
+  .main-welcome-tile--0 { left:5%; top:48px; bottom:auto; --tile-tilt:-9deg; --tile-depth:4deg; z-index:1; }
+  .main-welcome-tile--1 { left:13%; top:137px; bottom:auto; --tile-tilt:5deg; --tile-depth:-4deg; z-index:2; }
+  .main-welcome-tile--2 { right:5%; top:48px; bottom:auto; --tile-tilt:9deg; --tile-depth:-4deg; z-index:1; }
+  .main-welcome-tile--3 { right:13%; top:137px; bottom:auto; --tile-tilt:-5deg; --tile-depth:4deg; z-index:2; }
+  .main-welcome-tile::after { background:linear-gradient(115deg,transparent 25%,#ffffff55 45%,transparent 65%); background-size:260% 100%; background-position:100% 0; }
+  .main-welcome-tile:hover::after { background-position:0 0; transition:background-position .65s ease; }
+  body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile { animation:main-product-deck 4s ease-in-out infinite alternate!important; }
+  body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile:hover,body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile:focus-visible { animation-play-state:paused!important; box-shadow:0 20px 35px -13px color-mix(in srgb,var(--gold) 40%,transparent); border-color:var(--gold-text); }
+}
+@keyframes main-product-deck { from { transform:translateY(3px) rotateZ(var(--tile-tilt)) rotateY(var(--tile-depth)); } to { transform:translateY(-10px) rotateZ(calc(var(--tile-tilt) + 2deg)) rotateY(calc(var(--tile-depth) + 3deg)); } }
+@media (min-width:801px) and (max-width:1150px) { .main-welcome-tile--0 { left:1%; } .main-welcome-tile--1 { left:5%; top:185px; } .main-welcome-tile--2 { right:1%; } .main-welcome-tile--3 { right:5%; top:185px; } .main-welcome-stage:has(.main-welcome-showcase) .main-welcome-content { width:56%; } }
+@media (prefers-reduced-motion:reduce) { body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile { animation-duration:16s!important; } }
 /* A compact service desk beside shop news and paged recent purchases. */
 .storefront-community { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 1.8fr); gap: 22px 28px; margin-block: 24px 36px; color: var(--text); }
 .community-overview { display: contents; }
