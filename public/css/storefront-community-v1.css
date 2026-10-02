@@ -127,6 +127,19 @@ body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welco
 @keyframes main-crystal-stream { to { stroke-dashoffset: -575; } }
 @media (max-width: 800px) { .main-welcome-crystal { width: 80%; opacity: .22; } .main-welcome-crystal--left { left: -35%; } .main-welcome-crystal--right { right: -35%; } }
 @media (prefers-reduced-motion: reduce) { body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-crystal-facets, body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-crystal-energy { animation-duration: 20s !important; } }
+.main-welcome-search { position: relative; display: flex; align-items: center; width: min(460px, 100%); margin: 22px auto 0; padding: 4px; border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--border)); border-radius: 14px; background: var(--card); box-shadow: 0 8px 22px -12px color-mix(in srgb, var(--gold) 35%, transparent); }
+.main-welcome-search-label { position: absolute; width: 1px; height: 1px; clip-path: inset(50%); overflow: hidden; }
+.main-welcome-search input { flex: 1; min-width: 0; height: 44px; padding: 0 12px; border: 0; outline: none; background: transparent; color: var(--text); font: inherit; font-size: 12px; }
+.main-welcome-search input::placeholder { color: var(--text-2); opacity: 1; }
+.main-welcome-search button { display: grid; place-items: center; width: 44px; height: 44px; flex-shrink: 0; border: 0; border-radius: 10px; background: color-mix(in srgb, var(--gold) 12%, var(--card)); color: var(--gold-text); cursor: pointer; }
+.main-welcome-search:focus-within { outline: 2px solid var(--gold-text); outline-offset: 3px; }
+.main-welcome-shortcuts { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 16px; margin-top: 10px; }
+.main-welcome-shortcuts a { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; color: var(--text-2); font-size: 11px; text-decoration: none; }
+.main-welcome-shortcuts a:hover { color: var(--gold-text); }
+.main-welcome-shortcuts a:focus-visible, .main-welcome-search button:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
+.main-welcome-stage:has(.main-welcome-showcase) { padding-block: 34px; }
+.main-welcome-stage .main-welcome-actions { margin-top: 16px; }
+@media (max-width: 800px) { .main-welcome-search { margin-top: 17px; } .main-welcome-stage:has(.main-welcome-showcase) { padding-block: 28px 20px; gap: 16px; } }
 /* A compact service desk beside shop news and paged recent purchases. */
 .storefront-community { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 1.8fr); gap: 22px 28px; margin-block: 24px 36px; color: var(--text); }
 .community-overview { display: contents; }

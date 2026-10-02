@@ -16,6 +16,14 @@
   <div class="main-welcome-content">
     <h1>ยินดีต้อนรับสู่ <span><%= settings.shopName %></span></h1>
     <% if (settings.tagline) { %><p><%= settings.tagline %></p><% } %>
+    <form class="main-welcome-search" action="/search" method="get" role="search">
+      <label class="main-welcome-search-label" for="welcome-search">ค้นหาสินค้าในร้าน</label>
+      <input id="welcome-search" type="search" name="q" placeholder="ค้นหาเกมหรือสินค้าที่ต้องการ…" required maxlength="120"/>
+      <button type="submit" aria-label="ค้นหาสินค้า"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg></button>
+    </form>
+    <% if (typeof recommendedCategories !== 'undefined' && recommendedCategories.length) { %>
+    <nav class="main-welcome-shortcuts" aria-label="หมวดหมู่สินค้า"><% recommendedCategories.slice(0, 3).forEach(category => { %><a href="/products?recommended=<%= encodeURIComponent(category.id) %>"><%= category.title %><span aria-hidden="true">↗</span></a><% }) %></nav>
+    <% } %>
     <div class="main-welcome-actions">
       <a class="main-welcome-primary" href="/products">เลือกดูสินค้า<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg></a>
       <a class="main-welcome-contact" href="/contact" aria-label="ติดต่อร้าน"><svg width="19" height="19" aria-hidden="true"><use href="#ui-megaphone"/></svg></a>
