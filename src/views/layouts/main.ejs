@@ -631,7 +631,7 @@
 
       function restoreScroll(url, position) {
         if (position) {
-          window.scrollTo(position.x || 0, position.y || 0);
+          window.scrollTo({ left: position.x || 0, top: position.y || 0, behavior: 'instant' });
           return;
         }
         if (url.hash) {
@@ -641,7 +641,7 @@
             return;
           }
         }
-        window.scrollTo(0, 0);
+        window.scrollTo({ left: 0, top: 0, behavior: 'instant' });
       }
 
       function showNavigationError() {
@@ -715,7 +715,7 @@
             runPageScripts(nextShell);
           };
           const lightweightNavigation = window.matchMedia('(max-width: 900px) and (pointer: coarse)').matches;
-          if (document.startViewTransition && !lightweightNavigation && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          if (!document.getElementById('store-rain') && document.startViewTransition && !lightweightNavigation && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             await document.startViewTransition(swapPage).updateCallbackDone;
           } else {
             swapPage();
@@ -1149,8 +1149,31 @@
       // The API may already be available after a cached shell or another embed.
       if (window.YT && typeof window.YT.Player === 'function') initializePlayer();
 
-      if ('requestIdleCallback' in window) requestIdleCallback(loadYouTubeApi, { timeout: 3500 });
-      else setTimeout(loadYouTubeApi, 1800);
+      // Loading the YouTube embed parses large third-party scripts. Defer its
+      // automatic boot until browsing is quiet; an explicit play tap still loads immediately.
+      let musicBootTimer = null;
+      let lastMusicInteraction = Date.now();
+      let musicPageAway = false;
+      function noteMusicInteraction() { lastMusicInteraction = Date.now(); }
+      function bootMusicWhenQuiet() {
+        musicBootTimer = null;
+        if (musicPageAway || playerInitialized || apiRequested) return;
+        if (document.hidden || document.documentElement.classList.contains('lilteam-navigating') || Date.now() - lastMusicInteraction < 1500) {
+          musicBootTimer = setTimeout(bootMusicWhenQuiet, 500);
+          return;
+        }
+        if (!playbackWanted) return;
+        if ('requestIdleCallback' in window) requestIdleCallback(function () {
+          if (!musicPageAway && !document.hidden && Date.now() - lastMusicInteraction >= 1500 && !document.documentElement.classList.contains('lilteam-navigating')) loadYouTubeApi();
+          else if (!musicPageAway) musicBootTimer = setTimeout(bootMusicWhenQuiet, 500);
+        }, { timeout: 3500 });
+        else loadYouTubeApi();
+      }
+      window.addEventListener('scroll', noteMusicInteraction, { passive: true });
+      document.addEventListener('pointerdown', noteMusicInteraction, { passive: true });
+      window.addEventListener('pagehide', function () { musicPageAway = true; clearTimeout(musicBootTimer); musicBootTimer = null; });
+      window.addEventListener('pageshow', function () { musicPageAway = false; if (!musicBootTimer && !playerInitialized && !apiRequested) musicBootTimer = setTimeout(bootMusicWhenQuiet, 1500); });
+      musicBootTimer = setTimeout(bootMusicWhenQuiet, 1500);
 
       fetch('https://noembed.com/embed?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + videoId))
         .then(function (r) { return r.json(); })
@@ -1248,44 +1271,27 @@
     })();
   </script>
   <% } %>
-  <% if (typeof settings !== 'undefined' && settings.systemModules && settings.systemModules.rain && settings.rain && settings.rain.enabled) { const rain = settings.rain; %>
-  <canvas id="store-rain" aria-hidden="true" style="display:block;position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20;background:transparent;contain:layout paint size"></canvas>
-  <script>
-    (function(){
-      const canvas=document.getElementById('store-rain'); if(!canvas||!canvas.getContext)return;
-      const ctx=canvas.getContext('2d',{alpha:true});if(!ctx){canvas.remove();return}
-      const color=<%- (JSON.stringify(/^#[0-9a-fA-F]{6}$/.test(rain.color||'')?rain.color:'#78c8ff')).replace(/</g, "\\u003c") %>;
-      const level=<%- (JSON.stringify(['light','medium','heavy'].includes(rain.intensity)?rain.intensity:'medium')).replace(/</g, "\\u003c") %>;
-      const coarse=matchMedia('(max-width:900px), (pointer:coarse)').matches;
-      const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;
-      const limits={light:coarse?14:30,medium:coarse?24:52,heavy:coarse?34:72};
-      let drops=[],frame=0,last=0,w=0,h=0,dpr=1,running=false,scrolling=false,pageAway=false,paintTimer=0,resumeTimer=0;
-      const frameInterval=1000/(coarse?24:30);
-      function reset(drop,randomY){const depth=.22+Math.random()*.78;drop.bucket=Math.min(2,Math.floor(depth*3));drop.x=-20+Math.random()*(w+40);drop.y=randomY?Math.random()*h:-35-Math.random()*90;drop.len=(7+Math.random()*11)*(.72+depth*.45);drop.speed=(430+Math.random()*300)*(.72+depth*.38);drop.wind=-12+Math.random()*30;drop.slant=(drop.wind/drop.speed)*drop.len+(-.55+Math.random()*1.1);return drop}
-      function resize(force){const nextW=innerWidth,nextH=innerHeight;if(!force&&coarse&&w&&Math.abs(nextW-w)<2)return;dpr=Math.min(devicePixelRatio||1,coarse?.75:1);w=nextW;h=nextH;canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);const areaScale=coarse?1:Math.min(1,Math.max(.55,(w*h)/(1440*900)));const count=reduced?Math.max(7,Math.round(limits[level]*.4)):Math.max(9,Math.round(limits[level]*areaScale));drops=Array.from({length:count},()=>reset({},true))}
-      function rainPath(bucket){ctx.beginPath();for(const d of drops){if(d.bucket!==bucket)continue;ctx.moveTo(d.x,d.y);ctx.lineTo(d.x+d.slant+(d.wind*.025),d.y+d.len)}}
-      function draw(now){
-        frame=0;
-        if(document.hidden||!running)return;
-        if(!canRun()){stop();return}
-        const elapsed=last?Math.min(.08,Math.max(.001,(now-last)/1000)):.016;last=now;ctx.clearRect(0,0,w,h);ctx.strokeStyle=color;ctx.lineCap='round';
-        for(let bucket=0;bucket<3;bucket++){rainPath(bucket);ctx.globalAlpha=.2+(bucket*.13);ctx.lineWidth=.55+(bucket*.32);ctx.stroke()}
-        for(const d of drops){d.x+=d.wind*elapsed;d.y+=d.speed*elapsed;if(d.y>h+35||d.x>w+35||d.x<-35)reset(d,false)}ctx.globalAlpha=1;
-        schedule();
-      }
-      function canRun(){return !document.hidden&&!pageAway&&!scrolling&&!document.documentElement.classList.contains('lilteam-navigating')}
-      function schedule(){if(running&&!paintTimer&&!frame)paintTimer=setTimeout(()=>{paintTimer=0;if(canRun())frame=requestAnimationFrame(draw);else stop()},frameInterval)}
-      function start(){if(!canRun())return;running=true;canvas.style.visibility='visible';if(!frame&&!paintTimer){last=performance.now();schedule()}}
-      function stop(){running=false;clearTimeout(paintTimer);paintTimer=0;if(frame){cancelAnimationFrame(frame);frame=0}canvas.style.visibility='hidden'}
-      let timer;addEventListener('resize',()=>{clearTimeout(timer);timer=setTimeout(()=>resize(false),180)},{passive:true});
-      addEventListener('orientationchange',()=>{clearTimeout(timer);timer=setTimeout(()=>resize(true),220)},{passive:true});
-      addEventListener('scroll',()=>{scrolling=true;stop();clearTimeout(resumeTimer);resumeTimer=setTimeout(()=>{scrolling=false;start()},220)},{passive:true});
-      const navigationObserver=new MutationObserver(()=>{if(canRun())start();else stop()});navigationObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
-      document.addEventListener('visibilitychange',()=>{if(document.hidden)stop();else start()});resize(true);start();
-      addEventListener('pagehide',()=>{pageAway=true;clearTimeout(resumeTimer);clearTimeout(timer);scrolling=false;stop()});
-      addEventListener('pageshow',()=>{pageAway=false;start()});
-    })();
-  </script>
+  <% if (typeof settings !== 'undefined' && settings.systemModules && settings.systemModules.rain && settings.rain && settings.rain.enabled) {
+    const rain = settings.rain;
+    const rainColor = /^#[0-9a-fA-F]{6}$/.test(rain.color || '') ? rain.color : '#78c8ff';
+    const rainCount = ({ light: 4, medium: 8, heavy: 12 })[rain.intensity] || 8;
+    const rainLines = Array.from({ length: rainCount }, (_, i) => {
+      const x = 18 + ((i * 137) % 470), y = 25 + ((i * 211) % 700);
+      return `<path d="M${x} ${y}l${i % 2 ? 1 : -1} ${9 + (i % 4) * 3}" opacity="${.25 + (i % 3) * .1}"/>`;
+    }).join('');
+    const rainTile = 'data:image/svg+xml,' + encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="512" height="768" viewBox="0 0 512 768"><g stroke="${rainColor}" stroke-width="1" stroke-linecap="round" fill="none">${rainLines}</g></svg>`);
+  %>
+  <style>
+    #store-rain{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:20;contain:strict}
+    #store-rain .store-rain-layer{position:absolute;inset:-768px 0 0;background-repeat:repeat;background-size:512px 768px;animation:store-rain-fall 1.45s linear infinite;pointer-events:none}
+    #store-rain .store-rain-layer:nth-child(2){background-position:257px 319px;animation-duration:2.05s;animation-delay:-.8s;opacity:.65}
+    @keyframes store-rain-fall{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,768px,0)}}
+    @media(prefers-reduced-motion:reduce){#store-rain .store-rain-layer{animation:none;opacity:.3}}
+  </style>
+  <div id="store-rain" aria-hidden="true">
+    <div class="store-rain-layer" style="background-image:url('<%= rainTile %>')"></div>
+    <div class="store-rain-layer" style="background-image:url('<%= rainTile %>')"></div>
+  </div>
   <% } %>
 <script>
   (function () {

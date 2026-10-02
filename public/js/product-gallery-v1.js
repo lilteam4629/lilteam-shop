@@ -2,7 +2,34 @@
   'use strict';
   if (window.__lilteamProductGallery) return;
   window.__lilteamProductGallery = true;
-  var cards = [], timer = null, observer = null;
+  var cards = [], timer = null, observer = null, sizingFrame = 0, sizingImages = new Set();
+  // Read every image frame before writing styles to avoid repeated forced layouts.
+  function reserveSpace(image) {
+    if (!image.isConnected) return;
+    sizingImages.add(image);
+    if (sizingFrame) return;
+    sizingFrame = requestAnimationFrame(function () {
+      // Let the newly swapped page paint before measuring intrinsic image frames.
+      sizingFrame = requestAnimationFrame(function () {
+      sizingFrame = 0;
+      var measurements = [];
+      sizingImages.forEach(function (item) {
+        if (!item.isConnected) return;
+        var parentStyle = getComputedStyle(item.parentElement);
+        var imageStyle = getComputedStyle(item);
+        if (imageStyle.position === "absolute" || parentStyle.aspectRatio !== "auto") return;
+        var box = item.getBoundingClientRect();
+        if (box.width && box.height) measurements.push({ image: item, ratio: box.width + " / " + box.height });
+      });
+      sizingImages.clear();
+      measurements.forEach(function (item) {
+        item.image.style.setProperty("aspect-ratio", item.ratio, "important");
+        item.image.style.setProperty("height", "auto", "important");
+        item.image.style.setProperty("object-fit", "contain", "important");
+      });
+      });
+    });
+  }
   var reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
   function sources(value) {
     try { return JSON.parse(value || '[]').filter(function (url) { return typeof url === 'string' && url.trim(); }); }
@@ -60,6 +87,9 @@
     select(gallery, index);
   });
   function cleanup() {
+    if (sizingFrame) cancelAnimationFrame(sizingFrame);
+    sizingFrame = 0;
+    sizingImages.clear();
     if (timer) clearInterval(timer);
     timer = null;
     if (observer) observer.disconnect();
@@ -76,19 +106,8 @@
       var urls = sources(image.dataset.productImages);
       if (urls.length < 2) return;
       var entry = { image: image, urls: urls, index: Math.max(0, urls.indexOf(image.getAttribute('src'))), visible: false, busy: false };
-      function reserveSpace() {
-        var parentStyle = getComputedStyle(image.parentElement);
-        var imageStyle = getComputedStyle(image);
-        var box = image.getBoundingClientRect();
-        // Preserve the theme's fixed media frame. Only pin intrinsically sized images.
-        if (box.width && box.height && imageStyle.position !== 'absolute' && parentStyle.aspectRatio === 'auto') {
-          image.style.setProperty('aspect-ratio', box.width + ' / ' + box.height, 'important');
-          image.style.setProperty('height', 'auto', 'important');
-          image.style.setProperty('object-fit', 'contain', 'important');
-        }
-      }
-      if (image.complete) reserveSpace();
-      else image.addEventListener('load', reserveSpace, { once: true });
+      if (image.complete) reserveSpace(image);
+      else image.addEventListener('load', function () { reserveSpace(image); }, { once: true });
       cards.push(entry);
     });
     if (!cards.length) return;

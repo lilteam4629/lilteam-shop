@@ -61,14 +61,9 @@ assert.match(motionCss, /scroll-reveal-admin\{transform:translate3d\(0,24px,0\) 
 assert.match(motionCss, /:not\(\.scroll-reveal-admin\)/, 'mobile performance overrides must not flatten the admin bounce');
 assert.doesNotMatch(layout, /mobile-is-scrolling[^\n]{0,120}(return|continue)/,
   'rain must not freeze while a touch device scrolls');
-assert.match(layout, /contain:layout paint size/,
-  'rain canvas must stay isolated from page layout and paint');
-assert.doesNotMatch(layout, /id="store-rain"[^>]*(?:translateZ\(0\)|will-change:transform)/,
-  'full-screen rain canvas must not force a GPU layer that can flash large black polygons');
-assert.match(layout, /Math\.min\(\.08,Math\.max\(\.001,\(now-last\)\/1000\)\)/,
-  'rain must preserve its velocity after a dropped frame');
-assert.match(layout, /function start\(\).*function stop\(\)/s,
-  'rain must restart reliably after browser lifecycle suspension');
+assert.match(layout, /#store-rain.*contain:strict/, 'rain layout must remain isolated');
+assert.match(layout, /@keyframes store-rain-fall/, 'rain must use browser animation without per-frame JavaScript');
+assert.doesNotMatch(layout, /function rainPath|scrollUntil|pageAway/, 'rain must not repaint or hide during scrolling');
 assert.doesNotMatch(adminLayout, /admin-scroll-motion-v1\.css|admin-mobile-motion\.js|admin-motion\.js|admin-page-surface/, 'admin must not load or expose the removed bounce system');
 assert.doesNotMatch(adminLayout, /backdrop-filter: blur\(4px\)/, 'admin navigation must not blur the full viewport');
 assert.match(adminLayout, /navigationShowTimer = setTimeout/, 'fast admin navigation must not flash a blocking overlay');
