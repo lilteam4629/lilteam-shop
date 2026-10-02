@@ -7294,3 +7294,19 @@ body.storefront-owner-home-page #site-page-shell .community-news-track {
 @media (prefers-reduced-motion: reduce) {
   body.storefront-owner-home-page #site-page-shell .community-news-track { animation-duration: 70s !important; }
 }
+
+/* The late cozy-home reduced-motion rule has four class/attribute selectors.
+   Match this actual layout boundary so that it cannot finish the ticker in .01ms. */
+body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .community-announcements .community-news-track {
+  animation-name: community-news-run !important;
+  animation-duration: 35s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  animation-play-state: running !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] .community-announcements .community-news-track {
+    animation-duration: 70s !important;
+    animation-iteration-count: infinite !important;
+  }
+}
