@@ -157,6 +157,14 @@ body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welco
 @keyframes main-product-deck { from { transform:translateY(3px) rotateZ(var(--tile-tilt)) rotateY(var(--tile-depth)); } to { transform:translateY(-10px) rotateZ(calc(var(--tile-tilt) + 2deg)) rotateY(calc(var(--tile-depth) + 3deg)); } }
 @media (min-width:801px) and (max-width:1150px) { .main-welcome-tile--0 { left:1%; } .main-welcome-tile--1 { left:5%; top:185px; } .main-welcome-tile--2 { right:1%; } .main-welcome-tile--3 { right:5%; top:185px; } .main-welcome-stage:has(.main-welcome-showcase) .main-welcome-content { width:56%; } }
 @media (prefers-reduced-motion:reduce) { body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-tile { animation-duration:16s!important; } }
+/* Continuous cinematic motion remains active during hover and keyboard focus. */
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-showcase .main-welcome-tile { animation:main-product-cinematic 3.6s ease-in-out infinite alternate!important; animation-play-state:running!important; }
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-showcase .main-welcome-tile:nth-child(even) { animation-delay:-1.8s!important; }
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-showcase .main-welcome-tile::after { content:''; position:absolute; inset:0; border-radius:14px; pointer-events:none; background:linear-gradient(115deg,transparent 30%,#ffffff70 48%,transparent 65%); background-size:300% 100%; animation:main-product-sheen 4.5s ease-in-out infinite!important; }
+@keyframes main-product-cinematic { from { transform:translateY(10px) rotateZ(calc(var(--tile-tilt) - 3deg)) rotateY(-8deg) scale(.98); } to { transform:translateY(-15px) rotateZ(calc(var(--tile-tilt) + 4deg)) rotateY(8deg) scale(1.03); } }
+@keyframes main-product-sheen { 0%,20% { background-position:100% 0; opacity:0; } 35% { opacity:.8; } 65%,100% { background-position:0 0; opacity:0; } }
+@media(max-width:800px) { .main-welcome-tile { --tile-tilt:-5deg; } }
+@media(prefers-reduced-motion:reduce) { body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-showcase .main-welcome-tile { animation-duration:14s!important; } body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-showcase .main-welcome-tile::after { animation-duration:18s!important; } }
 /* A compact service desk beside shop news and paged recent purchases. */
 .storefront-community { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 1.8fr); gap: 22px 28px; margin-block: 24px 36px; color: var(--text); }
 .community-overview { display: contents; }
