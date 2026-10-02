@@ -7348,12 +7348,25 @@ body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner
 
 /* Four actual welcome products on phones: a compact two-by-two showcase. */
 @media (max-width: 800px) {
+  .main-welcome-stage:has(.main-welcome-showcase) {
+    padding: 18px 14px 14px;
+    gap: 10px;
+  }
+  .main-welcome-stage:has(.main-welcome-showcase) h1 {
+    font-size: clamp(21px, 5.6vw, 26px);
+    line-height: 1.25;
+  }
+  .main-welcome-stage .main-welcome-content p { margin-top: 6px; line-height: 1.5; }
+  .main-welcome-stage .main-welcome-search { margin-top: 12px; padding: 2px; }
+  .main-welcome-stage .main-welcome-search input { font-size: 16px; padding-inline: 9px; }
+  .main-welcome-stage .main-welcome-shortcuts { margin-top: 4px; gap: 4px 14px; }
+  .main-welcome-stage .main-welcome-actions { margin-top: 8px; }
   .main-welcome-stage .main-welcome-showcase {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    width: min(100%, 284px);
-    gap: 16px;
-    padding: 8px 4px;
+    width: min(100%, 250px);
+    gap: 12px;
+    padding: 6px 4px;
     margin-inline: auto;
   }
   .main-welcome-stage .main-welcome-showcase .main-welcome-tile {
@@ -7362,9 +7375,9 @@ body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner
     inset: auto;
     width: 100%;
     min-width: 0;
-    padding: 6px;
+    padding: 5px;
     --tile-tilt: -3deg;
   }
   .main-welcome-stage .main-welcome-showcase .main-welcome-tile:nth-child(even) { --tile-tilt: 3deg; }
-  .main-welcome-stage .main-welcome-showcase .main-welcome-tile img { height: 98px; }
+  .main-welcome-stage .main-welcome-showcase .main-welcome-tile img { height: 78px; }
 }
