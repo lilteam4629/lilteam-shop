@@ -421,3 +421,14 @@ body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner
     animation-iteration-count: infinite !important;
   }
 }
+
+/* Keep compact and full service clocks alive under the late cozy-home motion guard. */
+body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] [data-main-service-strip] .main-service-clock__orbit {
+  transform-origin: 30px 30px;
+  animation: main-service-orbit 3s linear infinite !important;
+  animation-play-state: paused !important;
+}
+body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] [data-main-service-strip].is-visible:not(.is-paused) .main-service-clock__orbit { animation-play-state: running !important; }
+@media (prefers-reduced-motion: reduce) {
+  body.storefront-owner-home-page #site-page-shell.storefront-owner-home-v7 .owner-home-v20-shell[data-owner-home-layout="cozy-marketplace"] [data-main-service-strip] .main-service-clock__orbit { animation-duration: 6s !important; }
+}

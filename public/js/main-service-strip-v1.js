@@ -12,10 +12,16 @@
     const value = clockFormat.format(new Date());
     const [hour, minute, second] = value.split(':').map(Number);
     strips.filter(strip => strip.classList.contains('is-visible')).forEach(strip => {
-      strip.querySelector('[data-main-service-time]').textContent = value;
-      strip.querySelector('[data-service-hour]').style.transform = `rotate(${hour % 12 * 30 + minute / 2}deg)`;
-      strip.querySelector('[data-service-minute]').style.transform = `rotate(${minute * 6 + second / 10}deg)`;
-      strip.querySelector('[data-service-second]').style.transform = `rotate(${second * 6}deg)`;
+      const time = strip.querySelector('[data-main-service-time]');
+      if (time) time.textContent = value;
+      for (const [selector, angle] of [
+        ['[data-service-hour]', hour % 12 * 30 + minute / 2],
+        ['[data-service-minute]', minute * 6 + second / 10],
+        ['[data-service-second]', second * 6],
+      ]) {
+        const hand = strip.querySelector(selector);
+        if (hand) hand.style.transform = `rotate(${angle}deg)`;
+      }
     });
   }
   function syncClock() {
