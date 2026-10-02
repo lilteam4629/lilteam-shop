@@ -7258,10 +7258,7 @@ html:not(.light) .community-service-status { color: #9ce4ba; }
   .community-news-item { font-size: 11px; line-height: 30px; padding: 0 18px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .community-news-track { animation: none; }
-  .community-news-window { overflow-x: auto; scrollbar-width: thin; }
-  .community-news-group { min-width: 0; }
-  .community-news-group[aria-hidden="true"] { display: none; }
+  .community-news-track { animation-duration: 70s; }
 }
 
 /* The refreshed cards ride the same continuous, seamless motion as the old rail. */
@@ -7284,4 +7281,19 @@ body.storefront-owner-home-page #site-page-shell .community-orders .community-or
 }
 @media (prefers-reduced-motion: reduce) {
   .community-order-track { will-change: auto; }
+}
+
+/* Keep the announcement readable and moving on desktop, including legacy motion guards. */
+body.storefront-owner-home-page #site-page-shell .community-news-track {
+  animation-name: community-news-run !important;
+  animation-duration: 35s !important;
+  animation-timing-function: linear !important;
+  animation-iteration-count: infinite !important;
+  animation-play-state: running !important;
+}
+body.storefront-owner-home-page #site-page-shell .community-announcements.is-news-paused .community-news-track { animation-play-state: paused !important; }
+.community-news-toggle { flex: 0 0 28px; align-self: center; height: 28px; border-radius: 8px; color: var(--gold-text); background: color-mix(in srgb, var(--gold) 12%, var(--card)); cursor: pointer; }
+.community-news-toggle:focus-visible { outline: 2px solid var(--gold-text); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  body.storefront-owner-home-page #site-page-shell .community-news-track { animation-duration: 70s !important; }
 }
