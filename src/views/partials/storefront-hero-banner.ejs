@@ -1,7 +1,10 @@
 <% const sharedHero = typeof storefrontHero !== 'undefined' ? storefrontHero : { bannerImage: settings.hero?.mode === 'none' ? null : settings.hero?.bannerImage, bannerLink: settings.hero?.bannerLink || '' }; %>
 <% if (typeof isMainSite !== 'undefined' && isMainSite) { %>
 <section class="main-welcome-stage" id="home-top" aria-label="ยินดีต้อนรับสู่ร้าน">
-  <div class="main-welcome-orbit" aria-hidden="true"><div class="main-welcome-orbit-ring"></div><div class="main-welcome-orbit-ring main-welcome-orbit-ring--inner"></div><div class="main-welcome-orbit-satellite"></div></div>
+  <div class="main-welcome-crystal-scene" aria-hidden="true">
+    <svg class="main-welcome-crystal main-welcome-crystal--left" viewBox="0 0 420 360" fill="none"><g class="main-crystal-facets"><path d="m80 40 125 40 50 115-155 85-65-140Z"/><path d="m80 40 20 240 105-200-170 60 220 55-175-155Z"/><path d="m280 30 80 60-30 85-60-70Z"/><path d="m280 30 50 145 30-85-90 15Z"/></g><path class="main-crystal-energy" d="M-20 300 100 280 255 195 330 175 440 240"/><circle cx="100" cy="280" r="4"/><circle cx="255" cy="195" r="3"/></svg>
+    <svg class="main-welcome-crystal main-welcome-crystal--right" viewBox="0 0 420 360" fill="none"><g class="main-crystal-facets"><path d="m80 40 125 40 50 115-155 85-65-140Z"/><path d="m80 40 20 240 105-200-170 60 220 55-175-155Z"/><path d="m280 30 80 60-30 85-60-70Z"/><path d="m280 30 50 145 30-85-90 15Z"/></g><path class="main-crystal-energy" d="M-20 300 100 280 255 195 330 175 440 240"/><circle cx="100" cy="280" r="4"/><circle cx="255" cy="195" r="3"/></svg>
+  </div>
   <% const welcomeProducts = typeof products !== 'undefined' ? products.filter(p => p.images && p.images[0]).slice(0, 4) : []; %>
   <% if (welcomeProducts.length) { %>
   <div class="main-welcome-showcase" aria-label="เลือกชมสินค้าในร้าน">

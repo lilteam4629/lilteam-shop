@@ -7001,6 +7001,21 @@ body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welco
   .owner-home-v20-main > .main-welcome-stage { border: 0; border-radius: 0; box-shadow: none; background: var(--bg); }
   .main-welcome-orbit { background: radial-gradient(ellipse at 50% 75%, color-mix(in srgb, var(--gold) 9%, var(--bg)), var(--bg) 75%); mask-image: linear-gradient(180deg, transparent, #000 18%, #000 65%, transparent); }
 }
+/* Faceted gaming artwork replaces the orbital platform. */
+.main-welcome-crystal-scene { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--bg); }
+.main-welcome-crystal { position: absolute; width: min(44%, 600px); height: 100%; top: 0; stroke: var(--gold-text); stroke-width: 1; opacity: .38; }
+.main-welcome-crystal--left { left: -3%; }
+.main-welcome-crystal--right { right: -3%; transform: scaleX(-1); }
+.main-crystal-facets { fill: color-mix(in srgb, var(--gold) 8%, transparent); transform-origin: center; }
+.main-welcome-crystal circle { fill: var(--gold-text); stroke: none; }
+.main-crystal-energy { stroke-width: 2; stroke-dasharray: 45 530; }
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-crystal-facets { animation: main-crystal-hover 5s ease-in-out infinite alternate !important; }
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-crystal-energy { animation: main-crystal-stream 4s linear infinite !important; }
+body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-welcome-crystal--right .main-crystal-facets { animation-delay: -2.5s !important; }
+@keyframes main-crystal-hover { to { transform: translate(12px, -18px) rotate(5deg); } }
+@keyframes main-crystal-stream { to { stroke-dashoffset: -575; } }
+@media (max-width: 800px) { .main-welcome-crystal { width: 80%; opacity: .22; } .main-welcome-crystal--left { left: -35%; } .main-welcome-crystal--right { right: -35%; } }
+@media (prefers-reduced-motion: reduce) { body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-crystal-facets, body.storefront-owner-home-page #site-page-shell .main-welcome-stage .main-crystal-energy { animation-duration: 20s !important; } }
 /* A compact service desk beside shop news and paged recent purchases. */
 .storefront-community { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 1.8fr); gap: 22px 28px; margin-block: 24px 36px; color: var(--text); }
 .community-overview { display: contents; }
