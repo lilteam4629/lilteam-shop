@@ -388,6 +388,10 @@ async function checkRevenueReset(cookie) {
 async function crawlAdmin(cookie) {
   const queue = ['/admin'];
   const checked = new Set();
+  const adminShellCss = await fetchOk('/css/admin-experiment-v1.css', 'text/css');
+  if (!/\.experiment-menu-dialog\s+\.experiment-mobile-drawer-sidebar\s*\{[^}]*display:\s*flex/i.test(adminShellCss.body)) {
+    throw new Error('mobile category drawer is hidden with the desktop sidebar');
+  }
   while (queue.length) {
     const requestPath = queue.shift();
     if (checked.has(requestPath)) continue;
@@ -399,6 +403,9 @@ async function crawlAdmin(cookie) {
     if (page.body.includes('admin-mobile-motion.js') || page.body.includes('admin-scroll-motion-v1.css') || page.body.includes('admin-page-surface')) throw new Error(`removed admin motion still loaded: ${requestPath}`);
     if (!/class="experiment-admin admin-site(?:\s|")/.test(page.body) || !page.body.includes('data-experiment-sidebar')) {
       throw new Error(`main admin route did not use the unified sidebar shell: ${requestPath}`);
+    }
+    if (!page.body.includes('data-experiment-menu-open') || !page.body.includes('data-experiment-menu-content')) {
+      throw new Error(`admin route is missing its responsive category menu: ${requestPath}`);
     }
     if (!page.body.includes('data-admin-theme-toggle') || !page.body.includes('data-admin-theme="light"')) {
       throw new Error(`main admin route is missing its default light theme or accessible theme switch: ${requestPath}`);
