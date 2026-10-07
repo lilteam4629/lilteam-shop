@@ -93,6 +93,9 @@
 @media(max-width:420px){.welcome-live-stats{grid-template-columns:minmax(0,1fr)}.welcome-live-stats article{min-height:60px}.welcome-live-gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.welcome-live-hero-actions .experiment-button{padding-inline:10px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){.welcome-live-switch-row>i,.welcome-live-switch-row>i::after,.welcome-live-upload,.welcome-live-image-card,.welcome-live-stats article{transition:none}.welcome-live-stats article:hover{transform:none}}
 
+/* Keep the save button in the form flow instead of floating above controls. */
+.welcome-live-savebar{position:static;bottom:auto;z-index:auto;margin-top:12px}
+
 /* Main-shop welcome studio: paper-card styling with the saved shop accent. */
 html.admin-unified-site body.admin-site .welcome-live-page {
   --wl-accent: var(--gold, #c8a63f);

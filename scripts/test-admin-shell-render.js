@@ -50,6 +50,8 @@ const shared = {
     assert.match(html, /data-admin-theme-toggle/, `${label}: theme control`);
     assert.match(html, /data-experiment-notifications/, `${label}: notification control`);
     assert.match(html, /experiment-notification-count[^>]*>3</, `${label}: notification badge`);
+    assert.match(html, /href="\/admin\/settings"><svg[^>]*><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/, `${label}: valid settings navigation icon`);
+    assert.doesNotMatch(html, /M10\.3 4\.3c\.4-1\.8/, `${label}: malformed settings SVG removed`);
     assert.doesNotMatch(html, /<span>old<\/span>/, `${label}: legacy topbar removed`);
   }
   console.log('Admin shell render checks passed: pages with and without a topbar get the same controls.');

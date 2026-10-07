@@ -127,6 +127,7 @@
 .mgx-page-head::after{
   position:absolute;z-index:-1;right:26px;top:50%;content:"PLAY  •  OPEN  •  WIN";transform:translateY(-50%) rotate(-4deg);padding:12px 15px;border-radius:13px;color:var(--mgx-accent-ink);background:var(--mgx-accent-soft);font-size:10px;font-weight:900;letter-spacing:.14em;opacity:.82
 }
+.mgx-page-head::after{display:none}
 .mgx-page-head h1{font-size:28px;letter-spacing:-.045em}
 .mgx-page-head p{max-width:670px}
 .mgx-page-kicker{display:flex;align-items:center;gap:9px}
