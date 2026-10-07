@@ -362,14 +362,6 @@
   letter-spacing: .13em;
 }
 
-/* Save controls remain after the form content so they never cover inputs. */
-.experiment-settings-page .settings-form-actions {
-  position: static;
-  bottom: auto;
-  z-index: auto;
-  margin-top: 16px;
-}
-
 .experiment-settings-page .settings-preview-head strong {
   color: var(--ex-ink);
   font-size: 17px;
